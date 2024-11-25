@@ -27,7 +27,7 @@ public class DoubleQuotedStringType extends NamedBasicTypeImpl<String> {
     private final RelationalFormType relationalFormType;
 
     public DoubleQuotedStringType() {
-        this(RelationalFormType.EQUALS);
+        this(RelationalFormType.EXACT_COMPARISON);
     }
 
     public DoubleQuotedStringType(RelationalFormType relationalFormType) {
@@ -46,7 +46,7 @@ public class DoubleQuotedStringType extends NamedBasicTypeImpl<String> {
             @Override
             public String toRelationalValue(String domainForm) {
                 return switch (relationalFormType) {
-                    case EQUALS -> domainForm;
+                    case EXACT_COMPARISON -> domainForm;
                     case LIKE_CASE_SENSITIVE -> ".*" + domainForm + ".*";
                     case LIKE_CASE_INSENSITIVE -> "(?i).*" + domainForm + ".*";
                 };

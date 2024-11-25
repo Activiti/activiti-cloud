@@ -17,12 +17,15 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
-import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 
-public class IntegerVariableValueCondition extends VariableValueCondition {
+public class IntegerVariableValueCondition extends NumericVariableValueCondition {
+
+    @Override
+    public VariableType getVariableType() {
+        return VariableType.INTEGER;
+    }
 
     public IntegerVariableValueCondition(
         Path<?> path,
@@ -31,18 +34,6 @@ public class IntegerVariableValueCondition extends VariableValueCondition {
         CriteriaBuilder criteriaBuilder
     ) {
         super(path, operator, value, criteriaBuilder);
-    }
-
-    @Override
-    protected String getFunctionName() {
-        return switch (operator) {
-            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_EQUALS;
-            case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_GREATER_THAN_EQUAL;
-            case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_LESS_THAN;
-            case LESS_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_LESS_THAN_EQUAL;
-            default -> throw new IllegalFilterException(VariableType.INTEGER, operator);
-        };
     }
 
     @Override

@@ -389,6 +389,80 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
+    void should_returnTasks_filteredByStringProcessVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "string-value"))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "different-value"))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.STRING,
+            "string-value",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
+    void should_returnTasks_filteredByStringTaskVariable_notEquals() {
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "string-value"))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_2)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "different-value"))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.STRING,
+            "string-value",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
     void should_returnTasks_filteredByStringProcessVariable_containsInAnyOrder() {
         queryTestUtils
             .buildProcessInstance()
@@ -542,6 +616,84 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 43))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42))
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.INTEGER,
+            String.valueOf(42),
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_notEquals() {
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42))
+            .buildAndSave();
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_2)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 43))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.INTEGER,
+            String.valueOf(42),
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
     }
 
     @Test
@@ -979,6 +1131,85 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.42")))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("316.2")))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.42")))
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.BIGDECIMAL,
+            String.valueOf(new BigDecimal("42.42")),
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_notEquals() {
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.42")))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_2)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("316.2")))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.BIGDECIMAL,
+            String.valueOf(new BigDecimal("42.42")),
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
     }
 
     @Test
@@ -1438,6 +1669,85 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
+    void should_returnTasks_filteredByDateProcessVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-02"))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-03"))
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-02"))
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.DATE,
+            "2024-08-02",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTaskVariable_notEquals() {
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-02"))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_2)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-03"))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.DATE,
+            "2024-08-02",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
     void should_returnTasks_filteredByDateProcessVariable_gt_gte() {
         queryTestUtils
             .buildProcessInstance()
@@ -1890,6 +2200,95 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTimeProcessVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-08-02T00:11:00.000+00:00")
+            )
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00")
+            )
+            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-08-02T00:11:00.000+00:00")
+            )
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.DATETIME,
+            "2024-08-02T00:11:00.000+00:00",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTimeTaskVariable_notEquals() {
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-08-02T00:11:00.000+00:00")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_2)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00")
+            )
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.DATETIME,
+            "2024-08-02T00:11:00.000+00:00",
+            FilterOperator.NOT_EQUALS
+        );
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
     }
 
     @Test

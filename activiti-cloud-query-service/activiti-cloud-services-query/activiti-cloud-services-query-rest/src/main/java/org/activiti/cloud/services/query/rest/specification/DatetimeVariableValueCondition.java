@@ -37,6 +37,7 @@ public class DatetimeVariableValueCondition extends VariableValueCondition {
     protected String getFunctionName() {
         return switch (operator) {
             case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_EQUALS;
+            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_NOT_EQUALS;
             case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_GREATER_THAN;
             case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_GREATER_THAN_EQUAL;
             case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_LESS_THAN;

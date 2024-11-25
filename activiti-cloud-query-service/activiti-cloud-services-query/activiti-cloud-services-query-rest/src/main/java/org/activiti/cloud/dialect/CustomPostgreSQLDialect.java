@@ -69,10 +69,22 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
     public static final String JSON_VALUE_EQUALS = "jsonb_value_eq";
 
     /**
+     * Extracts the "value" field from a JSONB column and compares it with the given value, returning true if they are not equal.
+     * It works with strings and booleans.
+     */
+    public static final String JSON_VALUE_NOT_EQUALS = "jsonb_value_ne";
+
+    /**
      * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
      * returning true if they are equal.
      */
     public static final String JSON_VALUE_NUMERIC_EQUALS = "jsonb_numeric_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if they are not equal.
+     */
+    public static final String JSON_VALUE_NUMERIC_NOT_EQUALS = "jsonb_numeric_ne";
 
     /**
      * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
@@ -118,6 +130,12 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
 
     /**
      * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if they are not equal.
+     */
+    public static final String JSON_VALUE_DATE_NOT_EQUALS = "jsonb_date_ne";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
      * returning true if the extracted value is greater than the given value.
      */
     public static final String JSON_VALUE_DATE_GREATER_THAN = "jsonb_date_gt";
@@ -145,6 +163,12 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
      * returning true if they are equal.
      */
     public static final String JSON_VALUE_DATETIME_EQUALS = "jsonb_datetime_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if they are not equal.
+     */
+    public static final String JSON_VALUE_DATETIME_NOT_EQUALS = "jsonb_datetime_ne";
 
     /**
      * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
@@ -193,7 +217,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
     public void initializeFunctionRegistry(FunctionContributions functionContributions) {
         super.initializeFunctionRegistry(functionContributions);
         registerExtractionFunctions(functionContributions);
-        registerJsonValueEquals(functionContributions);
+        registerJsonValueRawFunctions(functionContributions);
         registerJsonValueLikeFunctions(functionContributions);
         registerJsonValueNumericFunctions(functionContributions);
         registerJsonValueDateFunctions(functionContributions);
@@ -262,10 +286,28 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             .register();
     }
 
-    private void registerJsonValueEquals(FunctionContributions functionContributions) {
+    private void registerJsonValueRawFunctions(FunctionContributions functionContributions) {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
         functionRegistry
             .patternDescriptorBuilder(JSON_VALUE_EQUALS, "?1 @@ '$.value == ?2'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, ANY value")
+            .setArgumentTypeResolver((function, argIndex, converter) -> {
+                if (argIndex == 1 && function.getArguments().get(1).getNodeJavaType().equals(StringJavaType.INSTANCE)) {
+                    return new DoubleQuotedStringType();
+                }
+                return StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE.resolveFunctionArgumentType(
+                    function,
+                    argIndex,
+                    converter
+                );
+            })
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(JSON_VALUE_NOT_EQUALS, "?1 @@ '$.value != ?2'")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
             )
@@ -335,6 +377,14 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             .setArgumentListSignature("JSONB jsonb, STRING value")
             .register();
         functionRegistry
+            .patternDescriptorBuilder(JSON_VALUE_NUMERIC_NOT_EQUALS, "(?1->>'value')::NUMERIC != ?2")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, STRING value")
+            .register();
+        functionRegistry
             .patternDescriptorBuilder(JSON_VALUE_NUMERIC_GREATER_THAN, "(?1->>'value')::NUMERIC > ?2")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
@@ -379,6 +429,14 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             .setArgumentListSignature("JSONB jsonb, STRING value")
             .register();
         functionRegistry
+            .patternDescriptorBuilder(JSON_VALUE_DATE_NOT_EQUALS, "(?1->>'value')::DATE != ?2::DATE")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, STRING value")
+            .register();
+        functionRegistry
             .patternDescriptorBuilder(JSON_VALUE_DATE_GREATER_THAN, "(?1->>'value')::DATE > ?2::DATE")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
@@ -416,6 +474,14 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
         functionRegistry
             .patternDescriptorBuilder(JSON_VALUE_DATETIME_EQUALS, "(?1->>'value')::TIMESTAMPTZ = ?2::TIMESTAMPTZ")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, STRING value")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(JSON_VALUE_DATETIME_NOT_EQUALS, "(?1->>'value')::TIMESTAMPTZ != ?2::TIMESTAMPTZ")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
             )

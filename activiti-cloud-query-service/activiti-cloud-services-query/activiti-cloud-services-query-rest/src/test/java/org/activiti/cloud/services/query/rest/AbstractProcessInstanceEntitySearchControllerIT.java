@@ -538,6 +538,44 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     @Test
+    void should_returnProcessInstances_filteredByStringVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "other-value"))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.STRING,
+            "value1",
+            FilterOperator.NOT_EQUALS
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByStringVariable_Contains() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -614,6 +652,44 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     @Test
+    void should_returnTaskInstances_filteredByIntegerVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 1))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.INTEGER,
+            String.valueOf(1),
+            FilterOperator.NOT_EQUALS
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByIntegerVariable_greaterThan() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -651,6 +727,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
     }
 
+    @Test
     void should_returnProcessInstances_filteredByIntegerVariable_greaterThanEqual() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -885,6 +962,44 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByBigDecimalVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.1")))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.2")))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.BIGDECIMAL,
+            "1.1",
+            FilterOperator.NOT_EQUALS
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body("page.totalElements", equalTo(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
     }
 
     @Test
@@ -1160,6 +1275,44 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByDateVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.DATE,
+            "2024-09-01",
+            FilterOperator.NOT_EQUALS
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
     }
 
     @Test
@@ -1439,6 +1592,48 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByDatetimeVariable_notEquals() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+            )
+            .buildAndSave();
+
+        VariableFilter variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.DATETIME,
+            "2024-09-01T00:11:00.000+00:00",
+            FilterOperator.NOT_EQUALS
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(variableFilter);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
     }
 
     @Test
