@@ -59,15 +59,19 @@ public class ProcessInstanceController {
 
     private final ProcessInstanceService processInstanceService;
 
+    private final ProcessInstanceControllerHelper processInstanceControllerHelper;
+
     @Autowired
     public ProcessInstanceController(
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-        ProcessInstanceService processInstanceService
+        ProcessInstanceService processInstanceService,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
     ) {
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processInstanceService = processInstanceService;
+        this.processInstanceControllerHelper = processInstanceControllerHelper;
     }
 
     @Operation(summary = "Find process instances", hidden = true)
@@ -81,7 +85,7 @@ public class ProcessInstanceController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceService.findAll(predicate, pageable),
+            processInstanceControllerHelper.findAllProcessInstances(predicate, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -102,7 +106,7 @@ public class ProcessInstanceController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceService.findAllWithVariables(predicate, variableKeys, pageable),
+            processInstanceControllerHelper.findAllProcessInstancesWithVariables(predicate, variableKeys, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -116,7 +120,7 @@ public class ProcessInstanceController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceService.search(searchRequest, pageable),
+            processInstanceControllerHelper.searchProcessInstances(searchRequest,pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -124,7 +128,9 @@ public class ProcessInstanceController {
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<QueryCloudProcessInstance> findByIdProcess(@PathVariable String processInstanceId) {
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceService.findById(processInstanceId));
+        return processInstanceRepresentationModelAssembler.toModel(
+            processInstanceControllerHelper.findById(processInstanceId
+            ));
     }
 
     @JsonView(JsonViews.General.class)

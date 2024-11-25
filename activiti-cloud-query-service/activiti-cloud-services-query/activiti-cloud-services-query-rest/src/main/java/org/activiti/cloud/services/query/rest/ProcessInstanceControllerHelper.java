@@ -16,67 +16,75 @@
 package org.activiti.cloud.services.query.rest;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
-import org.activiti.cloud.api.process.model.impl.QueryCloudSubprocessInstanceImpl;
+
+import com.querydsl.core.types.Predicate;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public class ProcessInstanceControllerHelper {
 
     private final ProcessInstanceRepository processInstanceRepository;
+    private final ProcessInstanceService processInstanceService;
 
-    public ProcessInstanceControllerHelper(ProcessInstanceRepository processInstanceRepository) {
+    public ProcessInstanceControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceService processInstanceService) {
         this.processInstanceRepository = processInstanceRepository;
+        this.processInstanceService = processInstanceService;
     }
 
-    public Page<ProcessInstanceEntity> mapSubprocesses(
-        Page<ProcessInstanceEntity> processInstances,
+    public Page<ProcessInstanceEntity> findAllProcessInstances(
+        Predicate predicate,
         Pageable pageable
     ) {
-        List<String> parentIds = processInstances
-            .getContent()
-            .stream()
-            .map(ProcessInstanceEntity::getId)
-            .collect(Collectors.toList());
+        Page<ProcessInstanceEntity> processInstances = processInstanceService.findAll(predicate, pageable);
+        return mapAllSubprocesses(processInstances, pageable);
+    }
 
-        Page<ProcessInstanceEntity> subprocesses = processInstanceRepository.findSubprocessesByParentIds(
-            parentIds,
+    public Page<ProcessInstanceEntity> findAllProcessInstancesWithVariables(
+        Predicate predicate,
+        List<String> variableKeys,
+        Pageable pageable) {
+        Page<ProcessInstanceEntity> processInstances = processInstanceService.findAllWithVariables(
+            predicate,
+            variableKeys,
+            pageable);
+        return mapAllSubprocesses(processInstances, pageable);
+    }
+
+    public ProcessInstanceEntity findById(String processInstanceId) {
+        ProcessInstanceEntity processInstance = processInstanceService.findById(processInstanceId);
+        return processInstanceRepository.mapSubprocesses(processInstance);
+    }
+
+    public Page<ProcessInstanceEntity> searchProcessInstances(
+        ProcessInstanceSearchRequest searchRequest,
+        Pageable pageable) {
+        Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
+        return mapAllSubprocesses(processInstances, pageable);
+    }
+
+    public Page<ProcessInstanceEntity> searchSubprocesses(
+        String processInstanceId,
+        Predicate predicate,
+        Pageable pageable) {
+        Page<ProcessInstanceEntity> processInstanceSubprocesses = processInstanceService.subprocesses(
+            processInstanceId,
+            predicate,
             pageable
         );
+        return mapAllSubprocesses(processInstanceSubprocesses, pageable);
+    }
 
-        Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap = subprocesses
-            .getContent()
-            .stream()
-            .collect(
-                Collectors.groupingBy(
-                    ProcessInstanceEntity::getParentId,
-                    Collectors.mapping(
-                        subprocess -> {
-                            QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstanceImpl();
-                            subProcessInstance.setId(subprocess.getId());
-                            subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-                            return subProcessInstance;
-                        },
-                        Collectors.toSet()
-                    )
-                )
-            );
-
-        processInstances
-            .getContent()
-            .forEach(processInstance -> {
-                Set<QueryCloudSubprocessInstance> subprocessSet = subprocessMap.getOrDefault(
-                    processInstance.getId(),
-                    Set.of()
-                );
-                processInstance.setSubprocesses(subprocessSet);
-            });
-
-        return processInstances;
+    public Page<ProcessInstanceEntity> mapAllSubprocesses(
+        Page<ProcessInstanceEntity> processInstances,
+        Pageable pageable) {
+        return processInstanceRepository.mapSubprocesses(
+            processInstances,
+            pageable
+        );
     }
 }

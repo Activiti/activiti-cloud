@@ -35,6 +35,7 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           skip_checkout: true
+          auto-commit: true
       - name: Ensure SHA pinned actions
         uses: zgosalvez/github-actions-ensure-sha-pinned-actions@5d6ac37a4cef8b8df67f482a8e384987766f0213 # v3.0.17
 
@@ -91,7 +92,7 @@ jobs:
         shell: bash
         run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
         env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -DskipTests=true -DskipITs=true
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 

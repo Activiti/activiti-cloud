@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomizedProcessInstanceRepository {
-    Page<ProcessInstanceEntity> findSubprocessesByParentIds(List<String> parentIds, Pageable pageable);
+    Page<ProcessInstanceEntity> mapSubprocesses(
+        Page<ProcessInstanceEntity> processInstances,
+        Pageable pageable
+    );
+
+    ProcessInstanceEntity mapSubprocesses(ProcessInstanceEntity processInstance);
 }

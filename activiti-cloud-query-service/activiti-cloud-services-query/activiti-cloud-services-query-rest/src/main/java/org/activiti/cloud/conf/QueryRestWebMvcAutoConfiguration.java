@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
@@ -297,8 +298,26 @@ public class QueryRestWebMvcAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessInstanceControllerHelper processInstanceControllerHelper(
-        ProcessInstanceRepository processInstanceRepository
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceService processInstanceService
     ) {
-        return new ProcessInstanceControllerHelper(processInstanceRepository);
+        return new ProcessInstanceControllerHelper(
+            processInstanceRepository,
+            processInstanceService
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
+    ) {
+        return new ProcessInstanceAdminControllerHelper(
+            processInstanceRepository,
+            processInstanceAdminService,
+            processInstanceControllerHelper
+        );
     }
 }

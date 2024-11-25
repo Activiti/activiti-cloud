@@ -36,7 +36,6 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresent
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -61,23 +60,23 @@ public class ProcessInstanceAdminController {
 
     private final ProcessInstanceAdminService processInstanceAdminService;
 
-    private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
+    private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
-    private ProcessInstanceControllerHelper processInstanceControllerHelper;
+    private final ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
 
     @Autowired
     public ProcessInstanceAdminController(
         ProcessInstanceAdminService processInstanceAdminService,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-        ProcessInstanceControllerHelper processInstanceControllerHelper
+        ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper
     ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.processInstanceControllerHelper = processInstanceControllerHelper;
+        this.processInstanceAdminControllerHelper = processInstanceAdminControllerHelper;
     }
 
     @Operation(summary = "Find process instances", hidden = true)
@@ -89,14 +88,9 @@ public class ProcessInstanceAdminController {
         ) Predicate predicate,
         Pageable pageable
     ) {
-        Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.findAll(predicate, pageable);
-        Page<ProcessInstanceEntity> queryCloudProcessInstances = processInstanceControllerHelper.mapSubprocesses(
-            processInstances,
-            pageable
-        );
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            queryCloudProcessInstances,
+            processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(predicate,pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -117,7 +111,7 @@ public class ProcessInstanceAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable),
+            processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(predicate,variableKeys,pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -171,7 +165,7 @@ public class ProcessInstanceAdminController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<QueryCloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(
-            processInstanceAdminService.findById(processInstanceId)
+            processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId)
         );
     }
 

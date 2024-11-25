@@ -111,31 +111,37 @@ public class QueryCloudSubprocessInstanceImpl implements QueryCloudSubprocessIns
     }
 
     @Override
+    @JsonIgnore
     public String getAppName() {
         return "";
     }
 
     @Override
+    @JsonIgnore
     public String getServiceName() {
         return "";
     }
 
     @Override
+    @JsonIgnore
     public String getServiceFullName() {
         return "";
     }
 
     @Override
+    @JsonIgnore
     public String getServiceType() {
         return "";
     }
 
     @Override
+    @JsonIgnore
     public String getServiceVersion() {
         return "";
     }
 
     @Override
+    @JsonIgnore
     public String getAppVersion() {
         return "";
     }
