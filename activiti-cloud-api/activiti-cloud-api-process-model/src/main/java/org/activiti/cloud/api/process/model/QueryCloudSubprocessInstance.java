@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.api.process.model;
 
-public class QueryCloudSubprocessInstance{
+public class QueryCloudSubprocessInstance {
 
     private String id;
     private String processDefinitionName;
