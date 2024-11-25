@@ -58,20 +58,16 @@ public class ProcessInstanceController {
 
     private final AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
-    private final ProcessInstanceService processInstanceService;
-
     private final ProcessInstanceControllerHelper processInstanceControllerHelper;
 
     @Autowired
     public ProcessInstanceController(
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-        ProcessInstanceService processInstanceService,
         ProcessInstanceControllerHelper processInstanceControllerHelper
     ) {
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.processInstanceService = processInstanceService;
         this.processInstanceControllerHelper = processInstanceControllerHelper;
     }
 
