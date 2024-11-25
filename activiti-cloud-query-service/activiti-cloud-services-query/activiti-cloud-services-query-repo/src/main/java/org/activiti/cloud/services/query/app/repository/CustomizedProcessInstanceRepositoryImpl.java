@@ -42,7 +42,8 @@ public class CustomizedProcessInstanceRepositoryImpl
     @Override
     public Page<ProcessInstanceEntity> mapSubprocesses(
         Page<ProcessInstanceEntity> processInstances,
-        Pageable pageable) {
+        Pageable pageable
+    ) {
         List<String> parentIds = getParentIds(processInstances);
 
         Page<ProcessInstanceEntity> subprocesses = findSubprocessesByParentIds(parentIds, pageable);
@@ -82,11 +83,7 @@ public class CustomizedProcessInstanceRepositoryImpl
     }
 
     private List<String> getParentIds(Page<ProcessInstanceEntity> processInstances) {
-        return processInstances
-            .getContent()
-            .stream()
-            .map(ProcessInstanceEntity::getId)
-            .toList();
+        return processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
     }
 
     private Map<String, Set<QueryCloudSubprocessInstance>> groupSubprocesses(Page<ProcessInstanceEntity> subprocesses) {
@@ -100,22 +97,26 @@ public class CustomizedProcessInstanceRepositoryImpl
                         subprocess -> {
                             QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
                             subProcessInstance.setId(subprocess.getId());
-                            subProcessInstance
-                                .setProcessDefinitionName(subprocess.getProcessDefinitionName());
+                            subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
                             return subProcessInstance;
                         },
-                        Collectors.toSet())));
+                        Collectors.toSet()
+                    )
+                )
+            );
     }
 
     private void setSubprocesses(
         Page<ProcessInstanceEntity> processInstances,
-        Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap) {
+        Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap
+    ) {
         processInstances
             .getContent()
             .forEach(processInstance -> {
                 Set<QueryCloudSubprocessInstance> subprocessSet = subprocessMap.getOrDefault(
                     processInstance.getId(),
-                    Set.of());
+                    Set.of()
+                );
                 processInstance.setSubprocesses(subprocessSet);
             });
     }
