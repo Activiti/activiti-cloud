@@ -26,7 +26,7 @@ public abstract class NumericVariableValueCondition extends VariableValueConditi
 
     public abstract VariableType getVariableType();
 
-    public NumericVariableValueCondition(
+    protected NumericVariableValueCondition(
         Path<?> path,
         FilterOperator operator,
         String value,
