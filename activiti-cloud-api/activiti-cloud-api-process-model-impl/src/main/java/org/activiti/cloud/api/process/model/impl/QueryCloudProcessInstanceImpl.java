@@ -17,17 +17,18 @@ package org.activiti.cloud.api.process.model.impl;
 
 import java.util.Set;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 
 public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl implements QueryCloudProcessInstance {
 
-    private Set<? extends QueryCloudProcessInstance> subprocesses;
+    private Set<QueryCloudSubprocessInstance> subprocesses;
 
     @Override
-    public Set<? extends QueryCloudProcessInstance> getSubprocesses() {
+    public Set<QueryCloudSubprocessInstance> getSubprocesses() {
         return subprocesses;
     }
 
-    public void setSubprocesses(Set<? extends QueryCloudProcessInstance> subprocesses) {
+    public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
     }
 }

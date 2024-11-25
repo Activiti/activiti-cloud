@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
-import org.activiti.cloud.api.process.model.impl.QueryCloudSubprocessInstanceImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.domain.Page;
@@ -61,7 +60,7 @@ public class CustomizedProcessInstanceRepositoryImpl
                     ProcessInstanceEntity::getParentId,
                     Collectors.mapping(
                         subprocess -> {
-                            QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstanceImpl();
+                            QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
                             subProcessInstance.setId(subprocess.getId());
                             subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
                             return subProcessInstance;
@@ -91,7 +90,7 @@ public class CustomizedProcessInstanceRepositoryImpl
         Set<QueryCloudSubprocessInstance> subprocessSet = subprocesses
             .stream()
             .map(subprocess -> {
-                QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstanceImpl();
+                QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
                 subProcessInstance.setId(subprocess.getId());
                 subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
                 return subProcessInstance;

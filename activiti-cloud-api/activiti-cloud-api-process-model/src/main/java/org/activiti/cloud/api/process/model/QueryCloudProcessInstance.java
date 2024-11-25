@@ -18,5 +18,5 @@ package org.activiti.cloud.api.process.model;
 import java.util.Set;
 
 public interface QueryCloudProcessInstance extends CloudProcessInstance {
-    Set<? extends QueryCloudProcessInstance> getSubprocesses();
+    Set<QueryCloudSubprocessInstance> getSubprocesses();
 }

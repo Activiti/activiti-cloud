@@ -46,6 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Filter;
@@ -222,7 +223,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     private String parentId;
 
     @Transient
-    private Set<? extends QueryCloudProcessInstance> subprocesses;
+    private Set<QueryCloudSubprocessInstance> subprocesses;
 
     public ProcessInstanceEntity() {}
 
@@ -515,11 +516,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     }
 
     @Override
-    public Set<? extends QueryCloudProcessInstance> getSubprocesses() {
+    public Set<QueryCloudSubprocessInstance> getSubprocesses() {
         return subprocesses;
     }
 
-    public void setSubprocesses(Set<? extends QueryCloudProcessInstance> subprocesses) {
+    public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
     }
 }

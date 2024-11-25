@@ -15,8 +15,24 @@
  */
 package org.activiti.cloud.api.process.model;
 
-public interface QueryCloudSubprocessInstance extends QueryCloudProcessInstance {
-    void setId(String id);
+public class QueryCloudSubprocessInstance{
 
-    void setProcessDefinitionName(String processDefinitionName);
+    private String id;
+    private String processDefinitionName;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
 }
