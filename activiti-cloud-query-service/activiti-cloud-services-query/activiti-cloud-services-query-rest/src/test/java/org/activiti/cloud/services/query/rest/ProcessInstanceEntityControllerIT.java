@@ -48,11 +48,13 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -122,12 +124,15 @@ public class ProcessInstanceEntityControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
+        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+            .willReturn(processInstancePage);
 
         //when
         mockMvc
@@ -140,12 +145,15 @@ public class ProcessInstanceEntityControllerIT {
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
+        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+            .willReturn(processInstancePage);
 
         //when
         mockMvc
@@ -183,6 +191,9 @@ public class ProcessInstanceEntityControllerIT {
         )
             .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+        given(processInstanceRepository.mapSubprocesses(any(
+            ProcessInstanceEntity.class)))
+            .willReturn(processInstanceEntity);
 
         //when
         this.mockMvc.perform(

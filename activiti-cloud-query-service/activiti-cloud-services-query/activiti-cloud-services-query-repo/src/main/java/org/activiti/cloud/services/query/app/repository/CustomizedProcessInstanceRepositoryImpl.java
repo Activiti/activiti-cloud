@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app.repository;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,10 +49,6 @@ public class CustomizedProcessInstanceRepositoryImpl
 
         Page<ProcessInstanceEntity> subprocesses = findSubprocessesByParentIds(parentIds, pageable);
 
-        if (subprocesses.isEmpty()) {
-            return processInstances;
-        }
-
         Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap = groupSubprocesses(subprocesses);
 
         setSubprocesses(processInstances, subprocessMap);
@@ -64,6 +61,7 @@ public class CustomizedProcessInstanceRepositoryImpl
         List<ProcessInstanceEntity> subprocesses = findSubprocessesByParentId(processInstance.getId());
 
         if (subprocesses == null || subprocesses.isEmpty()) {
+            processInstance.setSubprocesses(new HashSet<>());
             return processInstance;
         }
 

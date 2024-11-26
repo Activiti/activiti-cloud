@@ -44,11 +44,13 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -114,11 +116,14 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
 
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+            .willReturn(processInstancePage);
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
@@ -129,10 +134,14 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
+        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+            .willReturn(processInstancePage);
 
         //when
         mockMvc
