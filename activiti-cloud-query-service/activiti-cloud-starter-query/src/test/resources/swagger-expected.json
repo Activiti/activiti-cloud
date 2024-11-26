@@ -199,12 +199,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               }
             }
@@ -1787,12 +1787,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               }
             }
@@ -2371,12 +2371,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
                 }
               }
             }
@@ -2476,12 +2476,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               }
             }
@@ -3571,12 +3571,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
                 }
               }
             }
@@ -3645,12 +3645,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
                 }
               }
             }
@@ -4202,12 +4202,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
                 }
               }
             }
@@ -5284,12 +5284,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_General"
+                  "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
                 }
               }
             }
@@ -6765,7 +6765,7 @@
           "businessKey": {
             "type": "string"
           },
-          "assignee": {
+          "taskDefinitionKey": {
             "type": "string"
           },
           "createdDate": {
@@ -6924,8 +6924,8 @@
           }
         }
       },
-      "CloudProcessInstance_ProcessVariables": {
-        "title": "CloudProcessInstance_ProcessVariables",
+      "EntriesResponseContentQueryCloudProcessInstance_ProcessVariables": {
+        "title": "EntriesResponseContentQueryCloudProcessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "appName": {
@@ -7009,21 +7009,15 @@
           }
         }
       },
-      "EntryResponseContentCloudProcessInstance_ProcessVariables": {
-        "title": "EntryResponseContentCloudProcessInstance_ProcessVariables",
+      "QueryCloudSubprocessInstance_ProcessVariables": {
+        "title": "QueryCloudSubprocessInstance_ProcessVariables",
         "type": "object",
         "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/CloudProcessInstance_ProcessVariables"
-          }
-        }
-      },
-      "ListResponseContentCloudProcessInstance_ProcessVariables": {
-        "title": "ListResponseContentCloudProcessInstance_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentCloudProcessInstance_ProcessVariables"
+          "id": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
           }
         }
       },
@@ -7298,7 +7292,7 @@
           "businessKey": {
             "type": "string"
           },
-          "assignee": {
+          "taskDefinitionKey": {
             "type": "string"
           },
           "createdDate": {
@@ -7360,8 +7354,8 @@
           }
         }
       },
-      "CloudProcessInstance_General": {
-        "title": "CloudProcessInstance_General",
+      "EntryResponseContentQueryCloudProcessInstance_General": {
+        "title": "EntryResponseContentQueryCloudProcessInstance_General",
         "type": "object",
         "properties": {
           "appName": {
@@ -7430,23 +7424,26 @@
           }
         }
       },
-      "EntryResponseContentCloudProcessInstance_General": {
-        "title": "EntryResponseContentCloudProcessInstance_General",
+      "QueryCloudSubprocessInstance_General": {
+        "title": "QueryCloudSubprocessInstance_General",
         "type": "object",
         "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/CloudProcessInstance_General"
+          "id": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
           }
         }
       },
-      "EntriesResponseContentCloudProcessInstance_General": {
-        "title": "EntriesResponseContentCloudProcessInstance_General",
+      "EntriesResponseContentQueryCloudProcessInstance_General": {
+        "title": "EntriesResponseContentQueryCloudProcessInstance_General",
         "type": "object",
         "properties": {
           "entries": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_General"
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
             }
           },
           "pagination": {
@@ -7454,12 +7451,12 @@
           }
         }
       },
-      "ListResponseContentCloudProcessInstance_General": {
-        "title": "ListResponseContentCloudProcessInstance_General",
+      "ListResponseContentQueryCloudProcessInstance_General": {
+        "title": "ListResponseContentQueryCloudProcessInstance_General",
         "type": "object",
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentCloudProcessInstance_General"
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudProcessInstance_General"
           }
         }
       },
@@ -7683,7 +7680,7 @@
           "elementId": {
             "type": "string"
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "processDefinitionId": {
@@ -7839,7 +7836,7 @@
               "type": "object"
             }
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "processDefinitionId": {
