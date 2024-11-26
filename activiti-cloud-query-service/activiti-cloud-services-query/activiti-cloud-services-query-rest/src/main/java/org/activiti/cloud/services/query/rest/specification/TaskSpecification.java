@@ -107,7 +107,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         if (!query.getResultType().equals(Long.class)) {
             applySorting(
                 root,
-                root.join(TaskEntity_.processVariables, JoinType.LEFT),
+                () -> root.join(TaskEntity_.processVariables, JoinType.LEFT),
                 taskSearchRequest.sort(),
                 query,
                 criteriaBuilder
@@ -115,6 +115,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
+        }
+        if (query.getGroupList().isEmpty()) {
+            query.groupBy(root.get(TaskEntity_.id));
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }

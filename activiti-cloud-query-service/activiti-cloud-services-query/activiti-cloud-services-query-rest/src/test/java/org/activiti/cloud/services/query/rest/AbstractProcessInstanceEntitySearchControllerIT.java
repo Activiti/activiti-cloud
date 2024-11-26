@@ -19,6 +19,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -31,8 +32,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
@@ -40,8 +43,12 @@ import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
+import org.activiti.cloud.services.query.util.TaskBuilder;
+import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -2512,5 +2519,50 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body("page.totalPages", is(3))
             .body("page.size", is(4))
             .body("page.number", is(2));
+    }
+
+    @Test
+    void should_returnCorrectNumberOfDistinctProcessInstances() {
+        for (int i = 0; i < 10; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withId(String.valueOf(i))
+                .withInitiator(USER)
+                .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+                .withTasks(
+                    queryTestUtils
+                        .buildTask()
+                        .withName("task1")
+                        .withVariables(
+                            new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"),
+                            new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+                        ),
+                    queryTestUtils
+                        .buildTask()
+                        .withName("task2")
+                        .withVariables(
+                            new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"),
+                            new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+                        )
+                )
+                .withVariables(
+                    new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"),
+                    new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2"),
+                    new QueryTestUtils.VariableInput("var3", VariableType.STRING, "value3")
+                )
+                .buildAndSave();
+        }
+
+        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequestBuilder().withInitiators(USER).build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .param("maxItems", 10)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(10));
     }
 }

@@ -18,14 +18,21 @@ package org.activiti.cloud.services.query.rest.specification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
@@ -165,7 +172,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
 
     protected void applySorting(
         Root<T> root,
-        SetJoin<T, ProcessVariableEntity> joinedProcessVars,
+        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
         CloudRuntimeEntitySort sort,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
@@ -174,6 +181,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             validateSort(sort);
             Expression<Object> orderByClause;
             if (sort.isProcessVariable()) {
+                SetJoin<T, ProcessVariableEntity> joinedProcessVars = joinSupplier.get();
                 Expression<?> extractedValue = criteriaBuilder.function(
                     CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
                     Object.class,
@@ -201,6 +209,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                 //This is a workaround to override the nulls first behavior when ordering direction is DESC
                 query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
             }
+            query.groupBy(root, joinSupplier.get().get(ProcessVariableEntity_.processDefinitionKey));
         }
     }
 

@@ -85,6 +85,7 @@ public class TaskBuilder {
 
     public TaskBuilder withAssignee(String assignee) {
         task.setAssignee(assignee);
+        task.setStatus(Task.TaskStatus.ASSIGNED);
         return this;
     }
 

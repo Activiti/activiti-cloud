@@ -72,11 +72,14 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         if (!query.getResultType().equals(Long.class)) {
             applySorting(
                 root,
-                root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
+                () -> root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
                 searchRequest.sort(),
                 query,
                 criteriaBuilder
             );
+        }
+        if (query.getGroupList().isEmpty()) {
+            query.distinct(true);
         }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
