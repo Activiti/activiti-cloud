@@ -8,7 +8,6 @@ import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -46,7 +45,10 @@ public class ProcessInstanceControllerHelperTest {
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.findAllProcessInstances(predicate, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.findAllProcessInstances(
+            predicate,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);
@@ -63,7 +65,11 @@ public class ProcessInstanceControllerHelperTest {
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.findAllProcessInstancesWithVariables(predicate, variableKeys, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.findAllProcessInstancesWithVariables(
+            predicate,
+            variableKeys,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);
@@ -88,21 +94,21 @@ public class ProcessInstanceControllerHelperTest {
     public void searchProcessInstances_shouldReturnProcessInstances() {
         //given
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest(
-                Set.of("My-app"), // processDefinitionKeys
-                Set.of("initiator"), // initiators
-                Set.of("1.0"), // appVersions
-                Set.of(ProcessInstance.ProcessInstanceStatus.RUNNING), // statuses
-                null, // lastModifiedFrom
-                null, // lastModifiedTo
-                null, // startFrom
-                null, // startTo
-                null, // completedFrom
-                null, // completedTo
-                null, // suspendedFrom
-                null, // suspendedTo
-                null, // processVariableFilters
-                null, // processVariableKeys
-                null // sort
+            Set.of("My-app"), // processDefinitionKeys
+            Set.of("initiator"), // initiators
+            Set.of("1.0"), // appVersions
+            Set.of(ProcessInstance.ProcessInstanceStatus.RUNNING), // statuses
+            null, // lastModifiedFrom
+            null, // lastModifiedTo
+            null, // startFrom
+            null, // startTo
+            null, // completedFrom
+            null, // completedTo
+            null, // suspendedFrom
+            null, // suspendedTo
+            null, // processVariableFilters
+            null, // processVariableKeys
+            null // sort
         );
         Pageable pageable = PageRequest.of(0, 10);
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
@@ -110,7 +116,10 @@ public class ProcessInstanceControllerHelperTest {
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(searchRequest, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(
+            searchRequest,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);
@@ -127,7 +136,11 @@ public class ProcessInstanceControllerHelperTest {
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchSubprocesses(
+            processInstanceId,
+            predicate,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);

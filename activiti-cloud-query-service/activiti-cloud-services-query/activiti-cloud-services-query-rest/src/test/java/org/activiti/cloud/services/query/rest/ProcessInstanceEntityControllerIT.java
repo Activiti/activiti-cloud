@@ -126,12 +126,20 @@ public class ProcessInstanceEntityControllerIT {
         Predicate restrictedPredicate = mock(Predicate.class);
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+            Collections.singletonList(parentProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+        given(
+            processInstanceRepository.mapSubprocesses(
+                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
+                any(Pageable.class)
+            )
+        )
             .willReturn(processInstancePage);
 
         //when
@@ -147,12 +155,20 @@ public class ProcessInstanceEntityControllerIT {
         Predicate restrictedPredicate = mock(Predicate.class);
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+            Collections.singletonList(parentProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+        given(
+            processInstanceRepository.mapSubprocesses(
+                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
+                any(Pageable.class)
+            )
+        )
             .willReturn(processInstancePage);
 
         //when
@@ -191,8 +207,7 @@ public class ProcessInstanceEntityControllerIT {
         )
             .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
-        given(processInstanceRepository.mapSubprocesses(any(
-            ProcessInstanceEntity.class)))
+        given(processInstanceRepository.mapSubprocesses(any(ProcessInstanceEntity.class)))
             .willReturn(processInstanceEntity);
 
         //when

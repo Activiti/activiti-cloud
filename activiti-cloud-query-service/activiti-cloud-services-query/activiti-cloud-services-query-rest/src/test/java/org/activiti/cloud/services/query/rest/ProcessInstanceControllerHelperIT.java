@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.*;
@@ -27,9 +29,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SpringBootTest(
     properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
@@ -112,9 +111,7 @@ public class ProcessInstanceControllerHelperIT {
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
-        List<String> variableKeys = variables.stream()
-            .map(ProcessVariableEntity::getName)
-            .collect(Collectors.toList());
+        List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).collect(Collectors.toList());
         Predicate predicate = null;
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
@@ -193,7 +190,9 @@ public class ProcessInstanceControllerHelperIT {
         Page<ProcessInstanceEntity> result,
         ProcessInstanceEntity parentProcessInstance
     ) {
-        return result.getContent().stream()
+        return result
+            .getContent()
+            .stream()
             .filter(pi -> pi.getId().equals(parentProcessInstance.getId()))
             .findFirst()
             .orElse(null);

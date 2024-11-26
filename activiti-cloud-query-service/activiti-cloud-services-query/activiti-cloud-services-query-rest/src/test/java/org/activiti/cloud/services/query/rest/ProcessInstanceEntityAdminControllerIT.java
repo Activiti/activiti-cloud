@@ -119,10 +119,18 @@ public class ProcessInstanceEntityAdminControllerIT {
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
 
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+            Collections.singletonList(parentProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+        given(
+            processInstanceRepository.mapSubprocesses(
+                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
+                any(Pageable.class)
+            )
+        )
             .willReturn(processInstancePage);
         //when
         mockMvc
@@ -136,11 +144,19 @@ public class ProcessInstanceEntityAdminControllerIT {
         //given
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance), PageRequest.of(1, 10), 1);
+            Collections.singletonList(parentProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
 
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(processInstanceRepository.mapSubprocesses(ArgumentMatchers.<Page<ProcessInstanceEntity>>any(), any(Pageable.class)))
+        given(
+            processInstanceRepository.mapSubprocesses(
+                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
+                any(Pageable.class)
+            )
+        )
             .willReturn(processInstancePage);
 
         //when

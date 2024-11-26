@@ -46,7 +46,10 @@ public class ProcessInstanceAdminControllerHelperTest {
         given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(predicate, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(
+            predicate,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);
@@ -59,11 +62,16 @@ public class ProcessInstanceAdminControllerHelperTest {
         List<String> variableKeys = Collections.singletonList("var1");
         Pageable pageable = PageRequest.of(0, 10);
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
-        given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable)).willReturn(pageResult);
+        given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable))
+            .willReturn(pageResult);
         given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(predicate, variableKeys, pageable);
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
+            predicate,
+            variableKeys,
+            pageable
+        );
 
         //then
         assertThat(result).isEqualTo(pageResult);
