@@ -125,7 +125,7 @@ public class ProcessInstanceControllerHelperIT {
             .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
+        Set<ProcessVariableEntity> variables = createProcessVariables(8);
         List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).collect(Collectors.toList());
         Predicate predicate = null;
         int pageSize = 30;
@@ -190,7 +190,7 @@ public class ProcessInstanceControllerHelperIT {
         return subprocessInstance;
     }
 
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity, int count) {
+    private Set<ProcessVariableEntity> createProcessVariables(int count) {
         Set<ProcessVariableEntity> variables = new HashSet<>();
         for (int i = 0; i < count; i++) {
             ProcessVariableEntity variable = new ProcessVariableEntity();
