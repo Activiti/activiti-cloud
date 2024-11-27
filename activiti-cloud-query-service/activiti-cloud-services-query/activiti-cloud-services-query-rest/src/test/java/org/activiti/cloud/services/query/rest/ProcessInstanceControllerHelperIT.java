@@ -19,11 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.services.query.app.repository.*;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
@@ -52,7 +55,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @EnableAutoConfiguration
 @Testcontainers
 @WithMockUser
-public class ProcessInstanceControllerHelperIT {
+class ProcessInstanceControllerHelperIT {
+
+    private static final String TEST_USER = "testuser";
 
     @Container
     @ServiceConnection
@@ -71,14 +76,14 @@ public class ProcessInstanceControllerHelperIT {
     private SecurityPoliciesManager securityPoliciesManager;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldReturnAllProcessInstances() {
+    void shouldReturnAllProcessInstances() {
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
-        processInstanceEntity.setInitiator("testuser");
+        processInstanceEntity.setInitiator(TEST_USER);
         processInstanceRepository.save(processInstanceEntity);
         //given
         given(
@@ -88,7 +93,7 @@ public class ProcessInstanceControllerHelperIT {
             )
         )
             .willReturn(true);
-        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         Predicate predicate = null;
         int pageSize = 30;
@@ -111,9 +116,9 @@ public class ProcessInstanceControllerHelperIT {
     }
 
     @Test
-    public void shouldReturnAllProcessInstancesWithVariables() {
+    void shouldReturnAllProcessInstancesWithVariables() {
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
-        processInstanceEntity.setInitiator("testuser");
+        processInstanceEntity.setInitiator(TEST_USER);
         processInstanceRepository.save(processInstanceEntity);
         //given
         given(
@@ -123,10 +128,10 @@ public class ProcessInstanceControllerHelperIT {
             )
         )
             .willReturn(true);
-        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         Set<ProcessVariableEntity> variables = createProcessVariables(8);
-        List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).collect(Collectors.toList());
+        List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).toList();
         Predicate predicate = null;
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
@@ -141,9 +146,9 @@ public class ProcessInstanceControllerHelperIT {
     }
 
     @Test
-    public void shouldReturnProcessInstanceById() {
+    void shouldReturnProcessInstanceById() {
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
-        parentProcessInstance.setInitiator("testuser");
+        parentProcessInstance.setInitiator(TEST_USER);
         processInstanceRepository.save(parentProcessInstance);
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
 
@@ -157,7 +162,7 @@ public class ProcessInstanceControllerHelperIT {
             )
         )
             .willReturn(true);
-        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+        given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         String processInstanceId = parentProcessInstance.getId();
 

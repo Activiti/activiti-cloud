@@ -39,7 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessInstanceControllerHelperTest {
+class ProcessInstanceControllerHelperTest {
 
     @InjectMocks
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
@@ -51,7 +51,7 @@ public class ProcessInstanceControllerHelperTest {
     private ProcessInstanceService processInstanceService;
 
     @Test
-    public void findAllProcessInstances_shouldReturnProcessInstances() {
+    void findAllProcessInstances_shouldReturnProcessInstances() {
         //given
         Predicate predicate = mock(Predicate.class);
         Pageable pageable = PageRequest.of(0, 10);
@@ -70,7 +70,7 @@ public class ProcessInstanceControllerHelperTest {
     }
 
     @Test
-    public void findAllProcessInstancesWithVariables_shouldReturnProcessInstances() {
+    void findAllProcessInstancesWithVariables_shouldReturnProcessInstances() {
         //given
         Predicate predicate = mock(Predicate.class);
         List<String> variableKeys = Collections.singletonList("var1");
@@ -91,7 +91,7 @@ public class ProcessInstanceControllerHelperTest {
     }
 
     @Test
-    public void findById_shouldReturnProcessInstance() {
+    void findById_shouldReturnProcessInstance() {
         //given
         String processInstanceId = "1";
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
@@ -106,7 +106,7 @@ public class ProcessInstanceControllerHelperTest {
     }
 
     @Test
-    public void searchProcessInstances_shouldReturnProcessInstances() {
+    void searchProcessInstances_shouldReturnProcessInstances() {
         //given
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest(
             Set.of("My-app"), // processDefinitionKeys
@@ -141,7 +141,7 @@ public class ProcessInstanceControllerHelperTest {
     }
 
     @Test
-    public void searchSubprocesses_shouldReturnSubprocesses() {
+    void searchSubprocesses_shouldReturnSubprocesses() {
         //given
         String processInstanceId = "1";
         Predicate predicate = mock(Predicate.class);

@@ -18,14 +18,16 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.cloud.services.query.app.repository.*;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
-import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +49,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
 @Testcontainers
-public class ProcessInstanceAdminControllerHelperIT {
+class ProcessInstanceAdminControllerHelperIT {
 
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Autowired
-    ProcessInstanceControllerHelper processInstanceControllerHelper;
 
     @Autowired
     ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
@@ -63,17 +62,17 @@ public class ProcessInstanceAdminControllerHelperIT {
     ProcessInstanceRepository processInstanceRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         processInstanceRepository.deleteAll();
     }
 
     @Test
-    public void shouldReturnAllProcessInstanceAdmin() {
+    void shouldReturnAllProcessInstanceAdmin() {
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
         processInstanceRepository.save(processInstanceEntity);
         Predicate predicate = null;
         int pageSize = 30;
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(
             predicate,
@@ -92,7 +91,7 @@ public class ProcessInstanceAdminControllerHelperIT {
     }
 
     @Test
-    public void shouldReturnAllProcessInstanceAdminWithSubprocess() {
+    void shouldReturnAllProcessInstanceAdminWithSubprocess() {
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
 
@@ -101,7 +100,7 @@ public class ProcessInstanceAdminControllerHelperIT {
 
         Predicate predicate = null;
         int pageSize = 30;
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(
             predicate,
@@ -124,15 +123,15 @@ public class ProcessInstanceAdminControllerHelperIT {
     }
 
     @Test
-    public void shouldReturnAllProcessInstanceAdminWithVariables() {
+    void shouldReturnAllProcessInstanceAdminWithVariables() {
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
         processInstanceRepository.save(processInstanceEntity);
 
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
-        List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).collect(Collectors.toList());
+        List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).toList();
         Predicate predicate = null;
         int pageSize = 30;
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
             predicate,
@@ -144,7 +143,7 @@ public class ProcessInstanceAdminControllerHelperIT {
     }
 
     @Test
-    public void shouldReturnProcessAdminById() {
+    void shouldReturnProcessAdminById() {
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
 
@@ -216,5 +215,9 @@ public class ProcessInstanceAdminControllerHelperIT {
             variables.add(processVariableEntity);
         }
         return variables;
+    }
+
+    private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {
+        return PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
     }
 }
