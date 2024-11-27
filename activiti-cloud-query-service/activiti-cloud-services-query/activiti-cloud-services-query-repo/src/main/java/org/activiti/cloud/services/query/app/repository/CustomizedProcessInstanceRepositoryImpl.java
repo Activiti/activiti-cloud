@@ -68,16 +68,20 @@ public class CustomizedProcessInstanceRepositoryImpl
         Set<QueryCloudSubprocessInstance> subprocessSet = subprocesses
             .stream()
             .map(subprocess -> {
-                QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
-                subProcessInstance.setId(subprocess.getId());
-                subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-                return subProcessInstance;
+                return getQueryCloudSubprocessInstance(subprocess);
             })
             .collect(Collectors.toSet());
 
         processInstance.setSubprocesses(subprocessSet);
 
         return processInstance;
+    }
+
+    private QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
+        QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
+        subProcessInstance.setId(subprocess.getId());
+        subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
+        return subProcessInstance;
     }
 
     private List<String> getParentIds(Page<ProcessInstanceEntity> processInstances) {
@@ -93,10 +97,7 @@ public class CustomizedProcessInstanceRepositoryImpl
                     ProcessInstanceEntity::getParentId,
                     Collectors.mapping(
                         subprocess -> {
-                            QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
-                            subProcessInstance.setId(subprocess.getId());
-                            subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-                            return subProcessInstance;
+                            return getQueryCloudSubprocessInstance(subprocess);
                         },
                         Collectors.toSet()
                     )
