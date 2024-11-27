@@ -7863,9 +7863,6 @@
           "clientName": {
             "type": "string"
           },
-          "appVersion": {
-            "type": "string"
-          },
           "rootProcessInstanceId": {
             "type": "string"
           },
