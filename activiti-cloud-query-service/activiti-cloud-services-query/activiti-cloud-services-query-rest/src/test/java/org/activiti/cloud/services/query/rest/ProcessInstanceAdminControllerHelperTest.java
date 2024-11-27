@@ -37,7 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessInstanceAdminControllerHelperTest {
+class ProcessInstanceAdminControllerHelperTest {
 
     @InjectMocks
     private ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
@@ -52,7 +52,7 @@ public class ProcessInstanceAdminControllerHelperTest {
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
 
     @Test
-    public void findAllProcessInstanceAdmin_shouldReturnProcessInstances() {
+    void findAllProcessInstanceAdmin_shouldReturnProcessInstances() {
         //given
         Predicate predicate = mock(Predicate.class);
         Pageable pageable = PageRequest.of(0, 10);
@@ -71,7 +71,7 @@ public class ProcessInstanceAdminControllerHelperTest {
     }
 
     @Test
-    public void findAllProcessInstanceAdminWithVariables_shouldReturnProcessInstances() {
+    void findAllProcessInstanceAdminWithVariables_shouldReturnProcessInstances() {
         //given
         Predicate predicate = mock(Predicate.class);
         List<String> variableKeys = Collections.singletonList("var1");
@@ -93,7 +93,7 @@ public class ProcessInstanceAdminControllerHelperTest {
     }
 
     @Test
-    public void findByIdProcessAdmin_shouldReturnProcessInstance() {
+    void findByIdProcessAdmin_shouldReturnProcessInstance() {
         //given
         String processInstanceId = "1";
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
