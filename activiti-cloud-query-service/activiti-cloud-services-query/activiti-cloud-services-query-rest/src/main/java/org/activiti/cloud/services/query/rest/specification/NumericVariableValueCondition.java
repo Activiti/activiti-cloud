@@ -22,9 +22,11 @@ import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 
-public class DatetimeVariableValueCondition extends VariableValueCondition {
+public abstract class NumericVariableValueCondition extends VariableValueCondition {
 
-    public DatetimeVariableValueCondition(
+    public abstract VariableType getVariableType();
+
+    protected NumericVariableValueCondition(
         Path<?> path,
         FilterOperator operator,
         String value,
@@ -36,18 +38,13 @@ public class DatetimeVariableValueCondition extends VariableValueCondition {
     @Override
     protected String getFunctionName() {
         return switch (operator) {
-            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_EQUALS;
-            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_NOT_EQUALS;
-            case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_GREATER_THAN_EQUAL;
-            case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_LESS_THAN;
-            case LESS_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATETIME_LESS_THAN_EQUAL;
-            default -> throw new IllegalFilterException(VariableType.DATETIME, operator);
+            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_EQUALS;
+            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_NOT_EQUALS;
+            case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_GREATER_THAN;
+            case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_GREATER_THAN_EQUAL;
+            case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_LESS_THAN;
+            case LESS_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_NUMERIC_LESS_THAN_EQUAL;
+            default -> throw new IllegalFilterException(getVariableType(), operator);
         };
-    }
-
-    @Override
-    protected String getConvertedValue() {
-        return value;
     }
 }

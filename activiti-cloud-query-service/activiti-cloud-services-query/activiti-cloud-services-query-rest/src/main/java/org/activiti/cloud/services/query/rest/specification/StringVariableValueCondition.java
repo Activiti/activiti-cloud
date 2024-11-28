@@ -37,6 +37,7 @@ public class StringVariableValueCondition extends VariableValueCondition {
     protected String getFunctionName() {
         return switch (operator) {
             case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_EQUALS;
+            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_NOT_EQUALS;
             case LIKE -> CustomPostgreSQLDialect.JSON_VALUE_LIKE_CASE_INSENSITIVE;
             default -> throw new IllegalFilterException(VariableType.STRING, operator);
         };
