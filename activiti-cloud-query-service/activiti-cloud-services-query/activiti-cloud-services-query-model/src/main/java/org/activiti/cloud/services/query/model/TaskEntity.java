@@ -464,6 +464,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     /**
      * @return the taskCandidateUsers
      */
+    @JsonIgnore
     public Set<TaskCandidateUserEntity> getTaskCandidateUsers() {
         return this.taskCandidateUsers;
     }
@@ -476,6 +477,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
+    @JsonIgnore
     public List<String> getCandidateUsers() {
         return this.taskCandidateUsers != null
             ? this.taskCandidateUsers.stream().map(TaskCandidateUserEntity::getUserId).collect(Collectors.toList())
@@ -483,6 +485,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
+    @JsonIgnore
     public List<String> getCandidateGroups() {
         return this.taskCandidateGroups != null
             ? this.taskCandidateGroups.stream().map(TaskCandidateGroupEntity::getGroupId).collect(Collectors.toList())
@@ -492,6 +495,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     /**
      * @return the taskCandidateUsers
      */
+    @JsonIgnore
     public Set<TaskCandidateGroupEntity> getTaskCandidateGroups() {
         return this.taskCandidateGroups;
     }
