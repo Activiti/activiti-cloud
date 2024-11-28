@@ -3606,13 +3606,18 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
-    void should_returnCorrectNumberOfDistinctTasks_whenLeftJoiningProcessVariables() {
+    void should_returnCorrectNumberOfDistinctTasks_whenJoiningTaskAndProcessVariables() {
         ProcessInstanceEntity processInstance = queryTestUtils
             .buildProcessInstance()
             .withTasks(
                 IntStream
                     .range(0, 10)
-                    .mapToObj(i -> queryTestUtils.buildTask().withAssignee(CURRENT_USER))
+                    .mapToObj(i ->
+                        queryTestUtils
+                            .buildTask()
+                            .withTaskCandidateUsers(CURRENT_USER)
+                            .withVariables(new QueryTestUtils.VariableInput("taskVar", VariableType.STRING, "value"))
+                    )
                     .toArray(TaskBuilder[]::new)
             )
             .withVariables(
@@ -3624,14 +3629,31 @@ public abstract class AbstractTaskControllerIT {
             .buildAndSave();
 
         TaskSearchRequest request = new TaskSearchRequestBuilder()
-            .withAssignees(CURRENT_USER)
+            .withTaskVariableFilters(
+                new VariableFilter(
+                    processInstance.getProcessDefinitionKey(),
+                    "taskVar",
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    processInstance.getProcessDefinitionKey(),
+                    "var1",
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
             .withStatus(Task.TaskStatus.ASSIGNED)
             .build();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
-            .param("maxItems", 20)
+            .param("maxItems", 10)
             .when()
             .post(getSearchEndpointHttpPost())
             .then()

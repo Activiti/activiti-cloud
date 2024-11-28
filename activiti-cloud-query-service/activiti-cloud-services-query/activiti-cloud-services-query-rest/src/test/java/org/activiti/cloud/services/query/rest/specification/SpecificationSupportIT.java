@@ -185,7 +185,7 @@ class SpecificationSupportIT {
         Integer expectedSublistToIndex
     ) {
         VariableFilter filter = new VariableFilter(null, "name", variableType, filterValue, operator);
-        Specification<ProcessVariableEntity> specification = getSpecification(filter);
+        Specification<ProcessVariableEntity> specification = new SpecificationImpl(filter);
         List<ProcessVariableEntity> variables = createVariablesWithValues(values);
         List<ProcessVariableEntity> retrieved = variableRepository.findAll(specification);
 
@@ -196,25 +196,12 @@ class SpecificationSupportIT {
     @MethodSource("provideArgumentsThatShouldThrow")
     void should_throw_ResponseStatusException(VariableType variableType, FilterOperator operator) {
         VariableFilter filter = new VariableFilter(null, "name", variableType, "", operator);
-        Specification<ProcessVariableEntity> specification = getSpecification(filter);
+        Specification<ProcessVariableEntity> specification = new SpecificationImpl(filter);
 
         assertThatThrownBy(() -> variableRepository.findAll(specification))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining(variableType.name())
             .hasMessageContaining(operator.name());
-    }
-
-    private Specification<ProcessVariableEntity> getSpecification(VariableFilter filter) {
-        return new SpecificationSupport<>() {
-            @Override
-            public Predicate toPredicate(
-                Root<ProcessVariableEntity> root,
-                CriteriaQuery<?> query,
-                CriteriaBuilder criteriaBuilder
-            ) {
-                return getVariableValueCondition(root.get(ProcessVariableEntity_.value), filter, criteriaBuilder);
-            }
-        };
     }
 
     private List<ProcessVariableEntity> createVariablesWithValues(List<Object> values) {
@@ -228,6 +215,26 @@ class SpecificationSupportIT {
                     return variable;
                 })
                 .toList();
+        }
+    }
+
+    static class SpecificationImpl
+        extends SpecificationSupport<ProcessVariableEntity>
+        implements Specification<ProcessVariableEntity> {
+
+        private final VariableFilter filter;
+
+        public SpecificationImpl(VariableFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public Predicate toPredicate(
+            Root<ProcessVariableEntity> root,
+            CriteriaQuery<?> query,
+            CriteriaBuilder criteriaBuilder
+        ) {
+            return getVariableValueCondition(root.get(ProcessVariableEntity_.value), filter, criteriaBuilder);
         }
     }
 }

@@ -209,7 +209,6 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                 //This is a workaround to override the nulls first behavior when ordering direction is DESC
                 query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
             }
-            query.groupBy(root, joinSupplier.get().get(ProcessVariableEntity_.processDefinitionKey));
         }
     }
 

@@ -116,9 +116,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
-        if (query.getGroupList().isEmpty()) {
-            query.groupBy(root.get(TaskEntity_.id));
-        }
+        query.distinct(true);
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
