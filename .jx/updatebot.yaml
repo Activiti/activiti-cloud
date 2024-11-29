@@ -3,9 +3,7 @@ kind: UpdateConfig
 spec:
   rules:
     - urls:
-        - https://github.com/Alfresco/hxp-process-services
         - https://github.com/Alfresco/hxp-common-libraries
-        - https://github.com/Alfresco/hxp-studio-services
       reusePullRequest: true
       changes:
         - regex:
