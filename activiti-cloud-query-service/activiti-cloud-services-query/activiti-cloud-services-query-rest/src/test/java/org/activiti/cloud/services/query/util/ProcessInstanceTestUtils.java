@@ -15,17 +15,17 @@
  */
 package org.activiti.cloud.services.query.util;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 public class ProcessInstanceTestUtils {
+
     public ProcessInstanceEntity buildProcessInstanceEntity() {
         return new ProcessInstanceEntity(
             "My-app",
@@ -58,7 +58,7 @@ public class ProcessInstanceTestUtils {
         return variables;
     }
 
-    public ProcessInstanceSearchRequest createProcessInstanceSearchRequest(){
+    public ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
         return new ProcessInstanceSearchRequest(
             Set.of("My-app"), // processDefinitionKeys
             Set.of("initiator"), // initiators

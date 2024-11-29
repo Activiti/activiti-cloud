@@ -20,10 +20,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.querydsl.core.types.Predicate;
-
 import java.util.Collections;
 import java.util.List;
-
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;

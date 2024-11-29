@@ -19,11 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -50,7 +48,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    properties = {"spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false"}
+    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
 )
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration

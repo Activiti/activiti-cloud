@@ -192,7 +192,7 @@ class ProcessInstanceAdminControllerHelperIT {
         ProcessInstanceEntity processInstanceEntity,
         int numberOfVariables
     ) {
-        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity,numberOfVariables);
+        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, numberOfVariables);
     }
 
     private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {

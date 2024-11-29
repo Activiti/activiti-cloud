@@ -25,9 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-
 import java.util.*;
-
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -61,7 +59,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceController.class)
 @Import(
-    {QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class}
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
 )
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
@@ -157,7 +155,8 @@ class ProcessInstanceControllerIT {
         );
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findByIdIsIn(ids, Sort.unsorted())).willReturn(Collections.singletonList(processInstanceEntity));
+        given(processInstanceRepository.findByIdIsIn(ids, Sort.unsorted()))
+            .willReturn(Collections.singletonList(processInstanceEntity));
         given(
             processInstanceRepository.mapSubprocesses(
                 ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
@@ -168,7 +167,10 @@ class ProcessInstanceControllerIT {
 
         //when
         mockMvc
-            .perform(get("/v1/process-instances?{variableKeys}&skipCount=10&maxItems=10", variableKeys).accept(MediaType.APPLICATION_JSON))
+            .perform(
+                get("/v1/process-instances?{variableKeys}&skipCount=10&maxItems=10", variableKeys)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             //then
             .andExpect(status().isOk());
     }
@@ -183,12 +185,15 @@ class ProcessInstanceControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
         given(processInstanceService.findById(processInstanceId)).willReturn(processInstanceEntity);
-        given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity)
+        given(processInstanceRepository.mapSubprocesses(processInstanceEntity))
+            .willReturn(processInstanceEntity)
             .willReturn(processInstanceEntity);
 
         //when
-        mockMvc.perform(get("/v1/process-instances/{processInstanceId}", processInstanceId)
-                .accept(MediaType.APPLICATION_JSON))
+        mockMvc
+            .perform(
+                get("/v1/process-instances/{processInstanceId}", processInstanceId).accept(MediaType.APPLICATION_JSON)
+            )
             //then
             .andExpect(status().isOk());
     }
@@ -197,9 +202,7 @@ class ProcessInstanceControllerIT {
         return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
     }
 
-    private Set<ProcessVariableEntity> createProcessVariables(
-        ProcessInstanceEntity processInstanceEntity
-    ) {
+    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
         return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, 6);
     }
 }
