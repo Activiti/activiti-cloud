@@ -19,17 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Date;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
+import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {"spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false"}
 )
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
@@ -130,7 +131,7 @@ class ProcessInstanceControllerHelperIT {
             .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
-        Set<ProcessVariableEntity> variables = createProcessVariables(8);
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
         List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).toList();
         Predicate predicate = null;
         int pageSize = 30;
@@ -172,17 +173,7 @@ class ProcessInstanceControllerHelperIT {
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity(
-            "My-app",
-            "My-app",
-            "1",
-            null,
-            null,
-            UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(),
-            ProcessInstance.ProcessInstanceStatus.RUNNING,
-            new Date()
-        );
+        return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
     }
 
     private ProcessInstanceEntity buildSubprocessInstance(ProcessInstanceEntity parentProcessInstance) {
@@ -195,15 +186,8 @@ class ProcessInstanceControllerHelperIT {
         return subprocessInstance;
     }
 
-    private Set<ProcessVariableEntity> createProcessVariables(int count) {
-        Set<ProcessVariableEntity> variables = new HashSet<>();
-        for (int i = 0; i < count; i++) {
-            ProcessVariableEntity variable = new ProcessVariableEntity();
-            variable.setName("name" + i);
-            variable.setValue("id");
-            variables.add(variable);
-        }
-        return variables;
+    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
+        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, 8);
     }
 
     private ProcessInstanceEntity verifyReturnedProcessInstanceEntity(

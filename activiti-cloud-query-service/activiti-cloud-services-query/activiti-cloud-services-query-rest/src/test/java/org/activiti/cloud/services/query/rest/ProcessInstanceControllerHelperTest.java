@@ -20,14 +20,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.querydsl.core.types.Predicate;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import org.activiti.api.process.model.ProcessInstance;
+
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -108,23 +109,7 @@ class ProcessInstanceControllerHelperTest {
     @Test
     void searchProcessInstances_shouldReturnProcessInstances() {
         //given
-        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest(
-            Set.of("My-app"), // processDefinitionKeys
-            Set.of("initiator"), // initiators
-            Set.of("1.0"), // appVersions
-            Set.of(ProcessInstance.ProcessInstanceStatus.RUNNING), // statuses
-            null, // lastModifiedFrom
-            null, // lastModifiedTo
-            null, // startFrom
-            null, // startTo
-            null, // completedFrom
-            null, // completedTo
-            null, // suspendedFrom
-            null, // suspendedTo
-            null, // processVariableFilters
-            null, // processVariableKeys
-            null // sort
-        );
+        ProcessInstanceSearchRequest searchRequest = createProcessInstanceSearchRequest();
         Pageable pageable = PageRequest.of(0, 10);
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
         given(processInstanceService.search(searchRequest, pageable)).willReturn(pageResult);
@@ -159,5 +144,9 @@ class ProcessInstanceControllerHelperTest {
 
         //then
         assertThat(result).isEqualTo(pageResult);
+    }
+
+    private ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
+        return new ProcessInstanceTestUtils().createProcessInstanceSearchRequest();
     }
 }

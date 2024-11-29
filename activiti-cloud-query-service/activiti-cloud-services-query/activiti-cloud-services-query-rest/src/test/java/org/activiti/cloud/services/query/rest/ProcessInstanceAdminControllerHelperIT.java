@@ -18,8 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +26,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
+import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,17 +163,7 @@ class ProcessInstanceAdminControllerHelperIT {
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity(
-            "My-app",
-            "My-app",
-            "1",
-            null,
-            null,
-            UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(),
-            ProcessInstance.ProcessInstanceStatus.RUNNING,
-            new Date()
-        );
+        return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
     }
 
     private ProcessInstanceEntity buildSubprocessInstance(ProcessInstanceEntity parentProcessInstance) {
@@ -203,18 +192,7 @@ class ProcessInstanceAdminControllerHelperIT {
         ProcessInstanceEntity processInstanceEntity,
         int numberOfVariables
     ) {
-        Set<ProcessVariableEntity> variables = new HashSet<>();
-
-        for (int i = 0; i < numberOfVariables; i++) {
-            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-            processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
-            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-            processVariableEntity.setProcessInstance(processInstanceEntity);
-            variables.add(processVariableEntity);
-        }
-        return variables;
+        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity,numberOfVariables);
     }
 
     private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {

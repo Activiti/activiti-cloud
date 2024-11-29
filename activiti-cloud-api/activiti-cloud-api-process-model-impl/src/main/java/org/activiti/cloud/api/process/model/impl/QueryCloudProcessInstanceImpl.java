@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import java.util.Objects;
 import java.util.Set;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
@@ -22,8 +23,6 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl implements QueryCloudProcessInstance {
 
     private Set<QueryCloudSubprocessInstance> subprocesses;
-
-    public QueryCloudProcessInstanceImpl() {}
 
     @Override
     public Set<QueryCloudSubprocessInstance> getSubprocesses() {
@@ -33,5 +32,25 @@ public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl impl
     @Override
     public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        QueryCloudProcessInstanceImpl other = (QueryCloudProcessInstanceImpl) obj;
+        return Objects.equals(subprocesses, other.subprocesses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), subprocesses);
     }
 }
