@@ -19,6 +19,8 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -202,6 +204,8 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
         ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
@@ -210,6 +214,8 @@ public class QueryRestWebMvcAutoConfiguration {
     ) {
         return new TaskControllerHelper(
             taskRepository,
+            taskCandidateUserRepository,
+            taskCandidateGroupRepository,
             processVariableService,
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
