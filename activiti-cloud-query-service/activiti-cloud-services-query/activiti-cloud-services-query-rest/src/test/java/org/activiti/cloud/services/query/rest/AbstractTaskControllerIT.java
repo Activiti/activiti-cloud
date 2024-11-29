@@ -4016,6 +4016,7 @@ public abstract class AbstractTaskControllerIT {
                     .mapToObj(i ->
                         queryTestUtils
                             .buildTask()
+                            .withId(String.valueOf(i))
                             .withAssignee(CURRENT_USER)
                             .withTaskCandidateUsers(CURRENT_USER, "other-user")
                             .withTaskCandidateGroups("group1", "group2")
@@ -4050,6 +4051,7 @@ public abstract class AbstractTaskControllerIT {
                     FilterOperator.EQUALS
                 )
             )
+            .withSort(new CloudRuntimeEntitySort("createdDate", Sort.Direction.DESC, false, null, null))
             .withStatus(Task.TaskStatus.ASSIGNED)
             .build();
 
@@ -4064,7 +4066,7 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(10))
             .body(
                 TASK_IDS_JSON_PATH,
-                containsInAnyOrder(processInstance.getTasks().stream().map(Task::getId).toArray())
+                contains(IntStream.range(0, 10).mapToObj(String::valueOf).toList().reversed().toArray())
             );
     }
 }

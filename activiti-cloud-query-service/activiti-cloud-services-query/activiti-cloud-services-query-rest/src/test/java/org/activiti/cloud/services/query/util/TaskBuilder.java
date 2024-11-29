@@ -184,6 +184,9 @@ public class TaskBuilder {
                 variable.setProcessInstanceId(task.getProcessInstanceId());
             });
         taskVariableRepository.saveAll(task.getVariables());
+        if (task.getCreatedDate() == null) {
+            task.setCreatedDate(new Date());
+        }
         return taskRepository.save(task);
     }
 
