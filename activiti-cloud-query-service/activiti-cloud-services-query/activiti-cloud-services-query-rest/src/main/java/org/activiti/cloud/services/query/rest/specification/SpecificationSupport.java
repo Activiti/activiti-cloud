@@ -18,21 +18,15 @@ package org.activiti.cloud.services.query.rest.specification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Fetch;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
@@ -43,6 +37,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T> implements Specification<T> {
+
+    protected boolean distinct = true;
+
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
 
     protected void addLikeFilters(
         Collection<Predicate> predicates,

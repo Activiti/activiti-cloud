@@ -59,6 +59,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         CriteriaBuilder criteriaBuilder
     ) {
         predicates = new ArrayList<>();
+        query.distinct(distinct);
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
         applyInitiatorFilter(root);
@@ -77,9 +78,6 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                 query,
                 criteriaBuilder
             );
-        }
-        if (query.getGroupList().isEmpty()) {
-            query.distinct(true);
         }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();

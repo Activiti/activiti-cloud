@@ -20,7 +20,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.SetJoin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     private List<Predicate> predicates;
+    private List<Predicate> havingClauses;
 
     private final TaskSearchRequest taskSearchRequest;
 
@@ -85,6 +85,8 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         predicates = new ArrayList<>();
+        havingClauses = new ArrayList<>();
+        query.distinct(distinct);
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
@@ -104,6 +106,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyCandidateGroupFilter(root);
         applyTaskVariableFilters(root, query, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
+        if (!havingClauses.isEmpty()) {
+            query.having(havingClauses.toArray(Predicate[]::new));
+        }
         if (!query.getResultType().equals(Long.class)) {
             applySorting(
                 root,
@@ -116,7 +121,6 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
-        query.distinct(true);
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
@@ -286,7 +290,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
             );
             query.groupBy(root.get(TaskEntity_.id));
-            query.having(getHavingClause(pvRoot, taskSearchRequest.processVariableFilters(), criteriaBuilder));
+            havingClauses.add(getHavingClause(pvRoot, taskSearchRequest.processVariableFilters(), criteriaBuilder));
         }
     }
 
@@ -296,21 +300,28 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         CriteriaBuilder criteriaBuilder
     ) {
         if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
-            SetJoin<TaskEntity, TaskVariableEntity> join = root.join(TaskEntity_.variables);
+            Root<TaskVariableEntity> tvRoot = query.from(TaskVariableEntity.class);
+            Predicate joinCondition = criteriaBuilder.equal(
+                root.get(TaskEntity_.id),
+                tvRoot.get(TaskVariableEntity_.taskId)
+            );
             Predicate[] variableValueFilters = taskSearchRequest
                 .taskVariableFilters()
                 .stream()
                 .map(filter ->
                     criteriaBuilder.and(
-                        criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
-                        getVariableValueCondition(join.get(TaskVariableEntity_.value), filter, criteriaBuilder)
+                        joinCondition,
+                        criteriaBuilder.equal(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                        getVariableValueCondition(tvRoot.get(TaskVariableEntity_.value), filter, criteriaBuilder)
                     )
                 )
                 .toArray(Predicate[]::new);
 
             predicates.add(criteriaBuilder.or(variableValueFilters));
             query.groupBy(root.get(TaskEntity_.id));
-            query.having(getHavingClause(join, taskSearchRequest.taskVariableFilters(), criteriaBuilder));
+            havingClauses.add(
+                getTaskVariablesHavingClause(tvRoot, taskSearchRequest.taskVariableFilters(), criteriaBuilder)
+            );
         }
     }
 
@@ -344,8 +355,8 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         }
     }
 
-    private Predicate getHavingClause(
-        SetJoin<TaskEntity, TaskVariableEntity> root,
+    private Predicate getTaskVariablesHavingClause(
+        Root<TaskVariableEntity> root,
         Collection<VariableFilter> filters,
         CriteriaBuilder criteriaBuilder
     ) {

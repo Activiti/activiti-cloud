@@ -3942,6 +3942,8 @@ public abstract class AbstractTaskControllerIT {
         for (int i = 0; i < 10; i++) {
             queryTestUtils
                 .buildTask()
+                .withTaskCandidateGroups("group1", "group2")
+                .withTaskCandidateUsers(CURRENT_USER, "other-user")
                 .withAssignee(CURRENT_USER)
                 .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"))
                 .withId(String.valueOf(i))
@@ -4014,7 +4016,9 @@ public abstract class AbstractTaskControllerIT {
                     .mapToObj(i ->
                         queryTestUtils
                             .buildTask()
-                            .withTaskCandidateUsers(CURRENT_USER)
+                            .withAssignee(CURRENT_USER)
+                            .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                            .withTaskCandidateGroups("group1", "group2")
                             .withVariables(new QueryTestUtils.VariableInput("taskVar", VariableType.STRING, "value"))
                     )
                     .toArray(TaskBuilder[]::new)
