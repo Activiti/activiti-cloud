@@ -18,11 +18,13 @@ package org.activiti.cloud.services.query.app.repository;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
@@ -36,8 +38,11 @@ public class CustomizedProcessInstanceRepositoryImpl
     extends QuerydslRepositorySupport
     implements CustomizedProcessInstanceRepository {
 
-    public CustomizedProcessInstanceRepositoryImpl() {
+    private final JPAQueryFactory queryFactory;
+
+    public CustomizedProcessInstanceRepositoryImpl(EntityManager entityManager) {
         super(ProcessInstanceEntity.class);
+        this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
     @Override
@@ -116,8 +121,6 @@ public class CustomizedProcessInstanceRepositoryImpl
     public Page<ProcessInstanceEntity> findSubprocessesByParentIds(List<String> parentIds, Pageable pageable) {
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
-        EntityManager entityManager = getEntityManager();
-        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         Querydsl querydsl = getQuerydsl();
 
         JPQLQuery<ProcessInstanceEntity> subprocessQuery = queryFactory
@@ -134,9 +137,6 @@ public class CustomizedProcessInstanceRepositoryImpl
 
     public List<ProcessInstanceEntity> findSubprocessesByParentId(String parentId) {
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
-
-        EntityManager entityManager = getEntityManager();
-        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
 
         return queryFactory
             .selectFrom(processInstanceEntity)

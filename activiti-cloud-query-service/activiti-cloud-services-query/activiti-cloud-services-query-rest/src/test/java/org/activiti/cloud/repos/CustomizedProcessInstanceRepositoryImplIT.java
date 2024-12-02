@@ -1,0 +1,140 @@
+/*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.activiti.cloud.repos;
+
+import jakarta.persistence.EntityManager;
+import org.activiti.QueryRestTestApplication;
+import org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(
+    classes = { QueryRestTestApplication.class },
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+    }
+)
+@TestPropertySource("classpath:application-test.properties")
+@Testcontainers
+@Transactional
+class CustomizedProcessInstanceRepositoryImplIT {
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+
+    @Autowired
+    private CustomizedProcessInstanceRepositoryImpl repository;
+
+    @Autowired
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @BeforeEach
+    void setUp() {
+        processInstanceRepository.deleteAll();
+    }
+
+    @Test
+    void testMapSubprocessesForPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+        List<ProcessInstanceEntity> processInstancesList = buildDefaultProcessInstances(3);
+        String parentId1 = processInstancesList.getFirst().getId();
+        List<ProcessInstanceEntity> subprocesses1 = buildDefaultProcessInstances(2);
+        setSubprocesses(subprocesses1,parentId1);
+        String parentId2 = processInstancesList.getLast().getId();
+        List<ProcessInstanceEntity> subprocesses2 = buildDefaultProcessInstances(3);
+        setSubprocesses(subprocesses2,parentId2);
+
+        entityManager.flush();
+
+        Page<ProcessInstanceEntity> processInstances = new PageImpl<>(processInstancesList, pageable, processInstancesList.size());
+
+        Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances, pageable);
+
+        assertNotNull(result);
+        assertEquals(3, result.getTotalElements());
+
+        ProcessInstanceEntity parentInstance1 = result.getContent().stream()
+            .filter(instance -> instance.getId().equals(parentId1))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(parentInstance1);
+        assertEquals(2, parentInstance1.getSubprocesses().size());
+
+        ProcessInstanceEntity parentInstance2 = result.getContent().stream()
+            .filter(instance -> instance.getId().equals(parentId2))
+            .findFirst()
+            .orElse(null);
+        assertNotNull(parentInstance2);
+        assertEquals(3, parentInstance2.getSubprocesses().size());
+
+    }
+
+    @Test
+    void testMapSubprocessesForProcessInstance() {
+        List<ProcessInstanceEntity> processInstances = buildDefaultProcessInstances(5);
+        List<ProcessInstanceEntity> subprocesses = buildDefaultProcessInstances(2);
+        ProcessInstanceEntity entity = processInstances.getFirst();
+        String parentId = entity.getId();
+        setSubprocesses(subprocesses,parentId);
+
+        ProcessInstanceEntity result = repository.mapSubprocesses(entity);
+
+        assertNotNull(result);
+        assertNotNull(result.getSubprocesses().stream().toList().getLast().getId());
+    }
+
+    private List<ProcessInstanceEntity> buildDefaultProcessInstances(int count) {
+        List<ProcessInstanceEntity> entities = new ArrayList<>();
+        for(int i=1;i<=count;i++ ){
+            entities.add(new ProcessInstanceTestUtils().buildProcessInstanceEntity());
+        }
+        processInstanceRepository.saveAll(entities);
+        return entities;
+    }
+
+    private void setSubprocesses(List<ProcessInstanceEntity> subprocesses,String parentId){
+        for(ProcessInstanceEntity subprocess:subprocesses){
+            subprocess.setParentId(parentId);
+            processInstanceRepository.save(subprocess);
+        }
+    }
+}
