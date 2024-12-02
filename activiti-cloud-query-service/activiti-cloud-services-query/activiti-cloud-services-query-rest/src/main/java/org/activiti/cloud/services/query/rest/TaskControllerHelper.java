@@ -151,10 +151,9 @@ public class TaskControllerHelper {
         Pageable pageable,
         TaskSpecification taskSpecification
     ) {
-        Page<TaskEntity> tasks = new PageImpl<>(
-            executeTupleQueryAndExtractTasks(getTupleQuery(taskSpecification, pageable)),
-            pageable,
-            taskRepository.count(new SubqueryWrappingSpecification<>(taskSpecification))
+        Page<TaskEntity> tasks = taskRepository.findAll(
+            new SubqueryWrappingSpecification<>(taskSpecification),
+            pageable
         );
         fetchTaskCandidateUsers(tasks.getContent());
         fetchTaskCandidateGroups(tasks.getContent());

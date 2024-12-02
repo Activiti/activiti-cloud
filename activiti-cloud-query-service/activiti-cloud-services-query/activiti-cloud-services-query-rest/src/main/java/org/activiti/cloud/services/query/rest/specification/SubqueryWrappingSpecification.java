@@ -32,7 +32,6 @@ public class SubqueryWrappingSpecification<T> implements Specification<T> {
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        specification.setDistinct(false);
         Subquery<T> subquery = query.subquery(root.getModel().getJavaType());
         Root<T> subroot = subquery.correlate(root);
         subquery.select(subroot);

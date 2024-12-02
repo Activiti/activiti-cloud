@@ -27,13 +27,12 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.util.CollectionUtils;
 
 public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
-
-    private List<Predicate> predicates;
 
     private final String userId;
 
@@ -58,8 +57,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        predicates = new ArrayList<>();
-        query.distinct(distinct);
+        reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
         applyInitiatorFilter(root);
@@ -71,13 +69,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
         if (!query.getResultType().equals(Long.class)) {
-            applySorting(
-                root,
-                () -> root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
-                searchRequest.sort(),
-                query,
-                criteriaBuilder
-            );
+            applySorting(root, root.get(ProcessInstanceEntity_.id), searchRequest.sort(), query, criteriaBuilder);
         }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
@@ -197,7 +189,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         CriteriaBuilder criteriaBuilder
     ) {
         if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
+            Root<ProcessVariableEntity> pvRoot = getProcessVariableRoot(query);
             Predicate joinCondition = criteriaBuilder.equal(
                 root.get(ProcessInstanceEntity_.id),
                 pvRoot.get(ProcessVariableEntity_.processInstanceId)

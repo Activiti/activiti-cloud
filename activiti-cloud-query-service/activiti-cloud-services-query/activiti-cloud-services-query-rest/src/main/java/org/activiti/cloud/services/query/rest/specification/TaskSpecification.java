@@ -20,9 +20,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
@@ -37,10 +35,7 @@ import org.springframework.util.CollectionUtils;
 
 public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
-    private List<Predicate> predicates;
-    private List<Predicate> havingClauses;
-
-    private final TaskSearchRequest taskSearchRequest;
+    public final TaskSearchRequest taskSearchRequest;
 
     private final String userId;
     private final Collection<String> userGroups;
@@ -84,9 +79,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        predicates = new ArrayList<>();
-        havingClauses = new ArrayList<>();
-        query.distinct(distinct);
+        reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
@@ -112,7 +105,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         if (!query.getResultType().equals(Long.class)) {
             applySorting(
                 root,
-                () -> root.join(TaskEntity_.processVariables, JoinType.LEFT),
+                root.get(TaskEntity_.processInstanceId),
                 taskSearchRequest.sort(),
                 query,
                 criteriaBuilder
@@ -271,15 +264,15 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         CriteriaBuilder criteriaBuilder
     ) {
         if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
-            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
-            Predicate joinCondition = criteriaBuilder.equal(
+            Root<ProcessVariableEntity> pvRoot = getProcessVariableRoot(query);
+            Predicate implicitJoinCondition = criteriaBuilder.equal(
                 root.get(TaskEntity_.processInstanceId),
                 pvRoot.get(ProcessVariableEntity_.processInstanceId)
             );
-
+            predicates.add(implicitJoinCondition);
             predicates.add(
                 criteriaBuilder.and(
-                    joinCondition,
+                    implicitJoinCondition,
                     criteriaBuilder.or(
                         getProcessVariableValueFilters(
                             pvRoot,

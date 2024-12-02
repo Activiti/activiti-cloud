@@ -21,11 +21,11 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -38,10 +38,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T> implements Specification<T> {
 
-    protected boolean distinct = true;
+    protected List<Predicate> predicates;
+    protected List<Predicate> havingClauses;
+    protected Root<ProcessVariableEntity> processVariableRoot;
 
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    protected Root<ProcessVariableEntity> getProcessVariableRoot(CriteriaQuery<?> query) {
+        if (processVariableRoot == null) {
+            processVariableRoot = query.from(ProcessVariableEntity.class);
+        }
+        return processVariableRoot;
+    }
+
+    protected void reset() {
+        predicates = new ArrayList<>();
+        havingClauses = new ArrayList<>();
+        processVariableRoot = null;
     }
 
     protected void addLikeFilters(
@@ -172,7 +183,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
 
     protected void applySorting(
         Root<T> root,
-        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        Path<String> processInstanceId,
         CloudRuntimeEntitySort sort,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
@@ -181,34 +192,37 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             validateSort(sort);
             Expression<Object> orderByClause;
             if (sort.isProcessVariable()) {
-                SetJoin<T, ProcessVariableEntity> joinedProcessVars = joinSupplier.get();
+                Root<ProcessVariableEntity> pvRoot = getProcessVariableRoot(query);
+                Predicate implicitJoinCondition = criteriaBuilder.equal(
+                    processInstanceId,
+                    pvRoot.get(ProcessVariableEntity_.processInstanceId)
+                );
+                predicates.add(implicitJoinCondition);
                 Expression<?> extractedValue = criteriaBuilder.function(
                     CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
                     Object.class,
-                    joinedProcessVars.get(ProcessVariableEntity_.value)
+                    pvRoot.get(ProcessVariableEntity_.value)
                 );
                 orderByClause =
                     criteriaBuilder
                         .selectCase()
                         .when(
                             criteriaBuilder.and(
-                                joinedProcessVars
+                                pvRoot
                                     .get(ProcessVariableEntity_.processDefinitionKey)
                                     .in(sort.processDefinitionKeys()),
-                                criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
+                                criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), sort.field())
                             ),
                             extractedValue
-                        )
-                        .otherwise(criteriaBuilder.nullLiteral(Object.class));
+                        );
             } else {
                 orderByClause = root.get(sort.field());
             }
-            if (sort.direction().isAscending()) {
-                query.orderBy(criteriaBuilder.asc(orderByClause));
-            } else {
-                //This is a workaround to override the nulls first behavior when ordering direction is DESC
-                query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
-            }
+            query.orderBy(
+                sort.direction().isAscending()
+                    ? criteriaBuilder.asc(orderByClause)
+                    : criteriaBuilder.desc(orderByClause)
+            );
         }
     }
 
