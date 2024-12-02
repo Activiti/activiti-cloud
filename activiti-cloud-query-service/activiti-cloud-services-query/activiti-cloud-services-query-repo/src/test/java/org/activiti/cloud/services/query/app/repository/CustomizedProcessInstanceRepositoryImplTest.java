@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,10 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CustomizedProcessInstanceRepositoryImplTest {
 
@@ -89,8 +88,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
     private List<ProcessInstanceEntity> createParentProcessInstances(int count) {
         List<ProcessInstanceEntity> instances = new ArrayList<>();
-        for(int i =0;i<count;i++)
-        {
+        for (int i = 0; i < count; i++) {
             instances.add(createProcessInstance("1"));
         }
         return instances;
@@ -98,8 +96,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
     private List<ProcessInstanceEntity> createSubprocessInstances(int count, String parentId) {
         List<ProcessInstanceEntity> instances = new ArrayList<>();
-        for(int i =0;i<count;i++)
-        {
+        for (int i = 0; i < count; i++) {
             instances.add(createProcessInstance(parentId));
         }
         return instances;

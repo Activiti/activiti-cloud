@@ -93,10 +93,7 @@ public class CustomizedProcessInstanceRepositoryImpl
             .collect(
                 Collectors.groupingBy(
                     ProcessInstanceEntity::getParentId,
-                    Collectors.mapping(
-                        this::getQueryCloudSubprocessInstance,
-                        Collectors.toSet()
-                    )
+                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
                 )
             );
     }
