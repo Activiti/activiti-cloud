@@ -18,12 +18,11 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.*;
-
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.*;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -43,12 +42,16 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
     @Mock
     private EntityManager entityManager;
+
     @Mock
     private JPAQueryFactory queryFactory;
+
     @Mock
     private JPAQuery<ProcessInstanceEntity> jpaQuery;
+
     @Mock
     private JPQLQuery<ProcessInstanceEntity> jpqlQuery;
+
     @Mock
     private Querydsl querydsl;
 
@@ -64,7 +67,8 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
     @Test
     void testGetQueryCloudSubprocessInstance() {
-        ProcessInstanceEntity subprocess = new ProcessInstanceHelper().createProcessInstance(UUID.randomUUID().toString());
+        ProcessInstanceEntity subprocess = new ProcessInstanceHelper()
+            .createProcessInstance(UUID.randomUUID().toString());
         QueryCloudSubprocessInstance result = repository.getQueryCloudSubprocessInstance(subprocess);
 
         assertNotNull(result);
@@ -88,7 +92,8 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<ProcessInstanceEntity> processInstancesList = new ProcessInstanceHelper().createParentProcessInstances(4);
         String parentIdOne = processInstancesList.getFirst().getId();
         String parentIdTwo = processInstancesList.getLast().getId();
-        List<ProcessInstanceEntity> subprocessesList = new ProcessInstanceHelper().createSubprocessInstances(2, parentIdOne);
+        List<ProcessInstanceEntity> subprocessesList = new ProcessInstanceHelper()
+            .createSubprocessInstances(2, parentIdOne);
         subprocessesList.addAll(new ProcessInstanceHelper().createSubprocessInstances(3, parentIdTwo));
 
         Page<ProcessInstanceEntity> subprocesses = new PageImpl<>(subprocessesList);
@@ -106,7 +111,8 @@ class CustomizedProcessInstanceRepositoryImplTest {
     @Test
     void testFindSubprocessesByParentId() {
         String parentId = UUID.randomUUID().toString();
-        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper().createSubprocessInstances(2, parentId);
+        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper()
+            .createSubprocessInstances(2, parentId);
 
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
@@ -131,7 +137,8 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<String> parentIds = Arrays.asList("parent1", "parent2");
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper().createSubprocessInstances(2, "parent1");
+        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper()
+            .createSubprocessInstances(2, "parent1");
         expectedSubprocesses.addAll(new ProcessInstanceHelper().createSubprocessInstances(3, "parent2"));
 
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
@@ -157,13 +164,18 @@ class CustomizedProcessInstanceRepositoryImplTest {
     @Test
     void testMapSubprocesses() {
         List<ProcessInstanceEntity> processInstancesList = new ProcessInstanceHelper().createParentProcessInstances(2);
-        List<String> parentIds = Arrays.asList(processInstancesList.getFirst().getId(),processInstancesList.getLast().getId());
+        List<String> parentIds = Arrays.asList(
+            processInstancesList.getFirst().getId(),
+            processInstancesList.getLast().getId()
+        );
         Page<ProcessInstanceEntity> processInstances = new PageImpl<>(processInstancesList);
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<ProcessInstanceEntity> subprocessesList = new ProcessInstanceHelper().createSubprocessInstances(2,
-                processInstancesList.get(0).getId());
-        subprocessesList.addAll(new ProcessInstanceHelper().createSubprocessInstances(3, processInstancesList.get(1).getId()));
+        List<ProcessInstanceEntity> subprocessesList = new ProcessInstanceHelper()
+            .createSubprocessInstances(2, processInstancesList.get(0).getId());
+        subprocessesList.addAll(
+            new ProcessInstanceHelper().createSubprocessInstances(3, processInstancesList.get(1).getId())
+        );
 
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
@@ -185,7 +197,8 @@ class CustomizedProcessInstanceRepositoryImplTest {
     void testMapSubprocessesForProcessInstance() {
         ProcessInstanceEntity entity = new ProcessInstanceHelper().createProcessInstance("1");
         String parentId = entity.getId();
-        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper().createSubprocessInstances(2, parentId);
+        List<ProcessInstanceEntity> expectedSubprocesses = new ProcessInstanceHelper()
+            .createSubprocessInstances(2, parentId);
 
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 

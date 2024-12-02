@@ -16,7 +16,11 @@
 
 package org.activiti.cloud.repos;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -37,11 +41,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(
     classes = { QueryRestTestApplication.class },
     properties = {
@@ -54,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 @Transactional
 class CustomizedProcessInstanceRepositoryImplIT {
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -78,34 +78,41 @@ class CustomizedProcessInstanceRepositoryImplIT {
         List<ProcessInstanceEntity> processInstancesList = buildDefaultProcessInstances(3);
         String parentId1 = processInstancesList.getFirst().getId();
         List<ProcessInstanceEntity> subprocesses1 = buildDefaultProcessInstances(2);
-        setSubprocesses(subprocesses1,parentId1);
+        setSubprocesses(subprocesses1, parentId1);
         String parentId2 = processInstancesList.getLast().getId();
         List<ProcessInstanceEntity> subprocesses2 = buildDefaultProcessInstances(3);
-        setSubprocesses(subprocesses2,parentId2);
+        setSubprocesses(subprocesses2, parentId2);
 
         entityManager.flush();
 
-        Page<ProcessInstanceEntity> processInstances = new PageImpl<>(processInstancesList, pageable, processInstancesList.size());
+        Page<ProcessInstanceEntity> processInstances = new PageImpl<>(
+            processInstancesList,
+            pageable,
+            processInstancesList.size()
+        );
 
         Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances, pageable);
 
         assertNotNull(result);
         assertEquals(3, result.getTotalElements());
 
-        ProcessInstanceEntity parentInstance1 = result.getContent().stream()
+        ProcessInstanceEntity parentInstance1 = result
+            .getContent()
+            .stream()
             .filter(instance -> instance.getId().equals(parentId1))
             .findFirst()
             .orElse(null);
         assertNotNull(parentInstance1);
         assertEquals(2, parentInstance1.getSubprocesses().size());
 
-        ProcessInstanceEntity parentInstance2 = result.getContent().stream()
+        ProcessInstanceEntity parentInstance2 = result
+            .getContent()
+            .stream()
             .filter(instance -> instance.getId().equals(parentId2))
             .findFirst()
             .orElse(null);
         assertNotNull(parentInstance2);
         assertEquals(3, parentInstance2.getSubprocesses().size());
-
     }
 
     @Test
@@ -114,7 +121,7 @@ class CustomizedProcessInstanceRepositoryImplIT {
         List<ProcessInstanceEntity> subprocesses = buildDefaultProcessInstances(2);
         ProcessInstanceEntity entity = processInstances.getFirst();
         String parentId = entity.getId();
-        setSubprocesses(subprocesses,parentId);
+        setSubprocesses(subprocesses, parentId);
 
         ProcessInstanceEntity result = repository.mapSubprocesses(entity);
 
@@ -124,15 +131,15 @@ class CustomizedProcessInstanceRepositoryImplIT {
 
     private List<ProcessInstanceEntity> buildDefaultProcessInstances(int count) {
         List<ProcessInstanceEntity> entities = new ArrayList<>();
-        for(int i=1;i<=count;i++ ){
+        for (int i = 1; i <= count; i++) {
             entities.add(new ProcessInstanceTestUtils().buildProcessInstanceEntity());
         }
         processInstanceRepository.saveAll(entities);
         return entities;
     }
 
-    private void setSubprocesses(List<ProcessInstanceEntity> subprocesses,String parentId){
-        for(ProcessInstanceEntity subprocess:subprocesses){
+    private void setSubprocesses(List<ProcessInstanceEntity> subprocesses, String parentId) {
+        for (ProcessInstanceEntity subprocess : subprocesses) {
             subprocess.setParentId(parentId);
             processInstanceRepository.save(subprocess);
         }

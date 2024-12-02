@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.query.app.repository.utils;
 
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 
 public class ProcessInstanceHelper {
+
     public ProcessInstanceEntity createProcessInstance(String parentId) {
         ProcessInstanceEntity entity = new ProcessInstanceEntity();
         entity.setId(UUID.randomUUID().toString());
