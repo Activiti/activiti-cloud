@@ -97,6 +97,9 @@ class ProcessInstanceControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
+    private TaskControllerHelper taskControllerHelper;
+
+    @MockBean
     private VariableRepository processVariableRepository;
 
     @MockBean
