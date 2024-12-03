@@ -22,7 +22,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 
 public class ProcessInstanceHelper {
 
-    public ProcessInstanceEntity createProcessInstance(String parentId) {
+    public static ProcessInstanceEntity createProcessInstance(String parentId) {
         ProcessInstanceEntity entity = new ProcessInstanceEntity();
         entity.setId(UUID.randomUUID().toString());
         entity.setName(UUID.randomUUID().toString());
@@ -31,7 +31,7 @@ public class ProcessInstanceHelper {
         return entity;
     }
 
-    public List<ProcessInstanceEntity> createParentProcessInstances(int count) {
+    public static List<ProcessInstanceEntity> createParentProcessInstances(int count) {
         List<ProcessInstanceEntity> instances = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             instances.add(createProcessInstance("1"));
@@ -39,7 +39,7 @@ public class ProcessInstanceHelper {
         return instances;
     }
 
-    public List<ProcessInstanceEntity> createSubprocessInstances(int count, String parentId) {
+    public static List<ProcessInstanceEntity> createSubprocessInstances(int count, String parentId) {
         List<ProcessInstanceEntity> instances = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             instances.add(createProcessInstance(parentId));
