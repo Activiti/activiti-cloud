@@ -121,6 +121,7 @@ jobs:
       - name: Build Activiti Cloud Identity Adapter
         run: make docker/activiti-cloud-identity-adapter
 
+
   acceptance-tests:
     runs-on: ubuntu-latest
     needs: build
