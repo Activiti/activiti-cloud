@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessInstanceSearchRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -26,7 +27,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
-import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -142,9 +142,5 @@ class ProcessInstanceControllerHelperTest {
 
         //then
         assertThat(result).isEqualTo(pageResult);
-    }
-
-    private ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
-        return new ProcessInstanceTestUtils().createProcessInstanceSearchRequest();
     }
 }

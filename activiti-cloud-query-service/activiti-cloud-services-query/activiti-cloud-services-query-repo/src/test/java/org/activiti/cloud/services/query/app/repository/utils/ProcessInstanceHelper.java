@@ -22,6 +22,8 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 
 public class ProcessInstanceHelper {
 
+    private ProcessInstanceHelper() {}
+
     public static ProcessInstanceEntity createProcessInstance(String parentId) {
         ProcessInstanceEntity entity = new ProcessInstanceEntity();
         entity.setId(UUID.randomUUID().toString());

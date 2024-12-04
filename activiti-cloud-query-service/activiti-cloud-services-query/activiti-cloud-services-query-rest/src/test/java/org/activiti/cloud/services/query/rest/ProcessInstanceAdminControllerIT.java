@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -35,7 +37,6 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -112,7 +113,7 @@ class ProcessInstanceAdminControllerIT {
     @Test
     void shouldReturnProcessInstancesWithoutVariableKeys() throws Exception {
         //given
-        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        ProcessInstanceEntity parentProcessInstance = buildProcessInstanceEntity();
 
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
             Collections.singletonList(parentProcessInstance),
@@ -138,8 +139,8 @@ class ProcessInstanceAdminControllerIT {
     @Test
     void shouldReturnProcessInstancesWithVariableKeys() throws Exception {
         //given
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 6);
         List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).toList();
 
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
@@ -170,7 +171,7 @@ class ProcessInstanceAdminControllerIT {
     @Test
     void shouldReturnProcessInstanceById() throws Exception {
         //given
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         String processInstanceId = processInstanceEntity.getId();
         given(processInstanceAdminService.findById(processInstanceId)).willReturn(processInstanceEntity);
         given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity);
@@ -196,13 +197,5 @@ class ProcessInstanceAdminControllerIT {
             .perform(get("/admin/v1/process-instances/appVersions").accept(MediaType.APPLICATION_JSON))
             //then
             .andExpect(status().isOk());
-    }
-
-    private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
-    }
-
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
-        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, 6);
     }
 }

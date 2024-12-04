@@ -26,7 +26,9 @@ import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchReque
 
 public class ProcessInstanceTestUtils {
 
-    public ProcessInstanceEntity buildProcessInstanceEntity() {
+    private ProcessInstanceTestUtils() {}
+
+    public static ProcessInstanceEntity buildProcessInstanceEntity() {
         return new ProcessInstanceEntity(
             "My-app",
             "My-app",
@@ -40,7 +42,7 @@ public class ProcessInstanceTestUtils {
         );
     }
 
-    public Set<ProcessVariableEntity> createProcessVariables(
+    public static Set<ProcessVariableEntity> createProcessVariables(
         ProcessInstanceEntity processInstanceEntity,
         int numberOfVariables
     ) {
@@ -58,7 +60,7 @@ public class ProcessInstanceTestUtils {
         return variables;
     }
 
-    public ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
+    public static ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
         return new ProcessInstanceSearchRequest(
             Set.of("My-app"), // processDefinitionKeys
             Set.of("initiator"), // initiators

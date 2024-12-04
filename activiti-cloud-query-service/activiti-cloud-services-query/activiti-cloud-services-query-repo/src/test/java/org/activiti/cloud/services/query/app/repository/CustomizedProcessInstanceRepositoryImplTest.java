@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.app.repository;
 
 import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.querydsl.jpa.impl.JPAQuery;
@@ -81,7 +80,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<String> result = repository.getParentIds(processInstances);
 
         assertThat(result).isNotNull();
-        assertEquals(3, result.size());
+        assertThat(result.size()).isEqualTo(3);
     }
 
     @Test
@@ -97,11 +96,11 @@ class CustomizedProcessInstanceRepositoryImplTest {
         Map<String, Set<QueryCloudSubprocessInstance>> result = repository.groupSubprocesses(subprocesses);
 
         assertThat(result).isNotNull();
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey(parentIdOne));
-        assertTrue(result.containsKey(parentIdTwo));
-        assertEquals(2, result.get(parentIdOne).size());
-        assertEquals(3, result.get(parentIdTwo).size());
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.containsKey(parentIdOne)).isTrue();
+        assertThat(result.containsKey(parentIdTwo)).isTrue();
+        assertThat(result.get(parentIdOne).size()).isEqualTo(2);
+        assertThat(result.get(parentIdTwo).size()).isEqualTo(3);
     }
 
     @Test
@@ -118,7 +117,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<ProcessInstanceEntity> result = repository.findSubprocessesByParentId(parentId);
 
         assertThat(result).isNotNull();
-        assertEquals(2, result.size());
+        assertThat(result.size()).isEqualTo(2);
         assertThat(result.get(0).getId()).isNotNull();
         assertThat(result.get(1).getId()).isNotNull();
 
@@ -145,8 +144,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         Page<ProcessInstanceEntity> result = repository.findSubprocessesByParentIds(parentIds, pageable);
 
         assertThat(result).isNotNull();
-        assertEquals(5, result.getTotalElements());
-        assertEquals(5, result.getContent().size());
+        assertThat(result.getTotalElements()).isEqualTo(5);
         assertThat(result.getContent().get(0).getId()).isNotNull();
         assertThat(result.getContent().get(1).getId()).isNotNull();
 
@@ -181,8 +179,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances, pageable);
 
         assertThat(result).isNotNull();
-        assertEquals(2, result.getTotalElements());
-        assertEquals(2, result.getContent().size());
+        assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent().get(0).getSubprocesses()).isNotNull();
         assertThat(result.getContent().get(1).getSubprocesses()).isNotNull();
     }
@@ -202,6 +199,6 @@ class CustomizedProcessInstanceRepositoryImplTest {
         ProcessInstanceEntity result = repository.mapSubprocesses(entity);
 
         assertThat(result).isNotNull();
-        assertEquals(2, result.getSubprocesses().size());
+        assertThat(result.getSubprocesses().size()).isEqualTo(2);
     }
 }

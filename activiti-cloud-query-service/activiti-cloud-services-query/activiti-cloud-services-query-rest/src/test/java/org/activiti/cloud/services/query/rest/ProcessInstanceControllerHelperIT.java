@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
@@ -28,7 +30,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
-import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ class ProcessInstanceControllerHelperIT {
 
     @Test
     void shouldReturnAllProcessInstances() {
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         processInstanceEntity.setInitiator(TEST_USER);
         processInstanceRepository.save(processInstanceEntity);
         //given
@@ -116,7 +117,7 @@ class ProcessInstanceControllerHelperIT {
 
     @Test
     void shouldReturnAllProcessInstancesWithVariables() {
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         processInstanceEntity.setInitiator(TEST_USER);
         processInstanceRepository.save(processInstanceEntity);
         //given
@@ -129,7 +130,7 @@ class ProcessInstanceControllerHelperIT {
             .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
         List<String> variableKeys = variables.stream().map(ProcessVariableEntity::getName).toList();
         Predicate predicate = null;
         int pageSize = 30;
@@ -146,7 +147,7 @@ class ProcessInstanceControllerHelperIT {
 
     @Test
     void shouldReturnProcessInstanceById() {
-        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        ProcessInstanceEntity parentProcessInstance = buildProcessInstanceEntity();
         parentProcessInstance.setInitiator(TEST_USER);
         processInstanceRepository.save(parentProcessInstance);
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
@@ -170,10 +171,6 @@ class ProcessInstanceControllerHelperIT {
         assertThat(result).isEqualTo(parentProcessInstance);
     }
 
-    private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
-    }
-
     private ProcessInstanceEntity buildSubprocessInstance(ProcessInstanceEntity parentProcessInstance) {
         ProcessInstanceEntity subprocessInstance = new ProcessInstanceEntity();
         subprocessInstance.setId(UUID.randomUUID().toString());
@@ -182,10 +179,6 @@ class ProcessInstanceControllerHelperIT {
         subprocessInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         subprocessInstance.setParentId(parentProcessInstance.getId());
         return subprocessInstance;
-    }
-
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
-        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, 8);
     }
 
     private ProcessInstanceEntity verifyReturnedProcessInstanceEntity(

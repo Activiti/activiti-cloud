@@ -16,7 +16,8 @@
 
 package org.activiti.cloud.repos;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +93,8 @@ class CustomizedProcessInstanceRepositoryImplIT {
 
         Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances, pageable);
 
-        assertNotNull(result);
-        assertEquals(3, result.getTotalElements());
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(3);
 
         ProcessInstanceEntity parentInstance1 = result
             .getContent()
@@ -102,8 +102,8 @@ class CustomizedProcessInstanceRepositoryImplIT {
             .filter(instance -> instance.getId().equals(parentId1))
             .findFirst()
             .orElse(null);
-        assertNotNull(parentInstance1);
-        assertEquals(2, parentInstance1.getSubprocesses().size());
+        assertThat(parentInstance1).isNotNull();
+        assertThat(parentInstance1.getSubprocesses()).hasSize(2);
 
         ProcessInstanceEntity parentInstance2 = result
             .getContent()
@@ -111,8 +111,8 @@ class CustomizedProcessInstanceRepositoryImplIT {
             .filter(instance -> instance.getId().equals(parentId2))
             .findFirst()
             .orElse(null);
-        assertNotNull(parentInstance2);
-        assertEquals(3, parentInstance2.getSubprocesses().size());
+        assertThat(parentInstance2).isNotNull();
+        assertThat(parentInstance2.getSubprocesses()).hasSize(3);
     }
 
     @Test
@@ -125,14 +125,14 @@ class CustomizedProcessInstanceRepositoryImplIT {
 
         ProcessInstanceEntity result = repository.mapSubprocesses(entity);
 
-        assertNotNull(result);
-        assertNotNull(result.getSubprocesses().stream().toList().getLast().getId());
+        assertThat(result).isNotNull();
+        assertThat(result.getSubprocesses().stream().toList().getLast().getId()).isNotNull();
     }
 
     private List<ProcessInstanceEntity> buildDefaultProcessInstances(int count) {
         List<ProcessInstanceEntity> entities = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
-            entities.add(new ProcessInstanceTestUtils().buildProcessInstanceEntity());
+            entities.add(buildProcessInstanceEntity());
         }
         processInstanceRepository.saveAll(entities);
         return entities;

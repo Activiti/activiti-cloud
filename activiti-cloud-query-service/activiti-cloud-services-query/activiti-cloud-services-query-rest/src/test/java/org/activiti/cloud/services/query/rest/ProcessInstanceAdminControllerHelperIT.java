@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
@@ -26,7 +28,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
-import org.activiti.cloud.services.query.util.ProcessInstanceTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     void shouldReturnAllProcessInstanceAdmin() {
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         processInstanceRepository.save(processInstanceEntity);
         Predicate predicate = null;
         int pageSize = 30;
@@ -91,7 +92,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     void shouldReturnAllProcessInstanceAdminWithSubprocess() {
-        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        ProcessInstanceEntity parentProcessInstance = buildProcessInstanceEntity();
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
 
         processInstanceRepository.save(parentProcessInstance);
@@ -123,7 +124,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     void shouldReturnAllProcessInstanceAdminWithVariables() {
-        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         processInstanceRepository.save(processInstanceEntity);
 
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
@@ -143,7 +144,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     void shouldReturnProcessAdminById() {
-        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        ProcessInstanceEntity parentProcessInstance = buildProcessInstanceEntity();
         ProcessInstanceEntity subprocessInstance = buildSubprocessInstance(parentProcessInstance);
 
         processInstanceRepository.save(parentProcessInstance);
@@ -160,10 +161,6 @@ class ProcessInstanceAdminControllerHelperIT {
                 .anyMatch(subprocess -> subprocess.getId().equals(subprocessInstance.getId()))
         )
             .isTrue();
-    }
-
-    private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceTestUtils().buildProcessInstanceEntity();
     }
 
     private ProcessInstanceEntity buildSubprocessInstance(ProcessInstanceEntity parentProcessInstance) {
@@ -186,13 +183,6 @@ class ProcessInstanceAdminControllerHelperIT {
             .filter(pi -> pi.getId().equals(parentProcessInstance.getId()))
             .findFirst()
             .orElse(null);
-    }
-
-    private Set<ProcessVariableEntity> createProcessVariables(
-        ProcessInstanceEntity processInstanceEntity,
-        int numberOfVariables
-    ) {
-        return new ProcessInstanceTestUtils().createProcessVariables(processInstanceEntity, numberOfVariables);
     }
 
     private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {
