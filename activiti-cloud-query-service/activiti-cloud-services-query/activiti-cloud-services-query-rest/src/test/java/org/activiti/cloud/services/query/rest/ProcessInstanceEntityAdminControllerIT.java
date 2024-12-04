@@ -58,6 +58,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceAdminController.class)
@@ -67,6 +68,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
+@TestPropertySource(
+    locations = { "classpath:application-test.properties" },
+    properties = "activiti.cloud.rest.max-items.enabled=true"
+)
 public class ProcessInstanceEntityAdminControllerIT {
 
     @Autowired

@@ -56,6 +56,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceController.class)
@@ -65,6 +66,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
+@TestPropertySource(
+    locations = { "classpath:application-test.properties" },
+    properties = "activiti.cloud.rest.max-items.enabled=true"
+)
 class ProcessInstanceControllerIT {
 
     @Autowired
