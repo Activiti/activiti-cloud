@@ -61,6 +61,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withProcessDefinitionName(String processDefinitionName) {
+        process.setProcessDefinitionName(processDefinitionName);
+        return this;
+    }
+
     public ProcessInstanceBuilder withAppName(String appName) {
         process.setAppName(appName);
         return this;

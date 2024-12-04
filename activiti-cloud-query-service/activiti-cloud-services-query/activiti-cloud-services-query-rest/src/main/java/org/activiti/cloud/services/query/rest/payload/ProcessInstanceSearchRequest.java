@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 //prettier-ignore
 public record ProcessInstanceSearchRequest(
     Set<String> name,
+    Set<String> processDefinitionName,
     Set<String> initiator,
     Set<String> appVersion,
     Set<ProcessInstance.ProcessInstanceStatus> status,
