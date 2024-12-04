@@ -6707,6 +6707,9 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
           "processVariables": {
             "uniqueItems": true,
             "type": "array",
@@ -6821,9 +6824,33 @@
           "processInstanceId": {
             "type": "string"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "processInstanceId": {
+            "type": "string"
+          },
+          "candidateUsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -6968,13 +6995,13 @@
               "$ref": "#/components/schemas/QueryCloudSubprocessInstance_ProcessVariables"
             }
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
           "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
             "type": "string"
           },
           "serviceFullName": {
@@ -6990,6 +7017,13 @@
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parentId": {
             "type": "string"
           },
           "status": {
@@ -7259,6 +7293,9 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
           "processVariables": {
             "uniqueItems": true,
             "type": "array",
@@ -7373,9 +7410,33 @@
           "processInstanceId": {
             "type": "string"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "processInstanceId": {
+            "type": "string"
+          },
+          "candidateUsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -7399,13 +7460,13 @@
               "$ref": "#/components/schemas/QueryCloudSubprocessInstance_General"
             }
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
           "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
             "type": "string"
           },
           "serviceFullName": {
@@ -7421,6 +7482,13 @@
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parentId": {
             "type": "string"
           },
           "status": {
@@ -7673,7 +7741,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "businessKey": {
+          "processDefinitionKey": {
             "type": "string"
           },
           "completedDate": {
@@ -7687,9 +7755,9 @@
           "processDefinitionKey": {
             "type": "string"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "cancelledDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "appName": {
             "type": "string"
@@ -7712,16 +7780,16 @@
           "executionId": {
             "type": "string"
           },
-          "activityName": {
+          "executionId": {
             "type": "string"
           },
-          "activityType": {
+          "activityName": {
             "type": "string"
           },
           "elementId": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "elementId": {
             "type": "string"
           },
           "processInstanceId": {
@@ -7876,7 +7944,7 @@
           "processDefinitionKey": {
             "type": "string"
           },
-          "parentProcessInstanceId": {
+          "serviceName": {
             "type": "string"
           },
           "processDefinitionVersion": {
