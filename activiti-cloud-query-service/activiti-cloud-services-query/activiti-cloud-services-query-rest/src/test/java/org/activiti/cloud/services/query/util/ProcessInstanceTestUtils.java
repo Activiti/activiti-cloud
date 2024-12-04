@@ -65,6 +65,7 @@ public class ProcessInstanceTestUtils {
             Set.of("My-app"), // processDefinitionKeys
             Set.of("initiator"), // initiators
             Set.of("1.0"), // appVersions
+            Set.of("My-app"), // appNames
             Set.of(ProcessInstance.ProcessInstanceStatus.RUNNING), // statuses
             null, // lastModifiedFrom
             null, // lastModifiedTo
