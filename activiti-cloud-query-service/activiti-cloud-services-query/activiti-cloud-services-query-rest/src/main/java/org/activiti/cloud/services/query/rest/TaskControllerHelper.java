@@ -46,6 +46,7 @@ import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggrega
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.specification.SubqueryWrappingSpecification;
 import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
+import org.activiti.cloud.services.query.rest.specification.TaskSpecification2;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -130,7 +131,7 @@ public class TaskControllerHelper {
         return searchTasks(
             taskSearchRequest,
             pageable,
-            TaskSpecification.restricted(
+            TaskSpecification2.restricted(
                 taskSearchRequest,
                 securityManager.getAuthenticatedUserId(),
                 securityManager.getAuthenticatedUserGroups()
@@ -143,18 +144,15 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return searchTasks(taskSearchRequest, pageable, TaskSpecification.unrestricted(taskSearchRequest));
+        return searchTasks(taskSearchRequest, pageable, TaskSpecification2.unrestricted(taskSearchRequest));
     }
 
     private PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         TaskSearchRequest taskSearchRequest,
         Pageable pageable,
-        TaskSpecification taskSpecification
+        TaskSpecification2 taskSpecification
     ) {
-        Page<TaskEntity> tasks = taskRepository.findAll(
-            new SubqueryWrappingSpecification<>(taskSpecification),
-            pageable
-        );
+        Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
         fetchTaskCandidateUsers(tasks.getContent());
         fetchTaskCandidateGroups(tasks.getContent());
         processVariableService.fetchProcessVariablesForTasks(
