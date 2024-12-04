@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -44,7 +45,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -72,7 +72,7 @@ import org.springframework.test.web.servlet.MockMvc;
     locations = { "classpath:application-test.properties" },
     properties = "activiti.cloud.rest.max-items.enabled=true"
 )
-public class ProcessInstanceEntityAdminControllerIT {
+class ProcessInstanceEntityAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -119,33 +119,30 @@ public class ProcessInstanceEntityAdminControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
 
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance),
+            Collections.singletonList(processInstanceEntity),
             PageRequest.of(1, 10),
             1
         );
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
@@ -156,19 +153,18 @@ public class ProcessInstanceEntityAdminControllerIT {
 
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?page=1&size=10").accept(MediaTypes.HAL_JSON_VALUE))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.processInstances.[0].id").value(parentProcessInstance.getId()))
+            .andExpect(
+                jsonPath("$._embedded.processInstances[0].processDefinitionId")
+                    .value(parentProcessInstance.getProcessDefinitionId())
+            );
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {

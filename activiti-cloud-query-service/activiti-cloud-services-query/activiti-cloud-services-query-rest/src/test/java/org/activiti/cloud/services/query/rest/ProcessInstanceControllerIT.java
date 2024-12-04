@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -46,7 +47,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -123,9 +123,9 @@ class ProcessInstanceControllerIT {
     void shouldReturnProcessInstancesWithoutVariableKeys() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        ProcessInstanceEntity parentProcessInstance = buildProcessInstanceEntity();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
-            Collections.singletonList(parentProcessInstance),
+            Collections.singletonList(processInstanceEntity),
             PageRequest.of(1, 10),
             1
         );
@@ -133,19 +133,16 @@ class ProcessInstanceControllerIT {
             .willReturn(restrictedPredicate);
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(get("/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
     }
 
     @Test
@@ -166,22 +163,19 @@ class ProcessInstanceControllerIT {
             .willReturn(restrictedPredicate);
         given(processInstanceRepository.findByIdIsIn(ids, Sort.unsorted()))
             .willReturn(Collections.singletonList(processInstanceEntity));
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-instances?{variableKeys}&skipCount=10&maxItems=10", variableKeys)
+                get("/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10", variableKeys)
                     .accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
     }
 
     @Test
@@ -194,9 +188,7 @@ class ProcessInstanceControllerIT {
         given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
             .willReturn(restrictedPredicate);
         given(processInstanceService.findById(processInstanceId)).willReturn(processInstanceEntity);
-        given(processInstanceRepository.mapSubprocesses(processInstanceEntity))
-            .willReturn(processInstanceEntity)
-            .willReturn(processInstanceEntity);
+        given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity);
 
         //when
         mockMvc
@@ -204,6 +196,8 @@ class ProcessInstanceControllerIT {
                 get("/v1/process-instances/{processInstanceId}", processInstanceId).accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.entry.status").value(processInstanceEntity.getStatus().name()));
     }
 }

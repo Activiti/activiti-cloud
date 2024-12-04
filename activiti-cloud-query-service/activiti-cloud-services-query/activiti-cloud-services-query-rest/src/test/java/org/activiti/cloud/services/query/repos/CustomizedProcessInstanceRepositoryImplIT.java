@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.repos;
+package org.activiti.cloud.services.query.repos;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.assertj.core.api.Assertions.assertThat;

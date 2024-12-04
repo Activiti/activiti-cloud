@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -42,7 +43,6 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -127,18 +127,18 @@ class ProcessInstanceAdminControllerIT {
         );
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(processInstancePage);
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(parentProcessInstance.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(parentProcessInstance.getStatus().name()))
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.processDefinitionId")
+                    .value(parentProcessInstance.getProcessDefinitionId())
+            );
     }
 
     @Test
@@ -155,22 +155,19 @@ class ProcessInstanceAdminControllerIT {
         );
         given(processInstanceAdminService.findAllWithVariables(null, variableKeys, PageRequest.of(0, 10)))
             .willReturn(processInstancePage);
-        given(
-            processInstanceRepository.mapSubprocesses(
-                ArgumentMatchers.<Page<ProcessInstanceEntity>>any(),
-                any(Pageable.class)
-            )
-        )
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances?{variableKeys}&skipCount=10&maxItems=10", variableKeys)
+                get("/admin/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10", variableKeys)
                     .accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
     }
 
     @Test
@@ -188,7 +185,10 @@ class ProcessInstanceAdminControllerIT {
                     .accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.entry.serviceName").value(processInstanceEntity.getServiceName()))
+            .andExpect(jsonPath("$.entry.serviceFullName").value(processInstanceEntity.getServiceFullName()));
     }
 
     @Test
@@ -201,6 +201,7 @@ class ProcessInstanceAdminControllerIT {
         mockMvc
             .perform(get("/admin/v1/process-instances/appVersions").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0]").value("1.0"));
     }
 }
