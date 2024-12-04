@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import com.querydsl.jpa.impl.JPAQuery;
@@ -80,7 +80,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<String> result = repository.getParentIds(processInstances);
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(3);
+        assertThat(result).hasSize(3);
     }
 
     @Test
@@ -96,11 +96,11 @@ class CustomizedProcessInstanceRepositoryImplTest {
         Map<String, Set<QueryCloudSubprocessInstance>> result = repository.groupSubprocesses(subprocesses);
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(2);
-        assertThat(result.containsKey(parentIdOne)).isTrue();
-        assertThat(result.containsKey(parentIdTwo)).isTrue();
-        assertThat(result.get(parentIdOne).size()).isEqualTo(2);
-        assertThat(result.get(parentIdTwo).size()).isEqualTo(3);
+        assertThat(result).hasSize(2);
+        assertThat(result).containsKey(parentIdOne);
+        assertThat(result).containsKey(parentIdTwo);
+        assertThat(result.get(parentIdOne)).hasSize(2);
+        assertThat(result.get(parentIdTwo)).hasSize(3);
     }
 
     @Test
@@ -117,7 +117,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<ProcessInstanceEntity> result = repository.findSubprocessesByParentId(parentId);
 
         assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result).hasSize(2);
         assertThat(result.get(0).getId()).isNotNull();
         assertThat(result.get(1).getId()).isNotNull();
 
@@ -199,6 +199,6 @@ class CustomizedProcessInstanceRepositoryImplTest {
         ProcessInstanceEntity result = repository.mapSubprocesses(entity);
 
         assertThat(result).isNotNull();
-        assertThat(result.getSubprocesses().size()).isEqualTo(2);
+        assertThat(result.getSubprocesses()).hasSize(2);
     }
 }
