@@ -22,6 +22,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import java.util.List;
+import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -34,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+@CountOverFullWindow
 public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
 
     private final String userId;
@@ -131,6 +133,9 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                 query,
                 criteriaBuilder
             );
+        }
+        if (CollectionUtils.isEmpty(query.getGroupList())) {
+            query.distinct(true);
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }

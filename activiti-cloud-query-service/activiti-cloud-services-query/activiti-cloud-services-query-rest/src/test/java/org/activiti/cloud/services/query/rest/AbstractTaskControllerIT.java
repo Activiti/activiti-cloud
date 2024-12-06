@@ -110,9 +110,9 @@ public abstract class AbstractTaskControllerIT {
             .get(getSearchEndpointHttpGet())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].processVariables", hasSize(1))
-            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
     @Test
@@ -131,13 +131,26 @@ public abstract class AbstractTaskControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .param("skipCount", 0)
+            .param("maxItems", 10)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(5))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder("0", "1", "2", "3", "4"))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 0)
             .param("maxItems", 2)
             .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(2))
+            .body(TASKS_JSON_PATH, hasSize(2))
             .body("page.totalElements", equalTo(5));
 
         given()
@@ -149,7 +162,7 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(2))
+            .body(TASKS_JSON_PATH, hasSize(2))
             .body("page.totalElements", equalTo(5));
 
         given()
@@ -161,7 +174,7 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
+            .body(TASKS_JSON_PATH, hasSize(1))
             .body("page.totalElements", equalTo(5));
     }
 
@@ -193,9 +206,9 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].processVariables", hasSize(1))
-            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
     @Test
@@ -230,9 +243,9 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].processVariables", hasSize(1))
-            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
     @Test

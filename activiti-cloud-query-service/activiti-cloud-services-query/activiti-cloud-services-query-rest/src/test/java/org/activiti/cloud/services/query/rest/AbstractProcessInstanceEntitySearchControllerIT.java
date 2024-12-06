@@ -19,6 +19,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -356,6 +357,76 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnPaginatedProcessInstances_whenNoFilters() {
+        for (int i = 0; i < 5; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withId(String.valueOf(i))
+                .withTasks(
+                    queryTestUtils
+                        .buildTask()
+                        .withTaskCandidateUsers(USER, "other-user")
+                        .withTaskCandidateGroups("group1", "group2"),
+                    queryTestUtils
+                        .buildTask()
+                        .withTaskCandidateUsers(USER, "other-user")
+                        .withTaskCandidateGroups("group1", "group2")
+                )
+                .withInitiator(USER)
+                .buildAndSave();
+        }
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(5))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, containsInAnyOrder("0", "1", "2", "3", "4"))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 0)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 2)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 4)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body("page.totalElements", equalTo(5));
     }
 
     @Test
