@@ -41,6 +41,7 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.ProcessVariableFilterRequest;
+import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
@@ -59,9 +60,47 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
         this.searchRequest = searchRequest;
     }
 
-    public Map<String, Selection<?>> getSelections() {
-        return selections;
+    @Override
+    public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        applyProcessVariableFilters(joinProcessVariables(root), criteriaBuilder);
+        if (!filterConditions.isEmpty()) {
+            query.groupBy(root.get(getIdAttribute()));
+            query.having(
+                filterConditions
+                    .stream()
+                    .map(variableValueCondition -> {
+                        try {
+                            return variableValueCondition.toPredicate();
+                        } catch (FunctionArgumentException | IllegalArgumentException e) {
+                            throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Invalid filter (type: " +
+                                variableValueCondition.getClass().getSimpleName() +
+                                ", operator: " +
+                                variableValueCondition.operator +
+                                ", value: " +
+                                variableValueCondition.filterValue +
+                                ")"
+                            );
+                        }
+                    })
+                    .reduce(criteriaBuilder::and)
+                    .orElse(criteriaBuilder.conjunction())
+            );
+        }
+        if (!query.getResultType().equals(Long.class)) {
+            applySorting(root, joinProcessVariables(root), query, criteriaBuilder);
+        }
+        if (CollectionUtils.isEmpty(query.getGroupList())) {
+            query.distinct(true);
+        }
+        if (predicates.isEmpty()) {
+            return criteriaBuilder.conjunction();
+        }
+        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
+
+    protected abstract SingularAttribute<T, ?> getIdAttribute();
 
     protected void reset() {
         predicates = new ArrayList<>();
@@ -240,15 +279,13 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
      * Using a supplier to actually join process variable only if needed.
      * The instance of set join is stored in a field to avoid multiple joins.
      * @param root Specification root
-     * @param pvAttribute Process variable attribute to join
      * @return Supplier of SetJoin of process variables
      */
-    protected Supplier<SetJoin<T, ProcessVariableEntity>> joinProcessVariables(
-        Root<T> root,
-        SetAttribute<T, ProcessVariableEntity> pvAttribute
-    ) {
-        return () -> pvJoin == null ? pvJoin = root.join(pvAttribute, JoinType.LEFT) : pvJoin;
+    protected Supplier<SetJoin<T, ProcessVariableEntity>> joinProcessVariables(Root<T> root) {
+        return () -> pvJoin == null ? pvJoin = root.join(getProcessVariablesAttribute(), JoinType.LEFT) : pvJoin;
     }
+
+    protected abstract SetAttribute<T, ProcessVariableEntity> getProcessVariablesAttribute();
 
     protected void applyProcessVariableFilters(
         Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,

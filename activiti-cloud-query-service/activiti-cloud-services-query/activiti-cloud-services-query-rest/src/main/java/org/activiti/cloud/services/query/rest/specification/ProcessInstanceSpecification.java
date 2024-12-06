@@ -20,16 +20,16 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
-import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 @CountOverFullWindow
 public class ProcessInstanceSpecification
@@ -67,39 +67,17 @@ public class ProcessInstanceSpecification
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
-        applyProcessVariableFilters(joinProcessVariables(root, ProcessInstanceEntity_.variables), criteriaBuilder);
-        if (!filterConditions.isEmpty()) {
-            query.groupBy(root.get(ProcessInstanceEntity_.id));
-            query.having(
-                filterConditions
-                    .stream()
-                    .map(variableValueCondition -> {
-                        try {
-                            return variableValueCondition.toPredicate();
-                        } catch (FunctionArgumentException | IllegalArgumentException e) {
-                            throw new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Invalid filter (type: " +
-                                variableValueCondition.getClass().getSimpleName() +
-                                ", operator: " +
-                                variableValueCondition.operator +
-                                ", value: " +
-                                variableValueCondition.filterValue +
-                                ")"
-                            );
-                        }
-                    })
-                    .reduce(criteriaBuilder::and)
-                    .orElse(criteriaBuilder.conjunction())
-            );
-        }
-        if (!query.getResultType().equals(Long.class)) {
-            applySorting(root, joinProcessVariables(root, ProcessInstanceEntity_.variables), query, criteriaBuilder);
-        }
-        if (CollectionUtils.isEmpty(query.getGroupList())) {
-            query.distinct(true);
-        }
-        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    @Override
+    protected SingularAttribute<ProcessInstanceEntity, String> getIdAttribute() {
+        return ProcessInstanceEntity_.id;
+    }
+
+    @Override
+    protected SetAttribute<ProcessInstanceEntity, ProcessVariableEntity> getProcessVariablesAttribute() {
+        return ProcessInstanceEntity_.variables;
     }
 
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {

@@ -21,9 +21,12 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -31,10 +34,7 @@ import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 @CountOverFullWindow
 public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSearchRequest> {
@@ -119,42 +119,17 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                 .toList();
             filterConditions.addAll(conditions);
         }
-        applyProcessVariableFilters(joinProcessVariables(root, TaskEntity_.processVariables), criteriaBuilder);
-        if (!filterConditions.isEmpty()) {
-            query.groupBy(root.get(TaskEntity_.id));
-            query.having(
-                filterConditions
-                    .stream()
-                    .map(variableValueCondition -> {
-                        try {
-                            return variableValueCondition.toPredicate();
-                        } catch (FunctionArgumentException | IllegalArgumentException e) {
-                            throw new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Invalid filter (type: " +
-                                variableValueCondition.getClass().getSimpleName() +
-                                ", operator: " +
-                                variableValueCondition.operator +
-                                ", value: " +
-                                variableValueCondition.filterValue +
-                                ")"
-                            );
-                        }
-                    })
-                    .reduce(criteriaBuilder::and)
-                    .orElse(criteriaBuilder.conjunction())
-            );
-        }
-        if (!query.getResultType().equals(Long.class)) {
-            applySorting(root, joinProcessVariables(root, TaskEntity_.processVariables), query, criteriaBuilder);
-        }
-        if (CollectionUtils.isEmpty(query.getGroupList())) {
-            query.distinct(true);
-        }
-        if (predicates.isEmpty()) {
-            return criteriaBuilder.conjunction();
-        }
-        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    @Override
+    protected SingularAttribute<TaskEntity, String> getIdAttribute() {
+        return TaskEntity_.id;
+    }
+
+    @Override
+    protected SetAttribute<TaskEntity, ProcessVariableEntity> getProcessVariablesAttribute() {
+        return TaskEntity_.processVariables;
     }
 
     private void applyProcessDefinitionNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
