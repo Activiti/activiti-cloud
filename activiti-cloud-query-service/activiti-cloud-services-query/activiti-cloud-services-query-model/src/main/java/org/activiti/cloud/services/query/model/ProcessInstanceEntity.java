@@ -45,7 +45,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Filter;
@@ -74,7 +75,7 @@ import org.springframework.format.annotation.DateTimeFormat;
         ),
     }
 )
-public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
+public class ProcessInstanceEntity extends ActivitiEntityMetadata implements QueryCloudProcessInstance {
 
     @Id
     private String id;
@@ -220,6 +221,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
 
     private String parentId;
+
+    @Transient
+    private Set<QueryCloudSubprocessInstance> subprocesses;
 
     public ProcessInstanceEntity() {}
 
@@ -509,5 +513,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         ProcessInstanceEntity other = (ProcessInstanceEntity) obj;
 
         return id != null && Objects.equals(id, other.id);
+    }
+
+    @Override
+    public Set<QueryCloudSubprocessInstance> getSubprocesses() {
+        return subprocesses;
+    }
+
+    public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
+        this.subprocesses = subprocesses;
     }
 }

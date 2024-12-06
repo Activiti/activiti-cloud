@@ -39,6 +39,8 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableR
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
@@ -290,6 +292,29 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceSearchService,
             entityFinder,
             new QueryDslPredicateAggregator()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceControllerHelper processInstanceControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceService processInstanceService
+    ) {
+        return new ProcessInstanceControllerHelper(processInstanceRepository, processInstanceService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
+    ) {
+        return new ProcessInstanceAdminControllerHelper(
+            processInstanceRepository,
+            processInstanceAdminService,
+            processInstanceControllerHelper
         );
     }
 }

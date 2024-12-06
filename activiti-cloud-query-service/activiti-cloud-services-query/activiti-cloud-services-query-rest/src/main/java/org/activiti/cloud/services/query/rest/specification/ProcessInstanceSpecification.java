@@ -62,6 +62,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
+        applyProcessDefinitionNameFilter(root);
         applyInitiatorFilter(root);
         applyAppVersionFilter(root);
         applyStatusFilter(root);
@@ -137,6 +138,14 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(searchRequest.name())) {
             addLikeFilters(predicates, searchRequest.name(), root, criteriaBuilder, ProcessInstanceEntity_.name);
+        }
+    }
+
+    private void applyProcessDefinitionNameFilter(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.processDefinitionName())) {
+            predicates.add(
+                root.get(ProcessInstanceEntity_.processDefinitionName).in(searchRequest.processDefinitionName())
+            );
         }
     }
 
