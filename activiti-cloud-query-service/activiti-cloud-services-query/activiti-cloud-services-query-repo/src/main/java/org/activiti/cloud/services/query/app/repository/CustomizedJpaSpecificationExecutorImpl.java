@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.io.Serializable;
 import java.util.Collections;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import org.activiti.cloud.services.query.app.repository.function.CustomSQLFunction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -38,7 +39,7 @@ public class CustomizedJpaSpecificationExecutorImpl<T, ID extends Serializable>
             if (predicate != null) {
                 query.where(predicate);
             }
-            query.select(builder.function("COUNT_OVER", Long.class));
+            query.select(builder.function(CustomSQLFunction.COUNT_OVER_FULL_WINDOW.name(), Long.class));
             query.orderBy(Collections.emptyList());
             TypedQuery<Long> typedQuery = entityManager.createQuery(query);
             typedQuery.setMaxResults(1);

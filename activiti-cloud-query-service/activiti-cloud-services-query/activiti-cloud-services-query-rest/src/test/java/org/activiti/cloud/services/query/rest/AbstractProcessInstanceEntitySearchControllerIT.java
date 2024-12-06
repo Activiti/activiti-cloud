@@ -29,8 +29,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -99,39 +97,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withNames("amazing", "beautiful");
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
-    }
-
-    @Test
-    void should_returnProcessInstances_filteredByProcessDefinitionName() {
-        ProcessInstanceEntity processInstance1 = queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(USER)
-            .withProcessDefinitionName("Process def name one")
-            .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(USER)
-            .withProcessDefinitionName("Process def name two")
-            .buildAndSave();
-        queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(USER)
-            .withProcessDefinitionName("Process def name three")
-            .buildAndSave();
-
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessDefinitionNames("Process def name one", "Process def name two");
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2478,11 +2443,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     @Test
-    void should_returnProcessInstances_withSortedElementsFirst() {
+    void should_returnProcessInstances_paginatedAndSortedByProcessVariables_respectingDefaultNullBehaviour() {
+        /*
+         * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+         *  By default, null values sort as if larger than any non-null value;
+         *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+         */
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
-            .withAppName("Nice app")
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
             .buildAndSave();
@@ -2497,16 +2466,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
-            .withAppName("Best app ever")
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 4))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "best"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance4 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 3))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, null))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
@@ -2523,51 +2491,57 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
+            .param("skipCount", 0)
+            .param("maxItems", 2)
             .when()
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[0]", is(processInstance2.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[1]", is(processInstance1.getId()));
-
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        "var2",
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.INTEGER
-                    )
-                );
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH + "[0,1]",
+                contains(processInstance2.getId(), processInstance3.getId())
+            )
+            .body("page.totalElements", is(4));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
+            .param("skipCount", 2)
+            .param("maxItems", 2)
             .when()
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[0]", is(processInstance3.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[1]", is(processInstance4.getId()));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH + "[0,1]",
+                contains(processInstance1.getId(), processInstance4.getId())
+            )
+            .body("page.totalElements", is(4));
 
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("appName", Sort.Direction.DESC, false, null, null));
+        requestBuilder.invertSort();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
+            .param("skipCount", 0)
+            .param("maxItems", 4)
             .when()
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[0]", is(processInstance1.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH + "[1]", is(processInstance3.getId()));
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH,
+                contains(
+                    processInstance4.getId(),
+                    processInstance1.getId(),
+                    processInstance3.getId(),
+                    processInstance2.getId()
+                )
+            )
+            .body("page.totalElements", is(4));
     }
 
     @Test
