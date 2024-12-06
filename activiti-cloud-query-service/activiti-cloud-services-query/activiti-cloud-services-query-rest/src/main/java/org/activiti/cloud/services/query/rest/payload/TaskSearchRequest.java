@@ -22,7 +22,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 //prettier-ignore
-public record TaskSearchRequest(
+public record TaskSearchRequest (
     boolean onlyStandalone,
     boolean onlyRoot,
     Set<String> name,
@@ -48,4 +48,4 @@ public record TaskSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort
-) {}
+) implements ProcessVariableFilterRequest {}

@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import java.util.function.Supplier;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.VariableValue;
@@ -39,17 +40,24 @@ import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.rest.payload.ProcessVariableFilterRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-public abstract class SpecificationSupport<T> implements Specification<T> {
+public abstract class SpecificationSupport<T, R extends ProcessVariableFilterRequest> implements Specification<T> {
 
+    protected final R searchRequest;
     protected List<Predicate> predicates;
     protected Map<String, Selection<?>> selections = new HashMap<>();
     public List<VariableValueCondition> filterConditions;
 
     private SetJoin<T, ProcessVariableEntity> pvJoin;
+
+    protected SpecificationSupport(R searchRequest) {
+        this.searchRequest = searchRequest;
+    }
 
     public Map<String, Selection<?>> getSelections() {
         return selections;
@@ -168,15 +176,16 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
 
     protected void applySorting(
         Root<T> root,
-        SetJoin<T, ProcessVariableEntity> pvJoin,
-        CloudRuntimeEntitySort sort,
+        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
+        CloudRuntimeEntitySort sort = searchRequest.sort();
         if (sort != null) {
             validateSort(sort);
             Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
+                SetJoin<T, ProcessVariableEntity> pvJoin = joinSupplier.get();
                 orderByClause =
                     getCondition(
                         criteriaBuilder.and(
@@ -227,10 +236,48 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
         }
     }
 
-    protected SetJoin<T, ProcessVariableEntity> joinProcessVariables(Root<T> root, String attributeName) {
-        if (pvJoin == null) {
-            pvJoin = root.joinSet(attributeName, JoinType.LEFT);
+    /**
+     * Using a supplier to actually join process variable only if needed.
+     * The instance of set join is stored in a field to avoid multiple joins.
+     * @param root Specification root
+     * @param pvAttribute Process variable attribute to join
+     * @return Supplier of SetJoin of process variables
+     */
+    protected Supplier<SetJoin<T, ProcessVariableEntity>> joinProcessVariables(
+        Root<T> root,
+        SetAttribute<T, ProcessVariableEntity> pvAttribute
+    ) {
+        return () -> pvJoin == null ? pvJoin = root.join(pvAttribute, JoinType.LEFT) : pvJoin;
+    }
+
+    protected void applyProcessVariableFilters(
+        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            SetJoin<T, ProcessVariableEntity> pvRoot = joinSupplier.get();
+            List<VariableValueCondition> conditions = searchRequest
+                .processVariableFilters()
+                .stream()
+                .map(filter -> {
+                    VariableValueCondition condition = getCondition(
+                        criteriaBuilder.and(
+                            criteriaBuilder.equal(
+                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                filter.processDefinitionKey()
+                            ),
+                            criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name())
+                        ),
+                        criteriaBuilder,
+                        pvRoot.get(ProcessVariableEntity_.value),
+                        filter
+                    );
+                    String alias = getAlias(filter.processDefinitionKey(), filter.name());
+                    selections.put(alias, condition.getColumnExpression().alias(alias));
+                    return condition;
+                })
+                .toList();
+            filterConditions.addAll(conditions);
         }
-        return pvJoin;
     }
 }

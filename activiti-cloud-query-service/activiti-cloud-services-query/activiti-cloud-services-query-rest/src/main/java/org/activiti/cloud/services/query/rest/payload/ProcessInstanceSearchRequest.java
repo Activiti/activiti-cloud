@@ -39,4 +39,4 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort
-) {}
+) implements ProcessVariableFilterRequest{}

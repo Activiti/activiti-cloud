@@ -20,13 +20,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.SetJoin;
-import java.util.List;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -36,14 +32,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @CountOverFullWindow
-public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
+public class ProcessInstanceSpecification
+    extends SpecificationSupport<ProcessInstanceEntity, ProcessInstanceSearchRequest> {
 
     private final String userId;
 
-    private final ProcessInstanceSearchRequest searchRequest;
-
     private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
-        this.searchRequest = searchRequest;
+        super(searchRequest);
         this.userId = userId;
     }
 
@@ -72,34 +67,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
-        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            SetJoin<ProcessInstanceEntity, ProcessVariableEntity> pvRoot = joinProcessVariables(
-                root,
-                ProcessInstanceEntity_.VARIABLES
-            );
-            List<VariableValueCondition> conditions = searchRequest
-                .processVariableFilters()
-                .stream()
-                .map(filter -> {
-                    VariableValueCondition condition = getCondition(
-                        criteriaBuilder.and(
-                            criteriaBuilder.equal(
-                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                                filter.processDefinitionKey()
-                            ),
-                            criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name())
-                        ),
-                        criteriaBuilder,
-                        pvRoot.get(ProcessVariableEntity_.value),
-                        filter
-                    );
-                    String alias = getAlias(filter.processDefinitionKey(), filter.name());
-                    selections.put(alias, condition.getColumnExpression().alias(alias));
-                    return condition;
-                })
-                .toList();
-            filterConditions.addAll(conditions);
-        }
+        applyProcessVariableFilters(joinProcessVariables(root, ProcessInstanceEntity_.variables), criteriaBuilder);
         if (!filterConditions.isEmpty()) {
             query.groupBy(root.get(ProcessInstanceEntity_.id));
             query.having(
@@ -126,13 +94,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
             );
         }
         if (!query.getResultType().equals(Long.class)) {
-            applySorting(
-                root,
-                joinProcessVariables(root, ProcessInstanceEntity_.VARIABLES),
-                searchRequest.sort(),
-                query,
-                criteriaBuilder
-            );
+            applySorting(root, joinProcessVariables(root, ProcessInstanceEntity_.variables), query, criteriaBuilder);
         }
         if (CollectionUtils.isEmpty(query.getGroupList())) {
             query.distinct(true);

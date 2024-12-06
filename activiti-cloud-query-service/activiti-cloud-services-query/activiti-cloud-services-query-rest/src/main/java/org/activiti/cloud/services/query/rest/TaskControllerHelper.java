@@ -17,16 +17,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +29,14 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupReposi
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
-import org.activiti.cloud.services.query.rest.specification.VariableValueCondition;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.hibernate.Session;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -75,9 +61,6 @@ public class TaskControllerHelper {
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
     private final SecurityManager securityManager;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public TaskControllerHelper(
         TaskRepository taskRepository,

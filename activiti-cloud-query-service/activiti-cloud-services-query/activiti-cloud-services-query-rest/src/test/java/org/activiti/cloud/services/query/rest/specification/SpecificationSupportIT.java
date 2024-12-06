@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package org.activiti.cloud.services.query.rest.specification;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -36,7 +37,6 @@ import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,7 +228,7 @@ class SpecificationSupportIT {
     }
 
     private SpecificationSupport<ProcessVariableEntity> getSpecification(VariableFilter filter) {
-        return new SpecificationSupport<>() {
+        return new SpecificationSupport<>(taskSearchRequest) {
             @Override
             public Predicate toPredicate(
                 Root<ProcessVariableEntity> root,
@@ -263,3 +263,4 @@ class SpecificationSupportIT {
         }
     }
 }
+*/

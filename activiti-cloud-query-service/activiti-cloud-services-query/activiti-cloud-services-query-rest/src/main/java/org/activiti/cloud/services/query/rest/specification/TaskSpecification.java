@@ -24,8 +24,6 @@ import jakarta.persistence.criteria.SetJoin;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -39,15 +37,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @CountOverFullWindow
-public class TaskSpecification extends SpecificationSupport<TaskEntity> {
-
-    public final TaskSearchRequest taskSearchRequest;
+public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSearchRequest> {
 
     private final String userId;
     private final Collection<String> userGroups;
 
-    private TaskSpecification(TaskSearchRequest taskSearchRequest, String userId, Collection<String> userGroups) {
-        this.taskSearchRequest = taskSearchRequest;
+    private TaskSpecification(TaskSearchRequest searchRequest, String userId, Collection<String> userGroups) {
+        super(searchRequest);
         this.userId = userId;
         this.userGroups = userGroups;
     }
@@ -104,9 +100,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyDueDateFilters(root, criteriaBuilder);
         applyCandidateUserFilter(root);
         applyCandidateGroupFilter(root);
-        if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
+        if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
-            List<VariableValueCondition> conditions = taskSearchRequest
+            List<VariableValueCondition> conditions = searchRequest
                 .taskVariableFilters()
                 .stream()
                 .map(filter -> {
@@ -123,34 +119,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 .toList();
             filterConditions.addAll(conditions);
         }
-        if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
-            SetJoin<TaskEntity, ProcessVariableEntity> pvRoot = joinProcessVariables(
-                root,
-                TaskEntity_.PROCESS_VARIABLES
-            );
-            List<VariableValueCondition> conditions = taskSearchRequest
-                .processVariableFilters()
-                .stream()
-                .map(filter -> {
-                    VariableValueCondition condition = getCondition(
-                        criteriaBuilder.and(
-                            criteriaBuilder.equal(
-                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                                filter.processDefinitionKey()
-                            ),
-                            criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name())
-                        ),
-                        criteriaBuilder,
-                        pvRoot.get(ProcessVariableEntity_.value),
-                        filter
-                    );
-                    String alias = getAlias(filter.processDefinitionKey(), filter.name());
-                    selections.put(alias, condition.getColumnExpression().alias(alias));
-                    return condition;
-                })
-                .toList();
-            filterConditions.addAll(conditions);
-        }
+        applyProcessVariableFilters(joinProcessVariables(root, TaskEntity_.processVariables), criteriaBuilder);
         if (!filterConditions.isEmpty()) {
             query.groupBy(root.get(TaskEntity_.id));
             query.having(
@@ -177,13 +146,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
             );
         }
         if (!query.getResultType().equals(Long.class)) {
-            applySorting(
-                root,
-                joinProcessVariables(root, TaskEntity_.PROCESS_VARIABLES),
-                taskSearchRequest.sort(),
-                query,
-                criteriaBuilder
-            );
+            applySorting(root, joinProcessVariables(root, TaskEntity_.processVariables), query, criteriaBuilder);
         }
         if (CollectionUtils.isEmpty(query.getGroupList())) {
             query.distinct(true);
@@ -195,10 +158,10 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
     }
 
     private void applyProcessDefinitionNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.processDefinitionName())) {
+        if (!CollectionUtils.isEmpty(searchRequest.processDefinitionName())) {
             addLikeFilters(
                 predicates,
-                taskSearchRequest.processDefinitionName(),
+                searchRequest.processDefinitionName(),
                 root,
                 criteriaBuilder,
                 TaskEntity_.processDefinitionName
@@ -207,130 +170,124 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
     }
 
     private void applyCandidateGroupFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.candidateGroupId())) {
+        if (!CollectionUtils.isEmpty(searchRequest.candidateGroupId())) {
             predicates.add(
                 root
                     .join(TaskEntity_.taskCandidateGroups)
                     .get(TaskCandidateGroupEntity_.groupId)
-                    .in(taskSearchRequest.candidateGroupId())
+                    .in(searchRequest.candidateGroupId())
             );
         }
     }
 
     private void applyCandidateUserFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.candidateUserId())) {
+        if (!CollectionUtils.isEmpty(searchRequest.candidateUserId())) {
             predicates.add(
                 root
                     .join(TaskEntity_.taskCandidateUsers)
                     .get(TaskCandidateUserEntity_.userId)
-                    .in(taskSearchRequest.candidateUserId())
+                    .in(searchRequest.candidateUserId())
             );
         }
     }
 
     private void applyDueDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.dueDateFrom() != null) {
-            predicates.add(criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateFrom()));
+        if (searchRequest.dueDateFrom() != null) {
+            predicates.add(criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), searchRequest.dueDateFrom()));
         }
-        if (taskSearchRequest.dueDateTo() != null) {
-            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateTo()));
+        if (searchRequest.dueDateTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), searchRequest.dueDateTo()));
         }
     }
 
     private void applyCompletedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.completedFrom() != null) {
+        if (searchRequest.completedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.completedDate), searchRequest.completedFrom())
             );
         }
-        if (taskSearchRequest.completedTo() != null) {
-            predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedTo())
-            );
+        if (searchRequest.completedTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.completedDate), searchRequest.completedTo()));
         }
     }
 
     private void applyLastClaimedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.lastClaimedFrom() != null) {
+        if (searchRequest.lastClaimedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.claimedDate), searchRequest.lastClaimedFrom())
             );
         }
-        if (taskSearchRequest.lastClaimedTo() != null) {
-            predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedTo())
-            );
+        if (searchRequest.lastClaimedTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.claimedDate), searchRequest.lastClaimedTo()));
         }
     }
 
     private void applyLastModifiedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.lastModifiedFrom() != null) {
+        if (searchRequest.lastModifiedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.lastModified), searchRequest.lastModifiedFrom())
             );
         }
-        if (taskSearchRequest.lastModifiedTo() != null) {
+        if (searchRequest.lastModifiedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedTo())
+                criteriaBuilder.lessThan(root.get(TaskEntity_.lastModified), searchRequest.lastModifiedTo())
             );
         }
     }
 
     private void applyCreatedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.createdFrom() != null) {
-            predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdFrom())
-            );
+        if (searchRequest.createdFrom() != null) {
+            predicates.add(criteriaBuilder.greaterThan(root.get(TaskEntity_.createdDate), searchRequest.createdFrom()));
         }
-        if (taskSearchRequest.createdTo() != null) {
-            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdTo()));
+        if (searchRequest.createdTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), searchRequest.createdTo()));
         }
     }
 
     private void applyAssigneeFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.assignee())) {
-            predicates.add(root.get(TaskEntity_.assignee).in(taskSearchRequest.assignee()));
+        if (!CollectionUtils.isEmpty(searchRequest.assignee())) {
+            predicates.add(root.get(TaskEntity_.assignee).in(searchRequest.assignee()));
         }
     }
 
     private void applyCompletedByFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.completedBy())) {
-            predicates.add(root.get(TaskEntity_.completedBy).in(taskSearchRequest.completedBy()));
+        if (!CollectionUtils.isEmpty(searchRequest.completedBy())) {
+            predicates.add(root.get(TaskEntity_.completedBy).in(searchRequest.completedBy()));
         }
     }
 
     private void applyStatusFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.status())) {
-            predicates.add(root.get(TaskEntity_.status).in(taskSearchRequest.status()));
+        if (!CollectionUtils.isEmpty(searchRequest.status())) {
+            predicates.add(root.get(TaskEntity_.status).in(searchRequest.status()));
         }
     }
 
     private void applyPriorityFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.priority())) {
-            predicates.add(root.get(TaskEntity_.priority).in(taskSearchRequest.priority()));
+        if (!CollectionUtils.isEmpty(searchRequest.priority())) {
+            predicates.add(root.get(TaskEntity_.priority).in(searchRequest.priority()));
         }
     }
 
     private void applyDescriptionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.description())) {
-            addLikeFilters(predicates, taskSearchRequest.description(), root, criteriaBuilder, TaskEntity_.description);
+        if (!CollectionUtils.isEmpty(searchRequest.description())) {
+            addLikeFilters(predicates, searchRequest.description(), root, criteriaBuilder, TaskEntity_.description);
         }
     }
 
     private void applyNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.name())) {
-            addLikeFilters(predicates, taskSearchRequest.name(), root, criteriaBuilder, TaskEntity_.name);
+        if (!CollectionUtils.isEmpty(searchRequest.name())) {
+            addLikeFilters(predicates, searchRequest.name(), root, criteriaBuilder, TaskEntity_.name);
         }
     }
 
     private void applyStandaloneFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.onlyStandalone()) {
+        if (searchRequest.onlyStandalone()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.processInstanceId)));
         }
     }
 
     private void applyRootTasksFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.onlyRoot()) {
+        if (searchRequest.onlyRoot()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.parentTaskId)));
         }
     }
