@@ -16,28 +16,38 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
-public class BigDecimalVariableValueCondition extends NumericVariableValueCondition {
-
-    @Override
-    public VariableType getVariableType() {
-        return VariableType.BIGDECIMAL;
-    }
+public class BigDecimalVariableValueCondition extends VariableValueCondition {
 
     public BigDecimalVariableValueCondition(
-        Path<?> path,
+        Path<VariableValue> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
         String value,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(path, operator, value, criteriaBuilder);
+        super(variableValuePath, variablePredicate, operator, value, criteriaBuilder);
     }
 
     @Override
-    protected Object getConvertedValue() {
-        return value;
+    public Expression getExtractedValue() {
+        return criteriaBuilder.function(
+            CustomPostgreSQLDialect.EXTRACT_JSON_NUMERIC_VALUE,
+            BigDecimal.class,
+            variableValuePath
+        );
+    }
+
+    @Override
+    protected Expression getConvertedValue() {
+        return criteriaBuilder.literal(new BigDecimal(filterValue));
     }
 }

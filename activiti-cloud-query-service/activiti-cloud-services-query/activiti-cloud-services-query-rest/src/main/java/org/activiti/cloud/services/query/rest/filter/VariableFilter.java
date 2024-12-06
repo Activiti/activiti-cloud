@@ -19,4 +19,8 @@ import jakarta.annotation.Nullable;
 
 public record VariableFilter(
     @Nullable String processDefinitionKey, String name, VariableType type, String value, FilterOperator operator
-) {}
+) {
+    public boolean isProcessVariableFilter() {
+        return processDefinitionKey != null;
+    }
+}

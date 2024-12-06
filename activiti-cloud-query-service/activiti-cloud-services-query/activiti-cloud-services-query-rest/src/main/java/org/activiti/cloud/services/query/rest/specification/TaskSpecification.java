@@ -20,7 +20,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.SetJoin;
 import java.util.Collection;
+import java.util.List;
+import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
@@ -29,10 +32,13 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
 
+@CountOverFullWindow
 public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     public final TaskSearchRequest taskSearchRequest;
@@ -48,6 +54,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     /**
      * Creates a specification that retrieve tasks that match filters in the request without restrictions related to any user.
+     *
      * @param taskSearchRequest the request containing all the filters
      * @return a specification that applies the filters in the request
      */
@@ -65,8 +72,8 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
      * - there are no candidate users and groups set and task is not assigned
      *
      * @param taskSearchRequest the request containing all the filters
-     * @param userId user id to be applied for restriction
-     * @param userGroups groups to be applied for restriction
+     * @param userId            user id to be applied for restriction
+     * @param userGroups        groups to be applied for restriction
      * @return a specification that applies the filters and restricts the retrieved tasks based on the given user and groups
      */
     public static TaskSpecification restricted(
@@ -97,15 +104,82 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyDueDateFilters(root, criteriaBuilder);
         applyCandidateUserFilter(root);
         applyCandidateGroupFilter(root);
-        applyTaskVariableFilters(root, query, criteriaBuilder);
-        applyProcessVariableFilters(root, query, criteriaBuilder);
-        if (!havingClauses.isEmpty()) {
-            query.having(havingClauses.toArray(Predicate[]::new));
+        if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
+            SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
+            List<VariableValueCondition> conditions = taskSearchRequest
+                .taskVariableFilters()
+                .stream()
+                .map(filter -> {
+                    VariableValueCondition condition = getCondition(
+                        criteriaBuilder.equal(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                        criteriaBuilder,
+                        tvRoot.get(TaskVariableEntity_.value),
+                        filter
+                    );
+                    String alias = "tv_" + filter.name();
+                    selections.put(alias, condition.getColumnExpression().alias(alias));
+                    return condition;
+                })
+                .toList();
+            filterConditions.addAll(conditions);
+        }
+        if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
+            SetJoin<TaskEntity, ProcessVariableEntity> pvRoot = joinProcessVariables(
+                root,
+                TaskEntity_.PROCESS_VARIABLES
+            );
+            List<VariableValueCondition> conditions = taskSearchRequest
+                .processVariableFilters()
+                .stream()
+                .map(filter -> {
+                    VariableValueCondition condition = getCondition(
+                        criteriaBuilder.and(
+                            criteriaBuilder.equal(
+                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                filter.processDefinitionKey()
+                            ),
+                            criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name())
+                        ),
+                        criteriaBuilder,
+                        pvRoot.get(ProcessVariableEntity_.value),
+                        filter
+                    );
+                    String alias = getAlias(filter.processDefinitionKey(), filter.name());
+                    selections.put(alias, condition.getColumnExpression().alias(alias));
+                    return condition;
+                })
+                .toList();
+            filterConditions.addAll(conditions);
+        }
+        if (!filterConditions.isEmpty()) {
+            query.groupBy(root.get(TaskEntity_.id));
+            query.having(
+                filterConditions
+                    .stream()
+                    .map(variableValueCondition -> {
+                        try {
+                            return variableValueCondition.toPredicate();
+                        } catch (FunctionArgumentException | IllegalArgumentException e) {
+                            throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Invalid filter (type: " +
+                                variableValueCondition.getClass().getSimpleName() +
+                                ", operator: " +
+                                variableValueCondition.operator +
+                                ", value: " +
+                                variableValueCondition.filterValue +
+                                ")"
+                            );
+                        }
+                    })
+                    .reduce(criteriaBuilder::and)
+                    .orElse(criteriaBuilder.conjunction())
+            );
         }
         if (!query.getResultType().equals(Long.class)) {
             applySorting(
                 root,
-                root.get(TaskEntity_.processInstanceId),
+                joinProcessVariables(root, TaskEntity_.PROCESS_VARIABLES),
                 taskSearchRequest.sort(),
                 query,
                 criteriaBuilder
@@ -258,66 +332,6 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         }
     }
 
-    private void applyProcessVariableFilters(
-        Root<TaskEntity> root,
-        CriteriaQuery<?> query,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
-            Root<ProcessVariableEntity> pvRoot = getProcessVariableRoot(query);
-            Predicate implicitJoinCondition = criteriaBuilder.equal(
-                root.get(TaskEntity_.processInstanceId),
-                pvRoot.get(ProcessVariableEntity_.processInstanceId)
-            );
-            predicates.add(implicitJoinCondition);
-            predicates.add(
-                criteriaBuilder.and(
-                    implicitJoinCondition,
-                    criteriaBuilder.or(
-                        getProcessVariableValueFilters(
-                            pvRoot,
-                            taskSearchRequest.processVariableFilters(),
-                            criteriaBuilder
-                        )
-                    )
-                )
-            );
-            query.groupBy(root.get(TaskEntity_.id));
-            havingClauses.add(getHavingClause(pvRoot, taskSearchRequest.processVariableFilters(), criteriaBuilder));
-        }
-    }
-
-    private void applyTaskVariableFilters(
-        Root<TaskEntity> root,
-        CriteriaQuery<?> query,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
-            Root<TaskVariableEntity> tvRoot = query.from(TaskVariableEntity.class);
-            Predicate joinCondition = criteriaBuilder.equal(
-                root.get(TaskEntity_.id),
-                tvRoot.get(TaskVariableEntity_.taskId)
-            );
-            Predicate[] variableValueFilters = taskSearchRequest
-                .taskVariableFilters()
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.and(
-                        joinCondition,
-                        criteriaBuilder.equal(tvRoot.get(TaskVariableEntity_.name), filter.name()),
-                        getVariableValueCondition(tvRoot.get(TaskVariableEntity_.value), filter, criteriaBuilder)
-                    )
-                )
-                .toArray(Predicate[]::new);
-
-            predicates.add(criteriaBuilder.or(variableValueFilters));
-            query.groupBy(root.get(TaskEntity_.id));
-            havingClauses.add(
-                getTaskVariablesHavingClause(tvRoot, taskSearchRequest.taskVariableFilters(), criteriaBuilder)
-            );
-        }
-    }
-
     private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
         if (userId != null) {
             predicates.add(
@@ -346,37 +360,5 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
             );
         }
-    }
-
-    private Predicate getTaskVariablesHavingClause(
-        Root<TaskVariableEntity> root,
-        Collection<VariableFilter> filters,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        return filters
-            .stream()
-            .map(filter ->
-                criteriaBuilder.greaterThan(
-                    criteriaBuilder.count(
-                        criteriaBuilder
-                            .selectCase()
-                            .when(
-                                criteriaBuilder.and(
-                                    criteriaBuilder.equal(root.get(TaskVariableEntity_.name), filter.name()),
-                                    getVariableValueCondition(
-                                        root.get(TaskVariableEntity_.value),
-                                        filter,
-                                        criteriaBuilder
-                                    )
-                                ),
-                                criteriaBuilder.literal(1)
-                            )
-                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                    ),
-                    0L
-                )
-            )
-            .reduce(criteriaBuilder::and)
-            .orElse(criteriaBuilder.disjunction());
     }
 }

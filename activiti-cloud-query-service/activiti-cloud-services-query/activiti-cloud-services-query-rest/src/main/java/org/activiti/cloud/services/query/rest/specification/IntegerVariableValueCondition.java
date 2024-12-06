@@ -16,28 +16,37 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
-public class IntegerVariableValueCondition extends NumericVariableValueCondition {
-
-    @Override
-    public VariableType getVariableType() {
-        return VariableType.INTEGER;
-    }
+public class IntegerVariableValueCondition extends VariableValueCondition {
 
     public IntegerVariableValueCondition(
-        Path<?> path,
+        Path<VariableValue> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
         String value,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(path, operator, value, criteriaBuilder);
+        super(variableValuePath, variablePredicate, operator, value, criteriaBuilder);
     }
 
     @Override
-    protected Integer getConvertedValue() {
-        return Integer.parseInt(value);
+    public Expression getExtractedValue() {
+        return criteriaBuilder.function(
+            CustomPostgreSQLDialect.EXTRACT_JSON_NUMERIC_VALUE,
+            Integer.class,
+            variableValuePath
+        );
+    }
+
+    @Override
+    protected Expression getConvertedValue() {
+        return criteriaBuilder.literal(Integer.parseInt(filterValue));
     }
 }

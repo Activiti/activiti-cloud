@@ -16,35 +16,37 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 public class StringVariableValueCondition extends VariableValueCondition {
 
     public StringVariableValueCondition(
-        Path<?> path,
+        Path<VariableValue> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
         String value,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(path, operator, value, criteriaBuilder);
+        super(variableValuePath, variablePredicate, operator, value, criteriaBuilder);
     }
 
     @Override
-    protected String getFunctionName() {
-        return switch (operator) {
-            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_EQUALS;
-            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_NOT_EQUALS;
-            case LIKE -> CustomPostgreSQLDialect.JSON_VALUE_LIKE_CASE_INSENSITIVE;
-            default -> throw new IllegalFilterException(VariableType.STRING, operator);
-        };
+    public Expression getExtractedValue() {
+        return criteriaBuilder.function(
+            CustomPostgreSQLDialect.EXTRACT_JSON_STRING_VALUE,
+            String.class,
+            variableValuePath
+        );
     }
 
     @Override
-    protected String getConvertedValue() {
-        return value;
+    protected Expression<String> getConvertedValue() {
+        return criteriaBuilder.literal(filterValue);
     }
 }

@@ -16,33 +16,38 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 public class BooleanVariableValueCondition extends VariableValueCondition {
 
     public BooleanVariableValueCondition(
-        Path<?> path,
+        Path<VariableValue> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
         String value,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(path, operator, value, criteriaBuilder);
+        super(variableValuePath, variablePredicate, operator, value, criteriaBuilder);
     }
 
     @Override
-    protected String getFunctionName() {
-        if (operator == FilterOperator.EQUALS) {
-            return CustomPostgreSQLDialect.JSON_VALUE_EQUALS;
-        }
-        throw new IllegalFilterException(VariableType.BOOLEAN, operator);
+    public Expression getExtractedValue() {
+        Expression<Boolean> function = criteriaBuilder.function(
+            CustomPostgreSQLDialect.EXTRACT_JSON_BOOLEAN_VALUE,
+            Boolean.class,
+            variableValuePath
+        );
+        return criteriaBuilder.selectCase().when(function, 1).otherwise(0);
     }
 
     @Override
-    protected Boolean getConvertedValue() {
-        return Boolean.parseBoolean(value);
+    protected Expression getConvertedValue() {
+        return criteriaBuilder.literal(Boolean.parseBoolean(filterValue) ? 1 : 0);
     }
 }

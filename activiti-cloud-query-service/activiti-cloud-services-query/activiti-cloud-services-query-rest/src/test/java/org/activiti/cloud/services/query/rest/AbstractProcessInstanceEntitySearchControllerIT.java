@@ -2027,7 +2027,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.STRING
                 )
             );
@@ -2052,7 +2052,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.STRING
                     )
                 );
@@ -2100,7 +2100,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.INTEGER
                 )
             );
@@ -2125,7 +2125,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.INTEGER
                     )
                 );
@@ -2173,7 +2173,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.BIGDECIMAL
                 )
             );
@@ -2198,7 +2198,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.BIGDECIMAL
                     )
                 );
@@ -2246,7 +2246,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.DATE
                 )
             );
@@ -2271,7 +2271,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.DATE
                     )
                 );
@@ -2325,7 +2325,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.DATETIME
                 )
             );
@@ -2350,7 +2350,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.DATETIME
                     )
                 );
@@ -2398,7 +2398,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.BOOLEAN
                 )
             );
@@ -2427,7 +2427,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.BOOLEAN
                     )
                 );
@@ -2488,7 +2488,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.STRING
                 )
             );
@@ -2511,7 +2511,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         "var2",
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.INTEGER
                     )
                 );
@@ -2558,15 +2558,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.ASC,
-                        true,
-                        List.of(PROCESS_DEFINITION_KEY),
-                        null
-                    )
-                );
+                .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2575,72 +2567,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .post(getSearchEndpoint())
             .then()
             .statusCode(400);
-    }
-
-    @Test
-    void should_returnProcessInstances_sortedByProcessVariable_withDifferentProcessDefinitionKeys() {
-        String id1 = UUID.randomUUID().toString();
-        String id2 = UUID.randomUUID().toString();
-
-        queryTestUtils
-            .buildProcessInstance()
-            .withId(id1)
-            .withInitiator(USER)
-            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
-            .buildAndSave();
-
-        String otherProcDefKey = "other-process-definition-key";
-        queryTestUtils
-            .buildProcessInstance()
-            .withId(id2)
-            .withInitiator(USER)
-            .withProcessDefinitionKey(otherProcDefKey)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
-            .buildAndSave();
-
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    List.of(PROCESS_DEFINITION_KEY, otherProcDefKey),
-                    VariableType.STRING
-                )
-            );
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains(id2, id1));
-
-        requestBuilder =
-            new ProcessInstanceSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        List.of(PROCESS_DEFINITION_KEY, otherProcDefKey),
-                        VariableType.STRING
-                    )
-                );
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains(id1, id2));
     }
 
     @Test

@@ -19,6 +19,7 @@ import java.util.Map;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.query.sqm.function.SqmFunctionDescriptor;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
 import org.hibernate.query.sqm.produce.function.StandardFunctionArgumentTypeResolvers;
 import org.hibernate.type.StandardBasicTypes;
@@ -194,6 +195,12 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
      */
     public static final String JSON_VALUE_DATETIME_LESS_THAN_EQUAL = "jsonb_datetime_lte";
 
+    /**
+     *  Counts the number of rows in the full window frame.
+     *  If used with a group by clause, it return more than one result, so the result list should be limited to 1;
+     */
+    public static final String COUNT_OVER_FULL_WINDOW = "count_over";
+
     private static final Map<VariableType, String> EXTRACTION_FUNCTIONS_BY_TYPE = Map.of(
         VariableType.STRING,
         EXTRACT_JSON_STRING_VALUE,
@@ -222,10 +229,19 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
         registerJsonValueNumericFunctions(functionContributions);
         registerJsonValueDateFunctions(functionContributions);
         registerJsonValueDatetimeFunctions(functionContributions);
+        functionContributions
+            .getFunctionRegistry()
+            .patternDescriptorBuilder(COUNT_OVER_FULL_WINDOW, "COUNT(*) OVER ()")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.LONG)
+            )
+            .setExactArgumentCount(0)
+            .register();
     }
 
     private void registerExtractionFunctions(FunctionContributions functionContributions) {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
+        SqmFunctionDescriptor count = functionRegistry.findFunctionDescriptor("count");
         String jsonbArgSignature = "JSONB jsonb";
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_RAW_VALUE, "?1->'value'")

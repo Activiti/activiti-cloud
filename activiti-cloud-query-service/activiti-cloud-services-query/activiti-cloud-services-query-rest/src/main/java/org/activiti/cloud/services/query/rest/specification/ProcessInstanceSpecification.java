@@ -20,17 +20,19 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
+import jakarta.persistence.criteria.SetJoin;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
-import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.hibernate.query.sqm.produce.function.FunctionArgumentException;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
 
@@ -67,12 +69,67 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
-        applyProcessVariableFilters(root, query, criteriaBuilder);
-        if (!query.getResultType().equals(Long.class)) {
-            applySorting(root, root.get(ProcessInstanceEntity_.id), searchRequest.sort(), query, criteriaBuilder);
+        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            SetJoin<ProcessInstanceEntity, ProcessVariableEntity> pvRoot = joinProcessVariables(
+                root,
+                ProcessInstanceEntity_.VARIABLES
+            );
+            List<VariableValueCondition> conditions = searchRequest
+                .processVariableFilters()
+                .stream()
+                .map(filter -> {
+                    VariableValueCondition condition = getCondition(
+                        criteriaBuilder.and(
+                            criteriaBuilder.equal(
+                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                filter.processDefinitionKey()
+                            ),
+                            criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name())
+                        ),
+                        criteriaBuilder,
+                        pvRoot.get(ProcessVariableEntity_.value),
+                        filter
+                    );
+                    String alias = getAlias(filter.processDefinitionKey(), filter.name());
+                    selections.put(alias, condition.getColumnExpression().alias(alias));
+                    return condition;
+                })
+                .toList();
+            filterConditions.addAll(conditions);
         }
-        if (predicates.isEmpty()) {
-            return criteriaBuilder.conjunction();
+        if (!filterConditions.isEmpty()) {
+            query.groupBy(root.get(ProcessInstanceEntity_.id));
+            query.having(
+                filterConditions
+                    .stream()
+                    .map(variableValueCondition -> {
+                        try {
+                            return variableValueCondition.toPredicate();
+                        } catch (FunctionArgumentException | IllegalArgumentException e) {
+                            throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Invalid filter (type: " +
+                                variableValueCondition.getClass().getSimpleName() +
+                                ", operator: " +
+                                variableValueCondition.operator +
+                                ", value: " +
+                                variableValueCondition.filterValue +
+                                ")"
+                            );
+                        }
+                    })
+                    .reduce(criteriaBuilder::and)
+                    .orElse(criteriaBuilder.conjunction())
+            );
+        }
+        if (!query.getResultType().equals(Long.class)) {
+            applySorting(
+                root,
+                joinProcessVariables(root, ProcessInstanceEntity_.VARIABLES),
+                searchRequest.sort(),
+                query,
+                criteriaBuilder
+            );
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
@@ -180,30 +237,6 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                     )
                 )
             );
-        }
-    }
-
-    private void applyProcessVariableFilters(
-        Root<ProcessInstanceEntity> root,
-        CriteriaQuery<?> query,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            Root<ProcessVariableEntity> pvRoot = getProcessVariableRoot(query);
-            Predicate joinCondition = criteriaBuilder.equal(
-                root.get(ProcessInstanceEntity_.id),
-                pvRoot.get(ProcessVariableEntity_.processInstanceId)
-            );
-
-            Predicate[] variableValueFilters = getProcessVariableValueFilters(
-                pvRoot,
-                searchRequest.processVariableFilters(),
-                criteriaBuilder
-            );
-
-            query.groupBy(root.get(ProcessInstanceEntity_.id));
-            query.having(getHavingClause(pvRoot, searchRequest.processVariableFilters(), criteriaBuilder));
-            predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
         }
     }
 }

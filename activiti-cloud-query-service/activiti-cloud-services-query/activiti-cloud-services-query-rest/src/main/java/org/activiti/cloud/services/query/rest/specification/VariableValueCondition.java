@@ -16,41 +16,67 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 public abstract class VariableValueCondition {
 
-    protected final Path<?> path;
+    protected final Path<?> variableValuePath;
+    protected final Predicate variablePredicate;
     protected final FilterOperator operator;
-    protected final String value;
+    protected final String filterValue;
     protected final CriteriaBuilder criteriaBuilder;
+    private Expression columnExpression;
 
     protected VariableValueCondition(
-        Path<?> path,
+        Path<?> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
-        String value,
+        String filterValue,
         CriteriaBuilder criteriaBuilder
     ) {
-        this.path = path;
+        this.variableValuePath = variableValuePath;
+        this.variablePredicate = variablePredicate;
         this.operator = operator;
-        this.value = value;
+        this.filterValue = filterValue;
         this.criteriaBuilder = criteriaBuilder;
     }
 
+    public abstract Expression<?> getExtractedValue();
+
+    protected abstract Expression getConvertedValue();
+
     public Predicate toPredicate() {
-        return criteriaBuilder.isTrue(
-            criteriaBuilder.function(
-                getFunctionName(),
-                Boolean.class,
-                path,
-                criteriaBuilder.literal(getConvertedValue())
-            )
-        );
+        return switch (operator) {
+            case EQUALS -> criteriaBuilder.equal(getColumnExpression(), getConvertedValue());
+            case NOT_EQUALS -> criteriaBuilder.notEqual(getColumnExpression(), getConvertedValue());
+            case GREATER_THAN -> criteriaBuilder.greaterThan(getColumnExpression(), getConvertedValue());
+            case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
+                getColumnExpression(),
+                getConvertedValue()
+            );
+            case LESS_THAN -> criteriaBuilder.lessThan(getColumnExpression(), getConvertedValue());
+            case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(getColumnExpression(), getConvertedValue());
+            case LIKE -> criteriaBuilder.like(
+                criteriaBuilder.lower((Expression<String>) getColumnExpression()),
+                "%" + filterValue.toLowerCase() + "%"
+            );
+        };
     }
 
-    protected abstract String getFunctionName();
-
-    protected abstract Object getConvertedValue();
+    public Expression getColumnExpression() {
+        if (columnExpression == null) {
+            columnExpression =
+                criteriaBuilder.greatest(
+                    (Expression) criteriaBuilder
+                        .selectCase()
+                        .when(variablePredicate, getExtractedValue())
+                        .otherwise(criteriaBuilder.nullLiteral(getExtractedValue().getJavaType()))
+                );
+        }
+        return columnExpression;
+    }
 }

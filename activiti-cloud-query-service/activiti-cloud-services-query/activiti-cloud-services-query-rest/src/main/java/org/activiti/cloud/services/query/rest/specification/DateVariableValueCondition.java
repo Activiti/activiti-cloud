@@ -16,38 +16,38 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDate;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
+import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 public class DateVariableValueCondition extends VariableValueCondition {
 
     public DateVariableValueCondition(
-        Path<?> path,
+        Path<VariableValue> variableValuePath,
+        Predicate variablePredicate,
         FilterOperator operator,
         String value,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(path, operator, value, criteriaBuilder);
+        super(variableValuePath, variablePredicate, operator, value, criteriaBuilder);
     }
 
     @Override
-    protected String getFunctionName() {
-        return switch (operator) {
-            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATE_EQUALS;
-            case NOT_EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATE_NOT_EQUALS;
-            case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATE_GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATE_GREATER_THAN_EQUAL;
-            case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATE_LESS_THAN;
-            case LESS_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATE_LESS_THAN_EQUAL;
-            default -> throw new IllegalFilterException(VariableType.DATE, operator);
-        };
+    public Expression getExtractedValue() {
+        return criteriaBuilder.function(
+            CustomPostgreSQLDialect.EXTRACT_JSON_DATE_VALUE,
+            LocalDate.class,
+            variableValuePath
+        );
     }
 
     @Override
-    protected String getConvertedValue() {
-        return value;
+    protected Expression getConvertedValue() {
+        return criteriaBuilder.literal(filterValue).as(LocalDate.class);
     }
 }

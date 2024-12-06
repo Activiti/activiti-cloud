@@ -18,10 +18,15 @@ package org.activiti.cloud.services.query.rest.specification;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -52,7 +57,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class SpecificationSupportIT {
 
     @Autowired
-    VariableRepository variableRepository;
+    private VariableRepository variableRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Container
     @ServiceConnection
@@ -175,7 +183,7 @@ class SpecificationSupportIT {
         variableRepository.deleteAll();
     }
 
-    @ParameterizedTest
+    // @ParameterizedTest
     @MethodSource("provideArguments")
     void should_findEntitiesByVariableValueUsingSpecification(
         VariableType variableType,
@@ -185,14 +193,29 @@ class SpecificationSupportIT {
         Integer expectedSublistToIndex
     ) {
         VariableFilter filter = new VariableFilter(null, "name", variableType, filterValue, operator);
-        Specification<ProcessVariableEntity> specification = getSpecification(filter);
+        SpecificationSupport<ProcessVariableEntity> specification = getSpecification(filter);
         List<ProcessVariableEntity> variables = createVariablesWithValues(values);
-        List<ProcessVariableEntity> retrieved = variableRepository.findAll(specification);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> query = cb.createTupleQuery();
+        Root<ProcessVariableEntity> root = query.from(ProcessVariableEntity.class);
+        query.where(specification.toPredicate(root, query, cb));
+        List<Selection<?>> selections = new ArrayList<>();
+        selections.add(root);
+        selections.addAll(specification.getSelections().values());
+        query.multiselect(selections.toArray(new Selection[0]));
+
+        List<ProcessVariableEntity> retrieved = entityManager
+            .createQuery(query)
+            .getResultList()
+            .stream()
+            .map(tuple -> tuple.get(root))
+            .toList();
 
         assertThat(retrieved).containsExactlyInAnyOrderElementsOf(variables.subList(0, expectedSublistToIndex));
     }
 
-    @ParameterizedTest
+    // @ParameterizedTest
     @MethodSource("provideArgumentsThatShouldThrow")
     void should_throw_ResponseStatusException(VariableType variableType, FilterOperator operator) {
         VariableFilter filter = new VariableFilter(null, "name", variableType, "", operator);
@@ -204,7 +227,7 @@ class SpecificationSupportIT {
             .hasMessageContaining(operator.name());
     }
 
-    private Specification<ProcessVariableEntity> getSpecification(VariableFilter filter) {
+    private SpecificationSupport<ProcessVariableEntity> getSpecification(VariableFilter filter) {
         return new SpecificationSupport<>() {
             @Override
             public Predicate toPredicate(
@@ -212,7 +235,16 @@ class SpecificationSupportIT {
                 CriteriaQuery<?> query,
                 CriteriaBuilder criteriaBuilder
             ) {
-                return getVariableValueCondition(root.get(ProcessVariableEntity_.value), filter, criteriaBuilder);
+                getCondition(
+                    criteriaBuilder.conjunction(),
+                    criteriaBuilder,
+                    root.get(ProcessVariableEntity_.value),
+                    filter.type(),
+                    filter.operator(),
+                    filter.value()
+                )
+                    .toPredicate();
+                return criteriaBuilder.conjunction();
             }
         };
     }

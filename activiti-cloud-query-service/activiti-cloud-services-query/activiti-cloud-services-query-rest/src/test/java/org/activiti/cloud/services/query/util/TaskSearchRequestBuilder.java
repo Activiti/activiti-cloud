@@ -182,6 +182,20 @@ public class TaskSearchRequestBuilder {
         return this;
     }
 
+    public TaskSearchRequestBuilder invertSort() {
+        if (sort != null) {
+            sort =
+                new CloudRuntimeEntitySort(
+                    sort.field(),
+                    sort.direction().isAscending() ? "desc" : "asc",
+                    sort.isProcessVariable(),
+                    sort.processDefinitionKey(),
+                    sort.type()
+                );
+        }
+        return this;
+    }
+
     public TaskSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
