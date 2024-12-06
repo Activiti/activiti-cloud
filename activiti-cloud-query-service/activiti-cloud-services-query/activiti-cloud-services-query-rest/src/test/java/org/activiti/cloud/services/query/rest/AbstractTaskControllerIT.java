@@ -27,8 +27,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import org.activiti.api.task.model.Task;
@@ -118,7 +116,90 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
-    void should_returnTasks_withOnlyRequestedProcessVariables_whenSearchingWithPostEndpoint() {
+    void should_returnPaginatedTasks_whenNoFilters() {
+        for (int i = 0; i < 5; i++) {
+            queryTestUtils
+                .buildTask()
+                .withId(String.valueOf(i))
+                .withTaskCandidateUsers(CURRENT_USER, "other-user", "another-user")
+                .withTaskCandidateGroups("group1", "group2", "group3")
+                .buildAndSave();
+        }
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 0)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 2)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 4)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(1))
+            .body("page.totalElements", equalTo(5));
+    }
+
+    @Test
+    void should_returnTasks_withOnlyRequestedProcessVariables() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(UUID.randomUUID().toString(), VariableType.STRING, "value2")
+            )
+            .withTasks(
+                queryTestUtils
+                    .buildTask()
+                    .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                    .withTaskCandidateGroups("group1", "group2")
+            )
+            .buildAndSave();
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableKeys(new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(1))
+            .body("_embedded.tasks[0].processVariables", hasSize(1))
+            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+    }
+
+    @Test
+    void should_returnTasks_filteredByProcessVariable_withOnlyRequestedProcessVariables() {
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(CURRENT_USER)

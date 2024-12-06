@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 public class CustomizedJpaSpecificationExecutorImpl<T, ID extends Serializable>
     extends SimpleJpaRepository<T, ID>
@@ -36,16 +37,17 @@ public class CustomizedJpaSpecificationExecutorImpl<T, ID extends Serializable>
             CriteriaQuery<Long> query = builder.createQuery(Long.class);
             Assert.notNull(domainClass, "Domain class must not be null");
             Predicate predicate = spec.toPredicate(query.from(domainClass), query, builder);
-            if (predicate != null) {
-                query.where(predicate);
+            if (!CollectionUtils.isEmpty(query.getGroupList())) {
+                if (predicate != null) {
+                    query.where(predicate);
+                }
+                query.select(builder.function(CustomSQLFunction.COUNT_OVER_FULL_WINDOW.name(), Long.class));
+                query.orderBy(Collections.emptyList());
+                TypedQuery<Long> typedQuery = entityManager.createQuery(query);
+                typedQuery.setMaxResults(1);
+                return typedQuery;
             }
-            query.select(builder.function(CustomSQLFunction.COUNT_OVER_FULL_WINDOW.name(), Long.class));
-            query.orderBy(Collections.emptyList());
-            TypedQuery<Long> typedQuery = entityManager.createQuery(query);
-            typedQuery.setMaxResults(1);
-            return typedQuery;
-        } else {
-            return super.getCountQuery(spec, domainClass);
         }
+        return super.getCountQuery(spec, domainClass);
     }
 }

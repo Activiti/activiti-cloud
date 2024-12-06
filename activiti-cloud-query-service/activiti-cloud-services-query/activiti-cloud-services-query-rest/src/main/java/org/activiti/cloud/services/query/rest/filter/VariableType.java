@@ -16,9 +16,6 @@
 package org.activiti.cloud.services.query.rest.filter;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public enum VariableType {
     STRING,
@@ -39,16 +36,5 @@ public enum VariableType {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
         }
-    }
-
-    public Class<?> getComparableType() {
-        return switch (this) {
-            case STRING -> String.class;
-            case INTEGER -> Integer.class;
-            case BIGDECIMAL -> BigDecimal.class;
-            case BOOLEAN -> Integer.class;
-            case DATE -> LocalDate.class;
-            case DATETIME -> LocalDateTime.class;
-        };
     }
 }

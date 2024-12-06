@@ -185,6 +185,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 criteriaBuilder
             );
         }
+        if (CollectionUtils.isEmpty(query.getGroupList())) {
+            query.distinct(true);
+        }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
