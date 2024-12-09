@@ -3929,7 +3929,6 @@ public abstract class AbstractTaskControllerIT {
                 )
             );
 
-        //Expecting null last for ASC
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .param("maxItems", 8)
