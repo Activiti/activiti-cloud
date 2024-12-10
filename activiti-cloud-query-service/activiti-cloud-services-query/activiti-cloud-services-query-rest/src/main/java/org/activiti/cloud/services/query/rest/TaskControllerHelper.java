@@ -29,6 +29,7 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupReposi
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
@@ -137,6 +138,7 @@ public class TaskControllerHelper {
         TaskSpecification taskSpecification
     ) {
         Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
+        fetchTaskCandidateUsers(tasks.getContent());
         fetchTaskCandidateGroups(tasks.getContent());
         processVariableService.fetchProcessVariablesForTasks(
             tasks.getContent(),
@@ -226,6 +228,14 @@ public class TaskControllerHelper {
         } else {
             return taskRepository.findAll(extendedPredicate, pageable);
         }
+    }
+
+    private void fetchTaskCandidateUsers(Collection<TaskEntity> tasks) {
+        Map<String, Set<TaskCandidateUserEntity>> candidatesByTaskId = taskCandidateUserRepository
+            .findByTaskIdIn(tasks.stream().map(TaskEntity::getId).collect(Collectors.toSet()))
+            .stream()
+            .collect(Collectors.groupingBy(TaskCandidateUserEntity::getTaskId, Collectors.toSet()));
+        tasks.forEach(task -> task.setTaskCandidateUsers(candidatesByTaskId.get(task.getId())));
     }
 
     private void fetchTaskCandidateGroups(Collection<TaskEntity> tasks) {
