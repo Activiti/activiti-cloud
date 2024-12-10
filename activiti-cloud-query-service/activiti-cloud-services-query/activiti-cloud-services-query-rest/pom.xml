@@ -256,6 +256,24 @@
       <artifactId>spring-mock-mvc</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.activiti</groupId>
+          <artifactId>activiti-image-generator</artifactId>
+          <version>0.0.1-PR-4871-805-20241209.165435-1</version>
+          <scope>compile</scope>
+      </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-image-generator</artifactId>
+      <version>0.0.1-PR-4871-805-20241209.165435-1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-image-generator</artifactId>
+      <version>0.0.1-PR-4871-805-20241209.165435-1</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
