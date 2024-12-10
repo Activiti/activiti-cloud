@@ -24,8 +24,9 @@ import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
@@ -102,22 +103,21 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         applyCandidateGroupFilter(root);
         if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
-            List<VariableValueCondition> conditions = searchRequest
-                .taskVariableFilters()
-                .stream()
-                .map(filter -> {
-                    VariableValueCondition condition = getCondition(
-                        criteriaBuilder.equal(tvRoot.get(TaskVariableEntity_.name), filter.name()),
-                        criteriaBuilder,
-                        tvRoot.get(TaskVariableEntity_.value),
-                        filter
-                    );
-                    String alias = "tv_" + filter.name();
-                    selections.put(alias, condition.getColumnExpression().alias(alias));
-                    return condition;
-                })
-                .toList();
-            filterConditions.addAll(conditions);
+            filterConditions.addAll(
+                searchRequest
+                    .taskVariableFilters()
+                    .stream()
+                    .map(filter ->
+                        new VariableValueFilterConditionImpl<>(
+                            (SetJoin<TaskEntity, ? extends AbstractVariableEntity>) tvRoot,
+                            Map.of(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                            javaTypeMapping.get(filter.type()),
+                            filter,
+                            criteriaBuilder
+                        )
+                    )
+                    .toList()
+            );
         }
         return super.toPredicate(root, query, criteriaBuilder);
     }
