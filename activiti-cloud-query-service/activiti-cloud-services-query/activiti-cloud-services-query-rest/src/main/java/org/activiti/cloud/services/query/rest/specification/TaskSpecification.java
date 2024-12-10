@@ -25,7 +25,6 @@ import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
@@ -106,15 +105,17 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
             List<VariableValueCondition> conditions = searchRequest
                 .taskVariableFilters()
                 .stream()
-                .map(filter ->
-                    new VariableValueCondition(
-                        tvRoot,
-                        Map.of(tvRoot.get(TaskVariableEntity_.name), filter.name()),
-                        getJavaMapping(filter.type()),
-                        filter,
-                        criteriaBuilder
-                    )
-                )
+                .map(filter -> {
+                    VariableValueCondition condition = getCondition(
+                        criteriaBuilder.equal(tvRoot.get(TaskVariableEntity_.name), filter.name()),
+                        criteriaBuilder,
+                        tvRoot.get(TaskVariableEntity_.value),
+                        filter
+                    );
+                    String alias = "tv_" + filter.name();
+                    selections.put(alias, condition.getColumnExpression().alias(alias));
+                    return condition;
+                })
                 .toList();
             filterConditions.addAll(conditions);
         }

@@ -17,67 +17,66 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Map;
+import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
-public class VariableValueCondition<R, K, V> extends VariableSelection {
+public abstract class VariableValueCondition {
 
-    private final VariableFilter filter;
+    protected final Path<?> variableValuePath;
+    protected final Predicate variablePredicate;
+    protected final FilterOperator operator;
+    protected final String filterValue;
+    protected final CriteriaBuilder criteriaBuilder;
+    private Expression columnExpression;
 
     protected VariableValueCondition(
-        From<R, K> root,
-        Map<Path<String>, String> selectionFilters,
-        Class<V> variableJavaType,
-        VariableFilter filter,
+        Path<?> variableValuePath,
+        Predicate variablePredicate,
+        FilterOperator operator,
+        String filterValue,
         CriteriaBuilder criteriaBuilder
     ) {
-        super(root, selectionFilters, variableJavaType, criteriaBuilder);
-        this.filter = filter;
+        this.variableValuePath = variableValuePath;
+        this.variablePredicate = variablePredicate;
+        this.operator = operator;
+        this.filterValue = filterValue;
+        this.criteriaBuilder = criteriaBuilder;
     }
 
-    public VariableFilter getFilter() {
-        return filter;
-    }
+    public abstract Expression<?> getExtractedValue();
+
+    protected abstract Expression getConvertedValue();
 
     public Predicate toPredicate() {
-        return switch (filter.operator()) {
-            case EQUALS -> criteriaBuilder.equal(getSelectionExpression(), getConvertedValue());
-            case NOT_EQUALS -> criteriaBuilder.notEqual(getSelectionExpression(), getConvertedValue());
-            case GREATER_THAN -> criteriaBuilder.greaterThan(getSelectionExpression(), getConvertedValue());
+        return switch (operator) {
+            case EQUALS -> criteriaBuilder.equal(getColumnExpression(), getConvertedValue());
+            case NOT_EQUALS -> criteriaBuilder.notEqual(getColumnExpression(), getConvertedValue());
+            case GREATER_THAN -> criteriaBuilder.greaterThan(getColumnExpression(), getConvertedValue());
             case GREATER_THAN_OR_EQUAL -> criteriaBuilder.greaterThanOrEqualTo(
-                getSelectionExpression(),
+                getColumnExpression(),
                 getConvertedValue()
             );
-            case LESS_THAN -> criteriaBuilder.lessThan(getSelectionExpression(), getConvertedValue());
-            case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(getSelectionExpression(), getConvertedValue());
+            case LESS_THAN -> criteriaBuilder.lessThan(getColumnExpression(), getConvertedValue());
+            case LESS_THAN_OR_EQUAL -> criteriaBuilder.lessThanOrEqualTo(getColumnExpression(), getConvertedValue());
             case LIKE -> criteriaBuilder.like(
-                criteriaBuilder.lower((Expression<String>) getSelectionExpression()),
-                "%" + filter.value().toLowerCase() + "%"
+                criteriaBuilder.lower((Expression<String>) getColumnExpression()),
+                "%" + filterValue.toLowerCase() + "%"
             );
         };
     }
 
-    protected Expression getConvertedValue() {
-        if (variableJavaType == String.class) {
-            return criteriaBuilder.literal(filter.value());
-        } else if (variableJavaType == Integer.class) {
-            return criteriaBuilder.literal(Integer.parseInt(filter.value()));
-        } else if (variableJavaType == BigDecimal.class) {
-            return criteriaBuilder.literal(new BigDecimal(filter.value()));
-        } else if (variableJavaType == Boolean.class) {
-            return criteriaBuilder.literal(Boolean.parseBoolean(filter.value()) ? 1 : 0);
-        } else if (variableJavaType == LocalDate.class) {
-            return criteriaBuilder.literal(filter.value()).as(LocalDate.class);
-        } else if (variableJavaType == LocalDateTime.class) {
-            return criteriaBuilder.literal(filter.value()).as(LocalDateTime.class);
-        } else {
-            throw new IllegalArgumentException("Unsupported variable type: " + variableJavaType);
+    public Expression getColumnExpression() {
+        if (columnExpression == null) {
+            columnExpression =
+                criteriaBuilder.greatest(
+                    (Expression) criteriaBuilder
+                        .selectCase()
+                        .when(variablePredicate, getExtractedValue())
+                        .otherwise(criteriaBuilder.nullLiteral(getExtractedValue().getJavaType()))
+                );
         }
+        return columnExpression;
     }
 }
