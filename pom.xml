@@ -223,7 +223,7 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>6.5.3.Final</hibernate.version>
+    <hibernate.version>6.6.3.Final</hibernate.version>
     <classgraph.version>4.8.175</classgraph.version>
 
 
