@@ -3889,14 +3889,13 @@ public abstract class AbstractTaskControllerIT {
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2));
     }
 
+    /**
+     * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+     *  By default, null values sort as if larger than any non-null value;
+     *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     */
     @Test
     void should_returnTasks_sortedByProcessVariables_respectingDefaultNullBehaviour() {
-        /*
-         * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
-         *  By default, null values sort as if larger than any non-null value;
-         *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
-         */
-
         for (int i = 0; i < 5; i++) {
             queryTestUtils
                 .buildProcessInstance()

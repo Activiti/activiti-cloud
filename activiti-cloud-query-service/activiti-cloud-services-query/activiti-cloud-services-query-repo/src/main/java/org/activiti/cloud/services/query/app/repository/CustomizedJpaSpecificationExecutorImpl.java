@@ -31,8 +31,8 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-public class CustomizedJpaSpecificationExecutorImpl<T, ID extends Serializable>
-    extends SimpleJpaRepository<T, ID>
+public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
+    extends SimpleJpaRepository<T, I>
     implements CustomizedJpaSpecificationExecutor<T> {
 
     private final EntityManager entityManager;

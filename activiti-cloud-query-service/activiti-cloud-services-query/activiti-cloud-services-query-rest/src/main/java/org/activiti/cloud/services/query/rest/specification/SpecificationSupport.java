@@ -49,10 +49,8 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
 
     protected final R searchRequest;
     protected List<Predicate> predicates;
-    public List<VariableValueFilterCondition> filterConditions;
-
+    protected List<VariableValueFilterCondition> filterConditions;
     private SetJoin<T, ProcessVariableEntity> pvJoin;
-
     protected final Map<VariableType, Class<?>> javaTypeMapping = Map.of(
         VariableType.STRING,
         String.class,
@@ -163,14 +161,14 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
             validateSort(sort);
             Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
-                From<T, ProcessVariableEntity> pvJoin = joinSupplier.get();
+                From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
                 orderByClause =
                     new VariableSelectionExpressionImpl<>(
-                        pvJoin,
+                        joinRoot,
                         Map.of(
-                            pvJoin.get(ProcessVariableEntity_.processDefinitionKey),
+                            joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
                             sort.processDefinitionKey(),
-                            pvJoin.get(ProcessVariableEntity_.name),
+                            joinRoot.get(ProcessVariableEntity_.name),
                             sort.field()
                         ),
                         javaTypeMapping.get(sort.type()),
@@ -213,7 +211,12 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
      * @return Supplier of SetJoin of process variables
      */
     protected Supplier<SetJoin<T, ProcessVariableEntity>> joinProcessVariables(Root<T> root) {
-        return () -> pvJoin == null ? pvJoin = root.join(getProcessVariablesAttribute(), JoinType.LEFT) : pvJoin;
+        return () -> {
+            if (pvJoin == null) {
+                pvJoin = root.join(getProcessVariablesAttribute(), JoinType.LEFT);
+            }
+            return pvJoin;
+        };
     }
 
     protected abstract SetAttribute<T, ProcessVariableEntity> getProcessVariablesAttribute();

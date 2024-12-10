@@ -2513,13 +2513,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             );
     }
 
+    /**
+     * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+     *  By default, null values sort as if larger than any non-null value;
+     *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     */
     @Test
     void should_returnProcessInstances_paginatedAndSortedByProcessVariables_respectingDefaultNullBehaviour() {
-        /*
-         * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
-         *  By default, null values sort as if larger than any non-null value;
-         *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
-         */
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
