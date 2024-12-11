@@ -86,6 +86,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
+        applyIdFilter(root);
+        applyParentIdFilter(root);
+        applyProcessInstanceIdFilter(root);
         applyStandaloneFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
         applyDescriptionFilter(root, criteriaBuilder);
@@ -130,6 +133,18 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
     @Override
     protected SetAttribute<TaskEntity, ProcessVariableEntity> getProcessVariablesAttribute() {
         return TaskEntity_.processVariables;
+    }
+
+    private void applyParentIdFilter(Root<TaskEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
+            predicates.add(root.get(TaskEntity_.parentTaskId).in(searchRequest.parentId()));
+        }
+    }
+
+    private void applyProcessInstanceIdFilter(Root<TaskEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.processInstanceId())) {
+            predicates.add(root.get(TaskEntity_.processInstanceId).in(searchRequest.processInstanceId()));
+        }
     }
 
     private void applyProcessDefinitionNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {

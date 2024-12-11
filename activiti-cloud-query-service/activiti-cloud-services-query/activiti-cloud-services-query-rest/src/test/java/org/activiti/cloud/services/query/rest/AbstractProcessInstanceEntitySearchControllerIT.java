@@ -30,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.stream.IntStream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -81,6 +82,50 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     protected abstract String getSearchEndpoint();
+
+    @Test
+    void should_returnProcessInstances_filteredById() {
+        IntStream
+            .range(0, 3)
+            .forEach(i -> queryTestUtils.buildProcessInstance().withId("id" + i).withInitiator(USER).buildAndSave());
+
+        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequestBuilder().withIds("id0", "id2").build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("id0", "id2"));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByParentId() {
+        queryTestUtils.buildProcessInstance().withId("id1").withInitiator(USER).withParentId("parent1").buildAndSave();
+
+        queryTestUtils.buildProcessInstance().withId("id2").withInitiator(USER).withParentId("parent2").buildAndSave();
+
+        queryTestUtils.buildProcessInstance().withId("id3").withInitiator(USER).withParentId("parent3").buildAndSave();
+
+        queryTestUtils.buildProcessInstance().withId("id4").withInitiator(USER).buildAndSave();
+
+        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequestBuilder()
+            .withParentIds("parent1", "parent3")
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("id1", "id3"));
+    }
 
     @Test
     void should_returnProcessInstances_filteredByNameLike() {
@@ -2514,7 +2559,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     /**
-     * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+     * From Postgres documentation: <a href="https://www.postgresql.org/docs/current/queries-order.html">Postgres sorting</a>
      *  By default, null values sort as if larger than any non-null value;
      *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
      */

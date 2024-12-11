@@ -56,6 +56,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withParentId(String parentId) {
+        process.setParentId(parentId);
+        return this;
+    }
+
     public ProcessInstanceBuilder withName(String name) {
         process.setName(name);
         return this;

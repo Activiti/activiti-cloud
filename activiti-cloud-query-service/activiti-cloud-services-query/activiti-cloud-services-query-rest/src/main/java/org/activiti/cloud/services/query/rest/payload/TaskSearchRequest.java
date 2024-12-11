@@ -25,6 +25,9 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 public record TaskSearchRequest (
     boolean onlyStandalone,
     boolean onlyRoot,
+    Set<String> id,
+    Set<String> parentId,
+    Set<String> processInstanceId,
     Set<String> name,
     Set<String> description,
     Set<String> processDefinitionName,
@@ -48,4 +51,4 @@ public record TaskSearchRequest (
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort
-) implements ProcessVariableFilterRequest {}
+) implements CloudRuntimeEntityFilterRequest {}

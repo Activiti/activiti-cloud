@@ -38,14 +38,14 @@ import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntityFilterRequest;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
-import org.activiti.cloud.services.query.rest.payload.ProcessVariableFilterRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-public abstract class SpecificationSupport<T, R extends ProcessVariableFilterRequest> implements Specification<T> {
+public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilterRequest> implements Specification<T> {
 
     protected final R searchRequest;
     protected List<Predicate> predicates;
@@ -129,6 +129,12 @@ public abstract class SpecificationSupport<T, R extends ProcessVariableFilterReq
                     )
                     .toList()
             );
+        }
+    }
+
+    protected void applyIdFilter(Root<T> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.id())) {
+            predicates.add(root.get(getIdAttribute()).in(searchRequest.id()));
         }
     }
 

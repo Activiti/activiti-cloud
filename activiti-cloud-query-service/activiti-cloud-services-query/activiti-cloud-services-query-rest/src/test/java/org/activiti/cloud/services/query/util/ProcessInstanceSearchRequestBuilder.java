@@ -31,6 +31,8 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ProcessInstanceSearchRequestBuilder {
 
+    private Set<String> ids;
+    private Set<String> parentIds;
     private Set<String> names;
     private Set<String> processDefinitionNames;
     private Set<String> initiators;
@@ -47,6 +49,16 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
+
+    public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
+        this.ids = Set.of(ids);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withParentIds(String... parentIds) {
+        this.parentIds = Set.of(parentIds);
+        return this;
+    }
 
     public ProcessInstanceSearchRequestBuilder withNames(String... names) {
         this.names = Set.of(names);
@@ -157,6 +169,8 @@ public class ProcessInstanceSearchRequestBuilder {
             }
         }
         return new ProcessInstanceSearchRequest(
+            ids,
+            parentIds,
             names,
             processDefinitionNames,
             initiators,

@@ -33,6 +33,9 @@ public class TaskSearchRequestBuilder {
 
     private boolean onlyStandalone;
     private boolean onlyRoot;
+    private Set<String> id;
+    private Set<String> parentId;
+    private Set<String> processInstanceId;
     private Set<String> name;
     private Set<String> description;
     private Set<String> processDefinitionName;
@@ -64,6 +67,21 @@ public class TaskSearchRequestBuilder {
 
     public TaskSearchRequestBuilder onlyRoot() {
         this.onlyRoot = true;
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withId(String... ids) {
+        this.id = Set.of(ids);
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withParentId(String... parentIds) {
+        this.parentId = Set.of(parentIds);
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withProcessInstanceId(String... processInstanceIds) {
+        this.processInstanceId = Set.of(processInstanceIds);
         return this;
     }
 
@@ -214,6 +232,9 @@ public class TaskSearchRequestBuilder {
         return new TaskSearchRequest(
             onlyStandalone,
             onlyRoot,
+            id,
+            parentId,
+            processInstanceId,
             name,
             description,
             processDefinitionName,

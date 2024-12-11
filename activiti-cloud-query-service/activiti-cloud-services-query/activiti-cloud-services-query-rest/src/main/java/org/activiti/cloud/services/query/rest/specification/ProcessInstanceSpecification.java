@@ -58,6 +58,8 @@ public class ProcessInstanceSpecification
     ) {
         reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
+        applyIdFilter(root);
+        applyParentIdFilter(root);
         applyNameFilter(root, criteriaBuilder);
         applyProcessDefinitionNameFilter(root);
         applyInitiatorFilter(root);
@@ -78,6 +80,12 @@ public class ProcessInstanceSpecification
     @Override
     protected SetAttribute<ProcessInstanceEntity, ProcessVariableEntity> getProcessVariablesAttribute() {
         return ProcessInstanceEntity_.variables;
+    }
+
+    private void applyParentIdFilter(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
+            predicates.add(root.get(ProcessInstanceEntity_.parentId).in(searchRequest.parentId()));
+        }
     }
 
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {

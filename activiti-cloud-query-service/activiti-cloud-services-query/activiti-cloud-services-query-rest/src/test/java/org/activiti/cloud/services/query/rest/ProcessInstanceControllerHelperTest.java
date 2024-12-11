@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessInstanceSearchRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -27,6 +28,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -107,15 +109,15 @@ class ProcessInstanceControllerHelperTest {
     @Test
     void searchProcessInstances_shouldReturnProcessInstances() {
         //given
-        ProcessInstanceSearchRequest searchRequest = createProcessInstanceSearchRequest();
         Pageable pageable = PageRequest.of(0, 10);
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
-        given(processInstanceService.search(searchRequest, pageable)).willReturn(pageResult);
+        given(processInstanceService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
+            .willReturn(pageResult);
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
         //when
         Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(
-            searchRequest,
+            new ProcessInstanceSearchRequestBuilder().build(),
             pageable
         );
 

@@ -212,6 +212,104 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
+    void should_returnTasks_filteredById() {
+        IntStream
+            .range(0, 3)
+            .forEach(i -> queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave());
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder().withId("id0", "id2").build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("id0", "id2"));
+    }
+
+    @Test
+    void should_returnTasks_filteredByParentId() {
+        TaskEntity parent1 = queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+        TaskEntity parent2 = queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+
+        queryTestUtils.buildTask().withId(TASK_ID_1).withAssignee(CURRENT_USER).withParentTask(parent1).buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withAssignee(CURRENT_USER)
+            .withParentTask(queryTestUtils.buildTask().buildAndSave())
+            .buildAndSave();
+
+        queryTestUtils.buildTask().withId(TASK_ID_3).withAssignee(CURRENT_USER).withParentTask(parent2).buildAndSave();
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder()
+            .withParentId(parent1.getId(), parent2.getId())
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+    }
+
+    @Test
+    void should_returnTasks_filteredByProcessInstanceId() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(processInstance1)
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(queryTestUtils.buildProcessInstance().buildAndSave())
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_3)
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(processInstance2)
+            .buildAndSave();
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder()
+            .withProcessInstanceId(processInstance1.getId(), processInstance2.getId())
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+    }
+
+    @Test
     void should_returnTasks_filteredByProcessVariable_withOnlyRequestedProcessVariables() {
         queryTestUtils
             .buildProcessInstance()

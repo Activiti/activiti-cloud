@@ -6412,6 +6412,27 @@
           "onlyRoot": {
             "type": "boolean"
           },
+          "id": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parentId": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "processInstanceId": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "name": {
             "uniqueItems": true,
             "type": "array",
@@ -6752,14 +6773,7 @@
           "standalone": {
             "type": "boolean"
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6774,16 +6788,23 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "parentTaskId": {
             "type": "string"
           },
           "taskDefinitionKey": {
             "type": "string"
           },
-          "assignee": {
+          "formKey": {
             "type": "string"
           },
-          "formKey": {
+          "assignee": {
             "type": "string"
           },
           "businessKey": {
@@ -6804,6 +6825,9 @@
           "completedBy": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -6815,9 +6839,6 @@
               "DELETED"
             ]
           },
-          "description": {
-            "type": "string"
-          },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
@@ -6828,6 +6849,20 @@
         "title": "ProcessInstanceSearchRequest_ProcessVariables",
         "type": "object",
         "properties": {
+          "id": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parentId": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "name": {
             "uniqueItems": true,
             "type": "array",
@@ -6989,21 +7024,24 @@
           "id": {
             "type": "string"
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "processDefinitionId": {
             "type": "string"
           },
-          "startDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
           "businessKey": {
             "type": "string"
           },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "initiator": {
+            "type": "string"
+          },
+          "parentId": {
             "type": "string"
           },
           "status": {
@@ -7016,18 +7054,15 @@
               "COMPLETED"
             ]
           },
-          "parentId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "processDefinitionKey": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "processDefinitionName": {
+            "type": "string"
           }
         }
       },
@@ -7304,14 +7339,7 @@
           "standalone": {
             "type": "boolean"
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7326,16 +7354,23 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "parentTaskId": {
             "type": "string"
           },
           "taskDefinitionKey": {
             "type": "string"
           },
-          "assignee": {
+          "formKey": {
             "type": "string"
           },
-          "formKey": {
+          "assignee": {
             "type": "string"
           },
           "businessKey": {
@@ -7356,6 +7391,9 @@
           "completedBy": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7366,9 +7404,6 @@
               "CANCELLED",
               "DELETED"
             ]
-          },
-          "description": {
-            "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
@@ -7420,21 +7455,24 @@
           "id": {
             "type": "string"
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "processDefinitionId": {
             "type": "string"
           },
-          "startDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
           "businessKey": {
             "type": "string"
           },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "initiator": {
+            "type": "string"
+          },
+          "parentId": {
             "type": "string"
           },
           "status": {
@@ -7447,18 +7485,15 @@
               "COMPLETED"
             ]
           },
-          "parentId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "processDefinitionKey": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "processDefinitionName": {
+            "type": "string"
           }
         }
       },
@@ -7657,20 +7692,20 @@
           "id": {
             "type": "string"
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "cancelledDate": {
             "type": "string",
             "format": "date-time"
           },
-          "startedDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
           "businessKey": {
             "type": "string"
+          },
+          "startedDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "status": {
             "type": "string",
@@ -7849,13 +7884,10 @@
               "type": "object"
             }
           },
-          "clientId": {
-            "type": "string"
-          },
-          "clientName": {
-            "type": "string"
-          },
           "appVersion": {
+            "type": "string"
+          },
+          "businessKey": {
             "type": "string"
           },
           "executionId": {
@@ -7864,7 +7896,10 @@
           "clientType": {
             "type": "string"
           },
-          "businessKey": {
+          "clientId": {
+            "type": "string"
+          },
+          "clientName": {
             "type": "string"
           },
           "processDefinitionKey": {

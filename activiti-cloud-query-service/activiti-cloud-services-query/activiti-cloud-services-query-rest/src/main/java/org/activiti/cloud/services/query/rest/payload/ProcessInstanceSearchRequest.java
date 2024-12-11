@@ -23,6 +23,9 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 //prettier-ignore
 public record ProcessInstanceSearchRequest(
+
+    Set<String> id,
+    Set<String> parentId,
     Set<String> name,
     Set<String> processDefinitionName,
     Set<String> initiator,
@@ -39,4 +42,4 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort
-) implements ProcessVariableFilterRequest{}
+) implements CloudRuntimeEntityFilterRequest {}
