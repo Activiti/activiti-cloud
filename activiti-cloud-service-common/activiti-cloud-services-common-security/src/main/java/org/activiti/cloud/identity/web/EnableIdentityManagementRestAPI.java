@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import org.activiti.cloud.identity.config.IdentitySearchCacheConfiguration;
 import org.activiti.cloud.identity.web.controller.IdentityManagementController;
 import org.activiti.cloud.identity.web.controller.IdentityManagementRestExceptionHandler;
+import org.activiti.cloud.identity.web.controller.ServerTimeController;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -37,6 +38,7 @@ import org.springframework.context.annotation.Import;
         IdentityManagementController.class,
         IdentityManagementRestExceptionHandler.class,
         IdentitySearchCacheConfiguration.class,
+        ServerTimeController.class,
     }
 )
 public @interface EnableIdentityManagementRestAPI {
