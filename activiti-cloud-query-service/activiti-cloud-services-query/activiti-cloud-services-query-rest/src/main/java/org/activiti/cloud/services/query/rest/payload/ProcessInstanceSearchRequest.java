@@ -23,7 +23,6 @@ import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 //prettier-ignore
 public record ProcessInstanceSearchRequest(
-
     Set<String> id,
     Set<String> parentId,
     Set<String> name,
