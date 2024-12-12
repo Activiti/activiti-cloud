@@ -17,6 +17,8 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
+import java.time.Instant;
+import java.util.Date;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
@@ -47,7 +49,7 @@ public class DatetimeVariableValueCondition extends VariableValueCondition {
     }
 
     @Override
-    protected String getConvertedValue() {
-        return value;
+    protected Date getConvertedValue() {
+        return Date.from(Instant.parse(value));
     }
 }

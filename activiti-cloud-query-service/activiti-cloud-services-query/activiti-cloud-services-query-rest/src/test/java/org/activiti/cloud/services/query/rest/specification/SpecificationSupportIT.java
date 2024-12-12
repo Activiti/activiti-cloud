@@ -18,10 +18,15 @@ package org.activiti.cloud.services.query.rest.specification;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -31,6 +36,7 @@ import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -53,6 +59,9 @@ class SpecificationSupportIT {
 
     @Autowired
     VariableRepository variableRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Container
     @ServiceConnection
@@ -190,6 +199,132 @@ class SpecificationSupportIT {
         List<ProcessVariableEntity> retrieved = variableRepository.findAll(specification);
 
         assertThat(retrieved).containsExactlyInAnyOrderElementsOf(variables.subList(0, expectedSublistToIndex));
+    }
+
+    @Test
+    public void testStringVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new StringVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "va'lue\"",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo("va''lue");
+    }
+
+    @Test
+    public void testBooleanVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new BooleanVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "true",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    public void testBigDecimalVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new BigDecimalVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "10.00",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo(BigDecimal.valueOf(10.00));
+    }
+
+    @Test
+    public void testDatetimeVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new DatetimeVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "2024-08-02T00:11:22.000+00:00",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo(Date.from(Instant.parse("2024-08-02T00:11:22.000+00:00")));
+    }
+
+    @Test
+    public void testDateVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new DateVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "2024-08-02",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo(LocalDate.parse("2024-08-02"));
+    }
+
+    @Test
+    public void testIntegerVariableValueConditionConvertedValue() {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+        var query = criteriaBuilder.createQuery(ProcessVariableEntity.class);
+        var root = query.from(ProcessVariableEntity.class);
+
+        // given
+        var subject = new IntegerVariableValueCondition(
+            root.get(ProcessVariableEntity_.value),
+            FilterOperator.EQUALS,
+            "123",
+            criteriaBuilder
+        );
+
+        // when
+        var value = subject.getConvertedValue();
+
+        // then
+        assertThat(value).isEqualTo(123);
     }
 
     @ParameterizedTest

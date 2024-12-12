@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
+import java.math.BigDecimal;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 
@@ -37,7 +38,7 @@ public class BigDecimalVariableValueCondition extends NumericVariableValueCondit
     }
 
     @Override
-    protected Object getConvertedValue() {
-        return value;
+    protected BigDecimal getConvertedValue() {
+        return BigDecimal.valueOf(Double.parseDouble(value));
     }
 }

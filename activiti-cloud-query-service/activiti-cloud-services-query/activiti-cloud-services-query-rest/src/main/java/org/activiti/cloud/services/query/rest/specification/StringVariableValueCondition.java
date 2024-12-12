@@ -45,6 +45,6 @@ public class StringVariableValueCondition extends VariableValueCondition {
 
     @Override
     protected String getConvertedValue() {
-        return value;
+        return value.replaceAll("'", "''").replaceAll("\"", "");
     }
 }
