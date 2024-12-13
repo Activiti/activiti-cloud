@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ServiceTask")
 @Table(name = "BPMN_ACTIVITY")
@@ -38,19 +39,23 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
     private IntegrationContextEntity integrationContext;
 
     @QueryType(PropertyType.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Transient
     private Date startedFrom;
 
     @QueryType(PropertyType.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Transient
     private Date startedTo;
 
     @QueryType(PropertyType.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Transient
     @Access(AccessType.PROPERTY)
     private Date completedFrom;
 
     @QueryType(PropertyType.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Transient
     private Date completedTo;
 
