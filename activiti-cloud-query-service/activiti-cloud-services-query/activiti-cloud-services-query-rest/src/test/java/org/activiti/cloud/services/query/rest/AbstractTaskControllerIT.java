@@ -74,7 +74,6 @@ public abstract class AbstractTaskControllerIT {
     public void setUp() {
         webAppContextSetup(context);
         postProcessors(csrf().asHeader());
-        queryTestUtils.cleanUp();
     }
 
     @AfterEach

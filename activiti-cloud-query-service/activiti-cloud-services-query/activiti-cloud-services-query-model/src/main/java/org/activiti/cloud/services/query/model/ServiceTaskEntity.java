@@ -16,9 +16,12 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.PropertyType;
+import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.*;
@@ -33,6 +36,23 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
     @JsonIgnore
     @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
     private IntegrationContextEntity integrationContext;
+
+    @QueryType(PropertyType.DATE)
+    @Transient
+    private Date startedFrom;
+
+    @QueryType(PropertyType.DATE)
+    @Transient
+    private Date startedTo;
+
+    @QueryType(PropertyType.DATE)
+    @Transient
+    @Access(AccessType.PROPERTY)
+    private Date completedFrom;
+
+    @QueryType(PropertyType.DATE)
+    @Transient
+    private Date completedTo;
 
     protected ServiceTaskEntity() {}
 
