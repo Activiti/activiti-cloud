@@ -63,7 +63,6 @@ class ServiceTaskAdminControllerIT {
 
     private static final String SEARCH_ENDPOINT = "/admin/v1/service-tasks";
     private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
     private static final String ENTRIES_ROOT = "list.entries";
     private static final String SERVICE_TASKS_ID_ROOT = ENTRIES_ROOT + ".entry.id";
 
@@ -87,7 +86,7 @@ class ServiceTaskAdminControllerIT {
         queryTestUtils.buildServiceTask().withStartedDate(new Date(500)).save();
 
         given()
-            .param("startedFrom", dateTimeFormatter.format(new Date(900)))
+            .param("startedFrom", dateTimeFormatter.format(new Date(1000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
             .get(SEARCH_ENDPOINT)
@@ -106,7 +105,7 @@ class ServiceTaskAdminControllerIT {
         queryTestUtils.buildServiceTask().withStartedDate(new Date(3000)).save();
 
         given()
-            .param("startedTo", dateTimeFormatter.format(new Date(2500)))
+            .param("startedTo", dateTimeFormatter.format(new Date(2000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
             .get(SEARCH_ENDPOINT)
@@ -125,7 +124,7 @@ class ServiceTaskAdminControllerIT {
         queryTestUtils.buildServiceTask().withCompletedDate(new Date(500)).save();
 
         given()
-            .param("completedFrom", dateTimeFormatter.format(new Date(900)))
+            .param("completedFrom", dateTimeFormatter.format(new Date(1000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
             .get(SEARCH_ENDPOINT)
@@ -144,7 +143,7 @@ class ServiceTaskAdminControllerIT {
         queryTestUtils.buildServiceTask().withCompletedDate(new Date(3000)).save();
 
         given()
-            .param("completedTo", dateTimeFormatter.format(new Date(2500)))
+            .param("completedTo", dateTimeFormatter.format(new Date(2000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
             .get(SEARCH_ENDPOINT)
