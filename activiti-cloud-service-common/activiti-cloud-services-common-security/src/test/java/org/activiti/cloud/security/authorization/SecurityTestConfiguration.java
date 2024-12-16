@@ -21,6 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.Collection;
 import org.activiti.cloud.services.common.security.config.CommonJwtAuthenticationConverterConfiguration;
 import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
@@ -28,8 +30,14 @@ import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConverter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
+import org.activiti.spring.cache.config.ActivitiSpringCacheManagerAutoConfiguration;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
@@ -41,9 +49,28 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @EnableWebSecurity
 @SpringBootConfiguration
-@Import({ CommonSecurityAutoConfiguration.class, CommonJwtAuthenticationConverterConfiguration.class })
+@Import(
+    {
+        CommonSecurityAutoConfiguration.class,
+        CommonJwtAuthenticationConverterConfiguration.class,
+        ActivitiSpringCacheManagerAutoConfiguration.class,
+        CacheAutoConfiguration.class,
+    }
+)
 @EnableConfigurationProperties(value = AuthorizationProperties.class)
 public class SecurityTestConfiguration {
+
+    //    @Bean
+    public CacheManager cacheManager(Collection<Cache> caches) {
+        SimpleCacheManager cacheManager = new SimpleCacheManager() {
+            @Override
+            protected Cache getMissingCache(String name) {
+                return new CaffeineCache(name, Caffeine.newBuilder().build());
+            }
+        };
+        cacheManager.setCaches(caches);
+        return cacheManager;
+    }
 
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
