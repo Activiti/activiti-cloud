@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.app.repository.config;
 
+import org.activiti.cloud.services.query.app.repository.CustomizedJpaSpecificationExecutorImpl;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -25,7 +26,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @AutoConfiguration
-@EnableJpaRepositories(basePackageClasses = ProcessInstanceRepository.class)
+@EnableJpaRepositories(
+    basePackageClasses = ProcessInstanceRepository.class,
+    repositoryBaseClass = CustomizedJpaSpecificationExecutorImpl.class
+)
 @EntityScan(basePackageClasses = ProcessInstanceEntity.class)
 public class QueryRepositoryAutoConfiguration {
 

@@ -27,16 +27,19 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.activiti.api.task.model.Task;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
+import org.activiti.cloud.services.query.util.TaskBuilder;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +74,6 @@ public abstract class AbstractTaskControllerIT {
     public void setUp() {
         webAppContextSetup(context);
         postProcessors(csrf().asHeader());
-        queryTestUtils.cleanUp();
     }
 
     @AfterEach
@@ -107,13 +109,207 @@ public abstract class AbstractTaskControllerIT {
             .get(getSearchEndpointHttpGet())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].processVariables", hasSize(1))
-            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
     @Test
-    void should_returnTasks_withOnlyRequestedProcessVariables_whenSearchingWithPostEndpoint() {
+    void should_returnPaginatedTasks_whenNoFilters() {
+        for (int i = 0; i < 5; i++) {
+            queryTestUtils
+                .buildTask()
+                .withId(String.valueOf(i))
+                .withTaskCandidateUsers(CURRENT_USER, "other-user", "another-user")
+                .withTaskCandidateGroups("group1", "group2", "group3")
+                .buildAndSave();
+        }
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 0)
+            .param("maxItems", 10)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(5))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder("0", "1", "2", "3", "4"))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 0)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 2)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("skipCount", 4)
+            .param("maxItems", 2)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body("page.totalElements", equalTo(5));
+    }
+
+    @Test
+    void should_returnTasks_withOnlyRequestedProcessVariables() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(UUID.randomUUID().toString(), VariableType.STRING, "value2")
+            )
+            .withTasks(
+                queryTestUtils
+                    .buildTask()
+                    .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                    .withTaskCandidateGroups("group1", "group2")
+            )
+            .buildAndSave();
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableKeys(new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
+    }
+
+    @Test
+    void should_returnTasks_filteredById() {
+        IntStream
+            .range(0, 3)
+            .forEach(i -> queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave());
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder().withId("id0", "id2").build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("id0", "id2"));
+    }
+
+    @Test
+    void should_returnTasks_filteredByParentId() {
+        TaskEntity parent1 = queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+        TaskEntity parent2 = queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+
+        queryTestUtils.buildTask().withId(TASK_ID_1).withAssignee(CURRENT_USER).withParentTask(parent1).buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withAssignee(CURRENT_USER)
+            .withParentTask(queryTestUtils.buildTask().buildAndSave())
+            .buildAndSave();
+
+        queryTestUtils.buildTask().withId(TASK_ID_3).withAssignee(CURRENT_USER).withParentTask(parent2).buildAndSave();
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder()
+            .withParentId(parent1.getId(), parent2.getId())
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+    }
+
+    @Test
+    void should_returnTasks_filteredByProcessInstanceId() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(CURRENT_USER)
+            .withProcessDefinitionKey(UUID.randomUUID().toString())
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_1)
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(processInstance1)
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(queryTestUtils.buildProcessInstance().buildAndSave())
+            .buildAndSave();
+
+        queryTestUtils
+            .buildTask()
+            .withId(TASK_ID_3)
+            .withAssignee(CURRENT_USER)
+            .withParentProcess(processInstance2)
+            .buildAndSave();
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder()
+            .withProcessInstanceId(processInstance1.getId(), processInstance2.getId())
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+    }
+
+    @Test
+    void should_returnTasks_filteredByProcessVariable_withOnlyRequestedProcessVariables() {
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(CURRENT_USER)
@@ -144,9 +340,9 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].processVariables", hasSize(1))
-            .body("_embedded.tasks[0].processVariables[0].name", is(VAR_NAME));
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
+            .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
     }
 
     @Test
@@ -463,7 +659,7 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
-    void should_returnTasks_filteredByStringProcessVariable_containsInAnyOrder() {
+    void should_returnTasks_filteredByStringProcessVariable_contains() {
         queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
@@ -501,7 +697,7 @@ public abstract class AbstractTaskControllerIT {
     }
 
     @Test
-    void should_returnTasks_filteredByTaskProcessVariable_containsInAnyOrder() {
+    void should_returnTasks_filteredByTaskProcessVariable_contains() {
         queryTestUtils
             .buildProcessInstance()
             .withTasks(
@@ -3404,7 +3600,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.STRING
                 )
             );
@@ -3426,7 +3622,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.STRING
                     )
                 );
@@ -3474,7 +3670,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.INTEGER
                 )
             );
@@ -3496,7 +3692,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.INTEGER
                     )
                 );
@@ -3544,7 +3740,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.BIGDECIMAL
                 )
             );
@@ -3566,7 +3762,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.BIGDECIMAL
                     )
                 );
@@ -3614,7 +3810,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.DATE
                 )
             );
@@ -3636,7 +3832,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.DATE
                     )
                 );
@@ -3690,7 +3886,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.DATETIME
                 )
             );
@@ -3712,7 +3908,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.DATETIME
                     )
                 );
@@ -3752,7 +3948,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    List.of(PROCESS_DEFINITION_KEY),
+                    PROCESS_DEFINITION_KEY,
                     VariableType.BOOLEAN
                 )
             );
@@ -3774,7 +3970,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        List.of(PROCESS_DEFINITION_KEY),
+                        PROCESS_DEFINITION_KEY,
                         VariableType.BOOLEAN
                     )
                 );
@@ -3790,113 +3986,56 @@ public abstract class AbstractTaskControllerIT {
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2));
     }
 
+    /**
+     * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+     *  By default, null values sort as if larger than any non-null value;
+     *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     */
     @Test
-    void should_returnTasks_withSortedElementsFirst() {
-        queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(CURRENT_USER)
-            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
-            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_1).withStatus(Task.TaskStatus.ASSIGNED))
-            .buildAndSave();
+    void should_returnTasks_sortedByProcessVariables_respectingDefaultNullBehaviour() {
+        for (int i = 0; i < 5; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withInitiator(CURRENT_USER)
+                .withId(String.valueOf(i))
+                .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, i))
+                .withTasks(queryTestUtils.buildTask().withId(String.valueOf(i)))
+                .buildAndSave();
+        }
 
-        queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(CURRENT_USER)
-            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
-            .buildAndSave();
-
-        queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(CURRENT_USER)
-            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3).withStatus(Task.TaskStatus.CREATED))
-            .buildAndSave();
-
-        String taskId4 = "taskId4";
-        queryTestUtils
-            .buildProcessInstance()
-            .withInitiator(CURRENT_USER)
-            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
-            .withTasks(queryTestUtils.buildTask().withId(taskId4))
-            .buildAndSave();
+        for (int i = 5; i < 10; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withInitiator(CURRENT_USER)
+                .withId(String.valueOf(i))
+                .withProcessDefinitionKey("other-process")
+                .withTasks(queryTestUtils.buildTask().withId(String.valueOf(i)))
+                .buildAndSave();
+        }
 
         TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort("status", Sort.Direction.ASC, false, null, null));
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    VAR_NAME,
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.INTEGER
+                )
+            );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 8)
+            .param("skipCount", 0)
             .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0]", is(TASK_ID_1))
-            .body(TASK_IDS_JSON_PATH + "[1]", is(TASK_ID_3));
-
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("status", Sort.Direction.DESC, false, null, null));
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpointHttpPost())
-            .then()
-            .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0]", is(TASK_ID_3))
-            .body(TASK_IDS_JSON_PATH + "[1]", is(TASK_ID_1));
-
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.ASC,
-                        true,
-                        List.of(PROCESS_DEFINITION_KEY),
-                        VariableType.STRING
-                    )
-                );
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpointHttpPost())
-            .then()
-            .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0]", is(taskId4))
-            .body(TASK_IDS_JSON_PATH + "[1]", is(TASK_ID_1));
-
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        List.of(PROCESS_DEFINITION_KEY),
-                        VariableType.STRING
-                    )
-                );
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpointHttpPost())
-            .then()
-            .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0]", is(TASK_ID_1))
-            .body(TASK_IDS_JSON_PATH + "[1]", is(taskId4));
+            .body(TASKS_JSON_PATH, hasSize(8))
+            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("0", "1", "2", "3"));
     }
 
     @Test
@@ -3914,15 +4053,7 @@ public abstract class AbstractTaskControllerIT {
 
         requestBuilder =
             new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.ASC,
-                        true,
-                        List.of(PROCESS_DEFINITION_KEY),
-                        null
-                    )
-                );
+                .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3938,11 +4069,19 @@ public abstract class AbstractTaskControllerIT {
         for (int i = 0; i < 10; i++) {
             queryTestUtils
                 .buildTask()
+                .withTaskCandidateGroups("group1", "group2")
+                .withTaskCandidateUsers(CURRENT_USER, "other-user")
                 .withAssignee(CURRENT_USER)
                 .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"))
                 .withId(String.valueOf(i))
                 .buildAndSave();
-            queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+            queryTestUtils
+                .buildTask()
+                .withTaskCandidateGroups("group1", "group2")
+                .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                .withAssignee(CURRENT_USER)
+                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "different-value"))
+                .buildAndSave();
         }
 
         TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
@@ -3998,5 +4137,356 @@ public abstract class AbstractTaskControllerIT {
             .body("page.totalPages", is(3))
             .body("page.size", is(4))
             .body("page.number", is(2));
+    }
+
+    @Test
+    void should_returnCorrectNumberOfDistinctTasks_whenJoiningTaskAndProcessVariables() {
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withTasks(
+                IntStream
+                    .range(0, 10)
+                    .mapToObj(i ->
+                        queryTestUtils
+                            .buildTask()
+                            .withId(String.valueOf(i))
+                            .withAssignee(CURRENT_USER)
+                            .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                            .withTaskCandidateGroups("group1", "group2")
+                            .withVariables(new QueryTestUtils.VariableInput("taskVar", VariableType.STRING, "value"))
+                    )
+                    .toArray(TaskBuilder[]::new)
+            )
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2"),
+                new QueryTestUtils.VariableInput("var3", VariableType.STRING, "value2")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc1")
+            .withProcessDefinitionKey("otherKey")
+            .withTasks(
+                queryTestUtils.buildTask().withId("1.1"),
+                queryTestUtils.buildTask().withId("2.1"),
+                queryTestUtils.buildTask().withId("3.1")
+            )
+            .withVariables(
+                IntStream
+                    .range(0, 10)
+                    .mapToObj(i -> new QueryTestUtils.VariableInput("var" + i, VariableType.STRING, "value"))
+                    .toArray(QueryTestUtils.VariableInput[]::new)
+            )
+            .buildAndSave();
+
+        TaskSearchRequest request = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(
+                new VariableFilter(
+                    processInstance.getProcessDefinitionKey(),
+                    "taskVar",
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    processInstance.getProcessDefinitionKey(),
+                    VAR_NAME,
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
+            .withSort(new CloudRuntimeEntitySort("createdDate", Sort.Direction.DESC, false, null, null))
+            .withStatus(Task.TaskStatus.ASSIGNED)
+            .build();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .param("maxItems", 10)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(10))
+            .body(
+                TASK_IDS_JSON_PATH,
+                contains(IntStream.range(0, 10).mapToObj(String::valueOf).toList().reversed().toArray())
+            );
+    }
+
+    @Test
+    void should_returnTasks_sortedAndFiltered_bySameProcessVariable() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc1")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("1").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc2")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("2").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:10:00.000+00:00")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc3")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("3").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc4")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:13:00.000+00:00")
+            )
+            .buildAndSave();
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.DATETIME,
+                    "2024-09-01T00:09:30.000+00:00",
+                    FilterOperator.GREATER_THAN
+                ),
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.DATETIME,
+                    "2024-09-01T00:12:30.000+00:00",
+                    FilterOperator.LESS_THAN
+                )
+            )
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    VAR_NAME,
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.DATETIME
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 0)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("2", "3"))
+            .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 2)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains("1"))
+            .body("page.totalElements", is(3));
+
+        requestBuilder.invertSort();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 0)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("1", "3"))
+            .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 2)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains("2"))
+            .body("page.totalElements", is(3));
+    }
+
+    @Test
+    void should_returnTasks_sortedAndFiltered_byDifferentProcessVariables() {
+        final String varToSortBy = "var2";
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc1")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("1").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, 3.4),
+                new QueryTestUtils.VariableInput(varToSortBy, VariableType.DATE, "2024-09-03")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc2")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("2").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, 2.1),
+                new QueryTestUtils.VariableInput(varToSortBy, VariableType.DATE, "2024-09-01")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc3")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withId("3").withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, 2.2),
+                new QueryTestUtils.VariableInput(varToSortBy, VariableType.DATE, "2024-09-02")
+            )
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc4")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(CURRENT_USER, "other-user"))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, 10.2),
+                new QueryTestUtils.VariableInput(varToSortBy, VariableType.DATE, "2024-09-01")
+            )
+            .buildAndSave();
+
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.BIGDECIMAL,
+                    "2.0",
+                    FilterOperator.GREATER_THAN
+                ),
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.BIGDECIMAL,
+                    "4.0",
+                    FilterOperator.LESS_THAN
+                )
+            )
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    varToSortBy,
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.DATE
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 0)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("2", "3"))
+            .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 2)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains("1"))
+            .body("page.totalElements", is(3));
+
+        requestBuilder.invertSort();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 0)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("1", "3"))
+            .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 2)
+            .param("skipCount", 2)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(1))
+            .body(TASK_IDS_JSON_PATH, contains("2"))
+            .body("page.totalElements", is(3));
+    }
+
+    @Test
+    void should_returnTasks_sortedByProcessVariable_andFilteredByTaskVariable() {
+        final String varToSortBy = "var2";
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("proc1")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withTasks(
+                queryTestUtils
+                    .buildTask()
+                    .withId("1")
+                    .withTaskCandidateUsers(CURRENT_USER, "other-user")
+                    .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "abcd"))
+            )
+            .withVariables(new QueryTestUtils.VariableInput(varToSortBy, VariableType.INTEGER, 3))
+            .buildAndSave();
     }
 }
