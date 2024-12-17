@@ -99,15 +99,13 @@ jobs:
         uses: sonarsource/sonarcloud-github-action@02ef91109b2d589e757aefcfb2854c2783fd7b19 # v4
         with:
           projectBaseDir: .
+          args: >
+            -Dsonar.organization=activiti
+            -Dsonar.projectKey=my-projectkey
+            -Dsonar.verbose=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
-        with:
-          name: coverage-report
-          path: target/site/jacoco/jacoco.xml
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
