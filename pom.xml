@@ -230,6 +230,10 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/report-aggregate/target/site/
+      jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
   </properties>
   <repositories>
     <repository>
@@ -523,15 +527,11 @@ limitations under the License.]]>
             </goals>
           </execution>
           <execution>
-            <id>report</id>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
             <goals>
-              <goal>report</goal>
+              <goal>report-aggregate</goal>
             </goals>
-            <configuration>
-              <formats>
-                <format>XML</format>
-              </formats>
-            </configuration>
           </execution>
         </executions>
       </plugin>

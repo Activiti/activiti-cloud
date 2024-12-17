@@ -95,17 +95,13 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@02ef91109b2d589e757aefcfb2854c2783fd7b19 # v4
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=activiti
-            -Dsonar.projectKey=activiti-cloud
-            -Dsonar.verbose=true
+      - name: Load JaCoCo report on SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=activiti-cloud -Pcoverage
+
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
