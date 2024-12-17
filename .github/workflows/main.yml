@@ -101,7 +101,7 @@ jobs:
           projectBaseDir: .
           args: >
             -Dsonar.organization=activiti
-            -Dsonar.projectKey=my-projectkey
+            -Dsonar.projectKey=activiti-cloud
             -Dsonar.verbose=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
