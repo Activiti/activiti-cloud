@@ -87,7 +87,7 @@ import org.springframework.test.web.servlet.MvcResult;
         AlfrescoWebAutoConfiguration.class,
     }
 )
-public class AuditEventsControllerImplIT {
+public class AuditEventsControllerImpWebMvcTest {
 
     @MockBean
     private EventsRepository eventsRepository;
