@@ -46,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(properties = { "spring.main.banner-mode=off" })
 @Import({ AlfrescoWebAutoConfiguration.class, AuditTestConfiguration.class })
-public class AuditEventsControllerImpIT {
+class AuditEventsControllerImpIT {
 
     @Autowired
     private EventsRepository<AuditEventEntity> eventsRepository;
