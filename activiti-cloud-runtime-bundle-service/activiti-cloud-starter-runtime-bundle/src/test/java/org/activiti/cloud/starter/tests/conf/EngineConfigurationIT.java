@@ -22,11 +22,15 @@ import java.util.AbstractMap;
 import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
+import org.activiti.spring.boot.ActivitiProperties;
+import org.activiti.spring.cache.SpringProcessDefinitionCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -47,6 +51,12 @@ public class EngineConfigurationIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
+
+    @Autowired
+    private ActivitiProperties activitiProperties;
+
+    @Autowired
+    private RepositoryService repositoryService;
 
     @Test
     public void shouldConfigureDefaultConnectorBindingProperties() {
@@ -169,5 +179,24 @@ public class EngineConfigurationIT {
         assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
         assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
         assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
+    }
+
+    @Test
+    public void shouldConfigureProcessDefinitionCacheSpec() {
+        assertThat(activitiProperties.getCaffeine().getSpec())
+            .isEqualTo("maximumSize=70, expireAfterAccess=5m, recordStats");
+    }
+
+    @Test
+    public void shouldDeployAllProcessDefinitions() {
+        assertThat(repositoryService.createProcessDefinitionQuery().count()).isGreaterThan(70);
+    }
+
+    @Test
+    public void shouldApplyProcessDefinitionCacheSpec() {
+        var springProcessDefinitionCache = (SpringProcessDefinitionCache) configuration.getProcessDefinitionCache();
+
+        assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize())
+            .isEqualTo(70);
     }
 }
