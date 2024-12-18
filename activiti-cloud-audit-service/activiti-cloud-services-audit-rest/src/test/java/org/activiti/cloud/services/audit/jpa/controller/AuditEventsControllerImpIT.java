@@ -61,7 +61,7 @@ public class AuditEventsControllerImpIT {
     private SecurityManager securityManager;
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
-        .ofPattern("yyyy-MM-dd'T'HH:mm:ss.000'Z'")
+        .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         .withZone(ZoneOffset.UTC);
 
     private static final String ENTRIES_ROOT = "_embedded.events";
