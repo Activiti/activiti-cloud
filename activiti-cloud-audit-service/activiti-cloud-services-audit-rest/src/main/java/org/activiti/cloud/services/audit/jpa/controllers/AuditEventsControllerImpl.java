@@ -115,7 +115,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
         SearchParams searchParams,
         Pageable pageable
     ) {

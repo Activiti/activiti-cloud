@@ -39,7 +39,7 @@ public interface AuditEventsController {
     EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId);
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
+    PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
         SearchParams searchParams,
         Pageable pageable
     );
