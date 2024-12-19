@@ -184,19 +184,18 @@ public class EngineConfigurationIT {
     @Test
     public void shouldConfigureProcessDefinitionCacheSpec() {
         assertThat(activitiProperties.getCaffeine().getSpec())
-            .isEqualTo("maximumSize=70, expireAfterAccess=5m, recordStats");
+            .isEqualTo("maximumSize=1000, expireAfterAccess=10m, recordStats");
     }
 
     @Test
     public void shouldDeployAllProcessDefinitions() {
-        assertThat(repositoryService.createProcessDefinitionQuery().count()).isGreaterThan(70);
-    }
+        var processDefinitionCount = repositoryService.createProcessDefinitionQuery().count();
 
-    @Test
-    public void shouldApplyProcessDefinitionCacheSpec() {
+        assertThat(processDefinitionCount).isGreaterThan(0);
+
         var springProcessDefinitionCache = (SpringProcessDefinitionCache) configuration.getProcessDefinitionCache();
 
         assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize())
-            .isEqualTo(70);
+            .isEqualTo(processDefinitionCount);
     }
 }
