@@ -26,6 +26,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.activiti.spring.boot.ActivitiProperties;
+import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
 import org.activiti.spring.cache.SpringProcessDefinitionCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:engine.properties")
+@TestPropertySource(
+    value = "classpath:engine.properties",
+    properties = { "spring.activiti.process-definition-cache-limit=70" }
+)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
@@ -54,6 +58,9 @@ public class EngineConfigurationIT {
 
     @Autowired
     private ActivitiProperties activitiProperties;
+
+    @Autowired
+    private ActivitiSpringCacheManagerProperties cacheManagerProperties;
 
     @Autowired
     private RepositoryService repositoryService;
@@ -182,19 +189,29 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldConfigureProcessDefinitionCacheSpec() {
+    public void shouldConfigureProcessDefinitionCacheName() {
         assertThat(activitiProperties.getProcessDefinitionCacheName()).isEqualTo("processDefinitions");
+    }
+
+    @Test
+    public void shouldConfigureProcessDefinitionCacheLimit() {
+        assertThat(activitiProperties.getProcessDefinitionCacheLimit()).isEqualTo(70);
+        assertThat(cacheManagerProperties.getCaches().get("processDefinitions").getCaffeine().getSpec())
+            .isEqualTo("maximumSize=70, expireAfterAccess=10m, recordStats");
     }
 
     @Test
     public void shouldDeployAllProcessDefinitions() {
         var processDefinitionCount = repositoryService.createProcessDefinitionQuery().count();
 
-        assertThat(processDefinitionCount).isGreaterThan(0);
+        assertThat(processDefinitionCount).isGreaterThan(70);
+    }
 
+    @Test
+    public void shouldCacheProcessDefinitionsLimit() {
         var springProcessDefinitionCache = (SpringProcessDefinitionCache) configuration.getProcessDefinitionCache();
 
         assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize())
-            .isEqualTo(processDefinitionCount);
+            .isEqualTo(Long.valueOf(activitiProperties.getProcessDefinitionCacheLimit()));
     }
 }
