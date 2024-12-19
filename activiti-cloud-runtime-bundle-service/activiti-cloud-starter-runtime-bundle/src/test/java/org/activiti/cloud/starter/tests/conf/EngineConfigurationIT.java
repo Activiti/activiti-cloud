@@ -183,8 +183,7 @@ public class EngineConfigurationIT {
 
     @Test
     public void shouldConfigureProcessDefinitionCacheSpec() {
-        assertThat(activitiProperties.getCaffeine().getSpec())
-            .isEqualTo("maximumSize=1000, expireAfterAccess=10m, recordStats");
+        assertThat(activitiProperties.getProcessDefinitionCacheName()).isEqualTo("processDefinitions");
     }
 
     @Test
