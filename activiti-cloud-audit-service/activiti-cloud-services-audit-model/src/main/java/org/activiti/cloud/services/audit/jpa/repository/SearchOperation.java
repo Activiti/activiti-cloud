@@ -19,7 +19,9 @@ public enum SearchOperation {
     EQUALITY,
     NEGATION,
     GREATER_THAN,
+    GREATER_THAN_EQUAL,
     LESS_THAN,
+    LESS_THAN_EQUAL,
     LIKE,
     STARTS_WITH,
     ENDS_WITH,
@@ -39,16 +41,17 @@ public enum SearchOperation {
 
     public static final String RIGHT_PARANTHESIS = ")";
 
-    public static SearchOperation getSimpleOperation(final char input) {
+    public static SearchOperation getSimpleOperation(final String operation) {
+        char input = operation.charAt(0);
         switch (input) {
             case ':':
                 return EQUALITY;
             case '!':
                 return NEGATION;
             case '>':
-                return GREATER_THAN;
+                return operation.length() > 1 && operation.charAt(1) == '=' ? GREATER_THAN_EQUAL : GREATER_THAN;
             case '<':
-                return LESS_THAN;
+                return operation.length() > 1 && operation.charAt(1) == '=' ? LESS_THAN_EQUAL : LESS_THAN;
             case '~':
                 return LIKE;
             default:

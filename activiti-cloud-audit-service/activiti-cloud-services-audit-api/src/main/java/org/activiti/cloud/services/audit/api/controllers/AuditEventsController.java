@@ -18,6 +18,7 @@ package org.activiti.cloud.services.audit.api.controllers;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
+import org.activiti.cloud.services.audit.api.search.SearchParams;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -26,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,8 +39,8 @@ public interface AuditEventsController {
     EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> findById(@PathVariable String eventId);
 
     @RequestMapping(method = RequestMethod.GET)
-    PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
-        @RequestParam(value = "search", required = false) String search,
+    PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
+        SearchParams searchParams,
         Pageable pageable
     );
 }
