@@ -230,10 +230,6 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
-    <sonar.coverage.jacoco.xmlReportPaths>
-      ${project.basedir}/report-aggregate/target/site/
-      jacoco-aggregate/jacoco.xml
-    </sonar.coverage.jacoco.xmlReportPaths>
   </properties>
   <repositories>
     <repository>
@@ -276,6 +272,11 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.11.0.3922</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
