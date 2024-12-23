@@ -54,7 +54,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 @EnableConfigurationProperties(value = AuthorizationProperties.class)
 public class SecurityTestConfiguration {
 
-
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
         return mock(ClientRegistrationRepository.class);
