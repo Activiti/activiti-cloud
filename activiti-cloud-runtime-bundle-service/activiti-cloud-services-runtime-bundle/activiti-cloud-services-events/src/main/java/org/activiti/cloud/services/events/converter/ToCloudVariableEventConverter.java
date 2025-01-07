@@ -28,17 +28,17 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.core.common.model.connector.VariableDefinition;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 
 public class ToCloudVariableEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final CachingProcessExtensionService processExtensionService;
+    private final ProcessExtensionService processExtensionService;
 
     public ToCloudVariableEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        CachingProcessExtensionService processExtensionService
+        ProcessExtensionService processExtensionService
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.processExtensionService = processExtensionService;

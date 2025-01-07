@@ -77,7 +77,7 @@ import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -351,7 +351,7 @@ public class CloudEventsAutoConfiguration {
     @ConditionalOnMissingBean
     public ToCloudVariableEventConverter cloudVariableEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        CachingProcessExtensionService processExtensionService
+        ProcessExtensionService processExtensionService
     ) {
         return new ToCloudVariableEventConverter(runtimeBundleInfoAppender, processExtensionService);
     }

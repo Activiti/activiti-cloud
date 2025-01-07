@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak.config;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.Feign;
-import java.time.Duration;
 import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
@@ -37,7 +35,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
@@ -59,12 +56,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 )
 @EnableConfigurationProperties({ ActivitiKeycloakProperties.class, KeycloakProperties.class })
 public class ActivitiKeycloakAutoConfiguration {
-
-    @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
-    private String cacheExpireAfterWrite;
-
-    @Value("${identity.client.cache.cacheMaxSize:1000}")
-    private int cacheMaxSize;
 
     @Autowired
     private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
@@ -91,42 +82,6 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean
     public KeycloakManagementService identityManagementService(KeycloakClient keycloakClient) {
         return new KeycloakManagementService(keycloakClient);
-    }
-
-    @Bean
-    public CaffeineCache groupRoleMappingCache() {
-        return new CaffeineCache(
-            "groupRoleMapping",
-            Caffeine
-                .newBuilder()
-                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                .maximumSize(cacheMaxSize)
-                .build()
-        );
-    }
-
-    @Bean
-    public CaffeineCache userRoleMappingCache() {
-        return new CaffeineCache(
-            "userRoleMapping",
-            Caffeine
-                .newBuilder()
-                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                .maximumSize(cacheMaxSize)
-                .build()
-        );
-    }
-
-    @Bean
-    public CaffeineCache userGroupsCache() {
-        return new CaffeineCache(
-            "userGroups",
-            Caffeine
-                .newBuilder()
-                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                .maximumSize(cacheMaxSize)
-                .build()
-        );
     }
 
     @Bean(name = "identityHealthService")
