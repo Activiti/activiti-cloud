@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryCustomizer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -38,9 +37,6 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
     @Autowired(required = false)
     private ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer;
 
-    @Autowired(required = false)
-    private ConnectionFactoryCustomizer activitiRabbitMqConnectionFactoryCustomizer;
-
     @Test
     public void contextLoads() {
         assertThat(messagingProperties.getDestinations()).isInstanceOf(LinkedCaseInsensitiveMap.class);
@@ -49,9 +45,7 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
     @Test
     public void rabbitMqConfiguration() {
         assertThat(messagingProperties.getRabbitmq().getMissingAnonymousQueuesFatal()).isTrue();
-        assertThat(messagingProperties.getRabbitmq().getRequestedHeartbeat()).isEqualTo(30);
 
         assertThat(activitiRabbitMqMessageListenerContainerCustomizer).isNotNull();
-        assertThat(activitiRabbitMqConnectionFactoryCustomizer).isNotNull();
     }
 }

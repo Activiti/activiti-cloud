@@ -22,7 +22,6 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.amqp.rabbit.listener.AbstractMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
@@ -39,19 +38,6 @@ public class ActivitiCloudMessagingAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass({ ConnectionFactory.class, MessageListenerContainer.class })
     static class ActivitiCloudMessagingRabbitConfiguration {
-
-        @Bean
-        ConnectionFactoryCustomizer activitiRabbitMqConnectionFactoryCustomizer(
-            ActivitiCloudMessagingProperties activitiCloudMessagingProperties
-        ) {
-            return factory -> {
-                Optional
-                    .ofNullable(activitiCloudMessagingProperties)
-                    .map(ActivitiCloudMessagingProperties::getRabbitmq)
-                    .map(ActivitiCloudMessagingProperties.RabbitMqProperties::getRequestedHeartbeat)
-                    .ifPresent(factory::setRequestedHeartbeat);
-            };
-        }
 
         @Bean
         ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer(
