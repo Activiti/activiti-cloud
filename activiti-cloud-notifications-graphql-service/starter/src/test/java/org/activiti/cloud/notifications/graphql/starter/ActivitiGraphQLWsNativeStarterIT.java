@@ -840,7 +840,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
         StepVerifier
             .create(flux)
             .expectSubscription()
-            .thenAwait(Duration.ofMillis(1000))
+            .thenAwait(Duration.ofMillis(300))
             .then(sendEvents(event1, event2, event3))
             .expectNextMatches(messageMatches(messages))
             .thenCancel()
