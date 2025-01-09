@@ -133,6 +133,17 @@ class ProcessVariableValueConverterTest {
     }
 
     @Test
+    void testProcessVariableValueConverterDatetimeValue() {
+        // when
+        Date dateValue = variableValueConverter.convert(
+            new ProcessVariableValue("Datetime", DATE_1970_01_01T01_01_01_001Z)
+        );
+
+        // then
+        assertThat(dateValue).isEqualTo(dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z));
+    }
+
+    @Test
     void testProcessVariableValueConverterBigDecimalValue() {
         assertThat(
             Stream
