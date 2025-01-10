@@ -1047,21 +1047,21 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.112")))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.2")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.11")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
             VariableType.BIGDECIMAL,
-            "1.1",
+            "1.112",
             FilterOperator.EQUALS
         );
 

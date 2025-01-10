@@ -20,6 +20,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.util.Map;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
@@ -84,6 +85,9 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
     private Expression getConvertedFilterValue() {
         if (variableJavaType == Boolean.class) {
             return criteriaBuilder.literal(Boolean.parseBoolean(filter.value()) ? 1 : 0);
+        }
+        if (variableJavaType == BigDecimal.class) {
+            return criteriaBuilder.literal(new BigDecimal(filter.value()));
         }
         Expression<String> value = criteriaBuilder.literal(filter.value());
         return variableJavaType == String.class ? value : value.as(variableJavaType);
