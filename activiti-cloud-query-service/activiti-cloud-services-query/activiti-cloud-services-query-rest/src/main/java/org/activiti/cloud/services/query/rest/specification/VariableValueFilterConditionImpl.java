@@ -86,6 +86,9 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
         if (variableJavaType == Boolean.class) {
             return criteriaBuilder.literal(Boolean.parseBoolean(filter.value()) ? 1 : 0);
         }
+        if (variableJavaType == BigDecimal.class) {
+            return criteriaBuilder.literal(new BigDecimal(filter.value()));
+        }
         Expression<String> value = criteriaBuilder.literal(filter.value());
         return variableJavaType == String.class ? value : value.as(variableJavaType);
     }
