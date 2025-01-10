@@ -72,25 +72,6 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
         return extractedValue;
     }
 
-    public Expression getExtractedValue2() {
-        if (variableJavaType == Boolean.class) {
-            return criteriaBuilder
-                .function(
-                    CustomPostgreSQLDialect.EXTRACT_JSON_BOOLEAN_VALUE,
-                    Boolean.class,
-                    root.get(AbstractVariableEntity_.value)
-                )
-                .as(Integer.class);
-        }
-        return criteriaBuilder
-            .function(
-                CustomPostgreSQLDialect.EXTRACT_JSON_STRING_VALUE,
-                String.class,
-                root.get(AbstractVariableEntity_.value)
-            )
-            .as(variableJavaType);
-    }
-
     @Override
     public Expression getSelectionExpression() {
         if (selectionExpression == null) {
