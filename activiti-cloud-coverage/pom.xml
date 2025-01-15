@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-mono-aggregator</artifactId>
+    <version>8.7.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>activiti-cloud-coverage</artifactId>
+  <name>Aggregate Coverage Report</name>
+  <packaging>pom</packaging>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-dependencies-parent</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-connectors-dependencies</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-audit-dependencies</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-messages-dependencies</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-examples</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+
+  <dependencies>
+    <!-- Parent directory: activiti-cloud-connectors -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-connector</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-connectors -->
+    <!-- Parent directory: activiti-cloud-messages-service/starters -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-messages-redis</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service/starters -->
+    <!-- Parent directory: activiti-cloud-messages-service/starters -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-messages-jdbc</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service/starters -->
+    <!-- Parent directory: activiti-cloud-messages-service/starters -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-messages-hazelcast</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service/starters -->
+    <!-- Parent directory: activiti-cloud-messages-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-messages-integration-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service -->
+    <!-- Parent directory: activiti-cloud-messages-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-messages-core</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service/services -->
+    <!-- Parent directory: activiti-cloud-messages-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-messages-tests</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-messages-service/services -->
+    <!-- Parent directory: activiti-cloud-api -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-api-task-model-impl</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-api -->
+    <!-- Parent directory: activiti-cloud-api -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-api -->
+    <!-- Parent directory: activiti-cloud-api -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-api-events</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-api -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-consumer</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-rest</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-liquibase</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-model</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-audit</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-audit-consumer</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-api</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-audit-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-audit-rest</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-audit-service -->
+    <!-- Parent directory: activiti-cloud-query-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-query-consumer</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-repo</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-liquibase</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-rest</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-model</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-consumer</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-query-events</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service/activiti-cloud-services-query -->
+    <!-- Parent directory: activiti-cloud-query-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-query-rest</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service -->
+    <!-- Parent directory: activiti-cloud-query-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-query</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-query-service -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-metadata</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-security</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-test-containers</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-util</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-dbp-rest</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-starter</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-swagger</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-common-config</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-service-common -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-service-common -->
+    <!-- Parent directory: activiti-cloud-acceptance-scenarios -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>security-policies-acceptance-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-acceptance-scenarios -->
+    <!-- Parent directory: activiti-cloud-acceptance-scenarios -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>identity-adapter-acceptance-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-acceptance-scenarios -->
+    <!-- Parent directory: activiti-cloud-acceptance-scenarios -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>multiple-runtime-acceptance-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-acceptance-scenarios -->
+    <!-- Parent directory: activiti-cloud-acceptance-scenarios -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>runtime-acceptance-tests</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-acceptance-scenarios -->
+    <!-- Parent directory: activiti-cloud-examples/example-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>example-runtime-bundle-starter</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/example-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-examples/example-cloud-connector -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>example-cloud-connector-starter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/example-cloud-connector -->
+    <!-- Parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <!-- Parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-starter</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <!-- Parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-starter-consumer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <!-- Parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-liquibase</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <!-- Parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-starter-rest</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples/activiti-cloud-query -->
+    <!-- Parent directory: activiti-cloud-examples -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-identity-adapter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-examples -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-runtime-bundle-it</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-events</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-connectors</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-runtime-gateway</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-core</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-rest-impl</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-identity-basic</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-security</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-web</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-graphiql</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-subscriptions</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-schema</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-events</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-ws</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <!-- Parent directory: activiti-cloud-notifications-graphql-service/services -->
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-notifications-graphql-jpa-query</artifactId>
+    </dependency>
+    <!-- End of parent directory: activiti-cloud-notifications-graphql-service/services -->
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>jacoco-report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

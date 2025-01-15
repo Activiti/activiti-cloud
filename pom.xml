@@ -168,6 +168,7 @@
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-examples</module>
     <module>activiti-cloud-dependencies</module>
+    <module>activiti-cloud-coverage</module>
   </modules>
   <scm>
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
