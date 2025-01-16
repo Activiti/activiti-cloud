@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.dialect;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
@@ -34,6 +36,23 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
      * Extracts the "value" field from a JSONB column and casts it to BOOLEAN.
      */
     public static final String EXTRACT_JSON_BOOLEAN_VALUE = "jsonb_boolean_value_extract";
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to NUMERIC with a precision of 38 and a scale of 16.
+     */
+    public static final String EXTRACT_JSON_NUMERIC_VALUE = "jsonb_numeric_value_extract";
+
+    private static final Map<Class<?>, String> extractionFunctionsByType = Map.of(
+        String.class,
+        EXTRACT_JSON_STRING_VALUE,
+        Boolean.class,
+        EXTRACT_JSON_BOOLEAN_VALUE,
+        BigDecimal.class,
+        EXTRACT_JSON_NUMERIC_VALUE
+    );
+
+    public static String getExtractionFunctionName(Class<?> type) {
+        return extractionFunctionsByType.getOrDefault(type, EXTRACT_JSON_STRING_VALUE);
+    }
 
     @Override
     public void initializeFunctionRegistry(FunctionContributions functionContributions) {
@@ -51,6 +70,17 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             .patternDescriptorBuilder(EXTRACT_JSON_BOOLEAN_VALUE, "(?1->>'value')::BOOLEAN")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_NUMERIC_VALUE, "(?1->>'value')::NUMERIC(38,16)")
+            .setInvariantType(
+                functionContributions
+                    .getTypeConfiguration()
+                    .getBasicTypeRegistry()
+                    .resolve(StandardBasicTypes.BIG_DECIMAL)
             )
             .setExactArgumentCount(1)
             .setArgumentListSignature("JSONB jsonb")

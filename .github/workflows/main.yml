@@ -430,7 +430,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
           git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
+          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot --head $(git branch --show-current)
 
   notify:
     runs-on: ubuntu-latest

@@ -65,7 +65,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.ConstantDefinition;
 import org.activiti.spring.process.model.Extension;
@@ -137,7 +137,7 @@ class ProcessDefinitionControllerImplIT {
     private CloudProcessDeployedProducer processDeployedProducer;
 
     @MockBean
-    private CachingProcessExtensionService cachingProcessExtensionService;
+    private ProcessExtensionService processExtensionService;
 
     @MockBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
@@ -258,7 +258,7 @@ class ProcessDefinitionControllerImplIT {
         givenVariableDefinition.setDisplayName("Var name");
         extension.setProperties(Map.of("var1", givenVariableDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         mockMvc
             .perform(
@@ -430,7 +430,7 @@ class ProcessDefinitionControllerImplIT {
         extension.setMappings(Map.of("startEvent", startEventMapping));
         extension.setProperties(Map.of("variableRef", givenVariableDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
@@ -492,7 +492,7 @@ class ProcessDefinitionControllerImplIT {
         extension.setMappings(Map.of("startEvent", startEventMapping));
         extension.setProperties(Map.of("variableRef", givenVariableDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
@@ -545,7 +545,7 @@ class ProcessDefinitionControllerImplIT {
         Extension extension = new Extension();
         extension.setProperties(Map.of("variableRef", givenVariableDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
@@ -606,7 +606,7 @@ class ProcessDefinitionControllerImplIT {
         extension.setMappings(Map.of("startEvent", startEventMapping));
         extension.setProperties(Map.of("variableRef", givenVariableDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
@@ -646,7 +646,7 @@ class ProcessDefinitionControllerImplIT {
         bpmnModel.getProcesses().add(process);
         when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(null);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(null);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
@@ -703,7 +703,7 @@ class ProcessDefinitionControllerImplIT {
         Extension extension = new Extension();
         extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
@@ -759,7 +759,7 @@ class ProcessDefinitionControllerImplIT {
         Extension extension = new Extension();
         extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
@@ -810,7 +810,7 @@ class ProcessDefinitionControllerImplIT {
 
         Extension extension = new Extension();
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
@@ -862,7 +862,7 @@ class ProcessDefinitionControllerImplIT {
 
         Extension extension = new Extension();
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
@@ -913,7 +913,7 @@ class ProcessDefinitionControllerImplIT {
         Extension extension = new Extension();
         extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
@@ -962,7 +962,7 @@ class ProcessDefinitionControllerImplIT {
         variableMapping.setType(SourceMappingType.VARIABLE);
         startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
 
-        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(null);
+        when(processExtensionService.getExtensionsForId("procId")).thenReturn(null);
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))

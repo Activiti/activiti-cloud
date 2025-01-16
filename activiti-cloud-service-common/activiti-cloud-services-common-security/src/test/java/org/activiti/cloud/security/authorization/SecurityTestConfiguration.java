@@ -28,7 +28,9 @@ import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConverter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
+import org.activiti.spring.cache.config.ActivitiSpringCacheManagerAutoConfiguration;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -41,7 +43,14 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @EnableWebSecurity
 @SpringBootConfiguration
-@Import({ CommonSecurityAutoConfiguration.class, CommonJwtAuthenticationConverterConfiguration.class })
+@Import(
+    {
+        CommonSecurityAutoConfiguration.class,
+        CommonJwtAuthenticationConverterConfiguration.class,
+        ActivitiSpringCacheManagerAutoConfiguration.class,
+        CacheAutoConfiguration.class,
+    }
+)
 @EnableConfigurationProperties(value = AuthorizationProperties.class)
 public class SecurityTestConfiguration {
 

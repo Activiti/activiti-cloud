@@ -65,7 +65,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -279,9 +279,9 @@ public class ServicesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator(
-        CachingProcessExtensionService cachingProcessExtensionService
+        ProcessExtensionService processExtensionService
     ) {
-        return new ProcessDefinitionVariablesDecorator(cachingProcessExtensionService);
+        return new ProcessDefinitionVariablesDecorator(processExtensionService);
     }
 
     @Bean

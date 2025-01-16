@@ -49,7 +49,7 @@ import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,7 +117,7 @@ class ProcessInstanceVariableControllerImplIT {
     private CloudProcessDeployedProducer processDeployedProducer;
 
     @MockBean
-    private CachingProcessExtensionService cachingProcessExtensionService;
+    private ProcessExtensionService processExtensionService;
 
     @MockBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
@@ -140,7 +140,7 @@ class ProcessInstanceVariableControllerImplIT {
         assertThat(resourcesAssembler).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
-        assertThat(cachingProcessExtensionService).isNotNull();
+        assertThat(processExtensionService).isNotNull();
     }
 
     @Test

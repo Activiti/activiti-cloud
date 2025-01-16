@@ -1261,7 +1261,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("316.2")))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.423"))
+            )
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
         queryTestUtils
@@ -1303,7 +1305,7 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils
             .buildTask()
             .withVariables(
-                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("285.432"))
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.423"))
             )
             .buildAndSave();
 
@@ -1340,7 +1342,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("316.2")))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.423"))
+            )
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
             .buildAndSave();
         queryTestUtils
@@ -1383,7 +1387,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils
             .buildTask()
             .withId(TASK_ID_2)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("316.2")))
+            .withVariables(
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("42.423"))
+            )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
