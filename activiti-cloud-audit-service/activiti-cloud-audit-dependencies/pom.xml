@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Audit Dependencies BOM (Bill Of Materials)</name>
   <properties>
-    <querydsl.version>5.6.1</querydsl.version>
+    <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -94,19 +94,19 @@
       <dependency>
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-apt</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
         <scope>provided</scope>
         <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-core</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
       </dependency>
       <dependency>
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
         <classifier>jakarta</classifier>
       </dependency>
       <dependency>

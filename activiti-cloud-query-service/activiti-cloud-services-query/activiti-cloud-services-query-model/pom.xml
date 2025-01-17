@@ -70,7 +70,7 @@
     <dependency>
       <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
-      <version>${querydsl.version}</version>
+      <version>${openfeign.querydsl.version}</version>
       <scope>provided</scope>
       <classifier>jakarta</classifier>
     </dependency>
@@ -82,7 +82,7 @@
       <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
       <classifier>jakarta</classifier>
-      <version>${querydsl.version}</version>
+      <version>${openfeign.querydsl.version}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.persistence</groupId>
