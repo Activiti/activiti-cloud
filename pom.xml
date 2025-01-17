@@ -168,6 +168,7 @@
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-examples</module>
     <module>activiti-cloud-dependencies</module>
+    <module>activiti-cloud-coverage</module>
   </modules>
   <scm>
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
@@ -520,6 +521,13 @@ limitations under the License.]]>
             <phase>post-integration-test</phase>
             <goals>
               <goal>report-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
             </goals>
           </execution>
         </executions>
