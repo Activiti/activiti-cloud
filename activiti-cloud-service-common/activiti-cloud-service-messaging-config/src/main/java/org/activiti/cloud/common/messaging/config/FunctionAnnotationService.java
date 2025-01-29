@@ -17,9 +17,9 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.lang.annotation.Annotation;
-import org.springframework.lang.Nullable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.lang.Nullable;
 
 public class FunctionAnnotationService {
 
