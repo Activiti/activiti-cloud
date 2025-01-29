@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.common.liquibase;
 
+import java.util.Collections;
+import java.util.Objects;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
@@ -36,12 +38,16 @@ public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoa
         liquibase.setDataSource(dataSource);
         liquibase.setResourceLoader(resourceLoader);
         liquibase.setChangeLog(properties.getChangeLog());
-        liquibase.setContexts(String.join(",", properties.getContexts()));
+        liquibase.setContexts(
+            String.join(",", Objects.requireNonNullElse(properties.getContexts(), Collections.emptyList()))
+        );
         liquibase.setDefaultSchema(properties.getDefaultSchema());
         liquibase.setLiquibaseTablespace(properties.getLiquibaseTablespace());
         liquibase.setDropFirst(properties.isDropFirst());
         liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabelFilter(String.join(",", properties.getLabelFilter()));
+        liquibase.setLabelFilter(
+            String.join(",", Objects.requireNonNullElse(properties.getLabelFilter(), Collections.emptyList()))
+        );
         liquibase.setChangeLogParameters(properties.getParameters());
         liquibase.setRollbackFile(properties.getRollbackFile());
         liquibase.setDatabaseChangeLogTable(properties.getDatabaseChangeLogTable());
