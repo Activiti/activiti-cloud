@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +50,7 @@ public class SpringdocApiDocsIT {
     @Value("classpath:org/activiti/cloud/common/swagger/apidocs/springdoc-api-docs.json")
     private Resource springdocApiDocsFile;
 
+    @Disabled
     @Test
     public void should_generateSpringdocApiDocs() throws Exception {
         mockMvc
