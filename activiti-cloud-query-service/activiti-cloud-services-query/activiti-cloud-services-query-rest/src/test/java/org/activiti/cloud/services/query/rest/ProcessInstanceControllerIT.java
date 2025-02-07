@@ -28,7 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -52,7 +54,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -199,5 +205,13 @@ class ProcessInstanceControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.entry.id").value(processInstanceEntity.getId()))
             .andExpect(jsonPath("$.entry.status").value(processInstanceEntity.getStatus().name()));
+    }
+
+    @Test
+    void should_returnBadRequestError_when_invalidProcessInstanceEnum() throws Exception {
+        mockMvc
+            .perform(get("/v1/process-instances?status=ASSIGNED").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isBadRequest());
     }
 }

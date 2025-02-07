@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,12 +42,9 @@ public class CommonExceptionHandlerQuery {
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
+    @ExceptionHandler({ IllegalStateException.class, ConversionFailedException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
-        IllegalStateException ex,
-        HttpServletResponse response
-    ) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(Exception ex, HttpServletResponse response) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
