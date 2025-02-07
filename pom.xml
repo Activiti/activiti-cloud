@@ -231,6 +231,7 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
+    <aspectweaver.version>1.9.22.1</aspectweaver.version>
   </properties>
   <repositories>
     <repository>
