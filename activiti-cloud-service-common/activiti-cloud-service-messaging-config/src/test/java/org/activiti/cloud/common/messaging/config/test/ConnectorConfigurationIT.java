@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.Connector;
@@ -362,12 +361,12 @@ public class ConnectorConfigurationIT {
         // when
         input.send(message, "engineEvents");
 
-        await().untilAtomic(myErrorHandler.get(), Matchers.notNullValue());
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
 
         // then
         verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
 
-        assertThat(myErrorHandler.get())
+        assertThat(myErrorHandler.getReference())
             .extracting(AtomicReference::get)
             .extracting(ErrorMessage::getPayload)
             .extracting(Throwable::getCause)
@@ -392,7 +391,7 @@ public class ConnectorConfigurationIT {
         return parser.parseExpression(expression).getValue(evaluationContext, Boolean.class);
     }
 
-    static class MyErrorHandler implements Consumer<ErrorMessage>, Supplier<AtomicReference<ErrorMessage>> {
+    static class MyErrorHandler implements Consumer<ErrorMessage> {
 
         private final AtomicReference<ErrorMessage> reference = new AtomicReference<>();
 
@@ -401,8 +400,7 @@ public class ConnectorConfigurationIT {
             reference.set(errorMessage);
         }
 
-        @Override
-        public AtomicReference<ErrorMessage> get() {
+        public AtomicReference<ErrorMessage> getReference() {
             return reference;
         }
     }
