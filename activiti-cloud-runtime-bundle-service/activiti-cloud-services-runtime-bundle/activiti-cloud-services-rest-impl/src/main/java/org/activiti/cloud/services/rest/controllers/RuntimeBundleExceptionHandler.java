@@ -18,7 +18,6 @@ package org.activiti.cloud.services.rest.controllers;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
@@ -34,8 +33,8 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -44,65 +43,72 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
     @ResponseStatus(NO_CONTENT)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(
         ActivitiInterchangeInfoNotFoundException ex,
         HttpServletResponse response
     ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(NOT_FOUND.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(NOT_FOUND.value(), ex.getMessage());
     }
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(FORBIDDEN)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(
         ActivitiForbiddenException ex,
         HttpServletResponse response
     ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(FORBIDDEN.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(FORBIDDEN.value(), ex.getMessage());
     }
 
     @ExceptionHandler(UnprocessableEntityException.class)
     @ResponseStatus(UNPROCESSABLE_ENTITY)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(
         UnprocessableEntityException ex,
         HttpServletResponse response
     ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
     }
 
     @ExceptionHandler({ NotFoundException.class, ActivitiObjectNotFoundException.class })
     @ResponseStatus(NOT_FOUND)
-    public EntityModel<ActivitiErrorMessage> handleAppException(RuntimeException ex, HttpServletResponse response) {
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(RuntimeException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(NOT_FOUND.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(NOT_FOUND.value(), ex.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(BAD_REQUEST)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(
         IllegalStateException ex,
         HttpServletResponse response
     ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(ActivitiException.class)
     @ResponseStatus(BAD_REQUEST)
-    public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiException ex, HttpServletResponse response) {
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(ActivitiException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(ActivitiIllegalArgumentException.class)
     @ResponseStatus(CONFLICT)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
+    @ResponseBody
+    public ActivitiErrorMessage handleAppException(
         ActivitiIllegalArgumentException ex,
         HttpServletResponse response
     ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage()));
+        return new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage());
     }
 }

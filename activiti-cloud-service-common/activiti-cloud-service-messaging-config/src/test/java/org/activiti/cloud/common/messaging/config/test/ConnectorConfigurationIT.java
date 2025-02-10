@@ -36,7 +36,6 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -348,9 +347,8 @@ public class ConnectorConfigurationIT {
             .isEqualTo("TestReply".getBytes(StandardCharsets.UTF_8));
     }
 
-    @Disabled
     @Test
-    public void testConnectorMyErrorHandler() {
+    public void xtestConnectorMyErrorHandler() {
         // given
         Message<String> message = MessageBuilder
             .withPayload("TestC")
