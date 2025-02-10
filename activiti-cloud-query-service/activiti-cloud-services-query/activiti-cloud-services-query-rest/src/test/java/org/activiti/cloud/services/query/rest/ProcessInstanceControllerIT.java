@@ -34,6 +34,7 @@ import java.util.Set;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -64,6 +65,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(ProcessInstanceController.class)
 @Import(
@@ -209,9 +211,13 @@ class ProcessInstanceControllerIT {
 
     @Test
     void should_returnBadRequestError_when_invalidProcessInstanceEnum() throws Exception {
-        mockMvc
+        MvcResult result = mockMvc
             .perform(get("/v1/process-instances?status=ASSIGNED").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        assertThat(result.getResponse().getContentAsString())
+            .contains(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
     }
 }

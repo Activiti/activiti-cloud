@@ -19,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
+import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.hateoas.EntityModel;
@@ -42,11 +43,29 @@ public class CommonExceptionHandlerQuery {
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
-    @ExceptionHandler({ IllegalStateException.class, ConversionFailedException.class })
+    @ExceptionHandler({ IllegalStateException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public EntityModel<ActivitiErrorMessage> handleAppException(Exception ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        IllegalStateException ex,
+        HttpServletResponse response
+    ) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler({ ConversionFailedException.class })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        ConversionFailedException ex,
+        HttpServletResponse response
+    ) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return EntityModel.of(
+            new ActivitiErrorMessageImpl(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
+            )
+        );
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
