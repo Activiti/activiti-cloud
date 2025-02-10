@@ -129,6 +129,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             execution.getId()
                         );
                     }
+                } else {
+                    LOGGER.warn(
+                        "Integration error '{}' with executionId '{}' is not a CloudBpmnError. Ignoring it.",
+                        integrationError,
+                        execution.getId()
+                    );
                 }
             } else {
                 String message =
