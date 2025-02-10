@@ -55,10 +55,7 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(FORBIDDEN)
     @ResponseBody
-    public ActivitiErrorMessage handleAppException(
-        ActivitiForbiddenException ex,
-        HttpServletResponse response
-    ) {
+    public ActivitiErrorMessage handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return new ActivitiErrorMessageImpl(FORBIDDEN.value(), ex.getMessage());
     }
@@ -66,10 +63,7 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(UnprocessableEntityException.class)
     @ResponseStatus(UNPROCESSABLE_ENTITY)
     @ResponseBody
-    public ActivitiErrorMessage handleAppException(
-        UnprocessableEntityException ex,
-        HttpServletResponse response
-    ) {
+    public ActivitiErrorMessage handleAppException(UnprocessableEntityException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return new ActivitiErrorMessageImpl(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
     }
@@ -85,10 +79,7 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(BAD_REQUEST)
     @ResponseBody
-    public ActivitiErrorMessage handleAppException(
-        IllegalStateException ex,
-        HttpServletResponse response
-    ) {
+    public ActivitiErrorMessage handleAppException(IllegalStateException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage());
     }
@@ -104,10 +95,7 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(ActivitiIllegalArgumentException.class)
     @ResponseStatus(CONFLICT)
     @ResponseBody
-    public ActivitiErrorMessage handleAppException(
-        ActivitiIllegalArgumentException ex,
-        HttpServletResponse response
-    ) {
+    public ActivitiErrorMessage handleAppException(ActivitiIllegalArgumentException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage());
     }
