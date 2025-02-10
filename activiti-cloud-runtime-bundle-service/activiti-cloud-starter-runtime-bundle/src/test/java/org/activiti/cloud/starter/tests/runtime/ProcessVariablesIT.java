@@ -624,8 +624,7 @@ public class ProcessVariablesIT {
         }
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(responseEntity.getBody().getMessage()).contains("variableDate");
-        assertThat(responseEntity.getBody().getMessage()).contains("variableDateTime");
+        assertThat(responseEntity.getBody().getMessage()).isEqualTo("Variables fail type validation: variableDate, variableDateTime");
     }
 
     @Test
