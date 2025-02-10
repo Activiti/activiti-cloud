@@ -24,6 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
@@ -205,7 +206,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         //then
         verify(managementService, times(2)).executeCommand(commandArgumentCaptor.capture());
         final List<CompositeCommand> compositeCommands = commandArgumentCaptor.getAllValues();
-        var propagateCloudBpmnErrorCmd = compositeCommands.get(0);
+        var propagateCloudBpmnErrorCmd = compositeCommands.getFirst();
         assertThat(propagateCloudBpmnErrorCmd.getCommands()).hasSize(3);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
@@ -233,7 +234,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         return integrationContext;
     }
 
-    private class AnotherCloudException extends RuntimeException {
+    private static class AnotherCloudException extends RuntimeException {
+
+        @Serial
         private static final long serialVersionUID = 1L;
     }
 }

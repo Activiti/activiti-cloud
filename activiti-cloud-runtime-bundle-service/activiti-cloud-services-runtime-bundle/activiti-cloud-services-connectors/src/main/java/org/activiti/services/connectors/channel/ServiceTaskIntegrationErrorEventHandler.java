@@ -82,8 +82,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 .createExecutionQuery()
                 .executionId(integrationContextEntity.getExecutionId())
                 .list();
-            if (executions.size() > 0) {
-                ExecutionEntity execution = (ExecutionEntity) executions.get(0);
+            if (!executions.isEmpty()) {
+                ExecutionEntity execution = (ExecutionEntity) executions.getFirst();
 
                 String clientId = integrationContext.getClientId();
                 String errorClassName = integrationError.getErrorClassName();
