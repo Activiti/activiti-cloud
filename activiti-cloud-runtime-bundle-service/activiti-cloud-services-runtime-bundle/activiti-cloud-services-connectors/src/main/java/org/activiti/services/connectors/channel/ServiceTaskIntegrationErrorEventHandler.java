@@ -100,7 +100,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
                 LOGGER.info(message, integrationError);
 
-                if (CloudBpmnError.class.getName().equals(errorClassName)) {
+                String expectedErrorClassName = CloudBpmnError.class.getName();
+                if (expectedErrorClassName.equals(errorClassName)) {
                     if (execution.getActivityId().equals(clientId)) {
                         try {
                             commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
@@ -131,8 +132,9 @@ public class ServiceTaskIntegrationErrorEventHandler {
                     }
                 } else {
                     LOGGER.warn(
-                        "Integration error '{}' with executionId '{}' is not a CloudBpmnError. Ignoring it.",
-                        integrationError,
+                        "Expected ErrorClassName '{}' but got '{}'. Ignoring integration error with executionId '{}'.",
+                        expectedErrorClassName,
+                        errorClassName,
                         execution.getId()
                     );
                 }
