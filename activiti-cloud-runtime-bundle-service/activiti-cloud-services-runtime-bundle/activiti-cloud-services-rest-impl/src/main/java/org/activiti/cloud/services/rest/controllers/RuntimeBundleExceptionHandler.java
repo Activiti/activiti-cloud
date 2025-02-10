@@ -56,7 +56,10 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(FORBIDDEN)
     @ResponseBody
-    public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiForbiddenException ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        ActivitiForbiddenException ex,
+        HttpServletResponse response
+    ) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(FORBIDDEN.value(), ex.getMessage()));
     }
@@ -64,7 +67,10 @@ public class RuntimeBundleExceptionHandler {
     @ExceptionHandler(UnprocessableEntityException.class)
     @ResponseStatus(UNPROCESSABLE_ENTITY)
     @ResponseBody
-    public EntityModel<ActivitiErrorMessage> handleAppException(UnprocessableEntityException ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        UnprocessableEntityException ex,
+        HttpServletResponse response
+    ) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
     }
