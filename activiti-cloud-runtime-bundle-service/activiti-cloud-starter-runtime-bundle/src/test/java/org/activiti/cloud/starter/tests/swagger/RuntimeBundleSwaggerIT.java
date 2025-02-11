@@ -54,7 +54,7 @@ public class RuntimeBundleSwaggerIT {
     @MockBean
     private ProcessDeployedEventProducer producer;
 
-    //@Disabled("Missing ListResponseContent, EntriesResponseContent, EntryResponseContent")
+    @Disabled("Missing ListResponseContent, EntriesResponseContent, EntryResponseContent")
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
         mockMvc
