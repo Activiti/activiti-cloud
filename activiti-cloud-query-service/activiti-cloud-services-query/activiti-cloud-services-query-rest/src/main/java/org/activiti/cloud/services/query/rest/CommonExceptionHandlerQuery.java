@@ -21,6 +21,8 @@ import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class CommonExceptionHandlerQuery {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonExceptionHandlerQuery.class);
 
     // TODO: 12/04/2019 this exception handler should be moved to activiti-cloud-service-common
     @ExceptionHandler(ActivitiForbiddenException.class)
@@ -59,6 +63,7 @@ public class CommonExceptionHandlerQuery {
         ConversionFailedException ex,
         HttpServletResponse response
     ) {
+        LOGGER.error(ex.getMessage(), ex);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(
             new ActivitiErrorMessageImpl(
