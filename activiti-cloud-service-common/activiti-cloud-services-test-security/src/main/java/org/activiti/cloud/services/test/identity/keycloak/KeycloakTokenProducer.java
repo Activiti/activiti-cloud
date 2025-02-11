@@ -82,19 +82,19 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     @Override
     public HttpEntity entityWithAuthorizationHeader(String user, String password) {
         HttpHeaders headers = authorizationHeaders(user, password);
-        return new HttpEntity<>("parameters", headers);
+        return new HttpEntity<>(headers);
     }
 
     @Override
     public HttpEntity entityWithoutAuthentication() {
         HttpHeaders headers = new HttpHeaders();
-        return new HttpEntity<>("parameters", headers);
+        return new HttpEntity<>(headers);
     }
 
     @Override
     public HttpEntity entityWithAuthorizationHeader() {
         HttpHeaders headers = authorizationHeaders();
-        return new HttpEntity<>("parameters", headers);
+        return new HttpEntity<>(headers);
     }
 
     @Override
