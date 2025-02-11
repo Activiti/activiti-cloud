@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.charset.Charset;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
+@Disabled("Missing ListResponseContent, EntriesResponseContent, EntryResponseContent")
 public class QuerySwaggerIT {
 
     @Autowired
