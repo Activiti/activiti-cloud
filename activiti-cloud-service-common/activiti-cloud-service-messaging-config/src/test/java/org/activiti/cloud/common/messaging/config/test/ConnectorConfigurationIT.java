@@ -348,7 +348,7 @@ public class ConnectorConfigurationIT {
     }
 
     @Test
-    public void xtestConnectorMyErrorHandler() {
+    public void testConnectorMyErrorHandler() {
         // given
         Message<String> message = MessageBuilder
             .withPayload("TestC")

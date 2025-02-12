@@ -38,9 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = {
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
-        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect"
     }
 )
 @TestPropertySource("classpath:application-test.properties")
