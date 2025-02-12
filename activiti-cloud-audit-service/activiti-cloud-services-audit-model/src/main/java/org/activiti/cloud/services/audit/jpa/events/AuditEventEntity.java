@@ -102,6 +102,10 @@ public abstract class AuditEventEntity {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }

@@ -63,6 +63,8 @@ import org.springframework.test.web.servlet.MockMvc;
 )
 public class AuditEventDeleteControllerIT {
 
+    private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
+
     @MockBean
     private EventsRepository eventsRepository;
 
@@ -115,6 +117,7 @@ public class AuditEventDeleteControllerIT {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
+        eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");
