@@ -21,7 +21,7 @@ import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.springframework.data.domain.Sort;
 
 public record CloudRuntimeEntitySort(
-    String field, Sort.Direction direction, boolean isProcessVariable, Collection<String> processDefinitionKeys, VariableType type
+    String field, Sort.Direction direction, boolean isProcessVariable, String processDefinitionKey, VariableType type
 ) {
     /**
      * This constructor's purpose is to make deserialization of 'direction' case-insensitive.
@@ -31,14 +31,14 @@ public record CloudRuntimeEntitySort(
         String field,
         String direction,
         boolean isProcessVariable,
-        Collection<String> processDefinitionKeys,
+        String processDefinitionKey,
         VariableType type
     ) {
         this(
             field,
             Sort.Direction.fromString(direction),
             isProcessVariable,
-            processDefinitionKeys,
+            processDefinitionKey,
             type == null ? null : VariableType.fromString(type.name())
         );
     }

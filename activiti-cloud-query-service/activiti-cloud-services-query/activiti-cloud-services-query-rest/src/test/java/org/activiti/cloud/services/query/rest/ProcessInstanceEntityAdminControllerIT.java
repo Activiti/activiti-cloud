@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -34,6 +35,8 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -47,6 +50,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +58,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceAdminController.class)
@@ -63,13 +68,23 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
-public class ProcessInstanceEntityAdminControllerIT {
+@TestPropertySource(
+    locations = { "classpath:application-test.properties" },
+    properties = "activiti.cloud.rest.max-items.enabled=true"
+)
+class ProcessInstanceEntityAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private ProcessInstanceRepository processInstanceRepository;
+
+    @MockBean
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @MockBean
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @MockBean
     private SecurityManager securityManager;
@@ -104,33 +119,52 @@ public class ProcessInstanceEntityAdminControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+        ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
 
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(processInstanceEntity),
+            PageRequest.of(1, 10),
+            1
+        );
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
+        ProcessInstanceEntity parentProcessInstance = buildDefaultProcessInstance();
+        Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
+            Collections.singletonList(parentProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
+
         given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
-            );
+            .willReturn(processInstancePage);
+        given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(get("/admin/v1/process-instances?page=1&size=10").accept(MediaTypes.HAL_JSON_VALUE))
             //then
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.processInstances.[0].id").value(parentProcessInstance.getId()))
+            .andExpect(
+                jsonPath("$._embedded.processInstances[0].processDefinitionId")
+                    .value(parentProcessInstance.getProcessDefinitionId())
+            );
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {

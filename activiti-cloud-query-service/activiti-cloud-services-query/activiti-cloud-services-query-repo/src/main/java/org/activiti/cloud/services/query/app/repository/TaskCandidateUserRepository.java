@@ -18,6 +18,8 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Collection;
+import java.util.Set;
 import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserId;
@@ -33,6 +35,8 @@ public interface TaskCandidateUserRepository
         QuerydslPredicateExecutor<TaskCandidateUserEntity>,
         QuerydslBinderCustomizer<QTaskCandidateUserEntity>,
         CrudRepository<TaskCandidateUserEntity, TaskCandidateUserId> {
+    Set<TaskCandidateUserEntity> findByTaskIdIn(Collection<String> taskIds);
+
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateUserEntity root) {
         whitelist(root).apply(bindings);

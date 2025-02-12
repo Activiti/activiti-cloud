@@ -19,7 +19,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
+import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +33,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class CommonExceptionHandlerQuery {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonExceptionHandlerQuery.class);
 
     // TODO: 12/04/2019 this exception handler should be moved to activiti-cloud-service-common
     @ExceptionHandler(ActivitiForbiddenException.class)
@@ -41,7 +47,7 @@ public class CommonExceptionHandlerQuery {
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
+    @ExceptionHandler({ IllegalStateException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public EntityModel<ActivitiErrorMessage> handleAppException(
         IllegalStateException ex,
@@ -49,6 +55,22 @@ public class CommonExceptionHandlerQuery {
     ) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler({ ConversionFailedException.class })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        ConversionFailedException ex,
+        HttpServletResponse response
+    ) {
+        LOGGER.error(ex.getMessage(), ex);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return EntityModel.of(
+            new ActivitiErrorMessageImpl(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
+            )
+        );
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

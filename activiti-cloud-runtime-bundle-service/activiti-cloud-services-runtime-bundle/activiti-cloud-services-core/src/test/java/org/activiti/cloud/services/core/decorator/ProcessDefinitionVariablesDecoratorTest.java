@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class ProcessDefinitionVariablesDecoratorTest {
     private ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator;
 
     @Mock
-    private CachingProcessExtensionService processExtensionService;
+    private ProcessExtensionService processExtensionService;
 
     @ParameterizedTest
     @CsvSource({ "variables, true", "VARIABLES, true", "else, false" })

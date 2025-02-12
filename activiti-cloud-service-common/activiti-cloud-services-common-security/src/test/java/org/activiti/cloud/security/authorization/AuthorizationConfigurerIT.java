@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.security.authorization;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -73,6 +75,9 @@ public class AuthorizationConfigurerIT {
 
     @Autowired
     private JwtDecoder jwtDecoderMock;
+
+    @Autowired
+    private CaffeineCacheManager caffeineCacheManager;
 
     private DefaultMockMvcBuilder mockMvcBuilder;
 
@@ -207,6 +212,11 @@ public class AuthorizationConfigurerIT {
                     .header(AUTH_HEADER_NAME, DUMMY_BEARER)
             )
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_configureSearchCaches() {
+        assertThat(caffeineCacheManager.getCacheNames()).containsOnly("userSearch", "groupSearch", "userInfoApiCall");
     }
 
     private void performRoleRestrictedRequests(MockMvc mockMvc) throws Exception {

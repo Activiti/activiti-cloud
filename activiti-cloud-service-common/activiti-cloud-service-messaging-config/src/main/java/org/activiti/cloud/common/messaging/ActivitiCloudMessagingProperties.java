@@ -103,7 +103,30 @@ public class ActivitiCloudMessagingProperties {
 
     private Map<String, InputConverterFunction> inputConverters;
 
+    private RabbitMqProperties rabbitmq = new RabbitMqProperties();
+
+    public static class RabbitMqProperties {
+
+        private Boolean missingAnonymousQueuesFatal;
+
+        public Boolean getMissingAnonymousQueuesFatal() {
+            return missingAnonymousQueuesFatal;
+        }
+
+        public void setMissingAnonymousQueuesFatal(Boolean missingAnonymousQueuesFatal) {
+            this.missingAnonymousQueuesFatal = missingAnonymousQueuesFatal;
+        }
+    }
+
     ActivitiCloudMessagingProperties() {}
+
+    public RabbitMqProperties getRabbitmq() {
+        return rabbitmq;
+    }
+
+    public void setRabbitmq(RabbitMqProperties rabbitmq) {
+        this.rabbitmq = rabbitmq;
+    }
 
     public Boolean isPartitioned() {
         return partitioned;

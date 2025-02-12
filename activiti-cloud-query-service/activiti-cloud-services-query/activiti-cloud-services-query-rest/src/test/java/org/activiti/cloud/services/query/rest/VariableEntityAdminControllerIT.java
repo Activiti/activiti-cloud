@@ -35,6 +35,8 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -76,6 +78,12 @@ public class VariableEntityAdminControllerIT {
 
     @MockBean
     private VariableRepository processVariableRepository;
+
+    @MockBean
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @MockBean
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @MockBean
     private UserGroupManager userGroupManager;

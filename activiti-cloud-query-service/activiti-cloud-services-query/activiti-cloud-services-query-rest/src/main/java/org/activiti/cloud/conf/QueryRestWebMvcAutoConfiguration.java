@@ -19,6 +19,8 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -37,6 +39,8 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableR
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
@@ -202,6 +206,8 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
         ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
@@ -210,6 +216,8 @@ public class QueryRestWebMvcAutoConfiguration {
     ) {
         return new TaskControllerHelper(
             taskRepository,
+            taskCandidateUserRepository,
+            taskCandidateGroupRepository,
             processVariableService,
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
@@ -284,6 +292,29 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceSearchService,
             entityFinder,
             new QueryDslPredicateAggregator()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceControllerHelper processInstanceControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceService processInstanceService
+    ) {
+        return new ProcessInstanceControllerHelper(processInstanceRepository, processInstanceService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
+    ) {
+        return new ProcessInstanceAdminControllerHelper(
+            processInstanceRepository,
+            processInstanceAdminService,
+            processInstanceControllerHelper
         );
     }
 }

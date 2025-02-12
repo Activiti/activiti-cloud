@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.util;
 
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -46,11 +47,15 @@ public class QueryTestUtils {
     @Autowired
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
+    @Autowired
+    private ServiceTaskRepository serviceTaskRepository;
+
     public void cleanUp() {
         taskVariableRepository.deleteAll();
         taskRepository.deleteAll();
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
+        serviceTaskRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
     }
@@ -66,6 +71,10 @@ public class QueryTestUtils {
             taskCandidateUserRepository,
             taskCandidateGroupRepository
         );
+    }
+
+    public ServiceTaskBuilder buildServiceTask() {
+        return new ServiceTaskBuilder(serviceTaskRepository);
     }
 
     public record VariableInput(String name, VariableType type, Object value) {

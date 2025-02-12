@@ -20,27 +20,25 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
+import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.util.CollectionUtils;
 
-public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
-
-    private List<Predicate> predicates;
+@CountOverFullWindow
+public class ProcessInstanceSpecification
+    extends SpecificationSupport<ProcessInstanceEntity, ProcessInstanceSearchRequest> {
 
     private final String userId;
 
-    private final ProcessInstanceSearchRequest searchRequest;
-
     private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
-        this.searchRequest = searchRequest;
+        super(searchRequest);
         this.userId = userId;
     }
 
@@ -58,9 +56,12 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        predicates = new ArrayList<>();
+        reset();
         applyUserRestrictionFilter(root, criteriaBuilder);
+        applyIdFilter(root);
+        applyParentIdFilter(root);
         applyNameFilter(root, criteriaBuilder);
+        applyProcessDefinitionNameFilter(root);
         applyInitiatorFilter(root);
         applyAppVersionFilter(root);
         applyStatusFilter(root);
@@ -68,25 +69,36 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
-        applyProcessVariableFilters(root, query, criteriaBuilder);
-        if (!query.getResultType().equals(Long.class)) {
-            applySorting(
-                root,
-                root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
-                searchRequest.sort(),
-                query,
-                criteriaBuilder
-            );
+        return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    @Override
+    protected SingularAttribute<ProcessInstanceEntity, String> getIdAttribute() {
+        return ProcessInstanceEntity_.id;
+    }
+
+    @Override
+    protected SetAttribute<ProcessInstanceEntity, ProcessVariableEntity> getProcessVariablesAttribute() {
+        return ProcessInstanceEntity_.variables;
+    }
+
+    private void applyParentIdFilter(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
+            predicates.add(root.get(ProcessInstanceEntity_.parentId).in(searchRequest.parentId()));
         }
-        if (predicates.isEmpty()) {
-            return criteriaBuilder.conjunction();
-        }
-        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(searchRequest.name())) {
             addLikeFilters(predicates, searchRequest.name(), root, criteriaBuilder, ProcessInstanceEntity_.name);
+        }
+    }
+
+    private void applyProcessDefinitionNameFilter(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.processDefinitionName())) {
+            predicates.add(
+                root.get(ProcessInstanceEntity_.processDefinitionName).in(searchRequest.processDefinitionName())
+            );
         }
     }
 
@@ -187,30 +199,6 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                     )
                 )
             );
-        }
-    }
-
-    private void applyProcessVariableFilters(
-        Root<ProcessInstanceEntity> root,
-        CriteriaQuery<?> query,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
-            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
-            Predicate joinCondition = criteriaBuilder.equal(
-                root.get(ProcessInstanceEntity_.id),
-                pvRoot.get(ProcessVariableEntity_.processInstanceId)
-            );
-
-            Predicate[] variableValueFilters = getProcessVariableValueFilters(
-                pvRoot,
-                searchRequest.processVariableFilters(),
-                criteriaBuilder
-            );
-
-            query.groupBy(root.get(ProcessInstanceEntity_.id));
-            query.having(getHavingClause(pvRoot, searchRequest.processVariableFilters(), criteriaBuilder));
-            predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
         }
     }
 }

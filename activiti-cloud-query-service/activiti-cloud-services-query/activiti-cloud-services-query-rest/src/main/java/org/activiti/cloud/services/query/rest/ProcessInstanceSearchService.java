@@ -23,7 +23,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,10 +76,7 @@ public class ProcessInstanceSearchService {
         Pageable pageable,
         ProcessInstanceSpecification specification
     ) {
-        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(
-            specification,
-            PageRequest.of(pageable.getPageNumber(), pageable.getPageSize())
-        );
+        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(specification, pageable);
         processVariableService.fetchProcessVariablesForProcessInstances(
             processInstances.getContent(),
             processVariableKeys

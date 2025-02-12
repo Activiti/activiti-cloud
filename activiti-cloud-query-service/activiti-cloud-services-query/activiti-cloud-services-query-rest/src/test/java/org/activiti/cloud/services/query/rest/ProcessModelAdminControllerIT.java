@@ -33,6 +33,8 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
@@ -68,6 +70,12 @@ public class ProcessModelAdminControllerIT {
 
     @MockBean
     private ProcessInstanceRepository processInstanceRepository;
+
+    @MockBean
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @MockBean
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @MockBean
     private UserGroupManager userGroupManager;

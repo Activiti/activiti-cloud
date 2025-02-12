@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.8.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-runtime-bundle-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
@@ -205,6 +205,11 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-test-containers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-runtime-gateway</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
