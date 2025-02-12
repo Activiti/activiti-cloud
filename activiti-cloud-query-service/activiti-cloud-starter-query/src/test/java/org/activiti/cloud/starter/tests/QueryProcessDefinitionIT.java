@@ -35,9 +35,9 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
@@ -46,6 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.StreamUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -72,6 +73,9 @@ public class QueryProcessDefinitionIT {
     @Autowired
     private MyProducer producer;
 
+    @MockitoBean
+    private BuildProperties buildProperties;
+
     @BeforeEach
     public void setUp() {
         identityTokenProducer.withTestUser("hruser");
@@ -83,7 +87,6 @@ public class QueryProcessDefinitionIT {
         processDefinitionRepository.deleteAll();
     }
 
-    @Disabled("No response")
     @Test
     public void shouldGetAvailableProcessDefinitions() {
         //given
@@ -123,7 +126,6 @@ public class QueryProcessDefinitionIT {
             );
     }
 
-    @Disabled("404 no response")
     @Test
     public void shouldGetAvailableProcessModels() throws Exception {
         //given
@@ -182,7 +184,6 @@ public class QueryProcessDefinitionIT {
             .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
 
-    @Disabled("No response")
     @Test
     public void shouldFilterOnProcessKey() {
         //given
@@ -215,7 +216,6 @@ public class QueryProcessDefinitionIT {
             .containsExactly(tuple(secondProcessDefinition.getId(), "My second Process", "mySecondProcess"));
     }
 
-    @Disabled("No response")
     @Test
     public void shouldUpdateDefinitionOnDuplicate() {
         //given
@@ -254,7 +254,6 @@ public class QueryProcessDefinitionIT {
             );
     }
 
-    @Disabled("No response")
     @Test
     public void shouldUpdateProcessModelOnDuplicate() throws Exception {
         //given
