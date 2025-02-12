@@ -225,7 +225,7 @@
 
     <!-- dependencies versions -->
     <hibernate.version>6.6.3.Final</hibernate.version>
-    <classgraph.version>4.8.175</classgraph.version>
+    <classgraph.version>4.8.179</classgraph.version>
 
 
     <!-- Tests Config -->
