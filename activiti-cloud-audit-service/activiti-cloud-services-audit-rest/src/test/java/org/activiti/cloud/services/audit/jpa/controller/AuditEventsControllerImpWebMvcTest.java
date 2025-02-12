@@ -138,7 +138,6 @@ class AuditEventsControllerImpWebMvcTest {
 
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");
@@ -244,7 +243,6 @@ class AuditEventsControllerImpWebMvcTest {
 
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(1L);
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
         eventEntity.setProcessDefinitionId("1");
@@ -268,7 +266,6 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
 
-        eventEntity.setId(1L);
         eventEntity.setEntityId("entityId");
         eventEntity.setProcessInstanceId("processInstanceId");
         eventEntity.setProcessDefinitionId("processDefinitionId");
@@ -339,7 +336,6 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(eventType.name());
 
-        eventEntity.setId(1L);
         eventEntity.setEntityId("entityId");
         eventEntity.setProcessInstanceId("processInstanceId");
         eventEntity.setProcessDefinitionId("processDefinitionId");
