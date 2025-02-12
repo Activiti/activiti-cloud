@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 
 public class ProcessInstanceTestUtils {
 
@@ -58,26 +57,5 @@ public class ProcessInstanceTestUtils {
             variables.add(processVariableEntity);
         }
         return variables;
-    }
-
-    public static ProcessInstanceSearchRequest createProcessInstanceSearchRequest() {
-        return new ProcessInstanceSearchRequest(
-            Set.of("My-app"), // processDefinitionKeys
-            Set.of("initiator"), // initiators
-            Set.of("1.0"), // appVersions
-            Set.of("My-app"), // appNames
-            Set.of(ProcessInstance.ProcessInstanceStatus.RUNNING), // statuses
-            null, // lastModifiedFrom
-            null, // lastModifiedTo
-            null, // startFrom
-            null, // startTo
-            null, // completedFrom
-            null, // completedTo
-            null, // suspendedFrom
-            null, // suspendedTo
-            null, // processVariableFilters
-            null, // processVariableKeys
-            null // sort
-        );
     }
 }

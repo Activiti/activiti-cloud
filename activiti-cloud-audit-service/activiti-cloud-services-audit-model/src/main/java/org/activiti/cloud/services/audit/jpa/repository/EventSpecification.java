@@ -48,8 +48,12 @@ public class EventSpecification implements Specification<AuditEventEntity> {
                 return builder.notEqual(root.get(criteria.getKey()), criteria.getValue());
             case GREATER_THAN:
                 return builder.greaterThan(root.get(criteria.getKey()), criteria.getValue().toString());
+            case GREATER_THAN_EQUAL:
+                return builder.greaterThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString());
             case LESS_THAN:
                 return builder.lessThan(root.get(criteria.getKey()), criteria.getValue().toString());
+            case LESS_THAN_EQUAL:
+                return builder.lessThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString());
             case LIKE:
                 return builder.like(root.get(criteria.getKey()), criteria.getValue().toString());
             case STARTS_WITH:

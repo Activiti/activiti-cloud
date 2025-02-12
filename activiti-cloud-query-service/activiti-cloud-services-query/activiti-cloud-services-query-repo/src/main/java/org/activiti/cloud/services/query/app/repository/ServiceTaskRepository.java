@@ -38,6 +38,10 @@ public interface ServiceTaskRepository
     default void customize(QuerydslBindings bindings, QServiceTaskEntity root) {
         whitelist(root).apply(bindings);
 
+        bindings.bind(root.startedFrom).first((path, value) -> root.startedDate.goe(value));
+        bindings.bind(root.startedTo).first((path, value) -> root.startedDate.loe(value));
+        bindings.bind(root.completedFrom).first((path, value) -> root.completedDate.goe(value));
+        bindings.bind(root.completedTo).first((path, value) -> root.completedDate.loe(value));
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 

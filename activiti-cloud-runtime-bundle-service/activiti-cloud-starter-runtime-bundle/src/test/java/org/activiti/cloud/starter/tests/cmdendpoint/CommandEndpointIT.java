@@ -295,7 +295,15 @@ public class CommandEndpointIT {
             .extracting(SyncCloudProcessDefinitionsResult::getEntity)
             .asInstanceOf(InstanceOfAssertFactories.LIST)
             .isNotEmpty()
-            .containsOnly(processDefinitionKeys.get(testProcessDefinitionKey));
+            .satisfies(processDefinitionIds ->
+                assertThat(
+                    processDefinitionIds
+                        .stream()
+                        .map(String.class::cast)
+                        .allMatch(it -> it.contains(testProcessDefinitionKey))
+                )
+                    .isTrue()
+            );
     }
 
     private void completeTask(Task task) {

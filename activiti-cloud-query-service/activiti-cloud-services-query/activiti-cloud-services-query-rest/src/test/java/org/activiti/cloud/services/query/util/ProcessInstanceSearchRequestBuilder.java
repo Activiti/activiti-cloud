@@ -25,11 +25,14 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.springframework.data.domain.Sort;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ProcessInstanceSearchRequestBuilder {
 
+    private Set<String> ids;
+    private Set<String> parentIds;
     private Set<String> names;
     private Set<String> processDefinitionNames;
     private Set<String> initiators;
@@ -46,6 +49,16 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
+
+    public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
+        this.ids = Set.of(ids);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withParentIds(String... parentIds) {
+        this.parentIds = Set.of(parentIds);
+        return this;
+    }
 
     public ProcessInstanceSearchRequestBuilder withNames(String... names) {
         this.names = Set.of(names);
@@ -127,6 +140,20 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder invertSort() {
+        if (sort != null) {
+            sort =
+                new CloudRuntimeEntitySort(
+                    sort.field(),
+                    sort.direction().isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC,
+                    sort.isProcessVariable(),
+                    sort.processDefinitionKey(),
+                    sort.type()
+                );
+        }
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -142,6 +169,8 @@ public class ProcessInstanceSearchRequestBuilder {
             }
         }
         return new ProcessInstanceSearchRequest(
+            ids,
+            parentIds,
             names,
             processDefinitionNames,
             initiators,

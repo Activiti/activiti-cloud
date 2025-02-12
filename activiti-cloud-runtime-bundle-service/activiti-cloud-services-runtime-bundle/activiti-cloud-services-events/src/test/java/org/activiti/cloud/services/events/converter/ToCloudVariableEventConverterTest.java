@@ -26,7 +26,7 @@ import org.activiti.api.runtime.event.impl.VariableCreatedEventImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class ToCloudVariableEventConverterTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private CachingProcessExtensionService processExtensionService;
+    private ProcessExtensionService processExtensionService;
 
     @Test
     void should_returnNull_whenPropertiesAreEmpty() {

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-dependencies</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.8.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
 
@@ -79,9 +79,9 @@
       <artifactId>hibernate-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
+      <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
-      <version>5.1.0</version>
+      <version>5.6.1</version>
       <scope>provided</scope>
       <classifier>jakarta</classifier>
     </dependency>

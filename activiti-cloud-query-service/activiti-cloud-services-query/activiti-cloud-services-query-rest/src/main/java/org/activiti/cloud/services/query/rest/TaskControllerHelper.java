@@ -17,15 +17,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +35,9 @@ import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelA
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.activiti.cloud.services.query.rest.specification.SubqueryWrappingSpecification;
 import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -73,9 +62,6 @@ public class TaskControllerHelper {
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
     private final SecurityManager securityManager;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public TaskControllerHelper(
         TaskRepository taskRepository,
@@ -151,11 +137,7 @@ public class TaskControllerHelper {
         Pageable pageable,
         TaskSpecification taskSpecification
     ) {
-        Page<TaskEntity> tasks = new PageImpl<>(
-            executeTupleQueryAndExtractTasks(getTupleQuery(taskSpecification, pageable)),
-            pageable,
-            taskRepository.count(new SubqueryWrappingSpecification<>(taskSpecification))
-        );
+        Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
         fetchTaskCandidateUsers(tasks.getContent());
         fetchTaskCandidateGroups(tasks.getContent());
         processVariableService.fetchProcessVariablesForTasks(
@@ -246,25 +228,6 @@ public class TaskControllerHelper {
         } else {
             return taskRepository.findAll(extendedPredicate, pageable);
         }
-    }
-
-    private TypedQuery<Tuple> getTupleQuery(TaskSpecification taskSpecification, Pageable pageable) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tuple> tupleQuery = cb.createTupleQuery();
-        Root<TaskEntity> root = tupleQuery.from(TaskEntity.class);
-        tupleQuery.where(taskSpecification.toPredicate(root, tupleQuery, cb));
-        List<Selection<?>> selections = new ArrayList<>();
-        selections.add(root);
-        tupleQuery.getOrderList().forEach(order -> selections.add(order.getExpression()));
-        tupleQuery.multiselect(selections.toArray(new Selection[0]));
-        TypedQuery<Tuple> query = entityManager.createQuery(tupleQuery);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-        return query;
-    }
-
-    private List<TaskEntity> executeTupleQueryAndExtractTasks(TypedQuery<Tuple> query) {
-        return query.getResultList().stream().map(t -> t.get(0, TaskEntity.class)).collect(Collectors.toList());
     }
 
     private void fetchTaskCandidateUsers(Collection<TaskEntity> tasks) {

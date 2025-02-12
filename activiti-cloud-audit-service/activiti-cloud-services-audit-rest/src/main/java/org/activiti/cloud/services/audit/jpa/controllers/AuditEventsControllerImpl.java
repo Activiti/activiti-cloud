@@ -31,6 +31,7 @@ import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverte
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
+import org.activiti.cloud.services.audit.api.search.SearchParams;
 import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
@@ -53,7 +54,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -115,11 +115,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(
-        @RequestParam(value = "search", required = false) String search,
+    public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> search(
+        SearchParams searchParams,
         Pageable pageable
     ) {
-        Specification<AuditEventEntity> spec = createSearchSpec(search);
+        Specification<AuditEventEntity> spec = createSearchSpec(searchParams);
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);
 
@@ -144,8 +144,9 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         );
     }
 
-    private Specification<AuditEventEntity> createSearchSpec(String search) {
+    private Specification<AuditEventEntity> createSearchSpec(SearchParams searchParams) {
         EventSpecificationsBuilder builder = new EventSpecificationsBuilder();
+        String search = searchParams.search();
         if (search != null && !search.isEmpty()) {
             String operationSetExpr = Arrays
                 .asList(SearchOperation.SIMPLE_OPERATION_SET)
@@ -159,7 +160,12 @@ public class AuditEventsControllerImpl implements AuditEventsController {
                 builder.with(matcher.group(1), matcher.group(2), matcher.group(4), matcher.group(3), matcher.group(5));
             }
         }
-
+        if (searchParams.eventTimeFrom() != null) {
+            builder.with("timestamp", ">=", searchParams.eventTimeFrom().getTime(), null, null);
+        }
+        if (searchParams.eventTimeTo() != null) {
+            builder.with("timestamp", "<=", searchParams.eventTimeTo().getTime(), null, null);
+        }
         return builder.build();
     }
 }

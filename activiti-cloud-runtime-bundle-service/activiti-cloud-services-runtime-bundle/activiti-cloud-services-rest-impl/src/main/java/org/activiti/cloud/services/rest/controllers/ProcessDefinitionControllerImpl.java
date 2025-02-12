@@ -58,7 +58,7 @@ import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.Mapping.SourceMappingType;
 import org.activiti.spring.process.model.ProcessConstantsMapping;
@@ -94,7 +94,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDefinitionService processDefinitionService;
 
-    private final CachingProcessExtensionService cachingProcessExtensionService;
+    private final ProcessExtensionService processExtensionService;
 
     @Autowired
     public ProcessDefinitionControllerImpl(
@@ -106,7 +106,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         ProcessDefinitionService processDefinitionService,
-        CachingProcessExtensionService cachingProcessExtensionService
+        ProcessExtensionService processExtensionService
     ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
@@ -117,7 +117,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
         this.processDefinitionService = processDefinitionService;
-        this.cachingProcessExtensionService = cachingProcessExtensionService;
+        this.processExtensionService = processExtensionService;
     }
 
     @Override
@@ -242,7 +242,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
             if (startEvent.isPresent()) {
                 return new ExtensionsStartEventId(
                     startEvent.get().getId(),
-                    cachingProcessExtensionService.getExtensionsForId(id)
+                    processExtensionService.getExtensionsForId(id)
                 );
             }
         }

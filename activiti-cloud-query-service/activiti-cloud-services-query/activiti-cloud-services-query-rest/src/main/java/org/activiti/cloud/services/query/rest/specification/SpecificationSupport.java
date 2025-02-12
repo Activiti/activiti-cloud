@@ -18,30 +18,124 @@ package org.activiti.cloud.services.query.rest.specification;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntityFilterRequest;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-public abstract class SpecificationSupport<T> implements Specification<T> {
+public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilterRequest> implements Specification<T> {
 
-    protected boolean distinct = true;
+    protected final R searchRequest;
+    protected List<Predicate> predicates;
+    protected List<VariableValueFilterCondition> filterConditions;
+    private SetJoin<T, ProcessVariableEntity> pvJoin;
+    protected final Map<VariableType, Class<?>> javaTypeMapping = Map.of(
+        VariableType.STRING,
+        String.class,
+        VariableType.INTEGER,
+        Integer.class,
+        VariableType.BIGDECIMAL,
+        BigDecimal.class,
+        VariableType.DATE,
+        LocalDate.class,
+        VariableType.DATETIME,
+        LocalDateTime.class,
+        VariableType.BOOLEAN,
+        Boolean.class
+    );
 
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    protected SpecificationSupport(R searchRequest) {
+        this.searchRequest = searchRequest;
+    }
+
+    protected abstract SingularAttribute<T, ?> getIdAttribute();
+
+    protected void reset() {
+        predicates = new ArrayList<>();
+        filterConditions = new ArrayList<>();
+        pvJoin = null;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        applyProcessVariableFilters(joinProcessVariables(root), criteriaBuilder);
+        if (!filterConditions.isEmpty()) {
+            query.groupBy(root.get(getIdAttribute()));
+            query.having(
+                filterConditions
+                    .stream()
+                    .map(VariableValueFilterCondition::getPredicate)
+                    .reduce(criteriaBuilder::and)
+                    .orElse(criteriaBuilder.conjunction())
+            );
+        }
+        if (!query.getResultType().equals(Long.class)) {
+            applySorting(root, joinProcessVariables(root), query, criteriaBuilder);
+        }
+        if (CollectionUtils.isEmpty(query.getGroupList())) {
+            query.distinct(true);
+        }
+        if (predicates.isEmpty()) {
+            return criteriaBuilder.conjunction();
+        }
+        return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+    }
+
+    protected void applyProcessVariableFilters(
+        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            SetJoin<T, ProcessVariableEntity> pvRoot = joinSupplier.get();
+            filterConditions.addAll(
+                searchRequest
+                    .processVariableFilters()
+                    .stream()
+                    .map(filter ->
+                        new VariableValueFilterConditionImpl<>(
+                            (SetJoin<T, ? extends AbstractVariableEntity>) pvRoot,
+                            Map.of(
+                                pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                filter.processDefinitionKey(),
+                                pvRoot.get(ProcessVariableEntity_.name),
+                                filter.name()
+                            ),
+                            javaTypeMapping.get(filter.type()),
+                            filter,
+                            criteriaBuilder
+                        )
+                    )
+                    .toList()
+            );
+        }
+    }
+
+    protected void applyIdFilter(Root<T> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.id())) {
+            predicates.add(root.get(getIdAttribute()).in(searchRequest.id()));
+        }
     }
 
     protected void addLikeFilters(
@@ -62,159 +156,46 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
         );
     }
 
-    protected Predicate[] getProcessVariableValueFilters(
-        Root<ProcessVariableEntity> root,
-        Collection<VariableFilter> filters,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        return filters
-            .stream()
-            .map(filter ->
-                criteriaBuilder.and(
-                    criteriaBuilder.equal(
-                        root.get(ProcessVariableEntity_.processDefinitionKey),
-                        filter.processDefinitionKey()
-                    ),
-                    criteriaBuilder.equal(root.get(ProcessVariableEntity_.name), filter.name()),
-                    getVariableValueCondition(root.get(ProcessVariableEntity_.value), filter, criteriaBuilder)
-                )
-            )
-            .toArray(Predicate[]::new);
-    }
-
-    protected Predicate getHavingClause(
-        Root<ProcessVariableEntity> root,
-        Collection<VariableFilter> filters,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        return filters
-            .stream()
-            .map(filter ->
-                criteriaBuilder.greaterThan(
-                    criteriaBuilder.count(
-                        criteriaBuilder
-                            .selectCase()
-                            .when(
-                                criteriaBuilder.and(
-                                    criteriaBuilder.equal(
-                                        root.get(ProcessVariableEntity_.processDefinitionKey),
-                                        filter.processDefinitionKey()
-                                    ),
-                                    criteriaBuilder.equal(root.get(ProcessVariableEntity_.name), filter.name()),
-                                    getVariableValueCondition(
-                                        root.get(ProcessVariableEntity_.value),
-                                        filter,
-                                        criteriaBuilder
-                                    )
-                                ),
-                                criteriaBuilder.literal(1)
-                            )
-                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                    ),
-                    0L
-                )
-            )
-            .reduce(criteriaBuilder::and)
-            .orElse(criteriaBuilder.disjunction());
-    }
-
-    protected Predicate getVariableValueCondition(
-        Path<?> valueColumnPath,
-        VariableFilter filter,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        try {
-            VariableValueCondition valueConditionStrategy =
-                switch (filter.type()) {
-                    case STRING -> new StringVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                    case INTEGER -> new IntegerVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                    case BIGDECIMAL -> new BigDecimalVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                    case DATE -> new DateVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                    case DATETIME -> new DatetimeVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                    case BOOLEAN -> new BooleanVariableValueCondition(
-                        valueColumnPath,
-                        filter.operator(),
-                        filter.value(),
-                        criteriaBuilder
-                    );
-                };
-
-            return valueConditionStrategy.toPredicate();
-        } catch (IllegalFilterException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-    }
-
     protected void applySorting(
         Root<T> root,
         Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
-        CloudRuntimeEntitySort sort,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
+        CloudRuntimeEntitySort sort = searchRequest.sort();
         if (sort != null) {
             validateSort(sort);
-            Expression<Object> orderByClause;
+            Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
-                SetJoin<T, ProcessVariableEntity> joinedProcessVars = joinSupplier.get();
-                Expression<?> extractedValue = criteriaBuilder.function(
-                    CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
-                    Object.class,
-                    joinedProcessVars.get(ProcessVariableEntity_.value)
-                );
+                From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
                 orderByClause =
-                    criteriaBuilder
-                        .selectCase()
-                        .when(
-                            criteriaBuilder.and(
-                                joinedProcessVars
-                                    .get(ProcessVariableEntity_.processDefinitionKey)
-                                    .in(sort.processDefinitionKeys()),
-                                criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
-                            ),
-                            extractedValue
-                        )
-                        .otherwise(criteriaBuilder.nullLiteral(Object.class));
+                    new VariableSelectionExpressionImpl<>(
+                        joinRoot,
+                        Map.of(
+                            joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                            sort.processDefinitionKey(),
+                            joinRoot.get(ProcessVariableEntity_.name),
+                            sort.field()
+                        ),
+                        javaTypeMapping.get(sort.type()),
+                        criteriaBuilder
+                    )
+                        .getSelectionExpression();
+                query.groupBy(root.get(getIdAttribute()));
             } else {
                 orderByClause = root.get(sort.field());
             }
-            if (sort.direction().isAscending()) {
-                query.orderBy(criteriaBuilder.asc(orderByClause));
-            } else {
-                //This is a workaround to override the nulls first behavior when ordering direction is DESC
-                query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
-            }
+            query.orderBy(
+                sort.direction().isAscending()
+                    ? criteriaBuilder.asc(orderByClause)
+                    : criteriaBuilder.desc(orderByClause)
+            );
         }
     }
 
     protected void validateSort(CloudRuntimeEntitySort sort) {
         if (sort.isProcessVariable()) {
-            if (sort.processDefinitionKeys() == null) {
+            if (sort.processDefinitionKey() == null) {
                 throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Process definition key is required when sorting by process variable"
@@ -228,4 +209,21 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             }
         }
     }
+
+    /**
+     * Using a supplier to actually join process variable only if needed.
+     * The instance of set join is stored in a field to avoid multiple joins.
+     * @param root Specification root
+     * @return Supplier of SetJoin of process variables
+     */
+    protected Supplier<SetJoin<T, ProcessVariableEntity>> joinProcessVariables(Root<T> root) {
+        return () -> {
+            if (pvJoin == null) {
+                pvJoin = root.join(getProcessVariablesAttribute(), JoinType.LEFT);
+            }
+            return pvJoin;
+        };
+    }
+
+    protected abstract SetAttribute<T, ProcessVariableEntity> getProcessVariablesAttribute();
 }

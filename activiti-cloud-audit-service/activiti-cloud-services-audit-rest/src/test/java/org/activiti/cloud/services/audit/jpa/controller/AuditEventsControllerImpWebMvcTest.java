@@ -87,7 +87,7 @@ import org.springframework.test.web.servlet.MvcResult;
         AlfrescoWebAutoConfiguration.class,
     }
 )
-public class AuditEventsControllerImplIT {
+class AuditEventsControllerImpWebMvcTest {
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -105,12 +105,12 @@ public class AuditEventsControllerImplIT {
     private UserGroupManager userGroupManager;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
     @Test
-    public void getEvents() throws Exception {
+    void getEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 11);
 
@@ -152,7 +152,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void getEventsAlfresco() throws Exception {
+    void getEventsAlfresco() throws Exception {
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
@@ -179,7 +179,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void headEvents() throws Exception {
+    void headEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 10);
 
@@ -189,7 +189,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void headEventsAlfresco() throws Exception {
+    void headEventsAlfresco() throws Exception {
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
@@ -203,7 +203,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void getEventById() throws Exception {
+    void getEventById() throws Exception {
         AuditEventEntity eventEntity = buildAuditEventEntity(1);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
@@ -212,7 +212,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void getEventByIdAlfresco() throws Exception {
+    void getEventByIdAlfresco() throws Exception {
         AuditEventEntity eventEntity = buildAuditEventEntity(1);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
@@ -223,7 +223,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void headEventById() throws Exception {
+    void headEventById() throws Exception {
         AuditEventEntity eventEntity = buildAuditEventEntity(1);
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
@@ -236,7 +236,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void getSignalEventById() throws Exception {
+    void getSignalEventById() throws Exception {
         BPMNSignalImpl signal = new BPMNSignalImpl("elementId");
         signal.setSignalPayload(new SignalPayload("signal", null));
 
@@ -257,7 +257,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void shouldGetTimerEventById() throws Exception {
+    void shouldGetTimerEventById() throws Exception {
         BPMNTimerImpl timer = new BPMNTimerImpl("elementId");
         timer.setProcessDefinitionId("processDefinitionId");
         timer.setProcessInstanceId("processInstanceId");
@@ -284,7 +284,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void shouldGetMessageSentEventById() throws Exception {
+    void shouldGetMessageSentEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageSentAuditEventEntity.class,
             BPMNMessageEvent.MessageEvents.MESSAGE_SENT
@@ -296,7 +296,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void shouldGetMessageWaitingEventById() throws Exception {
+    void shouldGetMessageWaitingEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageWaitingAuditEventEntity.class,
             BPMNMessageEvent.MessageEvents.MESSAGE_WAITING
@@ -308,7 +308,7 @@ public class AuditEventsControllerImplIT {
     }
 
     @Test
-    public void shouldGetMessageReceivedEventById() throws Exception {
+    void shouldGetMessageReceivedEventById() throws Exception {
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageReceivedAuditEventEntity.class,
             BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED
@@ -362,13 +362,11 @@ public class AuditEventsControllerImplIT {
     }
 
     private MessageEventPayload createMessagePayload() {
-        MessageEventPayload messageEventPayload = MessagePayloadBuilder
+        return MessagePayloadBuilder
             .event("messageName")
             .withBusinessKey("businessId")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
-
-        return messageEventPayload;
     }
 }
