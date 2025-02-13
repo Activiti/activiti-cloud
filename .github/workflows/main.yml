@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Check dependabot build
-        uses: Activiti/Activiti/.github/actions/check-ext-build@7700f0283a9ff5181581a350d2520e55c61c1c60 # 8.6.0
+        uses: Activiti/Activiti/.github/actions/check-ext-build@d93095fd93ebed502ee1a7520afbf43cfcaf510a # 8.7.0
       - name: pre-commit
         uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:

@@ -207,7 +207,7 @@
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
-    <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <third-party-license-maven-plugin.version>2.4.0</third-party-license-maven-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -225,7 +225,7 @@
 
     <!-- dependencies versions -->
     <hibernate.version>6.6.3.Final</hibernate.version>
-    <classgraph.version>4.8.175</classgraph.version>
+    <classgraph.version>4.8.179</classgraph.version>
 
 
     <!-- Tests Config -->
