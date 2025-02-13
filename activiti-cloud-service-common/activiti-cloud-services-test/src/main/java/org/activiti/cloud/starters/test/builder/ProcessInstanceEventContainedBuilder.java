@@ -21,7 +21,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
 import org.activiti.api.runtime.model.impl.BPMNSequenceFlowImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.QueryCloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
@@ -115,8 +115,8 @@ public class ProcessInstanceEventContainedBuilder {
         return completedProcess;
     }
 
-    private CloudProcessInstanceImpl buildSuspendedProcessInstance(String name) {
-        CloudProcessInstanceImpl suspendedProcess = new CloudProcessInstanceImpl();
+    private QueryCloudProcessInstanceImpl buildSuspendedProcessInstance(String name) {
+        QueryCloudProcessInstanceImpl suspendedProcess = new QueryCloudProcessInstanceImpl();
         suspendedProcess.setId(UUID.randomUUID().toString());
         suspendedProcess.setInitiator("testuser");
         suspendedProcess.setName(name);
@@ -177,8 +177,8 @@ public class ProcessInstanceEventContainedBuilder {
         return processInstance;
     }
 
-    public CloudProcessInstanceImpl aRunningProcessInstanceWithSuspendedDate(String name, Date suspendedDate) {
-        CloudProcessInstanceImpl suspendedProcess = buildSuspendedProcessInstance(name);
+    public QueryCloudProcessInstanceImpl aRunningProcessInstanceWithSuspendedDate(String name, Date suspendedDate) {
+        QueryCloudProcessInstanceImpl suspendedProcess = buildSuspendedProcessInstance(name);
         suspendedProcess.setSuspendedDate(suspendedDate);
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(suspendedProcess),

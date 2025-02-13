@@ -18,7 +18,7 @@ package org.activiti.cloud.services.query.rest.assembler;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
@@ -28,10 +28,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessInstanceRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessInstanceEntity, EntityModel<CloudProcessInstance>> {
+    implements RepresentationModelAssembler<ProcessInstanceEntity, EntityModel<QueryCloudProcessInstance>> {
 
     @Override
-    public EntityModel<CloudProcessInstance> toModel(ProcessInstanceEntity entity) {
+    public EntityModel<QueryCloudProcessInstance> toModel(ProcessInstanceEntity entity) {
         Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findByIdProcess(entity.getId())).withSelfRel();
         Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null))
             .withRel("tasks");

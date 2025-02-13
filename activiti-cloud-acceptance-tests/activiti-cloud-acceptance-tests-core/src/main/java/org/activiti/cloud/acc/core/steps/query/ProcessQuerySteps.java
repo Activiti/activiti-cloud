@@ -19,10 +19,10 @@ import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatR
 import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
+import java.util.List;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -34,6 +34,7 @@ import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
@@ -120,9 +121,23 @@ public class ProcessQuerySteps {
                 assertThat(variableInstances).isNotNull();
                 assertThat(variableInstances).isNotEmpty();
                 //one of the variables should have name matching variableName and value
-                assertThat(variableInstances)
-                    .extracting(VariableInstance::getName, VariableInstance::getValue)
-                    .contains(tuple(variableName, variableValue));
+
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(variableName);
+
+                assertThat(
+                    variableInstances
+                        .stream()
+                        .filter(it -> it.getName().equals(variableName))
+                        .map(CloudVariableInstance::getValue)
+                        .map(value -> value instanceof List<?> listOfValues ? listOfValues : List.of(value))
+                        .findFirst()
+                )
+                    .isNotEmpty()
+                    .get()
+                    .asInstanceOf(InstanceOfAssertFactories.LIST)
+                    .containsExactlyInAnyOrderElementsOf(
+                        variableValue instanceof List<?> variableValues ? variableValues : List.of(variableValue)
+                    );
             });
     }
 

@@ -16,7 +16,7 @@
 package org.activiti.cloud.dialect;
 
 public enum RelationalFormType {
-    EQUALS,
+    EXACT_COMPARISON,
     LIKE_CASE_SENSITIVE,
     LIKE_CASE_INSENSITIVE,
 }

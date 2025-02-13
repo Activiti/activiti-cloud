@@ -85,6 +85,7 @@ public class TaskBuilder {
 
     public TaskBuilder withAssignee(String assignee) {
         task.setAssignee(assignee);
+        task.setStatus(Task.TaskStatus.ASSIGNED);
         return this;
     }
 
@@ -183,6 +184,9 @@ public class TaskBuilder {
                 variable.setProcessInstanceId(task.getProcessInstanceId());
             });
         taskVariableRepository.saveAll(task.getVariables());
+        if (task.getCreatedDate() == null) {
+            task.setCreatedDate(new Date());
+        }
         return taskRepository.save(task);
     }
 

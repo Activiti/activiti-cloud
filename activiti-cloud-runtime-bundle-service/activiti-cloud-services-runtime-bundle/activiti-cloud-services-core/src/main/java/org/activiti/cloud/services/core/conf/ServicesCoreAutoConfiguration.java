@@ -29,6 +29,7 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
+import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
@@ -50,6 +51,7 @@ import org.activiti.cloud.services.core.commands.SignalCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SuspendProcessInstanceCmdExecutor;
+import org.activiti.cloud.services.core.commands.SyncProcessDefinitionsCmdExecutor;
 import org.activiti.cloud.services.core.commands.UpdateTaskVariableCmdExecutor;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionVariablesDecorator;
@@ -59,13 +61,16 @@ import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.common.util.DateFormatterProvider;
+import org.activiti.engine.RepositoryService;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
@@ -169,6 +174,24 @@ public class ServicesCoreAutoConfiguration {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public SyncProcessDefinitionsCmdExecutor syncProcessDefinitionsCmdExecutor(
+        ProcessDefinitionsSyncService processDefinitionsSyncService
+    ) {
+        return new SyncProcessDefinitionsCmdExecutor(processDefinitionsSyncService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionsSyncService processDefinitionsSyncService(
+        RepositoryService repositoryService,
+        APIProcessDefinitionConverter converter,
+        ApplicationEventPublisher applicationEventPublisher
+    ) {
+        return new ProcessDefinitionsSyncService(repositoryService, converter, applicationEventPublisher);
+    }
+
     @Bean("commandEndpoint")
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
@@ -256,9 +279,9 @@ public class ServicesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator(
-        CachingProcessExtensionService cachingProcessExtensionService
+        ProcessExtensionService processExtensionService
     ) {
-        return new ProcessDefinitionVariablesDecorator(cachingProcessExtensionService);
+        return new ProcessDefinitionVariablesDecorator(processExtensionService);
     }
 
     @Bean

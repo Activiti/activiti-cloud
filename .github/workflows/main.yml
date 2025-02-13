@@ -28,15 +28,15 @@ jobs:
   pre-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Check dependabot build
-        uses: Activiti/Activiti/.github/actions/check-ext-build@7700f0283a9ff5181581a350d2520e55c61c1c60 # 8.6.0
+        uses: Activiti/Activiti/.github/actions/check-ext-build@d93095fd93ebed502ee1a7520afbf43cfcaf510a # 8.7.0
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@38608ef4fb69adae7f1eac6eeb88e67b7d083bfd # v3.0.16
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@6eb1abde32fed00453b0d03497f4ba4fecba146d # v3.0.21
 
   build:
     runs-on: ubuntu-latest
@@ -48,11 +48,11 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # 4.5.0
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # 4.7.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -72,7 +72,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -87,13 +87,20 @@ jobs:
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
           echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
+      - name: Set SONAR_SCANNER_OPTS
+        shell: bash
+        run: |
+          echo "JACOCO_REPORT_PATH=${{ github.workspace }}/activiti-cloud-coverage/target/site/jacoco-aggregate/jacoco.xml" >> $GITHUB_ENV
+          echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization='activiti' -Dsonar.projectKey='Activiti_activiti-cloud' -Dsonar.coverage.jacoco.xmlReportPaths=${{ env.JACOCO_REPORT_PATH }}" >> $GITHUB_ENV
+
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}} ${{ env.SONAR_SCANNER_OPTS }}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
@@ -144,9 +151,9 @@ jobs:
             messaging-destinations: pdb
     steps:
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -154,7 +161,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # 4.5.0
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # 4.7.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -170,7 +177,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -294,7 +301,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -322,17 +329,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
         with:
           java-version: 21
           distribution: 'temurin'
 
-      - uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -351,7 +358,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -373,8 +380,8 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -396,7 +403,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
@@ -412,12 +419,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -430,7 +437,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
           git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
+          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot --head $(git branch --show-current)
 
   notify:
     runs-on: ubuntu-latest
@@ -439,8 +446,7 @@ jobs:
       - propagate-maven
     if: always() && failure() && github.event_name == 'push'
     steps:
-      - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - name: Teams Notification
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@166e610d3eebb2a561d6daba97cd58d98ef2db14 # v8.13.0
         with:
-          channel-id: 'C03PMT6APFU' # eng-hxp-studio-activiti-gh-notifs, to be renamed eng-automate-activiti-gh-notifs
-          token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
+          webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WEBHOOK }}

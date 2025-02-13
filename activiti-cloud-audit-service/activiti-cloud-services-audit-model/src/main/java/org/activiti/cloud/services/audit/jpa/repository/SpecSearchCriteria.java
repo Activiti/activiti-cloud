@@ -45,7 +45,7 @@ public class SpecSearchCriteria {
     }
 
     public SpecSearchCriteria(String key, String operation, String prefix, String value, String suffix) {
-        SearchOperation op = SearchOperation.getSimpleOperation(operation.charAt(0));
+        SearchOperation op = SearchOperation.getSimpleOperation(operation);
         if (op != null) {
             if (op == SearchOperation.EQUALITY) { // the operation may be complex operation
                 final boolean startWithAsterisk = prefix != null && prefix.contains(SearchOperation.ZERO_OR_MORE_REGEX);

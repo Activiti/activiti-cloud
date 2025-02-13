@@ -1574,6 +1574,46 @@ public class ActivitiGraphQLStarterIT {
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
 
+    @Test
+    public void testGraphqlPagedQueryWithAliasedResults() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+            query {
+              page1: Tasks(page: {start: 1, limit: 2}) {
+                select {
+                  id
+                  name
+                }
+              }
+              page2: Tasks(page: {start: 3, limit: 2}) {
+                select {
+                  id
+                  name
+                }
+              }
+            }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected =
+            "{page1={select=[{id=1, name=task1}, {id=2, name=task2}]}, page2={select=[{id=5, name=task5}, {id=6, name=task6}]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
     public static StringObjectMapBuilder mapBuilder() {
         return new StringObjectMapBuilder();
     }
