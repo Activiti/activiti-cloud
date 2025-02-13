@@ -215,7 +215,6 @@
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
