@@ -56,8 +56,16 @@ public class ProcessModelEntity {
         return processDefinition;
     }
 
+    public void setProcessDefinition(ProcessDefinitionEntity processDefinition) {
+        this.processDefinition = processDefinition;
+    }
+
     public String getProcessModelContent() {
         return processModelContent;
+    }
+
+    public void setProcessModelContent(String processModelContent) {
+        this.processModelContent = processModelContent;
     }
 
     @Override

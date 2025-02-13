@@ -39,14 +39,30 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessDeployedEvent processDeployedEvent = CloudProcessDeployedEvent.class.cast(event);
         ProcessDefinition processDefinition = processDeployedEvent.getEntity();
-        LOGGER.debug("Handling process deployed event for " + processDefinition.getKey());
-        ProcessDefinitionEntity processDefinitionEntity = new ProcessDefinitionEntity(
-            processDeployedEvent.getServiceName(),
-            processDeployedEvent.getServiceFullName(),
-            processDeployedEvent.getServiceVersion(),
-            processDeployedEvent.getAppName(),
-            processDeployedEvent.getAppVersion()
+        LOGGER.debug("Handling process deployed event for {}", processDefinition.getKey());
+        var processDefinitionEntity = getProcessDefinitionEntity(processDefinition, processDeployedEvent);
+        entityManager.merge(processDefinitionEntity);
+
+        var processModelEntity = getProcessModelEntity(
+            processDefinitionEntity,
+            processDeployedEvent.getProcessModelContent()
         );
+        entityManager.merge(processModelEntity);
+    }
+
+    private ProcessDefinitionEntity getProcessDefinitionEntity(
+        ProcessDefinition processDefinition,
+        CloudProcessDeployedEvent processDeployedEvent
+    ) {
+        var processDefinitionEntity = entityManager.find(ProcessDefinitionEntity.class, processDefinition.getId());
+        if (processDefinitionEntity == null) {
+            processDefinitionEntity = new ProcessDefinitionEntity();
+        }
+        processDefinitionEntity.setServiceName(processDeployedEvent.getServiceName());
+        processDefinitionEntity.setServiceFullName(processDeployedEvent.getServiceFullName());
+        processDefinitionEntity.setServiceVersion(processDeployedEvent.getServiceVersion());
+        processDefinitionEntity.setAppName(processDeployedEvent.getAppName());
+        processDefinitionEntity.setAppVersion(processDeployedEvent.getAppVersion());
         processDefinitionEntity.setId(processDefinition.getId());
         processDefinitionEntity.setDescription(processDefinition.getDescription());
         processDefinitionEntity.setFormKey(processDefinition.getFormKey());
@@ -55,14 +71,20 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
         processDefinitionEntity.setVersion(processDefinition.getVersion());
         processDefinitionEntity.setCategory(processDefinition.getCategory());
         processDefinitionEntity.setServiceType(processDeployedEvent.getServiceType());
-        entityManager.merge(processDefinitionEntity);
+        return processDefinitionEntity;
+    }
 
-        ProcessModelEntity processModelEntity = new ProcessModelEntity(
-            processDefinitionEntity,
-            processDeployedEvent.getProcessModelContent()
-        );
-        processModelEntity.setId(processDefinitionEntity.getId());
-        entityManager.merge(processModelEntity);
+    private ProcessModelEntity getProcessModelEntity(
+        ProcessDefinitionEntity processDefinitionEntity,
+        String processModelContent
+    ) {
+        var processModelEntity = entityManager.find(ProcessModelEntity.class, processDefinitionEntity.getId());
+        if (processModelEntity == null) {
+            processModelEntity = new ProcessModelEntity();
+        }
+        processModelEntity.setProcessDefinition(processDefinitionEntity);
+        processModelEntity.setProcessModelContent(processModelContent);
+        return processModelEntity;
     }
 
     @Override
