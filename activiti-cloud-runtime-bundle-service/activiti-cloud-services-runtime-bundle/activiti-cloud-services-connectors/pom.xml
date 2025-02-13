@@ -11,12 +11,6 @@
   <name>Activiti Cloud Services :: Connectors</name>
   <dependencies>
     <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjweaver</artifactId>
-      <version>${aspectweaver.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-events</artifactId>
     </dependency>

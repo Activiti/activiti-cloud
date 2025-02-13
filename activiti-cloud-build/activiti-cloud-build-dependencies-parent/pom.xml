@@ -22,6 +22,11 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>${aspectweaver.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
         <version>${graphql-java.version}</version>
