@@ -59,17 +59,12 @@ public class CommonExceptionHandlerQuery {
 
     @ExceptionHandler({ ConversionFailedException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public EntityModel<ActivitiErrorMessage> handleAppException(
-        ConversionFailedException ex,
-        HttpServletResponse response
-    ) {
+    public ActivitiErrorMessage handleAppException(ConversionFailedException ex, HttpServletResponse response) {
         LOGGER.error(ex.getMessage(), ex);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        return EntityModel.of(
-            new ActivitiErrorMessageImpl(
-                HttpStatus.BAD_REQUEST.value(),
-                ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
-            )
+        return new ActivitiErrorMessageImpl(
+            HttpStatus.BAD_REQUEST.value(),
+            ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
         );
     }
 
