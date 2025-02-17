@@ -78,6 +78,19 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         );
     }
 
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        //the property spring.hateoas.use-hal-as-default-json-media-type is not working
+        //we need to manually remove application/json from supported mediaTypes
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter) {
+                ArrayList<MediaType> mediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
+                mediaTypes.remove(MediaType.APPLICATION_JSON);
+                ((TypeConstrainedMappingJackson2HttpMessageConverter) converter).setSupportedMediaTypes(mediaTypes);
+            }
+        }
+    }
+
     @Bean
     public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         return new AlfrescoJackson2HttpMessageConverter<>(
