@@ -18,6 +18,10 @@ package org.activiti.cloud.common.swagger.springdoc.conf;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.customizer.*;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.IgnoredTypesModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -91,5 +95,29 @@ public class SwaggerAutoConfiguration {
     @ConditionalOnMissingBean
     public NamingOperationCustomizer namingOperationCustomizer() {
         return new NamingOperationCustomizer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IgnoredTypesModelConverter ignoredTypesModelConverter() {
+        return new IgnoredTypesModelConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CollectionModelConverter collectionModelConverter() {
+        return new CollectionModelConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityModelConverter entityModelConverter() {
+        return new EntityModelConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PagedModelConverter pagedModelConverter() {
+        return new PagedModelConverter();
     }
 }

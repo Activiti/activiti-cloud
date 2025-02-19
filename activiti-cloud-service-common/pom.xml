@@ -41,7 +41,7 @@
     <java-semver.version>0.9.0</java-semver.version>
     <resteasy.version>6.2.10.Final</resteasy.version>
     <logstash.version>8.0</logstash.version>
-    <springdoc.version>2.1.0</springdoc.version>
+    <springdoc.version>2.8.4</springdoc.version>
     <xstream.version>1.4.21</xstream.version>
     <json-unit.version>4.1.0</json-unit.version>
     <java-jwt.version>4.4.0</java-jwt.version>

@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.swagger.springdoc;
 
-import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -39,10 +38,6 @@ public class BaseOpenApiBuilder {
     public BaseOpenApiBuilder(BuildProperties buildProperties, OAuthFlow swaggerOAuthFlow) {
         this.buildProperties = buildProperties;
         this.swaggerOAuthFlow = swaggerOAuthFlow;
-        ModelConverters.getInstance().addConverter(new EntityModelConverter());
-        ModelConverters.getInstance().addConverter(new CollectionModelConverter());
-        ModelConverters.getInstance().addConverter(new PagedModelConverter());
-        ModelConverters.getInstance().addConverter(new IgnoredTypesModelConverter());
         SwaggerDocUtils.replaceParameterObjectWithClass(Pageable.class, PageableMixin.class);
     }
 
