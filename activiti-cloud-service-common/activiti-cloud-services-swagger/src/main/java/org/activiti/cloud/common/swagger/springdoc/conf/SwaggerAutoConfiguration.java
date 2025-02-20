@@ -22,6 +22,7 @@ import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionMode
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.IgnoredTypesModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
+import org.springdoc.core.customizers.OperationIdCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -93,8 +94,8 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public NamingOperationCustomizer namingOperationCustomizer() {
-        return new NamingOperationCustomizer();
+    public OperationIdCustomizer operationIdCustomizer() {
+        return new CustomOperationIdCustomizer();
     }
 
     @Bean
