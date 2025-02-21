@@ -35,7 +35,6 @@ import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -44,7 +43,6 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
     @ResponseStatus(NO_CONTENT)
-    @ResponseBody
     public EntityModel<ActivitiErrorMessage> handleAppException(
         ActivitiInterchangeInfoNotFoundException ex,
         HttpServletResponse response
@@ -55,7 +53,6 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(ActivitiForbiddenException.class)
     @ResponseStatus(FORBIDDEN)
-    @ResponseBody
     public EntityModel<ActivitiErrorMessage> handleAppException(
         ActivitiForbiddenException ex,
         HttpServletResponse response
@@ -66,7 +63,6 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(UnprocessableEntityException.class)
     @ResponseStatus(UNPROCESSABLE_ENTITY)
-    @ResponseBody
     public EntityModel<ActivitiErrorMessage> handleAppException(
         UnprocessableEntityException ex,
         HttpServletResponse response
@@ -77,7 +73,6 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler({ NotFoundException.class, ActivitiObjectNotFoundException.class })
     @ResponseStatus(NOT_FOUND)
-    @ResponseBody
     public EntityModel<ActivitiErrorMessage> handleAppException(RuntimeException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(NOT_FOUND.value(), ex.getMessage()));
@@ -85,15 +80,16 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(BAD_REQUEST)
-    @ResponseBody
-    public ActivitiErrorMessage handleAppException(IllegalStateException ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        IllegalStateException ex,
+        HttpServletResponse response
+    ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage());
+        return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(ActivitiException.class)
     @ResponseStatus(BAD_REQUEST)
-    @ResponseBody
     public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
@@ -101,9 +97,11 @@ public class RuntimeBundleExceptionHandler {
 
     @ExceptionHandler(ActivitiIllegalArgumentException.class)
     @ResponseStatus(CONFLICT)
-    @ResponseBody
-    public ActivitiErrorMessage handleAppException(ActivitiIllegalArgumentException ex, HttpServletResponse response) {
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        ActivitiIllegalArgumentException ex,
+        HttpServletResponse response
+    ) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage());
+        return EntityModel.of(new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage()));
     }
 }
