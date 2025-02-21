@@ -25,5 +25,4 @@ public class CustomOperationIdCustomizer extends OperationIdCustomizer {
     public void customise(OpenAPI openAPI) {
         // Intentionally left blank to disable the default customization
     }
-
 }
