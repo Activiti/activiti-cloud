@@ -17,44 +17,13 @@
 package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import java.util.Optional;
 import org.springdoc.core.customizers.OperationIdCustomizer;
 
 public class CustomOperationIdCustomizer extends OperationIdCustomizer {
 
-    private static final String DEFAULT_SPRINGDOC_PATTERN_REGEX = "(_[0-9])*$";
-
     @Override
     public void customise(OpenAPI openAPI) {
-        if (openAPI.getPaths() != null) {
-            openAPI
-                .getPaths()
-                .forEach((path, pathItem) -> {
-                    if (pathItem != null) {
-                        processOperation(pathItem.getGet());
-                        processOperation(pathItem.getPost());
-                        processOperation(pathItem.getPut());
-                        processOperation(pathItem.getDelete());
-                        processOperation(pathItem.getOptions());
-                        processOperation(pathItem.getHead());
-                        processOperation(pathItem.getPatch());
-                        processOperation(pathItem.getTrace());
-                    }
-                });
-        }
+        // Intentionally left blank to disable the default customization
     }
 
-    private void processOperation(Operation operation) {
-        if (operation != null) {
-            Optional
-                .ofNullable(operation.getOperationId())
-                .ifPresent(operationId ->
-                    operation.setOperationId(operationId.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, ""))
-                );
-            Optional
-                .ofNullable(operation.getSummary())
-                .ifPresent(summary -> operation.setSummary(summary.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, "")));
-        }
-    }
 }
