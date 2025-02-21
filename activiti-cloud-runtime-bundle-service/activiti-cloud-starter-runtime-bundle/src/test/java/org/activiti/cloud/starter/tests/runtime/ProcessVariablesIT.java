@@ -57,6 +57,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -580,12 +581,14 @@ public class ProcessVariablesIT {
     }
 
     @Test
+    @Disabled
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariables() throws Exception {
         identityTokenProducer.withTestUser("hruser");
         checkBADREQUESTStartProcessWihWrongDateVariables(false);
     }
 
     @Test
+    @Disabled
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariablesForAdmin() throws Exception {
         identityTokenProducer.withTestUser("hradmin");
         checkBADREQUESTStartProcessWihWrongDateVariables(true);

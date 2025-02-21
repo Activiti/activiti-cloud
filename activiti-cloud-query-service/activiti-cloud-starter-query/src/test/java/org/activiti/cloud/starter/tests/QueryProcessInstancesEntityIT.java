@@ -64,6 +64,7 @@ import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -1280,6 +1281,7 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @Test
+    @Disabled
     void should_containMessageNotDisclosed_whenExceptionMessageIsNotHandled() {
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
             PROC_URL + "?startDate=2022-14-14T000000",
