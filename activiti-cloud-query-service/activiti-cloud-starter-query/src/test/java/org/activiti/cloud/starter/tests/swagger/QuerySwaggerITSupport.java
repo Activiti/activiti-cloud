@@ -34,7 +34,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest("springdoc.override-with-generic-response=false")
+@SpringBootTest
 @DirtiesContext
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
