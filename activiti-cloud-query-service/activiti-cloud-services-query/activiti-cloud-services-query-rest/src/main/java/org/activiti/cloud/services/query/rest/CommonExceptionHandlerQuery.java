@@ -23,6 +23,8 @@ import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitize
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CommonExceptionHandlerQuery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExceptionHandlerQuery.class);
