@@ -34,6 +34,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -64,7 +65,6 @@ import org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder;
 import org.activiti.cloud.starters.test.builder.VariableEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -1281,16 +1281,15 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @Test
-    @Disabled
     void should_containMessageNotDisclosed_whenExceptionMessageIsNotHandled() {
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity = testRestTemplate.exchange(
             PROC_URL + "?startDate=2022-14-14T000000",
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
-            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+            new ParameterizedTypeReference<EntryResponseContent<ActivitiErrorMessageImpl>>() {}
         );
 
-        assertThat(responseEntity.getBody().getMessage())
+        assertThat(responseEntity.getBody().getEntry().getMessage())
             .isEqualTo(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
     }
 

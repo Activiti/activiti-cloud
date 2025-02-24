@@ -44,6 +44,7 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -57,7 +58,6 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.VariablesUtil;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -581,14 +581,12 @@ public class ProcessVariablesIT {
     }
 
     @Test
-    @Disabled
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariables() throws Exception {
         identityTokenProducer.withTestUser("hruser");
         checkBADREQUESTStartProcessWihWrongDateVariables(false);
     }
 
     @Test
-    @Disabled
     public void shouldGetBADREQUESTOnStartProcessWihWrongDateVariablesForAdmin() throws Exception {
         identityTokenProducer.withTestUser("hradmin");
         checkBADREQUESTStartProcessWihWrongDateVariables(true);
@@ -601,7 +599,7 @@ public class ProcessVariablesIT {
         variables.put("variableDate", "WrongDateString");
         variables.put("variableDateTime", "WrongDateString");
 
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity;
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity;
         if (isAdmin) {
             responseEntity =
                 processInstanceRestTemplate.adminStartProcessWithErrorResponse(
@@ -627,7 +625,7 @@ public class ProcessVariablesIT {
         }
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(responseEntity.getBody().getMessage())
+        assertThat(responseEntity.getBody().getEntry().getMessage())
             .isEqualTo("Variables fail type validation: variableDate, variableDateTime");
     }
 
