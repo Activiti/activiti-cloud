@@ -79,13 +79,14 @@ public class ProcessVariableCreatedEventHandler {
             variableCreatedEvent.getAppVersion(),
             new Date(variableCreatedEvent.getTimestamp()),
             new Date(variableCreatedEvent.getTimestamp()),
-            null
+            null,
+            variableCreatedEvent.isEphemeralVariable()
         );
         variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
-
+        variableEntity.setEphemeral(variableCreatedEvent.isEphemeralVariable());
         entityManager.persist(variableEntity);
 
         return variableEntity;

@@ -59,6 +59,12 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     private String variableDefinitionId;
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    private boolean ephemeral;
+
     @Schema(
         description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
         readOnly = true
@@ -79,7 +85,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         String appVersion,
         Date createTime,
         Date lastUpdatedTime,
-        String executionId
+        String executionId,
+        boolean ephemeral
     ) {
         super(
             type,
@@ -95,6 +102,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
             executionId
         );
         this.id = id;
+        this.ephemeral = ephemeral;
     }
 
     @Override
@@ -126,6 +134,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public boolean isEphemeral() {
+        return ephemeral;
+    }
+
+    public void setEphemeral(boolean ephemeral) {
+        this.ephemeral = ephemeral;
     }
 
     @Override

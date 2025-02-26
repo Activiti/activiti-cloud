@@ -23,6 +23,8 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
 
     private T previousValue;
 
+    private boolean isEphimeralVariable;
+
     public CloudVariableUpdatedEventImpl() {}
 
     public CloudVariableUpdatedEventImpl(VariableInstance entity, T previousValue) {
@@ -35,6 +37,12 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
         this.previousValue = previousValue;
     }
 
+    public CloudVariableUpdatedEventImpl(VariableInstance entity, T previousValue, boolean isEphimeralVariable) {
+        super(entity);
+        this.previousValue = previousValue;
+        this.isEphimeralVariable = isEphimeralVariable;
+    }
+
     @Override
     public VariableEvent.VariableEvents getEventType() {
         return VariableEvent.VariableEvents.VARIABLE_UPDATED;
@@ -43,5 +51,10 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
     @Override
     public T getPreviousValue() {
         return previousValue;
+    }
+
+    @Override
+    public boolean isEphemeralVariable() {
+        return isEphimeralVariable;
     }
 }
