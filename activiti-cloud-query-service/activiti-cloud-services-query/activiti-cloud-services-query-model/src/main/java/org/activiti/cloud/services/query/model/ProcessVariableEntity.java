@@ -25,6 +25,8 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
+
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
@@ -46,7 +48,7 @@ import org.hibernate.annotations.ParamDef;
 )
 @DynamicInsert
 @DynamicUpdate
-public class ProcessVariableEntity extends AbstractVariableEntity {
+public class ProcessVariableEntity extends AbstractVariableEntity implements QueryCloudVariableInstance {
 
     @Id
     @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
