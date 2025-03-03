@@ -151,8 +151,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(12),
-
+            .isEqualTo(12);
     }
 
     @Test
