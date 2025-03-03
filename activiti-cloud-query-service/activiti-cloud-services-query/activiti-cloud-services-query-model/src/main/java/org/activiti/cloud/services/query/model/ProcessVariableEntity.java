@@ -60,11 +60,11 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
 
     private String variableDefinitionId;
 
+    private boolean ephemeral;
+
     public void setId(Long id) {
         this.id = id;
     }
-
-    private boolean ephemeral;
 
     @Schema(
         description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
