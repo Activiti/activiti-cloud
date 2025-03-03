@@ -21,7 +21,8 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class QueryCloudVariableInstanceRepresentationModelAssembler  implements RepresentationModelAssembler<ProcessVariableEntity, EntityModel<QueryCloudVariableInstance>> {
+public class QueryCloudVariableInstanceRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessVariableEntity, EntityModel<QueryCloudVariableInstance>> {
 
     @Override
     public EntityModel<QueryCloudVariableInstance> toModel(ProcessVariableEntity entity) {

@@ -56,7 +56,7 @@ class ToCloudVariableEventConverterTest {
             "processInstanceId",
             null
         );
-        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId",false);
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId", false);
 
         Extension extension = new Extension();
         VariableDefinition variableDefinition = new VariableDefinition();
@@ -129,8 +129,7 @@ class ToCloudVariableEventConverterTest {
     }
 
     @Test
-    void should_setTheValueOf_propertyIsEphemeral_from_VariableCreatedEvents()
-    {
+    void should_setTheValueOf_propertyIsEphemeral_from_VariableCreatedEvents() {
         VariableInstance variableInstance = new VariableInstanceImpl<>(
             "variableName",
             "string",
@@ -160,6 +159,5 @@ class ToCloudVariableEventConverterTest {
         assertThat((String) entity.getValue()).isEqualTo("example");
         assertThat(entity.getProcessInstanceId()).isEqualTo("processInstanceId");
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableCreatedEventImpl.class));
-
     }
 }

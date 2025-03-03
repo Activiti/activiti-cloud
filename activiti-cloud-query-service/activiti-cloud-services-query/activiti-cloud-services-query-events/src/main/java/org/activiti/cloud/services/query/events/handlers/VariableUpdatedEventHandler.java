@@ -77,7 +77,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                     new Date(variableUpdatedEvent.getTimestamp()),
                     new Date(variableUpdatedEvent.getTimestamp()),
                     null,
-                    false
+                    variableUpdatedEvent.isEphemeralVariable()
                 );
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 processVariableUpdateEventHandler.handle(variableEntity);

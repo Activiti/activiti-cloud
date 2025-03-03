@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.api.model.shared;
 
-public interface QueryCloudVariableInstance extends CloudVariableInstance{
-
-     boolean isEphemeral();
-     void setEphemeral(boolean ephemeral);
-
+public interface QueryCloudVariableInstance extends CloudVariableInstance {
+    boolean isEphemeral();
+    void setEphemeral(boolean ephemeral);
 }
