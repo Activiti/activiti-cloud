@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS PROCESS_VARIABLE (
   type VARCHAR(255),
   variable_definition_id VARCHAR(255),
   "value" JSON,
-  ephemeral BOOLEAN DEFAULT FALSE,
+  ephemeral BOOLEAN,
   PRIMARY KEY (id)
 );
 
