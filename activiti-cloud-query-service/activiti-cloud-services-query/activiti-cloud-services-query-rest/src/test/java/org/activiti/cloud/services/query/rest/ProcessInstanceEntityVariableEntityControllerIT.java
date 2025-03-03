@@ -151,7 +151,8 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(12);
+            .isEqualTo(12),
+
     }
 
     @Test
@@ -190,7 +191,8 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             null,
             new Date(),
             new Date(),
-            UUID.randomUUID().toString()
+            UUID.randomUUID().toString(),
+            false
         );
         variableEntity.setValue("John");
         return variableEntity;
