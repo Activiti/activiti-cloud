@@ -3770,12 +3770,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }
@@ -5441,12 +5441,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }
@@ -7252,6 +7252,84 @@
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentCloudVariableInstance"
+          }
+        }
+      },
+      "QueryCloudVariableInstance": {
+        "title": "QueryCloudVariableInstance",
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "ephemeral": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EntriesResponseContentQueryCloudVariableInstance": {
+        "title": "EntriesResponseContentQueryCloudVariableInstance",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudVariableInstance"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "EntryResponseContentQueryCloudVariableInstance": {
+        "title": "EntryResponseContentQueryCloudVariableInstance",
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/QueryCloudVariableInstance"
+          }
+        }
+      },
+      "ListResponseContentQueryCloudVariableInstance": {
+        "title": "ListResponseContentQueryCloudVariableInstance",
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudVariableInstance"
           }
         }
       },
