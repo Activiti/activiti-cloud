@@ -3719,6 +3719,13 @@
             }
           },
           {
+            "name": "ephemeral",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "processDefinitionKey",
             "in": "query",
             "schema": {
@@ -5387,6 +5394,13 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "ephemeral",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           },
           {
