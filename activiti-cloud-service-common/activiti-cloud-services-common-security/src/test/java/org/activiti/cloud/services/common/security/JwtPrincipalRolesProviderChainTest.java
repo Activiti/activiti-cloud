@@ -31,9 +31,9 @@ import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProvider
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.KeycloakPrincipal;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
 public class JwtPrincipalRolesProviderChainTest {
@@ -54,7 +54,7 @@ public class JwtPrincipalRolesProviderChainTest {
     @Test
     public void testGetRoles() {
         // given
-        Principal principal = mock(KeycloakPrincipal.class);
+        Principal principal = mock(JwtAuthenticationToken.class);
         when(provider1.getRoles(any())).thenReturn(null);
         when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1", "role2"));
 
@@ -71,7 +71,7 @@ public class JwtPrincipalRolesProviderChainTest {
     @Test
     public void testGetRolesSecurityException() {
         // given
-        Principal principal = mock(KeycloakPrincipal.class);
+        Principal principal = mock(JwtAuthenticationToken.class);
         when(provider1.getRoles(any())).thenReturn(null);
         when(provider2.getRoles(any())).thenReturn(null);
 
