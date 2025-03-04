@@ -49,7 +49,6 @@
     <james.apache-mime4j.version>0.8.11</james.apache-mime4j.version>
     <batik.version>1.17</batik.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
-    <spring-cloud-function.version>4.2.1</spring-cloud-function.version>
   </properties>
   <dependencyManagement>
     <dependencies>
