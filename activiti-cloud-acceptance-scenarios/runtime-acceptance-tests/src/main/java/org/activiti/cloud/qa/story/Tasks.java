@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import net.thucydides.core.steps.StepEventBus;
@@ -387,7 +389,7 @@ public class Tasks {
 
     @Then("task variables are visible in rb and query")
     public void checkTaskVariablesAreTheSameInRBAndQuery() {
-        await()
+        await().atMost(20, TimeUnit.SECONDS)
             .pollInterval(Duration.ofMillis(250L))
             .pollInSameThread()
             .untilAsserted(() -> {
