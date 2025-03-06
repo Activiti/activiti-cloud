@@ -55,7 +55,7 @@ INSERT INTO task (id, assignee, created_date, description, due_date, last_modifi
   ('5', 'assignee', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task5', 5, 'process_definition_id', 1, 'COMPLETED'  , 'owner', null);
 
 INSERT INTO PROCESS_VARIABLE (id,create_time, execution_id, last_updated_time, name, process_instance_id, type, ephemeral, "value") VALUES
-  (1,CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', false, '{"value": { "key" : ["1","2","3","4","5"]}}');
+  (1,CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', false, JSON '{"value": { "key" : ["1","2","3","4","5"]}}');
 
 INSERT INTO TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value") VALUES
   (2, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '1', 'String', '{"value": "10"}'),
