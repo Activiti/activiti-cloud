@@ -44,6 +44,7 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -598,7 +599,7 @@ public class ProcessVariablesIT {
         variables.put("variableDate", "WrongDateString");
         variables.put("variableDateTime", "WrongDateString");
 
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity;
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity;
         if (isAdmin) {
             responseEntity =
                 processInstanceRestTemplate.adminStartProcessWithErrorResponse(
@@ -624,8 +625,8 @@ public class ProcessVariablesIT {
         }
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(responseEntity.getBody().getMessage()).contains("variableDate");
-        assertThat(responseEntity.getBody().getMessage()).contains("variableDateTime");
+        assertThat(responseEntity.getBody().getEntry().getMessage())
+            .isEqualTo("Variables fail type validation: variableDate, variableDateTime");
     }
 
     @Test

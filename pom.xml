@@ -196,7 +196,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>3.3.5</spring-boot.version>
+    <spring-boot.version>3.4.2</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -225,12 +225,13 @@
 
     <!-- dependencies versions -->
     <hibernate.version>6.6.7.Final</hibernate.version>
-    <classgraph.version>4.8.175</classgraph.version>
-
+    <classgraph.version>4.8.179</classgraph.version>
 
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
+    <aspectweaver.version>1.9.22.1</aspectweaver.version>
+    <swagger-annotations.version>2.2.28</swagger-annotations.version>
   </properties>
   <repositories>
     <repository>

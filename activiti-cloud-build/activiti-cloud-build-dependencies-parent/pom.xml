@@ -12,7 +12,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2023.0.3</spring-cloud.version>
+    <spring-cloud.version>2024.0.0</spring-cloud.version>
     <testcontainers.version>1.20.1</testcontainers.version>
     <h2.version>2.2.224</h2.version>
     <graphql-java.version>22.1</graphql-java.version>
@@ -21,6 +21,11 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>${aspectweaver.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
@@ -69,6 +74,16 @@
         <version>${hibernate.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-jpamodelgen</artifactId>
+        <version>${hibernate.version}</version>
       </dependency>
       <dependency>
         <groupId>org.postgresql</groupId>
