@@ -66,7 +66,7 @@ public class QueryRestApplicationIT {
     private IdentityTokenProducer identityTokenProducer;
 
     @Test
-    public void contextLoads() throws Exception {
+    public void contextLoads() {
         assertThat(applicationContext).isNotNull();
     }
 

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Test ReST API",
     "termsOfService": "alfresco.com",
@@ -395,7 +395,6 @@
   "components": {
     "schemas": {
       "EntriesResponseContentString": {
-        "title": "EntriesResponseContentString",
         "type": "object",
         "properties": {
           "entries": {
@@ -407,28 +406,28 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata"
           }
-        }
+        },
+        "title": "EntriesResponseContentString"
       },
       "EntryResponseContentString": {
-        "title": "EntryResponseContentString",
         "type": "object",
         "properties": {
           "entry": {
             "type": "string"
           }
-        }
+        },
+        "title": "EntryResponseContentString"
       },
       "ListResponseContentString": {
-        "title": "ListResponseContentString",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentString"
           }
-        }
+        },
+        "title": "ListResponseContentString"
       },
       "PaginationMetadata": {
-        "title": "PaginationMetadata",
         "type": "object",
         "properties": {
           "skipCount": {
@@ -450,14 +449,18 @@
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "title": "PaginationMetadata"
       },
       "AnnotatedMember": {
-        "title": "AnnotatedMember",
         "type": "object",
         "properties": {
           "fullName": {
             "type": "string"
+          },
+          "typeContext": {
+            "$ref": "#/components/schemas/TypeResolutionContext",
+            "deprecated": true
           },
           "member": {
             "type": "object",
@@ -473,9 +476,6 @@
                 "type": "boolean"
               }
             }
-          },
-          "typeContext": {
-            "$ref": "#/components/schemas/TypeResolutionContext"
           },
           "allAnnotations": {
             "$ref": "#/components/schemas/AnnotationMap"
@@ -506,48 +506,42 @@
               }
             }
           }
-        }
+        },
+        "title": "AnnotatedMember"
       },
       "AnnotationMap": {
-        "title": "AnnotationMap",
-        "type": "object"
+        "type": "object",
+        "title": "AnnotationMap"
       },
       "EntryResponseContentExtendedJsonDeserializerWrapper": {
-        "title": "EntryResponseContentExtendedJsonDeserializerWrapper",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/ExtendedJsonDeserializerWrapper"
           }
-        }
+        },
+        "title": "EntryResponseContentExtendedJsonDeserializerWrapper"
       },
       "ExtendedJsonDeserializer": {
-        "title": "ExtendedJsonDeserializer",
         "type": "object",
         "properties": {
+          "emptyValue": {
+            "type": "object",
+            "deprecated": true
+          },
+          "cachable": {
+            "type": "boolean"
+          },
           "nullValue": {
-            "uniqueItems": true,
             "type": "array",
             "deprecated": true,
             "items": {
               "$ref": "#/components/schemas/ExtendedJsonDeserializer"
-            }
-          },
-          "cachable": {
-            "type": "boolean"
-          },
-          "emptyValue": {
-            "type": "object",
-            "deprecated": true
+            },
+            "uniqueItems": true
           },
           "delegatee": {
             "$ref": "#/components/schemas/JsonDeserializerObject"
-          },
-          "knownPropertyNames": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
           },
           "nullAccessPattern": {
             "type": "string",
@@ -567,48 +561,48 @@
           },
           "objectIdReader": {
             "$ref": "#/components/schemas/ObjectIdReader"
+          },
+          "knownPropertyNames": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           },
           "test": {
             "type": "string"
           }
-        }
+        },
+        "title": "ExtendedJsonDeserializer"
       },
       "ExtendedJsonDeserializerWrapper": {
-        "title": "ExtendedJsonDeserializerWrapper",
         "type": "object",
         "properties": {
           "jsonDeserializers": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ExtendedJsonDeserializer"
-            }
+            },
+            "uniqueItems": true
           }
-        }
+        },
+        "title": "ExtendedJsonDeserializerWrapper"
       },
       "JsonDeserializerObject": {
-        "title": "JsonDeserializerObject",
         "type": "object",
         "properties": {
-          "nullValue": {
+          "emptyValue": {
             "type": "object",
             "deprecated": true
           },
           "cachable": {
             "type": "boolean"
           },
-          "emptyValue": {
+          "nullValue": {
             "type": "object",
             "deprecated": true
           },
           "delegatee": {
             "$ref": "#/components/schemas/JsonDeserializerObject"
-          },
-          "knownPropertyNames": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
           },
           "nullAccessPattern": {
             "type": "string",
@@ -628,11 +622,17 @@
           },
           "objectIdReader": {
             "$ref": "#/components/schemas/ObjectIdReader"
+          },
+          "knownPropertyNames": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           }
-        }
+        },
+        "title": "JsonDeserializerObject"
       },
       "MergeInfo": {
-        "title": "MergeInfo",
         "type": "object",
         "properties": {
           "getter": {
@@ -641,10 +641,10 @@
           "fromDefaults": {
             "type": "boolean"
           }
-        }
+        },
+        "title": "MergeInfo"
       },
       "NullValueProvider": {
-        "title": "NullValueProvider",
         "type": "object",
         "properties": {
           "nullAccessPattern": {
@@ -655,14 +655,14 @@
               "DYNAMIC"
             ]
           }
-        }
+        },
+        "title": "NullValueProvider"
       },
       "ObjectIdGeneratorObject": {
-        "title": "ObjectIdGeneratorObject",
-        "type": "object"
+        "type": "object",
+        "title": "ObjectIdGeneratorObject"
       },
       "ObjectIdInfo": {
-        "title": "ObjectIdInfo",
         "type": "object",
         "properties": {
           "alwaysAsId": {
@@ -671,10 +671,10 @@
           "propertyName": {
             "$ref": "#/components/schemas/PropertyName"
           }
-        }
+        },
+        "title": "ObjectIdInfo"
       },
       "ObjectIdReader": {
-        "title": "ObjectIdReader",
         "type": "object",
         "properties": {
           "propertyName": {
@@ -692,14 +692,14 @@
           "deserializer": {
             "$ref": "#/components/schemas/JsonDeserializerObject"
           }
-        }
+        },
+        "title": "ObjectIdReader"
       },
       "ObjectIdResolver": {
-        "title": "ObjectIdResolver",
-        "type": "object"
+        "type": "object",
+        "title": "ObjectIdResolver"
       },
       "PropertyMetadata": {
-        "title": "PropertyMetadata",
         "type": "object",
         "properties": {
           "defaultValue": {
@@ -738,10 +738,10 @@
               "DEFAULT"
             ]
           }
-        }
+        },
+        "title": "PropertyMetadata"
       },
       "PropertyName": {
-        "title": "PropertyName",
         "type": "object",
         "properties": {
           "empty": {
@@ -753,10 +753,10 @@
           "namespace": {
             "type": "string"
           }
-        }
+        },
+        "title": "PropertyName"
       },
       "SettableBeanProperty": {
-        "title": "SettableBeanProperty",
         "type": "object",
         "properties": {
           "name": {
@@ -771,17 +771,14 @@
           "valueTypeDeserializer": {
             "$ref": "#/components/schemas/TypeDeserializer"
           },
-          "member": {
-            "$ref": "#/components/schemas/AnnotatedMember"
-          },
           "wrapperName": {
             "$ref": "#/components/schemas/PropertyName"
           },
+          "member": {
+            "$ref": "#/components/schemas/AnnotatedMember"
+          },
           "ignorable": {
             "type": "boolean"
-          },
-          "objectIdInfo": {
-            "$ref": "#/components/schemas/ObjectIdInfo"
           },
           "nullValueProvider": {
             "$ref": "#/components/schemas/NullValueProvider"
@@ -800,6 +797,9 @@
           "injectionOnly": {
             "type": "boolean"
           },
+          "objectIdInfo": {
+            "$ref": "#/components/schemas/ObjectIdInfo"
+          },
           "valueDeserializer": {
             "$ref": "#/components/schemas/JsonDeserializerObject"
           },
@@ -812,12 +812,15 @@
           "metadata": {
             "$ref": "#/components/schemas/PropertyMetadata"
           }
-        }
+        },
+        "title": "SettableBeanProperty"
       },
       "TypeDeserializer": {
-        "title": "TypeDeserializer",
         "type": "object",
         "properties": {
+          "typeIdResolver": {
+            "$ref": "#/components/schemas/TypeIdResolver"
+          },
           "typeInclusion": {
             "type": "string",
             "enum": [
@@ -830,14 +833,11 @@
           },
           "propertyName": {
             "type": "string"
-          },
-          "typeIdResolver": {
-            "$ref": "#/components/schemas/TypeIdResolver"
           }
-        }
+        },
+        "title": "TypeDeserializer"
       },
       "TypeIdResolver": {
-        "title": "TypeIdResolver",
         "type": "object",
         "properties": {
           "mechanism": {
@@ -855,17 +855,21 @@
           "descForKnownTypeIds": {
             "type": "string"
           }
-        }
+        },
+        "title": "TypeIdResolver"
       },
       "TypeResolutionContext": {
-        "title": "TypeResolutionContext",
-        "type": "object"
+        "type": "object",
+        "title": "TypeResolutionContext"
       }
     },
     "securitySchemes": {
       "oauth": {
         "type": "oauth2",
         "description": "Authorizing with SSO",
+        "in": "header",
+        "scheme": "bearer",
+        "bearerFormat": "jwt",
         "flows": {
           "authorizationCode": {
             "authorizationUrl": "http://dummy/token/url",

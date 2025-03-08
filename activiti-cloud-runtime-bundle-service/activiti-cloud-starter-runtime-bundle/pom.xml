@@ -212,6 +212,10 @@
       <artifactId>activiti-cloud-services-runtime-gateway</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
