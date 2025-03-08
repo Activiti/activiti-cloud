@@ -127,7 +127,7 @@ class ConnectorDefinitionControllerImplIT {
 
     @Test
     void getAllConnectorDefinitions() throws Exception {
-        this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc.perform(get("/v1/connector-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("content[0].links[0].rel", is("self")))
             .andExpect(jsonPath("content[0].id", is("id1")))
