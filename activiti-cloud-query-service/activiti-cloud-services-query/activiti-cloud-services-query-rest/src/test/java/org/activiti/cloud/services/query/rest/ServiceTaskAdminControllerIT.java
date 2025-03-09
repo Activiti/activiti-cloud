@@ -43,8 +43,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    classes = {QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class},
-    properties = {"spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false"}
+    classes = { QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class },
+    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
@@ -146,11 +146,6 @@ class ServiceTaskAdminControllerIT {
             .param("completedTo", dateTimeFormatter.format(new Date(2000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
-            .get(SEARCH_ENDPOINT)
-            .then().
-            extract().response().prettyPrint();
-            //.statusCode(200)
-            //.body(ENTRIES_ROOT, hasSize(2))
-            //.body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder("1", "2"));
+            .get(SEARCH_ENDPOINT);
     }
 }
