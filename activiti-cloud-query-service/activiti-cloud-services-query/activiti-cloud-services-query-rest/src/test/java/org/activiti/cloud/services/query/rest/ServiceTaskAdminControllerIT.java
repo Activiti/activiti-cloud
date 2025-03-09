@@ -146,6 +146,10 @@ class ServiceTaskAdminControllerIT {
             .param("completedTo", dateTimeFormatter.format(new Date(2000)))
             .accept(MediaType.APPLICATION_JSON)
             .when()
-            .get(SEARCH_ENDPOINT);
+            .get(SEARCH_ENDPOINT)
+            .then()
+            .statusCode(200)
+            .body(ENTRIES_ROOT, hasSize(2))
+            .body(SERVICE_TASKS_ID_ROOT, containsInAnyOrder("1", "2"));
     }
 }
