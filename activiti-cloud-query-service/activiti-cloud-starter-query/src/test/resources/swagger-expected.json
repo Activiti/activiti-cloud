@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "OpenAPI definition",
     "version": "v0"
@@ -59,8 +59,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,8 +69,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -164,8 +164,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -174,8 +174,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,10 +255,10 @@
             "required": false,
             "schema": {
               "type": "array",
+              "default": [],
               "items": {
                 "type": "string"
-              },
-              "default": []
+              }
             },
             "example": "Process_90W_3nLpw/initializedVar"
           },
@@ -589,8 +589,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -599,8 +599,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -987,8 +987,8 @@
           }
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -997,8 +997,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1329,8 +1329,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -1339,8 +1339,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1434,8 +1434,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -1444,8 +1444,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1505,10 +1505,10 @@
             "required": false,
             "schema": {
               "type": "array",
+              "default": [],
               "items": {
                 "type": "string"
-              },
-              "default": []
+              }
             },
             "example": "Process_90W_3nLpw/initializedVar"
           },
@@ -1752,8 +1752,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -1762,8 +1762,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2063,8 +2063,8 @@
           }
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2073,8 +2073,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2336,8 +2336,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2346,8 +2346,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2441,8 +2441,8 @@
           "required": true
         },
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2451,8 +2451,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2532,10 +2532,10 @@
             "required": false,
             "schema": {
               "type": "array",
+              "default": [],
               "items": {
                 "type": "string"
-              },
-              "default": []
+              }
             },
             "example": "Process_90W_3nLpw/initializedVar"
           },
@@ -2866,8 +2866,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2876,8 +2876,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2984,8 +2984,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2994,8 +2994,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3058,8 +3058,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3068,8 +3068,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3132,8 +3132,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3142,8 +3142,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3212,8 +3212,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3222,8 +3222,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3289,10 +3289,10 @@
             "required": false,
             "schema": {
               "type": "array",
+              "default": [],
               "items": {
                 "type": "string"
-              },
-              "default": []
+              }
             },
             "example": "Process_90W_3nLpw/initializedVar"
           },
@@ -3536,8 +3536,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3546,8 +3546,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3610,8 +3610,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3620,8 +3620,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3742,8 +3742,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3752,8 +3752,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3821,10 +3821,10 @@
             "required": false,
             "schema": {
               "type": "array",
+              "default": [],
               "items": {
                 "type": "string"
-              },
-              "default": []
+              }
             },
             "example": "Process_90W_3nLpw/initializedVar"
           },
@@ -3859,8 +3859,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -3869,8 +3869,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3894,12 +3894,26 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                    }
+                  ]
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                    }
+                  ]
                 }
               }
             }
@@ -4174,8 +4188,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4184,8 +4198,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4248,8 +4262,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4258,8 +4272,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4402,8 +4416,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4412,8 +4426,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4476,8 +4490,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4486,8 +4500,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4587,8 +4601,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4597,8 +4611,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4705,8 +4719,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4715,8 +4729,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4779,8 +4793,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4789,8 +4803,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4853,8 +4867,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4863,8 +4877,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4933,8 +4947,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -4943,8 +4957,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5066,8 +5080,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5076,8 +5090,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5140,8 +5154,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5150,8 +5164,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5214,8 +5228,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5224,8 +5238,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5288,8 +5302,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5298,8 +5312,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5420,8 +5434,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5430,8 +5444,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5523,8 +5537,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5533,8 +5547,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5658,8 +5672,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5668,8 +5682,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5732,8 +5746,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -5742,8 +5756,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6002,8 +6016,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -6012,8 +6026,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6037,20 +6051,20 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "uniqueItems": true,
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "uniqueItems": true
                 }
               },
               "application/json": {
                 "schema": {
-                  "uniqueItems": true,
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "uniqueItems": true
                 }
               }
             }
@@ -6169,8 +6183,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -6179,8 +6193,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6243,8 +6257,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -6253,8 +6267,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6354,8 +6368,8 @@
           }
         ],
         "responses": {
-          "404": {
-            "description": "Not Found",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -6364,8 +6378,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6414,7 +6428,6 @@
   "components": {
     "schemas": {
       "ActivitiErrorMessage": {
-        "title": "ActivitiErrorMessage",
         "type": "object",
         "properties": {
           "message": {
@@ -6424,19 +6437,19 @@
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "title": "ActivitiErrorMessage"
       },
       "EntryResponseContentActivitiErrorMessage": {
-        "title": "EntryResponseContentActivitiErrorMessage",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/ActivitiErrorMessage"
           }
-        }
+        },
+        "title": "EntryResponseContentActivitiErrorMessage"
       },
       "CloudRuntimeEntitySort_ProcessVariables": {
-        "title": "CloudRuntimeEntitySort_ProcessVariables",
         "type": "object",
         "properties": {
           "field": {
@@ -6466,10 +6479,10 @@
               "datetime"
             ]
           }
-        }
+        },
+        "title": "CloudRuntimeEntitySort_ProcessVariables"
       },
       "TaskSearchRequest_ProcessVariables": {
-        "title": "TaskSearchRequest_ProcessVariables",
         "type": "object",
         "properties": {
           "onlyStandalone": {
@@ -6479,57 +6492,56 @@
             "type": "boolean"
           },
           "id": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "parentId": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "processInstanceId": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "name": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "description": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "processDefinitionName": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "priority": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "integer",
               "format": "int32"
-            }
+            },
+            "uniqueItems": true
           },
           "status": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string",
@@ -6541,21 +6553,22 @@
                 "CANCELLED",
                 "DELETED"
               ]
-            }
+            },
+            "uniqueItems": true
           },
           "completedBy": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "assignee": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "createdFrom": {
             "type": "string",
@@ -6598,49 +6611,49 @@
             "format": "date-time"
           },
           "candidateUserId": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "candidateGroupId": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "taskVariableFilters": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VariableFilter_ProcessVariables"
-            }
+            },
+            "uniqueItems": true
           },
           "processVariableFilters": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VariableFilter_ProcessVariables"
-            }
+            },
+            "uniqueItems": true
           },
           "processVariableKeys": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string",
               "description": "Identifies a process variable by its process definition key and variable name. It's represented in the form 'processDefinitionKey/variableName'.",
               "example": "processDefinitionKey/variableName"
-            }
+            },
+            "uniqueItems": true
           },
           "sort": {
             "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
           }
-        }
+        },
+        "title": "TaskSearchRequest_ProcessVariables"
       },
       "VariableFilter_ProcessVariables": {
-        "title": "VariableFilter_ProcessVariables",
         "type": "object",
         "properties": {
           "processDefinitionKey": {
@@ -6675,10 +6688,10 @@
               "lte"
             ]
           }
-        }
+        },
+        "title": "VariableFilter_ProcessVariables"
       },
       "CloudVariableInstance_ProcessVariables": {
-        "title": "CloudVariableInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "appName": {
@@ -6708,19 +6721,19 @@
           "type": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           },
           "processInstanceId": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudVariableInstance_ProcessVariables"
       },
       "EntriesResponseContentQueryCloudTask_ProcessVariables": {
-        "title": "EntriesResponseContentQueryCloudTask_ProcessVariables",
         "type": "object",
         "properties": {
           "entries": {
@@ -6732,28 +6745,28 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata_ProcessVariables"
           }
-        }
+        },
+        "title": "EntriesResponseContentQueryCloudTask_ProcessVariables"
       },
       "EntryResponseContentQueryCloudTask_ProcessVariables": {
-        "title": "EntryResponseContentQueryCloudTask_ProcessVariables",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/QueryCloudTask_ProcessVariables"
           }
-        }
+        },
+        "title": "EntryResponseContentQueryCloudTask_ProcessVariables"
       },
       "ListResponseContentQueryCloudTask_ProcessVariables": {
-        "title": "ListResponseContentQueryCloudTask_ProcessVariables",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentQueryCloudTask_ProcessVariables"
           }
-        }
+        },
+        "title": "ListResponseContentQueryCloudTask_ProcessVariables"
       },
       "PaginationMetadata_ProcessVariables": {
-        "title": "PaginationMetadata_ProcessVariables",
         "type": "object",
         "properties": {
           "skipCount": {
@@ -6775,10 +6788,10 @@
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "title": "PaginationMetadata_ProcessVariables"
       },
       "QueryCloudTask_ProcessVariables": {
-        "title": "QueryCloudTask_ProcessVariables",
         "type": "object",
         "properties": {
           "permissions": {
@@ -6794,11 +6807,11 @@
             }
           },
           "processVariables": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_ProcessVariables"
-            }
+            },
+            "uniqueItems": true
           },
           "processDefinitionName": {
             "type": "string"
@@ -6821,6 +6834,12 @@
           "appVersion": {
             "type": "string"
           },
+          "standalone": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -6831,15 +6850,11 @@
           "id": {
             "type": "string"
           },
-          "owner": {
+          "businessKey": {
             "type": "string"
           },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "standalone": {
-            "type": "boolean"
+          "assignee": {
+            "type": "string"
           },
           "formKey": {
             "type": "string"
@@ -6859,15 +6874,6 @@
           "completedBy": {
             "type": "string"
           },
-          "assignee": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
@@ -6879,16 +6885,14 @@
               "DELETED"
             ]
           },
-          "parentTaskId": {
-            "type": "string"
+          "duration": {
+            "type": "integer",
+            "format": "int64"
           },
-          "taskDefinitionKey": {
+          "description": {
             "type": "string"
           },
           "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6903,64 +6907,72 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "title": "QueryCloudTask_ProcessVariables"
       },
       "ProcessInstanceSearchRequest_ProcessVariables": {
-        "title": "ProcessInstanceSearchRequest_ProcessVariables",
         "type": "object",
         "properties": {
           "id": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "parentId": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "name": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "processDefinitionName": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "initiator": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "appVersion": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "uniqueItems": true
           },
           "status": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string",
@@ -6971,7 +6983,8 @@
                 "CANCELLED",
                 "COMPLETED"
               ]
-            }
+            },
+            "uniqueItems": true
           },
           "lastModifiedFrom": {
             "type": "string",
@@ -7006,28 +7019,28 @@
             "format": "date-time"
           },
           "processVariableFilters": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VariableFilter_ProcessVariables"
-            }
+            },
+            "uniqueItems": true
           },
           "processVariableKeys": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string",
               "description": "Identifies a process variable by its process definition key and variable name. It's represented in the form 'processDefinitionKey/variableName'.",
               "example": "processDefinitionKey/variableName"
-            }
+            },
+            "uniqueItems": true
           },
           "sort": {
             "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
           }
-        }
+        },
+        "title": "ProcessInstanceSearchRequest_ProcessVariables"
       },
       "EntriesResponseContentQueryCloudProcessInstance_ProcessVariables": {
-        "title": "EntriesResponseContentQueryCloudProcessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "entries": {
@@ -7039,36 +7052,36 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata_ProcessVariables"
           }
-        }
+        },
+        "title": "EntriesResponseContentQueryCloudProcessInstance_ProcessVariables"
       },
       "EntryResponseContentQueryCloudProcessInstance_ProcessVariables": {
-        "title": "EntryResponseContentQueryCloudProcessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/QueryCloudProcessInstance_ProcessVariables"
           }
-        }
+        },
+        "title": "EntryResponseContentQueryCloudProcessInstance_ProcessVariables"
       },
       "ListResponseContentQueryCloudProcessInstance_ProcessVariables": {
-        "title": "ListResponseContentQueryCloudProcessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentQueryCloudProcessInstance_ProcessVariables"
           }
-        }
+        },
+        "title": "ListResponseContentQueryCloudProcessInstance_ProcessVariables"
       },
       "QueryCloudProcessInstance_ProcessVariables": {
-        "title": "QueryCloudProcessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "subprocesses": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/QueryCloudSubprocessInstance_ProcessVariables"
-            }
+            },
+            "uniqueItems": true
           },
           "appName": {
             "type": "string"
@@ -7094,15 +7107,15 @@
           "id": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "businessKey": {
             "type": "string"
           },
           "initiator": {
             "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "parentId": {
             "type": "string"
@@ -7124,20 +7137,20 @@
             "type": "string",
             "format": "date-time"
           },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
           },
           "processDefinitionName": {
             "type": "string"
-          },
-          "processDefinitionKey": {
-            "type": "string"
           }
-        }
+        },
+        "title": "QueryCloudProcessInstance_ProcessVariables"
       },
       "QueryCloudSubprocessInstance_ProcessVariables": {
-        "title": "QueryCloudSubprocessInstance_ProcessVariables",
         "type": "object",
         "properties": {
           "id": {
@@ -7146,10 +7159,10 @@
           "processDefinitionName": {
             "type": "string"
           }
-        }
+        },
+        "title": "QueryCloudSubprocessInstance_ProcessVariables"
       },
       "TasksQueryBody": {
-        "title": "TasksQueryBody",
         "type": "object",
         "properties": {
           "variableKeys": {
@@ -7164,14 +7177,14 @@
           "rootTasksOnly": {
             "type": "boolean"
           }
-        }
+        },
+        "title": "TasksQueryBody"
       },
       "FilterProvider": {
-        "title": "FilterProvider",
-        "type": "object"
+        "type": "object",
+        "title": "FilterProvider"
       },
       "MappingJacksonValue": {
-        "title": "MappingJacksonValue",
         "type": "object",
         "properties": {
           "value": {
@@ -7180,10 +7193,10 @@
           "filters": {
             "$ref": "#/components/schemas/FilterProvider"
           }
-        }
+        },
+        "title": "MappingJacksonValue"
       },
       "ProcessInstanceQueryBody": {
-        "title": "ProcessInstanceQueryBody",
         "type": "object",
         "properties": {
           "variableKeys": {
@@ -7192,10 +7205,10 @@
               "type": "string"
             }
           }
-        }
+        },
+        "title": "ProcessInstanceQueryBody"
       },
       "CloudVariableInstance": {
-        "title": "CloudVariableInstance",
         "type": "object",
         "properties": {
           "appName": {
@@ -7225,19 +7238,19 @@
           "type": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           },
           "processInstanceId": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudVariableInstance"
       },
       "EntriesResponseContentCloudVariableInstance": {
-        "title": "EntriesResponseContentCloudVariableInstance",
         "type": "object",
         "properties": {
           "entries": {
@@ -7249,25 +7262,26 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata"
           }
-        }
+        },
+        "title": "EntriesResponseContentCloudVariableInstance"
       },
       "EntryResponseContentCloudVariableInstance": {
-        "title": "EntryResponseContentCloudVariableInstance",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudVariableInstance"
           }
-        }
+        },
+        "title": "EntryResponseContentCloudVariableInstance"
       },
       "ListResponseContentCloudVariableInstance": {
-        "title": "ListResponseContentCloudVariableInstance",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentCloudVariableInstance"
           }
-        }
+        },
+        "title": "ListResponseContentCloudVariableInstance"
       },
       "QueryCloudVariableInstance": {
         "title": "QueryCloudVariableInstance",
@@ -7348,7 +7362,6 @@
         }
       },
       "PaginationMetadata": {
-        "title": "PaginationMetadata",
         "type": "object",
         "properties": {
           "skipCount": {
@@ -7370,10 +7383,10 @@
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "title": "PaginationMetadata"
       },
       "CloudVariableInstance_General": {
-        "title": "CloudVariableInstance_General",
         "type": "object",
         "properties": {
           "appName": {
@@ -7403,28 +7416,28 @@
           "type": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           },
           "processInstanceId": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudVariableInstance_General"
       },
       "EntryResponseContentQueryCloudTask_General": {
-        "title": "EntryResponseContentQueryCloudTask_General",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/QueryCloudTask_General"
           }
-        }
+        },
+        "title": "EntryResponseContentQueryCloudTask_General"
       },
       "QueryCloudTask_General": {
-        "title": "QueryCloudTask_General",
         "type": "object",
         "properties": {
           "permissions": {
@@ -7440,11 +7453,11 @@
             }
           },
           "processVariables": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_General"
-            }
+            },
+            "uniqueItems": true
           },
           "processDefinitionName": {
             "type": "string"
@@ -7467,6 +7480,12 @@
           "appVersion": {
             "type": "string"
           },
+          "standalone": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -7477,15 +7496,11 @@
           "id": {
             "type": "string"
           },
-          "owner": {
+          "businessKey": {
             "type": "string"
           },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "standalone": {
-            "type": "boolean"
+          "assignee": {
+            "type": "string"
           },
           "formKey": {
             "type": "string"
@@ -7505,15 +7520,6 @@
           "completedBy": {
             "type": "string"
           },
-          "assignee": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
@@ -7525,16 +7531,14 @@
               "DELETED"
             ]
           },
-          "parentTaskId": {
-            "type": "string"
+          "duration": {
+            "type": "integer",
+            "format": "int64"
           },
-          "taskDefinitionKey": {
+          "description": {
             "type": "string"
           },
           "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7549,35 +7553,44 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "title": "QueryCloudTask_General"
       },
       "EntryResponseContentQueryCloudProcessInstance_General": {
-        "title": "EntryResponseContentQueryCloudProcessInstance_General",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/QueryCloudProcessInstance_General"
           }
-        }
+        },
+        "title": "EntryResponseContentQueryCloudProcessInstance_General"
       },
       "QueryCloudProcessInstance_General": {
-        "title": "QueryCloudProcessInstance_General",
         "type": "object",
         "properties": {
           "subprocesses": {
-            "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/QueryCloudSubprocessInstance_General"
-            }
+            },
+            "uniqueItems": true
           },
           "appName": {
             "type": "string"
@@ -7603,15 +7616,15 @@
           "id": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "businessKey": {
             "type": "string"
           },
           "initiator": {
             "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "parentId": {
             "type": "string"
@@ -7633,20 +7646,20 @@
             "type": "string",
             "format": "date-time"
           },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
           },
           "processDefinitionName": {
             "type": "string"
-          },
-          "processDefinitionKey": {
-            "type": "string"
           }
-        }
+        },
+        "title": "QueryCloudProcessInstance_General"
       },
       "QueryCloudSubprocessInstance_General": {
-        "title": "QueryCloudSubprocessInstance_General",
         "type": "object",
         "properties": {
           "id": {
@@ -7655,34 +7668,34 @@
           "processDefinitionName": {
             "type": "string"
           }
-        }
+        },
+        "title": "QueryCloudSubprocessInstance_General"
       },
-      "EntriesResponseContentQueryCloudProcessInstance_General": {
-        "title": "EntriesResponseContentQueryCloudProcessInstance_General",
+      "EntriesResponseContentQueryCloudTask_General": {
         "type": "object",
         "properties": {
           "entries": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudTask_General"
             }
           },
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata_General"
           }
-        }
+        },
+        "title": "EntriesResponseContentQueryCloudTask_General"
       },
-      "ListResponseContentQueryCloudProcessInstance_General": {
-        "title": "ListResponseContentQueryCloudProcessInstance_General",
+      "ListResponseContentQueryCloudTask_General": {
         "type": "object",
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudProcessInstance_General"
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudTask_General"
           }
-        }
+        },
+        "title": "ListResponseContentQueryCloudTask_General"
       },
       "PaginationMetadata_General": {
-        "title": "PaginationMetadata_General",
         "type": "object",
         "properties": {
           "skipCount": {
@@ -7704,10 +7717,34 @@
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "title": "PaginationMetadata_General"
+      },
+      "EntriesResponseContentQueryCloudProcessInstance_General": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudProcessInstance_General"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata_General"
+          }
+        },
+        "title": "EntriesResponseContentQueryCloudProcessInstance_General"
+      },
+      "ListResponseContentQueryCloudProcessInstance_General": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudProcessInstance_General"
+          }
+        },
+        "title": "ListResponseContentQueryCloudProcessInstance_General"
       },
       "CloudProcessDefinition": {
-        "title": "CloudProcessDefinition",
         "type": "object",
         "properties": {
           "appName": {
@@ -7728,6 +7765,10 @@
           "appVersion": {
             "type": "string"
           },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
           "name": {
             "type": "string"
           },
@@ -7736,10 +7777,6 @@
           },
           "id": {
             "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
           },
           "formKey": {
             "type": "string"
@@ -7750,10 +7787,10 @@
           "description": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudProcessDefinition"
       },
       "EntriesResponseContentCloudProcessDefinition": {
-        "title": "EntriesResponseContentCloudProcessDefinition",
         "type": "object",
         "properties": {
           "entries": {
@@ -7765,43 +7802,43 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata"
           }
-        }
+        },
+        "title": "EntriesResponseContentCloudProcessDefinition"
       },
       "EntryResponseContentCloudProcessDefinition": {
-        "title": "EntryResponseContentCloudProcessDefinition",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudProcessDefinition"
           }
-        }
+        },
+        "title": "EntryResponseContentCloudProcessDefinition"
       },
       "ListResponseContentCloudProcessDefinition": {
-        "title": "ListResponseContentCloudProcessDefinition",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentCloudProcessDefinition"
           }
-        }
+        },
+        "title": "ListResponseContentCloudProcessDefinition"
       },
       "CloudApplication": {
-        "title": "CloudApplication",
         "type": "object",
         "properties": {
+          "version": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
           "id": {
             "type": "string"
-          },
-          "version": {
-            "type": "string"
           }
-        }
+        },
+        "title": "CloudApplication"
       },
       "EntriesResponseContentCloudApplication": {
-        "title": "EntriesResponseContentCloudApplication",
         "type": "object",
         "properties": {
           "entries": {
@@ -7813,39 +7850,39 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata"
           }
-        }
+        },
+        "title": "EntriesResponseContentCloudApplication"
       },
       "EntryResponseContentCloudApplication": {
-        "title": "EntryResponseContentCloudApplication",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudApplication"
           }
-        }
+        },
+        "title": "EntryResponseContentCloudApplication"
       },
       "ListResponseContentCloudApplication": {
-        "title": "ListResponseContentCloudApplication",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentCloudApplication"
           }
-        }
+        },
+        "title": "ListResponseContentCloudApplication"
       },
       "CloudServiceTask": {
-        "title": "CloudServiceTask",
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
+          "businessKey": {
+            "type": "string"
+          },
           "startedDate": {
             "type": "string",
             "format": "date-time"
-          },
-          "businessKey": {
-            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7856,20 +7893,20 @@
               "ERROR"
             ]
           },
-          "cancelledDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "cancelledDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "processDefinitionKey": {
             "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           },
           "appName": {
             "type": "string"
@@ -7907,10 +7944,10 @@
           "processInstanceId": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudServiceTask"
       },
       "EntriesResponseContentCloudServiceTask": {
-        "title": "EntriesResponseContentCloudServiceTask",
         "type": "object",
         "properties": {
           "entries": {
@@ -7922,28 +7959,28 @@
           "pagination": {
             "$ref": "#/components/schemas/PaginationMetadata"
           }
-        }
+        },
+        "title": "EntriesResponseContentCloudServiceTask"
       },
       "EntryResponseContentCloudServiceTask": {
-        "title": "EntryResponseContentCloudServiceTask",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudServiceTask"
           }
-        }
+        },
+        "title": "EntryResponseContentCloudServiceTask"
       },
       "ListResponseContentCloudServiceTask": {
-        "title": "ListResponseContentCloudServiceTask",
         "type": "object",
         "properties": {
           "list": {
             "$ref": "#/components/schemas/EntriesResponseContentCloudServiceTask"
           }
-        }
+        },
+        "title": "ListResponseContentCloudServiceTask"
       },
       "CloudIntegrationContext": {
-        "title": "CloudIntegrationContext",
         "type": "object",
         "properties": {
           "errorMessage": {
@@ -7961,9 +7998,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "errorCode": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
@@ -7971,6 +8005,9 @@
               "INTEGRATION_RESULT_RECEIVED",
               "INTEGRATION_ERROR_RECEIVED"
             ]
+          },
+          "errorCode": {
+            "type": "string"
           },
           "errorClassName": {
             "type": "string"
@@ -7999,11 +8036,11 @@
                   "type": "integer",
                   "format": "int32"
                 },
-                "className": {
-                  "type": "string"
-                },
                 "nativeMethod": {
                   "type": "boolean"
+                },
+                "className": {
+                  "type": "string"
                 }
               }
             }
@@ -8017,16 +8054,22 @@
           "clientName": {
             "type": "string"
           },
-          "executionId": {
-            "type": "string"
-          },
-          "clientType": {
+          "businessKey": {
             "type": "string"
           },
           "appVersion": {
             "type": "string"
           },
-          "businessKey": {
+          "clientType": {
+            "type": "string"
+          },
+          "executionId": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
             "type": "string"
           },
           "connectorType": {
@@ -8044,13 +8087,7 @@
               "type": "object"
             }
           },
-          "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
+          "processDefinitionKey": {
             "type": "string"
           },
           "parentProcessInstanceId": {
@@ -8060,7 +8097,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "processDefinitionKey": {
+          "rootProcessInstanceId": {
             "type": "string"
           },
           "appName": {
@@ -8078,40 +8115,17 @@
           "serviceVersion": {
             "type": "string"
           }
-        }
+        },
+        "title": "CloudIntegrationContext"
       },
       "EntryResponseContentCloudIntegrationContext": {
-        "title": "EntryResponseContentCloudIntegrationContext",
         "type": "object",
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudIntegrationContext"
           }
-        }
-      },
-      "EntriesResponseContentQueryCloudTask_General": {
-        "title": "EntriesResponseContentQueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntryResponseContentQueryCloudTask_General"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetadata_General"
-          }
-        }
-      },
-      "ListResponseContentQueryCloudTask_General": {
-        "title": "ListResponseContentQueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudTask_General"
-          }
-        }
+        },
+        "title": "EntryResponseContentCloudIntegrationContext"
       }
     }
   },
