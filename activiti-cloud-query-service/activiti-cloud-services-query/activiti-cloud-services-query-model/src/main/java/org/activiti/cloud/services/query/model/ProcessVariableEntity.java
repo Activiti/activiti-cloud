@@ -26,7 +26,7 @@ import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
-import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
@@ -103,9 +103,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
         this.ephemeral = ephemeral;
     }
 
-    public ProcessVariableEntity(CloudVariableCreatedEvent variableCreatedEvent) {
-        super(variableCreatedEvent);
-        this.ephemeral = variableCreatedEvent.isEphemeralVariable();
+    public ProcessVariableEntity(CloudVariableEvent variableEvent) {
+        super(variableEvent);
     }
 
     @Override

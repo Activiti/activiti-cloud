@@ -64,21 +64,8 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 taskVariableUpdatedEventHandler.handle(variableEntity);
             } else {
-                ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-                    null,
-                    variableUpdatedEvent.getEntity().getType(),
-                    variableUpdatedEvent.getEntity().getName(),
-                    variableUpdatedEvent.getEntity().getProcessInstanceId(),
-                    variableUpdatedEvent.getServiceName(),
-                    variableUpdatedEvent.getServiceFullName(),
-                    variableUpdatedEvent.getServiceVersion(),
-                    variableUpdatedEvent.getAppName(),
-                    variableUpdatedEvent.getAppVersion(),
-                    new Date(variableUpdatedEvent.getTimestamp()),
-                    new Date(variableUpdatedEvent.getTimestamp()),
-                    null,
-                    variableUpdatedEvent.isEphemeralVariable()
-                );
+                ProcessVariableEntity variableEntity = new ProcessVariableEntity(variableUpdatedEvent);
+                variableEntity.setEphemeral(variableUpdatedEvent.isEphemeralVariable());
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 processVariableUpdateEventHandler.handle(variableEntity);
             }
