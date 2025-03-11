@@ -67,26 +67,11 @@ public class ProcessVariableCreatedEventHandler {
         CloudVariableCreatedEvent variableCreatedEvent,
         ProcessInstanceEntity processInstanceEntity
     ) {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-            null,
-            variableCreatedEvent.getEntity().getType(),
-            variableCreatedEvent.getEntity().getName(),
-            variableCreatedEvent.getEntity().getProcessInstanceId(),
-            variableCreatedEvent.getServiceName(),
-            variableCreatedEvent.getServiceFullName(),
-            variableCreatedEvent.getServiceVersion(),
-            variableCreatedEvent.getAppName(),
-            variableCreatedEvent.getAppVersion(),
-            new Date(variableCreatedEvent.getTimestamp()),
-            new Date(variableCreatedEvent.getTimestamp()),
-            null,
-            variableCreatedEvent.isEphemeralVariable()
-        );
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity(variableCreatedEvent);
         variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
-        variableEntity.setEphemeral(variableCreatedEvent.isEphemeralVariable());
         entityManager.persist(variableEntity);
 
         return variableEntity;

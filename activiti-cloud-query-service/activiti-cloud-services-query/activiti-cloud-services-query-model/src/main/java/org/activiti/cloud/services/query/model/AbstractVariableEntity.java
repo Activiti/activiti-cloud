@@ -30,6 +30,7 @@ import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -94,6 +95,16 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.createTime = createTime;
         this.lastUpdatedTime = lastUpdatedTime;
         this.executionId = executionId;
+    }
+
+    public AbstractVariableEntity(CloudVariableEvent cloudVariableEvent) {
+        super(cloudVariableEvent);
+        this.type = cloudVariableEvent.getEntity().getType();
+        this.name = cloudVariableEvent.getEntity().getName();
+        this.processInstanceId = cloudVariableEvent.getEntity().getProcessInstanceId();
+        this.createTime = new Date(cloudVariableEvent.getTimestamp());
+        this.lastUpdatedTime = new Date(cloudVariableEvent.getTimestamp());
+        this.value = cloudVariableEvent.getEntity().getValue();
     }
 
     public abstract Long getId();
