@@ -101,6 +101,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
         this.id = id;
         this.ephemeral = ephemeral;
     }
+
     @Override
     public Long getId() {
         return id;
