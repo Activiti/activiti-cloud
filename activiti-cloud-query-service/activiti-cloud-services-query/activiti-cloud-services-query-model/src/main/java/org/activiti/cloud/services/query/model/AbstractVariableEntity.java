@@ -104,7 +104,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.processInstanceId = cloudVariableEvent.getEntity().getProcessInstanceId();
         this.createTime = new Date(cloudVariableEvent.getTimestamp());
         this.lastUpdatedTime = new Date(cloudVariableEvent.getTimestamp());
-        this.value = cloudVariableEvent.getEntity().getValue();
+        this.value = new VariableValue<>(cloudVariableEvent.getEntity().getValue());
     }
 
     public abstract Long getId();
