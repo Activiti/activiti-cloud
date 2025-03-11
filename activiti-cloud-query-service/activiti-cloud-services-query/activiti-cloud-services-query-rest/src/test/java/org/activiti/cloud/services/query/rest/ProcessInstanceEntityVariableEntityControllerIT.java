@@ -217,6 +217,10 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     private ProcessVariableEntity buildVariable() {
+        return buildVariable(false);
+    }
+
+    private ProcessVariableEntity buildVariable(boolean ephemeral) {
         ProcessVariableEntity variableEntity = new ProcessVariableEntity(
             1L,
             String.class.getName(),
@@ -230,29 +234,13 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             new Date(),
             new Date(),
             UUID.randomUUID().toString(),
-            false
+            ephemeral
         );
         variableEntity.setValue("John");
         return variableEntity;
     }
 
     private ProcessVariableEntity buildEphemeralVariable() {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-            1L,
-            String.class.getName(),
-            "firstName",
-            UUID.randomUUID().toString(),
-            "My app",
-            "My app",
-            "1",
-            null,
-            null,
-            new Date(),
-            new Date(),
-            UUID.randomUUID().toString(),
-            true
-        );
-        variableEntity.setValue("John");
-        return variableEntity;
+        return buildVariable(true);
     }
 }
