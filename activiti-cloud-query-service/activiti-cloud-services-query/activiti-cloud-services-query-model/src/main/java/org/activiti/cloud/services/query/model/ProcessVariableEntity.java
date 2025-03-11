@@ -105,6 +105,7 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
 
     public ProcessVariableEntity(CloudVariableEvent variableEvent) {
         super(variableEvent);
+        this.ephemeral = variableEvent.isEphemeralVariable();
     }
 
     @Override
