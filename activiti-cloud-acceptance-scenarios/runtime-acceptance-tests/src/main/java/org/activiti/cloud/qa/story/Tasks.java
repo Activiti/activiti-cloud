@@ -389,7 +389,6 @@ public class Tasks {
     @Then("task variables are visible in rb and query")
     public void checkTaskVariablesAreTheSameInRBAndQuery() {
         await()
-            .atMost(20, TimeUnit.SECONDS)
             .pollInterval(Duration.ofMillis(250L))
             .pollInSameThread()
             .untilAsserted(() -> {

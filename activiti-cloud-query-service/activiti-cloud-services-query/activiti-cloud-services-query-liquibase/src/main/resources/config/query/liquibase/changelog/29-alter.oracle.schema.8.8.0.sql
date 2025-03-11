@@ -15,4 +15,4 @@
  */
 
 ALTER TABLE process_variable
-  ADD COLUMN ephemeral boolean;
+  ADD COLUMN ephemeral NUMBER(1,0);
