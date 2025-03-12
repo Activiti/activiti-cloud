@@ -36,6 +36,7 @@ import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepres
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
@@ -77,6 +78,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceVariableRepresentationModelAssembler processInstanceVariableRepresentationModelAssembler() {
         return new ProcessInstanceVariableRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryCloudVariableInstanceRepresentationModelAssembler queryCloudVariableInstanceRepresentationModelAssembler() {
+        return new QueryCloudVariableInstanceRepresentationModelAssembler();
     }
 
     @Bean

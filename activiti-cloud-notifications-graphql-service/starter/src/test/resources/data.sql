@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS PROCESS_VARIABLE (
   type VARCHAR(255),
   variable_definition_id VARCHAR(255),
   "value" JSON,
+  ephemeral BOOLEAN,
   PRIMARY KEY (id)
 );
 
@@ -54,8 +55,8 @@ INSERT INTO task (id, assignee, business_key, created_date, description, due_dat
   ('5', 'assignee', null, CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task5', 10, 'process_definition_id', 1, 'COMPLETED'  , 'owner', null),
   ('6', 'assignee', 'bk6', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task6', 10, 'process_definition_id', 0, 'ASSIGNED'  , 'owner', null);
 
-INSERT INTO PROCESS_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, type, "value") VALUES
-  (1, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', JSON '{"value": { "key" : ["1","2","3","4","5"]}}');
+INSERT INTO PROCESS_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, type, ephemeral, "value") VALUES
+  (1, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', false, JSON '{"value": { "key" : ["1","2","3","4","5"]}}');
 
 INSERT INTO TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value") VALUES
   (2, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '1', 'String', JSON '{"value": "10"}'),

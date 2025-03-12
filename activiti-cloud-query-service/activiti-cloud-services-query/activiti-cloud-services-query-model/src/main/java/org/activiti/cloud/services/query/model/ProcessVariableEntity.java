@@ -25,6 +25,8 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
@@ -46,7 +48,7 @@ import org.hibernate.annotations.ParamDef;
 )
 @DynamicInsert
 @DynamicUpdate
-public class ProcessVariableEntity extends AbstractVariableEntity {
+public class ProcessVariableEntity extends AbstractVariableEntity implements QueryCloudVariableInstance {
 
     @Id
     @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
@@ -58,6 +60,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     private Long id;
 
     private String variableDefinitionId;
+
+    private boolean ephemeral;
 
     @Schema(
         description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
@@ -79,7 +83,8 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         String appVersion,
         Date createTime,
         Date lastUpdatedTime,
-        String executionId
+        String executionId,
+        boolean ephemeral
     ) {
         super(
             type,
@@ -95,6 +100,12 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
             executionId
         );
         this.id = id;
+        this.ephemeral = ephemeral;
+    }
+
+    public ProcessVariableEntity(CloudVariableEvent variableEvent) {
+        super(variableEvent);
+        this.ephemeral = variableEvent.isEphemeralVariable();
     }
 
     @Override
@@ -126,6 +137,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public boolean isEphemeral() {
+        return ephemeral;
+    }
+
+    public void setEphemeral(boolean ephemeral) {
+        this.ephemeral = ephemeral;
     }
 
     @Override

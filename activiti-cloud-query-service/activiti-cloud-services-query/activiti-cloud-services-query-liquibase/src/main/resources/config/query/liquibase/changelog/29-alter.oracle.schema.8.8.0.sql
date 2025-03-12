@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.model.shared.events;
 
-import org.activiti.api.model.shared.event.VariableEvent;
-import org.activiti.api.model.shared.model.VariableInstance;
-
-public interface CloudVariableEvent
-    extends VariableEvent, CloudRuntimeEvent<VariableInstance, VariableEvent.VariableEvents> {}
+ALTER TABLE process_variable
+  ADD COLUMN ephemeral NUMBER(1,0);
