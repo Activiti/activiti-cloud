@@ -296,7 +296,7 @@ jobs:
   delete-test-images:
     runs-on: ubuntu-latest
     needs:
-      - acceptance-tests
+#      - acceptance-tests
       # dependency needed for build.outputs env variables resolution
       - build
     steps:
