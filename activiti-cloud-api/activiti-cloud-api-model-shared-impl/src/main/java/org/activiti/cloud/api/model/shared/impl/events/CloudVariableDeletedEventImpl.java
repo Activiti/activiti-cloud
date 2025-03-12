@@ -21,10 +21,17 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 
 public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl implements CloudVariableDeletedEvent {
 
+    private boolean isEphemeralVariable;
+
     public CloudVariableDeletedEventImpl() {}
 
     public CloudVariableDeletedEventImpl(VariableInstance entity) {
         super(entity);
+    }
+
+    public CloudVariableDeletedEventImpl(VariableInstance entity, boolean isEphemeralVariable) {
+        super(entity);
+        this.isEphemeralVariable = isEphemeralVariable;
     }
 
     public CloudVariableDeletedEventImpl(String id, Long timestamp, VariableInstance entity) {
@@ -34,5 +41,10 @@ public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl implem
     @Override
     public VariableEvent.VariableEvents getEventType() {
         return VariableEvent.VariableEvents.VARIABLE_DELETED;
+    }
+
+    @Override
+    public boolean isEphemeralVariable() {
+        return this.isEphemeralVariable;
     }
 }

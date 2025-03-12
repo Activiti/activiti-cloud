@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
-import java.util.Date;
 import java.util.Set;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -67,25 +66,11 @@ public class ProcessVariableCreatedEventHandler {
         CloudVariableCreatedEvent variableCreatedEvent,
         ProcessInstanceEntity processInstanceEntity
     ) {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-            null,
-            variableCreatedEvent.getEntity().getType(),
-            variableCreatedEvent.getEntity().getName(),
-            variableCreatedEvent.getEntity().getProcessInstanceId(),
-            variableCreatedEvent.getServiceName(),
-            variableCreatedEvent.getServiceFullName(),
-            variableCreatedEvent.getServiceVersion(),
-            variableCreatedEvent.getAppName(),
-            variableCreatedEvent.getAppVersion(),
-            new Date(variableCreatedEvent.getTimestamp()),
-            new Date(variableCreatedEvent.getTimestamp()),
-            null
-        );
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity(variableCreatedEvent);
         variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
         variableEntity.setProcessInstance(processInstanceEntity);
-
         entityManager.persist(variableEntity);
 
         return variableEntity;

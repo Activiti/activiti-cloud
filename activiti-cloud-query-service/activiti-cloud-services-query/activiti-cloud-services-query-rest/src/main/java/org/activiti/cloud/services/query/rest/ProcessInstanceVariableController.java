@@ -24,11 +24,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,13 +51,13 @@ public class ProcessInstanceVariableController {
 
     private final VariableRepository variableRepository;
 
-    private ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+    private final QueryCloudVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedCollectionModelAssembler;
 
     @Autowired
     public ProcessInstanceVariableController(
-        ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        QueryCloudVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         VariableRepository variableRepository,
         AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedCollectionModelAssembler
     ) {
@@ -67,7 +67,7 @@ public class ProcessInstanceVariableController {
     }
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesProcess(
+    public PagedModel<EntityModel<QueryCloudVariableInstance>> getVariablesProcess(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessVariableEntity.class
