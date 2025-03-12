@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.model.shared.events;
+package org.activiti.cloud.api.model.shared;
 
-import org.activiti.api.model.shared.event.VariableEvent;
-import org.activiti.api.model.shared.model.VariableInstance;
-
-public interface CloudVariableEvent
-    extends VariableEvent, CloudRuntimeEvent<VariableInstance, VariableEvent.VariableEvents> {}
+public interface QueryCloudVariableInstance extends CloudVariableInstance {
+    boolean isEphemeral();
+}

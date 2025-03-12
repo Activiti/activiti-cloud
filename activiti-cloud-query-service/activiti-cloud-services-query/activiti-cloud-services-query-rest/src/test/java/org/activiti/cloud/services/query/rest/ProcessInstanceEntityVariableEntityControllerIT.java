@@ -155,6 +155,45 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     @Test
+    public void getVariablesShouldReturnAllResultsWithEphemeralFieldUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
+
+        ProcessVariableEntity variableEntity = buildEphemeralVariable();
+
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
+
+        //when
+        MvcResult result = mockMvc
+            .perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/variables?skipCount=11&maxItems=10",
+                    variableEntity.getProcessInstanceId()
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThatJson(result.getResponse().getContentAsString())
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12)
+            .node("list.entries[0].entry.ephemeral")
+            .isEqualTo(true);
+    }
+
+    @Test
     public void getVariablesShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
@@ -178,6 +217,10 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     private ProcessVariableEntity buildVariable() {
+        return buildVariable(false);
+    }
+
+    private ProcessVariableEntity buildVariable(boolean ephemeral) {
         ProcessVariableEntity variableEntity = new ProcessVariableEntity(
             1L,
             String.class.getName(),
@@ -190,9 +233,14 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             null,
             new Date(),
             new Date(),
-            UUID.randomUUID().toString()
+            UUID.randomUUID().toString(),
+            ephemeral
         );
         variableEntity.setValue("John");
         return variableEntity;
+    }
+
+    private ProcessVariableEntity buildEphemeralVariable() {
+        return buildVariable(true);
     }
 }
