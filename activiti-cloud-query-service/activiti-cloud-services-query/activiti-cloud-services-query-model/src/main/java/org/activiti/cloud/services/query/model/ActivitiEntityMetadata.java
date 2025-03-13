@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 @MappedSuperclass
 public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
@@ -43,6 +44,14 @@ public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
         this.serviceVersion = serviceVersion;
         this.appName = appName;
         this.appVersion = appVersion;
+    }
+
+    public ActivitiEntityMetadata(CloudRuntimeEvent<?, ?> cloudVariableEvent) {
+        this.serviceName = cloudVariableEvent.getServiceName();
+        this.serviceFullName = cloudVariableEvent.getServiceFullName();
+        this.serviceVersion = cloudVariableEvent.getServiceVersion();
+        this.appName = cloudVariableEvent.getAppName();
+        this.appVersion = cloudVariableEvent.getAppVersion();
     }
 
     public String getServiceName() {

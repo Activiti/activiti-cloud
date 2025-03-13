@@ -22,8 +22,14 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implements CloudVariableCreatedEvent {
 
     private String variableDefinitionId;
+    private boolean isEphemeralVariable;
 
     public CloudVariableCreatedEventImpl() {}
+
+    public CloudVariableCreatedEventImpl(VariableInstance entity, boolean isEphemeralVariable) {
+        super(entity);
+        this.isEphemeralVariable = isEphemeralVariable;
+    }
 
     public CloudVariableCreatedEventImpl(VariableInstance entity) {
         super(entity);
@@ -45,5 +51,10 @@ public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implem
 
     public void setVariableDefinitionId(String variableDefinitionId) {
         this.variableDefinitionId = variableDefinitionId;
+    }
+
+    @Override
+    public boolean isEphemeralVariable() {
+        return this.isEphemeralVariable;
     }
 }

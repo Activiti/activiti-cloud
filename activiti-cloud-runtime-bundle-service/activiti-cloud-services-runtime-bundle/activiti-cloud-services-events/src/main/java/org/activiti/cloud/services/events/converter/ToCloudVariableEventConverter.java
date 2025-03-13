@@ -45,9 +45,11 @@ public class ToCloudVariableEventConverter {
     }
 
     public CloudVariableCreatedEvent from(VariableCreatedEvent event) {
-        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(event.getEntity());
+        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(
+            event.getEntity(),
+            event.isEphemeralVariable()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
-
         cloudEvent.setVariableDefinitionId(getVariableDefinitionId(event));
         return cloudEvent;
     }
@@ -55,14 +57,18 @@ public class ToCloudVariableEventConverter {
     public CloudVariableUpdatedEvent from(VariableUpdatedEvent event) {
         CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl<>(
             event.getEntity(),
-            event.getPreviousValue()
+            event.getPreviousValue(),
+            event.isEphemeralVariable()
         );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudVariableDeletedEvent from(VariableDeletedEvent event) {
-        CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(event.getEntity());
+        CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(
+            event.getEntity(),
+            event.isEphemeralVariable()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
