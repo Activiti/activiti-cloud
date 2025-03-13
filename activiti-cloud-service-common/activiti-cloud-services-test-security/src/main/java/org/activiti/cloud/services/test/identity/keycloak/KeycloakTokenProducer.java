@@ -131,6 +131,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
         requestParams.add("username", user);
         requestParams.add("password", password);
         requestParams.add("grant_type", "password");
+        requestParams.add("scope", "openid email profile basic");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestParams, headers);
