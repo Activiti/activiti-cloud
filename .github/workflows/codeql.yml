@@ -80,8 +80,6 @@ jobs:
       env:
        MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
        MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-       GHCR_USERNAME: ${{ github.actor }}
-       GHCR_PASSWORD: ${{ secrets.HYLAND_GH_PACKAGES_READ_ONLY_TOKEN }}
        MAVEN_CLI_OPTS: >-
         --settings settings.xml -V --no-transfer-progress -Dspring.main.banner-mode=off
       run: mvn ${{ env.MAVEN_CLI_OPTS}} clean package -f "pom.xml" -B -V -e -Dfindbugs.skip
