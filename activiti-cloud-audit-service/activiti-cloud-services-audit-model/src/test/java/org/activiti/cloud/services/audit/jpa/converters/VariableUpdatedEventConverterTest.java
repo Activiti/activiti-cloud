@@ -20,37 +20,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
-import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
+import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.VariableValue;
 import org.junit.jupiter.api.Test;
 
-class VariableCreatedEventConverterTest {
+class VariableUpdatedEventConverterTest {
 
-    private final VariableCreatedEventConverter variableCreatedEventConverter = new VariableCreatedEventConverter(
+    private final VariableUpdatedEventConverter variableUpdatedEventConverter = new VariableUpdatedEventConverter(
         new EventContextInfoAppender()
     );
 
     @Test
-    void should_supportVariableCreatedEvent() {
-        assertThat(variableCreatedEventConverter.getSupportedEvent())
-            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
+    void should_supportVariableUpdatedEvent() {
+        assertThat(variableUpdatedEventConverter.getSupportedEvent())
+            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
     }
 
     @Test
     void shouldConvertFromCloudEventToEventEntity() {
-        CloudVariableCreatedEventImpl cloudEvent = buildCloudCreateInstance(buildVariableInstance());
+        CloudVariableUpdatedEventImpl<String> cloudEvent = buildCloudUpdateInstance(buildVariableInstance());
 
-        VariableCreatedEventEntity eventEntity = variableCreatedEventConverter.createEventEntity(cloudEvent);
+        VariableUpdatedEventEntity eventEntity = variableUpdatedEventConverter.createEventEntity(cloudEvent);
 
         assertHasSameAttributeValues(eventEntity, cloudEvent);
     }
 
     @Test
     void shouldConvertFromCloudEventToEventEntity_when_itsEphemeralVariable() {
-        CloudVariableCreatedEventImpl cloudEvent = buildCloudCreateInstance(buildVariableInstance());
+        CloudVariableUpdatedEventImpl<String> cloudEvent = buildCloudUpdateInstance(buildVariableInstance());
         cloudEvent.setEphemeralVariable(true);
 
-        VariableCreatedEventEntity eventEntity = variableCreatedEventConverter.createEventEntity(cloudEvent);
+        VariableUpdatedEventEntity eventEntity = variableUpdatedEventConverter.createEventEntity(cloudEvent);
 
         assertHasSameAttributeValues(eventEntity, cloudEvent);
     }
@@ -60,8 +61,8 @@ class VariableCreatedEventConverterTest {
     }
 
     private void assertHasSameAttributeValues(
-        VariableCreatedEventEntity eventEntity,
-        CloudVariableCreatedEventImpl cloudEvent
+        VariableUpdatedEventEntity eventEntity,
+        CloudVariableUpdatedEventImpl<String> cloudEvent
     ) {
         assertThat(eventEntity.getEventId()).isEqualTo(cloudEvent.getId());
         assertThat(eventEntity.getTimestamp()).isEqualTo(cloudEvent.getTimestamp());
@@ -82,16 +83,20 @@ class VariableCreatedEventConverterTest {
         assertThat(eventEntity.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
         assertThat(eventEntity.getVariableName()).isEqualTo(cloudEvent.getEntity().getName());
         assertThat(eventEntity.getVariableType()).isEqualTo(cloudEvent.getEntity().getType());
+        assertThat(eventEntity.getPreviousValue().getValue()).isEqualTo(cloudEvent.getPreviousValue());
         assertThat(eventEntity.getVariableInstance()).isEqualTo(cloudEvent.getEntity());
         assertThat(eventEntity.getTaskId()).isEqualTo(cloudEvent.getEntity().getTaskId());
         assertThat(eventEntity.isEphemeralVariable()).isEqualTo(cloudEvent.isEphemeralVariable());
     }
 
-    private CloudVariableCreatedEventImpl buildCloudCreateInstance(VariableInstanceImpl<String> variableInstance) {
-        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(
+    private CloudVariableUpdatedEventImpl<String> buildCloudUpdateInstance(
+        VariableInstanceImpl<String> variableInstance
+    ) {
+        CloudVariableUpdatedEventImpl<String> cloudEvent = new CloudVariableUpdatedEventImpl<String>(
             "id",
             System.currentTimeMillis(),
-            variableInstance
+            variableInstance,
+            "previousValue"
         );
         cloudEvent.setAppName("appName");
         cloudEvent.setAppVersion("appVersion");
@@ -111,38 +116,42 @@ class VariableCreatedEventConverterTest {
 
     @Test
     void createAPIEvent_should_createCloudEventWithBasicInformation() {
-        VariableCreatedEventEntity variableCreatedEventEntity = new VariableCreatedEventEntity();
-        variableCreatedEventEntity.setEventId("eventId");
-        variableCreatedEventEntity.setTimestamp(System.currentTimeMillis());
-        variableCreatedEventEntity.setVariableInstance(buildVariableInstance());
+        VariableUpdatedEventEntity variableUpdatedEventEntity = new VariableUpdatedEventEntity();
+        variableUpdatedEventEntity.setEventId("eventId");
+        variableUpdatedEventEntity.setTimestamp(System.currentTimeMillis());
+        variableUpdatedEventEntity.setVariableInstance(buildVariableInstance());
 
-        CloudVariableCreatedEventImpl event = (CloudVariableCreatedEventImpl) variableCreatedEventConverter.createAPIEvent(
-            variableCreatedEventEntity
+        CloudVariableUpdatedEventImpl<String> event = (CloudVariableUpdatedEventImpl<String>) variableUpdatedEventConverter.createAPIEvent(
+            variableUpdatedEventEntity
         );
 
         assertThat(event).isNotNull();
-        assertThat(event.getId()).isEqualTo(variableCreatedEventEntity.getEventId());
-        assertThat(event.getTimestamp()).isEqualTo(variableCreatedEventEntity.getTimestamp());
-        assertThat(event.getEntity()).isEqualTo(variableCreatedEventEntity.getVariableInstance());
-        assertThat(event.isEphemeralVariable()).isEqualTo(variableCreatedEventEntity.isEphemeralVariable());
+        assertThat(event.getId()).isEqualTo(variableUpdatedEventEntity.getEventId());
+        assertThat(event.getTimestamp()).isEqualTo(variableUpdatedEventEntity.getTimestamp());
+        assertThat(event.getEntity()).isEqualTo(variableUpdatedEventEntity.getVariableInstance());
+        assertThat(event.isEphemeralVariable()).isEqualTo(variableUpdatedEventEntity.isEphemeralVariable());
     }
 
     @Test
     void createAPIEvent_should_createCloudEventWithBasicInformationAndEphemeralAttribute() {
-        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(buildVariableInstance(), true);
+        CloudVariableUpdatedEventImpl<String> cloudEvent = new CloudVariableUpdatedEventImpl<String>(
+            buildVariableInstance(),
+            "previousValue",
+            true
+        );
         cloudEvent.setSequenceNumber(1);
-        VariableCreatedEventEntity variableCreatedEventEntity = new VariableCreatedEventEntity(cloudEvent);
-        variableCreatedEventEntity.setEventId("eventId");
-        variableCreatedEventEntity.setTimestamp(System.currentTimeMillis());
+        VariableUpdatedEventEntity variableUpdatedEventEntity = new VariableUpdatedEventEntity(cloudEvent);
+        variableUpdatedEventEntity.setEventId("eventId");
+        variableUpdatedEventEntity.setTimestamp(System.currentTimeMillis());
 
-        CloudVariableCreatedEventImpl event = (CloudVariableCreatedEventImpl) variableCreatedEventConverter.createAPIEvent(
-            variableCreatedEventEntity
+        CloudVariableUpdatedEventImpl event = (CloudVariableUpdatedEventImpl) variableUpdatedEventConverter.createAPIEvent(
+            variableUpdatedEventEntity
         );
 
         assertThat(event).isNotNull();
-        assertThat(event.getId()).isEqualTo(variableCreatedEventEntity.getEventId());
-        assertThat(event.getTimestamp()).isEqualTo(variableCreatedEventEntity.getTimestamp());
-        assertThat(event.getEntity()).isEqualTo(variableCreatedEventEntity.getVariableInstance());
+        assertThat(event.getId()).isEqualTo(variableUpdatedEventEntity.getEventId());
+        assertThat(event.getTimestamp()).isEqualTo(variableUpdatedEventEntity.getTimestamp());
+        assertThat(event.getEntity()).isEqualTo(variableUpdatedEventEntity.getVariableInstance());
         assertThat(event.isEphemeralVariable()).isTrue();
     }
 }
