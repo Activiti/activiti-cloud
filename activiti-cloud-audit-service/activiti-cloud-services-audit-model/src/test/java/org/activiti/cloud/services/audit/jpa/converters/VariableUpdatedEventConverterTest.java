@@ -22,7 +22,6 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.VariableUpdatedEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.VariableValue;
 import org.junit.jupiter.api.Test;
 
 class VariableUpdatedEventConverterTest {
