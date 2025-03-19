@@ -16,7 +16,9 @@
 
 package org.activiti.services.connectors.conf;
 
+import java.util.Collection;
 import java.util.function.Consumer;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -175,7 +177,8 @@ public class CloudConnectorsAutoConfiguration {
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
         IntegrationRequestBuilder integrationRequestBuilder,
-        IntegrationRequestSender integrationRequestSender
+        IntegrationRequestSender integrationRequestSender,
+        Collection<Consumer<IntegrationContext>> integrationContextEnrichers
     ) {
         return new MQServiceTaskBehavior(
             integrationContextManager,
@@ -184,7 +187,8 @@ public class CloudConnectorsAutoConfiguration {
             defaultServiceTaskBehavior,
             processEngineEventsAggregator,
             runtimeBundleProperties,
-            integrationRequestBuilder
+            integrationRequestBuilder,
+            integrationContextEnrichers
         );
     }
 }

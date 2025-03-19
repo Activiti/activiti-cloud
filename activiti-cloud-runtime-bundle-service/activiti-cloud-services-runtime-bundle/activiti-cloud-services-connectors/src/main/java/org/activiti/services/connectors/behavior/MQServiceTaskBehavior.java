@@ -15,7 +15,9 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.function.Consumer;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
@@ -40,6 +42,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final IntegrationRequestSender integrationRequestSender;
+    private final Collection<Consumer<IntegrationContext>> integrationContextEnrichers;
 
     public MQServiceTaskBehavior(
         IntegrationContextManager integrationContextManager,
@@ -48,7 +51,8 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         DefaultServiceTaskBehavior defaultServiceTaskBehavior,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
-        IntegrationRequestBuilder integrationRequestBuilder
+        IntegrationRequestBuilder integrationRequestBuilder,
+        Collection<Consumer<IntegrationContext>> integrationContextEnrichers
     ) {
         this.integrationContextManager = integrationContextManager;
         this.integrationRequestSender = integrationRequestSender;
@@ -57,6 +61,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         this.defaultServiceTaskBehavior = defaultServiceTaskBehavior;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.integrationContextEnrichers = integrationContextEnrichers;
     }
 
     @Override
@@ -70,6 +75,9 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
             storeIntegrationContext(execution),
             execution
         );
+        if (integrationContextEnrichers != null) {
+            integrationContextEnrichers.forEach(enricher -> enricher.accept(integrationContext));
+        }
         sendIntegrationRequest(integrationContext);
         aggregateCloudIntegrationRequestedEvent(integrationContext);
 

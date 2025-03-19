@@ -30,6 +30,8 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Collection;
+import java.util.function.Consumer;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -70,19 +72,23 @@ public class TaskControllerImpl implements TaskController {
 
     private final ProcessVariablesPayloadConverter payloadConverter;
 
+    private final Collection<Consumer<Task>> postTaskCompletionActions;
+
     @Autowired
     public TaskControllerImpl(
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         TaskRuntime taskRuntime,
-        ProcessVariablesPayloadConverter payloadConverter
+        ProcessVariablesPayloadConverter payloadConverter,
+        Collection<Consumer<Task>> postTaskCompletionActions
     ) {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
         this.taskRuntime = taskRuntime;
         this.payloadConverter = payloadConverter;
+        this.postTaskCompletionActions = postTaskCompletionActions;
     }
 
     @Override
@@ -128,6 +134,9 @@ public class TaskControllerImpl implements TaskController {
         }
 
         Task task = taskRuntime.complete(completeTaskPayload);
+        if (postTaskCompletionActions != null) {
+            postTaskCompletionActions.forEach(action -> action.accept(task));
+        }
         return taskRepresentationModelAssembler.toModel(task);
     }
 

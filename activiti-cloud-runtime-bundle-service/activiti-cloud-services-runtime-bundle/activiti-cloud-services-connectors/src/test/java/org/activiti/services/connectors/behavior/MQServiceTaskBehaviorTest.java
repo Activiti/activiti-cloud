@@ -24,6 +24,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -107,7 +108,8 @@ public class MQServiceTaskBehaviorTest {
                     defaultServiceTaskBehavior,
                     processEngineEventsAggregator,
                     runtimeBundleProperties,
-                    integrationRequestBuilder
+                    integrationRequestBuilder,
+                    Collections.emptyList()
                 )
             );
     }
