@@ -49,6 +49,7 @@ create table audit_event
     deployment                 text,
     candidate_starter_user     text,
     candidate_starter_group    text,
+    ephemeral_variable         boolean,
     primary key (id)
 );
 

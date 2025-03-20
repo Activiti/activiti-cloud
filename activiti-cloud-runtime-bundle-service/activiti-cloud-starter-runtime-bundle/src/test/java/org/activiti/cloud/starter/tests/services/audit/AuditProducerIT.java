@@ -84,6 +84,7 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.CompleteTaskPayloadBuilder;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
@@ -449,6 +450,40 @@ public class AuditProducerIT {
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getCompletedBy())
             .doesNotContainNull();
+    }
+
+    @Test
+    void should_produceEventForEphemeralVariables() {
+        //given
+        String ephemeralVarName = "ephemeralVar";
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("name", "peter")
+                .withVariable(ephemeralVarName, "availableOnTaskVariableEventButNotOnProcessVariableEvent")
+                .build()
+        );
+
+        //when
+        List<CloudVariableCreatedEvent> createdVariableEvents = streamHandler
+            .getAllReceivedEvents(CloudVariableCreatedEvent.class)
+            .stream()
+            .filter(event -> ephemeralVarName.equals(event.getEntity().getName()))
+            .toList();
+
+        //then
+        assertThat(createdVariableEvents)
+            .extracting(
+                CloudVariableCreatedEvent::isEphemeralVariable,
+                event -> event.getEntity().isTaskVariable(),
+                event -> event.getEntity().getValue()
+            )
+            .containsExactlyInAnyOrder(
+                tuple(true, false, null),
+                tuple(false, true, "availableOnTaskVariableEventButNotOnProcessVariableEvent")
+            );
     }
 
     @Test
