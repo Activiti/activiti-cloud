@@ -21,6 +21,8 @@ import org.activiti.api.model.shared.model.VariableInstance;
 public abstract class CloudVariableEventImpl
     extends CloudRuntimeEventImpl<VariableInstance, VariableEvent.VariableEvents> {
 
+    private boolean isEphemeralVariable;
+
     public CloudVariableEventImpl() {}
 
     public CloudVariableEventImpl(VariableInstance entity) {
@@ -31,5 +33,18 @@ public abstract class CloudVariableEventImpl
     public CloudVariableEventImpl(String id, Long timestamp, VariableInstance entity) {
         super(id, timestamp, entity);
         setEntityId(entity.getName());
+    }
+
+    public CloudVariableEventImpl(VariableInstance entity, boolean isEphemeralVariable) {
+        this(entity);
+        this.isEphemeralVariable = isEphemeralVariable;
+    }
+
+    public boolean isEphemeralVariable() {
+        return this.isEphemeralVariable;
+    }
+
+    public void setEphemeralVariable(boolean ephemeralVariable) {
+        isEphemeralVariable = ephemeralVariable;
     }
 }
