@@ -222,6 +222,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     private String parentId;
 
+    private String rootProcessInstanceId;
+
     @Transient
     private Set<QueryCloudSubprocessInstance> subprocesses;
 
@@ -388,6 +390,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     @Override
     public String getProcessDefinitionName() {
         return processDefinitionName;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId ;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public void setProcessDefinitionName(String processDefinitionName) {
