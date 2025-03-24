@@ -2038,6 +2038,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -2317,6 +2324,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3520,6 +3534,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -4169,6 +4190,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -5997,6 +6025,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
