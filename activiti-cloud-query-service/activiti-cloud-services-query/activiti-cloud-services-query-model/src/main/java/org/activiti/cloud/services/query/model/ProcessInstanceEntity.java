@@ -394,7 +394,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     @Override
     public String getRootProcessInstanceId() {
-        return rootProcessInstanceId ;
+        return rootProcessInstanceId;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
