@@ -7655,6 +7655,9 @@
           },
           "processDefinitionName": {
             "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_General"
