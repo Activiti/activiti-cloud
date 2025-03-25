@@ -53,6 +53,7 @@ import org.activiti.cloud.services.core.commands.StartProcessInstanceCmdExecutor
 import org.activiti.cloud.services.core.commands.SuspendProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SyncProcessDefinitionsCmdExecutor;
 import org.activiti.cloud.services.core.commands.UpdateTaskVariableCmdExecutor;
+import org.activiti.cloud.services.core.decorator.ProcessDefinitionConstantValuesDecorator;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionVariablesDecorator;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -195,7 +196,7 @@ public class ServicesCoreAutoConfiguration {
     @Bean("commandEndpoint")
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        return new CommandEndpoint<T>(cmdExecutors);
+        return new CommandEndpoint<>(cmdExecutors);
     }
 
     @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
@@ -282,6 +283,15 @@ public class ServicesCoreAutoConfiguration {
         ProcessExtensionService processExtensionService
     ) {
         return new ProcessDefinitionVariablesDecorator(processExtensionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionConstantValuesDecorator processDefinitionConstantValuesDecorator(
+        ProcessExtensionService processExtensionService,
+        RepositoryService repositoryService
+    ) {
+        return new ProcessDefinitionConstantValuesDecorator(processExtensionService, repositoryService);
     }
 
     @Bean
