@@ -2192,6 +2192,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
