@@ -32,7 +32,7 @@ jobs:
       - name: Check dependabot build
         uses: Activiti/Activiti/.github/actions/check-ext-build@d93095fd93ebed502ee1a7520afbf43cfcaf510a # 8.7.0
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -52,7 +52,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+      - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -72,7 +72,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -111,7 +111,7 @@ jobs:
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
       - name: Login to DockerHub
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -153,7 +153,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+      - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -177,7 +177,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -339,7 +339,7 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+      - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -358,7 +358,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -381,7 +381,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -419,12 +419,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -447,6 +447,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@695272dc5144fc5484e4ea610ae82715fb6294c8 # v8.14.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@c1236aee36bb9b35c5972819fcf8a4d07572e6cd # v8.16.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WEBHOOK }}

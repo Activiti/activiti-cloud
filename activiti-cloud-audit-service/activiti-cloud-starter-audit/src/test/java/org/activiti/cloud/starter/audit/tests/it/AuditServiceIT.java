@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
@@ -56,9 +57,12 @@ import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.model.shared.impl.conf.IgnoredRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
@@ -205,6 +209,47 @@ public class AuditServiceIT {
                         event -> event.getEntity().getValue()
                     )
                     .containsExactly("bigDecimalVar", "bigdecimal", "1.00");
+            });
+    }
+
+    @Test
+    public void should_handleEphemeralVariables() {
+        //given
+        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>(
+            "ephemeralVar",
+            "string",
+            null,
+            UUID.randomUUID().toString(),
+            null
+        );
+        List<CloudVariableEvent> variableEvents = new ArrayList<>();
+        variableEvents.add(new CloudVariableCreatedEventImpl(variableInstance, true));
+        variableEvents.add(new CloudVariableUpdatedEventImpl<>(variableInstance, null, true));
+        variableEvents.add(new CloudVariableDeletedEventImpl(variableInstance, true));
+        producer.send(variableEvents.toArray(new CloudVariableEvent[0]));
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents)
+                    .filteredOn(CloudVariableEvent.class::isInstance)
+                    .extracting(CloudVariableEvent.class::cast)
+                    .extracting(
+                        CloudVariableEvent::getEventType,
+                        event -> event.getEntity().getName(),
+                        event -> event.getEntity().getType(),
+                        event -> event.getEntity().getValue(),
+                        CloudVariableEvent::isEphemeralVariable
+                    )
+                    .containsExactlyInAnyOrder(
+                        tuple(VariableEvent.VariableEvents.VARIABLE_CREATED, "ephemeralVar", "string", null, true),
+                        tuple(VariableEvent.VariableEvents.VARIABLE_UPDATED, "ephemeralVar", "string", null, true),
+                        tuple(VariableEvent.VariableEvents.VARIABLE_DELETED, "ephemeralVar", "string", null, true)
+                    );
             });
     }
 
