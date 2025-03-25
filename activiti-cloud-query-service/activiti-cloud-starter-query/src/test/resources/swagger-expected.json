@@ -2319,13 +2319,6 @@
             }
           },
           {
-            "name": "rootProcessInstanceId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "processDefinitionVersion",
             "in": "query",
             "schema": {
@@ -2353,6 +2346,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
