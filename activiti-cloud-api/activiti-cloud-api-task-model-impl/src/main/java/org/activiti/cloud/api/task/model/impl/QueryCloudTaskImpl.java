@@ -26,6 +26,7 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public String processDefinitionName;
     public List<TaskPermissions> permissions;
     public Set<? extends CloudVariableInstance> processVariables;
+    public String rootProcessInstanceId;
 
     public QueryCloudTaskImpl() {}
 
@@ -52,4 +53,14 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public Set<? extends CloudVariableInstance> getProcessVariables() {
         return processVariables;
     }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
+    }
+
 }
