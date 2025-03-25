@@ -62,5 +62,4 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
         this.rootProcessInstanceId = rootProcessInstanceId;
     }
-
 }

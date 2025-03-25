@@ -645,7 +645,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         return rootProcessInstanceId;
     }
 
-    public void setRootProcessInstanceId(String rootProcessInstanceId){
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
         this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
