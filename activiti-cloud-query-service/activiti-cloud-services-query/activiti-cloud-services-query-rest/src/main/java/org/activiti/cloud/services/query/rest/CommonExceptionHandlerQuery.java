@@ -66,7 +66,7 @@ public class CommonExceptionHandlerQuery {
         ConversionFailedException ex,
         HttpServletResponse response
     ) {
-        LOGGER.error(ex.getMessage(), ex);
+        LOGGER.warn(ex.getMessage(), ex);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(
             new ActivitiErrorMessageImpl(

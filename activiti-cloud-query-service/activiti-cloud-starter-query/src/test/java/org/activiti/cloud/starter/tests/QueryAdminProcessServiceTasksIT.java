@@ -297,6 +297,18 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
+    void shouldReturn400WhenGetServiceTasksByStatusWithInvalidStatus() {
+        ResponseEntity<PagedModel<CloudServiceTask>> running = testRestTemplate.exchange(
+            "/admin/v1/service-tasks?status={status}",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            "RUNNING"
+        );
+        assertThat(running.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     public void shouldGetServiceTasksByStatus() throws InterruptedException {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
