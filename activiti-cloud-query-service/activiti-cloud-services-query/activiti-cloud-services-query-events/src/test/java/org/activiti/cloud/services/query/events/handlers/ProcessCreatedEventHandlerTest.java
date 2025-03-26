@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import jakarta.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -29,10 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class ProcessCreatedEventHandlerTest {
 
@@ -41,7 +41,6 @@ public class ProcessCreatedEventHandlerTest {
 
     @Mock
     EntityManager entityManager;
-
 
     @Test
     public void handleShouldCreateAndStoreProcessInstanceEntity() {
@@ -55,7 +54,6 @@ public class ProcessCreatedEventHandlerTest {
         ArgumentCaptor<ProcessInstanceEntity> captor = ArgumentCaptor.forClass(ProcessInstanceEntity.class);
         verify(entityManager).persist(captor.capture());
 
-
         ProcessInstanceEntity processInstanceEntity = captor.getValue();
 
         Assertions
@@ -68,12 +66,12 @@ public class ProcessCreatedEventHandlerTest {
 
     private static ProcessInstanceImpl buildProcess() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-         processInstance.setId("id");
-         processInstance.setName("name");
-         processInstance.setProcessDefinitionId("processDefinitionId");
-         processInstance.setRootProcessInstanceId("rootProcessInstanceId");
+        processInstance.setId("id");
+        processInstance.setName("name");
+        processInstance.setProcessDefinitionId("processDefinitionId");
+        processInstance.setRootProcessInstanceId("rootProcessInstanceId");
 
-         return processInstance;
+        return processInstance;
     }
 
     @Test
