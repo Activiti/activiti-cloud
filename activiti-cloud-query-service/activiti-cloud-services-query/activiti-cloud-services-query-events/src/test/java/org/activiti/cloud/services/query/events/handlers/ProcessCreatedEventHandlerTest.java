@@ -58,7 +58,7 @@ public class ProcessCreatedEventHandlerTest {
 
         Assertions
             .assertThat(processInstanceEntity)
-            .hasId(event.getEntity())
+            .hasId(event.getEntity().getId())
             .hasName(event.getEntity().getName())
             .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
             .hasRootProcessInstanceId(event.getEntity().getRootProcessInstanceId());
