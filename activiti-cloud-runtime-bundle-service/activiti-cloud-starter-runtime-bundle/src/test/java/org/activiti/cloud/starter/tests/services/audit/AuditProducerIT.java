@@ -916,30 +916,17 @@ public class AuditProducerIT {
         String processInstanceId = processInstance.getBody().getId();
 
         // when
-        List<String> subprocessIds = runtimeService
+        List<org.activiti.engine.runtime.ProcessInstance> childInstances = runtimeService
             .createProcessInstanceQuery()
             .superProcessInstanceId(processInstanceId)
-            .list()
-            .stream()
-            .map(it -> it.getProcessInstanceId())
-            .collect(Collectors.toList());
-        // then
+            .list();
 
-        List<String> rootProcessInstanceIds = runtimeService
-            .createProcessInstanceQuery()
-            .superProcessInstanceId(processInstanceId)
-            .list()
-            .stream()
-            .map(Execution::getRootProcessInstanceId)
-            .toList();
+        assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).hasSize(2);
 
-        assertThat(subprocessIds).hasSize(2);
+        String subProcessId1 = childInstances.get(0).getProcessInstanceId();
+        String subProcessId2 = childInstances.get(1).getProcessInstanceId();
 
-        String subProcessId1 = subprocessIds.get(0);
-        String subProcessId2 = subprocessIds.get(1);
-
-        assertThat(rootProcessInstanceIds).hasSize(2);
-        assertThat(rootProcessInstanceIds).containsOnly(processInstanceId);
+        assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).containsOnly(processInstanceId);
 
         await()
             .untilAsserted(() -> {
