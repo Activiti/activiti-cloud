@@ -29,6 +29,7 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
+import org.activiti.cloud.services.core.ProcessDefinitionValuesService;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
@@ -288,10 +289,9 @@ public class ServicesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionConstantValuesDecorator processDefinitionConstantValuesDecorator(
-        ProcessExtensionService processExtensionService,
-        RepositoryService repositoryService
+        ProcessDefinitionValuesService processDefinitionValuesService
     ) {
-        return new ProcessDefinitionConstantValuesDecorator(processExtensionService, repositoryService);
+        return new ProcessDefinitionConstantValuesDecorator(processDefinitionValuesService);
     }
 
     @Bean
@@ -310,5 +310,14 @@ public class ServicesCoreAutoConfiguration {
         List<ProcessDefinitionDecorator> processDefinitionDecorators
     ) {
         return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionValuesService processDefinitionValuesService(
+        RepositoryService repositoryService,
+        ProcessExtensionService processExtensionService
+    ) {
+        return new ProcessDefinitionValuesService(repositoryService, processExtensionService);
     }
 }
