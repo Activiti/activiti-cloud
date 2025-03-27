@@ -28,7 +28,6 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.test.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -58,6 +57,7 @@ public class TaskCreatedEventHandlerTest {
     public void handleShouldCreateAndStoreTask() {
         //given
         CloudTaskCreatedEvent event = new CloudTaskCreatedEventImpl(buildTask());
+        var expectedEventEntity = event.getEntity();
 
         ProcessInstanceEntity processInstanceEntity = buildProcessDefinitionEntity();
 
@@ -73,12 +73,10 @@ public class TaskCreatedEventHandlerTest {
 
         TaskEntity taskEntity = captor.getValue();
 
-        Assertions
-            .assertThat(taskEntity)
-            .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
-            .hasName(event.getEntity().getName())
-            .hasId(event.getEntity().getId())
-            .hasrootProcessInstanceId(processInstanceEntity.getRootProcessInstanceId());
+        assertThat(taskEntity.getId()).isEqualTo(expectedEventEntity.getId());
+        assertThat(taskEntity.getName()).isEqualTo(expectedEventEntity.getName());
+        assertThat(taskEntity.getProcessInstanceId()).isEqualTo(expectedEventEntity.getProcessInstanceId());
+        assertThat(taskEntity.getRootProcessInstanceId()).isEqualTo(processInstanceEntity.getRootProcessInstanceId());
     }
 
     private ProcessInstanceEntity buildProcessDefinitionEntity() {
