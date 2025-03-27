@@ -59,9 +59,10 @@ public class TaskCreatedEventHandlerTest {
         CloudTaskCreatedEvent event = new CloudTaskCreatedEventImpl(buildTask());
         var expectedEventEntity = event.getEntity();
 
-        ProcessInstanceEntity processInstanceEntity = buildProcessDefinitionEntity();
+        ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
 
-        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
+        when(entityManager.find(TaskEntity.class, event.getEntity().getId())).thenReturn(null);
+        when(entityManagerFinder.findProcessInstanceWithTasks(event.getEntity().getProcessInstanceId()))
             .thenReturn(Optional.of(processInstanceEntity));
 
         //when
@@ -79,8 +80,9 @@ public class TaskCreatedEventHandlerTest {
         assertThat(taskEntity.getRootProcessInstanceId()).isEqualTo(processInstanceEntity.getRootProcessInstanceId());
     }
 
-    private ProcessInstanceEntity buildProcessDefinitionEntity() {
+    private ProcessInstanceEntity buildProcessInstanceEntity() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("processInstanceId");
         processInstanceEntity.setRootProcessInstanceId("rootProcessInstanceId");
         processInstanceEntity.setProcessDefinitionName("name");
         return processInstanceEntity;
