@@ -29,6 +29,7 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
+import org.activiti.cloud.services.core.ProcessDefinitionValuesService;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
@@ -53,6 +54,7 @@ import org.activiti.cloud.services.core.commands.StartProcessInstanceCmdExecutor
 import org.activiti.cloud.services.core.commands.SuspendProcessInstanceCmdExecutor;
 import org.activiti.cloud.services.core.commands.SyncProcessDefinitionsCmdExecutor;
 import org.activiti.cloud.services.core.commands.UpdateTaskVariableCmdExecutor;
+import org.activiti.cloud.services.core.decorator.ProcessDefinitionConstantValuesDecorator;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionVariablesDecorator;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -195,7 +197,7 @@ public class ServicesCoreAutoConfiguration {
     @Bean("commandEndpoint")
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        return new CommandEndpoint<T>(cmdExecutors);
+        return new CommandEndpoint<>(cmdExecutors);
     }
 
     @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
@@ -286,6 +288,14 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessDefinitionConstantValuesDecorator processDefinitionConstantValuesDecorator(
+        ProcessDefinitionValuesService processDefinitionValuesService
+    ) {
+        return new ProcessDefinitionConstantValuesDecorator(processDefinitionValuesService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ProcessDefinitionService processDefinitionService(
         ProcessRuntime processRuntime,
         List<ProcessDefinitionDecorator> processDefinitionDecorators
@@ -300,5 +310,14 @@ public class ServicesCoreAutoConfiguration {
         List<ProcessDefinitionDecorator> processDefinitionDecorators
     ) {
         return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionValuesService processDefinitionValuesService(
+        RepositoryService repositoryService,
+        ProcessExtensionService processExtensionService
+    ) {
+        return new ProcessDefinitionValuesService(repositoryService, processExtensionService);
     }
 }
