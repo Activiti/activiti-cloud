@@ -17,6 +17,7 @@ package org.activiti.services.connectors.behavior;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -186,5 +187,32 @@ class MQServiceTaskBehaviorTest {
 
         //then
         verify(integrationContextEnricher).enrich(integrationContext);
+    }
+
+    @Test
+    void should_notThrow_whenEnrichersCollectionIsNull() {
+        //given
+        behavior =
+            spy(
+                new MQServiceTaskBehavior(
+                    integrationContextManager,
+                    integrationRequestSender,
+                    integrationContextBuilder,
+                    defaultServiceTaskBehavior,
+                    processEngineEventsAggregator,
+                    runtimeBundleProperties,
+                    integrationRequestBuilder,
+                    null
+                )
+            );
+        DelegateExecution execution = mock(DelegateExecution.class);
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContext integrationContext = mock(IntegrationContext.class);
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        //then
+        assertDoesNotThrow(() -> behavior.apply(execution));
     }
 }
