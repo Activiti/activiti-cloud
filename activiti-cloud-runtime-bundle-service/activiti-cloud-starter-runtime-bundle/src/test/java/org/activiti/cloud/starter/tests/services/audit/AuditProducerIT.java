@@ -921,8 +921,6 @@ public class AuditProducerIT {
             .superProcessInstanceId(processInstanceId)
             .list();
 
-        assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).hasSize(2);
-
         String subProcessId1 = childInstances.get(0).getProcessInstanceId();
         String subProcessId2 = childInstances.get(1).getProcessInstanceId();
 

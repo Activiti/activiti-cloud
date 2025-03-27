@@ -25,7 +25,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.test.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -47,6 +47,7 @@ public class ProcessCreatedEventHandlerTest {
         //given
         CloudProcessCreatedEvent event = new CloudProcessCreatedEventImpl(buildProcess());
 
+
         when(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).thenReturn(null);
         handler.handle(event);
 
@@ -56,12 +57,12 @@ public class ProcessCreatedEventHandlerTest {
 
         ProcessInstanceEntity processInstanceEntity = captor.getValue();
 
-        Assertions
-            .assertThat(processInstanceEntity)
-            .hasId(event.getEntity().getId())
-            .hasName(event.getEntity().getName())
-            .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
-            .hasRootProcessInstanceId(event.getEntity().getRootProcessInstanceId());
+        var expectedEventEntity = event.getEntity();
+
+        assertThat(processInstanceEntity.getId()).isEqualTo(expectedEventEntity.getId());
+        assertThat(processInstanceEntity.getName()).isEqualTo(expectedEventEntity.getName());
+        assertThat(processInstanceEntity.getProcessDefinitionId()).isEqualTo(expectedEventEntity.getProcessDefinitionId());
+        assertThat(processInstanceEntity.getRootProcessInstanceId()).isEqualTo(expectedEventEntity.getRootProcessInstanceId());
     }
 
     private static ProcessInstanceImpl buildProcess() {
