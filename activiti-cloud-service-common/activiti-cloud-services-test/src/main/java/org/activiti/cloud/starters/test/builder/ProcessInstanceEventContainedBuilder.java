@@ -58,15 +58,6 @@ public class ProcessInstanceEventContainedBuilder {
         return processInstance;
     }
 
-    public ProcessInstanceImpl aRunningProcessInstanceWithRootProcessInstance(String name) {
-        ProcessInstanceImpl processInstance = buildProcessInstanceWithRootProcessInstanceId(name);
-        eventsAggregator.addEvents(
-            new CloudProcessCreatedEventImpl(processInstance),
-            new CloudProcessStartedEventImpl(processInstance, null, null)
-        );
-        return processInstance;
-    }
-
     public ProcessInstanceImpl startSimpleProcessInstance(String processDefinitionId) {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
@@ -127,6 +118,7 @@ public class ProcessInstanceEventContainedBuilder {
         completedProcess.setProcessDefinitionKey("my-proc");
         completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
         completedProcess.setProcessDefinitionName("my-proc-definition-name");
+        completedProcess.setRootProcessInstanceId("rootProcessInstanceId");
         return completedProcess;
     }
 
