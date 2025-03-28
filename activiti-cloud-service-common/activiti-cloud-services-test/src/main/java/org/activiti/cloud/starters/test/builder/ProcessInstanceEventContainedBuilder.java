@@ -104,12 +104,6 @@ public class ProcessInstanceEventContainedBuilder {
         return buildProcessInstance(name, "testuser");
     }
 
-    private ProcessInstanceImpl buildProcessInstanceWithRootProcessInstanceId(String name) {
-        ProcessInstanceImpl processInstance = buildProcessInstance(name, "testuser");
-        processInstance.setRootProcessInstanceId("rootProcessInstanceId");
-        return processInstance;
-    }
-
     private ProcessInstanceImpl buildProcessInstance(String name, String initiator) {
         ProcessInstanceImpl completedProcess = new ProcessInstanceImpl();
         completedProcess.setId(UUID.randomUUID().toString());
