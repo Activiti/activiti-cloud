@@ -417,8 +417,15 @@ public class QueryTasksIT {
 
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
-                QueryCloudTask task = tasks.stream().findFirst().get();
-                assertThat(task.getRootProcessInstanceId()).isEqualTo(processInstance.getRootProcessInstanceId());
+                QueryCloudTask fetchedTask = tasks
+                    .stream()
+                    .filter(task -> task.getId().equals(createdTask.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+                assertThat(fetchedTask).isNotNull();
+                assertThat(fetchedTask.getRootProcessInstanceId())
+                    .isEqualTo(processInstance.getRootProcessInstanceId());
             });
     }
 
