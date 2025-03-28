@@ -391,6 +391,37 @@ public class QueryTasksIT {
             });
     }
 
+    @Test
+    void should_getTasksWithRootProcessInstanceId() {
+        //given
+        ProcessInstance processInstance = processInstanceBuilder.aRunningProcessInstanceWithRootProcessInstanceId(
+            "processWithRootProcessInstanceId"
+        );
+        Task createdTask = taskEventContainedBuilder.aCreatedTask("Created Task", processInstance);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = testRestTemplate.exchange(
+                    TASKS_URL + "/" + createdTask.getId(),
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    Task.TaskStatus.CREATED
+                );
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                assertThat(responseEntity.getBody()).isNotNull();
+                Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
+                QueryCloudTask task = tasks.stream().findFirst().get();
+                assertThat(task.getRootProcessInstanceId()).isEqualTo(processInstance.getRootProcessInstanceId());
+            });
+    }
+
     private <T> Collection<QueryCloudTask> executeGetTasksWithVariable(
         String variableName,
         T variableValue,
