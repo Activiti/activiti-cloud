@@ -94,6 +94,7 @@ create table process_instance
     suspended_date             timestamp,
     status                     varchar(255),
     process_definition_name    varchar(255),
+    root_process_instance_id   varchar(255),
     primary key (id)
 );
 create table process_model
