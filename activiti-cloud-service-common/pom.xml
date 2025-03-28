@@ -34,8 +34,8 @@
     <module>activiti-cloud-service-messaging-starter</module>
   </modules>
   <properties>
-    <activiti.version>0.0.1-PR-4964-1131-20250324.101610-1</activiti.version>
-    <commons-beanutils.version>1.9.4</commons-beanutils.version>
+    <activiti.version>8.8.0-alpha.33</activiti.version>
+    <commons-beanutils.version>1.10.1</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
