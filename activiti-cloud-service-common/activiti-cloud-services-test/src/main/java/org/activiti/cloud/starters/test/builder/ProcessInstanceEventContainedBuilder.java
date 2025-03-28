@@ -187,4 +187,13 @@ public class ProcessInstanceEventContainedBuilder {
         );
         return suspendedProcess;
     }
+
+    public ProcessInstance aRunningProcessInstanceWithRootProcessInstanceId(String name) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance)
+        );
+        return processInstance;
+    }
 }
