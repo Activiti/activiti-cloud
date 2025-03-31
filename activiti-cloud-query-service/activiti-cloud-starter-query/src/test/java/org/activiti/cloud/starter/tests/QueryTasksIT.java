@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
@@ -399,8 +400,6 @@ public class QueryTasksIT {
         );
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created Task", processInstance);
 
-        System.out.println("task  createdTask.getId() = " + createdTask.getId());
-
         eventsAggregator.sendAll();
 
         await()
@@ -413,7 +412,6 @@ public class QueryTasksIT {
                     PAGED_TASKS_RESPONSE_TYPE
                 );
 
-                System.out.println("responseEntity = " + responseEntity.getBody().getContent());
                 //then
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
