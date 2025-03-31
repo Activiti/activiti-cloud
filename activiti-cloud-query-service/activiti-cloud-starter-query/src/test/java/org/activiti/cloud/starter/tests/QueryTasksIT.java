@@ -408,8 +408,7 @@ public class QueryTasksIT {
                     TASKS_URL + "/" + createdTask.getId(),
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    Task.TaskStatus.CREATED
+                    new ParameterizedTypeReference<PagedModel<QueryCloudTask>>() {}
                 );
                 //then
                 assertThat(responseEntity).isNotNull();
