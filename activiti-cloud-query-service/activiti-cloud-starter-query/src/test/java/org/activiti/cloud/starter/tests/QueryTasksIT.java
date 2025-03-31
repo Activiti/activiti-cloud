@@ -399,6 +399,8 @@ public class QueryTasksIT {
         );
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created Task", processInstance);
 
+        System.out.println("task  createdTask.getId() = " + createdTask.getId());
+
         eventsAggregator.sendAll();
 
         await()
@@ -408,8 +410,10 @@ public class QueryTasksIT {
                     TASKS_URL + "/" + createdTask.getId(),
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<PagedModel<QueryCloudTask>>() {}
+                    PAGED_TASKS_RESPONSE_TYPE
                 );
+
+                System.out.println("responseEntity = " + responseEntity.getBody().getContent());
                 //then
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
