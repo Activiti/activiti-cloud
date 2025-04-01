@@ -26,7 +26,7 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public String processDefinitionName;
     public List<TaskPermissions> permissions;
     public Set<? extends CloudVariableInstance> processVariables;
-    public String rootProcessInstanceId;
+    private String rootProcessInstanceId;
 
     public QueryCloudTaskImpl() {}
 

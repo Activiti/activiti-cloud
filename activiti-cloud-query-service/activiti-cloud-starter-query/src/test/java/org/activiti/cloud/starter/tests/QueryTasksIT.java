@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Function;
@@ -395,7 +394,7 @@ public class QueryTasksIT {
     @Test
     void should_getTasksWithRootProcessInstanceId() {
         //given
-        ProcessInstance processInstance = processInstanceBuilder.aRunningProcessInstanceWithRootProcessInstanceId(
+        ProcessInstance processInstance = processInstanceBuilder.aRunningProcessInstance(
             "processWithRootProcessInstanceId"
         );
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created Task", processInstance);
