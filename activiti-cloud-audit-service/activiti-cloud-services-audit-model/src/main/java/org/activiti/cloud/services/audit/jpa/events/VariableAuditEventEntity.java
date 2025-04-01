@@ -28,6 +28,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     private String variableName;
     private String variableType;
     private String taskId;
+    private boolean ephemeralVariable;
 
     @Convert(converter = VariableJpaJsonConverter.class)
     @Column(columnDefinition = "text")
@@ -38,6 +39,7 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
     public VariableAuditEventEntity(CloudVariableEvent cloudEvent) {
         super(cloudEvent);
         setVariableInstance(cloudEvent.getEntity());
+        this.ephemeralVariable = cloudEvent.isEphemeralVariable();
     }
 
     public String getVariableName() {
@@ -66,6 +68,10 @@ public abstract class VariableAuditEventEntity extends AuditEventEntity {
 
     public VariableInstance getVariableInstance() {
         return variableInstance;
+    }
+
+    public boolean isEphemeralVariable() {
+        return ephemeralVariable;
     }
 
     public void setVariableInstance(VariableInstance variableInstance) {

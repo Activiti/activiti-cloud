@@ -1594,6 +1594,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -1896,6 +1903,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -2175,6 +2189,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3378,6 +3399,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -4027,6 +4055,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -5858,6 +5893,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -7146,6 +7188,9 @@
           },
           "processDefinitionName": {
             "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_ProcessVariables"
@@ -7654,6 +7699,9 @@
             "format": "int32"
           },
           "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
             "type": "string"
           }
         },

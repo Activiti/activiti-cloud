@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model;
+package org.activiti.services.connectors.enricher;
 
-import java.util.List;
-import java.util.Map;
-import org.activiti.api.process.model.VariableDefinition;
+import org.activiti.api.process.model.IntegrationContext;
 
-public interface ExtendedCloudProcessDefinition extends CloudProcessDefinition {
-    List<VariableDefinition> getVariableDefinitions();
-
-    Map<String, Object> getConstantValues();
+public interface IntegrationContextEnricher {
+    void enrich(IntegrationContext integrationContext);
 }

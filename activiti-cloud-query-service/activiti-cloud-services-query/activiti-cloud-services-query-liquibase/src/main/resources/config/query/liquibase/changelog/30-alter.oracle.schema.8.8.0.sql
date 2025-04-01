@@ -13,14 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model;
 
-import java.util.List;
-import java.util.Map;
-import org.activiti.api.process.model.VariableDefinition;
-
-public interface ExtendedCloudProcessDefinition extends CloudProcessDefinition {
-    List<VariableDefinition> getVariableDefinitions();
-
-    Map<String, Object> getConstantValues();
-}
+ALTER TABLE process_instance
+  ADD COLUMN root_process_instance_id VARCHAR(255);
