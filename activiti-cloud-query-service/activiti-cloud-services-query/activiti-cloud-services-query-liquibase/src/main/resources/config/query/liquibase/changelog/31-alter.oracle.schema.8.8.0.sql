@@ -13,27 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.task.model;
 
-import java.util.List;
-import java.util.Set;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
-
-public interface QueryCloudTask extends CloudTask {
-    String getProcessDefinitionName();
-
-    List<TaskPermissions> getPermissions();
-
-    void setPermissions(List<TaskPermissions> User);
-
-    Set<? extends CloudVariableInstance> getProcessVariables();
-
-    String getRootProcessInstanceId();
-
-    enum TaskPermissions {
-        VIEW,
-        CLAIM,
-        RELEASE,
-        UPDATE,
-    }
-}
+ALTER TABLE task
+  ADD COLUMN root_process_instance_id VARCHAR(255);
