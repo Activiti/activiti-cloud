@@ -92,7 +92,7 @@ public class ProcessDefinitionValuesService {
 
     private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id, boolean formRequired) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        Process process = bpmnModel.getMainProcess();
+        Process process = bpmnModel.getProcessById(id);
 
         if (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null) {
             Optional<FlowElement> startEvent = process

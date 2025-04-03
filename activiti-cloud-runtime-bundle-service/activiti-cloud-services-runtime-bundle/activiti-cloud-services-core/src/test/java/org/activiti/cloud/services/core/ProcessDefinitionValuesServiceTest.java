@@ -125,6 +125,7 @@ class ProcessDefinitionValuesServiceTest {
         var constantDefinition = new ConstantDefinition();
         constantDefinition.setValue("constantValue");
 
+        process.setId("processId");
         startEvent.setId("startEventId");
         process.addFlowElement(startEvent);
         bpmnModel.addProcess(process);
@@ -146,6 +147,7 @@ class ProcessDefinitionValuesServiceTest {
         var startEvent = new StartEvent();
         var extension = new Extension();
 
+        process.setId("processId");
         startEvent.setId("startEventId");
         process.addFlowElement(startEvent);
         bpmnModel.addProcess(process);
@@ -164,6 +166,7 @@ class ProcessDefinitionValuesServiceTest {
         var process = new Process();
         var startEvent = new StartEvent();
 
+        process.setId("processId");
         startEvent.setId("startEventId");
         process.addFlowElement(startEvent);
         bpmnModel.addProcess(process);
@@ -173,5 +176,66 @@ class ProcessDefinitionValuesServiceTest {
         var result = processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId");
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_returnStaticValues_multipleProcesses_when_getProcessModelStaticValuesMappingForStartEvent() {
+        var bpmnModel = new BpmnModel();
+        var firstProcess = new Process();
+        firstProcess.setId("firstProcessId");
+        bpmnModel.addProcess(firstProcess);
+
+        var process = new Process();
+        var startEvent = new StartEvent();
+        var extension = new Extension();
+        var processVariablesMapping = new ProcessVariablesMapping();
+        var mapping = new Mapping();
+        mapping.setValue("inputValue");
+        mapping.setType(Mapping.SourceMappingType.VALUE);
+
+        startEvent.setId("startEventId");
+        startEvent.setFormKey("formKey");
+        process.addFlowElement(startEvent);
+        process.setInitialFlowElement(startEvent);
+        process.setId("processId");
+        bpmnModel.addProcess(process);
+        processVariablesMapping.getInputs().put("inputKey", mapping);
+        extension.getMappings().put("startEventId", processVariablesMapping);
+
+        when(repositoryService.getBpmnModel("processId")).thenReturn(bpmnModel);
+        when(processExtensionService.getExtensionsForId("processId")).thenReturn(extension);
+
+        var result = processDefinitionValuesService.getProcessModelStaticValuesMappingForStartEvent("processId");
+
+        assertThat(result).hasSize(1).containsEntry("inputKey", "inputValue");
+    }
+
+    @Test
+    void should_returnConstantValues_multipleProcesses_when_getProcessModelConstantValuesForStartEvent() {
+        var bpmnModel = new BpmnModel();
+        var firstProcess = new Process();
+        firstProcess.setId("firstProcessId");
+        bpmnModel.addProcess(firstProcess);
+
+        var process = new Process();
+        process.setId("processId");
+        var startEvent = new StartEvent();
+        var extension = new Extension();
+        var processConstantsMapping = new ProcessConstantsMapping();
+        var constantDefinition = new ConstantDefinition();
+        constantDefinition.setValue("constantValue");
+
+        startEvent.setId("startEventId");
+        process.addFlowElement(startEvent);
+        bpmnModel.addProcess(process);
+        processConstantsMapping.put("constantKey", constantDefinition);
+        extension.getConstants().put("startEventId", processConstantsMapping);
+
+        when(repositoryService.getBpmnModel("processId")).thenReturn(bpmnModel);
+        when(processExtensionService.getExtensionsForId("processId")).thenReturn(extension);
+
+        var result = processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId");
+
+        assertThat(result).hasSize(1).containsEntry("constantKey", "constantValue");
     }
 }
