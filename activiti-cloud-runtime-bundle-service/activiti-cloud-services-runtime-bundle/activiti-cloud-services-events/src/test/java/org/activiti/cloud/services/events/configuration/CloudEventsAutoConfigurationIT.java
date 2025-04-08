@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class CloudEventsAutoConfigurationIT {
@@ -34,25 +34,25 @@ class CloudEventsAutoConfigurationIT {
     @SpringBootApplication
     static class MockRuntimeBundleApplication {
 
-        @MockBean
+        @MockitoBean
         private RuntimeService runtimeService;
 
-        @MockBean
+        @MockitoBean
         private ManagementService managementService;
 
-        @MockBean
+        @MockitoBean
         private TaskService taskService;
 
-        @MockBean
+        @MockitoBean
         private UserGroupManager userGroupManager;
 
-        @MockBean
+        @MockitoBean
         private SecurityManager securityManager;
 
-        @MockBean
+        @MockitoBean
         private RepositoryService repositoryService;
 
-        @MockBean
+        @MockitoBean
         private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
     }
 

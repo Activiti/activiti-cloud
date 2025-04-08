@@ -24,12 +24,12 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "spring.rabbitmq.host=rabbitmq")
 public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
 
-    @MockBean
+    @MockitoBean
     private GraphQLSchema graphQLSchema;
 
     @Autowired

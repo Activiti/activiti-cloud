@@ -37,7 +37,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -46,6 +45,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
 @SpringBootTest(
@@ -63,7 +63,7 @@ public class MessageProducerCommandContextCloseListenerIT {
     @Autowired
     private RuntimeService runtimeService;
 
-    @SpyBean
+    @MockitoSpyBean
     private MessageProducerCommandContextCloseListener subject;
 
     @Autowired
