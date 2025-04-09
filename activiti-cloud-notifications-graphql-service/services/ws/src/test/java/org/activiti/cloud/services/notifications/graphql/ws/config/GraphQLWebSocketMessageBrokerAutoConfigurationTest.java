@@ -23,14 +23,14 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SuppressWarnings("unused")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class GraphQLWebSocketMessageBrokerAutoConfigurationTest {
 
-    @MockBean
+    @MockitoBean
     private GraphQLSchema graphQLSchema;
 
     @Autowired

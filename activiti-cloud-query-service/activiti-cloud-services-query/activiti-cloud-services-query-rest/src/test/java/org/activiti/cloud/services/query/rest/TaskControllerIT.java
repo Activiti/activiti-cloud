@@ -28,11 +28,11 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -50,7 +50,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @WithMockUser(username = CURRENT_USER, roles = "ACTIVITI_USER")
 class TaskControllerIT extends AbstractTaskControllerIT {
 
-    @SpyBean
+    @MockitoSpyBean
     private SecurityManager securityManager;
 
     @Container
