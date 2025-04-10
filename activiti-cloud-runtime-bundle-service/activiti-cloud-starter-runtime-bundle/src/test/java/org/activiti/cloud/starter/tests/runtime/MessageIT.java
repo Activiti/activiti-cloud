@@ -112,9 +112,7 @@ public class MessageIT {
 
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(
-            runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessages").list()
-        )
+        assertThat(runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessages").list())
             .isEmpty();
     }
 
