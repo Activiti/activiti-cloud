@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class WebSocketMessageBrokerSecurityConfigurerTest {
@@ -32,7 +32,7 @@ public class WebSocketMessageBrokerSecurityConfigurerTest {
     @Autowired
     private WebSocketMessageBrokerSecurityConfigurer configuration;
 
-    @MockBean
+    @MockitoBean
     private BuildProperties buildProperties;
 
     @EnableAutoConfiguration
