@@ -8,7 +8,8 @@ Scenario: as a user I should be able to get process model
 Given the user is authenticated as testuser
 Then the user can get the process model for process with key SingleTaskProcess by passing its id
 
-!-- Commenting Story temporarily
-!-- Scenario: as a user I should be able to get process diagram
-!-- Given the user is authenticated as testuser
-!-- Then the process diagram image for process with key bigProcess is the same as process-definition-diagram.result.svg file
+@skip
+@ignored true
+Scenario: as a user I should be able to get process diagram
+Given the user is authenticated as testuser
+Then the process diagram image for process with key bigProcess is the same as process-definition-diagram.result.svg file
