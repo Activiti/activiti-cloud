@@ -286,13 +286,12 @@ jobs:
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
           make test/runtime-acceptance-tests
-          mkdir -p output
 
-      - name: Upload SVG Artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: acceptance-test-output
-          path: output/
+      # - name: Upload SVG Artifacts
+      #   uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      #   with:
+      #     name: acceptance-test-output
+      #     path: output/
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
