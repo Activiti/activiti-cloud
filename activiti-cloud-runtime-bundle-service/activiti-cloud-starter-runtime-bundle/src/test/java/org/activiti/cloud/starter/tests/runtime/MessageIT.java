@@ -70,7 +70,7 @@ public class MessageIT {
             runtimeService
                 .createProcessInstanceQuery()
                 .includeProcessVariables()
-                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                .processDefinitionKey("shouldDeliverMessages")
                 .list()
         )
             .hasSize(1)
@@ -94,7 +94,7 @@ public class MessageIT {
             runtimeService
                 .createProcessInstanceQuery()
                 .includeProcessVariables()
-                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                .processDefinitionKey("shouldDeliverMessages")
                 .list()
         )
             .hasSize(1)
@@ -113,7 +113,7 @@ public class MessageIT {
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(
-            runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessagesViaRestApi").list()
+            runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessages").list()
         )
             .isEmpty();
     }

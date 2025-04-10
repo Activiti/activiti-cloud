@@ -2,7 +2,7 @@
   "id": "shouldDeliverMessagesViaRestApiModel",
   "name": "myProcess.bpmn",
   "extensions": {
-    "shouldDeliverMessagesViaRestApi": {
+    "shouldDeliverMessages": {
       "properties": {},
       "mappings": {
         "Task_05bhhuh": {
