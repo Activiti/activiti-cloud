@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Comparator;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -54,6 +56,15 @@ public class ProcessDefinitionActions {
 
         String processDiagram = processRuntimeBundleSteps.getProcessDiagramByKey(matchingProcessDefinition.getId());
         File expectedResultFile = ResourceUtils.getFile(TEST_OUTPUT_RESULT_PATH + resultFileName);
+
+        File svgFile = new File("output/actual-" + resultFileName.replace(".xml", ".svg"));
+
+        // Write the process diagram to the SVG file
+        try (FileWriter writer = new FileWriter(svgFile)) {
+            writer.write(processDiagram);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         XmlAssert
             .assertThat(processDiagram)
