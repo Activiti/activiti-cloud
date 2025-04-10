@@ -24,8 +24,10 @@ import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(
     classes = { KeycloakClientApplication.class },
@@ -40,6 +42,9 @@ class KeycloakManagementServiceIT {
 
     @Autowired
     private KeycloakManagementService keycloakManagementService;
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     @Test
     void should_Not_RetrieveServiceAccounts_WhenUserTypeSearchParamIsInteractive() {

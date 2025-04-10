@@ -356,6 +356,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -745,6 +752,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -1093,6 +1107,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2651,6 +2672,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -6965,6 +6993,9 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudTask_ProcessVariables"
@@ -7614,6 +7645,9 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudTask_General"

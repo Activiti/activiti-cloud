@@ -13,15 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.rest.config;
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-@TestConfiguration
-public class StreamConfig {
-
-    @MockitoBean
-    public StreamBridge streamBridge;
-}
+ALTER TABLE task
+  ADD COLUMN root_process_instance_id VARCHAR(255);
