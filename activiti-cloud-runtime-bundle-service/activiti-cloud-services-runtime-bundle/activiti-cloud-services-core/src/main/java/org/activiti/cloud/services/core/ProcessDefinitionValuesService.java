@@ -96,21 +96,20 @@ public class ProcessDefinitionValuesService {
         String processId = getProcessId(id);
         Process process = processId != null ? bpmnModel.getProcessById(processId) : bpmnModel.getMainProcess();
 
-        if(process != null && (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null)) {
-                Optional<FlowElement> startEvent = process
-                    .getFlowElements()
-                    .stream()
-                    .filter(flowElement -> flowElement.getClass().equals(StartEvent.class))
-                    .findFirst();
+        if (process != null && (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null)) {
+            Optional<FlowElement> startEvent = process
+                .getFlowElements()
+                .stream()
+                .filter(flowElement -> flowElement.getClass().equals(StartEvent.class))
+                .findFirst();
 
-                if (startEvent.isPresent()) {
-                    return new ExtensionsStartEventId(
-                        startEvent.get().getId(),
-                        processExtensionService.getExtensionsForId(id)
-                    );
-                }
+            if (startEvent.isPresent()) {
+                return new ExtensionsStartEventId(
+                    startEvent.get().getId(),
+                    processExtensionService.getExtensionsForId(id)
+                );
             }
-
+        }
 
         return null;
     }
