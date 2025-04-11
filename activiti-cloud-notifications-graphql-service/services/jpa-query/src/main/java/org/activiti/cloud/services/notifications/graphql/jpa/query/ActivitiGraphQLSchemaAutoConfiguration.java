@@ -20,10 +20,12 @@ import static graphql.schema.GraphQLScalarType.newScalar;
 import com.introproventures.graphql.jpa.query.autoconfigure.EnableGraphQLJpaQuerySchema;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuilderCustomizer;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import graphql.GraphQL;
 import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -46,8 +48,12 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
     private boolean isAggregateEnabled;
 
     @Bean
-    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer() {
-        return builder ->
+    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(
+        ObjectProvider<RestrictedKeysProvider> restrictedKeysProvider
+    ) {
+        return builder -> {
+            restrictedKeysProvider.ifAvailable(builder::restrictedKeysProvider);
+
             builder
                 .name("Query")
                 .description("Activiti Cloud Query Schema")
@@ -70,5 +76,6 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                         )
                         .build()
                 );
+        };
     }
 }
