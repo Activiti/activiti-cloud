@@ -16,8 +16,11 @@
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaSchemaBuilder;
 import graphql.Scalars;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.Coercing;
@@ -28,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
@@ -37,8 +41,20 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @Autowired(required = false)
     private GraphQLSchema schema;
 
+    @Autowired
+    private GraphQLJpaSchemaBuilder graphQLJpaSchemaBuilder;
+
+    @Autowired
+    private RestrictedKeysProvider restrictedKeysProvider;
+
     @SpringBootApplication
-    static class TestApplication {}
+    static class TestApplication {
+
+        @Bean
+        RestrictedKeysProvider restrictedKeysProviderMock() {
+            return mock(RestrictedKeysProvider.class);
+        }
+    }
 
     @Test
     void contextLoads() {
@@ -147,5 +163,10 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
         // then
         assertThat(result).asString().isEqualTo("1970-01-01T00:00:00.001Z");
+    }
+
+    @Test
+    void restrictedKeysProvider() {
+        assertThat(graphQLJpaSchemaBuilder.getRestrictedKeysProvider()).isEqualTo(restrictedKeysProvider);
     }
 }
