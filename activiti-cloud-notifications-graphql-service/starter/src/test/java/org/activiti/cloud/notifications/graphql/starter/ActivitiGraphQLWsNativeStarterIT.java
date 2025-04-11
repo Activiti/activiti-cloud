@@ -95,14 +95,7 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
-@SpringBootTest(
-    webEnvironment = WebEnvironment.RANDOM_PORT,
-    classes = { GrapqhQLApplication.class },
-    properties = {
-        "spring.graphql.websocket.path=" + ActivitiGraphQLWsNativeStarterIT.WS_GRAPHQL_URI,
-        "spring.graphql.websocket.keep-alive=PT1S",
-    }
-)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
