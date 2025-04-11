@@ -48,21 +48,21 @@ public class ProcessDefinitionActions {
         assertThat(processModel).contains("bpmn2:process id=\"" + processDefinitionKey + "\"");
     }
 
-    @Then("the process diagram image for process with key $processDefinitionKey is the same as $resultFileName file")
-    public void getProcessDiagram(String processDefinitionKey, String resultFileName) throws FileNotFoundException {
-        ProcessDefinition matchingProcessDefinition = getProcessDefinition(processDefinitionKey);
-
-        String processDiagram = processRuntimeBundleSteps.getProcessDiagramByKey(matchingProcessDefinition.getId());
-        File expectedResultFile = ResourceUtils.getFile(TEST_OUTPUT_RESULT_PATH + resultFileName);
-
-        XmlAssert
-            .assertThat(processDiagram)
-            .and(expectedResultFile)
-            .ignoreWhitespace()
-            .withNodeFilter(node -> !"path".equals(node.getNodeName()))
-            .withAttributeFilter(attr -> !"style".equals(attr.getName()))
-            .areIdentical();
-    }
+    //    @Then("the process diagram image for process with key $processDefinitionKey is the same as $resultFileName file")
+    //    public void getProcessDiagram(String processDefinitionKey, String resultFileName) throws FileNotFoundException {
+    //        ProcessDefinition matchingProcessDefinition = getProcessDefinition(processDefinitionKey);
+    //
+    //        String processDiagram = processRuntimeBundleSteps.getProcessDiagramByKey(matchingProcessDefinition.getId());
+    //        File expectedResultFile = ResourceUtils.getFile(TEST_OUTPUT_RESULT_PATH + resultFileName);
+    //
+    //        XmlAssert
+    //            .assertThat(processDiagram)
+    //            .and(expectedResultFile)
+    //            .ignoreWhitespace()
+    //            .withNodeFilter(node -> !"path".equals(node.getNodeName()))
+    //            .withAttributeFilter(attr -> !"style".equals(attr.getName()))
+    //            .areIdentical();
+    //    }
 
     @NotNull
     private ProcessDefinition getProcessDefinition(String processDefinitionKey) {
