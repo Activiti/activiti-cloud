@@ -305,7 +305,7 @@ class ProcessDefinitionAdminControllerImplIT {
         startEvent.setFormKey("formKey");
         process.setInitialFlowElement(startEvent);
         process.addFlowElement(startEvent);
-        when(bpmnModel.getMainProcess()).thenReturn(process);
+        when(bpmnModel.getProcessById(any())).thenReturn(process);
         mockMvc
             .perform(
                 get("/admin/v1/process-definitions")
