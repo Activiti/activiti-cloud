@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.conf;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import jakarta.persistence.EntityManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -43,6 +45,7 @@ import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentati
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
+import org.activiti.cloud.services.security.ActivitiRestrictedKeysProvider;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
@@ -207,6 +210,15 @@ public class QueryRestWebMvcAutoConfiguration {
             restrictionBuilder,
             processDefinitionFilter
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    RestrictedKeysProvider restrictedKeysProvider(
+        EntityManager entityManager,
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService
+    ) {
+        return new ActivitiRestrictedKeysProvider(entityManager, processDefinitionRestrictionService);
     }
 
     @Bean
