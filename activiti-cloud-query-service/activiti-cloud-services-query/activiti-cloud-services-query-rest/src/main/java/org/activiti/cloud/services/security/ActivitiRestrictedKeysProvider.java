@@ -22,6 +22,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -68,163 +69,149 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
     public Optional<List<Object>> apply(EntityIntrospector.EntityIntrospectionResult entityDescriptor) {
         var entity = entityDescriptor.getEntity();
 
-        return new ProcessDefinitionRestrictedKeys(entity)
+        return new ProcessDefinitionRestrictedKeysSupplier(entity)
             .get()
-            .or(new ProcessInstanceRestrictedKeys(entity))
-            .or(new TaskRestrictedKeys(entity))
-            .or(new ProcessVariablesRestrictedKeys(entity))
-            .or(new TaskVariableRestrictedKeys(entity))
+            .or(new ProcessInstanceRestrictedKeysSupplier(entity))
+            .or(new TaskRestrictedKeysSupplier(entity))
+            .or(new ProcessVariablesRestrictedKeysSupplier(entity))
+            .or(new TaskVariableRestrictedKeysSupplier(entity))
             .or(Optional::empty);
     }
 
-    class ProcessDefinitionRestrictedKeys implements Supplier<Optional<List<Object>>> {
+    abstract static class RestrictedKeysSupplier<T> implements Supplier<Optional<List<Object>>> {
 
         private final Class<?> entityClass;
+        private final Class<T> genericType;
 
-        ProcessDefinitionRestrictedKeys(Class<?> entityClass) {
+        RestrictedKeysSupplier(Class<?> entityClass) {
             this.entityClass = entityClass;
+            this.genericType =
+                (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         }
 
         @Override
         public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
-                .filter(ProcessDefinitionEntity.class::equals)
-                .map(it -> {
-                    var predicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(
-                        new BooleanBuilder(),
-                        SecurityPolicyAccess.READ
-                    );
+            return Optional.of(entityClass).filter(this::isInstance).map(this::getKeys);
+        }
 
-                    var entity = QProcessDefinitionEntity.processDefinitionEntity;
+        boolean isInstance(Class<?> entityClass) {
+            return genericType.equals(this.entityClass);
+        }
 
-                    JPAQuery<?> query = new JPAQuery<QProcessDefinitionEntity>(entityManager)
-                        .from(entity)
-                        .select(entity.id)
-                        .where(predicate);
+        abstract List<Object> getKeys(Class<?> entityClass);
+    }
 
-                    return query.fetch().stream().map(Object.class::cast).toList();
-                });
+    class ProcessDefinitionRestrictedKeysSupplier extends RestrictedKeysSupplier<ProcessDefinitionEntity> {
+
+        ProcessDefinitionRestrictedKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
+        }
+
+        @Override
+        List<Object> getKeys(Class<?> entityClass) {
+            var predicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+                new BooleanBuilder(),
+                SecurityPolicyAccess.READ
+            );
+
+            var entity = QProcessDefinitionEntity.processDefinitionEntity;
+
+            JPAQuery<?> query = new JPAQuery<QProcessDefinitionEntity>(entityManager)
+                .from(entity)
+                .select(entity.id)
+                .where(predicate);
+
+            return query.fetch().stream().map(Object.class::cast).toList();
         }
     }
 
-    class ProcessInstanceRestrictedKeys implements Supplier<Optional<List<Object>>> {
+    class ProcessInstanceRestrictedKeysSupplier extends RestrictedKeysSupplier<ProcessInstanceEntity> {
 
-        private final Class<?> entityClass;
-
-        ProcessInstanceRestrictedKeys(Class<?> entityClass) {
-            this.entityClass = entityClass;
+        ProcessInstanceRestrictedKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
         }
 
         @Override
-        public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
-                .filter(ProcessInstanceEntity.class::equals)
-                .map(it -> {
-                    var predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
-                        new BooleanBuilder(),
-                        SecurityPolicyAccess.READ
-                    );
+        List<Object> getKeys(Class<?> entityClass) {
+            var predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+                new BooleanBuilder(),
+                SecurityPolicyAccess.READ
+            );
 
-                    var entity = QProcessInstanceEntity.processInstanceEntity;
+            var entity = QProcessInstanceEntity.processInstanceEntity;
 
-                    JPAQuery<?> query = new JPAQuery<QProcessInstanceEntity>(entityManager)
-                        .from(entity)
-                        .select(entity.id)
-                        .where(predicate);
+            JPAQuery<?> query = new JPAQuery<QProcessInstanceEntity>(entityManager)
+                .from(entity)
+                .select(entity.id)
+                .where(predicate);
 
-                    return query.fetch().stream().map(Object.class::cast).toList();
-                });
+            return query.fetch().stream().map(Object.class::cast).toList();
         }
     }
 
-    class ProcessVariablesRestrictedKeys implements Supplier<Optional<List<Object>>> {
+    class ProcessVariablesRestrictedKeysSupplier extends RestrictedKeysSupplier<ProcessVariableEntity> {
 
-        private final Class<?> entityClass;
-
-        ProcessVariablesRestrictedKeys(Class<?> entityClass) {
-            this.entityClass = entityClass;
+        ProcessVariablesRestrictedKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
         }
 
         @Override
-        public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
-                .filter(ProcessVariableEntity.class::equals)
-                .map(it -> {
-                    var predicate = processVariableRestrictionService.restrictProcessInstanceVariableQuery(
-                        new BooleanBuilder(),
-                        SecurityPolicyAccess.READ
-                    );
+        List<Object> getKeys(Class<?> entityClass) {
+            var predicate = processVariableRestrictionService.restrictProcessInstanceVariableQuery(
+                new BooleanBuilder(),
+                SecurityPolicyAccess.READ
+            );
 
-                    var entity = QProcessVariableEntity.processVariableEntity;
+            var entity = QProcessVariableEntity.processVariableEntity;
 
-                    JPAQuery<?> query = new JPAQuery<QProcessVariableEntity>(entityManager)
-                        .from(entity)
-                        .select(entity.id)
-                        .where(predicate);
+            JPAQuery<?> query = new JPAQuery<QProcessVariableEntity>(entityManager)
+                .from(entity)
+                .select(entity.id)
+                .where(predicate);
 
-                    return query.fetch().stream().map(Object.class::cast).toList();
-                });
+            return query.fetch().stream().map(Object.class::cast).toList();
         }
     }
 
-    class TaskRestrictedKeys implements Supplier<Optional<List<Object>>> {
+    class TaskRestrictedKeysSupplier extends RestrictedKeysSupplier<TaskEntity> {
 
-        private final Class<?> entityClass;
-
-        TaskRestrictedKeys(Class<?> entityClass) {
-            this.entityClass = entityClass;
+        TaskRestrictedKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
         }
 
         @Override
-        public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
-                .filter(TaskEntity.class::equals)
-                .map(it -> {
-                    var predicate = taskLookupRestrictionService.restrictTaskQuery(new BooleanBuilder());
+        List<Object> getKeys(Class<?> entityClass) {
+            var predicate = taskLookupRestrictionService.restrictTaskQuery(new BooleanBuilder());
 
-                    var entity = QTaskEntity.taskEntity;
+            var entity = QTaskEntity.taskEntity;
 
-                    JPAQuery<?> query = new JPAQuery<QTaskEntity>(entityManager)
-                        .from(entity)
-                        .select(entity.id)
-                        .where(predicate);
+            JPAQuery<?> query = new JPAQuery<QTaskEntity>(entityManager)
+                .from(entity)
+                .select(entity.id)
+                .where(predicate);
 
-                    return query.fetch().stream().map(Object.class::cast).toList();
-                });
+            return query.fetch().stream().map(Object.class::cast).toList();
         }
     }
 
-    class TaskVariableRestrictedKeys implements Supplier<Optional<List<Object>>> {
+    class TaskVariableRestrictedKeysSupplier extends RestrictedKeysSupplier<TaskVariableEntity> {
 
-        private final Class<?> entityClass;
-
-        TaskVariableRestrictedKeys(Class<?> entityClass) {
-            this.entityClass = entityClass;
+        TaskVariableRestrictedKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
         }
 
         @Override
-        public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
-                .filter(TaskVariableEntity.class::equals)
-                .map(it -> {
-                    var predicate = taskVariableLookupRestrictionService.restrictTaskVariableQuery(
-                        new BooleanBuilder()
-                    );
+        List<Object> getKeys(Class<?> entityClass) {
+            var predicate = taskVariableLookupRestrictionService.restrictTaskVariableQuery(new BooleanBuilder());
 
-                    var entity = QTaskVariableEntity.taskVariableEntity;
+            var entity = QTaskVariableEntity.taskVariableEntity;
 
-                    JPAQuery<?> query = new JPAQuery<QTaskVariableEntity>(entityManager)
-                        .from(entity)
-                        .select(entity.id)
-                        .where(predicate);
+            JPAQuery<?> query = new JPAQuery<QTaskVariableEntity>(entityManager)
+                .from(entity)
+                .select(entity.id)
+                .where(predicate);
 
-                    return query.fetch().stream().map(Object.class::cast).toList();
-                });
+            return query.fetch().stream().map(Object.class::cast).toList();
         }
     }
 }
