@@ -52,9 +52,9 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         // given
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
-        var entity = entityManager.getMetamodel().entity(ProcessDefinitionEntity.class);
-
-        var entityDescriptor = EntityIntrospector.introspect(entity);
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessDefinitionEntity.class)
+        );
 
         // when
         var result = activitiRestrictedKeysProvider.apply(entityDescriptor);

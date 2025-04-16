@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
+import com.introproventures.graphql.jpa.query.schema.impl.EntityIntrospector;
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
@@ -29,6 +31,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +55,12 @@ public class ProcessDefinitionRestrictionServiceIT {
 
     @MockitoBean
     private SecurityManager securityManager;
+
+    @Autowired
+    private ActivitiRestrictedKeysProvider activitiRestrictedKeysProvider;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private ProcessDefinitionEntity defKey1AuthorizedService;
     private ProcessDefinitionEntity defKey2AuthorizedService;
@@ -136,6 +145,30 @@ public class ProcessDefinitionRestrictionServiceIT {
                 tuple("test-cmd-endpoint-wild", "defKey1"), //access given via wildcard to hrgroup
                 tuple("test-cmd-endpoint-wild", "defKey2")
             ); //access given via wildcard to hrgroup
+    }
+
+    @Test
+    void activitiRestrictedKeysProvider() {
+        // given
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessDefinitionEntity.class)
+        );
+
+        // when
+        var ids = activitiRestrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(ids).isNotEmpty().get().asInstanceOf(InstanceOfAssertFactories.list(Object.class)).hasSize(1);
+
+        Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAllById(
+            ids.get().stream().map(String.class::cast).toList()
+        );
+
+        assertThat(processDefinitions)
+            .extracting(ProcessDefinitionEntity::getServiceName, ProcessDefinitionEntity::getKey)
+            .containsExactly(tuple("test-cmd-endpoint", "defKey1"));
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {
