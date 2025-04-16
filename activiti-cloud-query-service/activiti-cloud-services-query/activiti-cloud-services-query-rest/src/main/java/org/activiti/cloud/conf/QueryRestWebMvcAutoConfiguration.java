@@ -216,9 +216,20 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     RestrictedKeysProvider restrictedKeysProvider(
         EntityManagerFactory entityManagerFactory,
-        ProcessDefinitionRestrictionService processDefinitionRestrictionService
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService,
+        ProcessInstanceRestrictionService processInstanceRestrictionService,
+        ProcessVariableRestrictionService processVariableRestrictionService,
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService
     ) {
-        return new ActivitiRestrictedKeysProvider(entityManagerFactory, processDefinitionRestrictionService);
+        return new ActivitiRestrictedKeysProvider(
+            entityManagerFactory,
+            processDefinitionRestrictionService,
+            processInstanceRestrictionService,
+            processVariableRestrictionService,
+            taskLookupRestrictionService,
+            taskVariableLookupRestrictionService
+        );
     }
 
     @Bean
