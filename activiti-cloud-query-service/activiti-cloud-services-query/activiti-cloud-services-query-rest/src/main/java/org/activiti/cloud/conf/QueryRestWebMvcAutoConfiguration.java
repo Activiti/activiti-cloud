@@ -16,7 +16,7 @@
 package org.activiti.cloud.conf;
 
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -215,10 +215,10 @@ public class QueryRestWebMvcAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RestrictedKeysProvider restrictedKeysProvider(
-        EntityManager entityManager,
+        EntityManagerFactory entityManagerFactory,
         ProcessDefinitionRestrictionService processDefinitionRestrictionService
     ) {
-        return new ActivitiRestrictedKeysProvider(entityManager, processDefinitionRestrictionService);
+        return new ActivitiRestrictedKeysProvider(entityManagerFactory, processDefinitionRestrictionService);
     }
 
     @Bean

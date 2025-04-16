@@ -21,11 +21,13 @@ import com.introproventures.graphql.jpa.query.schema.impl.EntityIntrospector;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
@@ -34,11 +36,11 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
     private final EntityManager entityManager;
 
     public ActivitiRestrictedKeysProvider(
-        EntityManager entityManager,
+        EntityManagerFactory entityManagerFactory,
         ProcessDefinitionRestrictionService processDefinitionRestrictionService
     ) {
         this.processDefinitionRestrictionService = processDefinitionRestrictionService;
-        this.entityManager = entityManager;
+        this.entityManager = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
     }
 
     @Override
