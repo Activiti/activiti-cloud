@@ -25,6 +25,7 @@ import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -169,6 +171,20 @@ public class ProcessDefinitionRestrictionServiceIT {
         assertThat(processDefinitions)
             .extracting(ProcessDefinitionEntity::getServiceName, ProcessDefinitionEntity::getKey)
             .containsExactly(tuple("test-cmd-endpoint", "defKey1"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
+    void activitiRestrictedKeysProviderForUnrestrictedRole() {
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessDefinitionEntity.class)
+        );
+
+        // when
+        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {

@@ -17,6 +17,7 @@ package org.activiti.cloud.conf;
 
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -58,6 +59,7 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -220,7 +222,8 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         ProcessVariableRestrictionService processVariableRestrictionService,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService
+        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
+        @Value("${spring.activiti.cloud.query.graphql.admin-roles:ACTIVITI_ADMIN}") List<String> unrestrictedRoles
     ) {
         return new ActivitiRestrictedKeysProvider(
             entityManagerFactory,
@@ -228,7 +231,8 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceRestrictionService,
             processVariableRestrictionService,
             taskLookupRestrictionService,
-            taskVariableLookupRestrictionService
+            taskVariableLookupRestrictionService,
+            unrestrictedRoles
         );
     }
 

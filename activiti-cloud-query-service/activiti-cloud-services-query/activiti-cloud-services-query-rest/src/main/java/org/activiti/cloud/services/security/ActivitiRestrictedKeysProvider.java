@@ -38,6 +38,11 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
@@ -46,8 +51,10 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
     private final ProcessVariableRestrictionService processVariableRestrictionService;
     private final TaskLookupRestrictionService taskLookupRestrictionService;
     private final TaskVariableLookupRestrictionService taskVariableLookupRestrictionService;
-
     private final EntityManager entityManager;
+    private final List<String> unrestrictedRoles;
+
+    private String rolePrefix = "ROLE_";
 
     public ActivitiRestrictedKeysProvider(
         EntityManagerFactory entityManagerFactory,
@@ -55,7 +62,8 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         ProcessVariableRestrictionService processVariableRestrictionService,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService
+        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
+        List<String> unrestrictedRoles
     ) {
         this.processDefinitionRestrictionService = processDefinitionRestrictionService;
         this.entityManager = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
@@ -63,19 +71,50 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
         this.processVariableRestrictionService = processVariableRestrictionService;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.taskVariableLookupRestrictionService = taskVariableLookupRestrictionService;
+        this.unrestrictedRoles = unrestrictedRoles;
     }
 
     @Override
     public Optional<List<Object>> apply(EntityIntrospector.EntityIntrospectionResult entityDescriptor) {
         var entity = entityDescriptor.getEntity();
 
-        return new ProcessDefinitionRestrictedKeysSupplier(entity)
-            .get()
+        if (isAnonymousUser()) {
+            return Optional.empty();
+        }
+
+        return ifUnrestrictedByUserRoles()
+            .or(new ProcessDefinitionRestrictedKeysSupplier(entity))
             .or(new ProcessInstanceRestrictedKeysSupplier(entity))
             .or(new TaskRestrictedKeysSupplier(entity))
             .or(new ProcessVariablesRestrictedKeysSupplier(entity))
             .or(new TaskVariableRestrictedKeysSupplier(entity))
             .or(Optional::empty);
+    }
+
+    boolean isAnonymousUser() {
+        return Optional
+            .ofNullable(SecurityContextHolder.getContext())
+            .map(SecurityContext::getAuthentication)
+            .map(AnonymousAuthenticationToken.class::isInstance)
+            .orElse(false);
+    }
+
+    Optional<List<Object>> ifUnrestrictedByUserRoles() {
+        return Optional
+            .ofNullable(SecurityContextHolder.getContext())
+            .map(SecurityContext::getAuthentication)
+            .filter(Authentication::isAuthenticated)
+            .map(Authentication::getAuthorities)
+            .map(authorities ->
+                authorities
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(value -> value.startsWith(rolePrefix))
+                    .map(value -> value.replaceFirst("^".concat(rolePrefix), ""))
+                    .anyMatch(unrestrictedRoles::contains)
+            )
+            .filter(Boolean.TRUE::equals)
+            .map(ifUnrestricted -> List.of("*"));
     }
 
     abstract static class RestrictedKeysSupplier<T> implements Supplier<Optional<List<Object>>> {

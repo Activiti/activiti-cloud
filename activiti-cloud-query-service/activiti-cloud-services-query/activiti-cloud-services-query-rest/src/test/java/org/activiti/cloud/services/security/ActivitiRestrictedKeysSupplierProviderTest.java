@@ -28,6 +28,8 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -61,5 +63,33 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         // then
         assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
+    void unrestrictedKeys() {
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessDefinitionEntity.class)
+        );
+
+        // when
+        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void anonymousUserKeys() {
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessDefinitionEntity.class)
+        );
+
+        // when
+        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isEmpty();
     }
 }
