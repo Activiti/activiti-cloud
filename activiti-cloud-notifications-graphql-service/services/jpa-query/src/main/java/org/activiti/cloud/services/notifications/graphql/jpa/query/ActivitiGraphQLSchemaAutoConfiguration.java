@@ -23,7 +23,12 @@ import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import graphql.GraphQL;
 import java.util.Optional;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +63,12 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                 .name("Query")
                 .description("Activiti Cloud Query Schema")
                 .enableAggregate(isAggregateEnabled)
+                .entityPath(ApplicationEntity.class.getName())
+                .entityPath(ProcessDefinitionEntity.class.getName())
+                .entityPath(ProcessInstanceEntity.class.getName())
+                .entityPath(TaskEntity.class.getName())
+                .entityPath(ProcessVariableEntity.class.getName())
+                .entityPath(TaskVariableEntity.class.getName())
                 .scalar(
                     VariableValue.class,
                     newScalar()

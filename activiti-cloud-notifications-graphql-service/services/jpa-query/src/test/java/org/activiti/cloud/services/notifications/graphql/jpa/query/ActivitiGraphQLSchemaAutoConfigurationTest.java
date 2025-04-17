@@ -95,6 +95,16 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
         assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable").getArguments())
             .describedAs("Ensure query has correct number of arguments")
             .hasSize(1);
+
+        //then
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessDefinition").getArgument("id"))
+            .describedAs("Ensure that identity can be queried on")
+            .isNotNull();
+
+        //then
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessDefinition").getArguments())
+            .describedAs("Ensure query has correct number of arguments")
+            .hasSize(1);
     }
 
     @Test
@@ -110,10 +120,6 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
         assertThat(schema.getQueryType().getFieldDefinition("ProcessInstances").getArgument("page"))
             .describedAs("Ensure that collections can be paged")
-            .isNotNull();
-
-        assertThat(schema.getQueryType().getFieldDefinition("Tasks").getArgument("page"))
-            .describedAs("Ensure that collections can be queried on by page")
             .isNotNull();
 
         assertThat(schema.getQueryType().getFieldDefinition("Tasks").getArgument("page"))
@@ -139,6 +145,14 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
         assertThat(schema.getQueryType().getFieldDefinition("TaskVariables").getArguments())
             .describedAs("Ensure query has correct number of arguments")
             .hasSize(2);
+
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessDefinitions").getArgument("where"))
+            .describedAs("Ensure that collections can be queried")
+            .isNotNull();
+
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessDefinitions").getArgument("page"))
+            .describedAs("Ensure that collections can be paged")
+            .isNotNull();
     }
 
     @Test
