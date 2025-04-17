@@ -19,12 +19,18 @@ package org.activiti.cloud.services.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import com.introproventures.graphql.jpa.query.schema.impl.EntityIntrospector;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +44,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
-    private ActivitiRestrictedKeysProvider activitiRestrictedKeysProvider;
+    private RestrictedKeysProvider restrictedKeysProvider;
 
     @Autowired
     private EntityManager entityManager;
@@ -51,6 +57,11 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Test
     void contextLoads() {
+        assertThat(restrictedKeysProvider).isInstanceOf(ActivitiRestrictedKeysProvider.class);
+    }
+
+    @Test
+    void processDefinitionEntityRestrictedKeys() {
         // given
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
@@ -59,10 +70,86 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         );
 
         // when
-        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(entityDescriptor);
 
         // then
         assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    void processInstanceEntityRestrictedKeys() {
+        // given
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessInstanceEntity.class)
+        );
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    void taskEntityRestrictedKeys() {
+        // given
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        var entityDescriptor = EntityIntrospector.introspect(entityManager.getMetamodel().entity(TaskEntity.class));
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    void processVariableRestrictedKeys() {
+        // given
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ProcessVariableEntity.class)
+        );
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    void taskVariableRestrictedKeys() {
+        // given
+        given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
+
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(TaskVariableEntity.class)
+        );
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of());
+    }
+
+    @Test
+    @WithMockUser(username = "testuser")
+    void serviceTaskRestrictedKeys() {
+        var entityDescriptor = EntityIntrospector.introspect(
+            entityManager.getMetamodel().entity(ServiceTaskEntity.class)
+        );
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -73,7 +160,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         );
 
         // when
-        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(entityDescriptor);
 
         // then
         assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
@@ -87,7 +174,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         );
 
         // when
-        var result = activitiRestrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(entityDescriptor);
 
         // then
         assertThat(result).isEmpty();
