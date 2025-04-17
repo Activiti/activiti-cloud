@@ -88,7 +88,9 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
             .or(new TaskRestrictedKeysSupplier(entity))
             .or(new ProcessVariablesRestrictedKeysSupplier(entity))
             .or(new TaskVariableRestrictedKeysSupplier(entity))
-            .or(Optional::empty);
+            .or(() -> {
+                throw new UnsupportedOperationException("Unsupported entity type: " + entity);
+            });
     }
 
     boolean isAnonymousUser() {

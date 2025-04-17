@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
@@ -146,10 +147,12 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         );
 
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = catchThrowable(() -> restrictedKeysProvider.apply(entityDescriptor));
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(result)
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Unsupported entity type: class org.activiti.cloud.services.query.model.ServiceTaskEntity");
     }
 
     @Test
