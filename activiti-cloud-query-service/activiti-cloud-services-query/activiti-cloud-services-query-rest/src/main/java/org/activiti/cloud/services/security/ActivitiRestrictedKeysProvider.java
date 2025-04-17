@@ -38,6 +38,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -79,7 +80,7 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
         var entity = entityDescriptor.getEntity();
 
         if (isAnonymousUser()) {
-            return Optional.empty();
+            throw new AccessDeniedException("Access denied");
         }
 
         return ifUnrestrictedByUserRoles()

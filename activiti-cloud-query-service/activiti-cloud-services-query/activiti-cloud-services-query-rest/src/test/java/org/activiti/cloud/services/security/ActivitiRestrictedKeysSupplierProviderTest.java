@@ -35,6 +35,7 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -177,9 +178,9 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         );
 
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = catchThrowable(() -> restrictedKeysProvider.apply(entityDescriptor));
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(result).isInstanceOf(AccessDeniedException.class).hasMessage("Access denied");
     }
 }
