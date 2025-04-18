@@ -23,8 +23,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.lang.reflect.ParameterizedType;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -88,10 +90,7 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
             .or(new ProcessInstanceRestrictedKeysSupplier(entity))
             .or(new TaskRestrictedKeysSupplier(entity))
             .or(new ProcessVariablesRestrictedKeysSupplier(entity))
-            .or(new TaskVariableRestrictedKeysSupplier(entity))
-            .or(() -> {
-                throw new UnsupportedOperationException("Unsupported entity type: " + entity);
-            });
+            .or(new TaskVariableRestrictedKeysSupplier(entity));
     }
 
     boolean isAnonymousUser() {
@@ -133,7 +132,11 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
         @Override
         public Optional<List<Object>> get() {
-            return Optional.of(entityClass).filter(this::isInstance).map(this::getKeys);
+            return Optional
+                .of(entityClass)
+                .filter(this::isInstance)
+                .map(this::getKeys)
+                .filter(Predicate.not(Collection::isEmpty));
         }
 
         boolean isInstance(Class<?> entityClass) {
