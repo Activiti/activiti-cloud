@@ -33,10 +33,14 @@ import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.jupiter.api.AfterEach;
@@ -59,6 +63,15 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
     private ProcessInstanceRepository processInstanceRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @Autowired
     private RestrictedKeysProvider restrictedKeysProvider;
@@ -105,6 +118,10 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         processInstanceEntity.setProcessDefinitionKey("defKey1");
         processInstanceEntity.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstanceEntity);
+
+        taskCandidateUserRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
+        taskRepository.deleteAll();
     }
 
     @AfterEach
@@ -443,6 +460,42 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    void shouldGetTasksWhenCandidate() {
+        TaskEntity taskEntity = new TaskEntity();
+        String taskId = UUID.randomUUID().toString();
+        taskEntity.setId(taskId);
+        taskRepository.save(taskEntity);
+
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity(taskEntity.getId(), "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("testgroup"));
+        shouldGetTasksWhenCandidateRestrictTaskQuery();
+        shouldGetTasksWhenCandidateRestrictToInvolvedUser();
+    }
+
+    private void shouldGetTasksWhenCandidateRestrictTaskQuery() {
+        var entityDescriptor = introspect(TaskEntity.class);
+
+        var restrictedKeys = restrictedKeysProvider.apply(entityDescriptor);
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().isNotEmpty();
+
+        Iterable<TaskEntity> iterable = taskRepository.findAllById(toIterable(restrictedKeys));
+
+        assertThat(iterable).isNotEmpty();
+    }
+
+    private void shouldGetTasksWhenCandidateRestrictToInvolvedUser() {
+        var entityDescriptor = introspect(TaskEntity.class);
+
+        var restrictedKeys = restrictedKeysProvider.apply(entityDescriptor);
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().isNotEmpty();
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {
