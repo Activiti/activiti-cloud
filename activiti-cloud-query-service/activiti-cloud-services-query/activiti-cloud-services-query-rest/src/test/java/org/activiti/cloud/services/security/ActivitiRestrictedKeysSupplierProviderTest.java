@@ -32,6 +32,7 @@ import java.util.UUID;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -55,6 +56,9 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
+
+    @Autowired
+    private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
     private RestrictedKeysProvider restrictedKeysProvider;
@@ -93,6 +97,14 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
                 defKey2WildService
             )
         );
+
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("15");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("testuser");
+        processInstanceEntity.setProcessDefinitionKey("defKey1");
+        processInstanceEntity.setServiceName("test-cmd-endpoint");
+        processInstanceRepository.save(processInstanceEntity);
     }
 
     @AfterEach
@@ -235,7 +247,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser")
+    @WithMockUser(username = "otheruser")
     void serviceTaskRestrictedKeys() {
         var entityDescriptor = introspect(ServiceTaskEntity.class);
 
@@ -268,6 +280,169 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         // then
         assertThat(result).isInstanceOf(AccessDeniedException.class).hasMessage("Access denied");
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    public void shouldGetProcessInstancesWhenPermitted() {
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable).isNotEmpty();
+    }
+
+    @Test
+    @WithMockUser("hruser")
+    public void shouldGetProcessInstancesWhenUserPermittedByWildcard() {
+        //given
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("16");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("hruser");
+        processInstanceEntity.setProcessDefinitionKey("defKeyWild");
+        processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstanceEntity);
+
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable).isNotEmpty();
+    }
+
+    @Test
+    @WithMockUser("bobinhr")
+    public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("17");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("bobinhr");
+        processInstanceEntity.setProcessDefinitionKey("defKeyWild");
+        processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstanceEntity);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
+
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable).isNotEmpty();
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    public void shouldNotGetProcessInstancesWhenPolicyNotForUser() {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("18");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("testuser");
+        processInstanceEntity.setProcessDefinitionKey("defKeyWild");
+        processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
+        processInstanceRepository.save(processInstanceEntity);
+
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable)
+            .isNotEmpty()
+            //this user should see proc instances - but not for test-cmd-endpoint-wild
+            .allSatisfy(proc -> {
+                assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-wild");
+                assertThat(proc.getServiceName()).isEqualToIgnoringCase("test-cmd-endpoint");
+            });
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("19");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("testuser");
+        processInstanceEntity.setProcessDefinitionKey("defKey1");
+        processInstanceEntity.setServiceName("Te-St-CmD-EnDpoInT");
+        processInstanceRepository.save(processInstanceEntity);
+
+        ProcessInstanceEntity processInstanceEntity2 = new ProcessInstanceEntity();
+        processInstanceEntity2.setId("20");
+        processInstanceEntity2.setName("name");
+        processInstanceEntity2.setInitiator("testuser");
+        processInstanceEntity2.setProcessDefinitionKey("defKey1");
+        processInstanceEntity2.setServiceName("test-cmd-endpoint-dontmatchthisone");
+        processInstanceRepository.save(processInstanceEntity2);
+
+        assertThat(processInstanceRepository.count()).isGreaterThanOrEqualTo(2);
+
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable)
+            .isNotEmpty()
+            .allSatisfy(proc -> {
+                assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
+                assertThat(proc.getServiceName().replace("-", ""))
+                    .isEqualToIgnoringCase("test-cmd-endpoint".replace("-", ""));
+            });
+
+        assertThat(processInstanceRepository.findAllById(toIterable(result))).hasSize(2);
+    }
+
+    @Test
+    @WithMockUser("intruder")
+    public void shouldNotGetProcessInstancesWhenNotPermitted() {
+        // given
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("hruser")
+    public void shouldGetProcessInstancesWhenMatchesFullServiceName() {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("21");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("hruser");
+        processInstanceEntity.setProcessDefinitionKey("defKey2");
+        processInstanceEntity.setServiceFullName("test-cmd-endpoint");
+        processInstanceRepository.save(processInstanceEntity);
+
+        // given
+        var entityDescriptor = introspect(ProcessInstanceEntity.class);
+
+        // when
+        var result = restrictedKeysProvider.apply(entityDescriptor);
+
+        // then
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {
