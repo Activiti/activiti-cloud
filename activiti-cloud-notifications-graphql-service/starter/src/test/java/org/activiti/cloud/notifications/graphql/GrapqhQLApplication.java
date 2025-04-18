@@ -18,14 +18,14 @@ package org.activiti.cloud.notifications.graphql;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootApplication
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GrapqhQLApplication {
 
-    @MockBean
+    @MockitoBean
     private BuildProperties buildProperties;
 
     public static void main(String[] args) {

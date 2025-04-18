@@ -28,6 +28,7 @@ import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.Mapping.SourceMappingType;
 import org.activiti.spring.process.model.ProcessConstantsMapping;
 import org.activiti.spring.process.model.ProcessVariablesMapping;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProcessDefinitionValuesService {
 
@@ -92,9 +93,10 @@ public class ProcessDefinitionValuesService {
 
     private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id, boolean formRequired) {
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        Process process = bpmnModel.getMainProcess();
+        String processId = getProcessId(id);
+        Process process = processId != null ? bpmnModel.getProcessById(processId) : bpmnModel.getMainProcess();
 
-        if (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null) {
+        if (process != null && (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null)) {
             Optional<FlowElement> startEvent = process
                 .getFlowElements()
                 .stream()
@@ -113,4 +115,12 @@ public class ProcessDefinitionValuesService {
     }
 
     private record ExtensionsStartEventId(String id, Extension extensions) {}
+
+    private String getProcessId(String processDefinitionId) {
+        return Optional
+            .ofNullable(processDefinitionId)
+            .filter(StringUtils::isNotBlank)
+            .map(id -> id.split(":")[0])
+            .orElse(null);
+    }
 }

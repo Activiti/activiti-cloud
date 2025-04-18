@@ -27,10 +27,12 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 @SpringBootTest(
@@ -64,6 +66,9 @@ public class KeycloakClientIT {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
     private final String ACTIVITI_ADMIN_ROLE = ACTIVITI_ADMIN;
