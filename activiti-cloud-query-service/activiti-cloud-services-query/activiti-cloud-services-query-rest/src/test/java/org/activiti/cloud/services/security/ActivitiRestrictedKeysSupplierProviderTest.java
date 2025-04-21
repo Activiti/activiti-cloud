@@ -134,10 +134,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("testuser")
     public void shouldGetOnlyProcessDefinitionAllowedToTheUser() {
         //given
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
-
         //when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
 
         //then
         Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAllById(
@@ -152,10 +150,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("hruser")
     public void shouldGetAllDefinitionsInAllowedServiceInAdditionToDirectSpecifiedKeysWhenUsingWildcard() {
         //given
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
-
         //when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
 
         //then
         Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAllById(
@@ -175,11 +171,10 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("bobinhr")
     public void shouldGetAllProcessDefinitionsAllowedToGroup() {
         //given
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
         //when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
 
         //then
         Iterable<ProcessDefinitionEntity> processDefinitions = processDefinitionRepository.findAllById(
@@ -203,10 +198,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("otheruser")
     void shouldReturnEmptyProcessDefinitionEntityRestrictedKeys() {
         // given
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
 
         // then
         assertThat(result).isEmpty();
@@ -216,10 +209,9 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("otheruser")
     void processInstanceEntityRestrictedKeys() {
         // given
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
 
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         assertThat(result).isEmpty();
@@ -279,10 +271,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
     void unrestrictedKeys() {
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
 
         // then
         assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
@@ -291,10 +281,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithAnonymousUser
     void anonymousUserKeys() {
-        var entityDescriptor = introspect(ProcessDefinitionEntity.class);
-
         // when
-        var result = catchThrowable(() -> restrictedKeysProvider.apply(entityDescriptor));
+        var result = catchThrowable(() -> restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class)));
 
         // then
         assertThat(result).isInstanceOf(AccessDeniedException.class).hasMessage("Access denied");
@@ -303,15 +291,13 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser("testuser")
     public void shouldGetProcessInstancesWhenPermitted() {
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
 
-        assertThat(iterable).isNotEmpty();
+        assertThat(iterable).isNotEmpty().extracting(ProcessInstanceEntity::getId).containsOnly("15");
     }
 
     @Test
@@ -326,15 +312,13 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
         processInstanceRepository.save(processInstanceEntity);
 
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
 
-        assertThat(iterable).isNotEmpty();
+        assertThat(iterable).isNotEmpty().extracting(ProcessInstanceEntity::getId).containsOnly("16", "21");
     }
 
     @Test
@@ -350,15 +334,13 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
 
-        assertThat(iterable).isNotEmpty();
+        assertThat(iterable).isNotEmpty().extracting(ProcessInstanceEntity::getId).containsOnly("17");
     }
 
     @Test
@@ -372,10 +354,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         processInstanceEntity.setServiceName("test-cmd-endpoint-wild");
         processInstanceRepository.save(processInstanceEntity);
 
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
@@ -410,10 +390,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         assertThat(processInstanceRepository.count()).isGreaterThanOrEqualTo(2);
 
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
@@ -433,10 +411,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @WithMockUser("intruder")
     public void shouldNotGetProcessInstancesWhenNotPermitted() {
         // given
-        var entityDescriptor = introspect(ProcessInstanceEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
         // then
         assertThat(result).isEmpty();
