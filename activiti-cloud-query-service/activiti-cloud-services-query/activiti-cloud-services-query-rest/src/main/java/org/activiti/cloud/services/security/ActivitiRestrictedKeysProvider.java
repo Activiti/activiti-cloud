@@ -55,6 +55,7 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
     private final TaskLookupRestrictionService taskLookupRestrictionService;
     private final TaskVariableLookupRestrictionService taskVariableLookupRestrictionService;
     private final EntityManager entityManager;
+
     private final List<String> unrestrictedRoles;
 
     private String rolePrefix = "ROLE_";
@@ -83,6 +84,10 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
     public void setRolePrefix(String rolePrefix) {
         this.rolePrefix = rolePrefix;
+    }
+
+    public List<String> getUnrestrictedRoles() {
+        return unrestrictedRoles;
     }
 
     @Override

@@ -46,6 +46,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @TestPropertySource("classpath:application-test.properties")
-@SpringBootTest
+@SpringBootTest(
+    properties = {
+        "spring.activiti.cloud.query.graphql.restricted-key-provider.unrestricted-roles=ACTIVITI_ADMIN,ACTIVITI_MANAGER",
+    }
+)
 public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
@@ -102,7 +107,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     private ProcessDefinitionEntity defKey1UnauthorizedService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         defKey1AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey1");
         defKey2AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey2");
         defKey3AuthorizedService = buildProcessDefinition("test-cmd-endpoint", "defKey3");
@@ -135,7 +140,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskRepository.deleteAll();
         variableRepository.deleteAll();
@@ -144,8 +149,20 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     }
 
     @Test
+    void contextLoads() {
+        assertThat(restrictedKeysProvider)
+            .isInstanceOf(ActivitiRestrictedKeysProvider.class)
+            .asInstanceOf(InstanceOfAssertFactories.type(ActivitiRestrictedKeysProvider.class))
+            .extracting(
+                ActivitiRestrictedKeysProvider::getRolePrefix,
+                ActivitiRestrictedKeysProvider::getUnrestrictedRoles
+            )
+            .containsOnly("ROLE_", List.of("ACTIVITI_ADMIN", "ACTIVITI_MANAGER"));
+    }
+
+    @Test
     @WithMockUser("testuser")
-    public void shouldGetOnlyProcessDefinitionAllowedToTheUser() {
+    void shouldGetOnlyProcessDefinitionAllowedToTheUser() {
         //given
         //when
         var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
@@ -161,7 +178,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Test
     @WithMockUser("hruser")
-    public void shouldGetAllDefinitionsInAllowedServiceInAdditionToDirectSpecifiedKeysWhenUsingWildcard() {
+    void shouldGetAllDefinitionsInAllowedServiceInAdditionToDirectSpecifiedKeysWhenUsingWildcard() {
         //given
         //when
         var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
@@ -200,11 +217,6 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
                 tuple("test-cmd-endpoint-wild", "defKey1"), //access given via wildcard to hrgroup
                 tuple("test-cmd-endpoint-wild", "defKey2")
             ); //access given via wildcard to hrgroup
-    }
-
-    @Test
-    void contextLoads() {
-        assertThat(restrictedKeysProvider).isInstanceOf(ActivitiRestrictedKeysProvider.class);
     }
 
     @Test
