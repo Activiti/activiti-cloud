@@ -77,6 +77,14 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
         this.unrestrictedRoles = unrestrictedRoles;
     }
 
+    public String getRolePrefix() {
+        return rolePrefix;
+    }
+
+    public void setRolePrefix(String rolePrefix) {
+        this.rolePrefix = rolePrefix;
+    }
+
     @Override
     public Optional<List<Object>> apply(EntityIntrospector.EntityIntrospectionResult entityDescriptor) {
         var entity = entityDescriptor.getEntity();

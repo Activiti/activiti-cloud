@@ -18,6 +18,7 @@ package org.activiti.cloud.conf;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -62,6 +63,7 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -216,6 +218,10 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.query.graphql.restricted-key-provider.enabled",
+        matchIfMissing = true
+    )
     RestrictedKeysProvider restrictedKeysProvider(
         EntityManagerFactory entityManagerFactory,
         ProcessDefinitionRestrictionService processDefinitionRestrictionService,
@@ -223,9 +229,12 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessVariableRestrictionService processVariableRestrictionService,
         TaskLookupRestrictionService taskLookupRestrictionService,
         TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
-        @Value("${spring.activiti.cloud.query.graphql.admin-roles:ACTIVITI_ADMIN}") List<String> unrestrictedRoles
+        @Value(
+            "${spring.activiti.cloud.query.graphql.restricted-key-provider.unrestricted-roles:ACTIVITI_ADMIN}"
+        ) List<String> unrestrictedRoles,
+        @Value("${spring.activiti.cloud.query.graphql.restricted-key-provider.role-prefix:#{null}}") String rolePrefix
     ) {
-        return new ActivitiRestrictedKeysProvider(
+        var bean = new ActivitiRestrictedKeysProvider(
             entityManagerFactory,
             processDefinitionRestrictionService,
             processInstanceRestrictionService,
@@ -234,6 +243,10 @@ public class QueryRestWebMvcAutoConfiguration {
             taskVariableLookupRestrictionService,
             unrestrictedRoles
         );
+
+        Optional.ofNullable(rolePrefix).ifPresent(bean::setRolePrefix);
+
+        return bean;
     }
 
     @Bean
