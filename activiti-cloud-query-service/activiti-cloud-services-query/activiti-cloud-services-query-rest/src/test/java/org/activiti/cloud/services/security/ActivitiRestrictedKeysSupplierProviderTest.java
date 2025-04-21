@@ -40,6 +40,7 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
@@ -460,6 +461,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
+
+        assertThat(iterable).extracting(ProcessInstanceEntity::getId).containsOnly(processInstanceEntity.getId());
     }
 
     @Test
@@ -474,28 +477,157 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("testgroup"));
-        shouldGetTasksWhenCandidateRestrictTaskQuery();
-        shouldGetTasksWhenCandidateRestrictToInvolvedUser();
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(taskEntity.getId());
     }
 
-    private void shouldGetTasksWhenCandidateRestrictTaskQuery() {
-        var entityDescriptor = introspect(TaskEntity.class);
+    @Test
+    @WithMockUser("fred")
+    void shouldNotGetTasksWhenNotCandidate() {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskRepository.save(taskEntity);
 
-        var restrictedKeys = restrictedKeysProvider.apply(entityDescriptor);
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
 
-        assertThat(restrictedKeys).isNotEmpty().get().asList().isNotEmpty();
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
 
-        Iterable<TaskEntity> iterable = taskRepository.findAllById(toIterable(restrictedKeys));
-
-        assertThat(iterable).isNotEmpty();
+        assertThat(restrictedKeys).isEmpty();
     }
 
-    private void shouldGetTasksWhenCandidateRestrictToInvolvedUser() {
-        var entityDescriptor = introspect(TaskEntity.class);
+    @Test
+    @WithMockUser("testuser")
+    void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
 
-        var restrictedKeys = restrictedKeysProvider.apply(entityDescriptor);
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
 
-        assertThat(restrictedKeys).isNotEmpty().get().asList().isNotEmpty();
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    void shouldGetTasksAssignedToSomeOneElseWhenOwner() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskEntity.setAssignee("someOneElse");
+        taskEntity.setOwner("testuser");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "someOneElse");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(taskEntity.getId());
+    }
+
+    @Test
+    @WithMockUser("fred")
+    void shouldGetTasksWhenAssigneeEvenIfNotCandidate() {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("2");
+        taskEntity.setAssignee("fred");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("2", "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(taskEntity.getId());
+    }
+
+    @Test
+    @WithMockUser("hruser")
+    void shouldGetTasksWhenInCandidateGroup() {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("3");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("3", "hr");
+        taskCandidateGroupRepository.save(taskCandidateGroup);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(taskEntity.getId());
+    }
+
+    @Test
+    @WithMockUser("hruser")
+    void shouldNotGetTasksWhenNotInCandidateGroup() {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("4");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("4", "finance");
+        taskCandidateGroupRepository.save(taskCandidateGroup);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("hruser")
+    void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("3");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
+
+        TaskCandidateGroupEntity taskCandidateGroup = new TaskCandidateGroupEntity("3", "hr");
+        taskCandidateGroupRepository.save(taskCandidateGroup);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("hr"));
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    void shouldGetTasksWhenNoCandidatesConfiguredAndNotAssigned() {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("5");
+        taskRepository.save(taskEntity);
+
+        // no candidates or groups - just a taskEntity without any permissions so anyone can see
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(taskEntity.getId());
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured() {
+        //given
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("5");
+        taskEntity.setAssignee("someOneElse");
+        taskRepository.save(taskEntity);
+
+        // no candidates or groups - just a taskEntity without any permissions so anyone could see if not assigned
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
+
+        assertThat(restrictedKeys).isEmpty();
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {

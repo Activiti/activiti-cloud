@@ -226,13 +226,16 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
         @Override
         List<Object> getKeys(Class<?> entityClass) {
-            var predicate = taskLookupRestrictionService.restrictTaskQuery(new BooleanBuilder());
+            var predicate = taskLookupRestrictionService.restrictToInvolvedUsersQuery(new BooleanBuilder());
 
-            var entity = QTaskEntity.taskEntity;
+            var taskEntity = QTaskEntity.taskEntity;
+            var processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
             JPAQuery<?> query = new JPAQuery<QTaskEntity>(entityManager)
-                .from(entity)
-                .select(entity.id)
+                .from(taskEntity)
+                .leftJoin(processInstanceEntity)
+                .on(processInstanceEntity.id.eq(taskEntity.processInstanceId))
+                .select(taskEntity.id)
                 .where(predicate);
 
             return query.fetch().stream().map(Object.class::cast).toList();
