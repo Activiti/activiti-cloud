@@ -36,6 +36,8 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -67,6 +69,12 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private VariableRepository variableRepository;
+
+    @Autowired
+    private TaskVariableRepository taskVariableRepository;
 
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
@@ -123,10 +131,15 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskRepository.deleteAll();
+        variableRepository.deleteAll();
     }
 
     @AfterEach
     public void tearDown() {
+        taskCandidateUserRepository.deleteAll();
+        taskRepository.deleteAll();
+        variableRepository.deleteAll();
+        processInstanceRepository.deleteAll();
         processDefinitionRepository.deleteAll();
     }
 
@@ -318,7 +331,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         // then
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAllById(toIterable(result));
 
-        assertThat(iterable).isNotEmpty().extracting(ProcessInstanceEntity::getId).containsOnly("16", "21");
+        assertThat(iterable).isNotEmpty().extracting(ProcessInstanceEntity::getId).containsOnly("16");
     }
 
     @Test
@@ -604,6 +617,53 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
         var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskEntity.class));
 
         assertThat(restrictedKeys).isEmpty();
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    public void shouldGetTaskVariablesWhenCandidateForTask() throws Exception {
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId("1");
+        taskRepository.save(taskEntity);
+
+        TaskVariableEntity variableEntity = new TaskVariableEntity();
+        variableEntity.setName("name");
+        variableEntity.setValue("id");
+        variableEntity.setTaskId("1");
+        variableEntity.setTask(taskEntity);
+        taskVariableRepository.save(variableEntity);
+
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1", "testuser");
+        taskCandidateUserRepository.save(taskCandidateUser);
+
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(Arrays.asList("testgroup"));
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(TaskVariableEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(variableEntity.getId());
+    }
+
+    @Test
+    @WithMockUser("testuser")
+    public void shouldGetProcessInstanceVariablesWhenPermitted() throws Exception {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setId("15");
+        processInstanceEntity.setName("name");
+        processInstanceEntity.setInitiator("initiator");
+        processInstanceEntity.setProcessDefinitionKey("defKey1");
+        processInstanceEntity.setServiceName("test-cmd-endpoint");
+        processInstanceRepository.save(processInstanceEntity);
+
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity();
+        variableEntity.setName("name");
+        variableEntity.setValue("id");
+        variableEntity.setProcessInstanceId("15");
+        variableEntity.setProcessInstance(processInstanceEntity);
+        variableRepository.save(variableEntity);
+
+        var restrictedKeys = restrictedKeysProvider.apply(introspect(ProcessVariableEntity.class));
+
+        assertThat(restrictedKeys).isNotEmpty().get().asList().containsOnly(variableEntity.getId());
     }
 
     private ProcessDefinitionEntity buildProcessDefinition(String serviceName, String key) {
