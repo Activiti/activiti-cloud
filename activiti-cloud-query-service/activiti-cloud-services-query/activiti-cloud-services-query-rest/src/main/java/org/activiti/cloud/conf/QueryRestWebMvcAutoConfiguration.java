@@ -230,7 +230,7 @@ public class QueryRestWebMvcAutoConfiguration {
         TaskLookupRestrictionService taskLookupRestrictionService,
         TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
         @Value(
-            "${spring.activiti.cloud.query.graphql.restricted-key-provider.unrestricted-roles:ACTIVITI_ADMIN}"
+            "${spring.activiti.cloud.query.graphql.restricted-key-provider.unrestricted-roles:ACTIVITI_ADMIN,APPLICATION_MANAGER}"
         ) List<String> unrestrictedRoles,
         @Value("${spring.activiti.cloud.query.graphql.restricted-key-provider.role-prefix:#{null}}") String rolePrefix
     ) {

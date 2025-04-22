@@ -59,11 +59,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @TestPropertySource("classpath:application-test.properties")
-@SpringBootTest(
-    properties = {
-        "spring.activiti.cloud.query.graphql.restricted-key-provider.unrestricted-roles=ACTIVITI_ADMIN,ACTIVITI_MANAGER",
-    }
-)
+@SpringBootTest
 public class ActivitiRestrictedKeysSupplierProviderTest {
 
     @Autowired
@@ -157,7 +153,7 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
                 ActivitiRestrictedKeysProvider::getRolePrefix,
                 ActivitiRestrictedKeysProvider::getUnrestrictedRoles
             )
-            .containsOnly("ROLE_", List.of("ACTIVITI_ADMIN", "ACTIVITI_MANAGER"));
+            .containsOnly("ROLE_", List.of("ACTIVITI_ADMIN", "APPLICATION_MANAGER"));
     }
 
     @Test
