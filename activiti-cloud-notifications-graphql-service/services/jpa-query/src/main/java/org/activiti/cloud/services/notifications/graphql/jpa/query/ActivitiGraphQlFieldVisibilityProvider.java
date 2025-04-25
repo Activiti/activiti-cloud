@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -66,7 +67,9 @@ public class ActivitiGraphQlFieldVisibilityProvider implements Supplier<GraphqlF
             .ofNullable(SecurityContextHolder.getContext())
             .map(SecurityContext::getAuthentication);
 
-        if (authenticationToken.filter(isAnonymous).isPresent()) {
+        if (authenticationToken.isEmpty()) {
+            throw new AccessDeniedException("User is not allowed to access this resource");
+        } else if (authenticationToken.filter(isAnonymous).isPresent()) {
             return blockAllFields;
         }
 

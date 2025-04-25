@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
+import static graphql.validation.ValidationErrorType.FieldUndefined;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.util.Lists.list;
 import static org.mockito.Mockito.mock;
@@ -31,7 +33,6 @@ import graphql.schema.Coercing;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import graphql.validation.ValidationErrorType;
 import java.time.Instant;
 import java.util.Date;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -175,12 +177,12 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .isNotEmpty()
             .extracting("validationErrorType", "queryPath")
             .containsOnly(
-                tuple(ValidationErrorType.FieldUndefined, list("Application")),
-                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessModel")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessModels")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ProcessModel")),
+                tuple(FieldUndefined, list("ProcessModels")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
             );
     }
 
@@ -218,20 +220,20 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .isNotEmpty()
             .extracting("validationErrorType", "queryPath")
             .containsOnly(
-                tuple(ValidationErrorType.FieldUndefined, list("Task")),
-                tuple(ValidationErrorType.FieldUndefined, list("Tasks")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstance")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstances")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinitions")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinition")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariable")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariables")),
-                tuple(ValidationErrorType.FieldUndefined, list("TaskVariable")),
-                tuple(ValidationErrorType.FieldUndefined, list("TaskVariables")),
-                tuple(ValidationErrorType.FieldUndefined, list("Application")),
-                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+                tuple(FieldUndefined, list("Task")),
+                tuple(FieldUndefined, list("Tasks")),
+                tuple(FieldUndefined, list("ProcessInstance")),
+                tuple(FieldUndefined, list("ProcessInstances")),
+                tuple(FieldUndefined, list("ProcessDefinitions")),
+                tuple(FieldUndefined, list("ProcessDefinition")),
+                tuple(FieldUndefined, list("ProcessVariable")),
+                tuple(FieldUndefined, list("ProcessVariables")),
+                tuple(FieldUndefined, list("TaskVariable")),
+                tuple(FieldUndefined, list("TaskVariables")),
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
             );
     }
 
@@ -269,10 +271,10 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .isNotEmpty()
             .extracting("validationErrorType", "queryPath")
             .containsOnly(
-                tuple(ValidationErrorType.FieldUndefined, list("Application")),
-                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
             );
     }
 
@@ -310,22 +312,160 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .isNotEmpty()
             .extracting("validationErrorType", "queryPath")
             .containsOnly(
-                tuple(ValidationErrorType.FieldUndefined, list("Task")),
-                tuple(ValidationErrorType.FieldUndefined, list("Tasks")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstance")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstances")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinitions")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinition")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariable")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariables")),
-                tuple(ValidationErrorType.FieldUndefined, list("TaskVariable")),
-                tuple(ValidationErrorType.FieldUndefined, list("TaskVariables")),
-                tuple(ValidationErrorType.FieldUndefined, list("Application")),
-                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessModel")),
-                tuple(ValidationErrorType.FieldUndefined, list("ProcessModels")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
-                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+                tuple(FieldUndefined, list("Task")),
+                tuple(FieldUndefined, list("Tasks")),
+                tuple(FieldUndefined, list("ProcessInstance")),
+                tuple(FieldUndefined, list("ProcessInstances")),
+                tuple(FieldUndefined, list("ProcessDefinitions")),
+                tuple(FieldUndefined, list("ProcessDefinition")),
+                tuple(FieldUndefined, list("ProcessVariable")),
+                tuple(FieldUndefined, list("ProcessVariables")),
+                tuple(FieldUndefined, list("TaskVariable")),
+                tuple(FieldUndefined, list("TaskVariables")),
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ProcessModel")),
+                tuple(FieldUndefined, list("ProcessModels")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    public void testGraphqlFieldVisibilityUnauthenticated() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        var result = catchThrowable(() -> executor.execute(query));
+
+        // then
+        assertThat(result).isNotNull().isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    @WithMockUser
+    public void testGraphqlFieldVisibilityEmptyRoles() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(FieldUndefined, list("Task")),
+                tuple(FieldUndefined, list("Tasks")),
+                tuple(FieldUndefined, list("ProcessInstance")),
+                tuple(FieldUndefined, list("ProcessInstances")),
+                tuple(FieldUndefined, list("ProcessDefinitions")),
+                tuple(FieldUndefined, list("ProcessDefinition")),
+                tuple(FieldUndefined, list("ProcessVariable")),
+                tuple(FieldUndefined, list("ProcessVariables")),
+                tuple(FieldUndefined, list("TaskVariable")),
+                tuple(FieldUndefined, list("TaskVariables")),
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ProcessModel")),
+                tuple(FieldUndefined, list("ProcessModels")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = "FOO")
+    public void testGraphqlFieldVisibilityNoMatchingRoles() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(FieldUndefined, list("Task")),
+                tuple(FieldUndefined, list("Tasks")),
+                tuple(FieldUndefined, list("ProcessInstance")),
+                tuple(FieldUndefined, list("ProcessInstances")),
+                tuple(FieldUndefined, list("ProcessDefinitions")),
+                tuple(FieldUndefined, list("ProcessDefinition")),
+                tuple(FieldUndefined, list("ProcessVariable")),
+                tuple(FieldUndefined, list("ProcessVariables")),
+                tuple(FieldUndefined, list("TaskVariable")),
+                tuple(FieldUndefined, list("TaskVariables")),
+                tuple(FieldUndefined, list("Application")),
+                tuple(FieldUndefined, list("Applications")),
+                tuple(FieldUndefined, list("ProcessModel")),
+                tuple(FieldUndefined, list("ProcessModels")),
+                tuple(FieldUndefined, list("ServiceTask")),
+                tuple(FieldUndefined, list("ServiceTasks"))
             );
     }
 
