@@ -71,6 +71,9 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @Autowired
     private ActivitiGraphQlJPASchemaProperties activitiGraphQlJPASchemaProperties;
 
+    @Autowired
+    private ActivitiGraphQlFieldVisibilityProvider activitiGraphQlFieldVisibilityProvider;
+
     @SpringBootApplication
     static class TestApplication {
 
