@@ -16,22 +16,32 @@
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.util.Lists.list;
 import static org.mockito.Mockito.mock;
 
+import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaSchemaBuilder;
+import graphql.ExecutionResult;
 import graphql.Scalars;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.Coercing;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.validation.ValidationErrorType;
 import java.time.Instant;
 import java.util.Date;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
@@ -47,6 +57,9 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @Autowired
     private RestrictedKeysProvider restrictedKeysProvider;
 
+    @Autowired
+    private GraphQLExecutor executor;
+
     @SpringBootApplication
     static class TestApplication {
 
@@ -58,7 +71,284 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Test
     void contextLoads() {
-        assertThat(schema).isNotNull();
+        assertThat(schema)
+            .isNotNull()
+            .extracting(GraphQLSchema::getQueryType)
+            .extracting(GraphQLObjectType::getFields)
+            .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+            .extracting(GraphQLFieldDefinition::getName)
+            .containsOnly(
+                "TaskVariable",
+                "ProcessVariable",
+                "Application",
+                "ProcessDefinition",
+                "ProcessInstance",
+                "Task",
+                "TaskVariables",
+                "ProcessVariables",
+                "Applications",
+                "ProcessDefinitions",
+                "ProcessInstances",
+                "Tasks",
+                "ProcessModel",
+                "ProcessModels",
+                "ServiceTask",
+                "ServiceTasks"
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_USER")
+    public void testGraphqlFieldVisibilityForActivitiUser() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(ValidationErrorType.FieldUndefined, list("Application")),
+                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessModel")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessModels")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_MODELER")
+    public void testGraphqlFieldVisibilityForModelerUser() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(ValidationErrorType.FieldUndefined, list("Task")),
+                tuple(ValidationErrorType.FieldUndefined, list("Tasks")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstance")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstances")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinitions")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinition")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariable")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariables")),
+                tuple(ValidationErrorType.FieldUndefined, list("TaskVariable")),
+                tuple(ValidationErrorType.FieldUndefined, list("TaskVariables")),
+                tuple(ValidationErrorType.FieldUndefined, list("Application")),
+                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = { "ACTIVITI_MODELER", "ACTIVITI_USER" })
+    public void testGraphqlFieldVisibilityForCompositeRolesUser() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(ValidationErrorType.FieldUndefined, list("Application")),
+                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void testGraphqlFieldVisibilityAnonymous() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors())
+            .isNotEmpty()
+            .extracting("validationErrorType", "queryPath")
+            .containsOnly(
+                tuple(ValidationErrorType.FieldUndefined, list("Task")),
+                tuple(ValidationErrorType.FieldUndefined, list("Tasks")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstance")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessInstances")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinitions")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessDefinition")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariable")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessVariables")),
+                tuple(ValidationErrorType.FieldUndefined, list("TaskVariable")),
+                tuple(ValidationErrorType.FieldUndefined, list("TaskVariables")),
+                tuple(ValidationErrorType.FieldUndefined, list("Application")),
+                tuple(ValidationErrorType.FieldUndefined, list("Applications")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessModel")),
+                tuple(ValidationErrorType.FieldUndefined, list("ProcessModels")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTask")),
+                tuple(ValidationErrorType.FieldUndefined, list("ServiceTasks"))
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = { "ACTIVITI_ADMIN", "ACTIVITI_USER" })
+    public void testGraphqlFieldVisibilityAdmin() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(roles = { "APPLICATION_MANAGER", "ACTIVITI_USER" })
+    public void testGraphqlFieldVisibilityManager() {
+        //given
+        String query =
+            """
+            {
+                Task(id: "1") { id }
+                Tasks { select { id } }
+                ProcessInstance(id: "1") { id }
+                ProcessInstances { select { id } }
+                ProcessDefinition(id: "1") { id }
+                ProcessDefinitions { select { id } }
+                ProcessVariable(id: 1) { id }
+                ProcessVariables { select { id } }
+                TaskVariable(id: 1) { id }
+                TaskVariables { select { id } }
+                Application(id: "foo") { name }
+                Applications { select { name } }
+                ProcessModel(id: "1") { id }
+                ProcessModels { select { id } }
+                ServiceTask(id: "1") { id }
+                ServiceTasks { select { id } }
+            }
+            """;
+
+        //when
+        ExecutionResult result = executor.execute(query);
+
+        // then
+        assertThat(result.getErrors()).isEmpty();
     }
 
     @Test

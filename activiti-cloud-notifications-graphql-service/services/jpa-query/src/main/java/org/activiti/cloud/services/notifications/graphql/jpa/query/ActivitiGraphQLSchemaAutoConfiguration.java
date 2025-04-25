@@ -22,20 +22,31 @@ import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuil
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import graphql.GraphQL;
+import graphql.schema.visibility.BlockedFields;
+import graphql.schema.visibility.GraphqlFieldVisibility;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
-import org.activiti.cloud.services.query.model.ApplicationEntity;
-import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -47,28 +58,85 @@ import org.springframework.context.annotation.Bean;
     matchIfMissing = true
 )
 @EnableGraphQLJpaQuerySchema(basePackageClasses = ProcessInstanceEntity.class)
+@EnableConfigurationProperties(ActivitiGraphQlJPASchemaProperties.class)
+@PropertySource("classpath:config/jpa-query.properties")
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
-    @Value("${spring.activiti.cloud.services.notifications.graphql.jpa-query.aggregate.enabled:true}")
-    private boolean isAggregateEnabled;
+    private final ActivitiGraphQlJPASchemaProperties properties;
+
+    public ActivitiGraphQLSchemaAutoConfiguration(ActivitiGraphQlJPASchemaProperties properties) {
+        this.properties = properties;
+    }
+
+    @Bean
+    Supplier<GraphqlFieldVisibility> graphqlFieldVisibility() {
+        final var blockAllFields = BlockedFields.newBlock().addCompiledPattern(Pattern.compile(".*")).build();
+        final var allowAllFields = VisibleFields
+            .newFieldsVisibility()
+            .addCompiledPattern(Pattern.compile(".*"))
+            .build();
+        final var rolePrefix = Optional
+            .ofNullable(properties.getRestrictedKeysProvider())
+            .map(ActivitiGraphQlJPASchemaProperties.RestrictedKeysProviderProperties::getRolePrefix)
+            .orElse("ROLE_");
+
+        return () -> {
+            var authenticationToken = Optional
+                .ofNullable(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication);
+
+            Predicate<Authentication> isAnonymous = AnonymousAuthenticationToken.class::isInstance;
+            Predicate<Authentication> hasUnrestrictedRoles = authentication ->
+                authentication
+                    .getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(it -> it.replaceFirst(rolePrefix, ""))
+                    .anyMatch(authority ->
+                        properties.getRestrictedKeysProvider().getUnrestrictedRoles().contains(authority)
+                    );
+
+            Function<Collection<? extends GrantedAuthority>, Set<Pattern>> authoritiesToVisibilityPatterns = authorities ->
+                authorities
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(it -> it.replaceFirst(rolePrefix, ""))
+                    .map(it -> properties.getFieldsVisibility().get(it))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            Function<Set<Pattern>, GraphqlFieldVisibility> toGraphQlFieldVisibility = patterns ->
+                VisibleFields
+                    .newFieldsVisibility()
+                    .addCompiledPatterns(patterns)
+                    .addCompiledPattern(Pattern.compile("(?!JPA\\.).*"))
+                    .build();
+
+            if (authenticationToken.filter(isAnonymous).isPresent()) {
+                return blockAllFields;
+            } else if (authenticationToken.filter(hasUnrestrictedRoles).isPresent()) {
+                return allowAllFields;
+            }
+
+            return authenticationToken
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getAuthorities)
+                .map(authoritiesToVisibilityPatterns)
+                .filter(Predicate.not(Collection::isEmpty))
+                .map(toGraphQlFieldVisibility)
+                .orElse(blockAllFields);
+        };
+    }
 
     @Bean
     GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(
         ObjectProvider<RestrictedKeysProvider> restrictedKeysProvider
     ) {
         return builder -> {
-            restrictedKeysProvider.ifAvailable(builder::restrictedKeysProvider);
-
             builder
                 .name("Query")
                 .description("Activiti Cloud Query Schema")
-                .enableAggregate(isAggregateEnabled)
-                .entityPath(ApplicationEntity.class.getName())
-                .entityPath(ProcessDefinitionEntity.class.getName())
-                .entityPath(ProcessInstanceEntity.class.getName())
-                .entityPath(TaskEntity.class.getName())
-                .entityPath(ProcessVariableEntity.class.getName())
-                .entityPath(TaskVariableEntity.class.getName())
+                .enableAggregate(properties.getAggregate().isEnabled())
                 .scalar(
                     VariableValue.class,
                     newScalar()
@@ -87,6 +155,12 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                         )
                         .build()
                 );
+
+            restrictedKeysProvider.ifAvailable(builder::restrictedKeysProvider);
+
+            Optional
+                .ofNullable(properties.getEntities())
+                .ifPresent(entities -> entities.forEach(entity -> builder.entityPath(entity.getName())));
         };
     }
 }

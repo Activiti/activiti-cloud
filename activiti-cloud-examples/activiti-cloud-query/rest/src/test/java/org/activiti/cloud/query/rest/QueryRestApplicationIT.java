@@ -25,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
@@ -44,7 +47,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -70,8 +72,11 @@ public class QueryRestApplicationIT {
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
 
-    @MockitoSpyBean
+    @Autowired
     private RestrictedKeysProvider restrictedKeysProvider;
+
+    @Autowired
+    private GraphQLSchema graphQLSchema;
 
     @Test
     public void contextLoads() {
@@ -115,6 +120,35 @@ public class QueryRestApplicationIT {
             .extracting("list")
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
             .containsKeys("entries", "pagination");
+    }
+
+    @Test
+    void graphQLSchema() {
+        assertThat(graphQLSchema)
+            .isNotNull()
+            .extracting(GraphQLSchema::getQueryType)
+            .extracting(GraphQLObjectType::getFields)
+            .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+            .extracting(GraphQLFieldDefinition::getName)
+            .containsOnly(
+                "TaskVariable",
+                "ProcessVariable",
+                "Application",
+                "ProcessDefinition",
+                "ProcessInstance",
+                "Task",
+                "TaskVariables",
+                "ProcessVariables",
+                "Applications",
+                "ProcessDefinitions",
+                "ProcessInstances",
+                "Tasks",
+                "ProcessModel",
+                "ProcessModels",
+                "ServiceTask",
+                "ServiceTasks",
+                "hello"
+            );
     }
 
     @Test
