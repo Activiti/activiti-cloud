@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -29,7 +30,7 @@ public class ActivitiGraphQlJPASchemaProperties {
     private boolean enabled = true;
     private List<Class<?>> entities = new ArrayList<>();
     private AggregateProperties aggregate = new AggregateProperties();
-    private Map<String, Pattern> fieldsVisibility = new LinkedHashMap<>();
+    private FieldsVisibilityProperties fieldsVisibility = new FieldsVisibilityProperties();
 
     private RestrictedKeysProviderProperties restrictedKeysProvider = new RestrictedKeysProviderProperties();
 
@@ -57,11 +58,11 @@ public class ActivitiGraphQlJPASchemaProperties {
         this.aggregate = aggregate;
     }
 
-    public Map<String, Pattern> getFieldsVisibility() {
+    public FieldsVisibilityProperties getFieldsVisibility() {
         return fieldsVisibility;
     }
 
-    public void setFieldsVisibility(Map<String, Pattern> fieldsVisibility) {
+    public void setFieldsVisibility(FieldsVisibilityProperties fieldsVisibility) {
         this.fieldsVisibility = fieldsVisibility;
     }
 
@@ -114,6 +115,28 @@ public class ActivitiGraphQlJPASchemaProperties {
 
         public void setRolePrefix(String rolePrefix) {
             this.rolePrefix = rolePrefix;
+        }
+    }
+
+    public static class FieldsVisibilityProperties {
+
+        private boolean enabled = true;
+        private Map<String, Set<Pattern>> patterns = new LinkedHashMap<>();
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Map<String, Set<Pattern>> getPatterns() {
+            return patterns;
+        }
+
+        public void setPatterns(Map<String, Set<Pattern>> patterns) {
+            this.patterns = patterns;
         }
     }
 }

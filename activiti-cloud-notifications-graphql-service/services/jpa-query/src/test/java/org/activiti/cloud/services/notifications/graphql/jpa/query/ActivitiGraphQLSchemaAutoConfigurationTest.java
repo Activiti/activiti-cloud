@@ -34,6 +34,14 @@ import graphql.schema.GraphQLSchema;
 import graphql.validation.ValidationErrorType;
 import java.time.Instant;
 import java.util.Date;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +67,9 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Autowired
     private GraphQLExecutor executor;
+
+    @Autowired
+    private ActivitiGraphQlJPASchemaProperties activitiGraphQlJPASchemaProperties;
 
     @SpringBootApplication
     static class TestApplication {
@@ -94,6 +105,36 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
                 "ProcessModels",
                 "ServiceTask",
                 "ServiceTasks"
+            );
+    }
+
+    @Test
+    void activitiGraphQlJPASchemaProperties() {
+        assertThat(activitiGraphQlJPASchemaProperties.getEntities())
+            .containsOnly(
+                ProcessInstanceEntity.class,
+                TaskEntity.class,
+                ProcessDefinitionEntity.class,
+                ProcessVariableEntity.class,
+                TaskVariableEntity.class,
+                ServiceTaskEntity.class,
+                ProcessModelEntity.class,
+                ApplicationEntity.class
+            );
+        assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().isEnabled()).isTrue();
+        assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().getRolePrefix()).isEqualTo("ROLE_");
+        assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().getUnrestrictedRoles())
+            .containsOnly("ACTIVITI_ADMIN", "APPLICATION_MANAGER");
+        assertThat(activitiGraphQlJPASchemaProperties.getAggregate().isEnabled()).isTrue();
+        assertThat(activitiGraphQlJPASchemaProperties.getFieldsVisibility().isEnabled()).isTrue();
+        assertThat(activitiGraphQlJPASchemaProperties.getFieldsVisibility().getPatterns().toString())
+            .isEqualTo(
+                "{" +
+                "ACTIVITI_MODELER=[JPA.(ProcessModel|ProcessModels)], " +
+                "APPLICATION_MANAGER=[.*], " +
+                "ACTIVITI_USER=[JPA.(Task|Tasks|ProcessInstance|ProcessInstances|ProcessDefinition|ProcessDefinitions|ProcessVariable|ProcessVariables|TaskVariable|TaskVariables)], " +
+                "ACTIVITI_ADMIN=[.*]" +
+                "}"
             );
     }
 

@@ -22,17 +22,9 @@ import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuil
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import graphql.GraphQL;
-import graphql.schema.visibility.BlockedFields;
 import graphql.schema.visibility.GraphqlFieldVisibility;
-import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.springframework.beans.factory.ObjectProvider;
@@ -42,11 +34,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -69,63 +56,12 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
     }
 
     @Bean
-    Supplier<GraphqlFieldVisibility> graphqlFieldVisibility() {
-        final var blockAllFields = BlockedFields.newBlock().addCompiledPattern(Pattern.compile(".*")).build();
-        final var allowAllFields = VisibleFields
-            .newFieldsVisibility()
-            .addCompiledPattern(Pattern.compile(".*"))
-            .build();
-        final var rolePrefix = Optional
-            .ofNullable(properties.getRestrictedKeysProvider())
-            .map(ActivitiGraphQlJPASchemaProperties.RestrictedKeysProviderProperties::getRolePrefix)
-            .orElse("ROLE_");
-
-        return () -> {
-            var authenticationToken = Optional
-                .ofNullable(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication);
-
-            Predicate<Authentication> isAnonymous = AnonymousAuthenticationToken.class::isInstance;
-            Predicate<Authentication> hasUnrestrictedRoles = authentication ->
-                authentication
-                    .getAuthorities()
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .map(it -> it.replaceFirst(rolePrefix, ""))
-                    .anyMatch(authority ->
-                        properties.getRestrictedKeysProvider().getUnrestrictedRoles().contains(authority)
-                    );
-
-            Function<Collection<? extends GrantedAuthority>, Set<Pattern>> authoritiesToVisibilityPatterns = authorities ->
-                authorities
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .map(it -> it.replaceFirst(rolePrefix, ""))
-                    .map(it -> properties.getFieldsVisibility().get(it))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-            Function<Set<Pattern>, GraphqlFieldVisibility> toGraphQlFieldVisibility = patterns ->
-                VisibleFields
-                    .newFieldsVisibility()
-                    .addCompiledPatterns(patterns)
-                    .addCompiledPattern(Pattern.compile("(?!JPA\\.).*"))
-                    .build();
-
-            if (authenticationToken.filter(isAnonymous).isPresent()) {
-                return blockAllFields;
-            } else if (authenticationToken.filter(hasUnrestrictedRoles).isPresent()) {
-                return allowAllFields;
-            }
-
-            return authenticationToken
-                .filter(Authentication::isAuthenticated)
-                .map(Authentication::getAuthorities)
-                .map(authoritiesToVisibilityPatterns)
-                .filter(Predicate.not(Collection::isEmpty))
-                .map(toGraphQlFieldVisibility)
-                .orElse(blockAllFields);
-        };
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.services.notifications.graphql.jpa-query.fields-visibility.enabled",
+        matchIfMissing = true
+    )
+    Supplier<GraphqlFieldVisibility> activitiGraphQlFieldVisibilityProvider() {
+        return new ActivitiGraphQlFieldVisibilityProvider(properties);
     }
 
     @Bean
