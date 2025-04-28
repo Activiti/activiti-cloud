@@ -38,8 +38,10 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
@@ -229,8 +231,6 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser("otheruser")
     void processInstanceEntityRestrictedKeys() {
-        // given
-
         // when
         var result = restrictedKeysProvider.apply(introspect(ProcessInstanceEntity.class));
 
@@ -241,11 +241,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser("otheruser")
     void taskEntityRestrictedKeys() {
-        // given
-        var entityDescriptor = introspect(TaskEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(TaskEntity.class));
 
         // then
         assertThat(result).isEmpty();
@@ -254,11 +251,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser("otheruser")
     void processVariableRestrictedKeys() {
-        // given
-        var entityDescriptor = introspect(ProcessVariableEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(ProcessVariableEntity.class));
 
         // then
         assertThat(result).isEmpty();
@@ -267,23 +261,8 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     @Test
     @WithMockUser("otheruser")
     void taskVariableRestrictedKeys() {
-        // given
-        var entityDescriptor = introspect(TaskVariableEntity.class);
-
         // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
-
-        // then
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @WithMockUser(username = "otheruser")
-    void serviceTaskRestrictedKeys() {
-        var entityDescriptor = introspect(ServiceTaskEntity.class);
-
-        // when
-        var result = restrictedKeysProvider.apply(entityDescriptor);
+        var result = restrictedKeysProvider.apply(introspect(TaskVariableEntity.class));
 
         // then
         assertThat(result).isEmpty();
@@ -294,6 +273,36 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     void unrestrictedKeys() {
         // when
         var result = restrictedKeysProvider.apply(introspect(ProcessDefinitionEntity.class));
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
+    void processModelKeys() {
+        // when
+        var result = restrictedKeysProvider.apply(introspect(ProcessModelEntity.class));
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
+    void applicationKeys() {
+        // when
+        var result = restrictedKeysProvider.apply(introspect(ApplicationEntity.class));
+
+        // then
+        assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ACTIVITI_ADMIN")
+    void serviceTaskKeys() {
+        // when
+        var result = restrictedKeysProvider.apply(introspect(ServiceTaskEntity.class));
 
         // then
         assertThat(result).isNotEmpty().get().isEqualTo(List.of("*"));

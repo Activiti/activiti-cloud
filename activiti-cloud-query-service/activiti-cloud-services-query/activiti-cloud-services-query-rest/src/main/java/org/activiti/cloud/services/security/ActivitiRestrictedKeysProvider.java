@@ -28,17 +28,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -49,6 +54,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(ActivitiRestrictedKeysProvider.class);
     private final ProcessDefinitionRestrictionService processDefinitionRestrictionService;
     private final ProcessInstanceRestrictionService processInstanceRestrictionService;
     private final ProcessVariableRestrictionService processVariableRestrictionService;
@@ -103,7 +109,10 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
             .or(new ProcessInstanceRestrictedKeysSupplier(entity))
             .or(new TaskRestrictedKeysSupplier(entity))
             .or(new ProcessVariablesRestrictedKeysSupplier(entity))
-            .or(new TaskVariableRestrictedKeysSupplier(entity));
+            .or(new TaskVariableRestrictedKeysSupplier(entity))
+            .or(new ProcessModelKeysSupplier(entity))
+            .or(new ApplicationKeysSupplier(entity))
+            .or(new ServiceTaskKeysSupplier(entity));
     }
 
     boolean isAnonymousUser() {
@@ -180,6 +189,42 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
                 .where(predicate);
 
             return query.fetch().stream().map(Object.class::cast).toList();
+        }
+    }
+
+    class ProcessModelKeysSupplier extends RestrictedKeysSupplier<ProcessModelEntity> {
+
+        ProcessModelKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
+        }
+
+        @Override
+        List<Object> getKeys(Class<?> entityClass) {
+            return List.of("*");
+        }
+    }
+
+    class ApplicationKeysSupplier extends RestrictedKeysSupplier<ApplicationEntity> {
+
+        ApplicationKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
+        }
+
+        @Override
+        List<Object> getKeys(Class<?> entityClass) {
+            return List.of("*");
+        }
+    }
+
+    class ServiceTaskKeysSupplier extends RestrictedKeysSupplier<ServiceTaskEntity> {
+
+        ServiceTaskKeysSupplier(Class<?> entityClass) {
+            super(entityClass);
+        }
+
+        @Override
+        List<Object> getKeys(Class<?> entityClass) {
+            return List.of("*");
         }
     }
 
