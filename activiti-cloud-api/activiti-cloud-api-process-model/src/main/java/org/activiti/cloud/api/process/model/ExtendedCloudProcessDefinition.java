@@ -16,8 +16,11 @@
 package org.activiti.cloud.api.process.model;
 
 import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.VariableDefinition;
 
 public interface ExtendedCloudProcessDefinition extends CloudProcessDefinition {
     List<VariableDefinition> getVariableDefinitions();
+
+    Map<String, Object> getConstantValues();
 }

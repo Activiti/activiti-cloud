@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 class QueryConfigurationTest {
@@ -38,10 +38,10 @@ class QueryConfigurationTest {
         }
     }
 
-    @MockBean
+    @MockitoBean
     private BuildProperties buildProperties;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Test

@@ -25,9 +25,9 @@ import org.activiti.image.exception.ActivitiImageException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
@@ -38,10 +38,10 @@ public class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Serif";
 
-    @SpyBean
+    @MockitoSpyBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
-    @SpyBean
+    @MockitoSpyBean
     private ProcessInstanceDiagramController processInstanceDiagramController;
 
     @Value("classpath:/processes/SimpleProcess.bpmn20.xml")
