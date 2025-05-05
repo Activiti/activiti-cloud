@@ -38,7 +38,6 @@ import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.assemblers.ExtendedCloudProcessDefinitionRepresentationModelAssembler;
-import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -48,8 +47,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAdminController {
-
-    private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
     private final ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler;
 
@@ -61,13 +58,11 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
 
     @Autowired
     public ProcessDefinitionAdminControllerImpl(
-        ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
         ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         ProcessDefinitionAdminService processDefinitionAdminService
     ) {
-        this.representationModelAssembler = representationModelAssembler;
         this.extendedCloudProcessDefinitionRepresentationModelAssembler =
             extendedCloudProcessDefinitionRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;

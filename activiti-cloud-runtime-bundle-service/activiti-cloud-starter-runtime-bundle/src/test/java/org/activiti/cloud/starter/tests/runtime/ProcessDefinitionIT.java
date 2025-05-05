@@ -79,7 +79,7 @@ public class ProcessDefinitionIT {
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventStaticMappingsAndHasNoStartEventForm() {
         ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
-            processDefinitionIds.get("shouldDeliverMessagesViaRestApi")
+            processDefinitionIds.get("shouldDeliverMessages")
         );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
@@ -116,7 +116,7 @@ public class ProcessDefinitionIT {
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoStartEventForm() {
         ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
-            processDefinitionIds.get("shouldDeliverMessagesViaRestApi")
+            processDefinitionIds.get("shouldDeliverMessages")
         );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());

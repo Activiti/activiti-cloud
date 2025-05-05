@@ -47,9 +47,13 @@ public class ActivitiCloudMessagingAutoConfiguration {
                 if (container instanceof AbstractMessageListenerContainer rabbitListenerContainer) {
                     if (group == null) {
                         Optional
-                            .ofNullable(activitiCloudMessagingProperties)
-                            .map(ActivitiCloudMessagingProperties::getRabbitmq)
+                            .ofNullable(activitiCloudMessagingProperties.getRabbitmq())
                             .map(ActivitiCloudMessagingProperties.RabbitMqProperties::getMissingAnonymousQueuesFatal)
+                            .ifPresent(rabbitListenerContainer::setMissingQueuesFatal);
+                    } else {
+                        Optional
+                            .ofNullable(activitiCloudMessagingProperties.getRabbitmq())
+                            .map(ActivitiCloudMessagingProperties.RabbitMqProperties::getMissingDurableQueuesFatal)
                             .ifPresent(rabbitListenerContainer::setMissingQueuesFatal);
                     }
                 }

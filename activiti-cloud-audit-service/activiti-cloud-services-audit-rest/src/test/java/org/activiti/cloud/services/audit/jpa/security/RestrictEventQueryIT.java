@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
@@ -45,10 +45,10 @@ public class RestrictEventQueryIT {
     @Autowired
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private UserGroupManager userGroupManager;
 
     @Test

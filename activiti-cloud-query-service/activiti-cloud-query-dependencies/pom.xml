@@ -12,6 +12,7 @@
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <properties>
     <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
+    <graphql-jpa-query.version>1.2.14</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -108,6 +109,13 @@
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>${classgraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.introproventures</groupId>
+        <artifactId>graphql-jpa-query-dependencies</artifactId>
+        <version>${graphql-jpa-query.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
