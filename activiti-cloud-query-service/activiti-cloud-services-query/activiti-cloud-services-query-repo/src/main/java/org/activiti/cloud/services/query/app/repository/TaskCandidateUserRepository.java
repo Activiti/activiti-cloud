@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Collection;
 import java.util.Set;
+import java.util.Set;
 import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserId;
@@ -43,4 +44,6 @@ public interface TaskCandidateUserRepository
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
+
+    Set<TaskCandidateUserEntity> findByTaskId(String id);
 }
