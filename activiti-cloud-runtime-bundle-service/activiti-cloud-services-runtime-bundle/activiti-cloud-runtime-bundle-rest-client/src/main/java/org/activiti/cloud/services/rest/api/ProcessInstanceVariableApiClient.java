@@ -24,5 +24,4 @@ import org.springframework.cloud.openfeign.FeignClient;
     path = "${runtime.path}",
     configuration = { ClientConfiguration.class }
 )
-public interface ProcessInstanceVariableApiClient extends ProcessInstanceVariableController{
-}
+public interface ProcessInstanceVariableApiClient extends ProcessInstanceVariableController {}
