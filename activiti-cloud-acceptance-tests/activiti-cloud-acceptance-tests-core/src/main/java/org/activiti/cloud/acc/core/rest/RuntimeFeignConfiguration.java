@@ -50,11 +50,7 @@ import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.activiti.cloud.api.model.shared.impl.conf.CloudCommonModelAutoConfiguration;
 import org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration;
 import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfiguration;
-import org.activiti.cloud.services.rest.api.ProcessDefinitionsApiClient;
-import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
-import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
-import org.activiti.cloud.services.rest.api.TaskApiClient;
-import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
+import org.activiti.cloud.services.rest.api.*;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
@@ -111,6 +107,14 @@ public class RuntimeFeignConfiguration {
             .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
             .contract(new SpringMvcContract())
             .target(TaskVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceVariableApiClient processInstanceVariableApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
