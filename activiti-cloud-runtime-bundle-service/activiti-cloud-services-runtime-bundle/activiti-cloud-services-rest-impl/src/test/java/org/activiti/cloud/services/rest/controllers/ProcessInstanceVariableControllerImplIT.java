@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -162,7 +163,9 @@ class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+                get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk());
     }
