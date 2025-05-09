@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import io.swagger.v3.oas.annotations.Parameter;
