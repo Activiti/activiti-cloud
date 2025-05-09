@@ -163,9 +163,7 @@ class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
-                    .accept(MediaTypes.HAL_JSON_VALUE)
-                    .contentType(APPLICATION_JSON)
+                get("/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
             )
             .andExpect(status().isOk());
     }
