@@ -25,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface ProcessVariablesRuntimeService {
     @RequestLine("GET /v1/process-instances/{id}/variables")
-    @Headers("Accept: application/hal+json;charset=UTF-8")
+    @Headers("Accept: application/hal+json, application/json;charset=UTF-8")
     CollectionModel<CloudVariableInstance> getVariables(@Param("id") String id);
 
     @RequestLine("PUT /v1/process-instances/{id}/variables")
