@@ -100,6 +100,8 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         groupsArray.addAll(groups);
         claims.put("groups", groupsArray);
 
+        claims.put("sub", username);
+
         return claims;
     }
 }
