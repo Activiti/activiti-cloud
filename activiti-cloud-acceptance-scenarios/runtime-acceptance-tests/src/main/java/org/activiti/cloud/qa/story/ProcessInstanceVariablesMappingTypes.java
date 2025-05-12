@@ -250,7 +250,7 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(cloudVariableInstanceResource)
                     .isNotNull()
                     .isNotEmpty()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, "string"),
                         tuple(processVariableInteger, "integer"),
