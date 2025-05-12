@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 public interface ProcessInstanceVariableController {
-    @GetMapping(path = "/v1/process-instances/{processInstanceId}/variables", consumes = { APPLICATION_JSON_VALUE })
+    @GetMapping(path = "/v1/process-instances/{processInstanceId}/variables", consumes = APPLICATION_JSON_VALUE)
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
         @Parameter(description = "Enter the processInstanceId to get variables") @PathVariable String processInstanceId
     );
