@@ -190,7 +190,7 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(cloudVariableInstanceResource)
                     .isNotNull()
                     .isNotEmpty()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, variableValue1),
                         tuple(processVariableInteger, variableValue2),
@@ -220,7 +220,7 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(cloudVariableInstanceResource)
                     .isNotNull()
                     .isNotEmpty()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, variableValue1),
                         tuple(processVariableInteger, variableValue2),
@@ -250,7 +250,7 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(cloudVariableInstanceResource)
                     .isNotNull()
                     .isNotEmpty()
-                    .extracting(VariableInstance::getName, VariableInstance::getValue)
+                    .extracting(VariableInstance::getName, VariableInstance::getType)
                     .contains(
                         tuple(processVariableString, "string"),
                         tuple(processVariableInteger, "integer"),
