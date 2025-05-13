@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -36,7 +37,6 @@ import org.activiti.cloud.acc.core.steps.runtime.TaskRuntimeBundleSteps;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceSubProcesses {
 
@@ -137,11 +137,11 @@ public class ProcessInstanceSubProcesses {
         assertThat(subprocessInstance).isNotNull();
         await()
             .untilAsserted(() -> {
-                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     subprocessInstance.getId()
                 );
-                assertThat(processVariables.getContent()).isNotNull();
-                assertThat(processVariables.getContent())
+                assertThat(processVariables)
+                    .isNotNull()
                     .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
                     .contains(tuple(variableName, variableValue));
             });
@@ -151,11 +151,11 @@ public class ProcessInstanceSubProcesses {
     public void checkParentProcessInstanceVariable(String variableName, String variableValue) {
         await()
             .untilAsserted(() -> {
-                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     processInstance.getId()
                 );
-                assertThat(processVariables.getContent()).isNotNull();
-                assertThat(processVariables.getContent())
+                assertThat(processVariables)
+                    .isNotNull()
                     .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
                     .contains(tuple(variableName, variableValue));
             });
