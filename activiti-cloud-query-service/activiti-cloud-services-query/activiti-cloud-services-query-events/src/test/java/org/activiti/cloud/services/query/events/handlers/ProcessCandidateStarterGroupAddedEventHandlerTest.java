@@ -34,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.testcontainers.junit.jupiter.Container;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCandidateStarterGroupAddedEventHandlerTest {
