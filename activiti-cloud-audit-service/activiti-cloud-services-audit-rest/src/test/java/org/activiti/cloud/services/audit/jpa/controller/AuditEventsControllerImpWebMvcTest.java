@@ -17,7 +17,7 @@ package org.activiti.cloud.services.audit.jpa.controller;
 
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,6 +30,7 @@ import java.util.Optional;
 import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
+import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
@@ -60,6 +61,7 @@ import org.activiti.cloud.services.audit.jpa.events.TimerFiredAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,21 +123,21 @@ class AuditEventsControllerImpWebMvcTest {
             .andExpect(status().isOk());
     }
 
-    private List<AuditEventEntity> buildEventsData(int recordsNumber) {
+    private List<AuditEventEntity> buildEventsData(int recordsNumber) throws IllegalAccessException {
         List<AuditEventEntity> eventsList = new ArrayList<>();
 
         for (long i = 0; i < recordsNumber; i++) {
             //would like to mock this but jackson and mockito not happy together
-            AuditEventEntity eventEntity = buildAuditEventEntity();
+            AuditEventEntity eventEntity = buildAuditEventEntity(i);
             eventsList.add(eventEntity);
         }
 
         return eventsList;
     }
 
-    private AuditEventEntity buildAuditEventEntity() {
+    private AuditEventEntity buildAuditEventEntity(long eventId) throws IllegalAccessException {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
-
+        FieldUtils.writeField(eventEntity, "id", eventId, true);
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
@@ -203,18 +205,20 @@ class AuditEventsControllerImpWebMvcTest {
 
     @Test
     void getEventById() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity();
+        long eventId = 1L;
+        AuditEventEntity eventEntity = buildAuditEventEntity(eventId);
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
 
     @Test
     void getEventByIdAlfresco() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity();
+        long eventId = 1L;
+        AuditEventEntity eventEntity = buildAuditEventEntity(eventId);
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         mockMvc
             .perform(get("/{version}/events/{id}", "v1", eventEntity.getId()).accept(MediaType.APPLICATION_JSON))
@@ -223,9 +227,10 @@ class AuditEventsControllerImpWebMvcTest {
 
     @Test
     void headEventById() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity();
+        long eventId = 1L;
+        AuditEventEntity eventEntity = buildAuditEventEntity(eventId);
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         AuditEventEntity event = new ActivityStartedAuditEventEntity();
         event.setEventId("eventId");
@@ -241,6 +246,7 @@ class AuditEventsControllerImpWebMvcTest {
 
         SignalReceivedAuditEventEntity eventEntity = new SignalReceivedAuditEventEntity();
 
+        FieldUtils.writeField(eventEntity, "id", 1L, true);
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setServiceName("rb-my-app");
@@ -249,7 +255,7 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setProcessInstanceId("10");
         eventEntity.setSignal(signal);
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(1L)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
@@ -262,6 +268,7 @@ class AuditEventsControllerImpWebMvcTest {
         timer.setTimerPayload(createTimerPayload());
 
         TimerFiredAuditEventEntity eventEntity = new TimerFiredAuditEventEntity();
+        FieldUtils.writeField(eventEntity, "id", 1L, true);
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
@@ -275,43 +282,49 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setSequenceNumber(0);
         eventEntity.setTimer(timer);
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(1L)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
 
     @Test
     void shouldGetMessageSentEventById() throws Exception {
+        long eventId = 1L;
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageSentAuditEventEntity.class,
-            BPMNMessageEvent.MessageEvents.MESSAGE_SENT
+            BPMNMessageEvent.MessageEvents.MESSAGE_SENT,
+            eventId
         );
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
 
     @Test
     void shouldGetMessageWaitingEventById() throws Exception {
+        long eventId = 2L;
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageWaitingAuditEventEntity.class,
-            BPMNMessageEvent.MessageEvents.MESSAGE_WAITING
+            BPMNMessageEvent.MessageEvents.MESSAGE_WAITING,
+            eventId
         );
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
 
     @Test
     void shouldGetMessageReceivedEventById() throws Exception {
+        long eventId = 3L;
         MessageAuditEventEntity eventEntity = messageAuditEventEntity(
             MessageReceivedAuditEventEntity.class,
-            BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED
+            BPMNMessageEvent.MessageEvents.MESSAGE_RECEIVED,
+            eventId
         );
 
-        given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
+        given(eventsRepository.findByEventId(eq(String.valueOf(eventId)))).willReturn(Optional.of(eventEntity));
 
         mockMvc.perform(get("/{version}/events/{id}", "v1", eventEntity.getId())).andExpect(status().isOk());
     }
@@ -328,7 +341,8 @@ class AuditEventsControllerImpWebMvcTest {
 
     private MessageAuditEventEntity messageAuditEventEntity(
         Class<? extends MessageAuditEventEntity> clazz,
-        BPMNMessageEvent.MessageEvents eventType
+        MessageEvents eventType,
+        long eventId
     ) throws Exception {
         MessageAuditEventEntity eventEntity = clazz.getDeclaredConstructor().newInstance();
 
@@ -336,6 +350,7 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(eventType.name());
 
+        FieldUtils.writeField(eventEntity, "id", eventId, true);
         eventEntity.setEntityId("entityId");
         eventEntity.setProcessInstanceId("processInstanceId");
         eventEntity.setProcessDefinitionId("processDefinitionId");
