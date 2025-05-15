@@ -155,8 +155,6 @@ class EventsEngineEventsAdminControllerIT {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setAppName("testApp");
         eventEntity.setEventId("processEventId");
-        eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");
@@ -174,7 +172,6 @@ class EventsEngineEventsAdminControllerIT {
         eventEntity.setAppName("testApp");
         eventEntity.setEventId("variableEventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
         eventEntity.setVariableInstance(new VariableInstanceImpl<Object>("var", null, null, "processId", "taskId"));
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(VariableEvent.VariableEvents.VARIABLE_CREATED.name());

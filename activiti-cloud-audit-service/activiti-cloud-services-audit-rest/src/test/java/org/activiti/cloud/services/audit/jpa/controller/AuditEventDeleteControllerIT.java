@@ -117,7 +117,6 @@ public class AuditEventDeleteControllerIT {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");

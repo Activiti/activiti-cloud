@@ -126,19 +126,18 @@ class AuditEventsControllerImpWebMvcTest {
 
         for (long i = 0; i < recordsNumber; i++) {
             //would like to mock this but jackson and mockito not happy together
-            AuditEventEntity eventEntity = buildAuditEventEntity(i);
+            AuditEventEntity eventEntity = buildAuditEventEntity();
             eventsList.add(eventEntity);
         }
 
         return eventsList;
     }
 
-    private AuditEventEntity buildAuditEventEntity(long id) {
+    private AuditEventEntity buildAuditEventEntity() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
 
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");
@@ -204,7 +203,7 @@ class AuditEventsControllerImpWebMvcTest {
 
     @Test
     void getEventById() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity(1);
+        AuditEventEntity eventEntity = buildAuditEventEntity();
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
@@ -213,7 +212,7 @@ class AuditEventsControllerImpWebMvcTest {
 
     @Test
     void getEventByIdAlfresco() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity(1);
+        AuditEventEntity eventEntity = buildAuditEventEntity();
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
@@ -224,7 +223,7 @@ class AuditEventsControllerImpWebMvcTest {
 
     @Test
     void headEventById() throws Exception {
-        AuditEventEntity eventEntity = buildAuditEventEntity(1);
+        AuditEventEntity eventEntity = buildAuditEventEntity();
 
         given(eventsRepository.findByEventId(anyString())).willReturn(Optional.of(eventEntity));
 
@@ -244,7 +243,6 @@ class AuditEventsControllerImpWebMvcTest {
 
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(1L);
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.name());
         eventEntity.setProcessDefinitionId("1");
@@ -268,7 +266,6 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(BPMNTimerEvent.TimerEvents.TIMER_FIRED.name());
 
-        eventEntity.setId(1L);
         eventEntity.setEntityId("entityId");
         eventEntity.setProcessInstanceId("processInstanceId");
         eventEntity.setProcessDefinitionId("processDefinitionId");
@@ -339,7 +336,6 @@ class AuditEventsControllerImpWebMvcTest {
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setEventType(eventType.name());
 
-        eventEntity.setId(1L);
         eventEntity.setEntityId("entityId");
         eventEntity.setProcessInstanceId("processInstanceId");
         eventEntity.setProcessDefinitionId("processDefinitionId");
