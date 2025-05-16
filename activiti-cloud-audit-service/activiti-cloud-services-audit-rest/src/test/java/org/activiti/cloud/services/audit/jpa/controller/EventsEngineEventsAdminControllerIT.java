@@ -155,6 +155,7 @@ class EventsEngineEventsAdminControllerIT {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setAppName("testApp");
         eventEntity.setEventId("processEventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
         processInstance.setProcessDefinitionId("1");
