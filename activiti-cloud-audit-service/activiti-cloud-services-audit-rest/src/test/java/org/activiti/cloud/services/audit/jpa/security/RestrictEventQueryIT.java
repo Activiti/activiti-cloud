@@ -146,7 +146,6 @@ public class RestrictEventQueryIT {
         eventsRepository.save(eventEntity);
 
         ProcessStartedAuditEventEntity eventEntity2 = new ProcessStartedAuditEventEntity();
-        eventEntity2.setId(20L);
         eventEntity2.setProcessDefinitionId("defKey1");
         eventEntity2.setServiceName("audit-dontmatchthisone");
 
