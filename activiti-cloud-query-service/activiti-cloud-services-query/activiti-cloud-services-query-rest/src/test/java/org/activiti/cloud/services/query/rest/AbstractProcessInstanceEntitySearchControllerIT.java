@@ -1360,21 +1360,21 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01T00:01:00.000Z"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02T00:00:00.000Z"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
             VariableType.DATE,
-            "2024-09-01",
+            "2024-09-01T00:00:00.000Z",
             FilterOperator.EQUALS
         );
 

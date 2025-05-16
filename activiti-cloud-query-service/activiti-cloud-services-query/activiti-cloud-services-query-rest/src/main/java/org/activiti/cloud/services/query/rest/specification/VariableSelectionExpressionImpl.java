@@ -20,7 +20,6 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
-import java.math.BigDecimal;
 import java.util.Map;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
@@ -56,18 +55,13 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
 
     public Expression getExtractedValue() {
         String extractionFunctionName = CustomPostgreSQLDialect.getExtractionFunctionName(variableJavaType);
-        Class<?> extractionFunctionReturnType = variableJavaType == Boolean.class ||
-            variableJavaType == BigDecimal.class
-            ? variableJavaType
-            : String.class;
         Expression<?> extractedValue = criteriaBuilder.function(
             extractionFunctionName,
-            extractionFunctionReturnType,
+            variableJavaType,
             root.get(AbstractVariableEntity_.value)
         );
-        if (variableJavaType != BigDecimal.class) {
-            Class<?> castType = variableJavaType == Boolean.class ? Integer.class : variableJavaType;
-            extractedValue = extractedValue.as(castType);
+        if (variableJavaType == Boolean.class) {
+            return extractedValue.as(Integer.class);
         }
         return extractedValue;
     }
