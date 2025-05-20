@@ -48,10 +48,6 @@ public class ProcessModelEntity {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public ProcessDefinitionEntity getProcessDefinition() {
         return processDefinition;
     }

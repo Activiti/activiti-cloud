@@ -55,13 +55,12 @@ public class ProcessDeployedEventHandler implements QueryEventHandler {
         processDefinitionEntity.setVersion(processDefinition.getVersion());
         processDefinitionEntity.setCategory(processDefinition.getCategory());
         processDefinitionEntity.setServiceType(processDeployedEvent.getServiceType());
-        entityManager.merge(processDefinitionEntity);
+        ProcessDefinitionEntity mergedProcessDefinitionEntity = entityManager.merge(processDefinitionEntity);
 
         ProcessModelEntity processModelEntity = new ProcessModelEntity(
-            processDefinitionEntity,
+            mergedProcessDefinitionEntity,
             processDeployedEvent.getProcessModelContent()
         );
-        processModelEntity.setId(processDefinitionEntity.getId());
         entityManager.merge(processModelEntity);
     }
 

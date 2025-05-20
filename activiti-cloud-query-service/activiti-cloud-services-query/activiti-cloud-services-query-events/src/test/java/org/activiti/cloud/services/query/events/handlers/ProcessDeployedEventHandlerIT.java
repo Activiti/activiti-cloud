@@ -43,8 +43,6 @@ class ProcessDeployedEventHandlerIT {
     @Autowired
     private ProcessDeployedEventHandler handler;
 
-    //to be fixed in code
-    @Disabled
     @Test
     void shouldPersistProcessDefinitionAndModelInDatabase() {
         // given
@@ -66,8 +64,6 @@ class ProcessDeployedEventHandlerIT {
 
         // when
         handler.handle(event);
-        entityManager.flush();
-        entityManager.clear();
 
         // then
         ProcessDefinitionEntity storedProcessDef = entityManager.find(ProcessDefinitionEntity.class, processId);
