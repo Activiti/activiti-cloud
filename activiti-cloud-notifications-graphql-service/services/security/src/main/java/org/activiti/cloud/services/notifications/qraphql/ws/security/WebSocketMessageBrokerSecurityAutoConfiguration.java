@@ -100,7 +100,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
             );
         }
 
-                @Bean
+        @Bean
         @ConditionalOnMissingBean
         @ConditionalOnExpression("'${activiti.cloud.services.oauth2.iam-name}'!='keycloak'")
         public GraphQLAccessTokenVerifier jwtTokenVerifier(
