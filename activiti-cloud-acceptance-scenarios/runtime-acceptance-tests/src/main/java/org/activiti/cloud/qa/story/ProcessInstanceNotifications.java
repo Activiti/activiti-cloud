@@ -22,13 +22,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -45,6 +47,7 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
+import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
@@ -60,9 +63,12 @@ public class ProcessInstanceNotifications {
     @Steps
     private NotificationsSteps notificationsSteps;
 
+    @Autowired
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private AtomicReference<ProcessInstance> processInstanceRef;
     private AtomicReference<Subscription> subscriptionRef;
-    private Step<List> stepVerifier;
+    private Step<String> stepVerifier;
 
     @When("notifications: services are started")
     public void checkServicesStatus() {
@@ -102,7 +108,7 @@ public class ProcessInstanceNotifications {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<String> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
@@ -131,7 +137,7 @@ public class ProcessInstanceNotifications {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<String> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
@@ -222,18 +228,17 @@ public class ProcessInstanceNotifications {
     @Then(
         "notifications: the payload with $eventTypes notifications is expected with process definition key value $processDefinitionKey"
     )
-    public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey)
-        throws Exception {
-        List messagePayload = messagePayload(eventTypes, processDefinitionKey);
+    public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
         stepVerifier.expectNext(messagePayload);
     }
 
     @Then("notifications: the payload with $eventTypes notifications is expected")
-    public void expectPayloadWithEventTypesNotification(String eventTypes) throws Exception {
+    public void expectPayloadWithEventTypesNotification(String eventTypes) throws JsonProcessingException {
         String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
 
-        List messagePayload = messagePayload(eventTypes, processDefinitionKey);
+        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
         stepVerifier.expectNext(messagePayload);
     }
@@ -291,7 +296,7 @@ public class ProcessInstanceNotifications {
         };
     }
 
-    private List messagePayload(String eventTypes, String processDefinitionKey) {
+    private String messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
         ObjectMap[] engineEvents = Stream
             .of(eventTypes.split(","))
             .map(eventType -> engineEvent(eventType, processDefinitionKey))
@@ -299,10 +304,10 @@ public class ProcessInstanceNotifications {
 
         Map<String, Object> objectMapPayload = objectMapPayload(engineEvents);
 
-        return List.of(objectMapPayload);
+        return objectMapper.writeValueAsString(objectMapPayload);
     }
 
-    private Flux<List> subscribe(
+    private Flux<String> subscribe(
         String[] eventTypes,
         String businessKey,
         String processDefinitionKey,

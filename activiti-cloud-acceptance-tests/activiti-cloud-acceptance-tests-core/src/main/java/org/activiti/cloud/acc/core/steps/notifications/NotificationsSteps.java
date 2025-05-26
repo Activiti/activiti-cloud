@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,7 +56,7 @@ public class NotificationsSteps {
 
     @SuppressWarnings({ "serial" })
     @Step
-    public Flux<List> subscribe(
+    public Flux<String> subscribe(
         String accessToken,
         String query,
         Map<String, Object> variables,
@@ -74,7 +73,7 @@ public class NotificationsSteps {
             .document(query)
             .variables(variables)
             .executeSubscription()
-            .toFlux("engineEvents", List.class)
+            .toFlux("engineEvents", String.class)
             .doOnSubscribe(subscription -> {
                 subscriptionRef.set(subscription);
                 countDownLatch.countDown();
