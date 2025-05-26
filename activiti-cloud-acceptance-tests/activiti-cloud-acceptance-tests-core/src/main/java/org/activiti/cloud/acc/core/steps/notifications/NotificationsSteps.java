@@ -20,8 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
@@ -60,8 +59,7 @@ public class NotificationsSteps {
         String accessToken,
         String query,
         Map<String, Object> variables,
-        AtomicReference<Subscription> subscriptionRef,
-        CountDownLatch countDownLatch
+        Consumer<Subscription> action
     ) throws URISyntaxException {
         URI url = new URI(properties.getGraphqlWsUrl());
         WebSocketGraphQlTester graphQlTester = WebSocketGraphQlTester
@@ -74,9 +72,6 @@ public class NotificationsSteps {
             .variables(variables)
             .executeSubscription()
             .toFlux("engineEvents", String.class)
-            .doOnSubscribe(subscription -> {
-                subscriptionRef.set(subscription);
-                countDownLatch.countDown();
-            });
+            .doOnSubscribe(action);
     }
 }

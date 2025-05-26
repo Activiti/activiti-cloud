@@ -18,6 +18,8 @@ package org.activiti.cloud.qa.story;
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -26,11 +28,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -49,6 +50,7 @@ import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
 
@@ -68,6 +70,7 @@ public class ProcessInstanceNotifications {
 
     private AtomicReference<ProcessInstance> processInstanceRef;
     private AtomicReference<Subscription> subscriptionRef;
+
     private Step<String> stepVerifier;
 
     @When("notifications: services are started")
@@ -98,7 +101,8 @@ public class ProcessInstanceNotifications {
     }
 
     @When("notifications: the user subscribes to $eventTypesString notifications")
-    public void subscribeToEventTypesNotifications(String eventTypesString) throws URISyntaxException {
+    public void subscribeToEventTypesNotifications(String eventTypesString)
+        throws URISyntaxException, InterruptedException {
         String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
         String processDefinitionKey = sessionVariableCalled("process", String.class)
             .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
@@ -113,12 +117,9 @@ public class ProcessInstanceNotifications {
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
 
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Subscription was interrupted", e);
-        }
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
     }
 
     @When(
@@ -127,7 +128,7 @@ public class ProcessInstanceNotifications {
     public void subscribeToEventTypesNotificationsWithBusinessKeySessionVariable(
         String eventTypesString,
         String variableName
-    ) throws URISyntaxException {
+    ) throws URISyntaxException, InterruptedException {
         String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
         String processDefinitionKey = sessionVariableCalled("process", String.class)
             .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
@@ -142,16 +143,13 @@ public class ProcessInstanceNotifications {
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
 
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Subscription was interrupted", e);
-        }
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
     }
 
     @When("notifications: the user starts a process $processName")
-    public void startProcess(String processName) throws IOException, InterruptedException {
+    public void startProcess(String processName) throws IOException {
         String processDefinitionKey = processDefinitionKeyMatcher(processName);
         String businessKey = sessionVariableCalled("businessKey", String.class).orElse("businessKey");
 
@@ -162,7 +160,7 @@ public class ProcessInstanceNotifications {
     @When(
         "notifications: the user sends a start message named $messageName with businessKey value from session variable called $variableName"
     )
-    public void sendStartMessage(String messageName, String variableName) throws IOException, InterruptedException {
+    public void sendStartMessage(String messageName, String variableName) throws IOException {
         processInstanceRef = new AtomicReference<>();
         String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
 
@@ -184,7 +182,7 @@ public class ProcessInstanceNotifications {
     @Then(
         "notifications: the user sends a message named $messageName with correlationKey value of session variable called $variableName"
     )
-    public void sendMessage(String messageName, String variableName) throws Exception {
+    public void sendMessage(String messageName, String variableName) throws IOException {
         String variableValue = Serenity.sessionVariableCalled(variableName);
 
         ReceiveMessagePayload payload = MessagePayloadBuilder
@@ -228,7 +226,8 @@ public class ProcessInstanceNotifications {
     @Then(
         "notifications: the payload with $eventTypes notifications is expected with process definition key value $processDefinitionKey"
     )
-    public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+    public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey)
+        throws JsonProcessingException {
         String messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
         stepVerifier.expectNext(messagePayload);
@@ -246,6 +245,28 @@ public class ProcessInstanceNotifications {
     private void cancelSubscription() {
         // signal to stop receiving notifications
         subscriptionRef.get().cancel();
+    }
+
+    private Consumer<Subscription> countDownLatchAction(
+        CountDownLatch countDownLatch,
+        AtomicReference<Subscription> subscriptionRef,
+        Duration duration,
+        Runnable action
+    ) {
+        return subscription -> {
+            subscriptionRef.set(subscription);
+
+            Mono
+                .just(subscription)
+                .delaySubscription(duration)
+                .doOnError(error -> subscriptionRef.get().cancel())
+                .doOnSubscribe(it -> {
+                    action.run();
+                })
+                .subscribe(it -> {
+                    countDownLatch.countDown();
+                });
+        };
     }
 
     private Long sessionTimeoutSeconds() {
@@ -316,6 +337,14 @@ public class ProcessInstanceNotifications {
         String serviceName = notificationsSteps.getRuntimeBundleServiceName();
         AuthToken authToken = TokenHolder.getAuthToken();
         subscriptionRef = new AtomicReference<>();
+        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
+
+        Consumer<Subscription> action = countDownLatchAction(
+            countDownLatch,
+            subscriptionRef,
+            Duration.ofSeconds(subscriptionTimeoutSeconds),
+            () -> {}
+        );
 
         // TODO: add processDefinitionKey when signal events are fixed
         String query =
@@ -335,13 +364,7 @@ public class ProcessInstanceNotifications {
                 put("processDefinitionKey", processDefinitionKey);
             }
         };
-        return notificationsSteps.subscribe(
-            authToken.getAccess_token(),
-            query,
-            variables,
-            subscriptionRef,
-            countDownLatch
-        );
+        return notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
     }
 
     @SuppressWarnings("serial")
