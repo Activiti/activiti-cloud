@@ -29,7 +29,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
@@ -44,6 +43,45 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
     matchIfMissing = true
 )
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnExpression("'${activiti.cloud.services.oauth2.iam-name}'!='keycloak'")
+    public GraphQLAccessTokenVerifier jwtTokenVerifier(
+        JwtAccessTokenValidator jwtAccessTokenValidator,
+        JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+        JwtDecoder jwtDecoder
+    ) {
+        return new JwtAccessTokenVerifier(
+            jwtAccessTokenValidator,
+            jwtUserInfoUriAuthenticationConverter,
+            jwtDecoder,
+            jwt -> jwt.getClaimAsStringList("role")
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak")
+    public GraphQLAccessTokenVerifier keycloakTokenVerifier(
+        JwtAccessTokenValidator jwtAccessTokenValidator,
+        JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+        JwtDecoder jwtDecoder,
+        Function<Jwt, JwtAdapter> jwtAdapterSupplier
+    ) {
+        return new JwtAccessTokenVerifier(
+            jwtAccessTokenValidator,
+            jwtUserInfoUriAuthenticationConverter,
+            jwtDecoder,
+            jwt -> jwtAdapterSupplier.apply(jwt).getRoles()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public JWSAuthenticationManager keycloakWebSocketAuthManager(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
+        return new JWSAuthenticationManager(keycloakTokenVerifier);
+    }
 
     @Configuration
     @PropertySources(
@@ -75,61 +113,6 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
                 jwsAuthenticationManager,
                 new CustomAuthorizationManager<RequestAuthorizationContext>(authorities, permissions)
             );
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public JWSAuthenticationManager keycloakWebSocketAuthManager(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
-            return new JWSAuthenticationManager(keycloakTokenVerifier);
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak")
-        public GraphQLAccessTokenVerifier keycloakTokenVerifier(
-            JwtAccessTokenValidator jwtAccessTokenValidator,
-            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-            JwtDecoder jwtDecoder,
-            Function<Jwt, JwtAdapter> jwtAdapterSupplier
-        ) {
-            return new JwtAccessTokenVerifier(
-                jwtAccessTokenValidator,
-                jwtUserInfoUriAuthenticationConverter,
-                jwtDecoder,
-                jwt -> jwtAdapterSupplier.apply(jwt).getRoles()
-            );
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        @ConditionalOnExpression("'${activiti.cloud.services.oauth2.iam-name}'!='keycloak'")
-        public GraphQLAccessTokenVerifier jwtTokenVerifier(
-            JwtAccessTokenValidator jwtAccessTokenValidator,
-            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-            JwtDecoder jwtDecoder
-        ) {
-            return new JwtAccessTokenVerifier(
-                jwtAccessTokenValidator,
-                jwtUserInfoUriAuthenticationConverter,
-                jwtDecoder,
-                jwt -> jwt.getClaimAsStringList("role")
-            );
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(
-            JWSAuthenticationManager keycloakWebSocketAuthManager
-        ) {
-            return new JWSAuthenticationInterceptorConfigurer(keycloakWebSocketAuthManager);
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(
-            GraphQLAccessTokenVerifier keycloakTokenVerifier
-        ) {
-            return new JwtInterceptorConfigurer(keycloakTokenVerifier);
         }
     }
 }

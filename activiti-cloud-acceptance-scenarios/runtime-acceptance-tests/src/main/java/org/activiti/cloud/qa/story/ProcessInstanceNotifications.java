@@ -111,14 +111,7 @@ public class ProcessInstanceNotifications {
             countDownLatch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("Latch interrupted");
-        }
-
-        Subscription subscription = subscriptionRef.get();
-        if (subscription != null) {
-            System.out.println("Subscription is active");
-        } else {
-            System.out.println("Subscription is not active");
+            throw new IllegalStateException("Subscription was interrupted", e);
         }
     }
 
@@ -147,14 +140,7 @@ public class ProcessInstanceNotifications {
             countDownLatch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("Latch interrupted");
-        }
-
-        Subscription subscription = subscriptionRef.get();
-        if (subscription != null) {
-            System.out.println("Subscription is active");
-        } else {
-            System.out.println("Subscription is not active");
+            throw new IllegalStateException("Subscription was interrupted", e);
         }
     }
 
@@ -316,9 +302,6 @@ public class ProcessInstanceNotifications {
         return List.of(objectMapPayload);
     }
 
-    @SuppressWarnings("serial")
-    class ObjectMap extends LinkedHashMap<String, Object> {}
-
     private Flux<List> subscribe(
         String[] eventTypes,
         String businessKey,
@@ -355,4 +338,7 @@ public class ProcessInstanceNotifications {
             countDownLatch
         );
     }
+
+    @SuppressWarnings("serial")
+    class ObjectMap extends LinkedHashMap<String, Object> {}
 }
