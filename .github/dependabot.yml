@@ -26,8 +26,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
     - "/"
-    - "/.github/actions/check-service-health"
-    - "/.github/actions/setup-env-for-broker"
+    - "/.github/actions/*"
     schedule:
       interval: "weekly"
     groups:
