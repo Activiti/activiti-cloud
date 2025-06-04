@@ -59,5 +59,9 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-webflux</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-test-security</artifactId>
+    </dependency>
   </dependencies>
 </project>

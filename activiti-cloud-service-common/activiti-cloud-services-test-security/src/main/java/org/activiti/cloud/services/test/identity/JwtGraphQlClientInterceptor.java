@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.notifications.graphql.starter;
+package org.activiti.cloud.services.test.identity;
 
 import java.util.Map;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.graphql.client.WebSocketGraphQlClientInterceptor;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +27,10 @@ public final class JwtGraphQlClientInterceptor implements WebSocketGraphQlClient
 
     public JwtGraphQlClientInterceptor(IdentityTokenProducer identityTokenProducer) {
         this.token = initToken(identityTokenProducer);
+    }
+
+    public JwtGraphQlClientInterceptor(String token) {
+        this.token = "Bearer " + token;
     }
 
     @Override

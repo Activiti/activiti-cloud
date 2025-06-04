@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -71,7 +73,7 @@ public class ProcessInstanceNotifications {
     private AtomicReference<ProcessInstance> processInstanceRef;
     private AtomicReference<Subscription> subscriptionRef;
 
-    private Step<String> stepVerifier;
+    private Step<List> stepVerifier;
 
     @When("notifications: services are started")
     public void checkServicesStatus() {
@@ -112,7 +114,7 @@ public class ProcessInstanceNotifications {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<String> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
@@ -138,7 +140,7 @@ public class ProcessInstanceNotifications {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<String> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         stepVerifier = StepVerifier.create(flux).expectSubscription();
         stepVerifier.verifyTimeout(Duration.ofSeconds(1));
@@ -228,7 +230,7 @@ public class ProcessInstanceNotifications {
     )
     public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey)
         throws JsonProcessingException {
-        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
+        List messagePayload = List.of(messagePayload(eventTypes, processDefinitionKey));
 
         stepVerifier.expectNext(messagePayload);
     }
@@ -237,7 +239,7 @@ public class ProcessInstanceNotifications {
     public void expectPayloadWithEventTypesNotification(String eventTypes) throws JsonProcessingException {
         String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
 
-        String messagePayload = messagePayload(eventTypes, processDefinitionKey);
+        List messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
         stepVerifier.expectNext(messagePayload);
     }
@@ -260,12 +262,8 @@ public class ProcessInstanceNotifications {
                 .just(subscription)
                 .delaySubscription(duration)
                 .doOnError(error -> subscriptionRef.get().cancel())
-                .doOnSubscribe(it -> {
-                    action.run();
-                })
-                .subscribe(it -> {
-                    countDownLatch.countDown();
-                });
+                .doOnSubscribe(it -> action.run())
+                .subscribe(it -> countDownLatch.countDown());
         };
     }
 
@@ -317,7 +315,7 @@ public class ProcessInstanceNotifications {
         };
     }
 
-    private String messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+    private List messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
         ObjectMap[] engineEvents = Stream
             .of(eventTypes.split(","))
             .map(eventType -> engineEvent(eventType, processDefinitionKey))
@@ -325,10 +323,10 @@ public class ProcessInstanceNotifications {
 
         Map<String, Object> objectMapPayload = objectMapPayload(engineEvents);
 
-        return objectMapper.writeValueAsString(objectMapPayload);
+        return List.of(objectMapPayload);
     }
 
-    private Flux<String> subscribe(
+    private Flux<List> subscribe(
         String[] eventTypes,
         String businessKey,
         String processDefinitionKey,
