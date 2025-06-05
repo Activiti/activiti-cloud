@@ -21,13 +21,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
-import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
@@ -57,12 +55,8 @@ public class NotificationsSteps {
 
     @SuppressWarnings({ "serial" })
     @Step
-    public Flux<List> subscribe(
-        String accessToken,
-        String query,
-        Map<String, Object> variables,
-        Consumer<Subscription> action
-    ) throws URISyntaxException {
+    public Flux<List> subscribe(String accessToken, String query, Map<String, Object> variables)
+        throws URISyntaxException {
         URI url = new URI(properties.getGraphqlWsUrl());
         WebSocketGraphQlTester graphQlTester = WebSocketGraphQlTester
             .builder(url, new ReactorNettyWebSocketClient())
@@ -73,7 +67,6 @@ public class NotificationsSteps {
             .document(query)
             .variables(variables)
             .executeSubscription()
-            .toFlux("engineEvents", List.class)
-            .doOnSubscribe(action);
+            .toFlux("engineEvents", List.class);
     }
 }
