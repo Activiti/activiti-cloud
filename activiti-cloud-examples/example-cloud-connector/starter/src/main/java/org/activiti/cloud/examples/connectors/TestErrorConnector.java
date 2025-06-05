@@ -33,7 +33,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
+@ConnectorBinding(
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
+    condition = "",
+    outputHeader = "",
+    connectorType = "test-error-connector.throwError"
+)
 @Component(Channels.CHANNEL + "Connector")
 public class TestErrorConnector implements ConsumerConnector<IntegrationRequest> {
 

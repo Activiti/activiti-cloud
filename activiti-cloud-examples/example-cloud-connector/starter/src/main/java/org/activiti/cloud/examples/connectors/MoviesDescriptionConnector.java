@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
-    input = MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER,
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
     condition = "",
-    outputHeader = ""
+    outputHeader = "",
+    connectorType = "Movies.getMovieDesc"
 )
 @Component(MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER + "Connector")
 public class MoviesDescriptionConnector implements ConsumerConnector<IntegrationRequest> {

@@ -24,39 +24,31 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
     input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
-    condition = "headers['processDefinitionVersion']!=null",
+    condition = "",
     outputHeader = "",
-    connectorType = "headers.GET"
+    connectorType = "restconnector.GET"
 )
-@Component(HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER + "Connector")
-public class HeadersConnector implements ConsumerConnector<Message<IntegrationRequest>> {
+@Component
+public class RestConnectorGET implements ConsumerConnector<IntegrationRequest> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
 
-    @Autowired
-    public HeadersConnector(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
+    public RestConnectorGET(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
 
     @Override
-    public void accept(Message<IntegrationRequest> integrationRequestMessage) {
-        MessageHeaders headers = integrationRequestMessage.getHeaders();
-        IntegrationRequest integrationRequest = integrationRequestMessage.getPayload();
-
+    public void accept(IntegrationRequest integrationRequest) {
         Map<String, Object> result = new HashMap<>();
 
-        result.put("processDefinitionVersion", headers.get("processDefinitionVersion"));
-        result.put("processDefinitionKey", headers.get("processDefinitionKey"));
-        result.put("processDefinitionId", headers.get("processDefinitionId"));
+        result.put("restStatus", 200);
 
         Message<IntegrationResult> message = IntegrationResultBuilder
             .resultFor(integrationRequest, connectorProperties)

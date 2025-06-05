@@ -29,7 +29,12 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
+@ConnectorBinding(
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
+    condition = "",
+    outputHeader = "",
+    connectorType = "test-bpmn-error-connector.throwError"
+)
 @Component(Channels.CHANNEL + "Connector")
 public class TestBpmnErrorConnector implements ConsumerConnector<IntegrationRequest> {
 
