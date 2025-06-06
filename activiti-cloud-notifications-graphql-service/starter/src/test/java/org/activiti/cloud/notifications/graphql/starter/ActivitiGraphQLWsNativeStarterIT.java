@@ -1306,7 +1306,7 @@ class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlQueryWithLOCATEForVariablesValue() {
+    void testGraphqlQueryWithLOCATEForVariablesValue() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
                 query getProcessInstance {
