@@ -16,17 +16,15 @@
 
 package org.activiti.cloud.examples.connectors;
 
+import static org.activiti.cloud.examples.connectors.TestBpmnErrorConnector.TEST_BPMN_ERROR_CONNECTOR_CONSUMER;
+
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
-import org.activiti.cloud.examples.connectors.TestBpmnErrorConnector.Channels;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
@@ -35,8 +33,10 @@ import org.springframework.stereotype.Component;
     outputHeader = "",
     connectorType = "test-bpmn-error-connector.throwError"
 )
-@Component(Channels.CHANNEL + "Connector")
+@Component(TEST_BPMN_ERROR_CONNECTOR_CONSUMER + "Connector")
 public class TestBpmnErrorConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String TEST_BPMN_ERROR_CONNECTOR_CONSUMER = "testBpmnErrorConnectorInput";
 
     private IntegrationErrorSender integrationErrorSender;
     private ConnectorProperties connectorProperties;
@@ -47,15 +47,6 @@ public class TestBpmnErrorConnector implements ConsumerConnector<IntegrationRequ
     ) {
         this.integrationErrorSender = integrationErrorSender;
         this.connectorProperties = connectorProperties;
-    }
-
-    public interface Channels {
-        String CHANNEL = "testBpmnErrorConnectorInput";
-
-        @InputBinding(CHANNEL)
-        default SubscribableChannel testBpmnErrorConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).getObject();
-        }
     }
 
     @Override

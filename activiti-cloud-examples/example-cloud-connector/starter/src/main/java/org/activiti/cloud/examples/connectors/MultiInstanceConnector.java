@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import static org.activiti.cloud.examples.connectors.MultiInstanceConnector.MULTI_INSTANCE_CONSUMER;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,15 +25,11 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.activiti.cloud.examples.connectors.MultiInstanceConnector.Channels;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
@@ -40,21 +38,14 @@ import org.springframework.stereotype.Component;
     outputHeader = "",
     connectorType = "miCloudConnector"
 )
-@Component(Channels.CHANNEL + "Connector")
+@Component(MULTI_INSTANCE_CONSUMER + "Connector")
 public class MultiInstanceConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String MULTI_INSTANCE_CONSUMER = "miCloudConnectorInput";
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
     private final AtomicInteger counter = new AtomicInteger(0);
-
-    public interface Channels {
-        String CHANNEL = "miCloudConnectorInput";
-
-        @InputBinding(CHANNEL)
-        default SubscribableChannel miCloudConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).getObject();
-        }
-    }
 
     @Autowired
     public MultiInstanceConnector(

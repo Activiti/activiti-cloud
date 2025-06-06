@@ -16,6 +16,7 @@
 package org.activiti.cloud.examples.connectors;
 
 import static net.logstash.logback.marker.Markers.append;
+import static org.activiti.cloud.examples.connectors.ExampleConnector.EXAMPLE_CONNECTOR_CONSUMER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -42,8 +43,10 @@ import org.springframework.stereotype.Component;
     condition = "",
     connectorType = "ExampleConnector"
 )
-@Component(ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER + "Connector")
+@Component(EXAMPLE_CONNECTOR_CONSUMER + "Connector")
 public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String EXAMPLE_CONNECTOR_CONSUMER = "exampleConnectorConsumer";
 
     private final Logger logger = LoggerFactory.getLogger(ExampleConnector.class);
 
