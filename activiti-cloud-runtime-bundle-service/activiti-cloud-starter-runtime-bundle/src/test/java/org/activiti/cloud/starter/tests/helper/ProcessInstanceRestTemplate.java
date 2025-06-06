@@ -298,7 +298,7 @@ public class ProcessInstanceRestTemplate {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
-            null,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
         );
         return responseEntity;
@@ -308,7 +308,7 @@ public class ProcessInstanceRestTemplate {
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
-            null,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
         );
         return responseEntity;
@@ -437,7 +437,10 @@ public class ProcessInstanceRestTemplate {
             .withVariables(variables)
             .build();
 
-        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
+            setProcessVariablesPayload,
+            CONTENT_TYPE_HEADER
+        );
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.PUT,
