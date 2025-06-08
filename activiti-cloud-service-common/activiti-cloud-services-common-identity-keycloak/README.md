@@ -1,6 +1,6 @@
 # Keycloak Integration
 
-This module provides an adapater for keycloak. To see it in use see the spring-boot-sample-hal-rest-api project.
+This module provides an adapter for keycloak. To see it in use see the spring-boot-sample-hal-rest-api project.
 
 The keycloak integration for authentication is based upon https://developers.redhat.com/blog/2017/05/25/easily-secure-your-spring-boot-applications-with-keycloak/
 

@@ -11,4 +11,4 @@
 
 Activiti Cloud Shared Services &amp; APIs
 
-This repository contains Services and Starters that are consumed by other starters. Here you will find cross cutting concerns.
+This repository contains Services and Starters that are consumed by other starters. Here you will find cross-cutting concerns.
