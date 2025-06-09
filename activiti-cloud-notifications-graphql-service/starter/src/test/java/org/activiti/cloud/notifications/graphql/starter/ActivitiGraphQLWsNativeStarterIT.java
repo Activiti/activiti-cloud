@@ -1271,6 +1271,45 @@ public class ActivitiGraphQLWsNativeStarterIT {
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
 
+    @Test
+    public void testGraphqlQueryWithLOCATEForVariablesValue() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+                query getProcessInstance {
+                  Tasks
+                   (where: {variables: { name: {EQ: "variable4"}, value: {LOCATE: "key"}}})
+                  {
+                    select {
+                      id
+                      name
+                      variables {
+                        name
+                        value
+                      }
+                    }
+                  }
+                }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected = "{Tasks={select=[{id=2, name=task2, variables=[{name=variable4, value={key=data}}]}]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
     private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
         return m ->
             messages
