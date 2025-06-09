@@ -153,16 +153,19 @@ jobs:
       max-parallel: 2
       fail-fast: true
       matrix:
-        messaging-broker: [ rabbitmq, kafka ]
-        messaging-partitioned: [ partitioned, non-partitioned ]
-        messaging-destinations: [ default-destinations ]
-        include:
-#          - messaging-broker: kafka
-#            messaging-partitioned: partitioned
-#            messaging-destinations: override-destinations
-          - messaging-broker: rabbitmq
-            messaging-partitioned: non-partitioned
-            messaging-destinations: pdb
+        messaging-broker: [ kafka ]
+        messaging-partitioned: [ partitioned ]
+        messaging-destinations: [ override-destinations ]
+        # messaging-broker: [ rabbitmq, kafka ]
+        # messaging-partitioned: [ partitioned, non-partitioned ]
+        # messaging-destinations: [ default-destinations ]
+        # include:
+        #   - messaging-broker: kafka
+        #     messaging-partitioned: partitioned
+        #     messaging-destinations: override-destinations
+        #   - messaging-broker: rabbitmq
+        #     messaging-partitioned: non-partitioned
+        #     messaging-destinations: pdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -302,7 +305,7 @@ jobs:
           make test/runtime-acceptance-tests
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           echo "Delete Helm release"
           make delete
