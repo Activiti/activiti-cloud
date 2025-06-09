@@ -31,5 +31,6 @@ public class CustomHibernateAutoConfiguration implements HibernatePropertiesCust
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put("hibernate.dialect", CustomPostgreSQLDialect.class.getName());
+        hibernateProperties.put("hibernate.order_by.default_null_ordering", "last");
     }
 }
