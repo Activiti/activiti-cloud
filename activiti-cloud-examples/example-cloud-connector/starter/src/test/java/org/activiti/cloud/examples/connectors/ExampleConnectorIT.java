@@ -66,10 +66,10 @@ public class ExampleConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).build();
+        Message<?> message = MessageBuilder.withPayload(payload).setHeader("connectorType", "ExampleConnector").build();
 
         //when
-        input.send(message, ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER);
+        input.send(message, "ExampleConnector");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");

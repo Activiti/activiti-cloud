@@ -111,6 +111,15 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
+                            GenericSelector<Message<?>> connectorType = Optional
+                                .ofNullable(connectorBinding)
+                                .map(ConnectorBinding::connectorType)
+                                .filter(StringUtils::hasText)
+                                .map(resolveExpression)
+                                .map(it -> "headers['connectorType']=='" + it + "'")
+                                .map(ExpressionEvaluatingSelector::new)
+                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+
                             IntegrationFlow connectorFlow = IntegrationFlow
                                 .from(
                                     getGatewayInterface(Function.class.isInstance(bean)),
@@ -119,6 +128,13 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationRequest")
                                 .filter(
                                     selector,
+                                    filter ->
+                                        filter
+                                            .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                            .throwExceptionOnRejection(false)
+                                )
+                                .filter(
+                                    connectorType,
                                     filter ->
                                         filter
                                             .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
