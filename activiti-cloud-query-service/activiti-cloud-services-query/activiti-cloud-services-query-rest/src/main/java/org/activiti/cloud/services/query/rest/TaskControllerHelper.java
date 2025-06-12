@@ -17,25 +17,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-<<<<<<< Updated upstream
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-=======
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
-
-import java.util.List;
->>>>>>> Stashed changes
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -51,11 +37,6 @@ import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggrega
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-<<<<<<< Updated upstream
-=======
-import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
->>>>>>> Stashed changes
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -156,62 +137,14 @@ public class TaskControllerHelper {
         Pageable pageable,
         TaskSpecification taskSpecification
     ) {
-<<<<<<< Updated upstream
         Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
         fetchTaskCandidateUsers(tasks.getContent());
         fetchTaskCandidateGroups(tasks.getContent());
-=======
-        CriteriaBuilder cb1 = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tuple> tupleQuery = cb1.createTupleQuery();
-        Root<TaskEntity> root = tupleQuery.from(TaskEntity.class);
-        tupleQuery.where(taskSpecification.toPredicate(root, tupleQuery, cb1));
-        if (!tupleQuery.getOrderList().isEmpty()) {
-            tupleQuery.multiselect(root, tupleQuery.getOrderList().getFirst().getExpression());
-        } else {
-            tupleQuery.multiselect(root);
-        }
-
-        TypedQuery<Tuple> query = entityManager.createQuery(tupleQuery);
-        query.setFirstResult((int) pageable.getOffset());
-        query.setMaxResults(pageable.getPageSize());
-
-        List<TaskEntity> taskList = query.getResultList().stream()
-            .map(t -> t.get(0, TaskEntity.class))
-            .peek(task -> {
-                fillCandidateGroups(task);
-                fillCandidateUsers(task);
-            })
-            .collect(Collectors.toList());
-
-        Page<TaskEntity> tasks = new PageImpl<>(
-            taskList,
-            pageable,
-            taskRepository.count(taskSpecification)
-        );
-
-
->>>>>>> Stashed changes
         processVariableService.fetchProcessVariablesForTasks(
             tasks.getContent(),
             taskSearchRequest.processVariableKeys()
         );
         return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
-    }
-
-    @Autowired
-    private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
-
-    private void fillCandidateGroups(TaskEntity task) {
-        Set<TaskCandidateGroupEntity> entities = taskCandidateGroupRepository.findByTaskId(task.getId());
-        task.setTaskCandidateGroups(entities);
-    }
-
-    private void fillCandidateUsers(TaskEntity task) {
-        Set<TaskCandidateUserEntity> entities = taskCandidateUserRepository.findByTaskId(task.getId());
-        task.setTaskCandidateUsers(entities);
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {
