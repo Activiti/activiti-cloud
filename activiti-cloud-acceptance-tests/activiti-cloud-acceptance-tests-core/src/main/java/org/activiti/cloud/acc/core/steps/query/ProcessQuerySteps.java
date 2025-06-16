@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import net.thucydides.core.annotations.Step;
@@ -83,7 +82,6 @@ public class ProcessQuerySteps {
         assertThat(expectedStatus).isNotNull();
 
         await()
-            .atMost(Duration.ofSeconds(30))
             .untilAsserted(() -> {
                 CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
                 assertThat(processInstance).isNotNull();
