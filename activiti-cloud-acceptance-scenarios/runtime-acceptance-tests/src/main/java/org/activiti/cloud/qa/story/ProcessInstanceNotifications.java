@@ -244,7 +244,7 @@ public class ProcessInstanceNotifications {
     }
 
     private Long sessionTimeoutSeconds() {
-        return sessionVariableCalled("sessionTimeoutSeconds", Long.class).orElse(Long.valueOf(30));
+        return sessionVariableCalled("sessionTimeoutSeconds", Long.class).orElse(Long.valueOf(60));
     }
 
     private Long subscriptionTimeoutSeconds() {
