@@ -49,6 +49,7 @@ import org.jbehave.core.annotations.When;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ReplayProcessor;
 import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
 
@@ -67,6 +68,8 @@ public class ProcessInstanceNotifications {
     private AtomicReference<Subscription> subscriptionRef;
 
     private Step<List> stepVerifier;
+
+    ReplayProcessor<List> processor;
 
     @When("notifications: services are started")
     public void checkServicesStatus() {
@@ -97,6 +100,8 @@ public class ProcessInstanceNotifications {
 
     @When("notifications: the user subscribes to $eventTypesString notifications")
     public void subscribeToEventTypesNotifications(String eventTypesString) throws URISyntaxException {
+        processor = ReplayProcessor.create();
+
         String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
         String processDefinitionKey = sessionVariableCalled("process", String.class)
             .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
@@ -105,8 +110,8 @@ public class ProcessInstanceNotifications {
         String[] eventTypes = eventTypesString.split(",");
 
         Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey);
-
-        stepVerifier = StepVerifier.create(flux).expectSubscription();
+        flux.subscribe(processor);
+        stepVerifier = StepVerifier.create(processor).expectSubscription();
     }
 
     @When(
@@ -116,6 +121,8 @@ public class ProcessInstanceNotifications {
         String eventTypesString,
         String variableName
     ) throws URISyntaxException {
+        processor = ReplayProcessor.create();
+
         String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
         String processDefinitionKey = sessionVariableCalled("process", String.class)
             .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
@@ -125,7 +132,8 @@ public class ProcessInstanceNotifications {
 
         Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey);
 
-        stepVerifier = StepVerifier.create(flux).expectSubscription();
+        flux.subscribe(processor);
+        stepVerifier = StepVerifier.create(processor).expectSubscription();
     }
 
     @When("notifications: the user starts a process $processName")
