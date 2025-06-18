@@ -16,12 +16,23 @@
 
 package org.activiti.cloud.common.messaging;
 
-import jakarta.validation.constraints.*;
-import java.util.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
@@ -95,6 +106,12 @@ public class ActivitiCloudMessagingProperties {
      * Configure replacement character for illegal characters in the destination names. Default is -
      */
     private String destinationIllegalCharsReplacement = "-";
+
+    /**
+     * Configure multiplex destinations for a single binding
+     */
+    @NestedConfigurationProperty
+    private MultiplexBindingsProperties multiplex = new MultiplexBindingsProperties();
 
     /**
      * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
@@ -208,6 +225,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setDestinationIllegalCharsReplacement(String destinationIllegalCharsReplacement) {
         this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
+    }
+
+    public MultiplexBindingsProperties getMultiplex() {
+        return multiplex;
+    }
+
+    public void setMultiplex(MultiplexBindingsProperties multiplex) {
+        this.multiplex = multiplex;
     }
 
     public Function<String, String> transformDestination() {
@@ -368,6 +393,29 @@ public class ActivitiCloudMessagingProperties {
                 '\'' +
                 '}'
             );
+        }
+    }
+
+    @Validated
+    public static class MultiplexBindingsProperties {
+
+        private boolean enabled;
+        private Map<String, BindingProperties> bindings;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Map<String, BindingProperties> getBindings() {
+            return bindings;
+        }
+
+        public void setBindings(Map<String, BindingProperties> bindings) {
+            this.bindings = bindings;
         }
     }
 
