@@ -21,32 +21,25 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@ConnectorBinding(input = RestConnector.Channels.POST, condition = "", outputHeader = "")
+@ConnectorBinding(
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
+    condition = "",
+    outputHeader = "",
+    connectorType = "restconnector.POST"
+)
 @Component
-public class RestConnector implements ConsumerConnector<IntegrationRequest> {
+public class RestConnectorPOST implements ConsumerConnector<IntegrationRequest> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
 
-    interface Channels {
-        String POST = "restConnectorPost";
-
-        @InputBinding(POST)
-        default SubscribableChannel restConnectorPost() {
-            return MessageChannels.publishSubscribe(POST).getObject();
-        }
-    }
-
-    public RestConnector(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
+    public RestConnectorPOST(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }

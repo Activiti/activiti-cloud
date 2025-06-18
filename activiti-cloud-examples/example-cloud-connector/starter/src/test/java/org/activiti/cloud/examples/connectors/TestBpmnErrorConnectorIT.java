@@ -66,10 +66,13 @@ public class TestBpmnErrorConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).build();
+        Message<?> message = MessageBuilder
+            .withPayload(payload)
+            .setHeader("connectorType", "test-bpmn-error-connector.throwError")
+            .build();
 
         //when
-        input.send(message, TestBpmnErrorConnector.Channels.CHANNEL);
+        input.send(message, "test-bpmn-error-connector.throwError");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationError_myApp");

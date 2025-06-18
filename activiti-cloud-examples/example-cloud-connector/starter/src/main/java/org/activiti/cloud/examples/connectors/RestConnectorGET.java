@@ -15,10 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
-import static org.activiti.cloud.examples.connectors.TestErrorConnector.TEST_ERROR_CONNECTOR_CONSUMER;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -26,8 +24,6 @@ import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
@@ -35,49 +31,30 @@ import org.springframework.stereotype.Component;
     input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
     condition = "",
     outputHeader = "",
-    connectorType = "test-error-connector.throwError"
+    connectorType = "restconnector.GET"
 )
-@Component(TEST_ERROR_CONNECTOR_CONSUMER + "Connector")
-public class TestErrorConnector implements ConsumerConnector<IntegrationRequest> {
+@Component
+public class RestConnectorGET implements ConsumerConnector<IntegrationRequest> {
 
-    public static final String TEST_ERROR_CONNECTOR_CONSUMER = "testErrorConnectorInput";
-
-    private static final Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
 
-    private CountDownLatch countDownLatch;
-
-    public TestErrorConnector(
-        IntegrationResultSender integrationResultSender,
-        ConnectorProperties connectorProperties
-    ) {
+    public RestConnectorGET(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
 
     @Override
     public void accept(IntegrationRequest integrationRequest) {
-        String var = integrationRequest.getIntegrationContext().getInBoundVariable("var");
-        if (!"replay".equals(var)) {
-            throw new RuntimeException("TestErrorConnector");
-        } else {
-            countDownLatch = new CountDownLatch(1);
-        }
+        Map<String, Object> result = new HashMap<>();
 
-        logger.info("Processing integration request: {}", integrationRequest);
+        result.put("restStatus", 200);
 
         Message<IntegrationResult> message = IntegrationResultBuilder
             .resultFor(integrationRequest, connectorProperties)
+            .withOutboundVariables(result)
             .buildMessage();
-        try {
-            countDownLatch.await(10, TimeUnit.SECONDS);
 
-            logger.info("Sending integration result: {}", message.getPayload());
-
-            integrationResultSender.send(message);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
+        integrationResultSender.send(message);
     }
 }
