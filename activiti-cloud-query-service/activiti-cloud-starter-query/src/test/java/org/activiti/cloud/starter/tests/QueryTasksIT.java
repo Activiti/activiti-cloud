@@ -100,7 +100,7 @@ public class QueryTasksIT {
 
     private static final ParameterizedTypeReference<PagedModel<Task>> PAGED_TASK_INTERFACE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<Task>>() {};
 
-    private static final ParameterizedTypeReference<Task> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<Task>() {};
+    private static final ParameterizedTypeReference<QueryCloudTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<QueryCloudTask>() {};
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -389,6 +389,67 @@ public class QueryTasksIT {
                 //then
                 assertThat(retrievedTasks).extracting(Task::getName).containsExactly(taskScale3.getName());
             });
+    }
+
+    @Test
+    void should_getTasksWithRootProcessInstanceId() {
+        //given
+        ProcessInstance processInstance = processInstanceBuilder.aRunningProcessInstance(
+            "processWithRootProcessInstanceId"
+        );
+        Task createdTask = taskEventContainedBuilder.aCreatedTask("Created Task", processInstance);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
+                    processInstance
+                );
+                //then
+
+                assertThat(responseEntity.getBody()).isNotNull();
+                Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
+                QueryCloudTask fetchedTask = tasks
+                    .stream()
+                    .filter(task -> task.getId().equals(createdTask.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+                assertThat(fetchedTask).isNotNull();
+                assertThat(fetchedTask.getRootProcessInstanceId())
+                    .isEqualTo(processInstance.getRootProcessInstanceId());
+
+                //when
+                ResponseEntity<QueryCloudTask> retrieveTaskEntity = ensureRetrievesTaskByIdSuccessfully(
+                    createdTask.getId(),
+                    responseEntity
+                );
+                assertThat(retrieveTaskEntity.getBody()).isNotNull();
+                assertThat(retrieveTaskEntity.getBody().getRootProcessInstanceId())
+                    .isEqualTo(processInstance.getRootProcessInstanceId());
+            });
+    }
+
+    private ResponseEntity<QueryCloudTask> ensureRetrievesTaskByIdSuccessfully(
+        String taskId,
+        ResponseEntity<PagedModel<QueryCloudTask>> responseEntity
+    ) {
+        ResponseEntity<QueryCloudTask> retrieveTaskEntity = executeRequestGetTasksById(taskId);
+        assertThat(retrieveTaskEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return retrieveTaskEntity;
+    }
+
+    private ResponseEntity<PagedModel<QueryCloudTask>> ensureRetrieveTasksSuccessFully(
+        ProcessInstance processInstance
+    ) {
+        ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(processInstance);
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
     }
 
     private <T> Collection<QueryCloudTask> executeGetTasksWithVariable(
@@ -861,7 +922,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -881,7 +942,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -901,7 +962,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateGroups(createdTask.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(createdTask.getId());
 
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -989,7 +1050,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<Task> responseEntity = executeRequestGetTasksById(completedTask.getId());
+                ResponseEntity<QueryCloudTask> responseEntity = executeRequestGetTasksById(completedTask.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -1111,7 +1172,7 @@ public class QueryTasksIT {
         );
     }
 
-    private ResponseEntity<Task> executeRequestGetAdminTasksById(String id) {
+    private ResponseEntity<QueryCloudTask> executeRequestGetAdminTasksById(String id) {
         return testRestTemplate.exchange(
             ADMIN_TASKS_URL + "/" + id,
             HttpMethod.GET,
@@ -1120,7 +1181,7 @@ public class QueryTasksIT {
         );
     }
 
-    private ResponseEntity<Task> executeRequestGetTasksById(String id) {
+    private ResponseEntity<QueryCloudTask> executeRequestGetTasksById(String id) {
         return testRestTemplate.exchange(
             TASKS_URL + "/" + id,
             HttpMethod.GET,
@@ -1268,7 +1329,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<Task> responseEntity = executeRequestGetTasksById(releasedTask.getId());
+                ResponseEntity<QueryCloudTask> responseEntity = executeRequestGetTasksById(releasedTask.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -1478,7 +1539,7 @@ public class QueryTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(response).isNotNull();
@@ -1500,7 +1561,7 @@ public class QueryTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(response).isNotNull();
@@ -1524,7 +1585,7 @@ public class QueryTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<List<String>> response = getCandidateGroups(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(response).isNotNull();
@@ -1552,7 +1613,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -1573,7 +1634,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -1598,7 +1659,7 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 ResponseEntity<List<String>> responseEntity = getCandidateUsers(task.getId());
-                ResponseEntity<Task> taskResponseEntity = executeRequestGetTasksById(task.getId());
+                ResponseEntity<QueryCloudTask> taskResponseEntity = executeRequestGetTasksById(task.getId());
 
                 //then
                 assertThat(responseEntity).isNotNull();
@@ -1740,14 +1801,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks).isEmpty();
@@ -1775,14 +1833,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
@@ -1814,14 +1869,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
@@ -1852,14 +1904,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks).containsExactlyInAnyOrder(task1, task2);
@@ -1882,14 +1931,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks.size()).isEqualTo(1);
@@ -1932,7 +1978,7 @@ public class QueryTasksIT {
     private void assertCanRetrieveTaskById(String taskId) {
         await()
             .untilAsserted(() -> {
-                ResponseEntity<Task> responseEntity = executeRequestGetTasksById(taskId);
+                ResponseEntity<QueryCloudTask> responseEntity = executeRequestGetTasksById(taskId);
 
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -1946,7 +1992,7 @@ public class QueryTasksIT {
     private void assertAdminCanRetrieveTaskById(String taskId) {
         await()
             .untilAsserted(() -> {
-                ResponseEntity<Task> responseEntity = executeRequestGetAdminTasksById(taskId);
+                ResponseEntity<QueryCloudTask> responseEntity = executeRequestGetAdminTasksById(taskId);
 
                 assertThat(responseEntity).isNotNull();
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -1967,14 +2013,11 @@ public class QueryTasksIT {
         await()
             .untilAsserted(() -> {
                 //when
-                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = ensureRetrieveTasksSuccessFully(
                     runningProcessInstance
                 );
 
                 //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-
                 assertThat(responseEntity.getBody()).isNotNull();
                 Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
                 assertThat(tasks)

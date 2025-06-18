@@ -2562,31 +2562,33 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
      * From Postgres documentation: <a href="https://www.postgresql.org/docs/current/queries-order.html">Postgres sorting</a>
      *  By default, null values sort as if larger than any non-null value;
      *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     *  We are overriding this behavior in order to have null values always at the end
+     *  by setting property hibernate.order_by.default_null_ordering=last in CustomHibernateAutoConfiguration
      */
     @Test
-    void should_returnProcessInstances_paginatedAndSortedByProcessVariables_respectingDefaultNullBehaviour() {
-        ProcessInstanceEntity processInstance1 = queryTestUtils
+    void should_returnProcessInstances_paginatedAndSortedByProcessVariables_respectingNullsLastBehaviour() {
+        queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
             .buildAndSave();
 
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
             .buildAndSave();
 
-        ProcessInstanceEntity processInstance3 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "best"))
             .buildAndSave();
 
-        ProcessInstanceEntity processInstance4 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
@@ -2594,6 +2596,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableKeys(new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME))
             .withSort(
                 new CloudRuntimeEntitySort(
                     VAR_NAME,
@@ -2608,31 +2611,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
             .param("skipCount", 0)
-            .param("maxItems", 2)
+            .param("maxItems", 4)
             .when()
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
             .body(
-                PROCESS_INSTANCE_IDS_JSON_PATH + "[0,1]",
-                contains(processInstance2.getId(), processInstance3.getId())
-            )
-            .body("page.totalElements", is(4));
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .param("skipCount", 2)
-            .param("maxItems", 2)
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(
-                PROCESS_INSTANCE_IDS_JSON_PATH + "[0,1]",
-                contains(processInstance1.getId(), processInstance4.getId())
+                "_embedded.processInstances.collect { it.variables[0].value }",
+                contains("amazing", "best", "cool", null)
             )
             .body("page.totalElements", is(4));
 
@@ -2649,13 +2636,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
             .body(
-                PROCESS_INSTANCE_IDS_JSON_PATH,
-                contains(
-                    processInstance4.getId(),
-                    processInstance1.getId(),
-                    processInstance3.getId(),
-                    processInstance2.getId()
-                )
+                "_embedded.processInstances.collect { it.variables[0].value }",
+                contains("cool", "best", "amazing", null)
             )
             .body("page.totalElements", is(4));
     }

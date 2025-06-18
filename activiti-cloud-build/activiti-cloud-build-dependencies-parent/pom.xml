@@ -13,11 +13,11 @@
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
     <spring-cloud.version>2024.0.0</spring-cloud.version>
-    <testcontainers.version>1.20.1</testcontainers.version>
-    <h2.version>2.2.224</h2.version>
+    <testcontainers.version>1.21.0</testcontainers.version>
+    <h2.version>2.3.232</h2.version>
     <graphql-java.version>22.1</graphql-java.version>
     <postgresql.version>42.7.5</postgresql.version>
-    <liquibase.version>4.24.0</liquibase.version>
+    <liquibase.version>4.31.1</liquibase.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -93,7 +93,7 @@
       <dependency>
         <groupId>org.yaml</groupId>
         <artifactId>snakeyaml</artifactId>
-        <version>2.2</version>
+        <version>2.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

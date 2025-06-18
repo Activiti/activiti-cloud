@@ -84,6 +84,7 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.builders.CompleteTaskPayloadBuilder;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
@@ -103,6 +104,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.IdentityLink;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -449,6 +451,40 @@ public class AuditProducerIT {
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getCompletedBy())
             .doesNotContainNull();
+    }
+
+    @Test
+    void should_produceEventForEphemeralVariables() {
+        //given
+        String ephemeralVarName = "ephemeralVar";
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("name", "peter")
+                .withVariable(ephemeralVarName, "availableOnTaskVariableEventButNotOnProcessVariableEvent")
+                .build()
+        );
+
+        //when
+        List<CloudVariableCreatedEvent> createdVariableEvents = streamHandler
+            .getAllReceivedEvents(CloudVariableCreatedEvent.class)
+            .stream()
+            .filter(event -> ephemeralVarName.equals(event.getEntity().getName()))
+            .toList();
+
+        //then
+        assertThat(createdVariableEvents)
+            .extracting(
+                CloudVariableCreatedEvent::isEphemeralVariable,
+                event -> event.getEntity().isTaskVariable(),
+                event -> event.getEntity().getValue()
+            )
+            .containsExactlyInAnyOrder(
+                tuple(true, false, null),
+                tuple(false, true, "availableOnTaskVariableEventButNotOnProcessVariableEvent")
+            );
     }
 
     @Test
@@ -880,18 +916,15 @@ public class AuditProducerIT {
         String processInstanceId = processInstance.getBody().getId();
 
         // when
-        List<String> subprocessIds = runtimeService
+        List<org.activiti.engine.runtime.ProcessInstance> childInstances = runtimeService
             .createProcessInstanceQuery()
             .superProcessInstanceId(processInstanceId)
-            .list()
-            .stream()
-            .map(it -> it.getProcessInstanceId())
-            .collect(Collectors.toList());
-        // then
-        assertThat(subprocessIds).hasSize(2);
+            .list();
 
-        String subProcessId1 = subprocessIds.get(0);
-        String subProcessId2 = subprocessIds.get(1);
+        String subProcessId1 = childInstances.get(0).getProcessInstanceId();
+        String subProcessId2 = childInstances.get(1).getProcessInstanceId();
+
+        assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).containsOnly(processInstanceId);
 
         await()
             .untilAsserted(() -> {
@@ -1329,6 +1362,7 @@ public class AuditProducerIT {
         );
 
         assertThat(childProcesses).isNotEmpty();
+        assertThat(childProcesses.getFirst().getRootProcessInstanceId()).isEqualTo(processInstance.getId());
 
         String childProcessInstanceId = childProcesses.iterator().next().getId();
 

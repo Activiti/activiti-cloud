@@ -109,12 +109,22 @@ public class ActivitiCloudMessagingProperties {
 
         private Boolean missingAnonymousQueuesFatal;
 
+        private Boolean missingDurableQueuesFatal;
+
         public Boolean getMissingAnonymousQueuesFatal() {
             return missingAnonymousQueuesFatal;
         }
 
         public void setMissingAnonymousQueuesFatal(Boolean missingAnonymousQueuesFatal) {
             this.missingAnonymousQueuesFatal = missingAnonymousQueuesFatal;
+        }
+
+        public Boolean getMissingDurableQueuesFatal() {
+            return missingDurableQueuesFatal;
+        }
+
+        public void setMissingDurableQueuesFatal(Boolean missingDurableQueuesFatal) {
+            this.missingDurableQueuesFatal = missingDurableQueuesFatal;
         }
     }
 

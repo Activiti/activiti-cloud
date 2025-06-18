@@ -46,12 +46,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -76,10 +77,10 @@ class CandidateUserAdminControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockitoBean
     private RepositoryService repositoryService;
 
     @SpyBean
@@ -88,22 +89,22 @@ class CandidateUserAdminControllerIT {
     @Autowired
     private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
+    @MockitoBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
-    @MockBean
+    @MockitoBean
     private RuntimeService runtimeService;
 
-    @MockBean
+    @MockitoBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockitoBean
     private PrincipalIdentityProvider principalIdentityProvider;
 
-    @MockBean
+    @MockitoBean
     private ManagementService managementService;
 
     @BeforeEach

@@ -268,6 +268,33 @@ public class QueryProcessInstancesEntityIT {
     }
 
     @Test
+    public void shouldGetProcessWithRootProcessInstanceId() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+                assertThat(processInstanceEntities)
+                    .extracting(
+                        ProcessInstanceEntity::getId,
+                        ProcessInstanceEntity::getStatus,
+                        ProcessInstanceEntity::getRootProcessInstanceId
+                    )
+                    .contains(tuple(process.getId(), RUNNING, process.getRootProcessInstanceId()));
+            });
+    }
+
+    @Test
     public void shouldGetAdminProcessInfo() {
         //given
         ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");

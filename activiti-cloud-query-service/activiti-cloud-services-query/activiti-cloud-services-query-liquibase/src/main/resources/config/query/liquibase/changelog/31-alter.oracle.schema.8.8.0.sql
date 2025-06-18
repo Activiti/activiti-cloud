@@ -13,17 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.examples.connectors;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
-
-public interface HeadersConnectorChannels {
-    String HEADERS_CONNECTOR_CONSUMER = "headersConnectorConsumer";
-
-    @InputBinding(HEADERS_CONNECTOR_CONSUMER)
-    default SubscribableChannel headersConnectorConsumer() {
-        return MessageChannels.publishSubscribe(HEADERS_CONNECTOR_CONSUMER).getObject();
-    }
-}
+ALTER TABLE task
+  ADD COLUMN root_process_instance_id VARCHAR(255);

@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.examples.connectors;
+package org.activiti.cloud.services.rest.api;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
+import org.activiti.cloud.services.rest.api.configuration.ClientConfiguration;
+import org.springframework.cloud.openfeign.FeignClient;
 
-public interface MoviesDescriptionConnectorChannels {
-    String MOVIES_DESCRIPTION_CONSUMER = "moviesDescriptionConsumer";
-
-    @InputBinding(MOVIES_DESCRIPTION_CONSUMER)
-    default SubscribableChannel moviesDescriptionConsumer() {
-        return MessageChannels.publishSubscribe(MOVIES_DESCRIPTION_CONSUMER).getObject();
-    }
-}
+@FeignClient(
+    value = "processInstanceVariableApiClient",
+    url = "${runtime.url}",
+    path = "${runtime.path}",
+    configuration = { ClientConfiguration.class }
+)
+public interface ProcessInstanceVariableApiClient extends ProcessInstanceVariableController {}

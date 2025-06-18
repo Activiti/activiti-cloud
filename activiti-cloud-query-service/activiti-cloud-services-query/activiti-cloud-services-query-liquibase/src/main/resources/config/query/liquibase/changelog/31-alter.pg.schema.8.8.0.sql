@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.dialect;
 
-public enum RelationalFormType {
-    EXACT_COMPARISON,
-    LIKE_CASE_SENSITIVE,
-    LIKE_CASE_INSENSITIVE,
-}
+ALTER TABLE task
+  ADD COLUMN root_process_instance_id VARCHAR(255);

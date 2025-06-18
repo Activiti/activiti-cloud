@@ -43,10 +43,12 @@ public class VariableDeletedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableDeletedEventEntity variableDeletedEventEntity = (VariableDeletedEventEntity) auditEventEntity;
 
-        return new CloudVariableDeletedEventImpl(
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(
             variableDeletedEventEntity.getEventId(),
             variableDeletedEventEntity.getTimestamp(),
             variableDeletedEventEntity.getVariableInstance()
         );
+        event.setEphemeralVariable(variableDeletedEventEntity.isEphemeralVariable());
+        return event;
     }
 }

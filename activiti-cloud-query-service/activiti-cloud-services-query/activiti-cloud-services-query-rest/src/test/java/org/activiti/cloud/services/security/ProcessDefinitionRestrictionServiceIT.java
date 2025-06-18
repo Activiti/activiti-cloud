@@ -34,8 +34,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
@@ -47,10 +47,10 @@ public class ProcessDefinitionRestrictionServiceIT {
     @Autowired
     private ProcessDefinitionRestrictionService restrictionService;
 
-    @MockBean
+    @MockitoBean
     private UserGroupManager userGroupManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
     private ProcessDefinitionEntity defKey1AuthorizedService;

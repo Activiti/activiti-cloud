@@ -222,4 +222,58 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter13-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/13-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter13-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/13-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter14-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/14-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter14-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/14-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter15-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/15-alter.pg.schema.8.8.1.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+             id="alter15-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/15-alter.oracle.schema.8.8.1.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>

@@ -68,6 +68,7 @@ import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -84,6 +85,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -137,6 +139,9 @@ public class ActivitiGraphQLWsNativeStarterIT {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     private HttpHeaders authHeaders;
 
@@ -1262,6 +1267,45 @@ public class ActivitiGraphQLWsNativeStarterIT {
 
         var expected =
             "{Tasks={aggregate={countTasks=6, countProcessVariables=2, countTaskVariables=6, countTasksGroupedByStatus=[{status=ASSIGNED, count=1}, {status=COMPLETED, count=2}, {status=CREATED, count=3}], countProcessVariablesGroupedByTaskName=[{name=task4, count=1}, {name=task5, count=1}], by={countTaskProcessVariablesGroupedByVariableNameAndValue=[{name=initiator, value={key=[1, 2, 3, 4, 5]}, count=2}], countTaskVariablesGroupedByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}, {name=variable4, count=1}, {name=variable5, count=1}, {name=variable6, count=1}]}}}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testGraphqlQueryWithLOCATEForVariablesValue() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+                query getProcessInstance {
+                  Tasks
+                   (where: {variables: { name: {EQ: "variable4"}, value: {LOCATE: "key"}}})
+                  {
+                    select {
+                      id
+                      name
+                      variables {
+                        name
+                        value
+                      }
+                    }
+                  }
+                }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected = "{Tasks={select=[{id=2, name=task2, variables=[{name=variable4, value={key=data}}]}]}}";
 
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
