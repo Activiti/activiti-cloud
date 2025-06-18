@@ -25,4 +25,8 @@ public class AcceptanceTests extends ExtendedSerenityStories {
     protected String getRootPackage() {
         return "org.activiti.cloud";
     }
+
+    public AcceptanceTests() {
+        findStoriesCalled("**/stories/runtime-bundle/notifications-actions.story");
+    }
 }

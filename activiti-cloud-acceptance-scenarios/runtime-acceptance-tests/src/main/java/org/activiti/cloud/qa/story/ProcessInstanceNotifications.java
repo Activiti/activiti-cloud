@@ -279,7 +279,6 @@ public class ProcessInstanceNotifications {
         throws URISyntaxException {
         String serviceName = notificationsSteps.getRuntimeBundleServiceName();
         AuthToken authToken = TokenHolder.getAuthToken();
-        subscriptionRef = new AtomicReference<>();
 
         // TODO: add processDefinitionKey when signal events are fixed
         String query =

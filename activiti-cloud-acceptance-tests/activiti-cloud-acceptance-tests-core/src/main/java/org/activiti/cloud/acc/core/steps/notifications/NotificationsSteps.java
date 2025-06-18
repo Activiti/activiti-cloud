@@ -35,8 +35,6 @@ import reactor.core.publisher.Flux;
 @EnableRuntimeFeignContext
 public class NotificationsSteps {
 
-    private static final String AUTHORIZATION = "Authorization";
-
     @Autowired
     private RuntimeTestsConfigurationProperties properties;
 
