@@ -110,33 +110,7 @@ class TaskControllerIT extends AbstractTaskControllerIT {
 
     @Test
     void should_return400_whenInvalidSearchParameterIsProvided() {
-        // Try with a malformed JSON structure that should trigger parsing issues
         String invalidSearchJson = "{ {\"field\":\"status\",\"INVALID_OPERATOR\":\"INVALID_OPERATOR\",\"value\":\"someValue\"}}";
-
-        String otherUser = "other-user";
-        String testgroup = "testgroup";
-        Mockito.when(securityManager.getAuthenticatedUserGroups()).thenReturn(List.of(testgroup));
-
-        //Task to be retrieved because user is assignee
-        TaskEntity task1 = queryTestUtils.buildTask().withAssignee(CURRENT_USER).withOwner(otherUser).buildAndSave();
-
-        //Task to be retrieved because user is candidate for the task and task is not assigned
-        TaskEntity task2 = queryTestUtils.buildTask().withTaskCandidateUsers(CURRENT_USER).buildAndSave();
-
-        //Task NOT to be retrieved because user is candidate for the task but task is assigned
-        queryTestUtils.buildTask().withTaskCandidateUsers(CURRENT_USER).withAssignee(otherUser).buildAndSave();
-
-        //Task to be retrieved because user belongs to candidate group and task is not assigned
-        TaskEntity task4 = queryTestUtils.buildTask().withTaskCandidateGroups(testgroup).buildAndSave();
-
-        //Task NOT to be retrieved because user belongs to candidate group but task is assigned
-        queryTestUtils.buildTask().withTaskCandidateGroups(testgroup).withAssignee(otherUser).buildAndSave();
-
-        //Task to be retrieved because user is owner
-        TaskEntity task6 = queryTestUtils.buildTask().withOwner(CURRENT_USER).withAssignee(otherUser).buildAndSave();
-
-        //Task to be retrieved because there are no candidate users and groups and task is not assigned
-        TaskEntity task7 = queryTestUtils.buildTask().withOwner(otherUser).buildAndSave();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
