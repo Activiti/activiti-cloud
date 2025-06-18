@@ -32,6 +32,7 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.B
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +40,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -160,6 +163,45 @@ public class MultiplexFunctionBindingConfigurationIT {
                 FUNCTION_HANDLER_NAME,
                 FUNCTION_PROCESSOR_NAME
             );
+    }
+
+    @Test
+    public void multiplexConsumer() {
+        // when
+        var multiplexConsumer = bindingServiceProperties.getBindingProperties("multiplexConsumer");
+
+        // then
+        assertThat(multiplexConsumer)
+            .isNotNull()
+            .extracting(BindingProperties::getDestination)
+            .isEqualTo("commandConsumer,commandResults");
+
+        assertThat(multiplexConsumer).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
+    }
+
+    @Test
+    public void multiplexProducer() {
+        // when
+        var multiplexProducer = bindingServiceProperties.getBindingProperties("multiplexProducer");
+
+        // then
+        assertThat(multiplexProducer)
+            .isNotNull()
+            .extracting(BindingProperties::getDestination)
+            .isEqualTo("engineEvents");
+
+        assertThat(multiplexProducer)
+            .isNotNull()
+            .extracting(BindingProperties::getProducer)
+            .extracting(ProducerProperties::getRequiredGroups)
+            .isEqualTo("audit,query");
+    }
+
+    @Test
+    void multiplexBindings() {
+        assertThat(bindingServiceProperties.getBindings())
+            .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
+            .containsOnlyKeys("multiplexConsumer", "multiplexProducer");
     }
 
     @Test
