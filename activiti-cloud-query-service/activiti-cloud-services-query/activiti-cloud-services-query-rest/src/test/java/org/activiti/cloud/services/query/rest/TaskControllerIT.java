@@ -107,19 +107,4 @@ class TaskControllerIT extends AbstractTaskControllerIT {
                 containsInAnyOrder(task1.getId(), task2.getId(), task4.getId(), task6.getId(), task7.getId())
             );
     }
-
-    @Test
-    void should_return400_whenInvalidSearchParameterIsProvided() {
-        String invalidSearchJson = "{ {\"field\":\"status\",\"INVALID_OPERATOR\":\"INVALID_OPERATOR\",\"value\":\"someValue\"}}";
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(invalidSearchJson)
-            .when()
-            .post(getSearchEndpointHttpPost())
-            .then()
-            .statusCode(400);
-
-    }
-
 }
