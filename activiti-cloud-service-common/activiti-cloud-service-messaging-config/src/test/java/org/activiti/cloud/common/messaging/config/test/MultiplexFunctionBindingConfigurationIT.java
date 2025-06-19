@@ -201,7 +201,7 @@ public class MultiplexFunctionBindingConfigurationIT {
     void multiplexBindings() {
         assertThat(bindingServiceProperties.getBindings())
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsKeys("multiplexConsumer", "multiplexProducer");
+            .containsOnlyKeys("multiplexConsumer", "multiplexProducer");
     }
 
     @Test

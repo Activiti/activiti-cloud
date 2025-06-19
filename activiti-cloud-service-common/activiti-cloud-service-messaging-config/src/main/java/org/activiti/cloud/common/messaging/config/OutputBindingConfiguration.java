@@ -16,6 +16,8 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -57,7 +59,8 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
         FunctionAnnotationService functionAnnotationService,
         BindingServiceProperties bindingServiceProperties,
         StreamFunctionProperties streamFunctionProperties,
-        DefaultListableBeanFactory beanFactory
+        DefaultListableBeanFactory beanFactory,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -65,6 +68,14 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                 if (MessageChannel.class.isInstance(bean)) {
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
+                        .filter(inputBinding ->
+                            messagingProperties.getMultiplex().isEnabled() &&
+                            Stream
+                                .of(inputBinding.value())
+                                .anyMatch(bindingName ->
+                                    messagingProperties.getMultiplex().getBindings().containsKey(bindingName)
+                                )
+                        )
                         .ifPresent(functionBinding -> {
                             final String beanOutName = getOutBinding(beanName + OUTPUT_BINDING);
 

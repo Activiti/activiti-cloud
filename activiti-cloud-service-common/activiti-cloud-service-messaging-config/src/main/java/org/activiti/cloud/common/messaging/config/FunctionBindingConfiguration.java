@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +112,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     public BeanPostProcessor functionBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
-        Function<String, String> resolveExpression
+        Function<String, String> resolveExpression,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
