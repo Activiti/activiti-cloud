@@ -75,13 +75,8 @@ public class NotificationsSteps {
             .executeSubscription()
             .toFlux("engineEvents", List.class)
             .doOnSubscribe(action)
-            .doOnCancel(()-> {
-                processor.onComplete();
-            })
-            .doOnComplete(()-> {
-                processor.onComplete();
-            })
-            .doFinally(signal ->
-                processor.onComplete());
+            .doOnCancel(processor::onComplete)
+            .doOnComplete(processor::onComplete)
+            .doFinally(signal -> processor.onComplete());
     }
 }

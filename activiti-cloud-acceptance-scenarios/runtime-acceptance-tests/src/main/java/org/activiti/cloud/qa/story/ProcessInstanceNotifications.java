@@ -218,7 +218,6 @@ public class ProcessInstanceNotifications {
     public void verifyAllNotificationsAreReceived() {
         long sessionTimeout = sessionTimeoutSeconds();
 
-//        stepVerifier.expectComplete().verify(Duration.ofSeconds(sessionTimeout));
         stepVerifier.thenCancel().verify(Duration.ofSeconds(sessionTimeout));
     }
 
