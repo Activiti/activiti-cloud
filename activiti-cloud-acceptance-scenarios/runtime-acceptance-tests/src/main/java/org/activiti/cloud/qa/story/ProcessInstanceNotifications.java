@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -99,7 +100,8 @@ public class ProcessInstanceNotifications {
     }
 
     @When("notifications: the user subscribes to $eventTypesString notifications")
-    public void subscribeToEventTypesNotifications(String eventTypesString) throws URISyntaxException {
+    public void subscribeToEventTypesNotifications(String eventTypesString)
+        throws URISyntaxException, InterruptedException {
         processor = ReplayProcessor.create();
 
         String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
@@ -108,10 +110,14 @@ public class ProcessInstanceNotifications {
             .orElse("*");
 
         String[] eventTypes = eventTypesString.split(",");
+        CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey);
+        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
         flux.subscribe(processor);
         stepVerifier = StepVerifier.create(processor).expectSubscription();
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
     }
 
     @When(
@@ -120,7 +126,7 @@ public class ProcessInstanceNotifications {
     public void subscribeToEventTypesNotificationsWithBusinessKeySessionVariable(
         String eventTypesString,
         String variableName
-    ) throws URISyntaxException {
+    ) throws URISyntaxException, InterruptedException {
         processor = ReplayProcessor.create();
 
         String businessKey = sessionVariableCalled(variableName, String.class).orElse(null);
@@ -129,11 +135,15 @@ public class ProcessInstanceNotifications {
             .orElse("*");
 
         String[] eventTypes = eventTypesString.split(",");
+        CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey);
+        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         flux.subscribe(processor);
         stepVerifier = StepVerifier.create(processor).expectSubscription();
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
     }
 
     @When("notifications: the user starts a process $processName")
@@ -199,7 +209,9 @@ public class ProcessInstanceNotifications {
 
     @Then("notifications: the user completes the subscription")
     public void completeSubscription() {
-        stepVerifier.thenCancel();
+        assertThat(subscriptionRef.get()).isNotNull();
+
+        cancelSubscription();
     }
 
     @Then("notifications: verify all expected notifications are received")
@@ -252,7 +264,7 @@ public class ProcessInstanceNotifications {
     }
 
     private Long sessionTimeoutSeconds() {
-        return sessionVariableCalled("sessionTimeoutSeconds", Long.class).orElse(Long.valueOf(60));
+        return sessionVariableCalled("sessionTimeoutSeconds", Long.class).orElse(Long.valueOf(20));
     }
 
     private Long subscriptionTimeoutSeconds() {
@@ -283,10 +295,23 @@ public class ProcessInstanceNotifications {
         return List.of(engineEvents);
     }
 
-    private Flux<List> subscribe(String[] eventTypes, String businessKey, String processDefinitionKey)
-        throws URISyntaxException {
+    private Flux<List> subscribe(
+        String[] eventTypes,
+        String businessKey,
+        String processDefinitionKey,
+        CountDownLatch countDownLatch
+    ) throws URISyntaxException {
         String serviceName = notificationsSteps.getRuntimeBundleServiceName();
         AuthToken authToken = TokenHolder.getAuthToken();
+        subscriptionRef = new AtomicReference<>();
+        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
+
+        Consumer<Subscription> action = countDownLatchAction(
+            countDownLatch,
+            subscriptionRef,
+            Duration.ofSeconds(subscriptionTimeoutSeconds),
+            () -> {}
+        );
 
         // TODO: add processDefinitionKey when signal events are fixed
         String query =
@@ -306,7 +331,7 @@ public class ProcessInstanceNotifications {
                 put("processDefinitionKey", processDefinitionKey);
             }
         };
-        return notificationsSteps.subscribe(authToken.getAccess_token(), query, variables);
+        return notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
     }
 
     @SuppressWarnings("serial")
