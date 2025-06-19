@@ -41,9 +41,10 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
-        ActivitiMessagingDestinationTransformer destinationTransformer
+        ActivitiMessagingDestinationTransformer destinationTransformer,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
-        return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
+        return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer, messagingProperties);
     }
 
     @Bean

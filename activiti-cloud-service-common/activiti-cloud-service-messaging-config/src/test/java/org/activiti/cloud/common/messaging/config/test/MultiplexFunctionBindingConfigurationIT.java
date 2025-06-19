@@ -68,7 +68,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.multiplex.enabled=true",
         "activiti.cloud.messaging.multiplex.bindings.multiplexProducer.destination=engineEvents",
         "activiti.cloud.messaging.multiplex.bindings.multiplexProducer.producer.required-groups=audit,query",
-        "activiti.cloud.messaging.multiplex.bindings.multiplexConsumer.destination=commandConsumer,commandResults",
+        "activiti.cloud.messaging.multiplex.bindings.multiplexConsumer.destination=commandConsumer,commandResults,engineEvents",
         "activiti.cloud.messaging.multiplex.bindings.multiplexConsumer.group=${spring.application.name}",
     }
 )
@@ -128,7 +128,7 @@ public class MultiplexFunctionBindingConfigurationIT {
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
                 assertThat(message).isNotNull();
-                Message outMessage = MessageBuilder
+                Message<?> outMessage = MessageBuilder
                     .withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
                     .build();
@@ -174,7 +174,7 @@ public class MultiplexFunctionBindingConfigurationIT {
         assertThat(multiplexConsumer)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
-            .isEqualTo("commandConsumer,commandResults");
+            .isEqualTo("commandConsumer,commandResults,engineEvents");
 
         assertThat(multiplexConsumer).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
     }
@@ -194,14 +194,14 @@ public class MultiplexFunctionBindingConfigurationIT {
             .isNotNull()
             .extracting(BindingProperties::getProducer)
             .extracting(ProducerProperties::getRequiredGroups)
-            .isEqualTo("audit,query");
+            .isEqualTo(new String[] { "audit", "query" });
     }
 
     @Test
     void multiplexBindings() {
         assertThat(bindingServiceProperties.getBindings())
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsOnlyKeys("multiplexConsumer", "multiplexProducer");
+            .containsKeys("multiplexConsumer", "multiplexProducer");
     }
 
     @Test

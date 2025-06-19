@@ -16,7 +16,9 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.List;
 import java.util.Optional;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -29,11 +31,14 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
+    private final ActivitiCloudMessagingProperties messagingProperties;
 
     public ActivitiMessagingDestinationsBeanPostProcessor(
-        ActivitiMessagingDestinationTransformer destinationTransformer
+        ActivitiMessagingDestinationTransformer destinationTransformer,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         this.destinationTransformer = destinationTransformer;
+        this.messagingProperties = messagingProperties;
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -41,6 +46,25 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
 
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
+
+            if (messagingProperties.getMultiplex().isEnabled()) {
+                var bindings = messagingProperties.getMultiplex().getBindings();
+
+                bindings.forEach((key, target) -> {
+                    bindingServiceProperties
+                        .getBindings()
+                        .entrySet()
+                        .stream()
+                        .filter(entry ->
+                            List.of(target.getDestination().split(",")).contains(entry.getValue().getDestination())
+                        )
+                        .forEach(entry -> {
+                            bindingServiceProperties.getBindings().remove(entry.getKey());
+                        });
+                });
+
+                bindingServiceProperties.getBindings().putAll(bindings);
+            }
 
             bindingServiceProperties
                 .getBindings()
