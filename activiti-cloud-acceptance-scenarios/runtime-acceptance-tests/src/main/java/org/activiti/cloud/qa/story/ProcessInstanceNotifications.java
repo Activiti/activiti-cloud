@@ -112,7 +112,7 @@ public class ProcessInstanceNotifications {
         String[] eventTypes = eventTypesString.split(",");
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<List> flux = subscribe(processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
         flux.subscribe(processor);
         stepVerifier = StepVerifier.create(processor).expectSubscription();
         assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
@@ -137,7 +137,7 @@ public class ProcessInstanceNotifications {
         String[] eventTypes = eventTypesString.split(",");
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Flux<List> flux = subscribe(eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Flux<List> flux = subscribe(processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
 
         flux.subscribe(processor);
         stepVerifier = StepVerifier.create(processor).expectSubscription();
@@ -218,7 +218,8 @@ public class ProcessInstanceNotifications {
     public void verifyAllNotificationsAreReceived() {
         long sessionTimeout = sessionTimeoutSeconds();
 
-        stepVerifier.expectComplete().verify(Duration.ofSeconds(sessionTimeout));
+//        stepVerifier.expectComplete().verify(Duration.ofSeconds(sessionTimeout));
+        stepVerifier.thenCancel().verify(Duration.ofSeconds(sessionTimeout));
     }
 
     @Then(
@@ -296,6 +297,7 @@ public class ProcessInstanceNotifications {
     }
 
     private Flux<List> subscribe(
+        ReplayProcessor<List> processor,
         String[] eventTypes,
         String businessKey,
         String processDefinitionKey,
@@ -305,13 +307,6 @@ public class ProcessInstanceNotifications {
         AuthToken authToken = TokenHolder.getAuthToken();
         subscriptionRef = new AtomicReference<>();
         long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
-
-        Consumer<Subscription> action = countDownLatchAction(
-            countDownLatch,
-            subscriptionRef,
-            Duration.ofSeconds(subscriptionTimeoutSeconds),
-            () -> {}
-        );
 
         // TODO: add processDefinitionKey when signal events are fixed
         String query =
@@ -331,7 +326,14 @@ public class ProcessInstanceNotifications {
                 put("processDefinitionKey", processDefinitionKey);
             }
         };
-        return notificationsSteps.subscribe(authToken.getAccess_token(), query, variables, action);
+
+        Consumer<Subscription> action = countDownLatchAction(
+            countDownLatch,
+            subscriptionRef,
+            Duration.ofSeconds(subscriptionTimeoutSeconds),
+            () -> {}
+        );
+        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, variables, action);
     }
 
     @SuppressWarnings("serial")

@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ReplayProcessor;
 
 @EnableRuntimeFeignContext
 public class NotificationsSteps {
@@ -56,6 +57,7 @@ public class NotificationsSteps {
     @SuppressWarnings({ "serial" })
     @Step
     public Flux<List> subscribe(
+        ReplayProcessor<List> processor,
         String accessToken,
         String query,
         Map<String, Object> variables,
@@ -72,6 +74,14 @@ public class NotificationsSteps {
             .variables(variables)
             .executeSubscription()
             .toFlux("engineEvents", List.class)
-            .doOnSubscribe(action);
+            .doOnSubscribe(action)
+            .doOnCancel(()-> {
+                processor.onComplete();
+            })
+            .doOnComplete(()-> {
+                processor.onComplete();
+            })
+            .doFinally(signal ->
+                processor.onComplete());
     }
 }
