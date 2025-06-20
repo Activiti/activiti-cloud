@@ -35,7 +35,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>8.8.0-alpha.63</activiti.version>
+    <activiti.version>8.8.0-alpha.64</activiti.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
