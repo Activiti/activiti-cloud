@@ -31,8 +31,8 @@ import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,39 +40,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistry;
-import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
     properties = {
         "activiti.cloud.application.name=foo",
         "spring.application.name=bar",
-        "activiti.cloud.messaging.destination-transformers-enabled=false",
-        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
-        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+        "spring.cloud.function.definition=functionRouter;queryConsumerHandler;commandProcessorHandler",
+        "spring.cloud.stream.function.bindings.functionRouter-in-0=functionRouterInput",
+        "spring.cloud.stream.bindings.functionRouterInput.destination=commandConsumer,commandResults,engineEvents",
+        "spring.cloud.stream.bindings.functionRouterInput.group=${spring.application.name}",
         "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
+        //        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+        //        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.commandResults.destination=commandResults",
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
-        "spring.cloud.stream.bindings.commandResults.destination=commandResults",
-        "activiti.cloud.messaging.multiplex.enabled=true",
-        "activiti.cloud.messaging.multiplex.bindings.multiplexProducer.destination=engineEvents",
-        "activiti.cloud.messaging.multiplex.bindings.multiplexProducer.producer.required-groups=audit,query",
-        "activiti.cloud.messaging.multiplex.bindings.multiplexConsumer.destination=commandConsumer,commandResults,engineEvents",
-        "activiti.cloud.messaging.multiplex.bindings.multiplexConsumer.group=${spring.application.name}",
+        "activiti.cloud.messaging.multiplex.enabled=false",
     }
 )
-@Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
+@EnableTestBinder
+@Import({ TestBindingsChannelsConfiguration.class })
 public class MultiplexFunctionBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
@@ -82,6 +83,7 @@ public class MultiplexFunctionBindingConfigurationIT {
     private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
     private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
     private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
+    private static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
 
     private static AtomicReference<Message<?>> consumerMessage = new AtomicReference<>();
 
@@ -115,6 +117,11 @@ public class MultiplexFunctionBindingConfigurationIT {
     @TestConfiguration
     static class ApplicationConfig {
 
+        @InputBinding(FUNCTION_ROUTER_INPUT)
+        SubscribableChannel functionRouterInput() {
+            return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
+        }
+
         @Bean(FUNCTION_HANDLER_NAME)
         @FunctionBinding(input = QUERY_CONSUMER)
         public Consumer<Message<?>> queryConsumerHandler() {
@@ -131,6 +138,7 @@ public class MultiplexFunctionBindingConfigurationIT {
                 Message<?> outMessage = MessageBuilder
                     .withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
+                    .setHeader("spring.cloud.function.definition", "queryConsumerHandler_registration")
                     .build();
                 channels.auditProducer().send(outMessage);
                 return MessageBuilder.withPayload(message.getPayload()).setHeader("type", "Test Reply").build();
@@ -156,52 +164,21 @@ public class MultiplexFunctionBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions)
-            .doesNotContain(
-                FUNCTION_AUDIT_SUPPLIER_NAME,
-                FUNCTION_COMMAND_SUPPLIER_NAME,
-                FUNCTION_HANDLER_NAME,
-                FUNCTION_PROCESSOR_NAME
-            );
+        assertThat(functions).containsOnly("functionRouter", "queryConsumerHandler", "commandProcessorHandler");
     }
 
     @Test
-    public void multiplexConsumer() {
+    public void functionRouterBinding() {
         // when
-        var multiplexConsumer = bindingServiceProperties.getBindingProperties("multiplexConsumer");
+        var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterInput");
 
         // then
-        assertThat(multiplexConsumer)
+        assertThat(functionRouterInput)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
             .isEqualTo("commandConsumer,commandResults,engineEvents");
 
-        assertThat(multiplexConsumer).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
-    }
-
-    @Test
-    public void multiplexProducer() {
-        // when
-        var multiplexProducer = bindingServiceProperties.getBindingProperties("multiplexProducer");
-
-        // then
-        assertThat(multiplexProducer)
-            .isNotNull()
-            .extracting(BindingProperties::getDestination)
-            .isEqualTo("engineEvents");
-
-        assertThat(multiplexProducer)
-            .isNotNull()
-            .extracting(BindingProperties::getProducer)
-            .extracting(ProducerProperties::getRequiredGroups)
-            .isEqualTo(new String[] { "audit", "query" });
-    }
-
-    @Test
-    void multiplexBindings() {
-        assertThat(bindingServiceProperties.getBindings())
-            .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsOnlyKeys("multiplexConsumer", "multiplexProducer");
+        assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
     }
 
     @Test
@@ -273,7 +250,11 @@ public class MultiplexFunctionBindingConfigurationIT {
     @Test
     public void testConsumerBindings() {
         // given
-        Message<String> message = MessageBuilder.withPayload("Test").setHeader("type", "Test Consumer").build();
+        Message<String> message = MessageBuilder
+            .withPayload("Test")
+            .setHeader("type", "Test Consumer")
+            .setHeader("spring.cloud.function.definition", "queryConsumerHandler_registration")
+            .build();
 
         // when
         input.send(message, "engineEvents");
@@ -286,10 +267,14 @@ public class MultiplexFunctionBindingConfigurationIT {
     @Test
     public void testFunctionBindings() throws InterruptedException {
         // given
-        Message<String> message = MessageBuilder.withPayload("Test").setHeader("type", "Test Consumer").build();
+        Message<String> message = MessageBuilder
+            .withPayload("Test")
+            .setHeader("type", "Test Consumer")
+            .setHeader("spring.cloud.function.definition", "commandProcessorHandler_registration")
+            .build();
 
         // when
-        channels.commandConsumer().send(message);
+        input.send(message, "commandConsumer");
 
         // then
         Awaitility
