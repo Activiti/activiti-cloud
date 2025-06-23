@@ -20,8 +20,10 @@ import static org.activiti.cloud.common.messaging.config.InputBindingConfigurati
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.util.Arrays;
@@ -33,7 +35,6 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.assertj.core.api.Assertions;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,17 +60,19 @@ import org.springframework.messaging.support.MessageBuilder;
     properties = {
         "activiti.cloud.application.name=foo",
         "spring.application.name=bar",
-        "spring.cloud.function.definition=functionRouter;queryConsumerHandler;commandProcessorHandler",
-        "spring.cloud.stream.function.bindings.functionRouter-in-0=functionRouterInput",
-        "spring.cloud.stream.bindings.functionRouterInput.destination=commandConsumer,commandResults,engineEvents",
-        "spring.cloud.stream.bindings.functionRouterInput.group=${spring.application.name}",
+        //        "spring.cloud.function.definition=functionRouter;queryConsumerHandler_registration;commandProcessorHandler_registration",
+        //        "spring.cloud.stream.function.bindings.functionRouter-in-0=functionRouterInput",
+        //        "spring.cloud.stream.bindings.functionRouterInput.destination=commandConsumer,commandResults,engineEvents",
+        //        "spring.cloud.stream.bindings.functionRouterInput.group=${spring.application.name}",
         "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
-        //        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
-        //        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
-        "activiti.cloud.messaging.multiplex.enabled=false",
+        "activiti.cloud.messaging.function-router.enabled=true",
+        "activiti.cloud.messaging.function-router.input.destination=commandConsumer,integrationRequests,engineEvents",
+        "activiti.cloud.messaging.function-router.input.group=${spring.application.name}",
     }
 )
 @EnableTestBinder
@@ -83,7 +86,9 @@ public class MultiplexFunctionBindingConfigurationIT {
     private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
     private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
     private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
+    private static final String FUNCTION_INTEGRATION_REQUESTS_NAME = "integrationRequests" + INPUT_BINDING;
     private static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
+    private static final String FUNCTION_ROUTER_OUTPUT = "functionRouterOutput";
 
     private static AtomicReference<Message<?>> consumerMessage = new AtomicReference<>();
 
@@ -120,6 +125,11 @@ public class MultiplexFunctionBindingConfigurationIT {
         @InputBinding(FUNCTION_ROUTER_INPUT)
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
+        }
+
+        @InputBinding(FUNCTION_ROUTER_OUTPUT)
+        SubscribableChannel functionRouterOutput() {
+            return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
         }
 
         @Bean(FUNCTION_HANDLER_NAME)
@@ -164,7 +174,12 @@ public class MultiplexFunctionBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).containsOnly("functionRouter", "queryConsumerHandler", "commandProcessorHandler");
+        assertThat(functions)
+            .containsOnly(
+                "functionRouter",
+                "queryConsumerHandler_registration",
+                "commandProcessorHandler_registration"
+            );
     }
 
     @Test
@@ -176,7 +191,7 @@ public class MultiplexFunctionBindingConfigurationIT {
         assertThat(functionRouterInput)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
-            .isEqualTo("commandConsumer,commandResults,engineEvents");
+            .isEqualTo("commandConsumer,integrationRequests,engineEvents");
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
     }
@@ -198,22 +213,32 @@ public class MultiplexFunctionBindingConfigurationIT {
     @Test
     void testInputBindingsDefinitions() {
         Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_COMMAND_CONSUMER_NAME);
+        Assertions
+            .assertThat(bindingServiceProperties.getInputBindings())
+            .doesNotContain(FUNCTION_COMMAND_CONSUMER_NAME);
         Assertions
             .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
-            .isEqualTo(COMMAND_CONSUMER);
+            .isNull();
 
         Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_AUDIT_CONSUMER_NAME);
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_AUDIT_CONSUMER_NAME);
         Assertions
             .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
-            .isEqualTo(AUDIT_CONSUMER);
+            .isNull();
 
         Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_QUERY_CONSUMER_NAME);
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_QUERY_CONSUMER_NAME);
         Assertions
             .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
-            .isEqualTo(QUERY_CONSUMER);
+            .isNull();
+
+        Assertions.assertThat(context.getBean(INTEGRATION_REQUESTS, MessageChannel.class)).isNotNull();
+        Assertions
+            .assertThat(bindingServiceProperties.getInputBindings())
+            .doesNotContain(FUNCTION_INTEGRATION_REQUESTS_NAME);
+        Assertions
+            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_INTEGRATION_REQUESTS_NAME)))
+            .isNull();
     }
 
     @Test
@@ -274,21 +299,30 @@ public class MultiplexFunctionBindingConfigurationIT {
             .build();
 
         // when
-        input.send(message, "commandConsumer");
+        channels.commandConsumer().send(message);
+        //        input.send(message, "commandConsumer");
 
         // then
-        Awaitility
-            .await()
+        await()
             .untilAsserted(() -> {
                 Message<?> outputMessage = output.receive(
-                    10000,
+                    1000,
                     bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS)
                 );
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
+            });
 
-                assertThat(consumerMessage.get()).isNotNull();
-                assertThat(consumerMessage.get().getHeaders().get("type", String.class)).isEqualTo("Test Send");
+        // then
+        await()
+            .untilAsserted(() -> {
+                Message<?> outputMessage = output.receive(
+                    1000,
+                    bindingResolver.apply(TestBindingsChannels.AUDIT_PRODUCER)
+                );
+
+                assertThat(outputMessage).isNotNull();
+                assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
             });
     }
 }

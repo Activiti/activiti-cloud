@@ -113,7 +113,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionBindingPropertySource functionBindingPropertySource
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -131,7 +132,11 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            registerFunctionRegistration(beanName, functionRegistration);
+                            var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+
+                            if (messagingProperties.getFunctionRouter().isEnabled()) {
+                                functionBindingPropertySource.register(functionBeanName);
+                            }
 
                             GenericSelector<Message<?>> selector = Optional
                                 .ofNullable(functionBinding)

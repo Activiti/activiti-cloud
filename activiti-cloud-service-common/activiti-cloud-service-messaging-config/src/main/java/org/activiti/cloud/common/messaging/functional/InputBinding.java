@@ -30,4 +30,6 @@ import org.springframework.core.annotation.AliasFor;
 public @interface InputBinding {
     @AliasFor(annotation = Bean.class, attribute = "name")
     String[] value();
+
+    String functionRouter() default "";
 }

@@ -22,6 +22,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.util.Arrays;
@@ -31,7 +32,6 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.B
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,18 +244,17 @@ public class FunctionBindingConfigurationIT {
         channels.commandConsumer().send(message);
 
         // then
-        Awaitility
-            .await()
+        assertThat(consumerMessage).isNotNull();
+        assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+
+        await()
             .untilAsserted(() -> {
                 Message<?> outputMessage = output.receive(
-                    10000,
+                    1000,
                     bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS)
                 );
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
-
-                assertThat(consumerMessage).isNotNull();
-                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
             });
     }
 }

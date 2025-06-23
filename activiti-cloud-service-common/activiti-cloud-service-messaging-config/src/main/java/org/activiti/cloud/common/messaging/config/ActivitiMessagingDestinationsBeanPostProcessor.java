@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
@@ -32,13 +33,19 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
     private final ActivitiCloudMessagingProperties messagingProperties;
+    private final FunctionBindingPropertySource functionBindingPropertySource;
+    private final StreamFunctionConfigurationProperties streamFunctionProperties;
 
     public ActivitiMessagingDestinationsBeanPostProcessor(
         ActivitiMessagingDestinationTransformer destinationTransformer,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionBindingPropertySource functionBindingPropertySource,
+        StreamFunctionConfigurationProperties streamFunctionProperties
     ) {
         this.destinationTransformer = destinationTransformer;
         this.messagingProperties = messagingProperties;
+        this.functionBindingPropertySource = functionBindingPropertySource;
+        this.streamFunctionProperties = streamFunctionProperties;
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -47,23 +54,24 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
 
-            if (messagingProperties.getMultiplex().isEnabled()) {
-                var bindings = messagingProperties.getMultiplex().getBindings();
+            if (messagingProperties.getFunctionRouter().isEnabled()) {
+                functionBindingPropertySource.register("functionRouter");
+                streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
 
-                bindings.forEach((key, target) -> {
-                    bindingServiceProperties
-                        .getBindings()
-                        .entrySet()
-                        .stream()
-                        .filter(entry ->
-                            List.of(target.getDestination().split(",")).contains(entry.getValue().getDestination())
-                        )
-                        .forEach(entry -> {
-                            bindingServiceProperties.getBindings().remove(entry.getKey());
-                        });
-                });
+                var input = messagingProperties.getFunctionRouter().getInput();
 
-                bindingServiceProperties.getBindings().putAll(bindings);
+                bindingServiceProperties
+                    .getBindings()
+                    .entrySet()
+                    .stream()
+                    .filter(entry ->
+                        List.of(input.getDestination().split(",")).contains(entry.getValue().getDestination())
+                    )
+                    .forEach(entry -> {
+                        bindingServiceProperties.getBindings().remove(entry.getKey());
+                    });
+
+                bindingServiceProperties.getBindings().put("functionRouterInput", input);
             }
 
             bindingServiceProperties

@@ -108,10 +108,10 @@ public class ActivitiCloudMessagingProperties {
     private String destinationIllegalCharsReplacement = "-";
 
     /**
-     * Configure multiplex destinations for a single binding
+     * Configure functionRouter destinations for a single binding
      */
     @NestedConfigurationProperty
-    private MultiplexBindingsProperties multiplex = new MultiplexBindingsProperties();
+    private FunctionRouterProperties functionRouter = new FunctionRouterProperties();
 
     /**
      * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
@@ -227,12 +227,12 @@ public class ActivitiCloudMessagingProperties {
         this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
     }
 
-    public MultiplexBindingsProperties getMultiplex() {
-        return multiplex;
+    public FunctionRouterProperties getFunctionRouter() {
+        return functionRouter;
     }
 
-    public void setMultiplex(MultiplexBindingsProperties multiplex) {
-        this.multiplex = multiplex;
+    public void setFunctionRouter(FunctionRouterProperties functionRouter) {
+        this.functionRouter = functionRouter;
     }
 
     public Function<String, String> transformDestination() {
@@ -397,10 +397,12 @@ public class ActivitiCloudMessagingProperties {
     }
 
     @Validated
-    public static class MultiplexBindingsProperties {
+    public static class FunctionRouterProperties {
 
         private boolean enabled;
-        private Map<String, BindingProperties> bindings;
+
+        @NestedConfigurationProperty
+        private BindingProperties input;
 
         public boolean isEnabled() {
             return enabled;
@@ -410,12 +412,12 @@ public class ActivitiCloudMessagingProperties {
             this.enabled = enabled;
         }
 
-        public Map<String, BindingProperties> getBindings() {
-            return bindings;
+        public BindingProperties getInput() {
+            return input;
         }
 
-        public void setBindings(Map<String, BindingProperties> bindings) {
-            this.bindings = bindings;
+        public void setInput(BindingProperties input) {
+            this.input = input;
         }
     }
 

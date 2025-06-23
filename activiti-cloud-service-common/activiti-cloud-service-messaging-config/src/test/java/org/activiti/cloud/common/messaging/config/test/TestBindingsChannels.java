@@ -36,17 +36,17 @@ public interface TestBindingsChannels {
 
     String INTEGRATION_RESULTS = "integrationResults";
 
-    @InputBinding(COMMAND_CONSUMER)
+    @InputBinding(value = COMMAND_CONSUMER, functionRouter = "commandConsumer")
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
     }
 
-    @InputBinding(QUERY_CONSUMER)
+    @InputBinding(value = QUERY_CONSUMER, functionRouter = "engineEvents")
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
     }
 
-    @InputBinding(AUDIT_CONSUMER)
+    @InputBinding(value = AUDIT_CONSUMER, functionRouter = "engineEvents")
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
     }
@@ -61,7 +61,7 @@ public interface TestBindingsChannels {
         return MessageChannels.direct(AUDIT_PRODUCER).getObject();
     }
 
-    @InputBinding(INTEGRATION_REQUESTS)
+    @InputBinding(value = INTEGRATION_REQUESTS, functionRouter = "integrationRequests")
     default SubscribableChannel integrationRequests() {
         return MessageChannels.publishSubscribe(INTEGRATION_REQUESTS).getObject();
     }

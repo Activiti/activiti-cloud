@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -50,6 +51,15 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
                         .ifPresent(functionBinding -> {
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
+
+                            if (
+                                messagingProperties.getFunctionRouter().isEnabled() &&
+                                List
+                                    .of(messagingProperties.getFunctionRouter().getInput().getDestination().split(","))
+                                    .contains(functionBinding.functionRouter())
+                            ) {
+                                return;
+                            }
 
                             String inputBindings = bindingServiceProperties.getInputBindings();
 
