@@ -33,7 +33,6 @@ import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,10 +49,8 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
@@ -77,7 +74,7 @@ import org.springframework.messaging.support.MessageBuilder;
 )
 @EnableTestBinder
 @Import({ TestBindingsChannelsConfiguration.class })
-public class MultiplexFunctionBindingConfigurationIT {
+public class FunctionRouterBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
     private static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
@@ -87,8 +84,6 @@ public class MultiplexFunctionBindingConfigurationIT {
     private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
     private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
     private static final String FUNCTION_INTEGRATION_REQUESTS_NAME = "integrationRequests" + INPUT_BINDING;
-    private static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
-    private static final String FUNCTION_ROUTER_OUTPUT = "functionRouterOutput";
 
     private static AtomicReference<Message<?>> consumerMessage = new AtomicReference<>();
 
@@ -121,16 +116,6 @@ public class MultiplexFunctionBindingConfigurationIT {
 
     @TestConfiguration
     static class ApplicationConfig {
-
-        @InputBinding(FUNCTION_ROUTER_INPUT)
-        SubscribableChannel functionRouterInput() {
-            return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
-        }
-
-        @InputBinding(FUNCTION_ROUTER_OUTPUT)
-        SubscribableChannel functionRouterOutput() {
-            return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
-        }
 
         @Bean(FUNCTION_HANDLER_NAME)
         @FunctionBinding(input = QUERY_CONSUMER)
