@@ -61,14 +61,14 @@ import org.springframework.messaging.support.MessageBuilder;
         //        "spring.cloud.stream.function.bindings.functionRouter-in-0=functionRouterInput",
         //        "spring.cloud.stream.bindings.functionRouterInput.destination=commandConsumer,commandResults,engineEvents",
         //        "spring.cloud.stream.bindings.functionRouterInput.group=${spring.application.name}",
-        "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
-        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+        "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
+        "spring.cloud.stream.bindings.commandConsumer.destination=command-consumer",
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
-        "spring.cloud.stream.bindings.commandResults.destination=commandResults",
-        "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
-        "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.commandResults.destination=command-results",
+        "spring.cloud.stream.bindings.auditConsumer.destination=engine-events",
+        "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "activiti.cloud.messaging.function-router.enabled=true",
-        "activiti.cloud.messaging.function-router.input.destination=commandConsumer,integrationRequests,engineEvents",
+        "activiti.cloud.messaging.function-router.input.destination=command-consumer,integration-requests,engine-events",
         "activiti.cloud.messaging.function-router.input.group=${spring.application.name}",
     }
 )
@@ -170,7 +170,7 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(functionRouterInput)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
-            .isEqualTo("commandConsumer,integrationRequests,engineEvents");
+            .isEqualTo("command-consumer,integration-requests,engine-events");
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
     }
@@ -257,11 +257,11 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "engineEvents")
+            .setHeader("spring.cloud.function.destination", "engine-events")
             .build();
 
         // when
-        input.send(message, "engineEvents");
+        input.send(message, "engine-events");
 
         // then
         assertThat(consumerMessage).isNotNull();
@@ -274,7 +274,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "commandConsumer")
+            .setHeader("spring.cloud.function.destination", "command-consumer")
             .build();
 
         // when
