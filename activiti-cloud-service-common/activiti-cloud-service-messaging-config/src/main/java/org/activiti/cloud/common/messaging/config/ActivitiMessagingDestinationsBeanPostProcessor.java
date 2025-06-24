@@ -51,12 +51,13 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof BindingServiceProperties bindingServiceProperties) {
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
+            final var functionRouter = messagingProperties.getFunctionRouter();
 
-            if (messagingProperties.getFunctionRouter().isEnabled()) {
+            if (functionRouter.isEnabled()) {
                 functionBindingPropertySource.register("functionRouter");
                 streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
 
-                var input = messagingProperties.getFunctionRouter().getInput();
+                final var input = functionRouter.getInput();
 
                 bindingServiceProperties
                     .getBindings()
@@ -67,6 +68,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     )
                     .forEach(entry -> {
                         bindingServiceProperties.getBindings().remove(entry.getKey());
+                        functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
                     });
 
                 bindingServiceProperties.getBindings().put("functionRouterInput", input);
