@@ -16,15 +16,29 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageBuilder;
 
-@AutoConfiguration(before = InputBindingConfiguration.class, after = BinderFactoryAutoConfiguration.class)
+@AutoConfiguration(
+    before = InputBindingConfiguration.class,
+    after = { BinderFactoryAutoConfiguration.class, ActivitiMessagingDestinationsAutoConfiguration.class }
+)
 @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
 public class FunctionRouterConfiguration {
 
@@ -39,5 +53,50 @@ public class FunctionRouterConfiguration {
     @OutputBinding(FUNCTION_ROUTER_OUTPUT)
     SubscribableChannel functionRouterOutput() {
         return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
+    }
+
+    @Bean
+    public BeanPostProcessor outputBindingChannelPostProcessor(
+        @Autowired DefaultListableBeanFactory beanFactory,
+        @Autowired BindingServiceProperties bindingServiceProperties
+    ) {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessBeforeInitialization(Object bean, String beanName) {
+                return bean;
+            }
+
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) {
+                if (bean instanceof DirectChannel messageChannel) {
+                    Optional
+                        .ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
+                        .ifPresent(outputBinding -> {
+                            messageChannel.addInterceptor(
+                                new ChannelInterceptor() {
+                                    @Override
+                                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                                        var messageToUse = Optional
+                                            .ofNullable(bindingServiceProperties.getBindings().get(beanName))
+                                            .map(binding ->
+                                                MessageBuilder
+                                                    .fromMessage(message)
+                                                    .setHeader(
+                                                        "spring.cloud.function.definition",
+                                                        binding.getDestination()
+                                                    )
+                                                    .build()
+                                            )
+                                            .orElse(null);
+
+                                        return messageToUse != null ? messageToUse : message;
+                                    }
+                                }
+                            );
+                        });
+                }
+                return bean;
+            }
+        };
     }
 }

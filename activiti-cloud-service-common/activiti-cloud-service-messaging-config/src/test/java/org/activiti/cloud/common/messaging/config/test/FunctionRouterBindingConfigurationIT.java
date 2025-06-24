@@ -133,7 +133,6 @@ public class FunctionRouterBindingConfigurationIT {
                 Message<?> outMessage = MessageBuilder
                     .withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
-                    .setHeader("spring.cloud.function.definition", "queryConsumerHandler_registration")
                     .build();
                 channels.auditProducer().send(outMessage);
                 return MessageBuilder.withPayload(message.getPayload()).setHeader("type", "Test Reply").build();
