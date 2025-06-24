@@ -58,6 +58,11 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                                     .of(messagingProperties.getFunctionRouter().getInput().getDestination().split(","))
                                     .contains(functionBinding.functionRouter())
                             ) {
+                                messagingProperties
+                                    .getFunctionRouter()
+                                    .getDestinations()
+                                    .put(beanName, functionBinding.functionRouter());
+
                                 return;
                             }
 

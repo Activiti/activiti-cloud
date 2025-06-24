@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -132,10 +133,25 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
+                            functionRegistration.setBeanName(beanName + FunctionRegistration.REGISTRATION_NAME_SUFFIX);
+
                             var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
                             if (messagingProperties.getFunctionRouter().isEnabled()) {
-                                functionBindingPropertySource.register(functionBeanName);
+                                Optional
+                                    .ofNullable(
+                                        messagingProperties
+                                            .getFunctionRouter()
+                                            .getDestinations()
+                                            .get(functionBinding.input())
+                                    )
+                                    .ifPresent(destination -> {
+                                        messagingProperties
+                                            .getFunctionRouter()
+                                            .getRegistrations()
+                                            .computeIfAbsent(destination, key -> new ArrayList<>())
+                                            .add(functionBeanName);
+                                    });
                             }
 
                             GenericSelector<Message<?>> selector = Optional

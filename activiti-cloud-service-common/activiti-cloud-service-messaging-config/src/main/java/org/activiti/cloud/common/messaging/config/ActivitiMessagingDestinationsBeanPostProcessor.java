@@ -49,9 +49,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (BindingServiceProperties.class.isInstance(bean)) {
-            BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
-
+        if (bean instanceof BindingServiceProperties bindingServiceProperties) {
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
 
             if (messagingProperties.getFunctionRouter().isEnabled()) {

@@ -402,7 +402,11 @@ public class ActivitiCloudMessagingProperties {
         private boolean enabled;
 
         @NestedConfigurationProperty
-        private BindingProperties input;
+        private BindingProperties input = new BindingProperties();
+
+        private Map<String, String> destinations = new LinkedHashMap<>();
+
+        private Map<String, List<String>> registrations = new LinkedHashMap<>();
 
         public boolean isEnabled() {
             return enabled;
@@ -418,6 +422,22 @@ public class ActivitiCloudMessagingProperties {
 
         public void setInput(BindingProperties input) {
             this.input = input;
+        }
+
+        public Map<String, String> getDestinations() {
+            return destinations;
+        }
+
+        public void setDestinations(Map<String, String> destinations) {
+            this.destinations = destinations;
+        }
+
+        public Map<String, List<String>> getRegistrations() {
+            return registrations;
+        }
+
+        public void setRegistrations(Map<String, List<String>> registrations) {
+            this.registrations = registrations;
         }
     }
 

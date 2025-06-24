@@ -16,7 +16,9 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.ArrayList;
 import java.util.Optional;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,11 +65,18 @@ public class FunctionRouterConfiguration {
     }
 
     @Bean
-    MessageRoutingCallback functionRouterMessageRoutingCallback(BindingServiceProperties bindingServiceProperties) {
+    MessageRoutingCallback functionRouterMessageRoutingCallback(ActivitiCloudMessagingProperties messagingProperties) {
         return new MessageRoutingCallback() {
             @Override
             public String routingResult(Message<?> message) {
-                return (String) message.getHeaders().get(FUNCTION_DESTINATION);
+                var destination = (String) message.getHeaders().get(FUNCTION_DESTINATION);
+
+                var registrations = messagingProperties
+                    .getFunctionRouter()
+                    .getRegistrations()
+                    .getOrDefault(destination, new ArrayList<>());
+
+                return String.join(",", registrations);
             }
         };
     }

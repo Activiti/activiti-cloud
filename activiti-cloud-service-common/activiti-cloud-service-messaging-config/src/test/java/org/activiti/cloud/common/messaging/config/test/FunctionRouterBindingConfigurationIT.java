@@ -158,12 +158,7 @@ public class FunctionRouterBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions)
-            .containsOnly(
-                "functionRouter",
-                "queryConsumerHandler_registration",
-                "commandProcessorHandler_registration"
-            );
+        assertThat(functions).containsOnly("functionRouter");
     }
 
     @Test
@@ -262,7 +257,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "queryConsumerHandler_registration")
+            .setHeader("spring.cloud.function.destination", "engineEvents")
             .build();
 
         // when
@@ -274,17 +269,16 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testFunctionBindings() throws InterruptedException {
+    public void testFunctionBindings() {
         // given
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "commandProcessorHandler_registration")
+            .setHeader("spring.cloud.function.destination", "commandConsumer")
             .build();
 
         // when
         channels.commandConsumer().send(message);
-        //        input.send(message, "commandConsumer");
 
         // then
         await()
