@@ -262,7 +262,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.definition", "queryConsumerHandler_registration")
+            .setHeader("spring.cloud.function.destination", "queryConsumerHandler_registration")
             .build();
 
         // when
@@ -279,7 +279,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.definition", "commandProcessorHandler_registration")
+            .setHeader("spring.cloud.function.destination", "commandProcessorHandler_registration")
             .build();
 
         // when

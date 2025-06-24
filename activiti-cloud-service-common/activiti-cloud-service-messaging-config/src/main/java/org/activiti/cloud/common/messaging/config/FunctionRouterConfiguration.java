@@ -24,9 +24,11 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
@@ -42,17 +44,32 @@ import org.springframework.messaging.support.MessageBuilder;
 @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
 public class FunctionRouterConfiguration {
 
+    public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
     public static final String FUNCTION_ROUTER_OUTPUT = "functionRouterOutput";
 
-    @InputBinding(FUNCTION_ROUTER_INPUT)
-    SubscribableChannel functionRouterInput() {
-        return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
+    @Configuration
+    static class FunctionRouterChannels {
+
+        @InputBinding(FUNCTION_ROUTER_INPUT)
+        SubscribableChannel functionRouterInput() {
+            return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
+        }
+
+        @OutputBinding(FUNCTION_ROUTER_OUTPUT)
+        SubscribableChannel functionRouterOutput() {
+            return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
+        }
     }
 
-    @OutputBinding(FUNCTION_ROUTER_OUTPUT)
-    SubscribableChannel functionRouterOutput() {
-        return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
+    @Bean
+    MessageRoutingCallback functionRouterMessageRoutingCallback(BindingServiceProperties bindingServiceProperties) {
+        return new MessageRoutingCallback() {
+            @Override
+            public String routingResult(Message<?> message) {
+                return (String) message.getHeaders().get(FUNCTION_DESTINATION);
+            }
+        };
     }
 
     @Bean
@@ -81,10 +98,7 @@ public class FunctionRouterConfiguration {
                                             .map(binding ->
                                                 MessageBuilder
                                                     .fromMessage(message)
-                                                    .setHeader(
-                                                        "spring.cloud.function.definition",
-                                                        binding.getDestination()
-                                                    )
+                                                    .setHeader(FUNCTION_DESTINATION, binding.getDestination())
                                                     .build()
                                             )
                                             .orElse(null);
