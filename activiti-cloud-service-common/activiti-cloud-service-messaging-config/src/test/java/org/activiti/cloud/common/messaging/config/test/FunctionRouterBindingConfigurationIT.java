@@ -34,6 +34,7 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.B
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,6 +171,23 @@ public class FunctionRouterBindingConfigurationIT {
             .isEqualTo("command-consumer,integration-requests,engine-events");
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
+    }
+
+    @Test
+    public void bindingServiceProperties() {
+        // when
+        var bindings = bindingServiceProperties.getBindings();
+
+        // then
+        assertThat(bindings)
+            .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
+            .containsOnlyKeys(
+                "auditProducer",
+                "commandResults",
+                "functionRouterInput",
+                "functionRouterOutput",
+                "integrationResults"
+            );
     }
 
     @Test
