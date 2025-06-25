@@ -32,7 +32,7 @@ import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
@@ -401,12 +401,16 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
 
-        @NestedConfigurationProperty
-        private BindingProperties input = new BindingProperties();
+        private List<String> bindings = new ArrayList<>();
 
         private Map<String, String> destinations = new LinkedHashMap<>();
 
         private Map<String, List<String>> registrations = new LinkedHashMap<>();
+
+        private String group;
+
+        @NestedConfigurationProperty
+        private ConsumerProperties consumer = new ConsumerProperties();
 
         public boolean isEnabled() {
             return enabled;
@@ -414,14 +418,6 @@ public class ActivitiCloudMessagingProperties {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public BindingProperties getInput() {
-            return input;
-        }
-
-        public void setInput(BindingProperties input) {
-            this.input = input;
         }
 
         public Map<String, String> getDestinations() {
@@ -438,6 +434,30 @@ public class ActivitiCloudMessagingProperties {
 
         public void setRegistrations(Map<String, List<String>> registrations) {
             this.registrations = registrations;
+        }
+
+        public List<String> getBindings() {
+            return bindings;
+        }
+
+        public void setBindings(List<String> bindings) {
+            this.bindings = bindings;
+        }
+
+        public String getGroup() {
+            return group;
+        }
+
+        public void setGroup(String group) {
+            this.group = group;
+        }
+
+        public ConsumerProperties getConsumer() {
+            return consumer;
+        }
+
+        public void setConsumer(ConsumerProperties consumer) {
+            this.consumer = consumer;
         }
     }
 

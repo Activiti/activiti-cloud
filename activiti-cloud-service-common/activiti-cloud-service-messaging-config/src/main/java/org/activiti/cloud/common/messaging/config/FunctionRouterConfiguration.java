@@ -48,7 +48,6 @@ public class FunctionRouterConfiguration {
 
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
-    public static final String FUNCTION_ROUTER_OUTPUT = "functionRouterOutput";
 
     @Configuration
     static class FunctionRouterChannels {
@@ -56,11 +55,6 @@ public class FunctionRouterConfiguration {
         @InputBinding(FUNCTION_ROUTER_INPUT)
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
-        }
-
-        @OutputBinding(FUNCTION_ROUTER_OUTPUT)
-        SubscribableChannel functionRouterOutput() {
-            return MessageChannels.direct(FUNCTION_ROUTER_OUTPUT).getObject();
         }
     }
 

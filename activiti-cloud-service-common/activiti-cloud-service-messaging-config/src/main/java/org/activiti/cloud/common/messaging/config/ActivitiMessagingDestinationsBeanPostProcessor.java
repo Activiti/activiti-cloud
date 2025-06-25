@@ -16,13 +16,15 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
@@ -57,19 +59,23 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 functionBindingPropertySource.register("functionRouter");
                 streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
 
-                final var input = functionRouter.getInput();
+                final var input = new BindingProperties();
+                final var destinations = new ArrayList<String>();
 
                 bindingServiceProperties
                     .getBindings()
                     .entrySet()
                     .stream()
-                    .filter(entry ->
-                        List.of(input.getDestination().split(",")).contains(entry.getValue().getDestination())
-                    )
+                    .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
                     .forEach(entry -> {
                         bindingServiceProperties.getBindings().remove(entry.getKey());
+                        destinations.add(entry.getValue().getDestination());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
                     });
+
+                input.setDestination(destinations.stream().distinct().collect(Collectors.joining(",")));
+                input.setGroup(functionRouter.getGroup());
+                input.setConsumer(functionRouter.getConsumer());
 
                 bindingServiceProperties.getBindings().put("functionRouterInput", input);
             }

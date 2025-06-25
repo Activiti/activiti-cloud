@@ -27,6 +27,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -66,8 +67,9 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
         "activiti.cloud.messaging.function-router.enabled=true",
-        "activiti.cloud.messaging.function-router.input.destination=command-consumer,integration-requests,engine-events",
-        "activiti.cloud.messaging.function-router.input.group=${spring.application.name}",
+        "activiti.cloud.messaging.function-router.bindings=commandConsumer,integrationRequests,queryConsumer,auditConsumer",
+        "activiti.cloud.messaging.function-router.group=${spring.application.name}",
+        "activiti.cloud.messaging.function-router.consumer.concurrency=2",
     }
 )
 @EnableTestBinder
@@ -168,7 +170,11 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(functionRouterInput)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
-            .isEqualTo("command-consumer,integration-requests,engine-events");
+            .satisfies(destination ->
+                assertThat(List.of(destination.split(",")))
+                    .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                    .containsOnly("engine-events", "command-consumer", "integration-requests")
+            );
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
     }
@@ -181,13 +187,7 @@ public class FunctionRouterBindingConfigurationIT {
         // then
         assertThat(bindings)
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsOnlyKeys(
-                "auditProducer",
-                "commandResults",
-                "functionRouterInput",
-                "functionRouterOutput",
-                "integrationResults"
-            );
+            .containsOnlyKeys("auditProducer", "commandResults", "functionRouterInput", "integrationResults");
     }
 
     @Test
