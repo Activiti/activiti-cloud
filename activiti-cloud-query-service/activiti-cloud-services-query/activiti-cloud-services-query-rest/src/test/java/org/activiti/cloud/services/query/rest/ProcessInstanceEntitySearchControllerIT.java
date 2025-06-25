@@ -63,8 +63,6 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
         return "/v1/process-instances/search";
     }
 
-
-
     @Test
     public void should_excludeProcessInstances_by_processDefinitionCategoryName() throws Exception {
         // given
