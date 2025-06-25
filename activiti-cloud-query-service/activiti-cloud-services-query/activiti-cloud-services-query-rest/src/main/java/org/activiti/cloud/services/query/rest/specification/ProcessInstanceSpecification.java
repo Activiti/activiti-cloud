@@ -83,7 +83,7 @@ public class ProcessInstanceSpecification
         if (StringUtils.isNotEmpty(searchRequest.excludeByProcessCategoryName())) {
             Subquery<String> subquery = criteriaBuilder.createQuery().subquery(String.class);
             Root<ProcessDefinitionEntity> processDefinitionRoot = subquery.from(ProcessDefinitionEntity.class);
-            subquery.select(processDefinitionRoot.get(ProcessDefinitionEntity_.id));
+            subquery.select(processDefinitionRoot.get(ProcessDefinitionEntity_.key));
             subquery.where(
                 criteriaBuilder.equal(
                     processDefinitionRoot.get(ProcessDefinitionEntity_.category),
@@ -91,7 +91,7 @@ public class ProcessInstanceSpecification
                 )
             );
 
-            predicates.add(criteriaBuilder.not(root.get(ProcessInstanceEntity_.processDefinitionId).in(subquery)));
+            predicates.add(criteriaBuilder.not(root.get(ProcessInstanceEntity_.processDefinitionKey).in(subquery)));
         }
     }
 

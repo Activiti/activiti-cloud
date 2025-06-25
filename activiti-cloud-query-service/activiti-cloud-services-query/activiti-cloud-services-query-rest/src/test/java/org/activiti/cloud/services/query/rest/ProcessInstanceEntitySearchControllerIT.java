@@ -20,10 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-import java.util.Date;
-import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
-import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -57,9 +54,6 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
 
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
-
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -69,34 +63,34 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
         return "/v1/process-instances/search";
     }
 
+
+
     @Test
     public void should_excludeProcessInstances_by_processDefinitionCategoryName() throws Exception {
         // given
         ProcessDefinitionEntity processDefinitionToExclude = new ProcessDefinitionEntity();
         processDefinitionToExclude.setId("proc-def-id-to-exclude");
+        processDefinitionToExclude.setKey("proc-def-key-to-exclude");
         processDefinitionToExclude.setCategory("CategoryToExclude");
         processDefinitionRepository.save(processDefinitionToExclude);
 
-        ProcessInstanceEntity processInstanceToExclude = new ProcessInstanceEntity();
-        processInstanceToExclude.setId(UUID.randomUUID().toString());
-        processInstanceToExclude.setProcessDefinitionId(processDefinitionToExclude.getId());
-        processInstanceToExclude.setLastModified(new Date());
-        processInstanceToExclude.setStartDate(new Date());
-        processInstanceToExclude.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
-        processInstanceRepository.save(processInstanceToExclude);
+        queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(processDefinitionToExclude.getKey())
+            .withInitiator(USER)
+            .buildAndSave();
 
         ProcessDefinitionEntity processDefinitionToKeep = new ProcessDefinitionEntity();
         processDefinitionToKeep.setId("proc-def-id-to-keep");
+        processDefinitionToKeep.setKey("proc-def-key-to-keep");
         processDefinitionToKeep.setCategory("CategoryToKeep");
         processDefinitionRepository.save(processDefinitionToKeep);
 
-        ProcessInstanceEntity processInstanceToKeep = new ProcessInstanceEntity();
-        processInstanceToKeep.setId(UUID.randomUUID().toString());
-        processInstanceToKeep.setProcessDefinitionId(processDefinitionToKeep.getId());
-        processInstanceToKeep.setLastModified(new Date());
-        processInstanceToKeep.setStartDate(new Date());
-        processInstanceToKeep.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
-        processInstanceRepository.save(processInstanceToKeep);
+        ProcessInstanceEntity processInstanceToKeep = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(processDefinitionToKeep.getKey())
+            .withInitiator(USER)
+            .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withExcludeByProcessCategoryName("CategoryToExclude");
@@ -105,12 +99,12 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBuilder.buildJson())
             .when()
-            .post("/v1/process-instances/search")
+            .post(getSearchEndpoint())
             // then
             .then()
             .statusCode(200)
-            .body("list.entries", hasSize(1))
-            .body("list.entries[0].entry.id", equalTo(processInstanceToKeep.getId()));
+            .body("_embedded.processInstances", hasSize(1))
+            .body("_embedded.processInstances[0].id", equalTo(processInstanceToKeep.getId()));
     }
 
     @Test
