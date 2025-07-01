@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.process.model.BPMNActivity;
@@ -40,15 +40,19 @@ public class BPMNActivityJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("elementId")
-            .isEqualTo("element-id")
-            .node("activityName")
-            .isEqualTo("BPMN Activity Name")
-            .node("activityType")
-            .isEqualTo("Service Task")
-            .node("processDefinitionId")
-            .isEqualTo("proc-def-id")
-            .node("processInstanceId")
+            .inPath("elementId")
+            .isEqualTo("element-id");
+        assertThatJson(jsonRepresentation)
+            .inPath("activityName")
+            .isEqualTo("BPMN Activity Name");
+        assertThatJson(jsonRepresentation)
+            .inPath("activityType")
+            .isEqualTo("Service Task");
+        assertThatJson(jsonRepresentation)
+            .inPath("processDefinitionId")
+            .isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation)
+            .inPath("processInstanceId")
             .isEqualTo("proc-inst-id");
     }
 

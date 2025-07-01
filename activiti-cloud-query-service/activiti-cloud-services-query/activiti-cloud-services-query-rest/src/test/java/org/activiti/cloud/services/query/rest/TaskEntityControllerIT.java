@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -157,15 +157,19 @@ class TaskEntityControllerIT {
             .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(11)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
+            .inPath("list.pagination.skipCount")
+            .isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.maxItems")
+            .isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.count")
+            .isEqualTo(1);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.hasMoreItems")
+            .isEqualTo(false);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.totalItems")
             .isEqualTo(12);
     }
 
@@ -222,13 +226,13 @@ class TaskEntityControllerIT {
                 .andReturn();
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-            .node("entry.candidateUsers")
+            .inPath("entry.candidateUsers")
             .isArray()
             .ofLength(1)
             .thatContains("testuser");
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
-            .node("entry.candidateGroups")
+            .inPath("entry.candidateGroups")
             .isArray()
             .ofLength(1)
             .thatContains("testgroup");
@@ -273,7 +277,7 @@ class TaskEntityControllerIT {
                 .andExpect(status().isOk())
                 .andReturn();
         assertThatJson(mvcResult.getResponse().getContentAsString())
-            .node("entry.permissions")
+            .inPath("entry.permissions")
             .isArray()
             .ofLength(1)
             .thatContains(TaskPermissions.VIEW);

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -142,15 +142,19 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(11)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
+            .inPath("list.pagination.skipCount")
+            .isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.maxItems")
+            .isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.count")
+            .isEqualTo(1);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.hasMoreItems")
+            .isEqualTo(false);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.pagination.totalItems")
             .isEqualTo(12);
     }
 

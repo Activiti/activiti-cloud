@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
@@ -42,9 +42,10 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("userId")
-            .isEqualTo("auserId")
-            .node("processDefinitionId")
+            .inPath("userId")
+            .isEqualTo("auserId");
+        assertThatJson(jsonRepresentation)
+            .inPath("processDefinitionId")
             .isEqualTo("aprocessId");
     }
 
@@ -61,9 +62,10 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("groupId")
-            .isEqualTo("agroupId")
-            .node("processDefinitionId")
+            .inPath("groupId")
+            .isEqualTo("agroupId");
+        assertThatJson(jsonRepresentation)
+            .inPath("processDefinitionId")
             .isEqualTo("aprocessId");
     }
 

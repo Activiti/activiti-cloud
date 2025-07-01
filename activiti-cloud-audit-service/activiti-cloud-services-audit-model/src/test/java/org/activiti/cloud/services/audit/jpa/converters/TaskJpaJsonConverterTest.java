@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import java.util.Date;
@@ -46,23 +46,31 @@ public class TaskJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("id")
-            .isEqualTo("\"3\"")
-            .node("name")
-            .isEqualTo("task1")
-            .node("processDefinitionId")
-            .isEqualTo("proc-def-id")
-            .node("assignee")
-            .isEqualTo("user1")
-            .node("description")
-            .isEqualTo("First task")
-            .node("owner")
-            .isEqualTo("user2")
-            .node("priority")
-            .isEqualTo("50")
-            .node("processInstanceId")
-            .isEqualTo("\"10\"")
-            .node("parentTaskId")
+            .inPath("id")
+            .isEqualTo("\"3\"");
+        assertThatJson(jsonRepresentation)
+            .inPath("name")
+            .isEqualTo("task1");
+        assertThatJson(jsonRepresentation)
+            .inPath("processDefinitionId")
+            .isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation)
+            .inPath("assignee")
+            .isEqualTo("user1");
+        assertThatJson(jsonRepresentation)
+            .inPath("description")
+            .isEqualTo("First task");
+        assertThatJson(jsonRepresentation)
+            .inPath("owner")
+            .isEqualTo("user2");
+        assertThatJson(jsonRepresentation)
+            .inPath("priority")
+            .isEqualTo("50");
+        assertThatJson(jsonRepresentation)
+            .inPath("processInstanceId")
+            .isEqualTo("\"10\"");
+        assertThatJson(jsonRepresentation)
+            .inPath("parentTaskId")
             .isEqualTo("parent-task-id");
     }
 

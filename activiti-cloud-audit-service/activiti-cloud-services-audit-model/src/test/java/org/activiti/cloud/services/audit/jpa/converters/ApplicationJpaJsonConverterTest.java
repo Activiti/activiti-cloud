@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.process.model.Deployment;
@@ -40,11 +40,13 @@ public class ApplicationJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("name")
-            .isEqualTo("DeploymentName")
-            .node("version")
-            .isEqualTo(1)
-            .node("id")
+            .inPath("name")
+            .isEqualTo("DeploymentName");
+        assertThatJson(jsonRepresentation)
+            .inPath("version")
+            .isEqualTo(1);
+        assertThatJson(jsonRepresentation)
+            .inPath("id")
             .isEqualTo("DeploymentId");
     }
 

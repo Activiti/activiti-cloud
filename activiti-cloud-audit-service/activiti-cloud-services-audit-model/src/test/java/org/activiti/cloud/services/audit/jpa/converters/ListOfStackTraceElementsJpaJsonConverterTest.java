@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 public class ListOfStackTraceElementsJpaJsonConverterTest {
 
-    private ListOfStackTraceElementsJpaJsonConverter converter = new ListOfStackTraceElementsJpaJsonConverter();
+    private final ListOfStackTraceElementsJpaJsonConverter converter = new ListOfStackTraceElementsJpaJsonConverter();
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
@@ -39,7 +39,7 @@ public class ListOfStackTraceElementsJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("[0].methodName")
+            .inPath("[0].methodName")
             .isEqualTo("convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation");
     }
 

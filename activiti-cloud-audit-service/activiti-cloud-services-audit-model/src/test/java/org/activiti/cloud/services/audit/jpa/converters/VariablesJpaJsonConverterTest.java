@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import java.io.Serializable;
@@ -44,15 +44,19 @@ public class VariablesJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("name")
-            .isEqualTo("var-name")
-            .node("type")
-            .isEqualTo("String")
-            .node("value")
-            .isEqualTo("my string value")
-            .node("taskId")
-            .isEqualTo("task-id")
-            .node("processInstanceId")
+            .inPath("name")
+            .isEqualTo("var-name");
+        assertThatJson(jsonRepresentation)
+            .inPath("type")
+            .isEqualTo("String");
+        assertThatJson(jsonRepresentation)
+            .inPath("value")
+            .isEqualTo("my string value");
+        assertThatJson(jsonRepresentation)
+            .inPath("taskId")
+            .isEqualTo("task-id");
+        assertThatJson(jsonRepresentation)
+            .inPath("processInstanceId")
             .isEqualTo("proc-inst-id");
     }
 
@@ -96,15 +100,19 @@ public class VariablesJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("name")
-            .isEqualTo("var-name")
-            .node("type")
-            .isEqualTo("Invoice")
-            .node("value")
-            .isEqualTo(invoice)
-            .node("taskId")
-            .isEqualTo("task-id")
-            .node("processInstanceId")
+            .inPath("name")
+            .isEqualTo("var-name");
+        assertThatJson(jsonRepresentation)
+            .inPath("type")
+            .isEqualTo("Invoice");
+        assertThatJson(jsonRepresentation)
+            .inPath("value")
+            .isEqualTo(invoice);
+        assertThatJson(jsonRepresentation)
+            .inPath("taskId")
+            .isEqualTo("task-id");
+        assertThatJson(jsonRepresentation)
+            .inPath("processInstanceId")
             .isEqualTo("proc-inst-id");
     }
 
