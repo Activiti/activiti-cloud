@@ -54,7 +54,7 @@ public class ProcessInstanceJpaJsonConverterTest {
             .inPath("processDefinitionId")
             .isEqualTo("proc-def-id");
         assertThatJson(jsonRepresentation)
-            .node("businessKey")
+            .inPath("businessKey")
             .isEqualTo("business-key");
         assertThatJson(jsonRepresentation)
             .inPath("id")
