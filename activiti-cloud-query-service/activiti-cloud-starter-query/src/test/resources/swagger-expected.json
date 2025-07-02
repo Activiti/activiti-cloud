@@ -7109,6 +7109,9 @@
           },
           "sort": {
             "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
+          },
+          "excludeByProcessCategoryName": {
+            "type": "string"
           }
         },
         "title": "ProcessInstanceSearchRequest_ProcessVariables"
