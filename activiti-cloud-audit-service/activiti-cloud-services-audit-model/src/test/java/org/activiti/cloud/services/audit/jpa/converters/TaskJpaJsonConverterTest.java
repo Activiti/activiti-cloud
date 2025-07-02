@@ -45,33 +45,15 @@ public class TaskJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(task);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("id")
-            .isEqualTo("\"3\"");
-        assertThatJson(jsonRepresentation)
-            .inPath("name")
-            .isEqualTo("task1");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("proc-def-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("assignee")
-            .isEqualTo("user1");
-        assertThatJson(jsonRepresentation)
-            .inPath("description")
-            .isEqualTo("First task");
-        assertThatJson(jsonRepresentation)
-            .inPath("owner")
-            .isEqualTo("user2");
-        assertThatJson(jsonRepresentation)
-            .inPath("priority")
-            .isEqualTo("50");
-        assertThatJson(jsonRepresentation)
-            .inPath("processInstanceId")
-            .isEqualTo("\"10\"");
-        assertThatJson(jsonRepresentation)
-            .inPath("parentTaskId")
-            .isEqualTo("parent-task-id");
+        assertThatJson(jsonRepresentation).inPath("id").isEqualTo("\"3\"");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("task1");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("assignee").isEqualTo("user1");
+        assertThatJson(jsonRepresentation).inPath("description").isEqualTo("First task");
+        assertThatJson(jsonRepresentation).inPath("owner").isEqualTo("user2");
+        assertThatJson(jsonRepresentation).inPath("priority").isEqualTo("50");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("\"10\"");
+        assertThatJson(jsonRepresentation).inPath("parentTaskId").isEqualTo("parent-task-id");
     }
 
     @Test

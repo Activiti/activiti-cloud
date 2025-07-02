@@ -39,15 +39,9 @@ public class ApplicationJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(deployment);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("name")
-            .isEqualTo("DeploymentName");
-        assertThatJson(jsonRepresentation)
-            .inPath("version")
-            .isEqualTo(1);
-        assertThatJson(jsonRepresentation)
-            .inPath("id")
-            .isEqualTo("DeploymentId");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("DeploymentName");
+        assertThatJson(jsonRepresentation).inPath("version").isEqualTo(1);
+        assertThatJson(jsonRepresentation).inPath("id").isEqualTo("DeploymentId");
     }
 
     @Test

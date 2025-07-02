@@ -39,21 +39,11 @@ public class BPMNActivityJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(bpmnActivity);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("elementId")
-            .isEqualTo("element-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("activityName")
-            .isEqualTo("BPMN Activity Name");
-        assertThatJson(jsonRepresentation)
-            .inPath("activityType")
-            .isEqualTo("Service Task");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("proc-def-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("elementId").isEqualTo("element-id");
+        assertThatJson(jsonRepresentation).inPath("activityName").isEqualTo("BPMN Activity Name");
+        assertThatJson(jsonRepresentation).inPath("activityType").isEqualTo("Service Task");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     @Test

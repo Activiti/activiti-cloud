@@ -140,21 +140,13 @@ public class TaskEntityVariableEntityControllerIT {
             .andExpect(status().isOk())
             .andReturn();
 
-        assertThatJson(result.getResponse().getContentAsString())
-            .inPath("list.pagination.skipCount")
-            .isEqualTo(11);
-        assertThatJson(result.getResponse().getContentAsString())
-            .inPath("list.pagination.maxItems")
-            .isEqualTo(10);
-        assertThatJson(result.getResponse().getContentAsString())
-            .inPath("list.pagination.count")
-            .isEqualTo(1);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.skipCount").isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.count").isEqualTo(1);
         assertThatJson(result.getResponse().getContentAsString())
             .inPath("list.pagination.hasMoreItems")
             .isEqualTo(false);
-        assertThatJson(result.getResponse().getContentAsString())
-            .inPath("list.pagination.totalItems")
-            .isEqualTo(12);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.totalItems").isEqualTo(12);
     }
 
     @Test

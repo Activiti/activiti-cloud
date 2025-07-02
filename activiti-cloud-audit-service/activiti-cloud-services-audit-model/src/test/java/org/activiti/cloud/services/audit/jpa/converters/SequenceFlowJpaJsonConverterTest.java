@@ -47,33 +47,15 @@ public class SequenceFlowJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(sequenceFlow);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("elementId")
-            .isEqualTo("sequence-flow-element-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("sourceActivityElementId")
-            .isEqualTo("source-element-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("sourceActivityName")
-            .isEqualTo("source-activity-name");
-        assertThatJson(jsonRepresentation)
-            .inPath("sourceActivityType")
-            .isEqualTo("source-activity-type");
-        assertThatJson(jsonRepresentation)
-            .inPath("targetActivityElementId")
-            .isEqualTo("target-element-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("targetActivityName")
-            .isEqualTo("target-activity-name");
-        assertThatJson(jsonRepresentation)
-            .inPath("targetActivityType")
-            .isEqualTo("target-activity-type");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("proc-def-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("elementId").isEqualTo("sequence-flow-element-id");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityElementId").isEqualTo("source-element-id");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityName").isEqualTo("source-activity-name");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityType").isEqualTo("source-activity-type");
+        assertThatJson(jsonRepresentation).inPath("targetActivityElementId").isEqualTo("target-element-id");
+        assertThatJson(jsonRepresentation).inPath("targetActivityName").isEqualTo("target-activity-name");
+        assertThatJson(jsonRepresentation).inPath("targetActivityType").isEqualTo("target-activity-type");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     @Test

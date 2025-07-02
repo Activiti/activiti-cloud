@@ -41,12 +41,8 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = candidateStarterUserConverter.convertToDatabaseColumn(candidateStarterUser);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("userId")
-            .isEqualTo("auserId");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("aprocessId");
+        assertThatJson(jsonRepresentation).inPath("userId").isEqualTo("auserId");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("aprocessId");
     }
 
     @Test
@@ -61,12 +57,8 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = candidateStarterGroupConverter.convertToDatabaseColumn(candidateStarterGroup);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("groupId")
-            .isEqualTo("agroupId");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("aprocessId");
+        assertThatJson(jsonRepresentation).inPath("groupId").isEqualTo("agroupId");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("aprocessId");
     }
 
     @Test

@@ -43,21 +43,11 @@ public class VariablesJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("name")
-            .isEqualTo("var-name");
-        assertThatJson(jsonRepresentation)
-            .inPath("type")
-            .isEqualTo("String");
-        assertThatJson(jsonRepresentation)
-            .inPath("value")
-            .isEqualTo("my string value");
-        assertThatJson(jsonRepresentation)
-            .inPath("taskId")
-            .isEqualTo("task-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("var-name");
+        assertThatJson(jsonRepresentation).inPath("type").isEqualTo("String");
+        assertThatJson(jsonRepresentation).inPath("value").isEqualTo("my string value");
+        assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     @Test
@@ -99,21 +89,11 @@ public class VariablesJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("name")
-            .isEqualTo("var-name");
-        assertThatJson(jsonRepresentation)
-            .inPath("type")
-            .isEqualTo("Invoice");
-        assertThatJson(jsonRepresentation)
-            .inPath("value")
-            .isEqualTo(invoice);
-        assertThatJson(jsonRepresentation)
-            .inPath("taskId")
-            .isEqualTo("task-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("var-name");
+        assertThatJson(jsonRepresentation).inPath("type").isEqualTo("Invoice");
+        assertThatJson(jsonRepresentation).inPath("value").isEqualTo(invoice);
+        assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     private class Invoice implements Serializable {
