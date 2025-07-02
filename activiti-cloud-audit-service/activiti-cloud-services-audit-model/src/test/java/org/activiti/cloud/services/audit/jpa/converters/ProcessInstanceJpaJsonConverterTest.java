@@ -44,21 +44,11 @@ public class ProcessInstanceJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(processInstance);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .inPath("name")
-            .isEqualTo("My instance");
-        assertThatJson(jsonRepresentation)
-            .inPath("status")
-            .isEqualTo("RUNNING");
-        assertThatJson(jsonRepresentation)
-            .inPath("processDefinitionId")
-            .isEqualTo("proc-def-id");
-        assertThatJson(jsonRepresentation)
-            .inPath("businessKey")
-            .isEqualTo("business-key");
-        assertThatJson(jsonRepresentation)
-            .inPath("id")
-            .isEqualTo("\"20\"");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("My instance");
+        assertThatJson(jsonRepresentation).inPath("status").isEqualTo("RUNNING");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("businessKey").isEqualTo("business-key");
+        assertThatJson(jsonRepresentation).inPath("id").isEqualTo("\"20\"");
     }
 
     @Test
