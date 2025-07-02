@@ -49,7 +49,8 @@ public class TaskCandidatesJpaJsonConverterTest {
         jsonRepresentation = converterCandidateGroup.convertToDatabaseColumn(candidateGroup);
 
         //then
-        assertThatJson(jsonRepresentation).node("groupId").isEqualTo("group-id").node("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).inPath("groupId").isEqualTo("group-id");
+        assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
     }
 
     @Test
