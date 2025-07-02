@@ -33,4 +33,6 @@ public @interface ConnectorBinding {
     " and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}";
 
     String outputHeader() default "resultDestination";
+
+    String connectorType() default "";
 }

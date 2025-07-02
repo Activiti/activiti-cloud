@@ -64,6 +64,7 @@ import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryRes
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,22 +96,15 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
-@SpringBootTest(
-    webEnvironment = WebEnvironment.RANDOM_PORT,
-    classes = { GrapqhQLApplication.class },
-    properties = {
-        "spring.graphql.websocket.path=" + ActivitiGraphQLWsNativeStarterIT.WS_GRAPHQL_URI,
-        "spring.graphql.websocket.keep-alive=PT1S",
-    }
-)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-public class ActivitiGraphQLWsNativeStarterIT {
+class ActivitiGraphQLWsNativeStarterIT {
 
-    public static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
+    static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
@@ -148,7 +142,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     private GraphQlTester graphQlTester;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         identityTokenProducer.withTestUser(TESTADMIN);
         authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -165,12 +159,12 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
         testConnectionInit(TESTADMIN);
     }
 
     @Test
-    public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JsonProcessingException {
         testConnectionInit(HRUSER);
     }
 
@@ -215,7 +209,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         identityTokenProducer.withTestUser(TESTDEVOPS);
@@ -336,7 +330,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionPROCESS_DEPLOYED() {
+    void testGraphqlSubscriptionPROCESS_DEPLOYED() {
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
 
         var document =
@@ -385,7 +379,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionSIGNAL_RECEIVED() {
+    void testGraphqlSubscriptionSIGNAL_RECEIVED() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventType", "SIGNAL_RECEIVED")
@@ -447,7 +441,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionShouldFilterEmptyResults() {
+    void testGraphqlSubscriptionShouldFilterEmptyResults() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventType", "PROCESS_STARTED")
@@ -499,7 +493,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionCloudBPMNTimerEvents() {
+    void testGraphqlSubscriptionCloudBPMNTimerEvents() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put(
@@ -727,7 +721,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionCloudBPMNMessageEvents() {
+    void testGraphqlSubscriptionCloudBPMNMessageEvents() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventTypes", Arrays.array("MESSAGE_SENT", "MESSAGE_WAITING", "MESSAGE_RECEIVED"))
@@ -853,7 +847,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(null));
@@ -885,7 +879,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphql() {
+    void testGraphql() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             "{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}"
         );
@@ -907,7 +901,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlUnauthorized() {
+    void testGraphqlUnauthorized() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             "{Tasks(where:{name:{EQ: \"" + TASK_NAME + "\"}}){select{id assignee priority}}}"
         );
@@ -925,7 +919,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlTasksQueryWithEQNullValues() {
+    void testGraphqlTasksQueryWithEQNullValues() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                 "query {" +
@@ -971,7 +965,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlTasksQueryWithNENullValues() {
+    void testGraphqlTasksQueryWithNENullValues() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                 "query {" +
@@ -1015,7 +1009,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlWhere() {
+    void testGraphqlWhere() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                     "query {" +
@@ -1054,7 +1048,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlNesting() {
+    void testGraphqlNesting() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                     "query {"
@@ -1103,7 +1097,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlReverse() {
+    void testGraphqlReverse() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                     " query {"
@@ -1138,7 +1132,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlArguments() {
+    void testGraphqlArguments() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             "query TasksQuery($name: String!) {Tasks(where:{name:{EQ: $name}}) {select{id assignee priority}}}"
         );
@@ -1165,7 +1159,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlAggregateTaskVariablesQuery() {
+    void testGraphqlAggregateTaskVariablesQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
                 query {
@@ -1218,7 +1212,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    public void testGraphqlAggregateTasksQuery() {
+    void testGraphqlAggregateTasksQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
                 query {
@@ -1271,6 +1265,85 @@ public class ActivitiGraphQLWsNativeStarterIT {
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
 
+    @Test
+    void testGraphqlPagedQueryWithAliasedResults() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+            query {
+              page1: Tasks(page: {start: 1, limit: 2}) {
+                select {
+                  id
+                  name
+                }
+              }
+              page2: Tasks(page: {start: 3, limit: 2}) {
+                select {
+                  id
+                  name
+                }
+              }
+            }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected =
+            "{page1={select=[{id=1, name=task1}, {id=2, name=task2}]}, page2={select=[{id=5, name=task5}, {id=6, name=task6}]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    @Test
+    void testGraphqlQueryWithLOCATEForVariablesValue() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+                query getProcessInstance {
+                  Tasks
+                   (where: {variables: { name: {EQ: "variable4"}, value: {LOCATE: "key"}}})
+                  {
+                    select {
+                      id
+                      name
+                      variables {
+                        name
+                        value
+                      }
+                    }
+                  }
+                }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected = "{Tasks={select=[{id=2, name=task2, variables=[{name=variable4, value={key=data}}]}]}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
     private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
         return m ->
             messages
@@ -1289,7 +1362,7 @@ public class ActivitiGraphQLWsNativeStarterIT {
                 );
     }
 
-    public static StringObjectMapBuilder mapBuilder() {
+    static StringObjectMapBuilder mapBuilder() {
         return new StringObjectMapBuilder();
     }
 }

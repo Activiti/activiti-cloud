@@ -17,40 +17,26 @@ package org.activiti.cloud.acc.core.steps.notifications;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Duration;
-import java.util.LinkedHashMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
-import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.BaseService;
+import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
 import org.reactivestreams.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import reactor.core.publisher.Mono;
+import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.http.client.HttpClient.WebsocketSender;
-import reactor.netty.http.client.WebsocketClientSpec;
-import reactor.test.StepVerifier;
 
 @EnableRuntimeFeignContext
 public class NotificationsSteps {
-
-    private static final String GRAPHQL_WS = "graphql-ws";
-    private static final String AUTHORIZATION = "Authorization";
-    private static final Duration TIMEOUT = Duration.ofMillis(90000);
-    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec
-        .builder()
-        .protocols(GRAPHQL_WS)
-        .build();
-
-    @Autowired
-    private RuntimeDirtyContextHandler dirtyContextHandler;
 
     @Autowired
     private RuntimeTestsConfigurationProperties properties;
@@ -58,9 +44,6 @@ public class NotificationsSteps {
     @Autowired
     @Qualifier("runtimeBundleBaseService")
     private BaseService baseService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Step
     public void checkServicesHealth() {
@@ -73,69 +56,27 @@ public class NotificationsSteps {
 
     @SuppressWarnings({ "serial" })
     @Step
-    public ReplayProcessor<String> subscribe(
+    public Flux<List> subscribe(
+        ReplayProcessor<List> processor,
         String accessToken,
         String query,
         Map<String, Object> variables,
         Consumer<Subscription> action
-    ) throws InterruptedException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
+    ) throws URISyntaxException {
+        URI url = new URI(properties.getGraphqlWsUrl());
+        WebSocketGraphQlTester graphQlTester = WebSocketGraphQlTester
+            .builder(url, new ReactorNettyWebSocketClient())
+            .interceptor(new JwtGraphQlClientInterceptor(accessToken))
+            .build();
 
-        WebsocketSender client = HttpClient
-            .create()
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, "Bearer " + accessToken))
-            .websocket(graphqlWsClientSpec)
-            .uri(properties.getGraphqlWsUrl());
-
-        Map<String, Object> json = new LinkedHashMap<String, Object>() {
-            {
-                put("type", "start");
-                put("id", "1");
-                put(
-                    "payload",
-                    new LinkedHashMap<String, Object>() {
-                        {
-                            put("query", query);
-                            put("variables", variables);
-                        }
-                    }
-                );
-            }
-        };
-
-        String startMessage;
-        try {
-            startMessage = objectMapper.writeValueAsString(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        // handle start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("send").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("receive")
-                    .subscribeWith(data)
-                    .doOnCancel(() -> {
-                        // Let's close websocket and complete data processor
-                        o.sendClose().doOnTerminate(data::onComplete).block(Duration.ofSeconds(2));
-                    })
-                    .doOnSubscribe(action);
-            })
-            .log("handle")
-            .subscribe();
-
-        return data;
-    }
-
-    @Step
-    public void verifyData(ReplayProcessor<String> data, String... messages) {
-        StepVerifier.create(data).expectNext(messages).expectComplete().verify(TIMEOUT);
+        return graphQlTester
+            .document(query)
+            .variables(variables)
+            .executeSubscription()
+            .toFlux("engineEvents", List.class)
+            .doOnSubscribe(action)
+            .doOnCancel(processor::onComplete)
+            .doOnComplete(processor::onComplete)
+            .doFinally(signal -> processor.onComplete());
     }
 }
