@@ -1,3 +1,4 @@
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
-    org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerEnvironmentPostProcessor
+    org.activiti.cloud.starter.rb.configuration.ActivitiAuditProducerEnvironmentPostProcessor,\
+    org.activiti.cloud.starter.rb.configuration.ActivitiMessagingFunctionRouterEnvironmentPostProcessor

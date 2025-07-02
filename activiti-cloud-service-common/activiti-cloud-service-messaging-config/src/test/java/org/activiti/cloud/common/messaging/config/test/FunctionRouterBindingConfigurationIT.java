@@ -28,9 +28,11 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -185,7 +187,15 @@ public class FunctionRouterBindingConfigurationIT {
         var bindings = bindingServiceProperties.getBindings();
 
         // then
-        assertThat(bindings)
+        assertThat(
+            bindings
+                .entrySet()
+                .stream()
+                .filter(entry ->
+                    entry.getValue().getConsumer() == null || entry.getValue().getConsumer().isAutoStartup()
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        )
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys("auditProducer", "commandResults", "functionRouterInput", "integrationResults");
     }

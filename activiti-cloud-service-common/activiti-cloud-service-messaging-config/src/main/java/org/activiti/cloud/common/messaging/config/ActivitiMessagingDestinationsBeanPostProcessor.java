@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -55,31 +54,6 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
             final var functionRouter = messagingProperties.getFunctionRouter();
 
-            if (functionRouter.isEnabled()) {
-                functionBindingPropertySource.register("functionRouter");
-                streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
-
-                final var input = new BindingProperties();
-                final var destinations = new ArrayList<String>();
-
-                bindingServiceProperties
-                    .getBindings()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
-                    .forEach(entry -> {
-                        bindingServiceProperties.getBindings().remove(entry.getKey());
-                        destinations.add(entry.getValue().getDestination());
-                        functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
-                    });
-
-                input.setDestination(destinations.stream().distinct().collect(Collectors.joining(",")));
-                input.setGroup(functionRouter.getGroup());
-                input.setConsumer(functionRouter.getConsumer());
-
-                bindingServiceProperties.getBindings().put("functionRouterInput", input);
-            }
-
             bindingServiceProperties
                 .getBindings()
                 .forEach((bindingName, bindingProperties) -> {
@@ -91,6 +65,31 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                     log.warn("Configured destination '{}' for binding '{}'", destination, bindingName);
                 });
+
+            if (functionRouter.isEnabled()) {
+                functionBindingPropertySource.register("functionRouter");
+                streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
+
+                final var input = new BindingProperties();
+
+                bindingServiceProperties
+                    .getBindings()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
+                    .forEach(entry -> {
+                        bindingServiceProperties.getConsumerProperties(entry.getKey()).setAutoStartup(false);
+                        functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
+                    });
+
+                input.setDestination(
+                    functionRouter.getDestinations().values().stream().distinct().collect(Collectors.joining(","))
+                );
+                input.setGroup(functionRouter.getGroup());
+                input.setConsumer(functionRouter.getConsumer());
+
+                bindingServiceProperties.getBindings().put("functionRouterInput", input);
+            }
         }
 
         return bean;
