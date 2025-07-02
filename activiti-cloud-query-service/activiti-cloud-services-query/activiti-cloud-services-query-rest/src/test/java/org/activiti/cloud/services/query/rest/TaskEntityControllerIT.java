@@ -228,14 +228,14 @@ class TaskEntityControllerIT {
         assertThatJson(mvcResult.getResponse().getContentAsString())
             .inPath("entry.candidateUsers")
             .isArray()
-            .ofLength(1)
-            .thatContains("testuser");
+            .hasSize(1)
+            .contains("testuser");
 
         assertThatJson(mvcResult.getResponse().getContentAsString())
             .inPath("entry.candidateGroups")
             .isArray()
-            .ofLength(1)
-            .thatContains("testgroup");
+            .hasSize(1)
+            .contains("testgroup");
     }
 
     private Set<TaskCandidateGroupEntity> buildCandidateGroups(TaskEntity taskEntity) {
@@ -279,8 +279,8 @@ class TaskEntityControllerIT {
         assertThatJson(mvcResult.getResponse().getContentAsString())
             .inPath("entry.permissions")
             .isArray()
-            .ofLength(1)
-            .thatContains(TaskPermissions.VIEW);
+            .hasSize(1)
+            .contains(TaskPermissions.VIEW);
     }
 
     @Test
