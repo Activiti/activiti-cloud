@@ -163,6 +163,9 @@ jobs:
           - messaging-broker: rabbitmq
             messaging-partitioned: non-partitioned
             messaging-destinations: pdb
+          - messaging-broker: rabbitmq
+            messaging-partitioned: non-partitioned
+            messaging-destinations: function-router
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -211,6 +214,8 @@ jobs:
           kubectl delete ns $PREVIEW_NAME || true
 
       - name: Install release for ${{ matrix.messaging-broker }}
+        env:
+          ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: feature/AAE-35743-igdianov-multiples-function-binding-config
         run: |
           ### Variables ###
           export SSO_PROTOCOL=https
