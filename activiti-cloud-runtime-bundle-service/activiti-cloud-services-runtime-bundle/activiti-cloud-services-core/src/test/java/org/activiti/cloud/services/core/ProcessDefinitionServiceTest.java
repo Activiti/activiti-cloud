@@ -68,7 +68,8 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -101,7 +102,8 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 

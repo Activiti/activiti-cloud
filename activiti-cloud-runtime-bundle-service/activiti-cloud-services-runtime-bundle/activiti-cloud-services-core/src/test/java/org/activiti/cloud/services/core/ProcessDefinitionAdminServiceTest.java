@@ -67,7 +67,8 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -100,7 +101,8 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
