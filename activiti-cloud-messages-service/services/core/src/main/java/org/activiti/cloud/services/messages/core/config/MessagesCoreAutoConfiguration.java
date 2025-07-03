@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 import java.util.List;
@@ -123,7 +124,7 @@ public class MessagesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
-    @FunctionBinding(input = MessageConnectorProcessor.INPUT)
+    @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
     Consumer<Message<?>> messageConnectorConsumer(MessageConnectorProcessor connectorProcessor) {
         return message -> connectorProcessor.input().send(message);
     }
