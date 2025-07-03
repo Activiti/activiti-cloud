@@ -77,7 +77,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -126,10 +125,7 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
     @FunctionBinding(input = MessageConnectorProcessor.INPUT)
     Consumer<Message<?>> messageConnectorConsumer(MessageConnectorProcessor connectorProcessor) {
-        return message ->
-            connectorProcessor
-                .input()
-                .send(MessageBuilder.fromMessage(message).removeHeader("spring.cloud.function.destination").build());
+        return message -> connectorProcessor.input().send(message);
     }
 
     @Bean

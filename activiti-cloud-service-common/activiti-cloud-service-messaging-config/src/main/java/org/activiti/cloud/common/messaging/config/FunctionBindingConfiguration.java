@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -55,6 +56,7 @@ import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
@@ -180,7 +182,9 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
-                                    return function.apply(message);
+                                    return function.apply(
+                                        MessageBuilder.fromMessage(message).removeHeader(FUNCTION_DESTINATION).build()
+                                    );
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
