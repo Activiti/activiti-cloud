@@ -54,7 +54,7 @@ public class ActivitiMessagingFunctionRouterEnvironmentPostProcessor implements 
             .ifPresent(value -> {
                 Map<String, Object> properties = new LinkedHashMap<>();
 
-                properties.put("spring.cloud.stream.rabbit.bindings.messageEventsOutput.producer.bind-queue", false);
+                //                properties.put("spring.cloud.stream.rabbit.bindings.messageEventsOutput.producer.bind-queue", false);
                 properties.put("spring.cloud.stream.rabbit.bindings.signalProducer.producer.bind-queue", false);
 
                 environment

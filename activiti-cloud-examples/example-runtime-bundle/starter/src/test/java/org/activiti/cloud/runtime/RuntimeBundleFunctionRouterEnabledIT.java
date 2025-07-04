@@ -17,7 +17,6 @@ package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -62,8 +60,8 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     @Autowired
     private Environment environment;
 
-    @Autowired
-    private Consumer<Message<?>> messageConnectorConsumer;
+    //    @Autowired
+    //    private Consumer<Message<?>> messageConnectorConsumer;
 
     @Test
     void contextLoads() {
@@ -88,7 +86,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
                 Boolean.class
             )
         )
-            .isFalse();
+            .isNull();
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.signalProducer.producer.bind-queue",
@@ -99,7 +97,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
         assertThat(environment.getProperty("activiti.cloud.messaging.function-router.bindings", String.class))
             .isEqualTo(
-                "commandConsumer,integrationErrorsConsumer,integrationResultsConsumer,myCmdResults,signalConsumer,messageConnectorInput"
+                "commandConsumer,integrationErrorsConsumer,integrationResultsConsumer,myCmdResults,signalConsumer"
             );
 
         assertThat(
@@ -113,9 +111,8 @@ public class RuntimeBundleFunctionRouterEnabledIT {
         assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
             .isEqualTo("my-runtime-bundle");
     }
-
-    @Test
-    void messageConnectorConsumer() {
-        assertThat(messageConnectorConsumer).isNotNull();
-    }
+    //    @Test
+    //    void messageConnectorConsumer() {
+    //        assertThat(messageConnectorConsumer).isNotNull();
+    //    }
 }

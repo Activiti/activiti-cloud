@@ -18,7 +18,9 @@ package org.activiti.cloud.common.messaging.config;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
+import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +59,12 @@ public class FunctionRouterConfiguration {
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
         }
+
+        @Bean
+        @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
+        Consumer<Message<?>> functionRouterConsumer(RoutingFunction routingFunction) {
+            return routingFunction::apply;
+        }
     }
 
     @Bean
@@ -70,7 +79,7 @@ public class FunctionRouterConfiguration {
                     .getRegistrations()
                     .getOrDefault(destination, new ArrayList<>());
 
-                return String.join(",", registrations);
+                return String.join(";", registrations);
             }
         };
     }
@@ -81,11 +90,6 @@ public class FunctionRouterConfiguration {
         @Autowired BindingServiceProperties bindingServiceProperties
     ) {
         return new BeanPostProcessor() {
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) {
-                return bean;
-            }
-
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) {
                 if (bean instanceof DirectChannel messageChannel) {

@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -67,9 +69,6 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 });
 
             if (functionRouter.isEnabled()) {
-                functionBindingPropertySource.register("functionRouter");
-                streamFunctionProperties.getBindings().put("functionRouter-in-0", "functionRouterInput");
-
                 final var input = new BindingProperties();
 
                 bindingServiceProperties
@@ -78,7 +77,8 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .stream()
                     .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
                     .forEach(entry -> {
-                        bindingServiceProperties.getConsumerProperties(entry.getKey()).setAutoStartup(false);
+                        //bindingServiceProperties.getConsumerProperties(entry.getKey()).setAutoStartup(false);
+                        bindingServiceProperties.getBindings().remove(entry.getKey());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
                     });
 
@@ -87,8 +87,11 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 );
                 input.setGroup(functionRouter.getGroup());
                 input.setConsumer(functionRouter.getConsumer());
+                //                input.getConsumer().setMultiplex(true);
 
-                bindingServiceProperties.getBindings().put("functionRouterInput", input);
+                //functionBindingPropertySource.register("functionRouter");
+                bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, input);
+                //streamFunctionProperties.getBindings().put("functionRouter-in-0", FUNCTION_ROUTER_INPUT);
             }
         }
 

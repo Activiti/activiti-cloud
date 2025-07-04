@@ -15,14 +15,11 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -48,7 +45,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -76,7 +72,6 @@ import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -122,12 +117,15 @@ public class MessagesCoreAutoConfiguration {
         return new MessageConnectorIntegrationFlow(processor, aggregator, interceptor, adviceChain, properties, router);
     }
 
-    @Bean
-    @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
-    @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-    Consumer<Message<?>> messageConnectorConsumer(MessageConnectorProcessor connectorProcessor) {
-        return message -> connectorProcessor.input().send(message);
-    }
+    //    @Bean
+    //    @FunctionBinding(input = MessageConnectorSink.INPUT)
+    //    Consumer<Message<?>> messageConnectorConsumer(IntegrationFlow messageConnectorIntegrationFlow) {
+    //        return message -> {
+    //            var msg = MessageBuilder.fromMessage(message).removeHeader("replyChannel").build();
+    //
+    //            messageConnectorIntegrationFlow.getInputChannel().send(msg);
+    //        };
+    //    }
 
     @Bean
     @ConditionalOnMissingBean

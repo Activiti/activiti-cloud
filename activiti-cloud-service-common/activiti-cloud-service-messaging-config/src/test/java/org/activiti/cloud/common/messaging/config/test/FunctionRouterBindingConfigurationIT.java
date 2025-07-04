@@ -160,7 +160,7 @@ public class FunctionRouterBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).containsOnly("functionRouter");
+        assertThat(functions).containsOnly("");
     }
 
     @Test

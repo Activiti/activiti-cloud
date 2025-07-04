@@ -48,13 +48,6 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                 if (MessageChannel.class.isInstance(bean)) {
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
-                        .map(inputBinding -> {
-                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                getMessageConverterConfigurer()
-                                    .configureInputChannel(MessageChannel.class.cast(bean), beanName);
-                            }
-                            return inputBinding;
-                        })
                         .filter(inputBinding ->
                             !messagingProperties.getFunctionRouter().isEnabled() ||
                             !messagingProperties.getFunctionRouter().getBindings().contains(beanName)
@@ -73,6 +66,11 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                             bindingServiceProperties.setInputBindings(inputBindings);
 
                             streamFunctionProperties.getBindings().put(beanInName, beanName);
+
+                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                                getMessageConverterConfigurer()
+                                    .configureInputChannel(MessageChannel.class.cast(bean), beanName);
+                            }
                         });
                 }
 
