@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import net.javacrumbs.jsonunit.assertj.JsonAssert.ConfigurableJsonAssert;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.zip.ZipStream;
 
@@ -35,8 +35,6 @@ import org.activiti.cloud.services.common.zip.ZipStream;
  * Asserts for zip content
  */
 public class AssertZipContent {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final String name;
 
@@ -106,28 +104,12 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContent(String entry) {
-        assertThat(zipContent(entry))
-            .hasValueSatisfying(json -> {
-                try {
-                    JsonNode node = OBJECT_MAPPER.readTree(json);
-                    assertThat(node).isNotNull();
-                } catch (Exception e) {
-                    throw new AssertionError("Invalid JSON content for entry: " + entry, e);
-                }
-            });
+        assertThat(zipContent(entry)).hasValueSatisfying(content -> assertThatJson(content));
         return this;
     }
 
-    public AssertZipContent hasJsonContentSatisfying(String entry, java.util.function.Consumer<JsonNode> requirement) {
-        assertThat(zipContent(entry))
-            .hasValueSatisfying(json -> {
-                try {
-                    JsonNode node = OBJECT_MAPPER.readTree(json);
-                    requirement.accept(node);
-                } catch (Exception e) {
-                    throw new AssertionError("Invalid JSON content for entry: " + entry, e);
-                }
-            });
+    public AssertZipContent hasJsonContentSatisfying(String entry, Consumer<ConfigurableJsonAssert> requirement) {
+        assertThat(zipContent(entry)).map(content -> assertThatJson(content)).hasValueSatisfying(requirement);
         return this;
     }
 
