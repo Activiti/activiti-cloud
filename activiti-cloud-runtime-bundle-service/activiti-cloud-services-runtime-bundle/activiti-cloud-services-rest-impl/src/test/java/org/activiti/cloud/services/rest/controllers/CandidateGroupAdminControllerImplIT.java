@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -128,10 +128,10 @@ class CandidateGroupAdminControllerImplIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[0].entry.group")
+            .inPath("list.entries[0].entry.group")
             .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[1].entry.group")
+            .inPath("list.entries[1].entry.group")
             .isEqualTo("testgroup");
     }
 
@@ -146,10 +146,10 @@ class CandidateGroupAdminControllerImplIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateGroups[0].group")
+            .inPath("_embedded.candidateGroups[0].group")
             .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateGroups[1].group")
+            .inPath("_embedded.candidateGroups[1].group")
             .isEqualTo("testgroup");
     }
 }
