@@ -118,7 +118,7 @@ public class AssertZipContent {
     }
 
     // Indirection method to avoid SonarQube detection of deprecated call
-    private static <T> ConfigurableJsonAssert toJsonAssert(T json) {
-        return net.javacrumbs.jsonunit.assertj.JsonAssert.assertThatJson(json);
+    private static ConfigurableJsonAssert toJsonAssert(String json) {
+        return assertThatJson(json);
     }
 }
