@@ -356,6 +356,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -745,6 +752,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -1093,6 +1107,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -1594,6 +1615,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -1896,6 +1924,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -2175,6 +2210,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2630,6 +2672,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3378,6 +3427,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -4027,6 +4083,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -5858,6 +5921,13 @@
             }
           },
           {
+            "name": "rootProcessInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -6923,6 +6993,9 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudTask_ProcessVariables"
@@ -7036,6 +7109,9 @@
           },
           "sort": {
             "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
+          },
+          "excludeByProcessCategoryName": {
+            "type": "string"
           }
         },
         "title": "ProcessInstanceSearchRequest_ProcessVariables"
@@ -7145,6 +7221,9 @@
             "format": "int32"
           },
           "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
             "type": "string"
           }
         },
@@ -7569,6 +7648,9 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudTask_General"
@@ -7654,6 +7736,9 @@
             "format": "int32"
           },
           "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
             "type": "string"
           }
         },

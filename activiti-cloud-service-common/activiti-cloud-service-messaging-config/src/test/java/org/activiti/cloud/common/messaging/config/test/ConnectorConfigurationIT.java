@@ -17,6 +17,8 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_RESULTS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +45,6 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
@@ -60,6 +61,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest(
     properties = {
@@ -75,6 +77,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+        "spring.cloud.stream.bindings.integrationRequests.destination=rest-connector.GET,rest-connector.POST",
+        "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
     }
 )
@@ -113,7 +117,7 @@ public class ConnectorConfigurationIT {
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
-    @SpyBean
+    @MockitoSpyBean
     private MyErrorHandler myErrorHandler;
 
     @Value("${application.min.version}")
@@ -182,6 +186,32 @@ public class ConnectorConfigurationIT {
         public MyErrorHandler myErrorHandler() {
             return new MyErrorHandler();
         }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.GET"
+        )
+        public Connector<?, ?> connectorGet() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("GetRequest");
+                return "GetResult";
+            };
+        }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.POST"
+        )
+        public Connector<?, ?> connectorPost() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("PostRequest");
+                return "PostResult";
+            };
+        }
     }
 
     @BeforeEach
@@ -218,6 +248,8 @@ public class ConnectorConfigurationIT {
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_D + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorGet" + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorPost" + REGISTRATION_NAME_SUFFIX)).isNotNull();
     }
 
     @Test
@@ -370,6 +402,54 @@ public class ConnectorConfigurationIT {
             .extracting(Throwable::getCause)
             .extracting(Throwable::getMessage)
             .isEqualTo("Test Audit Consumer Error");
+    }
+
+    @Test
+    public void testConnectorsDemultiplexGetRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("GetRequest")
+            .setHeader("connectorType", "rest-connector.GET")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.GET");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("GetResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.apply(INTEGRATION_RESULTS))).isNull();
+    }
+
+    @Test
+    public void testConnectorsDemultiplexPostRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("PostRequest")
+            .setHeader("connectorType", "rest-connector.POST")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.POST");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("PostResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.apply(INTEGRATION_RESULTS))).isNull();
     }
 
     private String resolveExpression(String value) {
