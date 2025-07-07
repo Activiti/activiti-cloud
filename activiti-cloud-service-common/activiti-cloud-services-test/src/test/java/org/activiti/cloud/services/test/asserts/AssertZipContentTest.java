@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
