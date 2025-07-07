@@ -109,9 +109,7 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContentSatisfying(String entry, Consumer<ConfigurableJsonAssert> requirement) {
-        assertThat(zipContent(entry))
-            .map(content -> toJsonAssert(content))
-            .hasValueSatisfying(requirement);
+        assertThat(zipContent(entry)).map(content -> toJsonAssert(content)).hasValueSatisfying(requirement);
         return this;
     }
 
