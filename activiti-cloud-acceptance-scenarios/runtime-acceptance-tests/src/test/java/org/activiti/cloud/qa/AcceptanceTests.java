@@ -26,5 +26,8 @@ public class AcceptanceTests extends ExtendedSerenityStories {
         return "org.activiti.cloud";
     }
 
-    public AcceptanceTests() {}
+    public AcceptanceTests() {
+        findStoriesCalled("**/stories/runtime-bundle/process-instance-signal-actions.story");
+        findStoriesCalled("**/stories/runtime-bundle/process-instance-notifications-actions.story");
+    }
 }
