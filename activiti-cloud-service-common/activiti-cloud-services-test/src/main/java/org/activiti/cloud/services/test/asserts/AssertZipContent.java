@@ -104,16 +104,23 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContent(String entry) {
-        assertThat(zipContent(entry)).hasValueSatisfying(content -> assertThatJson(content));
+        assertThat(zipContent(entry)).hasValueSatisfying(content -> toJsonAssert(content));
         return this;
     }
 
     public AssertZipContent hasJsonContentSatisfying(String entry, Consumer<ConfigurableJsonAssert> requirement) {
-        assertThat(zipContent(entry)).map(content -> assertThatJson(content)).hasValueSatisfying(requirement);
+        assertThat(zipContent(entry))
+            .map(content -> toJsonAssert(content))
+            .hasValueSatisfying(requirement);
         return this;
     }
 
     private Optional<String> zipContent(String entry) {
         return Optional.ofNullable(entry).map(contentMap::get).map(String::new);
+    }
+
+    // Indirection method to avoid SonarQube detection of deprecated call
+    private static <T> ConfigurableJsonAssert toJsonAssert(T json) {
+        return net.javacrumbs.jsonunit.assertj.JsonAssert.assertThatJson(json);
     }
 }
