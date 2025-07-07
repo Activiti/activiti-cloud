@@ -36,6 +36,7 @@ import org.activiti.cloud.services.common.zip.ZipStream;
  */
 public class AssertZipContent {
 
+    private static final Consumer<ConfigurableJsonAssert> ACCEPT_ANY_JSON = json -> {};
     private final String name;
 
     private final String contentType;
@@ -104,12 +105,11 @@ public class AssertZipContent {
     }
 
     public AssertZipContent hasJsonContent(String entry) {
-        assertThat(zipContent(entry)).hasValueSatisfying(content -> toJsonAssert(content));
-        return this;
+        return hasJsonContentSatisfying(entry, ACCEPT_ANY_JSON);
     }
 
     public AssertZipContent hasJsonContentSatisfying(String entry, Consumer<ConfigurableJsonAssert> requirement) {
-        assertThat(zipContent(entry)).map(content -> toJsonAssert(content)).hasValueSatisfying(requirement);
+        assertThat(zipContent(entry)).map(AssertZipContent::toJsonAssert).hasValueSatisfying(requirement);
         return this;
     }
 
