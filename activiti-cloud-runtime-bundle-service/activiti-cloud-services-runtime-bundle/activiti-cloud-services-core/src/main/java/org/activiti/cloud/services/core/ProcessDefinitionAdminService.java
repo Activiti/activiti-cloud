@@ -38,7 +38,7 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
         Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(
             pageable,
-            ProcessPayloadBuilder.processDefinitions().withExcludedCategory(EXCLUDED_CATEGORY).build()
+            ProcessPayloadBuilder.processDefinitions().withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE).build()
         );
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;

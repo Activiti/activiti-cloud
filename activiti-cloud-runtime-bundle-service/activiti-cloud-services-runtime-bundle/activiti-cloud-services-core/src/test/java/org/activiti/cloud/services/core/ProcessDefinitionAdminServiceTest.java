@@ -120,7 +120,7 @@ public class ProcessDefinitionAdminServiceTest {
 
     @Test
     void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.EXCLUDED_CATEGORY;
+        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
         Pageable pageable = Pageable.of(0, 10);
 
         when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))

@@ -27,7 +27,7 @@ public abstract class BaseProcessDefinitionService {
 
     private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
-    protected static final String EXCLUDED_CATEGORY = "#triggerableByForm";
+    protected static final String PROCESS_CATEGORY_TO_EXCLUDE = "#triggerableByForm";
 
     public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         this.processDefinitionDecorators = processDefinitionDecorators;
