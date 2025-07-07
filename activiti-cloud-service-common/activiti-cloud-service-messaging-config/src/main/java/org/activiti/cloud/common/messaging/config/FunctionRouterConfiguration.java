@@ -23,6 +23,8 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -49,6 +51,8 @@ import org.springframework.messaging.support.MessageBuilder;
 @ConditionalOnProperty("activiti.cloud.messaging.function-router.enabled")
 public class FunctionRouterConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(FunctionRouterConfiguration.class);
+
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
 
@@ -59,12 +63,20 @@ public class FunctionRouterConfiguration {
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
         }
+    }
 
-        @Bean
-        @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-        Consumer<Message<?>> functionRouterConsumer(RoutingFunction routingFunction) {
-            return routingFunction::apply;
-        }
+    @Bean
+    @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
+    Consumer<Message<?>> functionRouterConsumer(RoutingFunction routingFunction) {
+        return message -> {
+            Optional
+                .ofNullable(message)
+                .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
+                .ifPresentOrElse(
+                    routingFunction::apply,
+                    () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
+                );
+        };
     }
 
     @Bean

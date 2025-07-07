@@ -116,7 +116,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .map(ConnectorBinding::connectorType)
                                 .filter(StringUtils::hasText)
                                 .map(resolveExpression)
-                                .map(it -> "headers['connectorType']=='" + it + "'")
+                                .map(it ->
+                                    "headers.containsKey('connectorType') && headers['connectorType']=='" + it + "'"
+                                )
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 

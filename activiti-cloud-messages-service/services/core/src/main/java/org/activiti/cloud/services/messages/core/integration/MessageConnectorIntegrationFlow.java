@@ -73,7 +73,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(processor.input())
+        return this.from("messageConnectorIntegrationFlowInput")
             .headerFilter(properties.getInputHeadersToRemove())
             .gateway(
                 flow ->
