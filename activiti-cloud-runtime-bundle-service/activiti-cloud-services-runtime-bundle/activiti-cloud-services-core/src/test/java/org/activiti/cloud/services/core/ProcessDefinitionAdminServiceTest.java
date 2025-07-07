@@ -134,6 +134,6 @@ public class ProcessDefinitionAdminServiceTest {
         verify(processAdminRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload.getExcludedCategory()).isEqualTo(excludedCategory);
+        assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
     }
 }
