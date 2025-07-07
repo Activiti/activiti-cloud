@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 public class ListOfStackTraceElementsJpaJsonConverterTest {
 
-    private final ListOfStackTraceElementsJpaJsonConverter converter = new ListOfStackTraceElementsJpaJsonConverter();
+    private ListOfStackTraceElementsJpaJsonConverter converter = new ListOfStackTraceElementsJpaJsonConverter();
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
