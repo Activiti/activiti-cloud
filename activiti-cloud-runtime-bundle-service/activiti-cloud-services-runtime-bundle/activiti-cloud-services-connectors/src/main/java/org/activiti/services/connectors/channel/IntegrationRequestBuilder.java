@@ -22,53 +22,27 @@ import static org.activiti.services.connectors.channel.ProcessEngineIntegrationC
 import java.io.Serializable;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 
 public class IntegrationRequestBuilder implements Serializable {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final BindingServiceProperties bindingServiceProperties;
-    private final ActivitiCloudMessagingProperties messagingProperties;
+    private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties,
-        ActivitiCloudMessagingProperties messagingProperties
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.bindingServiceProperties = bindingServiceProperties;
-        this.messagingProperties = messagingProperties;
+        this.bindingResolver = bindingResolver;
     }
 
     public IntegrationRequestImpl build(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
-        var functionRouter = messagingProperties.getFunctionRouter();
-        final String resultDestination;
-        final String errorDestination;
-
-        if (functionRouter.isEnabled()) {
-            var destinations = functionRouter.getDestinations();
-
-            resultDestination =
-                destinations.getOrDefault(
-                    INTEGRATION_RESULTS_CONSUMER,
-                    bindingServiceProperties.getBindingDestination(INTEGRATION_RESULTS_CONSUMER)
-                );
-            errorDestination =
-                destinations.getOrDefault(
-                    INTEGRATION_ERRORS_CONSUMER,
-                    bindingServiceProperties.getBindingDestination(INTEGRATION_ERRORS_CONSUMER)
-                );
-        } else {
-            resultDestination = bindingServiceProperties.getBindingDestination(INTEGRATION_RESULTS_CONSUMER);
-            errorDestination = bindingServiceProperties.getBindingDestination(INTEGRATION_ERRORS_CONSUMER);
-        }
-
-        integrationRequest.setErrorDestination(errorDestination);
-        integrationRequest.setResultDestination(resultDestination);
+        integrationRequest.setErrorDestination(bindingResolver.apply(INTEGRATION_ERRORS_CONSUMER));
+        integrationRequest.setResultDestination(bindingResolver.apply(INTEGRATION_RESULTS_CONSUMER));
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
         return integrationRequest;

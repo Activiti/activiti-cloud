@@ -116,17 +116,15 @@ public class FunctionRouterConfiguration {
                                 new ChannelInterceptor() {
                                     @Override
                                     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                                        var messageToUse = Optional
+                                        return Optional
                                             .ofNullable(bindingServiceProperties.getBindings().get(beanName))
-                                            .map(binding ->
+                                            .<Message<?>>map(binding ->
                                                 MessageBuilder
                                                     .fromMessage(message)
                                                     .setHeader(FUNCTION_DESTINATION, binding.getDestination())
                                                     .build()
                                             )
-                                            .orElse(null);
-
-                                        return messageToUse != null ? messageToUse : message;
+                                            .orElse(message);
                                     }
                                 }
                             );

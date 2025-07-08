@@ -66,9 +66,16 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     public static final String NULL_CHANNEL = "nullChannel";
 
     @Bean
-    public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties) {
-        return destination ->
-            Optional.ofNullable(bindingServiceProperties.getBindingDestination(destination)).orElse(destination);
+    public BindingResolver bindingResolver(
+        BindingServiceProperties bindingServiceProperties,
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        return bindingName ->
+            Optional
+                .of(messagingProperties.getFunctionRouter())
+                .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
+                .map(functionRouter -> functionRouter.getDestinations().get(bindingName))
+                .orElse(bindingServiceProperties.getBindingDestination(bindingName));
     }
 
     @Bean
@@ -114,8 +121,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
-        ActivitiCloudMessagingProperties messagingProperties,
-        FunctionBindingPropertySource functionBindingPropertySource
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
