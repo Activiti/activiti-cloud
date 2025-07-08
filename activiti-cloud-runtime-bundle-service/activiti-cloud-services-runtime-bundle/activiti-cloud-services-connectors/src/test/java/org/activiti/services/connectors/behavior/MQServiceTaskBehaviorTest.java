@@ -30,6 +30,7 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -94,6 +95,9 @@ class MQServiceTaskBehaviorTest {
     private BindingServiceProperties bindingServiceProperties;
 
     @Mock
+    private ActivitiCloudMessagingProperties messagingProperties;
+
+    @Mock
     private IntegrationRequestSender integrationRequestSender;
 
     @Mock
@@ -148,6 +152,9 @@ class MQServiceTaskBehaviorTest {
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
 
+        given(messagingProperties.getFunctionRouter())
+            .willReturn(new ActivitiCloudMessagingProperties.FunctionRouterProperties());
+
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
         when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
@@ -178,6 +185,9 @@ class MQServiceTaskBehaviorTest {
         DelegateExecution execution = mock(DelegateExecution.class);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         given(integrationContextManager.create()).willReturn(entity);
+
+        given(messagingProperties.getFunctionRouter())
+            .willReturn(new ActivitiCloudMessagingProperties.FunctionRouterProperties());
 
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
@@ -211,6 +221,9 @@ class MQServiceTaskBehaviorTest {
 
         IntegrationContext integrationContext = mock(IntegrationContext.class);
         given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        given(messagingProperties.getFunctionRouter())
+            .willReturn(new ActivitiCloudMessagingProperties.FunctionRouterProperties());
 
         //then
         assertDoesNotThrow(() -> behavior.apply(execution));

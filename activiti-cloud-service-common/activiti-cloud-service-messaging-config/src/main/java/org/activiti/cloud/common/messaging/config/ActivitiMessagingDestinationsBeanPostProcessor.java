@@ -77,7 +77,6 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .stream()
                     .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
                     .forEach(entry -> {
-                        //bindingServiceProperties.getConsumerProperties(entry.getKey()).setAutoStartup(false);
                         bindingServiceProperties.getBindings().remove(entry.getKey());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
                     });
@@ -87,11 +86,8 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 );
                 input.setGroup(functionRouter.getGroup());
                 input.setConsumer(functionRouter.getConsumer());
-                //                input.getConsumer().setMultiplex(true);
 
-                //functionBindingPropertySource.register("functionRouter");
                 bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, input);
-                //streamFunctionProperties.getBindings().put("functionRouter-in-0", FUNCTION_ROUTER_INPUT);
             }
         }
 

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -128,9 +129,10 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationRequestBuilder integrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties
+        BindingServiceProperties bindingServiceProperties,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
-        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingServiceProperties);
+        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingServiceProperties, messagingProperties);
     }
 
     @Bean

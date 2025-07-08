@@ -19,7 +19,7 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
@@ -37,6 +37,9 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
         String destination = resolver.resolveDestination(request);
 
-        streamBridge.send(destination, message);
+        streamBridge.send(
+            destination,
+            MessageBuilder.fromMessage(message).setHeader("spring.cloud.function.destination", destination).build()
+        );
     }
 }

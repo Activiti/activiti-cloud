@@ -40,6 +40,7 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -91,7 +92,10 @@ public class FunctionRouterConfiguration {
                     .getRegistrations()
                     .getOrDefault(destination, new ArrayList<>());
 
-                return String.join(";", registrations);
+                return registrations
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new MessageDeliveryException("Can't resolve destination route: " + destination));
             }
         };
     }

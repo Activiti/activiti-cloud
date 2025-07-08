@@ -16,9 +16,13 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
+
 import java.io.Serializable;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 
@@ -26,24 +30,42 @@ public class IntegrationRequestBuilder implements Serializable {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final BindingServiceProperties bindingServiceProperties;
+    private final ActivitiCloudMessagingProperties messagingProperties;
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties
+        BindingServiceProperties bindingServiceProperties,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.bindingServiceProperties = bindingServiceProperties;
+        this.messagingProperties = messagingProperties;
     }
 
     public IntegrationRequestImpl build(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
-        String resultDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER
-        );
-        String errorDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER
-        );
+        var functionRouter = messagingProperties.getFunctionRouter();
+        final String resultDestination;
+        final String errorDestination;
+
+        if (functionRouter.isEnabled()) {
+            var destinations = functionRouter.getDestinations();
+
+            resultDestination =
+                destinations.getOrDefault(
+                    INTEGRATION_RESULTS_CONSUMER,
+                    bindingServiceProperties.getBindingDestination(INTEGRATION_RESULTS_CONSUMER)
+                );
+            errorDestination =
+                destinations.getOrDefault(
+                    INTEGRATION_ERRORS_CONSUMER,
+                    bindingServiceProperties.getBindingDestination(INTEGRATION_ERRORS_CONSUMER)
+                );
+        } else {
+            resultDestination = bindingServiceProperties.getBindingDestination(INTEGRATION_RESULTS_CONSUMER);
+            errorDestination = bindingServiceProperties.getBindingDestination(INTEGRATION_ERRORS_CONSUMER);
+        }
 
         integrationRequest.setErrorDestination(errorDestination);
         integrationRequest.setResultDestination(resultDestination);
