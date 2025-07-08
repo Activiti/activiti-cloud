@@ -30,9 +30,11 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(
     classes = { KeycloakClientApplication.class },
@@ -49,6 +51,9 @@ public class KeycloakClientCrudIT {
 
     @Autowired
     private KeycloakClient keycloakClient;
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     @Test
     public void should_handleClientCRUD() {

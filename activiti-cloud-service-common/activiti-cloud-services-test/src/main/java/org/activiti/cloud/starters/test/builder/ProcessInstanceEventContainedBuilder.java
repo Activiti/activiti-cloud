@@ -112,6 +112,7 @@ public class ProcessInstanceEventContainedBuilder {
         completedProcess.setProcessDefinitionKey("my-proc");
         completedProcess.setProcessDefinitionId(UUID.randomUUID().toString());
         completedProcess.setProcessDefinitionName("my-proc-definition-name");
+        completedProcess.setRootProcessInstanceId("rootProcessInstanceId");
         return completedProcess;
     }
 

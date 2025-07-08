@@ -66,10 +66,10 @@ public class MultiInstanceConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).build();
+        Message<?> message = MessageBuilder.withPayload(payload).setHeader("connectorType", "miCloudConnector").build();
 
         //when
-        input.send(message, MultiInstanceConnector.Channels.CHANNEL);
+        input.send(message, "miCloudConnector");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");

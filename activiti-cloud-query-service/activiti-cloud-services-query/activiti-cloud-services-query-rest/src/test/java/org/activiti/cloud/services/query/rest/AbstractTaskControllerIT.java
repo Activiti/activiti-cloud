@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -79,6 +80,37 @@ public abstract class AbstractTaskControllerIT {
     @AfterEach
     public void cleanUp() {
         queryTestUtils.cleanUp();
+    }
+
+    @Test
+    void should_return400_whenInvalidSearchParameterIsProvided() {
+        String missingSortField =
+            """
+        {
+            "sort": {
+                "direction": "ASC",
+                "isProcessVariable": false,
+                "processDefinitionKey": null,
+                "type": "bigdecimal",
+                "processVariable": false
+            }
+        }""";
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(missingSortField)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(400)
+            .expect(
+                content()
+                    .string(
+                        is(
+                            "Invalid search parameter: Could not resolve attribute 'null' of 'org.activiti.cloud.services.query.model.TaskEntity'"
+                        )
+                    )
+            );
     }
 
     @Test
@@ -3993,29 +4025,21 @@ public abstract class AbstractTaskControllerIT {
     }
 
     /**
-     * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
+     * From Postgres documentation: <a href="https://www.postgresql.org/docs/current/queries-order.html">Postgres sorting</a>
      *  By default, null values sort as if larger than any non-null value;
      *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     *  We are overriding this behavior in order to have null values always at the end
+     *  by setting property hibernate.order_by.default_null_ordering=last in CustomHibernateAutoConfiguration
      */
     @Test
     void should_returnTasks_sortedByProcessVariables_respectingDefaultNullBehaviour() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 4; i++) {
             queryTestUtils
                 .buildProcessInstance()
                 .withInitiator(CURRENT_USER)
                 .withId(String.valueOf(i))
                 .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, i))
-                .withTasks(queryTestUtils.buildTask().withId(String.valueOf(i)))
-                .buildAndSave();
-        }
-
-        for (int i = 5; i < 10; i++) {
-            queryTestUtils
-                .buildProcessInstance()
-                .withInitiator(CURRENT_USER)
-                .withId(String.valueOf(i))
-                .withProcessDefinitionKey("other-process")
+                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, i == 0 ? null : i))
                 .withTasks(queryTestUtils.buildTask().withId(String.valueOf(i)))
                 .buildAndSave();
         }
@@ -4040,8 +4064,22 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(8))
-            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("0", "1", "2", "3"));
+            .body(TASKS_JSON_PATH, hasSize(4))
+            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("1", "2", "3", "0"));
+
+        requestBuilder.invertSort();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 8)
+            .param("skipCount", 0)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(4))
+            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("3", "2", "1", "0"));
     }
 
     @Test

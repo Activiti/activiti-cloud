@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.Collection;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -30,7 +31,6 @@ import org.activiti.cloud.acc.core.steps.runtime.ProcessVariablesRuntimeBundleSt
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceVariables {
 
@@ -57,14 +57,13 @@ public class ProcessInstanceVariables {
                 assertThat(variableName1).isNotNull();
                 assertThat(variableName2).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                final Collection<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
                     processInstanceId
                 );
 
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-
-                assertThat(cloudVariableInstanceResource.getContent())
+                assertThat(cloudVariableInstanceResource)
+                    .isNotNull()
+                    .isNotEmpty()
                     .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(tuple(variableName1, value1), tuple(variableName2, value2));
             });
@@ -78,12 +77,11 @@ public class ProcessInstanceVariables {
         await()
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
-                final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
-                if (variableInstances != null) {
-                    assertThat(variableInstances.getContent())
-                        .extracting(VariableInstance::getName)
-                        .doesNotContain(variableName);
-                }
+                final Collection<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
+                assertThat(variableInstances)
+                    .isNotNull()
+                    .extracting(CloudVariableInstance::getName)
+                    .doesNotContain(variableName);
             });
     }
 
@@ -95,11 +93,13 @@ public class ProcessInstanceVariables {
         await()
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
-                final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
-                assertThat(variableInstances).isNotNull();
-                assertThat(variableInstances).isNotEmpty();
+                final Collection<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
                 //one of the variables should have name matching variableName
-                assertThat(variableInstances.getContent()).extracting(VariableInstance::getName).contains(variableName);
+                assertThat(variableInstances)
+                    .isNotNull()
+                    .isNotEmpty()
+                    .extracting(CloudVariableInstance::getName)
+                    .contains(variableName);
             });
     }
 
@@ -115,7 +115,7 @@ public class ProcessInstanceVariables {
         processVariablesRuntimeBundleSteps.updateVariables(processInstanceId, setProcessVariablesPayload);
     }
 
-    public CollectionModel<CloudVariableInstance> getProcessVariables(String processInstanceId) {
+    public Collection<CloudVariableInstance> getProcessVariables(String processInstanceId) {
         return processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
     }
 

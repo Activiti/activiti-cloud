@@ -45,6 +45,7 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
     @Test
     public void rabbitMqConfiguration() {
         assertThat(messagingProperties.getRabbitmq().getMissingAnonymousQueuesFatal()).isTrue();
+        assertThat(messagingProperties.getRabbitmq().getMissingDurableQueuesFatal()).isTrue();
 
         assertThat(activitiRabbitMqMessageListenerContainerCustomizer).isNotNull();
     }

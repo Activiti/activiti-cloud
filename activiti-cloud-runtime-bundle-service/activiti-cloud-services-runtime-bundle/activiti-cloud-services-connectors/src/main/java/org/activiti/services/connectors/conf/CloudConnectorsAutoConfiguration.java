@@ -16,6 +16,7 @@
 
 package org.activiti.services.connectors.conf;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -39,6 +40,7 @@ import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
+import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -175,7 +177,8 @@ public class CloudConnectorsAutoConfiguration {
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
         IntegrationRequestBuilder integrationRequestBuilder,
-        IntegrationRequestSender integrationRequestSender
+        IntegrationRequestSender integrationRequestSender,
+        Set<IntegrationContextEnricher> integrationContextEnrichers
     ) {
         return new MQServiceTaskBehavior(
             integrationContextManager,
@@ -184,7 +187,8 @@ public class CloudConnectorsAutoConfiguration {
             defaultServiceTaskBehavior,
             processEngineEventsAggregator,
             runtimeBundleProperties,
-            integrationRequestBuilder
+            integrationRequestBuilder,
+            integrationContextEnrichers
         );
     }
 }

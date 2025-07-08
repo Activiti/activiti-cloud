@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import static org.activiti.cloud.examples.connectors.HeadersConnector.HEADERS_CONNECTOR_CONSUMER;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -30,12 +32,15 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
-    input = HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER,
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
     condition = "headers['processDefinitionVersion']!=null",
-    outputHeader = ""
+    outputHeader = "",
+    connectorType = "headers.GET"
 )
-@Component(HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER + "Connector")
+@Component(HEADERS_CONNECTOR_CONSUMER + "Connector")
 public class HeadersConnector implements ConsumerConnector<Message<IntegrationRequest>> {
+
+    public static final String HEADERS_CONNECTOR_CONSUMER = "headersConnectorConsumer";
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;

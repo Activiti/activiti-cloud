@@ -18,6 +18,8 @@ package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,19 +70,24 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
             scope
         );
 
-        StringBuilder value = new StringBuilder();
+        var target = Stream
+            .of(name.split(","))
+            .map(it -> {
+                var value = new StringBuilder();
 
-        if (StringUtils.hasText(prefix)) {
-            value.append(prefix).append(separator);
-        }
+                if (StringUtils.hasText(prefix)) {
+                    value.append(prefix).append(separator);
+                }
 
-        value.append(name);
+                value.append(it);
 
-        if (StringUtils.hasText(scope)) {
-            value.append(separator).append(scope);
-        }
+                if (StringUtils.hasText(scope)) {
+                    value.append(separator).append(scope);
+                }
 
-        String target = value.toString();
+                return value.toString();
+            })
+            .collect(Collectors.joining(","));
 
         return messagingProperties.isDestinationTransformersEnabled()
             ? messagingProperties.transformDestination().apply(target)

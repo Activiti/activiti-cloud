@@ -1,6 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "maven"
+    open-pull-requests-limit: 10
     directory: "/"
     schedule:
       interval: "daily"
@@ -25,8 +26,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
     - "/"
-    - "/.github/actions/check-service-health"
-    - "/.github/actions/setup-env-for-broker"
+    - "/.github/actions/*"
     schedule:
       interval: "weekly"
     groups:
