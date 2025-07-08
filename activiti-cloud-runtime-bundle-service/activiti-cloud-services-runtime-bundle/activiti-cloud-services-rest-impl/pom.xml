@@ -154,11 +154,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.javacrumbs.json-unit</groupId>
-      <artifactId>json-unit-fluent</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-runtime-impl</artifactId>
       <scope>test</scope>
