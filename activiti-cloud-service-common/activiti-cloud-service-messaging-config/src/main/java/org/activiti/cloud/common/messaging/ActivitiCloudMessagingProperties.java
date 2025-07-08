@@ -145,7 +145,7 @@ public class ActivitiCloudMessagingProperties {
         }
     }
 
-    ActivitiCloudMessagingProperties() {}
+    public ActivitiCloudMessagingProperties() {}
 
     public RabbitMqProperties getRabbitmq() {
         return rabbitmq;

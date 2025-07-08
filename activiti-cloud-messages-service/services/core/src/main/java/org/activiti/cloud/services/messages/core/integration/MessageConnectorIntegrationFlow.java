@@ -47,6 +47,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     public static final String DISCARD_CHANNEL = "discardChannel";
     public static final String REPLY_CHANNEL = "replyChannel";
     public static final String ERROR_CHANNEL = "errorChannel";
+    public static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW_INPUT = "messageConnectorIntegrationFlowInput";
 
     private final MessageConnectorProcessor processor;
     private final MessageConnectorAggregator aggregator;
@@ -73,7 +74,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from("messageConnectorIntegrationFlowInput")
+        return this.from(MESSAGE_CONNECTOR_INTEGRATION_FLOW_INPUT)
             .headerFilter(properties.getInputHeadersToRemove())
             .gateway(
                 flow ->

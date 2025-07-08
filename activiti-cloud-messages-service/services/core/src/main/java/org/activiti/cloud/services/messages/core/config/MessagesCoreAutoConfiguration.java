@@ -72,7 +72,6 @@ import org.springframework.integration.metadata.SimpleMetadataStore;
 import org.springframework.integration.selector.MetadataStoreSelector;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.store.SimpleMessageStore;
-import org.springframework.integration.support.MessageBuilder;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
@@ -125,14 +124,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @FunctionBinding(input = MessageConnectorSink.INPUT)
     Consumer<Message<?>> messageConnectorConsumer(IntegrationFlow messageConnectorIntegrationFlow) {
-        return message -> {
-            var msg = MessageBuilder
-                .fromMessage(message)
-                .removeHeaders("replyChannel", "discardChannel", "errorChannel")
-                .build();
-
-            messageConnectorIntegrationFlow.getInputChannel().send(msg);
-        };
+        return messageConnectorIntegrationFlow.getInputChannel()::send;
     }
 
     @Bean
