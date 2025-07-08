@@ -68,8 +68,11 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.auditConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
+        "activiti.cloud.messaging.destinations.commandConsumer.function-router=true",
+        "activiti.cloud.messaging.destinations.queryConsumer.function-router=true",
+        "activiti.cloud.messaging.destinations.auditConsumer.function-router=true",
         "activiti.cloud.messaging.function-router.enabled=true",
-        "activiti.cloud.messaging.function-router.bindings=commandConsumer,integrationRequests,queryConsumer,auditConsumer",
+        "activiti.cloud.messaging.function-router.bindings=integrationRequests",
         "activiti.cloud.messaging.function-router.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.consumer.concurrency=2",
     }
@@ -149,7 +152,14 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testFunctionDefinitions() {
+    void bindingResolver() {
+        assertThat(bindingResolver.apply("integrationRequests")).isEqualTo("integration-requests");
+        assertThat(bindingResolver.apply("commandResults")).isEqualTo("command-results");
+        assertThat(bindingResolver.apply("fooBar")).isEqualTo("fooBar");
+    }
+
+    @Test
+    void testFunctionDefinitions() {
         // given
         String functionDefinitions = (String) functionBindingPropertySource.getProperty(
             FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION
@@ -164,7 +174,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void functionRouterBinding() {
+    void functionRouterBinding() {
         // when
         var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterInput");
 
@@ -182,7 +192,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void bindingServiceProperties() {
+    void bindingServiceProperties() {
         // when
         var bindings = bindingServiceProperties.getBindings();
 
@@ -201,7 +211,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testOutputBindingsDefinitions() {
+    void testOutputBindingsDefinitions() {
         // then
         assertThat(context.getBean(TestBindingsChannels.AUDIT_PRODUCER, MessageChannel.class)).isNotNull();
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_NAME);
@@ -246,7 +256,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testFunctionRegistry() {
+    void testFunctionRegistry() {
         assertThat(functionRegistry.<Object>lookup(FUNCTION_HANDLER_NAME + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_PROCESSOR_NAME + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_AUDIT_SUPPLIER_NAME)).isNull();
@@ -254,7 +264,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testStreamBindings() {
+    void testStreamBindings() {
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
@@ -277,7 +287,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testConsumerBindings() {
+    void testConsumerBindings() {
         // given
         Message<String> message = MessageBuilder
             .withPayload("Test")
@@ -294,7 +304,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    public void testFunctionBindings() {
+    void testFunctionBindings() {
         // given
         Message<String> message = MessageBuilder
             .withPayload("Test")

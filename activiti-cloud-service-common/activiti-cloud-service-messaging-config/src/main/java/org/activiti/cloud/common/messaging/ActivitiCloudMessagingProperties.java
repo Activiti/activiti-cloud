@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -341,6 +342,11 @@ public class ActivitiCloudMessagingProperties {
          */
         private String separator;
 
+        /**
+         * Enable/disable function router for the binding destination. Default is false
+         */
+        private boolean functionRouter;
+
         DestinationProperties() {}
 
         public String getName() {
@@ -375,24 +381,23 @@ public class ActivitiCloudMessagingProperties {
             this.scope = scope;
         }
 
+        public boolean isFunctionRouter() {
+            return functionRouter;
+        }
+
+        public void setFunctionRouter(boolean functionRouter) {
+            this.functionRouter = functionRouter;
+        }
+
         @Override
         public String toString() {
-            return (
-                "DestinationProperties{" +
-                ", name='" +
-                name +
-                '\'' +
-                ", scope='" +
-                scope +
-                '\'' +
-                ", prefix='" +
-                prefix +
-                '\'' +
-                ", separator='" +
-                separator +
-                '\'' +
-                '}'
-            );
+            return new StringJoiner(", ", DestinationProperties.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("scope='" + scope + "'")
+                .add("prefix='" + prefix + "'")
+                .add("separator='" + separator + "'")
+                .add("functionRouter=" + functionRouter)
+                .toString();
         }
     }
 
