@@ -43,6 +43,7 @@ import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -75,7 +76,12 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                 .of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
                 .map(functionRouter -> functionRouter.getDestinations().get(bindingName))
-                .orElse(bindingServiceProperties.getBindingDestination(bindingName));
+                .or(() ->
+                    Optional
+                        .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
+                        .map(BindingProperties::getDestination)
+                )
+                .orElse(bindingName);
     }
 
     @Bean
