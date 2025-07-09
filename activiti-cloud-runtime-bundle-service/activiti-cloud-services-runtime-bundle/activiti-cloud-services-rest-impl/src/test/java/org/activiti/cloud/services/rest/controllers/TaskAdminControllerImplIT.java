@@ -82,9 +82,18 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        TaskAdminControllerImplIT.TestConfig.class,
     }
 )
 class TaskAdminControllerImplIT {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -98,7 +107,7 @@ class TaskAdminControllerImplIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @MockitoBean
+    @MockitoSpyBean
     private SpringPageConverter pageConverter;
 
     @Autowired
@@ -197,7 +206,7 @@ class TaskAdminControllerImplIT {
 
     @Test
     void assignMultipleTasks() throws Exception {
-        given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
+        given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl<>(List.of(buildDefaultAssignedTask()), 1));
         AssignTasksPayload assignTasksCmd = TaskPayloadBuilder
             .assignMultiple()
             .withTaskId("1")

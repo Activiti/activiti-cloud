@@ -73,9 +73,18 @@ import org.springframework.test.web.servlet.MvcResult;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CandidateUserControllerImplIT.TestConfig.class,
     }
 )
 class CandidateUserControllerImplIT {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,7 +95,7 @@ class CandidateUserControllerImplIT {
     @MockitoBean
     private TaskRuntime taskRuntime;
 
-    @MockitoBean
+    @MockitoSpyBean
     private SpringPageConverter springPageConverter;
 
     @Autowired

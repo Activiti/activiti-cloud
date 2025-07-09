@@ -48,7 +48,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.TestConfiguration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -73,9 +75,18 @@ import org.springframework.test.web.servlet.MvcResult;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CandidateGroupControllerImplIT.TestConfig.class,
     }
 )
 class CandidateGroupControllerImplIT {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,7 +97,7 @@ class CandidateGroupControllerImplIT {
     @MockitoBean
     private TaskRuntime taskRuntime;
 
-    @MockitoBean
+    @MockitoSpyBean
     private SpringPageConverter springPageConverter;
 
     @Autowired
