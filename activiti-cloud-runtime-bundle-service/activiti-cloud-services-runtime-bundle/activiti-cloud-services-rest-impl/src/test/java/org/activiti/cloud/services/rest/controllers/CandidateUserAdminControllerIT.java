@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
@@ -83,7 +82,7 @@ class CandidateUserAdminControllerIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @SpyBean
+    @MockitoSpyBean
     private SpringPageConverter pageConverter;
 
     @Autowired
