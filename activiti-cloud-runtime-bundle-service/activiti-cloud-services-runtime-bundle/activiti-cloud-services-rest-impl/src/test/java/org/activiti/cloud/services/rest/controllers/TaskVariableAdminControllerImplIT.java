@@ -83,6 +83,9 @@ import org.springframework.test.web.servlet.MockMvc;
 )
 class TaskVariableAdminControllerImplIT {
 
+    private static final String TASK_ID = UUID.randomUUID().toString();
+    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
+
     @Autowired
     private MockMvc mockMvc;
 
