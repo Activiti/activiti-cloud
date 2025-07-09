@@ -40,8 +40,17 @@ class AssertZipContentTest {
         FileContent fileContent = zipWithJsonEntry("data.json", "{\"foo\":\"bar\"}");
         AssertZipContent zipAssert = new AssertZipContent(fileContent);
 
-        // Just trigger the method for coverage
+        // Verify the zip contains the expected entry
+        zipAssert.hasEntries("data.json");
+
+        // Verify the file name
+        zipAssert.hasName("test.zip");
+
+        // Verify the JSON content is valid
         zipAssert.hasJsonContent("data.json");
+
+        // Verify the actual content matches what we expect
+        zipAssert.hasContent("data.json", "{\"foo\":\"bar\"}");
     }
 
     @Test
