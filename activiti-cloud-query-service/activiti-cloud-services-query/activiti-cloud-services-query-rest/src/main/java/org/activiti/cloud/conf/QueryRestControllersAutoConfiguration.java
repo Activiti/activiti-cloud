@@ -71,7 +71,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ProcessModelController.class,
         TaskAdminController.class,
         TaskController.class,
-        TaskControllerAdvice.class,
         TaskDeleteController.class,
         TaskVariableAdminController.class,
         TaskVariableController.class,

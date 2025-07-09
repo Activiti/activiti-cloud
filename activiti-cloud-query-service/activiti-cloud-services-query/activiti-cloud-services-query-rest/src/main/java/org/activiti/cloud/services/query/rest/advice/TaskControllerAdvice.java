@@ -23,9 +23,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(assignableTypes = { TaskController.class, TaskAdminController.class })
 public class TaskControllerAdvice {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerAdvice.class);

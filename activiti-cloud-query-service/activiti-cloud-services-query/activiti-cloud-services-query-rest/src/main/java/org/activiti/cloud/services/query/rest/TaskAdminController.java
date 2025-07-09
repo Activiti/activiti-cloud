@@ -37,6 +37,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
@@ -60,7 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-public class TaskAdminController {
+public class TaskAdminController extends TaskControllerAdvice {
 
     private final TaskRepository taskRepository;
 
