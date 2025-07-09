@@ -40,6 +40,7 @@ import org.activiti.cloud.services.query.rest.TaskController;
 import org.activiti.cloud.services.query.rest.TaskDeleteController;
 import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
+import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -70,6 +71,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ProcessModelController.class,
         TaskAdminController.class,
         TaskController.class,
+        TaskControllerAdvice.class,
         TaskDeleteController.class,
         TaskVariableAdminController.class,
         TaskVariableController.class,
