@@ -406,11 +406,11 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
 
-        private List<String> bindings = new ArrayList<>();
+        private final List<String> bindings = new ArrayList<>();
 
-        private Map<String, String> destinations = new LinkedHashMap<>();
+        private final Map<String, String> destinations = new LinkedHashMap<>();
 
-        private Map<String, List<String>> registrations = new LinkedHashMap<>();
+        private final Map<String, List<String>> registrations = new LinkedHashMap<>();
 
         private String group;
 
@@ -429,24 +429,12 @@ public class ActivitiCloudMessagingProperties {
             return destinations;
         }
 
-        public void setDestinations(Map<String, String> destinations) {
-            this.destinations = destinations;
-        }
-
         public Map<String, List<String>> getRegistrations() {
             return registrations;
         }
 
-        public void setRegistrations(Map<String, List<String>> registrations) {
-            this.registrations = registrations;
-        }
-
         public List<String> getBindings() {
             return bindings;
-        }
-
-        public void setBindings(List<String> bindings) {
-            this.bindings = bindings;
         }
 
         public String getGroup() {

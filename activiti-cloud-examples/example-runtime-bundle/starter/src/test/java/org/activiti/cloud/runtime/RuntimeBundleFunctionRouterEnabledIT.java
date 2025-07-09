@@ -17,9 +17,10 @@ package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.function.Consumer;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,10 +28,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.messaging.Message;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -38,17 +37,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = RuntimeBundleApplication.class,
     properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
 )
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 @Testcontainers
 public class RuntimeBundleFunctionRouterEnabledIT {
 
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Container
-    @ServiceConnection
-    static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:management-alpine");
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -62,9 +59,6 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     @Autowired
     private Environment environment;
 
-    @Autowired
-    private Consumer<Message<?>> messageConnectorConsumer;
-
     @Test
     void contextLoads() {
         assertThat(applicationContext).isNotNull();
@@ -72,12 +66,54 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
     @Test
     void bindingServiceProperties() {
-        assertThat(bindingServiceProperties).isNotNull();
+        assertThat(bindingServiceProperties.getBindings())
+            .doesNotContainKeys(
+                "commandConsumer",
+                "integrationErrorsConsumer",
+                "integrationResultsConsumer",
+                "myCmdResults",
+                "signalConsumer",
+                "messageConnectorInput"
+            )
+            .containsKey("functionRouterInput");
     }
 
     @Test
     void messagingProperties() {
-        assertThat(messagingProperties).isNotNull();
+        var functionRouterDestinations = messagingProperties
+            .getDestinations()
+            .entrySet()
+            .stream()
+            .filter(it -> it.getValue().isFunctionRouter())
+            .map(Map.Entry::getKey)
+            .toList();
+
+        assertThat(functionRouterDestinations)
+            .containsOnly(
+                "commandConsumer",
+                "integrationErrorsConsumer",
+                "integrationResultsConsumer",
+                "myCmdResults",
+                "signalConsumer",
+                "messageConnectorInput"
+            );
+    }
+
+    @Test
+    void functionRouter() {
+        var functionRouter = messagingProperties.getFunctionRouter();
+
+        assertThat(functionRouter.isEnabled()).isTrue();
+
+        assertThat(functionRouter.getBindings())
+            .containsOnly(
+                "commandConsumer",
+                "integrationErrorsConsumer",
+                "integrationResultsConsumer",
+                "myCmdResults",
+                "signalConsumer",
+                "messageConnectorInput"
+            );
     }
 
     @Test
@@ -97,10 +133,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
         )
             .isFalse();
 
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.bindings", String.class))
-            .isEqualTo(
-                "commandConsumer,integrationErrorsConsumer,integrationResultsConsumer,myCmdResults,signalConsumer,messageConnectorInput"
-            );
+        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.bindings", String.class)).isNull();
 
         assertThat(
             environment.getProperty(
@@ -112,10 +145,5 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
         assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
             .isEqualTo("my-runtime-bundle");
-    }
-
-    @Test
-    void messageConnectorConsumer() {
-        assertThat(messageConnectorConsumer).isNotNull();
     }
 }
