@@ -22,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AssertZipContentTest {
 
@@ -39,6 +40,12 @@ class AssertZipContentTest {
     void shouldValidateJsonEntry_basicCheck() throws IOException {
         FileContent fileContent = zipWithJsonEntry("data.json", "{\"foo\":\"bar\"}");
         AssertZipContent zipAssert = new AssertZipContent(fileContent);
+
+        // Standard assertions that SonarQube will recognize
+        assertThat(fileContent).isNotNull();
+        assertThat(fileContent.getFilename()).isEqualTo("test.zip");
+        assertThat(fileContent.getContentType()).isEqualTo("application/zip");
+        assertThat(zipAssert).isNotNull();
 
         // Verify the zip contains the expected entry
         zipAssert.hasEntries("data.json");
