@@ -17,7 +17,6 @@ package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
@@ -79,34 +78,12 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     }
 
     @Test
-    void messagingProperties() {
-        var functionRouterDestinations = messagingProperties
-            .getFunctionRouter()
-            .getBindings()
-            .entrySet()
-            .stream()
-            .filter(Map.Entry::getValue)
-            .map(Map.Entry::getKey)
-            .toList();
-
-        assertThat(functionRouterDestinations)
-            .containsOnly(
-                "commandConsumer",
-                "integrationErrorsConsumer",
-                "integrationResultsConsumer",
-                "myCmdResults",
-                "signalConsumer",
-                "messageConnectorInput"
-            );
-    }
-
-    @Test
     void functionRouter() {
         var functionRouter = messagingProperties.getFunctionRouter();
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getBindings().keySet())
+        assertThat(functionRouter.getFunctionRoutes())
             .containsOnly(
                 "commandConsumer",
                 "integrationErrorsConsumer",

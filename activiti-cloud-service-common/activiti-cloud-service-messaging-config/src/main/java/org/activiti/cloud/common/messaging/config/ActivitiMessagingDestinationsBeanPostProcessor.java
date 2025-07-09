@@ -75,7 +75,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .getBindings()
                     .entrySet()
                     .stream()
-                    .filter(entry -> functionRouter.isFunctionRouter(entry.getKey()))
+                    .filter(entry -> functionRouter.isFunctionRoute(entry.getKey()))
                     .forEach(entry -> {
                         bindingServiceProperties.getBindings().remove(entry.getKey());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());

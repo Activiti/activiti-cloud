@@ -58,6 +58,6 @@ class MessageEventsFunctionRouterIT extends MessageEventsIT {
 
     @Test
     void messagingProperties() {
-        assertThat(messagingProperties.getFunctionRouter().getBindings().keySet()).contains("messageConnectorInput");
+        assertThat(messagingProperties.getFunctionRouter().isFunctionRoute("messageConnectorInput")).isTrue();
     }
 }

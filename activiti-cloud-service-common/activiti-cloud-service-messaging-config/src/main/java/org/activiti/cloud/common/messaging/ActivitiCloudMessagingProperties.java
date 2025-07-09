@@ -423,8 +423,12 @@ public class ActivitiCloudMessagingProperties {
             return bindings;
         }
 
-        public boolean isFunctionRouter(String bindingName) {
+        public boolean isFunctionRoute(String bindingName) {
             return bindings.containsKey(bindingName) && bindings.get(bindingName);
+        }
+
+        public List<String> getFunctionRoutes() {
+            return bindings.keySet().stream().filter(this::isFunctionRoute).toList();
         }
 
         public String getGroup() {
