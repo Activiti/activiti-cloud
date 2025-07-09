@@ -342,11 +342,6 @@ public class ActivitiCloudMessagingProperties {
          */
         private String separator;
 
-        /**
-         * Enable/disable function router for the binding destination. Default is false
-         */
-        private boolean functionRouter;
-
         DestinationProperties() {}
 
         public String getName() {
@@ -381,14 +376,6 @@ public class ActivitiCloudMessagingProperties {
             this.scope = scope;
         }
 
-        public boolean isFunctionRouter() {
-            return functionRouter;
-        }
-
-        public void setFunctionRouter(boolean functionRouter) {
-            this.functionRouter = functionRouter;
-        }
-
         @Override
         public String toString() {
             return new StringJoiner(", ", DestinationProperties.class.getSimpleName() + "[", "]")
@@ -396,7 +383,6 @@ public class ActivitiCloudMessagingProperties {
                 .add("scope='" + scope + "'")
                 .add("prefix='" + prefix + "'")
                 .add("separator='" + separator + "'")
-                .add("functionRouter=" + functionRouter)
                 .toString();
         }
     }
@@ -406,7 +392,7 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
 
-        private final List<String> bindings = new ArrayList<>();
+        private final Map<String, Boolean> bindings = new LinkedCaseInsensitiveMap<>();
 
         private final Map<String, String> destinations = new LinkedHashMap<>();
 
@@ -433,8 +419,12 @@ public class ActivitiCloudMessagingProperties {
             return registrations;
         }
 
-        public List<String> getBindings() {
+        public Map<String, Boolean> getBindings() {
             return bindings;
+        }
+
+        public boolean isFunctionRouter(String bindingName) {
+            return bindings.containsKey(bindingName) && bindings.get(bindingName);
         }
 
         public String getGroup() {

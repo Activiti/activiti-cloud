@@ -81,10 +81,11 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     @Test
     void messagingProperties() {
         var functionRouterDestinations = messagingProperties
-            .getDestinations()
+            .getFunctionRouter()
+            .getBindings()
             .entrySet()
             .stream()
-            .filter(it -> it.getValue().isFunctionRouter())
+            .filter(Map.Entry::getValue)
             .map(Map.Entry::getKey)
             .toList();
 
@@ -105,7 +106,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getBindings())
+        assertThat(functionRouter.getBindings().keySet())
             .containsOnly(
                 "commandConsumer",
                 "integrationErrorsConsumer",

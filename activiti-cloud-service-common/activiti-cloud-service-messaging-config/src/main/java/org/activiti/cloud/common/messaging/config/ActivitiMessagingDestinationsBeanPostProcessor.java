@@ -18,7 +18,6 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -72,19 +71,11 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             if (functionRouter.isEnabled()) {
                 final var input = new BindingProperties();
 
-                messagingProperties
-                    .getDestinations()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().isFunctionRouter())
-                    .map(Map.Entry::getKey)
-                    .forEach(functionRouter.getBindings()::add);
-
                 bindingServiceProperties
                     .getBindings()
                     .entrySet()
                     .stream()
-                    .filter(entry -> functionRouter.getBindings().contains(entry.getKey()))
+                    .filter(entry -> functionRouter.isFunctionRouter(entry.getKey()))
                     .forEach(entry -> {
                         bindingServiceProperties.getBindings().remove(entry.getKey());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
