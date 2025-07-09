@@ -59,6 +59,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -121,8 +122,8 @@ class TaskVariableAdminControllerImplIT {
     @MockitoBean
     private ManagementService managementService;
 
-    private static final String TASK_ID = UUID.randomUUID().toString();
-    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
+    @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
+    private MessageChannel commandResults;
 
     @BeforeEach
     void setUp() {
