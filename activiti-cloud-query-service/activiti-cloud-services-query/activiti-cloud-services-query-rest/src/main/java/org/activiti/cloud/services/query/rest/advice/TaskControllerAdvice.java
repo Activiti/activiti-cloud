@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest.advice;
 
-import org.activiti.cloud.services.query.rest.TaskAdminController;
-import org.activiti.cloud.services.query.rest.TaskController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
