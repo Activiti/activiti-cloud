@@ -86,7 +86,7 @@ class CandidateUserControllerImplIT {
     @MockitoBean
     private TaskRuntime taskRuntime;
 
-    @MockitoSpyBean
+    @MockitoBean
     private SpringPageConverter springPageConverter;
 
     @Autowired

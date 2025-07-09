@@ -86,7 +86,7 @@ class ProcessInstanceTasksControllerImplIT {
     @MockitoBean
     private TaskRuntime taskRuntime;
 
-    @MockitoSpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
