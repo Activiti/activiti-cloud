@@ -83,7 +83,7 @@ class CandidateUserAdminControllerIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @MockitoSpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
