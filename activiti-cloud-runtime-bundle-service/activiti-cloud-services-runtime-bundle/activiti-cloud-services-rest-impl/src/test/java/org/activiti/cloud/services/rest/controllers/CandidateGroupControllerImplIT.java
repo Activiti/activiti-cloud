@@ -82,6 +82,7 @@ class CandidateGroupControllerImplIT {
 
     @TestConfiguration
     static class TestConfig {
+
         @Bean
         public SpringPageConverter springPageConverter() {
             return new SpringPageConverter();

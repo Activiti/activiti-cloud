@@ -46,8 +46,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -78,6 +78,7 @@ class CandidateUserAdminControllerIT {
 
     @org.springframework.boot.test.context.TestConfiguration
     static class TestConfig {
+
         @Bean
         public SpringPageConverter springPageConverter() {
             return new SpringPageConverter();

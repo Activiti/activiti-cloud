@@ -82,6 +82,7 @@ class ProcessInstanceTasksControllerImplIT {
 
     @TestConfiguration
     static class TestConfig {
+
         @Bean
         public SpringPageConverter springPageConverter() {
             return new SpringPageConverter();
