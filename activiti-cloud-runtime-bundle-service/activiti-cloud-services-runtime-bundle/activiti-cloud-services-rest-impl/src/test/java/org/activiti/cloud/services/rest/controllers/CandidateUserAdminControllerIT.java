@@ -122,7 +122,6 @@ class CandidateUserAdminControllerIT {
         }
     }
 
-
     @BeforeEach
     void setUp() {
         assertThat(pageConverter).isNotNull();
