@@ -80,15 +80,6 @@ import org.springframework.test.web.servlet.MvcResult;
 )
 class CandidateUserControllerImplIT {
 
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public SpringPageConverter springPageConverter() {
-            return new SpringPageConverter();
-        }
-    }
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -124,6 +115,15 @@ class CandidateUserControllerImplIT {
 
     @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @BeforeEach
     void setUp() {

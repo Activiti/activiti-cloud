@@ -80,15 +80,6 @@ import org.springframework.test.web.servlet.MockMvc;
 )
 class ProcessInstanceTasksControllerImplIT {
 
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public SpringPageConverter springPageConverter() {
-            return new SpringPageConverter();
-        }
-    }
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -127,6 +118,15 @@ class ProcessInstanceTasksControllerImplIT {
 
     @MockitoBean
     private ManagementService managementService;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @BeforeEach
     void setUp() {

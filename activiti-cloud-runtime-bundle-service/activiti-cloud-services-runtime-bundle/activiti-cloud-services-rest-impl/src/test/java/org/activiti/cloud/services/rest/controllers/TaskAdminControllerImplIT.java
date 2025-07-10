@@ -89,15 +89,6 @@ import org.springframework.test.web.servlet.MockMvc;
 )
 class TaskAdminControllerImplIT {
 
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public SpringPageConverter springPageConverter() {
-            return new SpringPageConverter();
-        }
-    }
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -136,6 +127,15 @@ class TaskAdminControllerImplIT {
 
     @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
 
     @BeforeEach
     void setUp() {
