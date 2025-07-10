@@ -289,7 +289,9 @@ class ProcessDefinitionControllerImplIT {
         assertThatJson(result.getResponse().getContentAsString()).inPath("entry.id").isEqualTo(procDefId);
         assertThatJson(result.getResponse().getContentAsString()).inPath("entry.name").isEqualTo("my process");
         assertThatJson(result.getResponse().getContentAsString()).inPath("entry.description").isEqualTo("This is my process");
-        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.version").isEqualTo(1);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("entry.version")
+            .isEqualTo(1);
     }
 
     @Test
