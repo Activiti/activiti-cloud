@@ -37,7 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
 @EnableAutoConfiguration
-public class RestrictEventQueryIT {
+class RestrictEventQueryIT {
 
     @Autowired
     private EventsRepository eventsRepository;
@@ -52,7 +52,7 @@ public class RestrictEventQueryIT {
     private UserGroupManager userGroupManager;
 
     @Test
-    public void shouldGetProcessInstancesWhenPermitted() throws Exception {
+    void shouldGetProcessInstancesWhenPermitted() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setProcessDefinitionId("defKey1");
         eventEntity.setServiceName("audit");
@@ -71,7 +71,7 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldGetProcessInstancesWhenUserPermittedByWildcard() throws Exception {
+    void shouldGetProcessInstancesWhenUserPermittedByWildcard() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setProcessDefinitionId("defKeyWild");
         eventEntity.setServiceName("audit-wild");
@@ -91,7 +91,7 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() throws Exception {
+    void shouldGetProcessInstancesWhenGroupPermittedByWildcard() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setProcessDefinitionId("defKeyWild");
         eventEntity.setServiceName("audit-wild");
@@ -111,7 +111,7 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldNotGetProcessInstancesWhenPolicyNotForUser() throws Exception {
+    void shouldNotGetProcessInstancesWhenPolicyNotForUser() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setProcessDefinitionId("defKeyWild");
         eventEntity.setServiceName("audit-wild");
@@ -138,16 +138,14 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
+    void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
-        eventEntity.setId(19L);
         eventEntity.setProcessDefinitionId("defKey1");
         eventEntity.setServiceName("A-uD-iT");
 
         eventsRepository.save(eventEntity);
 
         ProcessStartedAuditEventEntity eventEntity2 = new ProcessStartedAuditEventEntity();
-        eventEntity2.setId(20L);
         eventEntity2.setProcessDefinitionId("defKey1");
         eventEntity2.setServiceName("audit-dontmatchthisone");
 
@@ -176,7 +174,7 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldNotGetProcessInstancesWhenNotPermitted() throws Exception {
+    void shouldNotGetProcessInstancesWhenNotPermitted() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("intruder");
 
         Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
@@ -189,7 +187,7 @@ public class RestrictEventQueryIT {
     }
 
     @Test
-    public void shouldGetProcessInstancesWhenMatchesFullServiceName() throws Exception {
+    void shouldGetProcessInstancesWhenMatchesFullServiceName() {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setProcessDefinitionId("defKey2");
         eventEntity.setServiceName("audit");
