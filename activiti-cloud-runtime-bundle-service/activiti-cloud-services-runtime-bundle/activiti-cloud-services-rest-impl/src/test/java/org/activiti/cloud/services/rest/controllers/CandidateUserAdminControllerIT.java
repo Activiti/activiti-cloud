@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -75,15 +76,6 @@ import org.springframework.test.web.servlet.MvcResult;
     }
 )
 class CandidateUserAdminControllerIT {
-
-    @org.springframework.boot.test.context.TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public SpringPageConverter springPageConverter() {
-            return new SpringPageConverter();
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -120,6 +112,16 @@ class CandidateUserAdminControllerIT {
 
     @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public SpringPageConverter springPageConverter() {
+            return new SpringPageConverter();
+        }
+    }
+
 
     @BeforeEach
     void setUp() {
