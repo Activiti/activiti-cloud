@@ -115,7 +115,7 @@ class CandidateUserAdminControllerIT {
         assertThat(processDeployedProducer).isNotNull();
 
         when(pageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
-        .thenCallRealMethod();
+            .thenCallRealMethod();
     }
 
     @Test

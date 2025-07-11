@@ -118,7 +118,7 @@ class CandidateUserControllerImplIT {
         assertThat(processDeployedProducer).isNotNull();
 
         when(springPageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
-        .thenCallRealMethod();
+            .thenCallRealMethod();
     }
 
     @Test
