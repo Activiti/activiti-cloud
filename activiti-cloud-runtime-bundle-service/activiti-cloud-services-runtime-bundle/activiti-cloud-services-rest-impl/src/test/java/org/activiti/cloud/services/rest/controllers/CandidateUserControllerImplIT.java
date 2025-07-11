@@ -117,10 +117,9 @@ class CandidateUserControllerImplIT {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
 
-        Mockito.when(springPageConverter.toSpringPage(
-            ArgumentMatchers.any(Pageable.class),
-            ArgumentMatchers.any()
-        )).thenCallRealMethod();
+        Mockito
+            .when(springPageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
+            .thenCallRealMethod();
     }
 
     @Test
