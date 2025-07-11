@@ -19,7 +19,9 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +81,23 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .forEach(entry -> {
                         bindingServiceProperties.getBindings().remove(entry.getKey());
                         functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
+                    });
+
+                bindingServiceProperties
+                    .getBindings()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> functionRouter.getExcludeProducerGroups().containsKey(entry.getKey()))
+                    .forEach(entry -> {
+                        var producer = entry.getValue().getProducer();
+                        var excludedGroups = functionRouter.getExcludeProducerGroups().get(entry.getKey());
+                        var producerGroups = entry.getValue().getProducer().getRequiredGroups();
+                        var requiredGroups = Stream
+                            .of(producerGroups)
+                            .filter(Predicate.not(excludedGroups::contains))
+                            .toList();
+
+                        producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
                     });
 
                 input.setDestination(

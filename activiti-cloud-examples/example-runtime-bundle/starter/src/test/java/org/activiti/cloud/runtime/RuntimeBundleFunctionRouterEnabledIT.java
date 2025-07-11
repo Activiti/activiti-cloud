@@ -78,6 +78,12 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     }
 
     @Test
+    void bindingServicePropertiesRequiredProducerGroups() {
+        assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
+        assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
+    }
+
+    @Test
     void functionRouter() {
         var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -96,23 +102,6 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
     @Test
     void environment() {
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.messageEventsOutput.producer.bind-queue",
-                Boolean.class
-            )
-        )
-            .isFalse();
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.signalProducer.producer.bind-queue",
-                Boolean.class
-            )
-        )
-            .isFalse();
-
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.bindings", String.class)).isNull();
-
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",

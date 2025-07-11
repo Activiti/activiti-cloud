@@ -53,6 +53,7 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -62,6 +63,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.application.name=foo",
         "spring.application.name=bar",
         "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
+        "spring.cloud.stream.bindings.auditProducer.producer.required-groups=query,audit",
         "spring.cloud.stream.bindings.commandConsumer.destination=command-consumer",
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
@@ -75,6 +77,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.consumer.concurrency=2",
+        "activiti.cloud.messaging.function-router.exclude-producer-groups.auditProducer=query",
     }
 )
 @EnableTestBinder
@@ -119,6 +122,9 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private OutputDestination output;
 
+    @Autowired
+    private Environment environment;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -156,6 +162,12 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(bindingResolver.apply("integrationRequests")).isEqualTo("integration-requests");
         assertThat(bindingResolver.apply("commandResults")).isEqualTo("command-results");
         assertThat(bindingResolver.apply("fooBar")).isEqualTo("fooBar");
+    }
+
+    @Test
+    void producerGroups() {
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
+            .containsOnly("audit");
     }
 
     @Test

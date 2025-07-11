@@ -400,6 +400,8 @@ public class ActivitiCloudMessagingProperties {
 
         private String group;
 
+        private Map<String, List<String>> excludeProducerGroups;
+
         @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
 
@@ -445,6 +447,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setConsumer(ConsumerProperties consumer) {
             this.consumer = consumer;
+        }
+
+        public Map<String, List<String>> getExcludeProducerGroups() {
+            return excludeProducerGroups;
+        }
+
+        public void setExcludeProducerGroups(Map<String, List<String>> excludeProducerGroups) {
+            this.excludeProducerGroups = excludeProducerGroups;
         }
     }
 
