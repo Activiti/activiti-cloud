@@ -41,8 +41,8 @@ public class IntegrationRequestBuilder implements Serializable {
     public IntegrationRequestImpl build(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
-        integrationRequest.setErrorDestination(bindingResolver.apply(INTEGRATION_ERRORS_CONSUMER));
-        integrationRequest.setResultDestination(bindingResolver.apply(INTEGRATION_RESULTS_CONSUMER));
+        integrationRequest.setErrorDestination(bindingResolver.getBindingDestination(INTEGRATION_ERRORS_CONSUMER));
+        integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
         return integrationRequest;

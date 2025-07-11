@@ -251,7 +251,7 @@ public class FunctionBindingConfigurationIT {
             .untilAsserted(() -> {
                 Message<?> outputMessage = output.receive(
                     1000,
-                    bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS)
+                    bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
                 );
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");

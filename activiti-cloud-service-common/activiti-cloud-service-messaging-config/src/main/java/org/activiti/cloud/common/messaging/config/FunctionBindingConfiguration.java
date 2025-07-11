@@ -231,7 +231,11 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         };
     }
 
-    public interface BindingResolver extends Function<String, String> {}
+    public interface BindingResolver extends Function<String, String> {
+        default String getBindingDestination(String bindingName) {
+            return apply(bindingName);
+        }
+    }
 
     @Bean
     @ConditionalOnClass(JacksonMapper.class)

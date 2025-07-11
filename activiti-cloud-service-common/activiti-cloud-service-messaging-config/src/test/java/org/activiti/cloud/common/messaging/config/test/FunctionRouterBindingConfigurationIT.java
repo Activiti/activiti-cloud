@@ -159,9 +159,9 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void bindingResolver() {
-        assertThat(bindingResolver.apply("integrationRequests")).isEqualTo("integration-requests");
-        assertThat(bindingResolver.apply("commandResults")).isEqualTo("command-results");
-        assertThat(bindingResolver.apply("fooBar")).isEqualTo("fooBar");
+        assertThat(bindingResolver.getBindingDestination("integrationRequests")).isEqualTo("integration-requests");
+        assertThat(bindingResolver.getBindingDestination("commandResults")).isEqualTo("command-results");
+        assertThat(bindingResolver.getBindingDestination("fooBar")).isEqualTo("fooBar");
     }
 
     @Test
@@ -332,7 +332,7 @@ public class FunctionRouterBindingConfigurationIT {
             .untilAsserted(() -> {
                 Message<?> outputMessage = output.receive(
                     1000,
-                    bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS)
+                    bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
                 );
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
@@ -343,7 +343,7 @@ public class FunctionRouterBindingConfigurationIT {
             .untilAsserted(() -> {
                 Message<?> outputMessage = output.receive(
                     1000,
-                    bindingResolver.apply(TestBindingsChannels.AUDIT_PRODUCER)
+                    bindingResolver.getBindingDestination(TestBindingsChannels.AUDIT_PRODUCER)
                 );
 
                 assertThat(outputMessage).isNotNull();

@@ -57,6 +57,11 @@ class MessageEventsFunctionRouterIT extends MessageEventsIT {
     }
 
     @Test
+    void excludeRequiredProducerGroups() {
+        assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
+    }
+
+    @Test
     void messagingProperties() {
         assertThat(messagingProperties.getFunctionRouter().isFunctionRoute("messageConnectorInput")).isTrue();
     }
