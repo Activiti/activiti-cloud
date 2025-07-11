@@ -48,17 +48,18 @@ import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
@@ -87,7 +88,7 @@ class ProcessInstanceTasksControllerImplIT {
     @MockitoBean
     private TaskRuntime taskRuntime;
 
-    @SpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
@@ -122,6 +123,12 @@ class ProcessInstanceTasksControllerImplIT {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+
+
+        Mockito.when(pageConverter.toSpringPage(
+            ArgumentMatchers.any(Pageable.class),
+            ArgumentMatchers.any()
+        )).thenCallRealMethod();
     }
 
     @Test

@@ -43,11 +43,14 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -83,7 +86,7 @@ class CandidateUserAdminControllerIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @SpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
@@ -112,6 +115,11 @@ class CandidateUserAdminControllerIT {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+
+        Mockito.when(pageConverter.toSpringPage(
+            ArgumentMatchers.any(Pageable.class),
+            ArgumentMatchers.any()
+        )).thenCallRealMethod();
     }
 
     @Test
