@@ -123,8 +123,7 @@ class ProcessInstanceTasksControllerImplIT {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
 
-        when(pageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
-            .thenCallRealMethod();
+        when(pageConverter.toSpringPage(any(Pageable.class), any())).thenCallRealMethod();
     }
 
     @Test
