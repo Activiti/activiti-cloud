@@ -117,9 +117,8 @@ class CandidateGroupAdminControllerImplIT {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
 
-        Mockito
-            .when(pageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
-            .thenCallRealMethod();
+        when(pageConverter.toSpringPage(ArgumentMatchers.any(Pageable.class), ArgumentMatchers.any()))
+        .thenCallRealMethod();
     }
 
     @Test
