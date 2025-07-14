@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -82,29 +83,34 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                         functionRouter.getDestinations().put(key, value.getDestination());
 
                         log.warn("Configured function route '{}' for destination '{}'", key, value.getDestination());
-                    });
 
-                functionRouter
-                    .getExcludeProducerGroups()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> bindingServiceProperties.getBindings().containsKey(entry.getKey()))
-                    .forEach(entry -> {
-                        var producer = bindingServiceProperties.getProducerProperties(entry.getKey());
-                        var excludedGroups = functionRouter.getExcludeProducerGroups().get(entry.getKey());
-                        var producerGroups = producer.getRequiredGroups();
-                        var requiredGroups = Stream
-                            .of(producerGroups)
-                            .filter(Predicate.not(excludedGroups::contains))
-                            .toList();
+                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(key)) {
+                            bindingServiceProperties
+                                .getBindings()
+                                .entrySet()
+                                .stream()
+                                .filter(entry -> entry.getValue().getProducer() != null)
+                                .filter(entry ->
+                                    Objects.equals(entry.getValue().getDestination(), value.getDestination())
+                                )
+                                .forEach(entry -> {
+                                    var producer = entry.getValue().getProducer();
+                                    var excludedGroups = value.getGroup();
+                                    var producerGroups = producer.getRequiredGroups();
+                                    var requiredGroups = Stream
+                                        .of(producerGroups)
+                                        .filter(Predicate.not(excludedGroups::equals))
+                                        .toList();
 
-                        producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
+                                    producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
 
-                        log.warn(
-                            "Excluded producer required groups '{}' for binding '{}'",
-                            excludedGroups,
-                            entry.getKey()
-                        );
+                                    log.warn(
+                                        "Excluded producer required groups '{}' for binding '{}'",
+                                        excludedGroups,
+                                        entry.getKey()
+                                    );
+                                });
+                        }
                     });
 
                 functionRouterInput.setDestination(

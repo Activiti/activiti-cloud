@@ -69,6 +69,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
         "spring.cloud.stream.bindings.auditConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
+        "spring.cloud.stream.bindings.queryConsumer.group=query",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.group=${spring.application.name}",
@@ -77,7 +78,6 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.bindings.queryConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.bindings.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.bindings.integrationRequests.enabled=true",
-        "activiti.cloud.messaging.function-router.bindings.auditProducer.exclude-producer-groups=query",
     }
 )
 @EnableTestBinder

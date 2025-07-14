@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -448,19 +447,18 @@ public class ActivitiCloudMessagingProperties {
             this.consumer = consumer;
         }
 
-        public Map<String, List<String>> getExcludeProducerGroups() {
-            return bindings
-                .entrySet()
-                .stream()
-                .filter(entry -> entry.getValue().hasExcludeProducerGroups())
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getExcludeProducerGroups()));
+        public boolean isExcludeRequiredProducerGroup(String bindingName) {
+            return Optional
+                .ofNullable(bindings.get(bindingName))
+                .map(BindingFunctionRouterProperties::isExcludeRequiredProducerGroups)
+                .orElse(false);
         }
     }
 
     public static class BindingFunctionRouterProperties {
 
         private boolean enabled;
-        private List<String> excludeProducerGroups;
+        private boolean excludeRequiredProducerGroups = true;
 
         public boolean isEnabled() {
             return enabled;
@@ -470,16 +468,12 @@ public class ActivitiCloudMessagingProperties {
             this.enabled = enabled;
         }
 
-        public List<String> getExcludeProducerGroups() {
-            return excludeProducerGroups;
+        public boolean isExcludeRequiredProducerGroups() {
+            return excludeRequiredProducerGroups;
         }
 
-        public void setExcludeProducerGroups(List<String> excludeProducerGroups) {
-            this.excludeProducerGroups = excludeProducerGroups;
-        }
-
-        public boolean hasExcludeProducerGroups() {
-            return excludeProducerGroups != null && !excludeProducerGroups.isEmpty();
+        public void setExcludeRequiredProducerGroups(boolean excludeRequiredProducerGroups) {
+            this.excludeRequiredProducerGroups = excludeRequiredProducerGroups;
         }
     }
 
