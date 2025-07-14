@@ -16,7 +16,6 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -58,8 +57,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
         FunctionAnnotationService functionAnnotationService,
         BindingServiceProperties bindingServiceProperties,
         StreamFunctionProperties streamFunctionProperties,
-        DefaultListableBeanFactory beanFactory,
-        ActivitiCloudMessagingProperties messagingProperties
+        DefaultListableBeanFactory beanFactory
     ) {
         return new BeanPostProcessor() {
             @Override

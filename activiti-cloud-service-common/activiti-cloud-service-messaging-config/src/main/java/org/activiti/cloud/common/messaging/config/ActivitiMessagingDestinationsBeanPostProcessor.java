@@ -71,42 +71,51 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 });
 
             if (functionRouter.isEnabled()) {
-                final var input = new BindingProperties();
+                final var functionRouterInput = new BindingProperties();
 
-                bindingServiceProperties
-                    .getBindings()
-                    .entrySet()
+                functionRouter
+                    .getFunctionRoutes()
                     .stream()
-                    .filter(entry -> functionRouter.isFunctionRoute(entry.getKey()))
-                    .forEach(entry -> {
-                        bindingServiceProperties.getBindings().remove(entry.getKey());
-                        functionRouter.getDestinations().put(entry.getKey(), entry.getValue().getDestination());
+                    .filter(bindingServiceProperties.getBindings()::containsKey)
+                    .forEach(key -> {
+                        var value = bindingServiceProperties.getBindings().remove(key);
+                        functionRouter.getDestinations().put(key, value.getDestination());
+
+                        log.warn("Configured function route '{}' for destination '{}'", key, value.getDestination());
                     });
 
-                bindingServiceProperties
-                    .getBindings()
+                functionRouter
+                    .getExcludeProducerGroups()
                     .entrySet()
                     .stream()
-                    .filter(entry -> functionRouter.getExcludeProducerGroups().containsKey(entry.getKey()))
+                    .filter(entry -> bindingServiceProperties.getBindings().containsKey(entry.getKey()))
                     .forEach(entry -> {
-                        var producer = entry.getValue().getProducer();
+                        var producer = bindingServiceProperties.getProducerProperties(entry.getKey());
                         var excludedGroups = functionRouter.getExcludeProducerGroups().get(entry.getKey());
-                        var producerGroups = entry.getValue().getProducer().getRequiredGroups();
+                        var producerGroups = producer.getRequiredGroups();
                         var requiredGroups = Stream
                             .of(producerGroups)
                             .filter(Predicate.not(excludedGroups::contains))
                             .toList();
 
                         producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
+
+                        log.warn(
+                            "Excluded producer required groups '{}' for binding '{}'",
+                            excludedGroups,
+                            entry.getKey()
+                        );
                     });
 
-                input.setDestination(
+                functionRouterInput.setDestination(
                     functionRouter.getDestinations().values().stream().distinct().collect(Collectors.joining(","))
                 );
-                input.setGroup(functionRouter.getGroup());
-                input.setConsumer(functionRouter.getConsumer());
+                functionRouterInput.setGroup(functionRouter.getGroup());
+                functionRouterInput.setConsumer(functionRouter.getConsumer());
 
-                bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, input);
+                bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
+
+                log.warn("Configured function router binding '{}'", functionRouterInput);
             }
         }
 

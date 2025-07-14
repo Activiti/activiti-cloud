@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -392,15 +393,13 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
 
-        private final Map<String, Boolean> bindings = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, BindingFunctionRouterProperties> bindings = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, String> destinations = new LinkedHashMap<>();
+        private final Map<String, String> destinations = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, List<String>> registrations = new LinkedHashMap<>();
+        private final Map<String, List<String>> registrations = new LinkedCaseInsensitiveMap<>();
 
         private String group;
-
-        private Map<String, List<String>> excludeProducerGroups;
 
         @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
@@ -421,12 +420,12 @@ public class ActivitiCloudMessagingProperties {
             return registrations;
         }
 
-        public Map<String, Boolean> getBindings() {
+        public Map<String, BindingFunctionRouterProperties> getBindings() {
             return bindings;
         }
 
         public boolean isFunctionRoute(String bindingName) {
-            return bindings.containsKey(bindingName) && bindings.get(bindingName);
+            return bindings.containsKey(bindingName) && bindings.get(bindingName).isEnabled();
         }
 
         public List<String> getFunctionRoutes() {
@@ -450,11 +449,37 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public Map<String, List<String>> getExcludeProducerGroups() {
+            return bindings
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().hasExcludeProducerGroups())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getExcludeProducerGroups()));
+        }
+    }
+
+    public static class BindingFunctionRouterProperties {
+
+        private boolean enabled;
+        private List<String> excludeProducerGroups;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public List<String> getExcludeProducerGroups() {
             return excludeProducerGroups;
         }
 
-        public void setExcludeProducerGroups(Map<String, List<String>> excludeProducerGroups) {
+        public void setExcludeProducerGroups(List<String> excludeProducerGroups) {
             this.excludeProducerGroups = excludeProducerGroups;
+        }
+
+        public boolean hasExcludeProducerGroups() {
+            return excludeProducerGroups != null && !excludeProducerGroups.isEmpty();
         }
     }
 
