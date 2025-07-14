@@ -93,7 +93,8 @@ public class FunctionRouterBindingConfigurationIT {
     private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
     private static final String FUNCTION_INTEGRATION_REQUESTS_NAME = "integrationRequests" + INPUT_BINDING;
 
-    private static AtomicReference<Message<?>> consumerMessage = new AtomicReference<>();
+    private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
+    private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
 
     @Autowired
     private TestBindingsChannels channels;
@@ -132,7 +133,15 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = QUERY_CONSUMER)
         public Consumer<Message<?>> queryConsumerHandler() {
             return message -> {
-                consumerMessage.set(message);
+                queryMessage.set(message);
+            };
+        }
+
+        @Bean
+        @FunctionBinding(input = AUDIT_CONSUMER)
+        public Consumer<Message<?>> auditConsumerHandler() {
+            return message -> {
+                auditMessage.set(message);
             };
         }
 
@@ -153,7 +162,8 @@ public class FunctionRouterBindingConfigurationIT {
 
     @BeforeEach
     public void setUp() {
-        consumerMessage.set(null);
+        queryMessage.set(null);
+        auditMessage.set(null);
         output.clear();
     }
 
@@ -311,8 +321,14 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "engine-events");
 
         // then
-        assertThat(consumerMessage).isNotNull();
-        assertThat(consumerMessage.get().getHeaders().get("type", String.class)).isEqualTo("Test Consumer");
+        assertThat(queryMessage.get())
+            .isNotNull()
+            .extracting(msg -> msg.getHeaders().get("type", String.class))
+            .isEqualTo("Test Consumer");
+        assertThat(auditMessage.get())
+            .isNotNull()
+            .extracting(msg -> msg.getHeaders().get("type", String.class))
+            .isEqualTo("Test Consumer");
     }
 
     @Test

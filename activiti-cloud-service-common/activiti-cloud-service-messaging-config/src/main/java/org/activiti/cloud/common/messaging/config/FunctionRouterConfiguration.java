@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
@@ -40,7 +40,6 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -68,34 +67,46 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-    Consumer<Message<?>> functionRouterConsumer(RoutingFunction routingFunction) {
+    Consumer<Message<?>> functionRouterConsumer(
+        RoutingFunction routingFunction,
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
         return message -> {
             Optional
-                .ofNullable(message)
+                .of(message)
                 .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
+                .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
+                .map(messagingProperties.getFunctionRouter().getRegistrations()::get)
                 .ifPresentOrElse(
-                    routingFunction::apply,
+                    registrations ->
+                        registrations.forEach(registration -> {
+                            try {
+                                var functionMessage = MessageBuilder
+                                    .fromMessage(message)
+                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
+                                    .build();
+
+                                routingFunction.apply(functionMessage);
+                            } catch (Exception error) {
+                                log.error(
+                                    "Error routing function registration {} for message {}",
+                                    registration,
+                                    message,
+                                    error
+                                );
+                            }
+                        }),
                     () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
                 );
         };
     }
 
     @Bean
-    MessageRoutingCallback functionRouterMessageRoutingCallback(ActivitiCloudMessagingProperties messagingProperties) {
+    MessageRoutingCallback functionRouterMessageRoutingCallback() {
         return new MessageRoutingCallback() {
             @Override
             public String routingResult(Message<?> message) {
-                var destination = (String) message.getHeaders().get(FUNCTION_DESTINATION);
-
-                var registrations = messagingProperties
-                    .getFunctionRouter()
-                    .getRegistrations()
-                    .getOrDefault(destination, new ArrayList<>());
-
-                return registrations
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new MessageDeliveryException("Can't resolve destination route: " + destination));
+                return message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
             }
         };
     }
