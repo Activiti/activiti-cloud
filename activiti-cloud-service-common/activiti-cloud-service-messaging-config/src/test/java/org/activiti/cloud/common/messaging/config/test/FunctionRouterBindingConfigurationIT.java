@@ -145,6 +145,14 @@ public class FunctionRouterBindingConfigurationIT {
             };
         }
 
+        @Bean
+        @FunctionBinding(input = AUDIT_CONSUMER)
+        public Consumer<Message<?>> errorConsumerHandler() {
+            return message -> {
+                throw new RuntimeException("error");
+            };
+        }
+
         @Bean(FUNCTION_PROCESSOR_NAME)
         @FunctionBinding(input = COMMAND_CONSUMER, output = TestBindingsChannels.COMMAND_RESULTS)
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
@@ -321,14 +329,17 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "engine-events");
 
         // then
-        assertThat(queryMessage.get())
-            .isNotNull()
-            .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-            .isEqualTo("queryConsumerHandler_registration");
-        assertThat(auditMessage.get())
-            .isNotNull()
-            .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-            .isEqualTo("auditConsumerHandler_registration");
+        await()
+            .untilAsserted(() -> {
+                assertThat(queryMessage.get())
+                    .isNotNull()
+                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                    .isEqualTo("queryConsumerHandler_registration");
+                assertThat(auditMessage.get())
+                    .isNotNull()
+                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                    .isEqualTo("auditConsumerHandler_registration");
+            });
     }
 
     @Test

@@ -17,6 +17,7 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -96,21 +97,28 @@ public class FunctionRouterConfiguration {
                                 CompletableFuture
                                     .supplyAsync(() -> routingFunction.apply(routeRequest))
                                     .thenApply(result -> {
+                                        var registration = routeRequest
+                                            .getHeaders()
+                                            .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
                                         log.debug(
-                                            "Function message {} successfully routed to {}",
+                                            "Function message request {} successfully routed to {}",
                                             message,
-                                            routeRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION)
+                                            registration
                                         );
-                                        return result;
+                                        return Map.entry(registration, Optional.ofNullable(result));
                                     })
                                     .exceptionally(error -> {
+                                        var registration = routeRequest
+                                            .getHeaders()
+                                            .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+
                                         log.error(
-                                            "Error routing message {} to function registration {}",
+                                            "Error routing message request {} to function registration {}",
                                             message,
-                                            routeRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION),
+                                            registration,
                                             error
                                         );
-                                        return null;
+                                        return Map.entry(registration, Optional.of(error));
                                     })
                             )
                             .toArray(CompletableFuture[]::new);
@@ -119,9 +127,24 @@ public class FunctionRouterConfiguration {
                             .allOf(functions)
                             .thenApply(v -> Stream.of(functions).map(CompletableFuture::join).toList());
 
-                        completed.thenAccept(results ->
-                            log.debug("Successfully completed function route message request {}", message)
-                        );
+                        completed.thenAccept(results -> {
+                            var errors = results
+                                .stream()
+                                .map(Map.Entry.class::cast)
+                                .filter(entry ->
+                                    Optional.class.cast(entry.getValue())
+                                        .filter(Exception.class::isInstance)
+                                        .isPresent()
+                                )
+                                .map(entry -> Optional.class.cast(entry.getValue()).get())
+                                .toList();
+
+                            if (!errors.isEmpty()) {
+                                log.debug("Errors handling function route message request {}", errors);
+                            } else {
+                                log.debug("Successfully completed function route message request {}", message);
+                            }
+                        });
                     },
                     () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
                 );
