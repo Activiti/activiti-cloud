@@ -79,23 +79,26 @@ public class FunctionRouterConfiguration {
                 .map(messagingProperties.getFunctionRouter().getRegistrations()::get)
                 .ifPresentOrElse(
                     registrations ->
-                        registrations.forEach(registration -> {
-                            try {
-                                var functionMessage = MessageBuilder
-                                    .fromMessage(message)
-                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
-                                    .build();
+                        registrations
+                            .stream()
+                            .parallel()
+                            .forEach(registration -> {
+                                try {
+                                    var functionMessage = MessageBuilder
+                                        .fromMessage(message)
+                                        .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
+                                        .build();
 
-                                routingFunction.apply(functionMessage);
-                            } catch (Exception error) {
-                                log.error(
-                                    "Error routing function registration {} for message {}",
-                                    registration,
-                                    message,
-                                    error
-                                );
-                            }
-                        }),
+                                    routingFunction.apply(functionMessage);
+                                } catch (Exception error) {
+                                    log.error(
+                                        "Error routing function registration {} for message {}",
+                                        registration,
+                                        message,
+                                        error
+                                    );
+                                }
+                            }),
                     () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
                 );
         };
