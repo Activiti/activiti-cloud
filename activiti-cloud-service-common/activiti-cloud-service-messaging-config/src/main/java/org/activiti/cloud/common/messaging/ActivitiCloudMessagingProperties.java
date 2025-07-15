@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -274,7 +275,8 @@ public class ActivitiCloudMessagingProperties {
             Objects.equals(instanceIndex, that.instanceIndex) &&
             Objects.equals(destinationSeparator, that.destinationSeparator) &&
             Objects.equals(destinationPrefix, that.destinationPrefix) &&
-            Objects.equals(destinations, that.destinations)
+            Objects.equals(destinations, that.destinations) &&
+            Objects.equals(functionRouter, that.functionRouter)
         );
     }
 
@@ -400,6 +402,10 @@ public class ActivitiCloudMessagingProperties {
 
         private String group;
 
+        private int maxRetries = 3;
+
+        private Duration retryInterval = Duration.ofMillis(10);
+
         @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
 
@@ -452,6 +458,65 @@ public class ActivitiCloudMessagingProperties {
                 .ofNullable(bindings.get(bindingName))
                 .map(BindingFunctionRouterProperties::isExcludeRequiredProducerGroups)
                 .orElse(false);
+        }
+
+        public int getMaxRetries() {
+            return maxRetries;
+        }
+
+        public void setMaxRetries(int maxRetries) {
+            this.maxRetries = maxRetries;
+        }
+
+        public Duration getRetryInterval() {
+            return retryInterval;
+        }
+
+        public void setRetryInterval(Duration retryInterval) {
+            this.retryInterval = retryInterval;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FunctionRouterProperties that)) return false;
+            return (
+                enabled == that.enabled &&
+                maxRetries == that.maxRetries &&
+                Objects.equals(bindings, that.bindings) &&
+                Objects.equals(destinations, that.destinations) &&
+                Objects.equals(registrations, that.registrations) &&
+                Objects.equals(group, that.group) &&
+                Objects.equals(retryInterval, that.retryInterval) &&
+                Objects.equals(consumer, that.consumer)
+            );
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                enabled,
+                bindings,
+                destinations,
+                registrations,
+                group,
+                maxRetries,
+                retryInterval,
+                consumer
+            );
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", FunctionRouterProperties.class.getSimpleName() + "[", "]")
+                .add("enabled=" + enabled)
+                .add("bindings=" + bindings)
+                .add("destinations=" + destinations)
+                .add("registrations=" + registrations)
+                .add("group='" + group + "'")
+                .add("maxRetries=" + maxRetries)
+                .add("retryInterval=" + retryInterval)
+                .add("consumer=" + consumer)
+                .toString();
         }
     }
 

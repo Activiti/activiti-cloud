@@ -26,6 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -53,7 +55,6 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandlingException;
@@ -73,6 +74,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.queryConsumer.group=query",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
         "activiti.cloud.messaging.function-router.enabled=true",
+        "activiti.cloud.messaging.function-router.max-retries=4",
+        "activiti.cloud.messaging.function-router.retry-interval=100ms",
         "activiti.cloud.messaging.function-router.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.consumer.concurrency=2",
         "activiti.cloud.messaging.function-router.bindings.commandConsumer.enabled=true",
@@ -125,7 +128,7 @@ public class FunctionRouterBindingConfigurationIT {
     private OutputDestination output;
 
     @Autowired
-    private Environment environment;
+    private ActivitiCloudMessagingProperties messagingProperties;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -377,5 +380,11 @@ public class FunctionRouterBindingConfigurationIT {
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
             });
+    }
+
+    @Test
+    void messagingProperties() {
+        assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
+        assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
     }
 }

@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +78,7 @@ public class FunctionRouterConfiguration {
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties
     ) {
+        final var functionRouter = messagingProperties.getFunctionRouter();
         return message -> {
             Optional
                 .of(message)
@@ -87,38 +90,41 @@ public class FunctionRouterConfiguration {
                     registrations -> {
                         var functions = registrations
                             .stream()
-                            .map(registration ->
+                            .map(functionRegistration ->
                                 MessageBuilder
                                     .fromMessage(message)
-                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
+                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
                                     .build()
                             )
                             .map(routeRequest ->
-                                CompletableFuture
-                                    .supplyAsync(() -> routingFunction.apply(routeRequest))
+                                supplyAsyncWithRetry(
+                                        () -> CompletableFuture.supplyAsync(() -> routingFunction.apply(routeRequest)),
+                                        functionRouter.getMaxRetries(),
+                                        functionRouter.getRetryInterval()
+                                    )
                                     .thenApply(result -> {
-                                        var registration = routeRequest
+                                        var functionDefinition = routeRequest
                                             .getHeaders()
                                             .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
                                         log.debug(
                                             "Function message request {} successfully routed to {}",
                                             message,
-                                            registration
+                                            functionDefinition
                                         );
-                                        return Map.entry(registration, Optional.ofNullable(result));
+                                        return Map.entry(functionDefinition, Optional.ofNullable(result));
                                     })
                                     .exceptionally(error -> {
-                                        var registration = routeRequest
+                                        var functionDefinition = routeRequest
                                             .getHeaders()
                                             .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
 
                                         log.error(
                                             "Error routing message request {} to function registration {}",
                                             message,
-                                            registration,
+                                            functionDefinition,
                                             error
                                         );
-                                        return Map.entry(registration, Optional.of(error));
+                                        return Map.entry(functionDefinition, Optional.of(error));
                                     })
                             )
                             .toArray(CompletableFuture[]::new);
