@@ -78,13 +78,17 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .getFunctionRoutes()
                     .stream()
                     .filter(bindingServiceProperties.getBindings()::containsKey)
-                    .forEach(key -> {
-                        var value = bindingServiceProperties.getBindings().remove(key);
-                        functionRouter.getDestinations().put(key, value.getDestination());
+                    .forEach(bindingName -> {
+                        var value = bindingServiceProperties.getBindings().remove(bindingName);
+                        functionRouter.getDestinations().put(bindingName, value.getDestination());
 
-                        log.warn("Configured function route '{}' for destination '{}'", key, value.getDestination());
+                        log.warn(
+                            "Configured function route '{}' for destination '{}'",
+                            bindingName,
+                            value.getDestination()
+                        );
 
-                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(key)) {
+                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(bindingName)) {
                             bindingServiceProperties
                                 .getBindings()
                                 .entrySet()
@@ -111,6 +115,28 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                     );
                                 });
                         }
+                    });
+
+                functionRouter
+                    .getBindings()
+                    .keySet()
+                    .stream()
+                    .filter(Predicate.not(functionRouter::isFunctionRoute))
+                    .filter(functionRouter::isExcludeRequiredProducerGroup)
+                    .forEach(bindingName -> {
+                        Optional
+                            .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
+                            .map(BindingProperties::getProducer)
+                            .ifPresent(producer -> {
+                                var excludedGroups = producer.getRequiredGroups();
+                                producer.setRequiredGroups();
+
+                                log.warn(
+                                    "Excluded output producer required groups '{}' for binding '{}'",
+                                    excludedGroups,
+                                    bindingName
+                                );
+                            });
                     });
 
                 functionRouterInput.setDestination(

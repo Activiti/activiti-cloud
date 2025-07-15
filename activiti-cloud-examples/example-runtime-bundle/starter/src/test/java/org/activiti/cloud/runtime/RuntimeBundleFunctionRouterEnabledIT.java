@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,11 +36,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = RuntimeBundleApplication.class,
     properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
 )
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
 public class RuntimeBundleFunctionRouterEnabledIT {
+
+    @ServiceConnection
+    @Container
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:management-alpine");
 
     @Container
     @ServiceConnection
@@ -81,6 +83,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     void bindingServicePropertiesRequiredProducerGroups() {
         assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups()).isEmpty();
     }
 
     @Test
