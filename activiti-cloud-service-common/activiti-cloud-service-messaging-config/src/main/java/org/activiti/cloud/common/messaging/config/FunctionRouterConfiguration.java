@@ -16,8 +16,11 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -77,28 +80,34 @@ public class FunctionRouterConfiguration {
                 .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
                 .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .map(messagingProperties.getFunctionRouter().getRegistrations()::get)
+                .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
-                    registrations ->
-                        registrations
+                    registrations -> {
+                        var functions = registrations
                             .stream()
-                            .parallel()
-                            .forEach(registration -> {
-                                try {
-                                    var functionMessage = MessageBuilder
-                                        .fromMessage(message)
-                                        .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
-                                        .build();
+                            .map(registration ->
+                                MessageBuilder
+                                    .fromMessage(message)
+                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
+                                    .build()
+                            )
+                            .map(function -> CompletableFuture.supplyAsync(() -> routingFunction.apply(function)))
+                            .toArray(CompletableFuture[]::new);
 
-                                    routingFunction.apply(functionMessage);
-                                } catch (Exception error) {
-                                    log.error(
-                                        "Error routing function registration {} for message {}",
-                                        registration,
-                                        message,
-                                        error
-                                    );
-                                }
-                            }),
+                        CompletableFuture
+                            .allOf(functions)
+                            .thenRun(() -> log.debug("Message {} successfully routed to {}", message, registrations))
+                            .exceptionally(error -> {
+                                log.error(
+                                    "Error routing function registration {} for message {}",
+                                    registrations,
+                                    message,
+                                    error
+                                );
+                                return null;
+                            })
+                            .join();
+                    },
                     () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
                 );
         };

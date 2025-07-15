@@ -323,12 +323,12 @@ public class FunctionRouterBindingConfigurationIT {
         // then
         assertThat(queryMessage.get())
             .isNotNull()
-            .extracting(msg -> msg.getHeaders().get("type", String.class))
-            .isEqualTo("Test Consumer");
+            .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+            .isEqualTo("queryConsumerHandler_registration");
         assertThat(auditMessage.get())
             .isNotNull()
-            .extracting(msg -> msg.getHeaders().get("type", String.class))
-            .isEqualTo("Test Consumer");
+            .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+            .isEqualTo("auditConsumerHandler_registration");
     }
 
     @Test
