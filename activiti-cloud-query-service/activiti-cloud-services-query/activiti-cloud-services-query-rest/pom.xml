@@ -216,11 +216,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.javacrumbs.json-unit</groupId>
-      <artifactId>json-unit-fluent</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
@@ -260,6 +255,11 @@
       <artifactId>spring-mock-mvc</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>net.javacrumbs.json-unit</groupId>
+          <artifactId>json-unit-assertj</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <build>
     <plugins>

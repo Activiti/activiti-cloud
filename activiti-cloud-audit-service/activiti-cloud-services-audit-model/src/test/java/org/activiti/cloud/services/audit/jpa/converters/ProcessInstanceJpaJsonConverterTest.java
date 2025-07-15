@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import java.util.Date;
@@ -44,17 +44,11 @@ public class ProcessInstanceJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(processInstance);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("name")
-            .isEqualTo("My instance")
-            .node("status")
-            .isEqualTo("RUNNING")
-            .node("processDefinitionId")
-            .isEqualTo("proc-def-id")
-            .node("businessKey")
-            .isEqualTo("business-key")
-            .node("id")
-            .isEqualTo("\"20\"");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("My instance");
+        assertThatJson(jsonRepresentation).inPath("status").isEqualTo("RUNNING");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("businessKey").isEqualTo("business-key");
+        assertThatJson(jsonRepresentation).inPath("id").isEqualTo("\"20\"");
     }
 
     @Test

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -132,10 +132,10 @@ class CandidateUserControllerImplIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[0].entry.user")
+            .inPath("list.entries[0].entry.user")
             .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[1].entry.user")
+            .inPath("list.entries[1].entry.user")
             .isEqualTo("testuser");
     }
 
@@ -150,10 +150,10 @@ class CandidateUserControllerImplIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateUsers[0].user")
+            .inPath("_embedded.candidateUsers[0].user")
             .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateUsers[1].user")
+            .inPath("_embedded.candidateUsers[1].user")
             .isEqualTo("testuser");
     }
 }
