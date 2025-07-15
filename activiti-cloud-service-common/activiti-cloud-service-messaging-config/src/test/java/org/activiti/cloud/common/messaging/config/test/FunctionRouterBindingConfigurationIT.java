@@ -56,6 +56,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
@@ -149,7 +150,7 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = AUDIT_CONSUMER)
         public Consumer<Message<?>> errorConsumerHandler() {
             return message -> {
-                throw new RuntimeException("error");
+                throw new MessageHandlingException(message, "test error");
             };
         }
 
