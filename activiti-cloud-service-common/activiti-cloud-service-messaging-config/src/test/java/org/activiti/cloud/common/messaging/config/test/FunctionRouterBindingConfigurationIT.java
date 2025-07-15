@@ -99,6 +99,7 @@ public class FunctionRouterBindingConfigurationIT {
 
     private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
+    private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
 
     @Autowired
     private TestBindingsChannels channels;
@@ -145,15 +146,11 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = AUDIT_CONSUMER)
         public Consumer<Message<?>> auditConsumerHandler() {
             return message -> {
-                auditMessage.set(message);
-            };
-        }
+                if (auditRetries.getAndSet(auditRetries.get() + 1) < 3) {
+                    throw new MessageHandlingException(message, "test error");
+                }
 
-        @Bean
-        @FunctionBinding(input = AUDIT_CONSUMER)
-        public Consumer<Message<?>> errorConsumerHandler() {
-            return message -> {
-                throw new MessageHandlingException(message, "test error");
+                auditMessage.set(message);
             };
         }
 
@@ -176,6 +173,7 @@ public class FunctionRouterBindingConfigurationIT {
     public void setUp() {
         queryMessage.set(null);
         auditMessage.set(null);
+        auditRetries.set(0);
         output.clear();
     }
 
@@ -344,6 +342,8 @@ public class FunctionRouterBindingConfigurationIT {
                     .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
                     .isEqualTo("auditConsumerHandler_registration");
             });
+
+        assertThat(auditRetries.get()).isEqualTo(4);
     }
 
     @Test
