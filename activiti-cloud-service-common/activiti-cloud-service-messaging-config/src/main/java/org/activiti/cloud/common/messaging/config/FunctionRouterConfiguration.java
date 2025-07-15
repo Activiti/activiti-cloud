@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -91,22 +92,36 @@ public class FunctionRouterConfiguration {
                                     .setHeader(FunctionProperties.FUNCTION_DEFINITION, registration)
                                     .build()
                             )
-                            .map(function -> CompletableFuture.supplyAsync(() -> routingFunction.apply(function)))
+                            .map(routeRequest ->
+                                CompletableFuture
+                                    .supplyAsync(() -> routingFunction.apply(routeRequest))
+                                    .thenApply(result -> {
+                                        log.debug(
+                                            "Function message {} successfully routed to {}",
+                                            message,
+                                            routeRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION)
+                                        );
+                                        return result;
+                                    })
+                                    .exceptionally(error -> {
+                                        log.error(
+                                            "Error routing message {} to function registration {}",
+                                            message,
+                                            routeRequest.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION),
+                                            error
+                                        );
+                                        return null;
+                                    })
+                            )
                             .toArray(CompletableFuture[]::new);
 
-                        CompletableFuture
+                        var completed = CompletableFuture
                             .allOf(functions)
-                            .thenRun(() -> log.debug("Message {} successfully routed to {}", message, registrations))
-                            .exceptionally(error -> {
-                                log.error(
-                                    "Error routing function registration {} for message {}",
-                                    registrations,
-                                    message,
-                                    error
-                                );
-                                return null;
-                            })
-                            .join();
+                            .thenApply(v -> Stream.of(functions).map(CompletableFuture::join).toList());
+
+                        completed.thenAccept(results ->
+                            log.debug("Successfully completed function route message request {}", message)
+                        );
                     },
                     () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
                 );
