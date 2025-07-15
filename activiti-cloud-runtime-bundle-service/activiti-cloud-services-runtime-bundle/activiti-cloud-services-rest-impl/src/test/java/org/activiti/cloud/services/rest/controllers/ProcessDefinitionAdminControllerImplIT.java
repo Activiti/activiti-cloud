@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -216,26 +216,15 @@ class ProcessDefinitionAdminControllerImplIT {
 
         //then
         String responseContent = result.getResponse().getContentAsString();
-        assertThatJson(responseContent)
-            .node("list.pagination.skipCount")
-            .isEqualTo(10)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(11);
-        assertThatJson(responseContent)
-            .node("list.entries[0].entry.id")
-            .isEqualTo(processDefId)
-            .node("list.entries[0].entry.name")
-            .isEqualTo("my process")
-            .node("list.entries[0].entry.description")
-            .isEqualTo("This is my process")
-            .node("list.entries[0].entry.version")
-            .isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.skipCount").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.count").isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.hasMoreItems").isEqualTo(false);
+        assertThatJson(responseContent).inPath("list.pagination.totalItems").isEqualTo(11);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.id").isEqualTo(processDefId);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.name").isEqualTo("my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.description").isEqualTo("This is my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.version").isEqualTo(1);
     }
 
     @Test
