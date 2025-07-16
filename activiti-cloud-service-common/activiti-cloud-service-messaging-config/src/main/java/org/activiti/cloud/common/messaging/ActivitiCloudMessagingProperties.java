@@ -460,6 +460,14 @@ public class ActivitiCloudMessagingProperties {
                 .orElse(false);
         }
 
+        public boolean isOverrideRequiredProducerGroup(String bindingName) {
+            return Optional
+                .ofNullable(bindings.get(bindingName))
+                .map(BindingFunctionRouterProperties::getOverrideRequiredProducerGroups)
+                .map(it -> !it.isEmpty())
+                .orElse(false);
+        }
+
         public int getMaxRetries() {
             return maxRetries;
         }
@@ -524,6 +532,7 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
         private boolean excludeRequiredProducerGroups = true;
+        private List<String> overrideRequiredProducerGroups = new ArrayList<>();
 
         public boolean isEnabled() {
             return enabled;
@@ -539,6 +548,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setExcludeRequiredProducerGroups(boolean excludeRequiredProducerGroups) {
             this.excludeRequiredProducerGroups = excludeRequiredProducerGroups;
+        }
+
+        public List<String> getOverrideRequiredProducerGroups() {
+            return overrideRequiredProducerGroups;
+        }
+
+        public void setOverrideRequiredProducerGroups(List<String> overrideRequiredProducerGroups) {
+            this.overrideRequiredProducerGroups = overrideRequiredProducerGroups;
         }
     }
 

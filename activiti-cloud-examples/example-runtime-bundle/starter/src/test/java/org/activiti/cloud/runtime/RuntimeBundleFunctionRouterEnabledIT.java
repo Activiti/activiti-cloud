@@ -83,7 +83,8 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     void bindingServicePropertiesRequiredProducerGroups() {
         assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups()).isEmpty();
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
+            .containsOnly("consumer");
     }
 
     @Test
@@ -108,6 +109,14 @@ public class RuntimeBundleFunctionRouterEnabledIT {
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.auditProducer.producer.queue-name-group-only",
                 Boolean.class
             )
         )

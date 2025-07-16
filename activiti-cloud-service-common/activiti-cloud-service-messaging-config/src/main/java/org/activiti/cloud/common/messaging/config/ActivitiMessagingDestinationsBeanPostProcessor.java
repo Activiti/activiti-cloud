@@ -122,18 +122,21 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .keySet()
                     .stream()
                     .filter(Predicate.not(functionRouter::isFunctionRoute))
-                    .filter(functionRouter::isExcludeRequiredProducerGroup)
+                    .filter(functionRouter::isOverrideRequiredProducerGroup)
                     .forEach(bindingName -> {
                         Optional
                             .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
                             .map(BindingProperties::getProducer)
                             .ifPresent(producer -> {
-                                var excludedGroups = producer.getRequiredGroups();
-                                producer.setRequiredGroups();
+                                var overrideGroups = functionRouter
+                                    .getBindings()
+                                    .get(bindingName)
+                                    .getOverrideRequiredProducerGroups();
+                                producer.setRequiredGroups(overrideGroups.toArray(new String[] {}));
 
                                 log.warn(
-                                    "Excluded output producer required groups '{}' for binding '{}'",
-                                    excludedGroups,
+                                    "Override producer required groups '{}' for binding '{}'",
+                                    overrideGroups,
                                     bindingName
                                 );
                             });
