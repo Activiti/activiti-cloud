@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -141,17 +141,13 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.skipCount").isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.count").isEqualTo(1);
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(11)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(12);
+            .inPath("list.pagination.hasMoreItems")
+            .isEqualTo(false);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.totalItems").isEqualTo(12);
     }
 
     @Test
@@ -178,18 +174,15 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.skipCount").isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.count").isEqualTo(1);
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(11)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(12)
-            .node("list.entries[0].entry.ephemeral")
+            .inPath("list.pagination.hasMoreItems")
+            .isEqualTo(false);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.totalItems").isEqualTo(12);
+        assertThatJson(result.getResponse().getContentAsString())
+            .inPath("list.entries[0].entry.ephemeral")
             .isEqualTo(true);
     }
 

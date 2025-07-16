@@ -70,10 +70,11 @@ public class TestErrorConnectorIT {
         Message<?> message = MessageBuilder
             .withPayload(payload)
             .setHeader(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+            .setHeader("connectorType", "test-error-connector.throwError")
             .build();
 
         //when
-        input.send(message, TestErrorConnector.Channels.CHANNEL);
+        input.send(message, "test-error-connector.throwError");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationError_myApp");

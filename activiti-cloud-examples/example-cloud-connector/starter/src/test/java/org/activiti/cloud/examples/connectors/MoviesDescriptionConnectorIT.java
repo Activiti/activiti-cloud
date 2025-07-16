@@ -65,10 +65,13 @@ public class MoviesDescriptionConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).build();
+        Message<?> message = MessageBuilder
+            .withPayload(payload)
+            .setHeader("connectorType", "Movies.getMovieDesc")
+            .build();
 
         //when
-        input.send(message, MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER);
+        input.send(message, "Movies.getMovieDesc");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");
