@@ -19,7 +19,7 @@
   </modules>
   <properties>
     <activiti.version>8.8.0-alpha.71</activiti.version>
-    <commons-fileupload.version>1.6</commons-fileupload.version>
+    <commons-fileupload.version>1.6.0</commons-fileupload.version>
   </properties>
   <dependencyManagement>
     <dependencies>
