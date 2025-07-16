@@ -394,7 +394,7 @@ public class ActivitiCloudMessagingProperties {
 
         private boolean enabled;
 
-        private final Map<String, BindingFunctionRouterProperties> bindings = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, BindingFunctionRouterProperties> routes = new LinkedCaseInsensitiveMap<>();
 
         private final Map<String, String> destinations = new LinkedCaseInsensitiveMap<>();
 
@@ -425,16 +425,16 @@ public class ActivitiCloudMessagingProperties {
             return registrations;
         }
 
-        public Map<String, BindingFunctionRouterProperties> getBindings() {
-            return bindings;
+        public Map<String, BindingFunctionRouterProperties> getRoutes() {
+            return routes;
         }
 
         public boolean isFunctionRoute(String bindingName) {
-            return bindings.containsKey(bindingName) && bindings.get(bindingName).isEnabled();
+            return routes.containsKey(bindingName) && routes.get(bindingName).isEnabled();
         }
 
         public List<String> getFunctionRoutes() {
-            return bindings.keySet().stream().filter(this::isFunctionRoute).toList();
+            return routes.keySet().stream().filter(this::isFunctionRoute).toList();
         }
 
         public String getGroup() {
@@ -455,14 +455,14 @@ public class ActivitiCloudMessagingProperties {
 
         public boolean isExcludeRequiredProducerGroup(String bindingName) {
             return Optional
-                .ofNullable(bindings.get(bindingName))
+                .ofNullable(routes.get(bindingName))
                 .map(BindingFunctionRouterProperties::isExcludeRequiredProducerGroups)
                 .orElse(false);
         }
 
         public boolean isOverrideRequiredProducerGroup(String bindingName) {
             return Optional
-                .ofNullable(bindings.get(bindingName))
+                .ofNullable(routes.get(bindingName))
                 .map(BindingFunctionRouterProperties::getOverrideRequiredProducerGroups)
                 .map(it -> !it.isEmpty())
                 .orElse(false);
@@ -490,7 +490,7 @@ public class ActivitiCloudMessagingProperties {
             return (
                 enabled == that.enabled &&
                 maxRetries == that.maxRetries &&
-                Objects.equals(bindings, that.bindings) &&
+                Objects.equals(routes, that.routes) &&
                 Objects.equals(destinations, that.destinations) &&
                 Objects.equals(registrations, that.registrations) &&
                 Objects.equals(group, that.group) &&
@@ -503,7 +503,7 @@ public class ActivitiCloudMessagingProperties {
         public int hashCode() {
             return Objects.hash(
                 enabled,
-                bindings,
+                routes,
                 destinations,
                 registrations,
                 group,
@@ -517,7 +517,7 @@ public class ActivitiCloudMessagingProperties {
         public String toString() {
             return new StringJoiner(", ", FunctionRouterProperties.class.getSimpleName() + "[", "]")
                 .add("enabled=" + enabled)
-                .add("bindings=" + bindings)
+                .add("routes=" + routes)
                 .add("destinations=" + destinations)
                 .add("registrations=" + registrations)
                 .add("group='" + group + "'")

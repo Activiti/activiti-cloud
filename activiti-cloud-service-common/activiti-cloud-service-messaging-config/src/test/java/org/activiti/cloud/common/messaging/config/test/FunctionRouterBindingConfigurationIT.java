@@ -78,10 +78,10 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
         "activiti.cloud.messaging.function-router.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.consumer.concurrency=2",
-        "activiti.cloud.messaging.function-router.bindings.commandConsumer.enabled=true",
-        "activiti.cloud.messaging.function-router.bindings.queryConsumer.enabled=true",
-        "activiti.cloud.messaging.function-router.bindings.auditConsumer.enabled=true",
-        "activiti.cloud.messaging.function-router.bindings.integrationRequests.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.commandConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.queryConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
     }
 )
 @EnableTestBinder

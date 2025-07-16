@@ -118,7 +118,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     });
 
                 functionRouter
-                    .getBindings()
+                    .getRoutes()
                     .keySet()
                     .stream()
                     .filter(Predicate.not(functionRouter::isFunctionRoute))
@@ -129,7 +129,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             .map(BindingProperties::getProducer)
                             .ifPresent(producer -> {
                                 var overrideGroups = functionRouter
-                                    .getBindings()
+                                    .getRoutes()
                                     .get(bindingName)
                                     .getOverrideRequiredProducerGroups();
                                 producer.setRequiredGroups(overrideGroups.toArray(new String[] {}));
