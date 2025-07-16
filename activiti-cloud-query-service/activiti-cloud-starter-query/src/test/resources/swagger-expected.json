@@ -22,7 +22,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -32,7 +31,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -42,7 +40,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -127,7 +124,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -137,7 +133,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -147,7 +142,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -284,7 +278,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -294,7 +287,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -304,7 +296,13 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -325,6 +323,13 @@
             }
           },
           {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "processDefinitionName",
             "in": "query",
             "schema": {
@@ -337,6 +342,22 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           },
           {
@@ -363,10 +384,41 @@
             }
           },
           {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
@@ -378,6 +430,20 @@
           },
           {
             "name": "processInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -396,6 +462,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -430,6 +503,22 @@
             }
           },
           {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -439,6 +528,13 @@
           },
           {
             "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -468,6 +564,13 @@
             }
           },
           {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -480,118 +583,6 @@
                 "CANCELLED",
                 "DELETED"
               ]
-            }
-          },
-          {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "businessKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -680,7 +671,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -690,7 +680,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -700,7 +689,13 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -721,6 +716,13 @@
             }
           },
           {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "processDefinitionName",
             "in": "query",
             "schema": {
@@ -733,6 +735,22 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           },
           {
@@ -759,10 +777,41 @@
             }
           },
           {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
@@ -774,6 +823,20 @@
           },
           {
             "name": "processInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -792,6 +855,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -826,6 +896,22 @@
             }
           },
           {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -835,6 +921,13 @@
           },
           {
             "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -864,6 +957,13 @@
             }
           },
           {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -876,118 +976,6 @@
                 "CANCELLED",
                 "DELETED"
               ]
-            }
-          },
-          {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "businessKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -1064,6 +1052,13 @@
         "operationId": "deleteTasks",
         "parameters": [
           {
+            "name": "parentTaskId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "dueDate",
             "in": "query",
             "schema": {
@@ -1073,6 +1068,13 @@
           },
           {
             "name": "processInstance",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1091,6 +1093,22 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           },
           {
@@ -1117,10 +1135,41 @@
             }
           },
           {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
@@ -1132,6 +1181,20 @@
           },
           {
             "name": "processInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1150,6 +1213,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -1184,6 +1254,22 @@
             }
           },
           {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -1193,6 +1279,13 @@
           },
           {
             "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1222,6 +1315,13 @@
             }
           },
           {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -1234,118 +1334,6 @@
                 "CANCELLED",
                 "DELETED"
               ]
-            }
-          },
-          {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "businessKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -1418,7 +1406,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1428,7 +1415,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1438,7 +1424,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -1537,7 +1522,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1547,7 +1531,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1557,7 +1540,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -1846,7 +1828,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1856,7 +1837,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1866,7 +1846,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -2446,7 +2425,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2456,7 +2434,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2466,7 +2443,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -2603,7 +2579,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2613,7 +2588,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2623,7 +2597,13 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -2644,6 +2624,13 @@
             }
           },
           {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "processDefinitionName",
             "in": "query",
             "schema": {
@@ -2656,6 +2643,22 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           },
           {
@@ -2682,10 +2685,41 @@
             }
           },
           {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           },
           {
@@ -2697,6 +2731,20 @@
           },
           {
             "name": "processInstanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -2715,6 +2763,13 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -2749,6 +2804,22 @@
             }
           },
           {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -2758,6 +2829,13 @@
           },
           {
             "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -2787,6 +2865,13 @@
             }
           },
           {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -2799,118 +2884,6 @@
                 "CANCELLED",
                 "DELETED"
               ]
-            }
-          },
-          {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "businessKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -2991,7 +2964,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3001,7 +2973,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3011,7 +2982,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3349,7 +3319,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3359,7 +3328,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3369,7 +3337,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3742,7 +3709,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3752,7 +3718,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3762,7 +3727,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3888,7 +3852,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3898,7 +3861,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3908,7 +3870,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4008,7 +3969,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4018,7 +3978,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4028,7 +3987,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4388,7 +4346,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4398,7 +4355,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4408,7 +4364,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4616,7 +4571,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4626,7 +4580,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4636,7 +4589,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4740,7 +4692,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4750,7 +4701,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4760,7 +4710,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5084,7 +5033,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5094,7 +5042,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5104,7 +5051,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5441,7 +5387,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5451,7 +5396,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5461,7 +5405,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5573,7 +5516,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5583,7 +5525,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5593,7 +5534,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5676,7 +5616,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5686,7 +5625,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5696,7 +5634,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6162,7 +6099,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6172,7 +6108,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6182,7 +6117,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6390,7 +6324,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6400,7 +6333,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6410,7 +6342,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6764,19 +6695,19 @@
       "CloudVariableInstance_ProcessVariables": {
         "type": "object",
         "properties": {
-          "appName": {
+          "serviceFullName": {
             "type": "string"
           },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           },
           "appVersion": {
@@ -6791,13 +6722,13 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
+          "processInstanceId": {
             "type": "string"
           },
           "taskVariable": {
             "type": "boolean"
           },
-          "processInstanceId": {
+          "taskId": {
             "type": "string"
           }
         },
@@ -6886,13 +6817,7 @@
           "processDefinitionName": {
             "type": "string"
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
+          "rootProcessInstanceId": {
             "type": "string"
           },
           "serviceFullName": {
@@ -6901,13 +6826,16 @@
           "serviceVersion": {
             "type": "string"
           },
-          "appVersion": {
+          "serviceType": {
             "type": "string"
           },
-          "standalone": {
-            "type": "boolean"
+          "serviceName": {
+            "type": "string"
           },
-          "owner": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
             "type": "string"
           },
           "name": {
@@ -6920,14 +6848,57 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "owner": {
             "type": "string"
           },
-          "assignee": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "standalone": {
+            "type": "boolean"
+          },
+          "parentTaskId": {
             "type": "string"
           },
-          "formKey": {
+          "taskDefinitionKey": {
             "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "candidateUsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "createdDate": {
             "type": "string",
@@ -6944,58 +6915,18 @@
           "completedBy": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "description": {
+          "formKey": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "businessKey": {
             "type": "string"
           },
-          "candidateUsers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "candidateGroups": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "parentTaskId": {
-            "type": "string"
-          },
-          "taskDefinitionKey": {
+          "assignee": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudTask_ProcessVariables"
@@ -7159,19 +7090,19 @@
             },
             "uniqueItems": true
           },
-          "appName": {
+          "serviceFullName": {
             "type": "string"
           },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           },
           "appVersion": {
@@ -7183,17 +7114,11 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "startDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "parentId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "status": {
@@ -7206,12 +7131,24 @@
               "COMPLETED"
             ]
           },
-          "processDefinitionId": {
+          "parentId": {
             "type": "string"
           },
-          "completedDate": {
+          "startDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           },
           "processDefinitionKey": {
             "type": "string"
@@ -7219,12 +7156,6 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_ProcessVariables"
@@ -7290,19 +7221,19 @@
       "CloudVariableInstance": {
         "type": "object",
         "properties": {
-          "appName": {
+          "serviceFullName": {
             "type": "string"
           },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           },
           "appVersion": {
@@ -7317,13 +7248,13 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
+          "processInstanceId": {
             "type": "string"
           },
           "taskVariable": {
             "type": "boolean"
           },
-          "processInstanceId": {
+          "taskId": {
             "type": "string"
           }
         },
@@ -7362,84 +7293,6 @@
         },
         "title": "ListResponseContentCloudVariableInstance"
       },
-      "QueryCloudVariableInstance": {
-        "title": "QueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
-          "serviceFullName": {
-            "type": "string"
-          },
-          "serviceVersion": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "value": {
-            "type": "object"
-          },
-          "type": {
-            "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
-          },
-          "taskId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "ephemeral": {
-            "type": "boolean"
-          }
-        }
-      },
-      "EntriesResponseContentQueryCloudVariableInstance": {
-        "title": "EntriesResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntryResponseContentQueryCloudVariableInstance"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetadata"
-          }
-        }
-      },
-      "EntryResponseContentQueryCloudVariableInstance": {
-        "title": "EntryResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/QueryCloudVariableInstance"
-          }
-        }
-      },
-      "ListResponseContentQueryCloudVariableInstance": {
-        "title": "ListResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudVariableInstance"
-          }
-        }
-      },
       "PaginationMetadata": {
         "type": "object",
         "properties": {
@@ -7468,19 +7321,19 @@
       "CloudVariableInstance_General": {
         "type": "object",
         "properties": {
-          "appName": {
+          "serviceFullName": {
             "type": "string"
           },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           },
           "appVersion": {
@@ -7495,13 +7348,13 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
+          "processInstanceId": {
             "type": "string"
           },
           "taskVariable": {
             "type": "boolean"
           },
-          "processInstanceId": {
+          "taskId": {
             "type": "string"
           }
         },
@@ -7541,13 +7394,7 @@
           "processDefinitionName": {
             "type": "string"
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
+          "rootProcessInstanceId": {
             "type": "string"
           },
           "serviceFullName": {
@@ -7556,13 +7403,16 @@
           "serviceVersion": {
             "type": "string"
           },
-          "appVersion": {
+          "serviceType": {
             "type": "string"
           },
-          "standalone": {
-            "type": "boolean"
+          "serviceName": {
+            "type": "string"
           },
-          "owner": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
             "type": "string"
           },
           "name": {
@@ -7575,14 +7425,57 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "owner": {
             "type": "string"
           },
-          "assignee": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "standalone": {
+            "type": "boolean"
+          },
+          "parentTaskId": {
             "type": "string"
           },
-          "formKey": {
+          "taskDefinitionKey": {
             "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "candidateUsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "createdDate": {
             "type": "string",
@@ -7599,58 +7492,18 @@
           "completedBy": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "description": {
+          "formKey": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "businessKey": {
             "type": "string"
           },
-          "candidateUsers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "candidateGroups": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "parentTaskId": {
-            "type": "string"
-          },
-          "taskDefinitionKey": {
+          "assignee": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudTask_General"
@@ -7674,19 +7527,19 @@
             },
             "uniqueItems": true
           },
-          "appName": {
+          "serviceFullName": {
             "type": "string"
           },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           },
           "appVersion": {
@@ -7698,17 +7551,11 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "startDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "parentId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "status": {
@@ -7721,12 +7568,24 @@
               "COMPLETED"
             ]
           },
-          "processDefinitionId": {
+          "parentId": {
             "type": "string"
           },
-          "completedDate": {
+          "startDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
           },
           "processDefinitionKey": {
             "type": "string"
@@ -7734,12 +7593,6 @@
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_General"
@@ -7755,6 +7608,84 @@
           }
         },
         "title": "QueryCloudSubprocessInstance_General"
+      },
+      "EntriesResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudVariableInstance"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title": "EntriesResponseContentQueryCloudVariableInstance"
+      },
+      "EntryResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/QueryCloudVariableInstance"
+          }
+        },
+        "title": "EntryResponseContentQueryCloudVariableInstance"
+      },
+      "ListResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudVariableInstance"
+          }
+        },
+        "title": "ListResponseContentQueryCloudVariableInstance"
+      },
+      "QueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "ephemeral": {
+            "type": "boolean"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "title": "QueryCloudVariableInstance"
       },
       "EntriesResponseContentQueryCloudTask_General": {
         "type": "object",
@@ -7832,27 +7763,23 @@
       "CloudProcessDefinition": {
         "type": "object",
         "properties": {
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
           "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
             "type": "string"
           },
-          "appVersion": {
+          "serviceType": {
             "type": "string"
           },
-          "version": {
-            "type": "integer",
-            "format": "int32"
+          "serviceName": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -7863,13 +7790,17 @@
           "id": {
             "type": "string"
           },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
           "formKey": {
             "type": "string"
           },
           "category": {
-            "type": "string"
-          },
-          "description": {
             "type": "string"
           }
         },
@@ -7911,13 +7842,13 @@
       "CloudApplication": {
         "type": "object",
         "properties": {
-          "version": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "version": {
             "type": "string"
           }
         },
@@ -7962,10 +7893,11 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
+          "cancelledDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "startedDate": {
+          "completedDate": {
             "type": "string",
             "format": "date-time"
           },
@@ -7978,13 +7910,12 @@
               "ERROR"
             ]
           },
-          "completedDate": {
+          "startedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "cancelledDate": {
-            "type": "string",
-            "format": "date-time"
+          "businessKey": {
+            "type": "string"
           },
           "processDefinitionKey": {
             "type": "string"
@@ -7993,25 +7924,22 @@
             "type": "integer",
             "format": "int32"
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
           "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
             "type": "string"
           },
-          "appVersion": {
+          "serviceType": {
             "type": "string"
           },
-          "executionId": {
+          "serviceName": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
             "type": "string"
           },
           "activityName": {
@@ -8020,13 +7948,16 @@
           "activityType": {
             "type": "string"
           },
-          "elementId": {
+          "executionId": {
             "type": "string"
           },
           "processDefinitionId": {
             "type": "string"
           },
           "processInstanceId": {
+            "type": "string"
+          },
+          "elementId": {
             "type": "string"
           }
         },
@@ -8071,29 +8002,6 @@
           "errorMessage": {
             "type": "string"
           },
-          "requestDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resultDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "errorDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INTEGRATION_REQUESTED",
-              "INTEGRATION_RESULT_RECEIVED",
-              "INTEGRATION_ERROR_RECEIVED"
-            ]
-          },
-          "errorCode": {
-            "type": "string"
-          },
           "errorClassName": {
             "type": "string"
           },
@@ -8121,34 +8029,39 @@
                   "type": "integer",
                   "format": "int32"
                 },
-                "nativeMethod": {
-                  "type": "boolean"
-                },
                 "className": {
                   "type": "string"
+                },
+                "nativeMethod": {
+                  "type": "boolean"
                 }
               }
             }
           },
+          "errorCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INTEGRATION_REQUESTED",
+              "INTEGRATION_RESULT_RECEIVED",
+              "INTEGRATION_ERROR_RECEIVED"
+            ]
+          },
+          "requestDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resultDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "errorDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "id": {
-            "type": "string"
-          },
-          "clientId": {
-            "type": "string"
-          },
-          "clientName": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "clientType": {
-            "type": "string"
-          },
-          "executionId": {
             "type": "string"
           },
           "processDefinitionId": {
@@ -8172,6 +8085,27 @@
               "type": "object"
             }
           },
+          "businessKey": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientName": {
+            "type": "string"
+          },
+          "clientType": {
+            "type": "string"
+          },
+          "executionId": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processDefinitionKey": {
             "type": "string"
           },
@@ -8182,22 +8116,19 @@
             "type": "integer",
             "format": "int32"
           },
-          "rootProcessInstanceId": {
+          "serviceFullName": {
             "type": "string"
           },
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
+          "serviceVersion": {
             "type": "string"
           },
           "serviceType": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceName": {
             "type": "string"
           },
-          "serviceVersion": {
+          "appName": {
             "type": "string"
           }
         },
