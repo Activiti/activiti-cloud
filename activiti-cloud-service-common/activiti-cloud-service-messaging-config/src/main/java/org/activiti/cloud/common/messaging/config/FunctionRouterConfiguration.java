@@ -22,7 +22,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -88,39 +90,41 @@ public class FunctionRouterConfiguration {
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
                     registrations -> {
+                        Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
+                            functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+                        BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
+                                functionMessage,
+                                functionRegistration
+                            ) ->
+                            MessageBuilder
+                                .fromMessage(functionMessage)
+                                .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
+                                .build();
+
                         var functions = registrations
                             .stream()
-                            .map(functionRegistration ->
-                                MessageBuilder
-                                    .fromMessage(message)
-                                    .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                    .build()
-                            )
-                            .map(routeRequest ->
+                            .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
+                            .map(functionRequest ->
                                 supplyAsyncWithRetry(
-                                        () -> CompletableFuture.supplyAsync(() -> routingFunction.apply(routeRequest)),
+                                        () ->
+                                            CompletableFuture.supplyAsync(() -> routingFunction.apply(functionRequest)),
                                         functionRouter.getMaxRetries(),
                                         functionRouter.getRetryInterval()
                                     )
                                     .thenApply(result -> {
-                                        var functionDefinition = routeRequest
-                                            .getHeaders()
-                                            .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.debug(
                                             "Function message request {} successfully routed to {}",
-                                            message,
+                                            functionRequest,
                                             functionDefinition
                                         );
                                         return Map.entry(functionDefinition, Optional.ofNullable(result));
                                     })
                                     .exceptionally(error -> {
-                                        var functionDefinition = routeRequest
-                                            .getHeaders()
-                                            .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
-
+                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.error(
                                             "Error routing message request {} to function registration {}",
-                                            message,
+                                            functionRequest,
                                             functionDefinition,
                                             error
                                         );
