@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.cloud.services.rest.controllers.PageConverterTestUtils.setupPageConverterStub;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -122,7 +122,7 @@ class ProcessInstanceTasksControllerImplIT {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
 
-        when(pageConverter.toSpringPage(any(Pageable.class), any())).thenCallRealMethod();
+        setupPageConverterStub(pageConverter);
     }
 
     @Test
