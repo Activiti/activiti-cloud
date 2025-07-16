@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -168,7 +169,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
     }
@@ -200,7 +202,8 @@ class ProcessDefinitionControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
+        given(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .willReturn(processDefinitionPage);
 
         //when
         MvcResult result = mockMvc
@@ -210,26 +213,15 @@ class ProcessDefinitionControllerImplIT {
 
         //then
         String responseContent = result.getResponse().getContentAsString();
-        assertThatJson(responseContent)
-            .node("list.pagination.skipCount")
-            .isEqualTo(10)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(11);
-        assertThatJson(responseContent)
-            .node("list.entries[0].entry.id")
-            .isEqualTo(processDefId)
-            .node("list.entries[0].entry.name")
-            .isEqualTo("my process")
-            .node("list.entries[0].entry.description")
-            .isEqualTo("This is my process")
-            .node("list.entries[0].entry.version")
-            .isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.skipCount").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.count").isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.hasMoreItems").isEqualTo(false);
+        assertThatJson(responseContent).inPath("list.pagination.totalItems").isEqualTo(11);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.id").isEqualTo(processDefId);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.name").isEqualTo("my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.description").isEqualTo("This is my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.version").isEqualTo(1);
     }
 
     @Test
@@ -245,7 +237,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
         VariableDefinition givenVariableDefinition = new VariableDefinition();
@@ -293,15 +286,12 @@ class ProcessDefinitionControllerImplIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.id").isEqualTo(procDefId);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.name").isEqualTo("my process");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("entry.id")
-            .isEqualTo(procDefId)
-            .node("entry.name")
-            .isEqualTo("my process")
-            .node("entry.description")
-            .isEqualTo("This is my process")
-            .node("entry.version")
-            .isEqualTo(1);
+            .inPath("entry.description")
+            .isEqualTo("This is my process");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.version").isEqualTo(1);
     }
 
     @Test
@@ -393,7 +383,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -456,7 +447,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -518,7 +510,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -570,7 +563,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -631,7 +625,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -671,7 +666,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -728,7 +724,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -785,7 +782,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -836,7 +834,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -887,7 +886,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -938,7 +938,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();

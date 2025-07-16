@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.task.model.TaskCandidateGroup;
@@ -39,7 +39,8 @@ public class TaskCandidatesJpaJsonConverterTest {
         String jsonRepresentation = converterCandidateUser.convertToDatabaseColumn(candidateUser);
 
         //then
-        assertThatJson(jsonRepresentation).node("userId").isEqualTo("user-id").node("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).inPath("userId").isEqualTo("user-id");
+        assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
 
         //given
         TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id", "task-id");
@@ -48,7 +49,8 @@ public class TaskCandidatesJpaJsonConverterTest {
         jsonRepresentation = converterCandidateGroup.convertToDatabaseColumn(candidateGroup);
 
         //then
-        assertThatJson(jsonRepresentation).node("groupId").isEqualTo("group-id").node("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).inPath("groupId").isEqualTo("group-id");
+        assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
     }
 
     @Test
