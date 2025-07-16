@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
@@ -41,11 +41,8 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = candidateStarterUserConverter.convertToDatabaseColumn(candidateStarterUser);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("userId")
-            .isEqualTo("auserId")
-            .node("processDefinitionId")
-            .isEqualTo("aprocessId");
+        assertThatJson(jsonRepresentation).inPath("userId").isEqualTo("auserId");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("aprocessId");
     }
 
     @Test
@@ -60,11 +57,8 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = candidateStarterGroupConverter.convertToDatabaseColumn(candidateStarterGroup);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("groupId")
-            .isEqualTo("agroupId")
-            .node("processDefinitionId")
-            .isEqualTo("aprocessId");
+        assertThatJson(jsonRepresentation).inPath("groupId").isEqualTo("agroupId");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("aprocessId");
     }
 
     @Test

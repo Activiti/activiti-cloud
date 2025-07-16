@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class ListOfStackTraceElementsJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("[0].methodName")
+            .inPath("[0].methodName")
             .isEqualTo("convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation");
     }
 
