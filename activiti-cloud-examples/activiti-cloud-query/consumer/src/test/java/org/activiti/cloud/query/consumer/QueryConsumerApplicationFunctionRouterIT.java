@@ -37,11 +37,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @Testcontainers
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-public class QueryConsumerApplicationFunctionRouterEnabledIT {
+public class QueryConsumerApplicationFunctionRouterIT {
 
     @ServiceConnection
     @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     @Container
     @ServiceConnection
