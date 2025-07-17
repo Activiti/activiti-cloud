@@ -15,21 +15,26 @@
  */
 package org.activiti.cloud.services.query.util;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class ProcessInstanceBuilder {
 
     private final ProcessInstanceEntity process;
-    private final Set<TaskBuilder> taskBuffer = new HashSet<>();
+    private final List<TaskBuilder> taskBuffer = new ArrayList<>();
 
     private final VariableRepository variableRepository;
     private final ProcessInstanceRepository processInstanceRepository;
@@ -46,8 +51,23 @@ public class ProcessInstanceBuilder {
         this.withProcessDefinitionKey(UUID.randomUUID().toString());
     }
 
+    public ProcessInstanceBuilder withId(String id) {
+        process.setId(id);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withParentId(String parentId) {
+        process.setParentId(parentId);
+        return this;
+    }
+
     public ProcessInstanceBuilder withName(String name) {
         process.setName(name);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withProcessDefinitionName(String processDefinitionName) {
+        process.setProcessDefinitionName(processDefinitionName);
         return this;
     }
 
@@ -114,15 +134,22 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withStatus(ProcessInstance.ProcessInstanceStatus status) {
+        process.setStatus(status);
+        return this;
+    }
+
     public ProcessInstanceEntity buildAndSave() {
         variableRepository.saveAll(process.getVariables());
-        process.setTasks(
-            taskBuffer
-                .stream()
-                .map(builder -> builder.withParentProcess(process))
-                .map(TaskBuilder::buildAndSave)
-                .collect(Collectors.toSet())
-        );
+        Instant instant = Instant.now();
+
+        Set<TaskEntity> tasks = new HashSet<>();
+        for (TaskBuilder builder : taskBuffer) {
+            builder.withParentProcess(process);
+            builder.withCreatedDate(Date.from(instant.plusSeconds(taskBuffer.indexOf(builder))));
+            tasks.add(builder.buildAndSave());
+        }
+        process.setTasks(tasks);
         return processInstanceRepository.save(process);
     }
 }

@@ -39,6 +39,7 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
@@ -63,7 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-public class TaskController {
+public class TaskController extends TaskControllerAdvice {
 
     private final TaskRepository taskRepository;
 
@@ -130,7 +131,7 @@ public class TaskController {
     }
 
     @Operation(summary = "Search tasks")
-    @JsonView(JsonViews.General.class)
+    @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/search")
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         @RequestBody TaskSearchRequest taskSearchRequest,

@@ -46,7 +46,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceConnectors {
 
@@ -108,11 +107,12 @@ public class ProcessInstanceConnectors {
         assertThat(processInstanceId).isNotNull();
         await()
             .untilAsserted(() -> {
-                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     processInstanceId
                 );
-                assertThat(processVariables.getContent()).isNotNull();
-                assertThat(processVariables.getContent())
+
+                assertThat(processVariables)
+                    .isNotNull()
                     .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
                     .contains(tuple(variableName, variableValue));
             });

@@ -94,6 +94,7 @@ create table process_instance
     suspended_date             timestamp,
     status                     varchar(255),
     process_definition_name    varchar(255),
+    root_process_instance_id   varchar(255),
     primary key (id)
 );
 create table process_model
@@ -121,6 +122,7 @@ create table process_variable
     "value"             json,
     variable_definition_id varchar(64),
     process_definition_key varchar(255),
+    ephemeral           boolean,
     primary key (id)
 );
 create table task
@@ -161,6 +163,7 @@ create table task
     task_definition_key        varchar(255),
     process_definition_name    varchar(255),
     completed_by               varchar(255),
+    root_process_instance_id   varchar(255),
     primary key (id)
 );
 create table task_candidate_group
@@ -312,5 +315,6 @@ alter table task_process_variable
 create index idx_task_assignee on task(assignee);
 create index idx_task_owner on task(owner);
 create index idx_process_instance_initiator on process_instance(initiator);
-CREATE INDEX idx_task_process_var_taskId_processVarId ON task_process_variable (task_id, process_variable_id);
-CREATE INDEX idx_task_createdDate ON task (created_date);
+create INDEX idx_task_id_name_status on task(id, name, status);
+create INDEX idx_task_process_var_taskId_processVarId on task_process_variable (task_id, process_variable_id);
+create INDEX idx_task_createdDate on task (created_date);

@@ -12,6 +12,16 @@
           "model": {
             "$ref": "#/$defs/primitive/string"
           }
+        },
+        "1099e926-0af4-41ce-8ad9-a87fcc14c0b6": {
+          "id": "1099e926-0af4-41ce-8ad9-a87fcc14c0b6",
+          "name": "ephemeralVar",
+          "type": "string",
+          "required": false,
+          "ephemeral": true,
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          }
         }
       },
       "mappings": {

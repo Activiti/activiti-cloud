@@ -28,26 +28,28 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.core.common.model.connector.VariableDefinition;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 
 public class ToCloudVariableEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final CachingProcessExtensionService processExtensionService;
+    private final ProcessExtensionService processExtensionService;
 
     public ToCloudVariableEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        CachingProcessExtensionService processExtensionService
+        ProcessExtensionService processExtensionService
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.processExtensionService = processExtensionService;
     }
 
     public CloudVariableCreatedEvent from(VariableCreatedEvent event) {
-        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(event.getEntity());
+        CloudVariableCreatedEventImpl cloudEvent = new CloudVariableCreatedEventImpl(
+            event.getEntity(),
+            event.isEphemeralVariable()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
-
         cloudEvent.setVariableDefinitionId(getVariableDefinitionId(event));
         return cloudEvent;
     }
@@ -55,14 +57,18 @@ public class ToCloudVariableEventConverter {
     public CloudVariableUpdatedEvent from(VariableUpdatedEvent event) {
         CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl<>(
             event.getEntity(),
-            event.getPreviousValue()
+            event.getPreviousValue(),
+            event.isEphemeralVariable()
         );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudVariableDeletedEvent from(VariableDeletedEvent event) {
-        CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(event.getEntity());
+        CloudVariableDeletedEventImpl cloudEvent = new CloudVariableDeletedEventImpl(
+            event.getEntity(),
+            event.isEphemeralVariable()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

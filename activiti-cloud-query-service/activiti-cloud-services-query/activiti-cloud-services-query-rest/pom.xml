@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.8.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>activiti-cloud-services-query-rest</artifactId>
@@ -117,18 +117,18 @@
       <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
+      <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
-      <version>${querydsl.version}</version>
+      <version>${openfeign.querydsl.version}</version>
       <scope>provided</scope>
       <classifier>jakarta</classifier>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
+      <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
+      <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
       <classifier>jakarta</classifier>
     </dependency>
@@ -182,6 +182,10 @@
       <artifactId>jakarta.transaction-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.introproventures</groupId>
+      <artifactId>graphql-jpa-query-schema</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <scope>test</scope>
@@ -209,11 +213,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.javacrumbs.json-unit</groupId>
-      <artifactId>json-unit-fluent</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -256,6 +255,11 @@
       <artifactId>spring-mock-mvc</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>net.javacrumbs.json-unit</groupId>
+          <artifactId>json-unit-assertj</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <build>
     <plugins>

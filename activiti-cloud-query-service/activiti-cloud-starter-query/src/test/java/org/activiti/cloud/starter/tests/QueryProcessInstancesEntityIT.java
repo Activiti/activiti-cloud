@@ -34,6 +34,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -70,6 +71,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -83,6 +85,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -132,6 +135,9 @@ public class QueryProcessInstancesEntityIT {
 
     @Autowired
     private VariableRepository variableRepository;
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     private EventsAggregator eventsAggregator;
 
@@ -258,6 +264,33 @@ public class QueryProcessInstancesEntityIT {
                 ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
                 assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
                 assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
+            });
+    }
+
+    @Test
+    public void shouldGetProcessWithRootProcessInstanceId() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+                assertThat(processInstanceEntities)
+                    .extracting(
+                        ProcessInstanceEntity::getId,
+                        ProcessInstanceEntity::getStatus,
+                        ProcessInstanceEntity::getRootProcessInstanceId
+                    )
+                    .contains(tuple(process.getId(), RUNNING, process.getRootProcessInstanceId()));
             });
     }
 
@@ -1276,14 +1309,14 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     void should_containMessageNotDisclosed_whenExceptionMessageIsNotHandled() {
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity = testRestTemplate.exchange(
             PROC_URL + "?startDate=2022-14-14T000000",
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
-            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+            new ParameterizedTypeReference<EntryResponseContent<ActivitiErrorMessageImpl>>() {}
         );
 
-        assertThat(responseEntity.getBody().getMessage())
+        assertThat(responseEntity.getBody().getEntry().getMessage())
             .isEqualTo(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
     }
 

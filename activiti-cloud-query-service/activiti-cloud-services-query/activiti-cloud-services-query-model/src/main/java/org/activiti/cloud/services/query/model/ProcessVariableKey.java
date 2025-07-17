@@ -17,7 +17,13 @@ package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(
+    type = "string",
+    description = "Identifies a process variable by its process definition key and variable name. It's represented in the form 'processDefinitionKey/variableName'.",
+    example = "processDefinitionKey/variableName"
+)
 public record ProcessVariableKey(String processDefinitionKey, String variableName) {
     @JsonSetter
     public static ProcessVariableKey fromString(String processVariableKey) {

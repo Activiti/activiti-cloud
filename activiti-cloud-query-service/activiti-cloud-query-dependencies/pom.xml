@@ -5,13 +5,14 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.8.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-query-dependencies</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <properties>
-    <querydsl.version>5.0.0</querydsl.version>
+    <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
+    <graphql-jpa-query.version>1.2.15</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -87,27 +88,34 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.querydsl</groupId>
+        <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-apt</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
         <scope>provided</scope>
         <classifier>jakarta</classifier>
       </dependency>
       <dependency>
-        <groupId>com.querydsl</groupId>
+        <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-core</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.querydsl</groupId>
+        <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
-        <version>${querydsl.version}</version>
+        <version>${openfeign.querydsl.version}</version>
         <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>${classgraph.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.introproventures</groupId>
+        <artifactId>graphql-jpa-query-dependencies</artifactId>
+        <version>${graphql-jpa-query.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
     </dependencies>
   </dependencyManagement>

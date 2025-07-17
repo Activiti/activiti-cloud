@@ -23,21 +23,40 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
+import java.util.List;
+import java.util.Map;
+import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(classes = { QueryRestApplication.class })
-@WebAppConfiguration
+@SpringBootTest(
+    classes = { QueryRestApplication.class },
+    properties = "identity.test.token-interceptor.enabled=false",
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryRestApplicationIT {
 
@@ -47,8 +66,20 @@ public class QueryRestApplicationIT {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private TestRestTemplate testRestTemplate;
+
+    @Autowired
+    private IdentityTokenProducer identityTokenProducer;
+
+    @Autowired
+    private RestrictedKeysProvider restrictedKeysProvider;
+
+    @Autowired
+    private GraphQLSchema graphQLSchema;
+
     @Test
-    public void contextLoads() throws Exception {
+    public void contextLoads() {
         assertThat(applicationContext).isNotNull();
     }
 
@@ -70,5 +101,148 @@ public class QueryRestApplicationIT {
                             .and(not(containsString("Resource")))
                     )
             );
+    }
+
+    @Test
+    void shouldUseAlfrescoDbpRestFormat_whenGetProcessInstancesWithAcceptApplicationJson() {
+        var responseEntity = testRestTemplate.exchange(
+            "/v1/process-instances",
+            HttpMethod.GET,
+            entityWithAcceptJsonContentHeaders(entityWithAuthorizationHeader("testuser", "password")),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(responseEntity.getBody())
+            .isNotEmpty()
+            .containsKey("list")
+            .extracting("list")
+            .asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+            .containsKeys("entries", "pagination");
+    }
+
+    @Test
+    void graphQLSchema() {
+        assertThat(graphQLSchema)
+            .isNotNull()
+            .extracting(GraphQLSchema::getQueryType)
+            .extracting(GraphQLObjectType::getFields)
+            .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+            .extracting(GraphQLFieldDefinition::getName)
+            .containsOnly(
+                "TaskVariable",
+                "ProcessVariable",
+                "Application",
+                "ProcessDefinition",
+                "ProcessInstance",
+                "Task",
+                "TaskVariables",
+                "ProcessVariables",
+                "Applications",
+                "ProcessDefinitions",
+                "ProcessInstances",
+                "Tasks",
+                "ProcessModel",
+                "ProcessModels",
+                "ServiceTask",
+                "ServiceTasks",
+                "hello"
+            );
+    }
+
+    @Test
+    public void testGraphqlModelerUserShouldNotSeeTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("johnsnow", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat("{Tasks={select=[]}}").isEqualTo(result.getData().toString());
+    }
+
+    @Test
+    public void testGraphqlAdminUserShouldSeeAllTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("testadmin", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat(result.getData().toString())
+            .isEqualTo(
+                "{Tasks={select=[" +
+                "{name=task1, assignee=testuser, priority=5}, " +
+                "{name=task2, assignee=hruser, priority=10}, " +
+                "{name=task3, assignee=hruser, priority=5}, " +
+                "{name=task4, assignee=hruser, priority=10}, " +
+                "{name=task5, assignee=hruser, priority=10}, " +
+                "{name=task6, assignee=hruser, priority=10}" +
+                "]}}"
+            );
+    }
+
+    @Test
+    public void testGraphqlUserShouldSeeInvolvedTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("testuser", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat(result.getData().toString())
+            .isEqualTo("{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}");
+    }
+
+    private HttpEntity entityWithAuthorizationHeader(String user, String password) {
+        HttpEntity authEntity = identityTokenProducer.entityWithAuthorizationHeader(user, password);
+        return new HttpEntity(authEntity.getHeaders());
+    }
+
+    private HttpEntity entityWithAcceptJsonContentHeaders(HttpEntity authEntity) {
+        var headers = new HttpHeaders();
+        headers.set("Authorization", authEntity.getHeaders().getFirst("Authorization"));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity(headers);
+    }
+
+    private HttpEntity entityWithAcceptJsonContentHeaders(Object body, HttpEntity authEntity) {
+        var headers = new HttpHeaders();
+        headers.set("Authorization", authEntity.getHeaders().getFirst("Authorization"));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity(body, headers);
     }
 }

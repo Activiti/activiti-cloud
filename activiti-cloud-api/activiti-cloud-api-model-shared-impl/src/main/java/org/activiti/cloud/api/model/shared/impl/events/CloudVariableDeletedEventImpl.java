@@ -27,6 +27,10 @@ public class CloudVariableDeletedEventImpl extends CloudVariableEventImpl implem
         super(entity);
     }
 
+    public CloudVariableDeletedEventImpl(VariableInstance entity, boolean isEphemeralVariable) {
+        super(entity, isEphemeralVariable);
+    }
+
     public CloudVariableDeletedEventImpl(String id, Long timestamp, VariableInstance entity) {
         super(id, timestamp, entity);
     }

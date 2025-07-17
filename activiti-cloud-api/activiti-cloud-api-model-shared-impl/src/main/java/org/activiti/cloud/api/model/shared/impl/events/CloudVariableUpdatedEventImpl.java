@@ -35,6 +35,11 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
         this.previousValue = previousValue;
     }
 
+    public CloudVariableUpdatedEventImpl(VariableInstance entity, T previousValue, boolean isEphemeralVariable) {
+        super(entity, isEphemeralVariable);
+        this.previousValue = previousValue;
+    }
+
     @Override
     public VariableEvent.VariableEvents getEventType() {
         return VariableEvent.VariableEvents.VARIABLE_UPDATED;

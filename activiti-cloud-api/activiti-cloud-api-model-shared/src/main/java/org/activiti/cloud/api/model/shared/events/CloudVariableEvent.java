@@ -18,4 +18,5 @@ package org.activiti.cloud.api.model.shared.events;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 
-public interface CloudVariableEvent extends CloudRuntimeEvent<VariableInstance, VariableEvent.VariableEvents> {}
+public interface CloudVariableEvent
+    extends VariableEvent, CloudRuntimeEvent<VariableInstance, VariableEvent.VariableEvents> {}

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.8.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
@@ -25,7 +25,8 @@
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
     <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
-    <commons-fileupload.version>1.5</commons-fileupload.version>
+    <commons-fileupload.version>1.6.0</commons-fileupload.version>
+    <com.squareup.okhttp3.version>4.12.0</com.squareup.okhttp3.version>
   </properties>
   <dependencyManagement>
     <dependencies>

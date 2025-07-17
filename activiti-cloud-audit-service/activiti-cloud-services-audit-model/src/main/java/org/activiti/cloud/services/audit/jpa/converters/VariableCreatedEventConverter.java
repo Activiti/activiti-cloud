@@ -43,10 +43,12 @@ public class VariableCreatedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         VariableCreatedEventEntity variableCreatedEventEntity = (VariableCreatedEventEntity) auditEventEntity;
 
-        return new CloudVariableCreatedEventImpl(
+        CloudVariableCreatedEventImpl runtimeEvent = new CloudVariableCreatedEventImpl(
             variableCreatedEventEntity.getEventId(),
             variableCreatedEventEntity.getTimestamp(),
             variableCreatedEventEntity.getVariableInstance()
         );
+        runtimeEvent.setEphemeralVariable(variableCreatedEventEntity.isEphemeralVariable());
+        return runtimeEvent;
     }
 }

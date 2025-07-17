@@ -26,7 +26,7 @@ import org.activiti.api.runtime.event.impl.VariableCreatedEventImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class ToCloudVariableEventConverterTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private CachingProcessExtensionService processExtensionService;
+    private ProcessExtensionService processExtensionService;
 
     @Test
     void should_returnNull_whenPropertiesAreEmpty() {
@@ -56,7 +56,7 @@ class ToCloudVariableEventConverterTest {
             "processInstanceId",
             null
         );
-        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId", false);
 
         Extension extension = new Extension();
         VariableDefinition variableDefinition = new VariableDefinition();
@@ -68,6 +68,7 @@ class ToCloudVariableEventConverterTest {
         CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
 
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
+        assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isFalse();
     }
 
     @Test
@@ -79,7 +80,7 @@ class ToCloudVariableEventConverterTest {
             "processInstanceId",
             null
         );
-        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, null);
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, null, false);
 
         Extension extension = new Extension();
         VariableDefinition variableDefinition = new VariableDefinition();
@@ -92,6 +93,7 @@ class ToCloudVariableEventConverterTest {
         CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
 
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
+        assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isFalse();
     }
 
     @Test
@@ -103,7 +105,7 @@ class ToCloudVariableEventConverterTest {
             "processInstanceId",
             null
         );
-        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId", false);
 
         Extension extension = new Extension();
         HashMap<String, VariableDefinition> properties = new HashMap<>();
@@ -117,6 +119,39 @@ class ToCloudVariableEventConverterTest {
 
         CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
 
+        assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isEqualTo("variableDefinitionId");
+        VariableInstance entity = cloudVariableCreatedEvent.getEntity();
+        assertThat(entity.getName()).isEqualTo("variableName");
+        assertThat(entity.getType()).isEqualTo("string");
+        assertThat((String) entity.getValue()).isEqualTo("example");
+        assertThat(entity.getProcessInstanceId()).isEqualTo("processInstanceId");
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableCreatedEventImpl.class));
+    }
+
+    @Test
+    void should_setTheValueOf_propertyIsEphemeral_from_VariableCreatedEvents() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            "processInstanceId",
+            null
+        );
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId", true);
+
+        Extension extension = new Extension();
+        HashMap<String, VariableDefinition> properties = new HashMap<>();
+        VariableDefinition variableDefinition = new VariableDefinition();
+        variableDefinition.setName("variableName");
+        variableDefinition.setId("variableDefinitionId");
+        properties.put("variableDefinitionId", variableDefinition);
+        extension.setProperties(properties);
+
+        when(processExtensionService.getExtensionsForId("processDefinitionId")).thenReturn(extension);
+
+        CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isTrue();
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isEqualTo("variableDefinitionId");
         VariableInstance entity = cloudVariableCreatedEvent.getEntity();
         assertThat(entity.getName()).isEqualTo("variableName");

@@ -50,6 +50,13 @@ public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
         Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null
             ? variableUpdatedEventEntity.getPreviousValue().getValue()
             : null;
-        return new CloudVariableUpdatedEventImpl<>(eventId, timestamp, variableInstance, previousValue);
+        CloudVariableUpdatedEventImpl<Object> updatedEvent = new CloudVariableUpdatedEventImpl<>(
+            eventId,
+            timestamp,
+            variableInstance,
+            previousValue
+        );
+        updatedEvent.setEphemeralVariable(variableUpdatedEventEntity.isEphemeralVariable());
+        return updatedEvent;
     }
 }

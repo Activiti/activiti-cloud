@@ -38,6 +38,7 @@ public interface ProcessInstanceRepository
         JpaSpecificationExecutor<ProcessInstanceEntity>,
         QuerydslPredicateExecutor<ProcessInstanceEntity>,
         QuerydslBinderCustomizer<QProcessInstanceEntity>,
+        CustomizedProcessInstanceRepository,
         CrudRepository<ProcessInstanceEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QProcessInstanceEntity root) {

@@ -36,6 +36,7 @@ import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -59,7 +60,6 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
@@ -68,6 +68,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({ "classpath:application-test.properties", "classpath:access-control.properties" })
@@ -107,7 +108,7 @@ class ProcessInstanceIT {
     @Autowired
     private RuntimeService runtimeService;
 
-    @SpyBean
+    @MockitoSpyBean
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @Captor
@@ -229,10 +230,10 @@ class ProcessInstanceIT {
         assertThat(entity).isNotNull();
 
         CloudProcessInstance startedProcessInstance = entity.getBody();
-        ResponseEntity<ActivitiErrorMessageImpl> failEntity = processInstanceRestTemplate.startCreatedProcessFailing(
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> failEntity = processInstanceRestTemplate.startCreatedProcessFailing(
             startedProcessInstance.getId()
         );
-        assertThat(failEntity.getBody().getMessage())
+        assertThat(failEntity.getBody().getEntry().getMessage())
             .isEqualTo("Process instance " + startedProcessInstance.getId() + " has already been started");
         assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
@@ -699,6 +700,44 @@ class ProcessInstanceIT {
         assertThatExceptionOfType(AssertionError.class)
             .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity))
             .withMessageContaining("404 NOT_FOUND");
+
+        verify(this.processEngineEventsAggregator, atLeast(1)).add(this.cloudRuntimeEventArgumentCaptor.capture());
+        assertThat(cloudRuntimeEventArgumentCaptor.getAllValues())
+            .isNotEmpty()
+            .extracting("eventType")
+            .contains(PROCESS_DELETED);
+    }
+
+    @Test
+    void adminShouldCancelAndThenForceDestroyProcessInstance() {
+        //given
+        ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key"
+        );
+
+        assertThat(processEntity).isNotNull();
+        assertThat(processEntity.getBody()).isNotNull();
+        assertThat(processEntity.getBody().getId()).isNotNull();
+        assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
+
+        identityTokenProducer.withTestUser("testadmin");
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDelete(processEntity);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatExceptionOfType(AssertionError.class)
+            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity))
+            .withMessageContaining("404 NOT_FOUND");
+
+        //when
+        identityTokenProducer.withTestUser("testadmin");
+        responseEntity = processInstanceRestTemplate.adminDestroy(processEntity, true);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         verify(this.processEngineEventsAggregator, atLeast(1)).add(this.cloudRuntimeEventArgumentCaptor.capture());
         assertThat(cloudRuntimeEventArgumentCaptor.getAllValues())

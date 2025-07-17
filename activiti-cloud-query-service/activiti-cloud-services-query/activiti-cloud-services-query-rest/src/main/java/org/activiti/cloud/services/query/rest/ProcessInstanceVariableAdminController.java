@@ -24,11 +24,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -48,16 +48,16 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class ProcessInstanceVariableAdminController {
 
-    private AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedVariablesCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedVariablesCollectionModelAssembler;
 
-    private VariableRepository variableRepository;
+    private final VariableRepository variableRepository;
 
-    private ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+    private final QueryCloudVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
 
     @Autowired
     public ProcessInstanceVariableAdminController(
         VariableRepository variableRepository,
-        ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        QueryCloudVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessVariableEntity> pagedVariablesCollectionModelAssembler
     ) {
         this.variableRepository = variableRepository;
@@ -66,7 +66,7 @@ public class ProcessInstanceVariableAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesProcessAdmin(
+    public PagedModel<EntityModel<QueryCloudVariableInstance>> getVariablesProcessAdmin(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessVariableEntity.class

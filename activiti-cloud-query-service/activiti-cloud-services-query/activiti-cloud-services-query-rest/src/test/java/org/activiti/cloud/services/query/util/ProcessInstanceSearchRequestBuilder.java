@@ -20,18 +20,24 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.springframework.data.domain.Sort;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ProcessInstanceSearchRequestBuilder {
 
+    private Set<String> ids;
+    private Set<String> parentIds;
     private Set<String> names;
+    private Set<String> processDefinitionNames;
     private Set<String> initiators;
     private Set<String> appVersions;
+    private Set<ProcessInstance.ProcessInstanceStatus> statuses;
     private Date lastModifiedFrom;
     private Date lastModifiedTo;
     private Date startFrom;
@@ -43,9 +49,25 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
+    private String excludeByProcessCategoryName;
+
+    public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
+        this.ids = Set.of(ids);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withParentIds(String... parentIds) {
+        this.parentIds = Set.of(parentIds);
+        return this;
+    }
 
     public ProcessInstanceSearchRequestBuilder withNames(String... names) {
         this.names = Set.of(names);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withProcessDefinitionNames(String... processDefinitionNames) {
+        this.processDefinitionNames = Set.of(processDefinitionNames);
         return this;
     }
 
@@ -56,6 +78,11 @@ public class ProcessInstanceSearchRequestBuilder {
 
     public ProcessInstanceSearchRequestBuilder withAppVersions(String... appVersions) {
         this.appVersions = Set.of(appVersions);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withStatus(ProcessInstance.ProcessInstanceStatus... statuses) {
+        this.statuses = Set.of(statuses);
         return this;
     }
 
@@ -114,6 +141,25 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder invertSort() {
+        if (sort != null) {
+            sort =
+                new CloudRuntimeEntitySort(
+                    sort.field(),
+                    sort.direction().isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC,
+                    sort.isProcessVariable(),
+                    sort.processDefinitionKey(),
+                    sort.type()
+                );
+        }
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withExcludeByProcessCategoryName(String excludeByProcessCategoryName) {
+        this.excludeByProcessCategoryName = excludeByProcessCategoryName;
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -129,9 +175,13 @@ public class ProcessInstanceSearchRequestBuilder {
             }
         }
         return new ProcessInstanceSearchRequest(
+            ids,
+            parentIds,
             names,
+            processDefinitionNames,
             initiators,
             appVersions,
+            statuses,
             lastModifiedFrom,
             lastModifiedTo,
             startFrom,
@@ -142,7 +192,8 @@ public class ProcessInstanceSearchRequestBuilder {
             suspendedTo,
             processVariableFilters,
             processVariableKeys,
-            sort
+            sort,
+            excludeByProcessCategoryName
         );
     }
 

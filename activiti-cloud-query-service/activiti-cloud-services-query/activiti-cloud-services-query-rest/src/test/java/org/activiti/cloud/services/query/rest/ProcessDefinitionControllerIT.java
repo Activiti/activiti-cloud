@@ -36,6 +36,8 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
@@ -49,7 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -58,6 +59,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionController.class)
@@ -74,40 +76,46 @@ public class ProcessDefinitionControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceRepository processInstanceRepository;
 
-    @MockBean
+    @MockitoBean
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @MockitoBean
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @MockitoBean
     private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
+    @MockitoBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
+    @MockitoBean
     private TaskRepository taskRepository;
 
-    @MockBean
+    @MockitoBean
     private VariableRepository processVariableRepository;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceAdminService processInstanceAdminService;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceService processInstanceService;
 
-    @MockBean
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach

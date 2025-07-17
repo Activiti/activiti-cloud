@@ -17,14 +17,19 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import java.util.Date;
 import java.util.Set;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
 //prettier-ignore
 public record ProcessInstanceSearchRequest(
+    Set<String> id,
+    Set<String> parentId,
     Set<String> name,
+    Set<String> processDefinitionName,
     Set<String> initiator,
     Set<String> appVersion,
+    Set<ProcessInstance.ProcessInstanceStatus> status,
     Date lastModifiedFrom,
     Date lastModifiedTo,
     Date startFrom,
@@ -35,5 +40,6 @@ public record ProcessInstanceSearchRequest(
     Date suspendedTo,
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
-    CloudRuntimeEntitySort sort
-) {}
+    CloudRuntimeEntitySort sort,
+    String excludeByProcessCategoryName
+) implements CloudRuntimeEntityFilterRequest {}

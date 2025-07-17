@@ -25,6 +25,10 @@ public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implem
 
     public CloudVariableCreatedEventImpl() {}
 
+    public CloudVariableCreatedEventImpl(VariableInstance entity, boolean isEphemeralVariable) {
+        super(entity, isEphemeralVariable);
+    }
+
     public CloudVariableCreatedEventImpl(VariableInstance entity) {
         super(entity);
     }

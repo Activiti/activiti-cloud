@@ -18,11 +18,13 @@ package org.activiti.cloud.services.query.util;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +33,9 @@ public class TaskSearchRequestBuilder {
 
     private boolean onlyStandalone;
     private boolean onlyRoot;
+    private Set<String> id;
+    private Set<String> parentId;
+    private Set<String> processInstanceId;
     private Set<String> name;
     private Set<String> description;
     private Set<String> processDefinitionName;
@@ -53,6 +58,7 @@ public class TaskSearchRequestBuilder {
     private Set<VariableFilter> taskVariableFilters;
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
+    private CloudRuntimeEntitySort sort;
 
     public TaskSearchRequestBuilder onlyStandalone() {
         this.onlyStandalone = true;
@@ -61,6 +67,21 @@ public class TaskSearchRequestBuilder {
 
     public TaskSearchRequestBuilder onlyRoot() {
         this.onlyRoot = true;
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withId(String... ids) {
+        this.id = Set.of(ids);
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withParentId(String... parentIds) {
+        this.parentId = Set.of(parentIds);
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withProcessInstanceId(String... processInstanceIds) {
+        this.processInstanceId = Set.of(processInstanceIds);
         return this;
     }
 
@@ -174,6 +195,25 @@ public class TaskSearchRequestBuilder {
         return this;
     }
 
+    public TaskSearchRequestBuilder withSort(CloudRuntimeEntitySort sort) {
+        this.sort = sort;
+        return this;
+    }
+
+    public TaskSearchRequestBuilder invertSort() {
+        if (sort != null) {
+            sort =
+                new CloudRuntimeEntitySort(
+                    sort.field(),
+                    sort.direction().isAscending() ? "desc" : "asc",
+                    sort.isProcessVariable(),
+                    sort.processDefinitionKey(),
+                    sort.type()
+                );
+        }
+        return this;
+    }
+
     public TaskSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -185,12 +225,16 @@ public class TaskSearchRequestBuilder {
             if (processVariableKeys == null) {
                 processVariableKeys = keysFromFilters;
             } else {
+                processVariableKeys = new HashSet<>(processVariableKeys);
                 processVariableKeys.addAll(keysFromFilters);
             }
         }
         return new TaskSearchRequest(
             onlyStandalone,
             onlyRoot,
+            id,
+            parentId,
+            processInstanceId,
             name,
             description,
             processDefinitionName,
@@ -212,7 +256,8 @@ public class TaskSearchRequestBuilder {
             candidateGroupId,
             taskVariableFilters,
             processVariableFilters,
-            processVariableKeys
+            processVariableKeys,
+            sort
         );
     }
 

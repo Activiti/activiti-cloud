@@ -15,10 +15,16 @@
  */
 package org.activiti.cloud.conf;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import jakarta.persistence.EntityManagerFactory;
+import java.util.List;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -34,10 +40,14 @@ import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepres
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
+import org.activiti.cloud.services.security.ActivitiRestrictedKeysProvider;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
@@ -50,8 +60,10 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -73,6 +85,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceVariableRepresentationModelAssembler processInstanceVariableRepresentationModelAssembler() {
         return new ProcessInstanceVariableRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryCloudVariableInstanceRepresentationModelAssembler queryCloudVariableInstanceRepresentationModelAssembler() {
+        return new QueryCloudVariableInstanceRepresentationModelAssembler();
     }
 
     @Bean
@@ -200,8 +218,45 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.query.graphql.restricted-key-provider.enabled",
+        matchIfMissing = true
+    )
+    RestrictedKeysProvider restrictedKeysProvider(
+        EntityManagerFactory entityManagerFactory,
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService,
+        ProcessInstanceRestrictionService processInstanceRestrictionService,
+        ProcessVariableRestrictionService processVariableRestrictionService,
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
+        @Value(
+            "${spring.activiti.cloud.services.notifications.graphql.restricted-key-provider.unrestricted-roles:ACTIVITI_ADMIN,APPLICATION_MANAGER}"
+        ) List<String> unrestrictedRoles,
+        @Value(
+            "${spring.activiti.cloud.services.notifications.graphql.restricted-key-provider.role-prefix:#{null}}"
+        ) String rolePrefix
+    ) {
+        var bean = new ActivitiRestrictedKeysProvider(
+            entityManagerFactory,
+            processDefinitionRestrictionService,
+            processInstanceRestrictionService,
+            processVariableRestrictionService,
+            taskLookupRestrictionService,
+            taskVariableLookupRestrictionService,
+            unrestrictedRoles
+        );
+
+        Optional.ofNullable(rolePrefix).ifPresent(bean::setRolePrefix);
+
+        return bean;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
+        TaskCandidateUserRepository taskCandidateUserRepository,
+        TaskCandidateGroupRepository taskCandidateGroupRepository,
         ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
@@ -210,6 +265,8 @@ public class QueryRestWebMvcAutoConfiguration {
     ) {
         return new TaskControllerHelper(
             taskRepository,
+            taskCandidateUserRepository,
+            taskCandidateGroupRepository,
             processVariableService,
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
@@ -284,6 +341,29 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceSearchService,
             entityFinder,
             new QueryDslPredicateAggregator()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceControllerHelper processInstanceControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceService processInstanceService
+    ) {
+        return new ProcessInstanceControllerHelper(processInstanceRepository, processInstanceService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
+    ) {
+        return new ProcessInstanceAdminControllerHelper(
+            processInstanceRepository,
+            processInstanceAdminService,
+            processInstanceControllerHelper
         );
     }
 }

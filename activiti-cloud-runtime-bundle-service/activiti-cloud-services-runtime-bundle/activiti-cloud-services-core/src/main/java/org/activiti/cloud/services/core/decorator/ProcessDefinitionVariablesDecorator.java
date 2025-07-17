@@ -19,16 +19,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
-import org.activiti.spring.process.CachingProcessExtensionService;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.VariableDefinition;
 
 public class ProcessDefinitionVariablesDecorator implements ProcessDefinitionDecorator {
 
     private static final String HANDLED_VALUE = "variables";
 
-    private final CachingProcessExtensionService processExtensionService;
+    private final ProcessExtensionService processExtensionService;
 
-    public ProcessDefinitionVariablesDecorator(CachingProcessExtensionService processExtensionService) {
+    public ProcessDefinitionVariablesDecorator(ProcessExtensionService processExtensionService) {
         this.processExtensionService = processExtensionService;
     }
 

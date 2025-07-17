@@ -38,6 +38,7 @@ public class ProcessVariableValueConverter {
         typeRegistry.put("boolean", Boolean.class);
         typeRegistry.put("double", Double.class);
         typeRegistry.put("date", Date.class);
+        typeRegistry.put("datetime", Date.class);
         typeRegistry.put("localdate", LocalDate.class);
         typeRegistry.put("bigdecimal", BigDecimal.class);
         typeRegistry.put("json", JsonNode.class);

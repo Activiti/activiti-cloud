@@ -22,11 +22,16 @@ import java.util.AbstractMap;
 import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
+import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
+import org.activiti.spring.boot.ActivitiProperties;
+import org.activiti.spring.cache.ActivitiSpringCacheManagerProperties;
+import org.activiti.spring.cache.SpringProcessDefinitionCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -36,11 +41,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource("classpath:engine.properties")
+@TestPropertySource(
+    value = "classpath:engine.properties",
+    properties = { "spring.activiti.process-definition-cache-limit=70" }
+)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-public class EngineConfigurationIT {
+class EngineConfigurationIT {
 
     @Autowired
     private SpringProcessEngineConfiguration configuration;
@@ -48,8 +56,17 @@ public class EngineConfigurationIT {
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
+    @Autowired
+    private ActivitiProperties activitiProperties;
+
+    @Autowired
+    private ActivitiSpringCacheManagerProperties cacheManagerProperties;
+
+    @Autowired
+    private RepositoryService repositoryService;
+
     @Test
-    public void shouldConfigureDefaultConnectorBindingProperties() {
+    void shouldConfigureDefaultConnectorBindingProperties() {
         //given
 
         //when
@@ -76,7 +93,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldUseCloudActivityBehaviorFactory() {
+    void shouldUseCloudActivityBehaviorFactory() {
         assertThat(configuration.getActivityBehaviorFactory())
             .isInstanceOf(MappingAwareActivityBehaviorFactory.class)
             .isInstanceOf(CloudActivityBehaviorFactory.class);
@@ -87,7 +104,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveRequiredGroupsSetForAuditProducer() {
+    void shouldHaveRequiredGroupsSetForAuditProducer() {
         //when
         BindingProperties auditProducer = bindingServiceProperties.getBindingProperties("auditProducer");
 
@@ -102,7 +119,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveChannelBindingsSetForMessageEvents() {
+    void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
         BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");
 
@@ -112,7 +129,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveChannelBindingsSetForCommandEndpoint() {
+    void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
         BindingProperties commandConsumer = bindingServiceProperties.getBindingProperties("commandConsumer");
         BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandResults");
@@ -124,7 +141,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveChannelBindingsSetForSignalEvents() {
+    void shouldHaveChannelBindingsSetForSignalEvents() {
         //when
         BindingProperties signalProducer = bindingServiceProperties.getBindingProperties("signalProducer");
         BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer");
@@ -137,7 +154,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveChannelBindingsSetForCloudConnectors() {
+    void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
         BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties(
             "integrationResultsConsumer"
@@ -156,7 +173,7 @@ public class EngineConfigurationIT {
     }
 
     @Test
-    public void shouldHaveChannelBindingsSetForAsyncJobExecutor() {
+    void shouldHaveChannelBindingsSetForAsyncJobExecutor() {
         //when
         BindingProperties asyncExecutorJobsInput = bindingServiceProperties.getBindingProperties(
             "asyncExecutorJobsInput"
@@ -169,5 +186,32 @@ public class EngineConfigurationIT {
         assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
         assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
         assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
+    }
+
+    @Test
+    void shouldConfigureProcessDefinitionCacheName() {
+        assertThat(activitiProperties.getProcessDefinitionCacheName()).isEqualTo("processDefinitions");
+    }
+
+    @Test
+    void shouldConfigureProcessDefinitionCacheLimit() {
+        assertThat(activitiProperties.getProcessDefinitionCacheLimit()).isEqualTo(70);
+        assertThat(cacheManagerProperties.getCaches().get("processDefinitions").getCaffeine().getSpec())
+            .isEqualTo("maximumSize=70, expireAfterAccess=10m, recordStats");
+    }
+
+    @Test
+    void shouldDeployAllProcessDefinitions() {
+        var processDefinitionCount = repositoryService.createProcessDefinitionQuery().count();
+
+        assertThat(processDefinitionCount).isGreaterThan(70);
+    }
+
+    @Test
+    void shouldCacheProcessDefinitionsLimit() {
+        var springProcessDefinitionCache = (SpringProcessDefinitionCache) configuration.getProcessDefinitionCache();
+
+        assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize())
+            .isEqualTo(Long.valueOf(activitiProperties.getProcessDefinitionCacheLimit()));
     }
 }

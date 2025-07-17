@@ -25,7 +25,7 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.*;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -85,12 +85,12 @@ public class ProcessInstanceDeleteController {
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
     @Transactional
-    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances(
+    public CollectionModel<EntityModel<QueryCloudProcessInstance>> deleteProcessInstances(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate
     ) {
-        Collection<EntityModel<CloudProcessInstance>> result = new ArrayList<>();
+        Collection<EntityModel<QueryCloudProcessInstance>> result = new ArrayList<>();
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         for (ProcessInstanceEntity entity : iterable) {

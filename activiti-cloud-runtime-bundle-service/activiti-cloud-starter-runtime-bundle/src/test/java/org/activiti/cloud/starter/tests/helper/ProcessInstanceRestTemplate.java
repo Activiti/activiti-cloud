@@ -28,6 +28,7 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
+import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -152,12 +153,12 @@ public class ProcessInstanceRestTemplate {
         );
     }
 
-    private ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessCallFail(String baseURL) {
+    private ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> startCreatedProcessCallFail(String baseURL) {
         return testRestTemplate.exchange(
             baseURL,
             HttpMethod.POST,
             new HttpEntity<>(CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+            new ParameterizedTypeReference<EntryResponseContent<ActivitiErrorMessageImpl>>() {}
         );
     }
 
@@ -192,9 +193,13 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessFailing(String processInstanceId) {
+    public ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> startCreatedProcessFailing(
+        String processInstanceId
+    ) {
         String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/start");
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = startCreatedProcessCallFail(baseURL);
+        ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity = startCreatedProcessCallFail(
+            baseURL
+        );
         return responseEntity;
     }
 
@@ -218,7 +223,7 @@ public class ProcessInstanceRestTemplate {
         return startProcess(processDefinitionKey, null, variables, businessKey);
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(
+    public ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> startProcessWithErrorResponse(
         String baseURL,
         StartProcessPayload startProcess
     ) {
@@ -226,15 +231,17 @@ public class ProcessInstanceRestTemplate {
             baseURL,
             HttpMethod.POST,
             new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+            new ParameterizedTypeReference<EntryResponseContent<ActivitiErrorMessageImpl>>() {}
         );
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(StartProcessPayload startProcess) {
+    public ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> startProcessWithErrorResponse(
+        StartProcessPayload startProcess
+    ) {
         return startProcessWithErrorResponse(PROCESS_INSTANCES_RELATIVE_URL, startProcess);
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> adminStartProcessWithErrorResponse(
+    public ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> adminStartProcessWithErrorResponse(
         StartProcessPayload startProcess
     ) {
         return startProcessWithErrorResponse(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);
@@ -291,7 +298,7 @@ public class ProcessInstanceRestTemplate {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
-            null,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
         );
         return responseEntity;
@@ -301,7 +308,7 @@ public class ProcessInstanceRestTemplate {
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
-            null,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
         );
         return responseEntity;
@@ -430,7 +437,10 @@ public class ProcessInstanceRestTemplate {
             .withVariables(variables)
             .build();
 
-        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
+            setProcessVariablesPayload,
+            CONTENT_TYPE_HEADER
+        );
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.PUT,
