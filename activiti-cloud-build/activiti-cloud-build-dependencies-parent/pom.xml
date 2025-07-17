@@ -15,7 +15,7 @@
     <spring-cloud.version>2024.0.0</spring-cloud.version>
     <testcontainers.version>1.21.0</testcontainers.version>
     <h2.version>2.3.232</h2.version>
-    <graphql-java.version>22.1</graphql-java.version>
+    <graphql-java.version>24.1</graphql-java.version>
     <postgresql.version>42.7.7</postgresql.version>
     <liquibase.version>4.31.1</liquibase.version>
   </properties>
