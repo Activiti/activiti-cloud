@@ -6794,11 +6794,11 @@
           "processInstanceId": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance_ProcessVariables"
@@ -6876,18 +6876,18 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_ProcessVariables"
             },
             "uniqueItems": true
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           },
           "serviceFullName": {
             "type": "string"
@@ -6930,13 +6930,14 @@
           "standalone": {
             "type": "boolean"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "parentTaskId": {
             "type": "string"
           },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6945,18 +6946,27 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
           "candidateGroups": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "processDefinitionId": {
-            "type": "string"
-          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
           },
           "businessKey": {
             "type": "string"
@@ -6976,12 +6986,6 @@
           "completedBy": {
             "type": "string"
           },
-          "formKey": {
-            "type": "string"
-          },
-          "assignee": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
@@ -6992,10 +6996,6 @@
               "CANCELLED",
               "DELETED"
             ]
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "title": "QueryCloudTask_ProcessVariables"
@@ -7180,6 +7180,19 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "processDefinitionId": {
             "type": "string"
           },
@@ -7187,15 +7200,15 @@
             "type": "string",
             "format": "date-time"
           },
-          "businessKey": {
-            "type": "string"
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "initiator": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
+          "businessKey": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7208,19 +7221,6 @@
             ]
           },
           "parentId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionKey": {
             "type": "string"
           }
         },
@@ -7317,11 +7317,11 @@
           "processInstanceId": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance"
@@ -7417,11 +7417,11 @@
           "processInstanceId": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance_General"
@@ -7450,18 +7450,18 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_General"
             },
             "uniqueItems": true
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           },
           "serviceFullName": {
             "type": "string"
@@ -7504,13 +7504,14 @@
           "standalone": {
             "type": "boolean"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "parentTaskId": {
             "type": "string"
           },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7519,18 +7520,27 @@
               "type": "string"
             }
           },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
           "candidateGroups": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "processDefinitionId": {
-            "type": "string"
-          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
           },
           "businessKey": {
             "type": "string"
@@ -7550,12 +7560,6 @@
           "completedBy": {
             "type": "string"
           },
-          "formKey": {
-            "type": "string"
-          },
-          "assignee": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
@@ -7566,10 +7570,6 @@
               "CANCELLED",
               "DELETED"
             ]
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "title": "QueryCloudTask_General"
@@ -7617,6 +7617,19 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "processDefinitionId": {
             "type": "string"
           },
@@ -7624,15 +7637,15 @@
             "type": "string",
             "format": "date-time"
           },
-          "businessKey": {
-            "type": "string"
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "initiator": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
+          "businessKey": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7645,19 +7658,6 @@
             ]
           },
           "parentId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionKey": {
             "type": "string"
           }
         },
@@ -7744,11 +7744,11 @@
           "processInstanceId": {
             "type": "string"
           },
-          "taskVariable": {
-            "type": "boolean"
-          },
           "taskId": {
             "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
           }
         },
         "title": "QueryCloudVariableInstance"
@@ -7959,6 +7959,13 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "cancelledDate": {
             "type": "string",
             "format": "date-time"
@@ -7982,13 +7989,6 @@
               "CANCELLED",
               "ERROR"
             ]
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionKey": {
-            "type": "string"
           },
           "serviceFullName": {
             "type": "string"
@@ -8130,6 +8130,19 @@
           "id": {
             "type": "string"
           },
+          "parentProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "connectorType": {
             "type": "string"
           },
@@ -8151,35 +8164,22 @@
           "processDefinitionId": {
             "type": "string"
           },
+          "appVersion": {
+            "type": "string"
+          },
+          "executionId": {
+            "type": "string"
+          },
           "businessKey": {
             "type": "string"
           },
           "clientType": {
             "type": "string"
           },
-          "appVersion": {
-            "type": "string"
-          },
           "clientId": {
             "type": "string"
           },
           "clientName": {
-            "type": "string"
-          },
-          "executionId": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "parentProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionKey": {
             "type": "string"
           },
           "serviceFullName": {
