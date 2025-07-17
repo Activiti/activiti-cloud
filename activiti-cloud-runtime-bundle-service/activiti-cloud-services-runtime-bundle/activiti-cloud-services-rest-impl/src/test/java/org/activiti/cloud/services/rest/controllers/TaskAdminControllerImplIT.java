@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.cloud.services.rest.controllers.PageConverterTestUtils.setupPageConverterStub;
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,13 +60,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskAdminControllerImpl.class)
@@ -98,7 +97,7 @@ class TaskAdminControllerImplIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @SpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
@@ -127,6 +126,8 @@ class TaskAdminControllerImplIT {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+
+        setupPageConverterStub(pageConverter);
     }
 
     @Test
