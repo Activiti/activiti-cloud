@@ -34,7 +34,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = RuntimeBundleApplication.class,
-    properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
+    properties = {
+        "activiti.cloud.messaging.function-router.enabled=true",
+        "activiti.cloud.application.name=myapp",
+        "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=consumer",
+    }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
@@ -42,7 +46,7 @@ public class RuntimeBundleFunctionRouterEnabledIT {
 
     @ServiceConnection
     @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     @Container
     @ServiceConnection
