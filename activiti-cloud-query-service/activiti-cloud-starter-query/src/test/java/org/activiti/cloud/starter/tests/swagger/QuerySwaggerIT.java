@@ -61,13 +61,41 @@ public class QuerySwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON)).andReturn();
+        MvcResult result = mockMvc
+            .perform(get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.servers").isNotEmpty())
+            .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
+            .andExpect(jsonPath("$.paths").isNotEmpty())
+            .andExpect(jsonPath("$.components.schemas").isNotEmpty())
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("ListResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
+            .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
+            .andExpect(jsonPath("$.info.title").value("OpenAPI definition"))
+            .andExpect(
+                content()
+                    .string(
+                        both(notNullValue(String.class))
+                            .and(not(containsString("ListResponseContent«")))
+                            .and(not(containsString("EntriesResponseContent«")))
+                            .and(not(containsString("EntryResponseContent«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("Resources«Resource«")))
+                            .and(not(containsString("Resource«")))
+                    )
+            )
+            .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
+            .andReturn();
 
-        String generatedAPIDoc = result.getResponse().getContentAsString(Charset.defaultCharset());
+        String generatedAPIDoc = result.getResponse().getContentAsString();
+        assertThatJson(generatedAPIDoc)
+            .inPath("$.paths./v1/tasks.get.parameters[*].['name', 'required']")
+            .isArray()
+            .contains("{name: \"variables.name\", required: false}", "{name: \"variables.value\", required: false}");
 
-        // Print the current API doc to console for updating the expected file
-        System.out.println("=== CURRENT API DOCUMENTATION ===");
-        System.out.println(generatedAPIDoc);
-        System.out.println("=== END API DOCUMENTATION ===");
+        assertThatJson(generatedAPIDoc).isEqualTo(swaggerExpectedResource.getContentAsString(Charset.defaultCharset()));
     }
 }
