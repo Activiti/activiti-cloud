@@ -18,9 +18,17 @@
     <graphql-java.version>24.1</graphql-java.version>
     <postgresql.version>42.7.7</postgresql.version>
     <liquibase.version>4.31.1</liquibase.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- security fix AAE-36687, to be removed after Spring Boot update with that version included -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
+      <!-- security fix AAE-36687 -->
       <dependency>
         <groupId>org.aspectj</groupId>
         <artifactId>aspectjweaver</artifactId>
