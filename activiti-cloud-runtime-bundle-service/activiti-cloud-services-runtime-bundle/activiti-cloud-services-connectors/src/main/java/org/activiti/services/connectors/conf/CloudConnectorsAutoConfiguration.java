@@ -119,9 +119,10 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(
         StreamBridge streamBridge,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory
+        IntegrationContextMessageBuilderFactory messageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new IntegrationRequestSender(streamBridge, messageBuilderFactory);
+        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
     }
 
     @Bean
