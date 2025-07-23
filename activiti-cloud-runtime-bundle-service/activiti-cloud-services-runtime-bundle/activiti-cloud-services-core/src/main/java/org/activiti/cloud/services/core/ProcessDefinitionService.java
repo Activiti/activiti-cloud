@@ -15,13 +15,17 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.activiti.runtime.api.query.impl.PageImpl;
 
 public class ProcessDefinitionService extends BaseProcessDefinitionService {
 
@@ -35,12 +39,34 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         this.processRuntime = processRuntime;
     }
 
-    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
+    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include, boolean versions) {
         Page<ProcessDefinition> processDefinitions = processRuntime.processDefinitions(
             pageable,
             ProcessPayloadBuilder.processDefinitions().withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE).build()
         );
+
+        if (!versions) {
+            List<ProcessDefinition> latestDefinitions = filterLatestVersions(processDefinitions.getContent());
+            processDefinitions = new PageImpl<>(latestDefinitions, latestDefinitions.size());
+        }
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
+    }
+
+    private List<ProcessDefinition> filterLatestVersions(List<ProcessDefinition> processDefinitions) {
+        return new ArrayList<>(
+            processDefinitions
+                .stream()
+                .sorted((pd1, pd2) -> Integer.compare(pd2.getVersion(), pd1.getVersion()))
+                .collect(
+                    Collectors.toMap(
+                        ProcessDefinition::getKey,
+                        pd -> pd,
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                    )
+                )
+                .values()
+        );
     }
 }
