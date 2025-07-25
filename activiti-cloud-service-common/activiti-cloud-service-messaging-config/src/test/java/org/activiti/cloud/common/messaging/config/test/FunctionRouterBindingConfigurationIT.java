@@ -420,4 +420,44 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
         assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
     }
+
+    @Test
+    void functionRoutes() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().getFunctionRoutes())
+            .containsOnly(
+                "commandConsumer",
+                "queryConsumer",
+                "auditConsumer",
+                "integrationRequests",
+                "scriptRuntimeConsumer"
+            );
+    }
+
+    @Test
+    void functionRouterRegistrations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().getRegistrations())
+            .containsOnly(
+                Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
+                Map.entry(
+                    "engine-events",
+                    List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
+                ),
+                Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration"))
+            );
+    }
+
+    @Test
+    void functionRouterDestinations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().getDestinations())
+            .containsOnly(
+                Map.entry("auditConsumer", "engine-events"),
+                Map.entry("commandConsumer", "command-consumer"),
+                Map.entry("integrationRequests", "integration-requests"),
+                Map.entry("queryConsumer", "engine-events"),
+                Map.entry("scriptRuntimeConsumer", "script.EXECUTE")
+            );
+    }
 }
