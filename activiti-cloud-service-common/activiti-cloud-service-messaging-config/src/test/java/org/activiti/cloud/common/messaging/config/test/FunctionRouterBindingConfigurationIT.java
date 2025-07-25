@@ -22,6 +22,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
@@ -37,6 +38,8 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -73,6 +76,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.queryConsumer.group=query",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
+        "spring.cloud.stream.bindings.scriptRuntimeConsumer.destination=script.EXECUTE",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.max-retries=4",
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
@@ -82,6 +86,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.queryConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
     }
 )
 @EnableTestBinder
@@ -100,6 +105,7 @@ public class FunctionRouterBindingConfigurationIT {
     private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
     private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
+    private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
 
     @Autowired
     private TestBindingsChannels channels;
@@ -167,12 +173,21 @@ public class FunctionRouterBindingConfigurationIT {
                 return MessageBuilder.withPayload(message.getPayload()).setHeader("type", "Test Reply").build();
             };
         }
+
+        @Bean
+        @ConnectorBinding(input = SCRIPT_RUNTIME_CONSUMER, connectorType = "script.EXECUTE", condition = "true")
+        public ConsumerConnector<String> scriptRuntimeExecutor() {
+            return message -> {
+                connectorPayload.set(message);
+            };
+        }
     }
 
     @BeforeEach
     public void setUp() {
         queryMessage.set(null);
         auditMessage.set(null);
+        connectorPayload.set(null);
         auditRetries.set(0);
         output.clear();
     }
@@ -217,7 +232,7 @@ public class FunctionRouterBindingConfigurationIT {
             .satisfies(destination ->
                 assertThat(List.of(destination.split(",")))
                     .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                    .containsOnly("engine-events", "command-consumer", "integration-requests")
+                    .containsOnly("engine-events", "command-consumer", "integration-requests", "script.EXECUTE")
             );
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
@@ -379,6 +394,24 @@ public class FunctionRouterBindingConfigurationIT {
 
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+            });
+    }
+
+    @Test
+    void testConnectorBindings() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("run_test();")
+            .setHeader("spring.cloud.function.destination", "script.EXECUTE")
+            .build();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .untilAsserted(() -> {
+                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
             });
     }
 

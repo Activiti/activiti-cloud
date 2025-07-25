@@ -19,6 +19,7 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -156,7 +157,21 @@ public class FunctionRouterConfiguration {
                             }
                         });
                     },
-                    () -> log.warn("Missing '{}' header to route message {}", FUNCTION_DESTINATION, message)
+                    () -> {
+                        final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
+
+                        final var registration = Optional
+                            .ofNullable(destination)
+                            .map(it -> messagingProperties.getFunctionRouter().getRegistrations().get(it))
+                            .orElse(List.of());
+
+                        log.warn(
+                            "Unable to route message {} to destination '{}' for function registration '{}'",
+                            message,
+                            destination,
+                            registration
+                        );
+                    }
                 );
         };
     }

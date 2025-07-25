@@ -105,6 +105,8 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     protected String registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
         final String beanName = functionName + REGISTRATION_NAME_SUFFIX;
 
+        functionRegistration.setBeanName(beanName);
+
         GenericApplicationContext.class.cast(applicationContext)
             .registerBean(beanName, FunctionRegistration.class, () -> functionRegistration);
 

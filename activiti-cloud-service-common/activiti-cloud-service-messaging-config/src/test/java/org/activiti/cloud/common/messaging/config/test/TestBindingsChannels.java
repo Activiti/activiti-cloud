@@ -36,6 +36,8 @@ public interface TestBindingsChannels {
 
     String INTEGRATION_RESULTS = "integrationResults";
 
+    String SCRIPT_RUNTIME_CONSUMER = "scriptRuntimeConsumer";
+
     @InputBinding(value = COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
@@ -69,5 +71,10 @@ public interface TestBindingsChannels {
     @OutputBinding(INTEGRATION_RESULTS)
     default MessageChannel integrationResults() {
         return MessageChannels.direct(INTEGRATION_RESULTS).getObject();
+    }
+
+    @InputBinding(value = SCRIPT_RUNTIME_CONSUMER)
+    default SubscribableChannel scriptRuntimeConsumer() {
+        return MessageChannels.publishSubscribe(SCRIPT_RUNTIME_CONSUMER).getObject();
     }
 }

@@ -18,9 +18,11 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
@@ -65,7 +67,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     public BeanPostProcessor connectorBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
-        Function<String, String> resolveExpression
+        Function<String, String> resolveExpression,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -81,7 +84,24 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            registerFunctionRegistration(beanName, functionRegistration);
+                            final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+
+                            if (messagingProperties.getFunctionRouter().isEnabled()) {
+                                Optional
+                                    .ofNullable(
+                                        messagingProperties
+                                            .getFunctionRouter()
+                                            .getDestinations()
+                                            .get(connectorBinding.input())
+                                    )
+                                    .ifPresent(destination -> {
+                                        messagingProperties
+                                            .getFunctionRouter()
+                                            .getRegistrations()
+                                            .computeIfAbsent(destination, key -> new ArrayList<>())
+                                            .add(functionBeanName);
+                                    });
+                            }
 
                             responseDestination.set(connectorBinding.outputHeader());
 

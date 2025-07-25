@@ -145,8 +145,6 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            functionRegistration.setBeanName(beanName + FunctionRegistration.REGISTRATION_NAME_SUFFIX);
-
                             var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
                             if (messagingProperties.getFunctionRouter().isEnabled()) {
