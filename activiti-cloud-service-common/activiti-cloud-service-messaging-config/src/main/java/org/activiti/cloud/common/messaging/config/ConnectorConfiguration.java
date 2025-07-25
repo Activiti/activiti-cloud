@@ -91,13 +91,13 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     .ofNullable(
                                         messagingProperties
                                             .getFunctionRouter()
-                                            .getDestinations()
+                                            .destinations()
                                             .get(connectorBinding.input())
                                     )
                                     .ifPresent(destination -> {
                                         messagingProperties
                                             .getFunctionRouter()
-                                            .getRegistrations()
+                                            .registrations()
                                             .computeIfAbsent(destination, key -> new ArrayList<>())
                                             .add(functionBeanName);
                                     });

@@ -437,7 +437,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionRouterRegistrations() {
         Assertions
-            .assertThat(messagingProperties.getFunctionRouter().getRegistrations())
+            .assertThat(messagingProperties.getFunctionRouter().registrations())
             .containsOnly(
                 Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
                 Map.entry(
@@ -451,7 +451,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionRouterDestinations() {
         Assertions
-            .assertThat(messagingProperties.getFunctionRouter().getDestinations())
+            .assertThat(messagingProperties.getFunctionRouter().destinations())
             .containsOnly(
                 Map.entry("auditConsumer", "engine-events"),
                 Map.entry("commandConsumer", "command-consumer"),

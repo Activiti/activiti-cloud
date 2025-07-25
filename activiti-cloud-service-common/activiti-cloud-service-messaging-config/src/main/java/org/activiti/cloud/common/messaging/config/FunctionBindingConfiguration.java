@@ -75,7 +75,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
             Optional
                 .of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
-                .map(functionRouter -> functionRouter.getDestinations().get(bindingName))
+                .map(functionRouter -> functionRouter.destinations().get(bindingName))
                 .or(() ->
                     Optional
                         .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
@@ -152,13 +152,13 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                     .ofNullable(
                                         messagingProperties
                                             .getFunctionRouter()
-                                            .getDestinations()
+                                            .destinations()
                                             .get(functionBinding.input())
                                     )
                                     .ifPresent(destination -> {
                                         messagingProperties
                                             .getFunctionRouter()
-                                            .getRegistrations()
+                                            .registrations()
                                             .computeIfAbsent(destination, key -> new ArrayList<>())
                                             .add(functionBeanName);
                                     });

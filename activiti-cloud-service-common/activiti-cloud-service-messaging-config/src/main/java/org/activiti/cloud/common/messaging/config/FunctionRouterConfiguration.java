@@ -87,7 +87,7 @@ public class FunctionRouterConfiguration {
                 .of(message)
                 .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
                 .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
-                .map(messagingProperties.getFunctionRouter().getRegistrations()::get)
+                .map(messagingProperties.getFunctionRouter().registrations()::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
                     registrations -> {
@@ -162,7 +162,7 @@ public class FunctionRouterConfiguration {
 
                         final var registration = Optional
                             .ofNullable(destination)
-                            .map(it -> messagingProperties.getFunctionRouter().getRegistrations().get(it))
+                            .map(it -> messagingProperties.getFunctionRouter().registrations().get(it))
                             .orElse(List.of());
 
                         log.warn(

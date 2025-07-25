@@ -80,7 +80,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .filter(bindingServiceProperties.getBindings()::containsKey)
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
-                        functionRouter.getDestinations().put(bindingName, value.getDestination());
+                        functionRouter.destinations().put(bindingName, value.getDestination());
 
                         log.warn(
                             "Configured function route '{}' for destination '{}'",
@@ -143,7 +143,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     });
 
                 functionRouterInput.setDestination(
-                    functionRouter.getDestinations().values().stream().distinct().collect(Collectors.joining(","))
+                    functionRouter.destinations().values().stream().distinct().collect(Collectors.joining(","))
                 );
                 functionRouterInput.setGroup(functionRouter.getGroup());
                 functionRouterInput.setConsumer(functionRouter.getConsumer());

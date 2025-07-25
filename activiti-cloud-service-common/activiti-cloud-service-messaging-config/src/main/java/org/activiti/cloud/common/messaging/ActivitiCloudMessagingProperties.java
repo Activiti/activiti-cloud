@@ -417,11 +417,11 @@ public class ActivitiCloudMessagingProperties {
             this.enabled = enabled;
         }
 
-        public Map<String, String> getDestinations() {
+        public Map<String, String> destinations() {
             return destinations;
         }
 
-        public Map<String, List<String>> getRegistrations() {
+        public Map<String, List<String>> registrations() {
             return registrations;
         }
 
