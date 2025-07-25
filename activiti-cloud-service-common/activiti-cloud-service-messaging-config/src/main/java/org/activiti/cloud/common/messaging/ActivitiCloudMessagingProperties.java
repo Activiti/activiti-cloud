@@ -557,6 +557,15 @@ public class ActivitiCloudMessagingProperties {
         public void setOverrideRequiredProducerGroups(List<String> overrideRequiredProducerGroups) {
             this.overrideRequiredProducerGroups = overrideRequiredProducerGroups;
         }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", BindingFunctionRouterProperties.class.getSimpleName() + "[", "]")
+                .add("enabled=" + enabled)
+                .add("excludeRequiredProducerGroups=" + excludeRequiredProducerGroups)
+                .add("overrideRequiredProducerGroups=" + overrideRequiredProducerGroups)
+                .toString();
+        }
     }
 
     static class InputConverter<T> {

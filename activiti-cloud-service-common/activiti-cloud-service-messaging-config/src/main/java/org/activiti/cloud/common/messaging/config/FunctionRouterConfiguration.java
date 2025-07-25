@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionProperties;
@@ -65,6 +66,13 @@ public class FunctionRouterConfiguration {
 
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
+
+    @Bean
+    ApplicationRunner functionRouterConfigurationApplicationRunner(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        return args -> log.warn("Function Router has been initialized: {}", messagingProperties.getFunctionRouter());
+    }
 
     @Configuration
     static class FunctionRouterChannels {
