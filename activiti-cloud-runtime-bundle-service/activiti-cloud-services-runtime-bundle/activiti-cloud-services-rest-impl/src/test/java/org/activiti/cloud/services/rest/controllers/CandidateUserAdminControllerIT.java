@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.activiti.cloud.services.rest.controllers.PageConverterTestUtils.setupPageConverterStub;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,13 +47,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -83,7 +82,7 @@ class CandidateUserAdminControllerIT {
     @MockitoBean
     private RepositoryService repositoryService;
 
-    @SpyBean
+    @MockitoBean
     private SpringPageConverter pageConverter;
 
     @Autowired
@@ -112,6 +111,8 @@ class CandidateUserAdminControllerIT {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
+
+        setupPageConverterStub(pageConverter);
     }
 
     @Test
@@ -125,10 +126,10 @@ class CandidateUserAdminControllerIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[0].entry.user")
+            .inPath("list.entries[0].entry.user")
             .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.entries[1].entry.user")
+            .inPath("list.entries[1].entry.user")
             .isEqualTo("testuser");
     }
 
@@ -143,10 +144,10 @@ class CandidateUserAdminControllerIT {
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateUsers[0].user")
+            .inPath("_embedded.candidateUsers[0].user")
             .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("_embedded.candidateUsers[1].user")
+            .inPath("_embedded.candidateUsers[1].user")
             .isEqualTo("testuser");
     }
 }

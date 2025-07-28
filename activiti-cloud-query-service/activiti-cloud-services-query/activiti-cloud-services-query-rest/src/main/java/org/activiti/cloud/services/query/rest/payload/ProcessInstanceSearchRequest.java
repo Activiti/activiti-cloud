@@ -40,5 +40,6 @@ public record ProcessInstanceSearchRequest(
     Date suspendedTo,
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
-    CloudRuntimeEntitySort sort
+    CloudRuntimeEntitySort sort,
+    String excludeByProcessCategoryName
 ) implements CloudRuntimeEntityFilterRequest {}
