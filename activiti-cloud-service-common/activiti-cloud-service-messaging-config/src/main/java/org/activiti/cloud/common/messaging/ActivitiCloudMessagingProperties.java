@@ -484,6 +484,14 @@ public class ActivitiCloudMessagingProperties {
             this.retryInterval = retryInterval;
         }
 
+        public void register(String bindingName, String functionBeanName) {
+            Optional
+                .ofNullable(destinations.get(bindingName))
+                .ifPresent(destination -> {
+                    registrations.computeIfAbsent(destination, key -> new ArrayList<>()).add(functionBeanName);
+                });
+        }
+
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof FunctionRouterProperties that)) return false;

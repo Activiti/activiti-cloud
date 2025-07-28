@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -140,28 +139,16 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
                         .ifPresent(functionBinding -> {
-                            Type functionType = discoverFunctionType(bean, beanName);
+                            final Type functionType = discoverFunctionType(bean, beanName);
+                            final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
                             var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
-                            if (messagingProperties.getFunctionRouter().isEnabled()) {
-                                Optional
-                                    .ofNullable(
-                                        messagingProperties
-                                            .getFunctionRouter()
-                                            .destinations()
-                                            .get(functionBinding.input())
-                                    )
-                                    .ifPresent(destination -> {
-                                        messagingProperties
-                                            .getFunctionRouter()
-                                            .registrations()
-                                            .computeIfAbsent(destination, key -> new ArrayList<>())
-                                            .add(functionBeanName);
-                                    });
+                            if (functionRouter.isEnabled()) {
+                                functionRouter.register(functionBinding.input(), functionBeanName);
                             }
 
                             GenericSelector<Message<?>> selector = Optional

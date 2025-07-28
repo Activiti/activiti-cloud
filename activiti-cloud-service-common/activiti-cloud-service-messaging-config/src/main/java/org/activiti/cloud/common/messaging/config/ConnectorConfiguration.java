@@ -18,7 +18,6 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -79,28 +78,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
-                            Type functionType = discoverFunctionType(bean, beanName);
+                            final Type functionType = discoverFunctionType(bean, beanName);
+                            final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
                             final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
-                            if (messagingProperties.getFunctionRouter().isEnabled()) {
-                                Optional
-                                    .ofNullable(
-                                        messagingProperties
-                                            .getFunctionRouter()
-                                            .destinations()
-                                            .get(connectorBinding.input())
-                                    )
-                                    .ifPresent(destination -> {
-                                        messagingProperties
-                                            .getFunctionRouter()
-                                            .registrations()
-                                            .computeIfAbsent(destination, key -> new ArrayList<>())
-                                            .add(functionBeanName);
-                                    });
+                            if (functionRouter.isEnabled()) {
+                                functionRouter.register(connectorBinding.input(), functionBeanName);
                             }
 
                             responseDestination.set(connectorBinding.outputHeader());
