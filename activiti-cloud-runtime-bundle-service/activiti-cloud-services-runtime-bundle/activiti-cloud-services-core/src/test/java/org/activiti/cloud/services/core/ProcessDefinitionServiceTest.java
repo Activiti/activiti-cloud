@@ -18,19 +18,16 @@ package org.activiti.cloud.services.core;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.VariableDefinition;
-import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
@@ -44,7 +41,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -68,8 +64,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -102,8 +97,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
@@ -117,24 +111,5 @@ class ProcessDefinitionServiceTest {
 
     private static Stream<Arguments> emptyIncludeVariables() {
         return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
-    }
-
-    @Test
-    void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
-        Pageable pageable = Pageable.of(0, 10);
-
-        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
-
-        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList());
-
-        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
-            GetProcessDefinitionsPayload.class
-        );
-        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
-
-        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
     }
 }
