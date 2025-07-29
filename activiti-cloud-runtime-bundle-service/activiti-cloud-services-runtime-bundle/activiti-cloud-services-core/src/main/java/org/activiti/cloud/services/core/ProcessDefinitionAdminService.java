@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
@@ -41,22 +42,10 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         Page<ProcessDefinition> processDefinitions;
         if (!versions) {
             processDefinitions =
-                processAdminRuntime.processDefinitionsLatestVersions(
-                    pageable,
-                    ProcessPayloadBuilder
-                        .processDefinitions()
-                        .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
-                        .build()
-                );
+                processAdminRuntime.processDefinitionsLatestVersions(pageable);
         } else {
             processDefinitions =
-                processAdminRuntime.processDefinitions(
-                    pageable,
-                    ProcessPayloadBuilder
-                        .processDefinitions()
-                        .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
-                        .build()
-                );
+                processAdminRuntime.processDefinitions(pageable);
         }
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;

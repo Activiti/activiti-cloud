@@ -113,25 +113,6 @@ public class ProcessDefinitionAdminServiceTest {
     }
 
     @Test
-    void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
-        Pageable pageable = Pageable.of(0, 10);
-
-        when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
-
-        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), true);
-
-        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
-            GetProcessDefinitionsPayload.class
-        );
-        verify(processAdminRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
-
-        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
-    }
-
-    @Test
     void should_getProcessDefinitionsWithLatestVersion_whenVersionsIsFalse() {
         // ProcessDefinitionImpl processDefinition1 = createProcessDefinition("id1", "process1", "process1", 1);
         ProcessDefinitionImpl processDefinition2 = createProcessDefinition("id2", "process1", "process1", 2);
@@ -140,7 +121,7 @@ public class ProcessDefinitionAdminServiceTest {
         // processDefinitions.add(processDefinition1);
         processDefinitions.add(processDefinition2);
 
-        when(processAdminRuntime.processDefinitionsLatestVersions(any(), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitionsLatestVersions(any()))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
