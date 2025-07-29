@@ -67,7 +67,7 @@ public abstract class BaseProcessDefinitionService {
 
     protected GetProcessDefinitionsPayload getGetProcessDefinitionsPayload(boolean includeTriggerableByFormCategory) {
         GetProcessDefinitionsPayload processDefinitionsPayload = null;
-        if (includeTriggerableByFormCategory) {
+        if (!includeTriggerableByFormCategory) {
             processDefinitionsPayload =
                 ProcessPayloadBuilder
                     .processDefinitions()

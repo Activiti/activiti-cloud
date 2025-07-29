@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -67,7 +68,7 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull()))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -101,7 +102,7 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull()))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -122,7 +123,7 @@ public class ProcessDefinitionAdminServiceTest {
         when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
-        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList());
+        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), false);
 
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class

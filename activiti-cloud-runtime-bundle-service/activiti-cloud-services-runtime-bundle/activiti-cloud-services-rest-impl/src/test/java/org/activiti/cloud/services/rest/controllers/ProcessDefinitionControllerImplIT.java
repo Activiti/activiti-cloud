@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -171,7 +172,7 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), isNull(GetProcessDefinitionsPayload.class)))
             .thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
@@ -189,7 +190,7 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any(Pageable.class), (GetProcessDefinitionsPayload) eq(null)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(processDefinitionPage);
 
         mockMvc
@@ -214,7 +215,7 @@ class ProcessDefinitionControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        given(processRuntime.processDefinitions(any(Pageable.class), isNull(GetProcessDefinitionsPayload.class)))
             .willReturn(processDefinitionPage);
 
         //when
@@ -249,7 +250,7 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), isNull(GetProcessDefinitionsPayload.class)))
             .thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
