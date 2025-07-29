@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Audit Dependencies BOM (Bill Of Materials)</name>
   <properties>
-    <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
+    <openfeign.querydsl.version>7.0</openfeign.querydsl.version>
   </properties>
   <dependencyManagement>
     <dependencies>
