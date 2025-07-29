@@ -139,30 +139,25 @@ public class ProcessDefinitionAdminServiceTest {
 
     @Test
     void should_getProcessDefinitionsWithLatestVersion_whenVersionsIsFalse() {
-        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
-        processDefinition.setId("id");
-        processDefinition.setVersion(1);
-        processDefinition.setName("process1");
-
-        ProcessDefinitionImpl processDefinition2 = new ProcessDefinitionImpl();
-        processDefinition.setId("id");
-        processDefinition.setVersion(2);
-        processDefinition.setName("process1");
+        ProcessDefinitionImpl processDefinition1 = createProcessDefinition("id1", "process1", "process1", 1);
+        ProcessDefinitionImpl processDefinition2 = createProcessDefinition("id2", "process1", "process1", 2);
 
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
-        processDefinitions.add(processDefinition);
+        processDefinitions.add(processDefinition1);
         processDefinitions.add(processDefinition2);
 
         when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+            .thenReturn(new PageImpl<>(processDefinitions, 2));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
         when(
-            processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
+            processDefinitionDecorator.decorate(
+                argThat(argument -> argument.getId().equals(processDefinition2.getId()))
+            )
         )
             .thenAnswer(call -> {
-                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition2);
                 cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
                 return cloudProcessDefinition;
             });
@@ -171,8 +166,19 @@ public class ProcessDefinitionAdminServiceTest {
             .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), false)
             .getContent();
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("process1");
-        assertThat(result.get(0).getVersion()).isEqualTo(2);
+        assertThat(result)
+            .hasSize(1)
+            .first()
+            .extracting(ProcessDefinition::getName, ProcessDefinition::getVersion)
+            .containsExactly("process1", 2);
+    }
+
+    private ProcessDefinitionImpl createProcessDefinition(String id, String name, String key, int version) {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(id);
+        processDefinition.setVersion(version);
+        processDefinition.setName(name);
+        processDefinition.setKey(key);
+        return processDefinition;
     }
 }

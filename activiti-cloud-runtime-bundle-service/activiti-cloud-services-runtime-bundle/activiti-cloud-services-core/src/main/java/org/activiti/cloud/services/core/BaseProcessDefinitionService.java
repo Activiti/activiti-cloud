@@ -33,10 +33,7 @@ public abstract class BaseProcessDefinitionService {
         this.processDefinitionDecorators = processDefinitionDecorators;
     }
 
-    public abstract Page<ProcessDefinition> getProcessDefinitions(
-        Pageable pageable,
-        List<String> include
-    );
+    public abstract Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include);
 
     protected ExtendedCloudProcessDefinition decorateAll(ProcessDefinition processDefinition, List<String> include) {
         ExtendedCloudProcessDefinition decoratedProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
