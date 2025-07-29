@@ -40,33 +40,28 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include, boolean versions) {
-        Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(
-            pageable,
-            ProcessPayloadBuilder.processDefinitions().withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE).build()
-        );
+        Page<ProcessDefinition> processDefinitions;
         if (!versions) {
-            List<ProcessDefinition> latestDefinitions = filterLatestVersions(processDefinitions.getContent());
-            processDefinitions = new PageImpl<>(latestDefinitions, latestDefinitions.size());
+            processDefinitions =
+                processAdminRuntime.processDefinitionsLatestVersions(
+                    pageable,
+                    ProcessPayloadBuilder
+                        .processDefinitions()
+                        .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
+                        .build()
+                );
+        } else {
+            processDefinitions =
+                processAdminRuntime.processDefinitions(
+                    pageable,
+                    ProcessPayloadBuilder
+                        .processDefinitions()
+                        .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
+                        .build()
+                );
         }
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
-    }
-
-    private List<ProcessDefinition> filterLatestVersions(List<ProcessDefinition> processDefinitions) {
-        return new ArrayList<>(
-            processDefinitions
-                .stream()
-                .sorted((pd1, pd2) -> Integer.compare(pd2.getVersion(), pd1.getVersion()))
-                .collect(
-                    Collectors.toMap(
-                        ProcessDefinition::getKey,
-                        pd -> pd,
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                    )
-                )
-                .values()
-        );
     }
 
     @Override

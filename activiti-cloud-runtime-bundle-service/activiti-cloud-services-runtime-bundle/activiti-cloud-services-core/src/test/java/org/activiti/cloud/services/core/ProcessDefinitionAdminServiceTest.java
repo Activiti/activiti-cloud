@@ -139,15 +139,15 @@ public class ProcessDefinitionAdminServiceTest {
 
     @Test
     void should_getProcessDefinitionsWithLatestVersion_whenVersionsIsFalse() {
-        ProcessDefinitionImpl processDefinition1 = createProcessDefinition("id1", "process1", "process1", 1);
+        // ProcessDefinitionImpl processDefinition1 = createProcessDefinition("id1", "process1", "process1", 1);
         ProcessDefinitionImpl processDefinition2 = createProcessDefinition("id2", "process1", "process1", 2);
 
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
-        processDefinitions.add(processDefinition1);
+        // processDefinitions.add(processDefinition1);
         processDefinitions.add(processDefinition2);
 
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 2));
+        when(processAdminRuntime.processDefinitionsLatestVersions(any(), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
