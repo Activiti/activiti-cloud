@@ -148,9 +148,13 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 functionRouterInput.setGroup(functionRouter.getGroup());
                 functionRouterInput.setConsumer(functionRouter.getConsumer());
 
-                bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
+                if (!functionRouter.destinations().isEmpty()) {
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
 
-                log.warn("Configured function router binding '{}'", functionRouterInput);
+                    log.warn("Configured function router binding '{}'", functionRouterInput);
+                } else {
+                    log.warn("Skipping function router configuration with empty destinations");
+                }
             }
         }
 
