@@ -38,6 +38,7 @@
     <activiti.version>0.0.1-PR-5093-1795-20250729.125218-1</activiti.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
     <java-semver.version>0.9.0</java-semver.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
     <logstash.version>8.1</logstash.version>
@@ -46,11 +47,18 @@
     <java-jwt.version>4.5.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.12</james.apache-mime4j.version>
-    <batik.version>1.17</batik.version>
+    <batik.version>1.19</batik.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- temporary security fix for AAE-36930 -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
+      <!-- temporary security fix -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
