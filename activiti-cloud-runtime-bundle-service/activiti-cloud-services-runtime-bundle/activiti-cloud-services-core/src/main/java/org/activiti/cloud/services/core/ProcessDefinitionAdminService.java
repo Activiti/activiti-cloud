@@ -38,14 +38,13 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         super(processDefinitionDecorators);
         this.processAdminRuntime = processAdminRuntime;
     }
+
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include, boolean versions) {
         Page<ProcessDefinition> processDefinitions;
         if (!versions) {
-            processDefinitions =
-                processAdminRuntime.processDefinitionsLatestVersions(pageable);
+            processDefinitions = processAdminRuntime.processDefinitionsLatestVersions(pageable);
         } else {
-            processDefinitions =
-                processAdminRuntime.processDefinitions(pageable);
+            processDefinitions = processAdminRuntime.processDefinitions(pageable);
         }
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
