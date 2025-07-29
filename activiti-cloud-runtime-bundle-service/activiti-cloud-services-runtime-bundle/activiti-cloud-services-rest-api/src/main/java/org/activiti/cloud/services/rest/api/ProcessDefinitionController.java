@@ -37,9 +37,6 @@ public interface ProcessDefinitionController {
             value = "include",
             required = false
         ) List<String> include,
-        @Parameter(
-            description = "Specifies whether to include all versions (true) or only the latest version (false) of each process definition"
-        ) @RequestParam(value = "versions", required = false, defaultValue = "true") boolean versions,
         Pageable pageable
     );
 

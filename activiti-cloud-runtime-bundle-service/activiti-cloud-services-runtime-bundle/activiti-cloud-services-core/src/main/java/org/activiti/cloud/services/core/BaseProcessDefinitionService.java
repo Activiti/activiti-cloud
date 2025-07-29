@@ -35,8 +35,7 @@ public abstract class BaseProcessDefinitionService {
 
     public abstract Page<ProcessDefinition> getProcessDefinitions(
         Pageable pageable,
-        List<String> include,
-        boolean versions
+        List<String> include
     );
 
     protected ExtendedCloudProcessDefinition decorateAll(ProcessDefinition processDefinition, List<String> include) {

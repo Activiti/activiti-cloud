@@ -68,4 +68,9 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
                 .values()
         );
     }
+
+    @Override
+    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
+        return null;
+    }
 }
