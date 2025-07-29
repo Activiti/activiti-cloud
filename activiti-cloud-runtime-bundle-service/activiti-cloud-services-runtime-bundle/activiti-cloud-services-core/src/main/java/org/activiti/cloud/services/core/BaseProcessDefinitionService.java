@@ -17,6 +17,8 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
@@ -27,11 +29,21 @@ public abstract class BaseProcessDefinitionService {
 
     private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
+    protected static final String PROCESS_CATEGORY_TO_EXCLUDE = "#triggerableByForm";
+
     public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         this.processDefinitionDecorators = processDefinitionDecorators;
     }
 
-    public abstract Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include);
+    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
+        return getProcessDefinitions(pageable, include, true);
+    }
+
+    public abstract Page<ProcessDefinition> getProcessDefinitions(
+        Pageable pageable,
+        List<String> include,
+        boolean includeTriggerableByFormCategory
+    );
 
     protected ExtendedCloudProcessDefinition decorateAll(ProcessDefinition processDefinition, List<String> include) {
         ExtendedCloudProcessDefinition decoratedProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
@@ -51,5 +63,17 @@ public abstract class BaseProcessDefinitionService {
             .findFirst()
             .map(decorator -> decorator.decorate(processDefinition))
             .orElse(processDefinition);
+    }
+
+    protected GetProcessDefinitionsPayload getGetProcessDefinitionsPayload(boolean includeTriggerableByFormCategory) {
+        GetProcessDefinitionsPayload processDefinitionsPayload = null;
+        if (includeTriggerableByFormCategory) {
+            processDefinitionsPayload =
+                ProcessPayloadBuilder
+                    .processDefinitions()
+                    .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
+                    .build();
+        }
+        return processDefinitionsPayload;
     }
 }

@@ -39,6 +39,11 @@ public interface ProcessDefinitionAdminController {
             value = "include",
             required = false
         ) List<String> include,
+        @Parameter(description = "Include triggerable by form category") @RequestParam(
+            value = "includeTriggerableByFormCategory",
+            required = false,
+            defaultValue = "true"
+        ) boolean includeTriggerableByFormCategory,
         Pageable pageable
     );
 }

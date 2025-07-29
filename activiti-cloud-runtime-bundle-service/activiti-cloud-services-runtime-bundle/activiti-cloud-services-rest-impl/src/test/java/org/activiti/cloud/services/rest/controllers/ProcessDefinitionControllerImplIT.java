@@ -19,6 +19,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -37,10 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -168,23 +171,34 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
     }
 
-    private ProcessDefinition buildProcessDefinition(
-        String processDefinitionId,
-        String name,
-        String description,
-        int version
-    ) {
-        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
-        processDefinition.setId(processDefinitionId);
-        processDefinition.setName(name);
-        processDefinition.setDescription(description);
-        processDefinition.setVersion(version);
-        return processDefinition;
+    @Test
+    void getProcessDefinitionsExcludingProcessTriggerableByFormCategory() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any(Pageable.class), (GetProcessDefinitionsPayload) eq(null)))
+            .thenReturn(processDefinitionPage);
+
+        mockMvc
+            .perform(
+                get("/v1/process-definitions")
+                    .queryParam("includeTriggerableByFormCategory", "false")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -200,7 +214,8 @@ class ProcessDefinitionControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
+        given(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .willReturn(processDefinitionPage);
 
         //when
         MvcResult result = mockMvc
@@ -234,7 +249,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
         VariableDefinition givenVariableDefinition = new VariableDefinition();
@@ -958,5 +974,19 @@ class ProcessDefinitionControllerImplIT {
         Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
 
         assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    private ProcessDefinition buildProcessDefinition(
+        String processDefinitionId,
+        String name,
+        String description,
+        int version
+    ) {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(processDefinitionId);
+        processDefinition.setName(name);
+        processDefinition.setDescription(description);
+        processDefinition.setVersion(version);
+        return processDefinition;
     }
 }

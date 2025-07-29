@@ -114,11 +114,13 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     @Override
     public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(
         @RequestParam(required = false, defaultValue = "") List<String> include,
+        boolean includeTriggerableByFormCategory,
         Pageable pageable
     ) {
         Page<ProcessDefinition> page = processDefinitionService.getProcessDefinitions(
             pageConverter.toAPIPageable(pageable),
-            include
+            include,
+            includeTriggerableByFormCategory
         );
         return pagedCollectionModelAssembler.toModel(
             pageable,
