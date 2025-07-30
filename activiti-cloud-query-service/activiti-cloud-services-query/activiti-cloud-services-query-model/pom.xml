@@ -81,7 +81,6 @@
     <dependency>
       <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
-      <classifier>jakarta</classifier>
       <version>${openfeign.querydsl.version}</version>
     </dependency>
     <dependency>
