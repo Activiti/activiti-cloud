@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
+
+import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -46,11 +49,18 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
+                    final var functionRouter = messagingProperties.getFunctionRouter();
+
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
                         .filter(inputBinding ->
-                            !messagingProperties.getFunctionRouter().isEnabled() ||
-                            !messagingProperties.getFunctionRouter().isFunctionRoute(beanName)
+                            !functionRouter.isEnabled() ||
+                            (
+                                List.of(inputBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
+                                !functionRouter.destinations().isEmpty()
+                            )
+                        )
+                        .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
                         )
                         .ifPresent(functionBinding -> {
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
