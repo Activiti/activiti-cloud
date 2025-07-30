@@ -47,6 +47,6 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
 
     @Override
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
-        return null;
+        return getProcessDefinitions(pageable, include, true);
     }
 }
