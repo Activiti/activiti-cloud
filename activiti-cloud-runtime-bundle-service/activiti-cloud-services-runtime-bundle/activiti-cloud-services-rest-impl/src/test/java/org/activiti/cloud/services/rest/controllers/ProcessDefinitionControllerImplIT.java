@@ -19,7 +19,6 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -196,7 +195,7 @@ class ProcessDefinitionControllerImplIT {
         mockMvc
             .perform(
                 get("/v1/process-definitions")
-                    .queryParam("includeTriggerableByFormCategory", "false")
+                    .queryParam("excludedCategory", "#triggerableByForm")
                     .accept(MediaTypes.HAL_JSON_VALUE)
             )
             .andExpect(status().isOk());

@@ -308,7 +308,7 @@ class ProcessDefinitionAdminControllerImplIT {
 
         this.mockMvc.perform(
                 get("/admin/v1/process-definitions")
-                    .queryParam("includeTriggerableByFormCategory", "false")
+                    .queryParam("excludedCategory", "#triggerableByForm")
                     .accept(MediaTypes.HAL_JSON_VALUE)
             )
             .andExpect(status().isOk());

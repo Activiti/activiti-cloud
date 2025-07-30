@@ -37,11 +37,10 @@ public interface ProcessDefinitionController {
             value = "include",
             required = false
         ) List<String> include,
-        @Parameter(description = "Include triggerable by form category") @RequestParam(
-            value = "includeTriggerableByFormCategory",
-            required = false,
-            defaultValue = "true"
-        ) boolean includeTriggerableByFormCategory,
+        @Parameter(description = "Process definition category to exclude from results") @RequestParam(
+            value = "excludedCategory",
+            required = false
+        ) String excludedCategory,
         Pageable pageable
     );
 

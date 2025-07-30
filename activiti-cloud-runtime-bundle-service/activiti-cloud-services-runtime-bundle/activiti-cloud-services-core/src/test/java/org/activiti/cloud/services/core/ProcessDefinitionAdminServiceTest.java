@@ -50,7 +50,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessDefinitionAdminServiceTest {
+class ProcessDefinitionAdminServiceTest {
 
     private final ProcessAdminRuntime processAdminRuntime = Mockito.mock(ProcessAdminRuntime.class);
     private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
@@ -117,13 +117,13 @@ public class ProcessDefinitionAdminServiceTest {
 
     @Test
     void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
+        String excludedCategory = "#triggerableByForm";
         Pageable pageable = Pageable.of(0, 10);
 
         when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
-        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), false);
+        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
 
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
@@ -132,6 +132,25 @@ public class ProcessDefinitionAdminServiceTest {
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
+    }
+
+    @Test
+    void should_setFilterForProcessDefinitionsWithoutExcludedCategory() {
+        String excludedCategory = "#triggerableByForm SELECT * FROM wrong_category";
+        Pageable pageable = Pageable.of(0, 10);
+
+        when(processAdminRuntime.processDefinitions(eq(pageable), isNull(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
+
+        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+        verify(processAdminRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+
+        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload).isNull();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {

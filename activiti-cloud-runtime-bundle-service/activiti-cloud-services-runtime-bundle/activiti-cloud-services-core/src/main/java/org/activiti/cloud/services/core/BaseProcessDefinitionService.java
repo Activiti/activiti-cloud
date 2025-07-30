@@ -24,25 +24,28 @@ import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseProcessDefinitionService {
 
-    private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseProcessDefinitionService.class);
 
-    protected static final String PROCESS_CATEGORY_TO_EXCLUDE = "#triggerableByForm";
+    private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
     public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         this.processDefinitionDecorators = processDefinitionDecorators;
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
-        return getProcessDefinitions(pageable, include, true);
+        return getProcessDefinitions(pageable, include, null);
     }
 
     public abstract Page<ProcessDefinition> getProcessDefinitions(
         Pageable pageable,
         List<String> include,
-        boolean includeTriggerableByFormCategory
+        String excludedCategory
     );
 
     protected ExtendedCloudProcessDefinition decorateAll(ProcessDefinition processDefinition, List<String> include) {
@@ -65,15 +68,18 @@ public abstract class BaseProcessDefinitionService {
             .orElse(processDefinition);
     }
 
-    protected GetProcessDefinitionsPayload getGetProcessDefinitionsPayload(boolean includeTriggerableByFormCategory) {
+    protected GetProcessDefinitionsPayload getGetProcessDefinitionsPayload(String excludedCategory) {
         GetProcessDefinitionsPayload processDefinitionsPayload = null;
-        if (!includeTriggerableByFormCategory) {
+        if (validateInput(excludedCategory)) {
+            LOGGER.debug("Excluding process definitions with category: {}", excludedCategory);
+
             processDefinitionsPayload =
-                ProcessPayloadBuilder
-                    .processDefinitions()
-                    .withProcessCategoryToExclude(PROCESS_CATEGORY_TO_EXCLUDE)
-                    .build();
+                ProcessPayloadBuilder.processDefinitions().withProcessCategoryToExclude(excludedCategory).build();
         }
         return processDefinitionsPayload;
+    }
+
+    protected boolean validateInput(String excludedCategory) {
+        return StringUtils.isNotEmpty(excludedCategory) && excludedCategory.matches("[a-zA-Z0-9_\\-#.]+");
     }
 }

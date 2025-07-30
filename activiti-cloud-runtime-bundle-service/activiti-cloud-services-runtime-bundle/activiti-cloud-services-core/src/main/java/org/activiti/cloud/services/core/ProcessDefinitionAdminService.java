@@ -38,11 +38,9 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
     public Page<ProcessDefinition> getProcessDefinitions(
         Pageable pageable,
         List<String> include,
-        boolean includeTriggerableByFormCategory
+        String excludedCategory
     ) {
-        GetProcessDefinitionsPayload processDefinitionsPayload = getGetProcessDefinitionsPayload(
-            includeTriggerableByFormCategory
-        );
+        GetProcessDefinitionsPayload processDefinitionsPayload = getGetProcessDefinitionsPayload(excludedCategory);
         Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(
             pageable,
             processDefinitionsPayload

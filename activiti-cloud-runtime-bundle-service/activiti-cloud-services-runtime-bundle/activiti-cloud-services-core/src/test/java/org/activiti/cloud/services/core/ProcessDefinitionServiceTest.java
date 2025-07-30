@@ -118,13 +118,13 @@ class ProcessDefinitionServiceTest {
 
     @Test
     void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
+        String excludedCategory = "#triggerableByForm";
         Pageable pageable = Pageable.of(0, 10);
 
         when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
-        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), false);
+        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
 
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
@@ -133,6 +133,25 @@ class ProcessDefinitionServiceTest {
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
+    }
+
+    @Test
+    void should_setFilterForProcessDefinitionsWithoutExcludedCategory() {
+        String excludedCategory = "SELECT * FROM wrong_category";
+        Pageable pageable = Pageable.of(0, 10);
+
+        when(processRuntime.processDefinitions(eq(pageable), isNull(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
+
+        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+
+        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload).isNull();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
