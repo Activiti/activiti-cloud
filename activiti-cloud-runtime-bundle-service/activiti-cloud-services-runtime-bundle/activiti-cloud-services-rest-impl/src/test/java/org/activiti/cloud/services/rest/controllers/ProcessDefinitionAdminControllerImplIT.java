@@ -18,7 +18,6 @@ package org.activiti.cloud.services.rest.controllers;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,6 +67,8 @@ import org.activiti.spring.process.model.ProcessConstantsMapping;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -146,6 +147,9 @@ class ProcessDefinitionAdminControllerImplIT {
     @MockitoBean
     private ProcessExtensionService processExtensionService;
 
+    @Captor
+    ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor;
+
     @BeforeEach
     void setUp() {
         assertThat(processEngineChannels).isNotNull();
@@ -165,10 +169,13 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture()))
+            .thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
+
+        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isNull();
     }
 
     @Test
@@ -186,7 +193,8 @@ class ProcessDefinitionAdminControllerImplIT {
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
 
-        given(processAdminRuntime.processDefinitions(any(Pageable.class), isNull())).willReturn(processDefinitionPage);
+        given(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .willReturn(processDefinitionPage);
 
         //when
         MvcResult result =
@@ -223,7 +231,8 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var givenVariableDefinition = new VariableDefinition();
@@ -262,7 +271,8 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
@@ -303,15 +313,18 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture()))
             .thenReturn(processDefinitionPage);
 
+        var excludedCategory = "#triggerableByForm";
         this.mockMvc.perform(
                 get("/admin/v1/process-definitions")
-                    .queryParam("excludedCategory", "#triggerableByForm")
+                    .queryParam("excludedCategory", excludedCategory)
                     .accept(MediaTypes.HAL_JSON_VALUE)
             )
             .andExpect(status().isOk());
+
+        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isEqualTo(excludedCategory);
     }
 
     private ProcessDefinition buildProcessDefinition(
