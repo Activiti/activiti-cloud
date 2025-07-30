@@ -11,7 +11,7 @@
   <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
   <packaging>pom</packaging>
   <properties>
-    <openfeign.querydsl.version>6.10.1</openfeign.querydsl.version>
+    <openfeign.querydsl.version>7.0</openfeign.querydsl.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -81,7 +81,6 @@
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
         <version>${openfeign.querydsl.version}</version>
-        <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.classgraph</groupId>
