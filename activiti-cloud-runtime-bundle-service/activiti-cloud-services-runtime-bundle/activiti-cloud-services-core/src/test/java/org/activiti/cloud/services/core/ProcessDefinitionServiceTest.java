@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -69,7 +68,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(Pageable.class), isNull(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -103,7 +102,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(Pageable.class), isNull(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -140,7 +139,7 @@ class ProcessDefinitionServiceTest {
         String excludedCategory = "SELECT * FROM wrong_category";
         Pageable pageable = Pageable.of(0, 10);
 
-        when(processRuntime.processDefinitions(eq(pageable), isNull(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
         processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
@@ -151,7 +150,7 @@ class ProcessDefinitionServiceTest {
         verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload).isNull();
+        assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {

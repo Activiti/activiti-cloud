@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -68,7 +67,7 @@ class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull()))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -102,7 +101,7 @@ class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), isNull()))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -139,7 +138,7 @@ class ProcessDefinitionAdminServiceTest {
         String excludedCategory = "#triggerableByForm SELECT * FROM wrong_category";
         Pageable pageable = Pageable.of(0, 10);
 
-        when(processAdminRuntime.processDefinitions(eq(pageable), isNull(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
         processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
@@ -150,7 +149,7 @@ class ProcessDefinitionAdminServiceTest {
         verify(processAdminRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload).isNull();
+        assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
