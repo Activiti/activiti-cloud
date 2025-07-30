@@ -87,6 +87,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
     }
 )
 @EnableTestBinder
@@ -202,7 +203,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void producerGroups() {
         assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
-            .containsOnly("audit");
+            .containsOnly("consumer");
     }
 
     @Test
