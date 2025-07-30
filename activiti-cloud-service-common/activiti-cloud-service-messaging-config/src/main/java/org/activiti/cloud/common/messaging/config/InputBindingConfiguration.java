@@ -53,16 +53,16 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
 
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
-                        .filter(inputBinding ->
-                            !functionRouter.isEnabled() ||
-                            (
-                                List.of(inputBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
-                                !functionRouter.destinations().isEmpty()
-                            )
-                        )
                         .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
                         )
                         .ifPresent(functionBinding -> {
+                            if (
+                                List.of(functionBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
+                                functionRouter.destinations().isEmpty()
+                            ) {
+                                return;
+                            }
+
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
 
                             String inputBindings = bindingServiceProperties.getInputBindings();
