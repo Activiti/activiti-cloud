@@ -40,7 +40,7 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         List<String> include,
         String excludedCategory
     ) {
-        GetProcessDefinitionsPayload processDefinitionsPayload = getGetProcessDefinitionsPayload(excludedCategory);
+        GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayload(excludedCategory);
         Page<ProcessDefinition> processDefinitions = processRuntime.processDefinitions(
             pageable,
             processDefinitionsPayload

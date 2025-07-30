@@ -68,15 +68,14 @@ public abstract class BaseProcessDefinitionService {
             .orElse(processDefinition);
     }
 
-    protected GetProcessDefinitionsPayload getGetProcessDefinitionsPayload(String excludedCategory) {
-        GetProcessDefinitionsPayload processDefinitionsPayload = null;
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(String excludedCategory) {
+        var processDefinitionsPayloadBuilder = ProcessPayloadBuilder.processDefinitions();
         if (validateInput(excludedCategory)) {
             LOGGER.debug("Excluding process definitions with category: {}", excludedCategory);
 
-            processDefinitionsPayload =
-                ProcessPayloadBuilder.processDefinitions().withProcessCategoryToExclude(excludedCategory).build();
+            processDefinitionsPayloadBuilder.withProcessCategoryToExclude(excludedCategory);
         }
-        return processDefinitionsPayload;
+        return processDefinitionsPayloadBuilder.build();
     }
 
     protected boolean validateInput(String excludedCategory) {
