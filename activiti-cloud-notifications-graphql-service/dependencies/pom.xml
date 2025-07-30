@@ -10,9 +10,6 @@
   <name>Activiti Cloud Notifications :: GraphQL Dependencies (Bill Of Materials)</name>
   <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
   <packaging>pom</packaging>
-  <properties>
-    <openfeign.querydsl.version>7.0</openfeign.querydsl.version>
-  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>

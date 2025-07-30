@@ -223,6 +223,7 @@
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
+    <openfeign.querydsl.version>7.0</openfeign.querydsl.version>
 
     <!-- dependencies versions -->
     <hibernate.version>6.5.3.Final</hibernate.version>
