@@ -238,7 +238,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var givenVariableDefinition = new VariableDefinition();
