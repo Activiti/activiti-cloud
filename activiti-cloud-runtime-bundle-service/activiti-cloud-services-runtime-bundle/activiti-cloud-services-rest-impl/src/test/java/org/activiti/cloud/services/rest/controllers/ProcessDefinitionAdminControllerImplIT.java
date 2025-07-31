@@ -304,4 +304,27 @@ class ProcessDefinitionAdminControllerImplIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries[0].entry.constantValues.unauthorizedStart").value(true));
     }
+
+    @Test
+    void should_getProcessDefinitionsWithLatestVersions() throws Exception {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("procId");
+        processDefinition.setName("my process");
+        processDefinition.setDescription("this is my process");
+        processDefinition.setVersion(1);
+        String procId = "procId";
+        String processName = "my process";
+        String processDescription = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId, processName, processDescription, version));
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processAdminRuntime.processDefinitionsLatestVersions(any())).thenReturn(processDefinitionPage);
+
+        this.mockMvc.perform(get("/admin/v1/process-definitions?versions=false").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
+    }
 }

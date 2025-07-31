@@ -140,4 +140,21 @@ public class ProcessDefinitionAdminControllerIT {
             //then
             .andExpect(status().isOk());
     }
+
+    @Test
+    public void shouldReturnLatestProcessDefinition() throws Exception {
+        //given
+        given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+            );
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-definitions?versions=false&skipCount=10&maxItems=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
+    }
 }
