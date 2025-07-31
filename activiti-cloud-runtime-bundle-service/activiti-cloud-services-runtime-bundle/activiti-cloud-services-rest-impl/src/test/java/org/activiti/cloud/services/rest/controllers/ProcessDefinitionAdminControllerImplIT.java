@@ -168,7 +168,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(),any())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
@@ -201,7 +201,7 @@ class ProcessDefinitionAdminControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processAdminRuntime.processDefinitions(any(),any())).willReturn(processDefinitionPage);
+        given(processAdminRuntime.processDefinitions(any(), any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result =
@@ -277,7 +277,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(),any())).thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
