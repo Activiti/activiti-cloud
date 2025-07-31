@@ -514,63 +514,6 @@ limitations under the License.]]>
               <destFile>${project.build.directory}/jacoco.exec</destFile>
             </configuration>
           </execution>
-          <!-- Merge execution reports configuration-->
-          <execution>
-            <id>merge</id>
-            <goals>
-              <goal>merge</goal>
-            </goals>
-            <configuration>
-              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
-              <fileSets>
-                <fileSet>
-                  <directory>${project.basedir}</directory>
-                  <includes>
-                    <include>**/*.exec</include>
-                  </includes>
-                </fileSet>
-              </fileSets>
-              <destFile>${project.build.directory}/jacoco.exec</destFile>
-            </configuration>
-          </execution>
-          <!-- Merge execution reports configuration-->
-          <execution>
-            <id>merge</id>
-            <goals>
-              <goal>merge</goal>
-            </goals>
-            <configuration>
-              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
-              <fileSets>
-                <fileSet>
-                  <directory>${project.basedir}</directory>
-                  <includes>
-                    <include>**/*.exec</include>
-                  </includes>
-                </fileSet>
-              </fileSets>
-              <destFile>${project.build.directory}/jacoco.exec</destFile>
-            </configuration>
-          </execution>
-          <!-- Merge execution reports configuration-->
-          <execution>
-            <id>merge</id>
-            <goals>
-              <goal>merge</goal>
-            </goals>
-            <configuration>
-              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
-              <fileSets>
-                <fileSet>
-                  <directory>${project.basedir}</directory>
-                  <includes>
-                    <include>**/*.exec</include>
-                  </includes>
-                </fileSet>
-              </fileSets>
-              <destFile>${project.build.directory}/jacoco.exec</destFile>
-            </configuration>
-          </execution>
           <!-- Unit tests configuration-->
           <execution>
             <id>pre-unit-test</id>
