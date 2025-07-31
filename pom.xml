@@ -494,6 +494,18 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <!-- Default configuration for jacoco:merge goal when run directly -->
+          <fileSets>
+            <fileSet>
+              <directory>${project.basedir}</directory>
+              <includes>
+                <include>**/*.exec</include>
+              </includes>
+            </fileSet>
+          </fileSets>
+          <destFile>${project.build.directory}/jacoco.exec</destFile>
+        </configuration>
         <executions>
           <!-- Merge execution reports configuration-->
           <execution>
