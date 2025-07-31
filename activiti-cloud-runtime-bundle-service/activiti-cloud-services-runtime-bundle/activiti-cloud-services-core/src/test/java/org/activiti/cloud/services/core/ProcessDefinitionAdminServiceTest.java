@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.VariableDefinition;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -63,7 +65,8 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -77,7 +80,7 @@ public class ProcessDefinitionAdminServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), true)
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), false)
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -96,16 +99,24 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), include, true)
+            .getProcessDefinitions(Pageable.of(0, 50), include, false)
             .getContent();
 
+        verify(processAdminRuntime).processDefinitions(any(Pageable.class), payloadCaptor.capture());
         assertThat(result).hasSize(1);
         verify(processDefinitionDecorator, never()).decorate(any());
+        assertThat(payloadCaptor.getValue().isLatestVersionOnly()).isTrue();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
@@ -123,7 +134,7 @@ public class ProcessDefinitionAdminServiceTest {
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
 
-        when(processAdminRuntime.processDefinitionsLatestVersions(any()))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -138,7 +149,7 @@ public class ProcessDefinitionAdminServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), false)
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), true)
             .getContent();
 
         assertThat(result)

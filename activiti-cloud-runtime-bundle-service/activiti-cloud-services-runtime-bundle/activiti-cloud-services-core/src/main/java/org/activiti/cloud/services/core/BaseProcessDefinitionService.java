@@ -17,6 +17,8 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
@@ -51,5 +53,11 @@ public abstract class BaseProcessDefinitionService {
             .findFirst()
             .map(decorator -> decorator.decorate(processDefinition))
             .orElse(processDefinition);
+    }
+
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(boolean latestVersions) {
+        var processDefinitionsPayloadBuilder = ProcessPayloadBuilder.processDefinitions();
+        processDefinitionsPayloadBuilder.withLatestVersionOnly(latestVersions);
+        return processDefinitionsPayloadBuilder.build();
     }
 }

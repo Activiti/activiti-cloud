@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -322,9 +323,8 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitionsLatestVersions(any())).thenReturn(processDefinitionPage);
-
-        this.mockMvc.perform(get("/admin/v1/process-definitions?versions=false").accept(MediaTypes.HAL_JSON_VALUE))
+        when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
+        this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersions=true").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
     }
 }

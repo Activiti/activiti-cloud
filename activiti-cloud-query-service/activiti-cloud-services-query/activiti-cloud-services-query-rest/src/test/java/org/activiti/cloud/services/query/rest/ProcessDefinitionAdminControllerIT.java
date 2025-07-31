@@ -151,7 +151,7 @@ public class ProcessDefinitionAdminControllerIT {
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-definitions?versions=false&skipCount=10&maxItems=10")
+                get("/admin/v1/process-definitions?latestVersions=true&skipCount=10&maxItems=10")
                     .accept(MediaTypes.HAL_JSON_VALUE)
             )
             //then

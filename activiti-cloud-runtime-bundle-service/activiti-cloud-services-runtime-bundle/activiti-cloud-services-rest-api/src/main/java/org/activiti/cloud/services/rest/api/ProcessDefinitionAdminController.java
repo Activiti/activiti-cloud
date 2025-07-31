@@ -40,8 +40,8 @@ public interface ProcessDefinitionAdminController {
             required = false
         ) List<String> include,
         @Parameter(
-            description = "Specifies whether to include all versions (true) or only the latest version (false) of each process definition"
-        ) @RequestParam(value = "versions", required = false, defaultValue = "true") boolean versions,
+            description = "Specifies whether to include latest versions only (true) or all the versions (false) of each process definition"
+        ) @RequestParam(value = "latestVersions", required = false, defaultValue = "false") boolean latestVersions,
         Pageable pageable
     );
 }
