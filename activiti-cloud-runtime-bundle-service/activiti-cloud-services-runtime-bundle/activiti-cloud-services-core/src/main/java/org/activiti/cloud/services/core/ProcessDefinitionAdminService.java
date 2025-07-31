@@ -17,7 +17,7 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
@@ -40,10 +40,9 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         List<String> include,
         boolean latestVersions
     ) {
-        GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayload(latestVersions);
         Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(
             pageable,
-            processDefinitionsPayload
+            ProcessPayloadBuilder.processDefinitions().withLatestVersionOnly(latestVersions).build()
         );
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
