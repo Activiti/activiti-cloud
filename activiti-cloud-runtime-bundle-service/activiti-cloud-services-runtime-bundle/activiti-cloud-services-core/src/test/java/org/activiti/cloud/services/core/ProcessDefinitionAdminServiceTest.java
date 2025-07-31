@@ -99,11 +99,6 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-
-        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
-            GetProcessDefinitionsPayload.class
-        );
-
         when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
@@ -113,10 +108,8 @@ public class ProcessDefinitionAdminServiceTest {
             .getProcessDefinitions(Pageable.of(0, 50), include, false)
             .getContent();
 
-        verify(processAdminRuntime).processDefinitions(any(Pageable.class), payloadCaptor.capture());
         assertThat(result).hasSize(1);
         verify(processDefinitionDecorator, never()).decorate(any());
-        assertThat(payloadCaptor.getValue().isLatestVersionOnly()).isTrue();
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
@@ -133,6 +126,10 @@ public class ProcessDefinitionAdminServiceTest {
 
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
 
         when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
@@ -152,10 +149,12 @@ public class ProcessDefinitionAdminServiceTest {
             .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), true)
             .getContent();
 
+        verify(processAdminRuntime).processDefinitions(any(Pageable.class), payloadCaptor.capture());
         assertThat(result)
             .hasSize(1)
             .first()
             .extracting(ProcessDefinition::getName, ProcessDefinition::getVersion)
             .containsExactly("process1", 2);
+        assertThat(payloadCaptor.getValue().isLatestVersionOnly()).isTrue();
     }
 }
