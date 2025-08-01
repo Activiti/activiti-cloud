@@ -26,7 +26,7 @@ public class DeleteMeExternalIT {
 
     @Test
     void coveredITExternally() {
-        assertThat(deleteMe.covertedITLocally())
+        assertThat(deleteMe.coveredITLocally())
             .isEqualTo("this is a test method that is covered by integration tests in the same module");
     }
 }
