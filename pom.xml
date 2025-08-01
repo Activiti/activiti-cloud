@@ -501,11 +501,11 @@ limitations under the License.]]>
             <fileSet>
               <directory>${project.basedir}</directory>
               <includes>
-                <include>**/*.exec</include>
+                <include>**/jacoco.exec</include>
+                <include>**/jacoco-it.exec</include>
               </includes>
             </fileSet>
           </fileSets>
-          <destFile>${project.build.directory}/jacoco.exec</destFile>
         </configuration>
         <executions>
           <!-- Unit tests configuration-->
@@ -539,36 +539,6 @@ limitations under the License.]]>
             <goals>
               <goal>report-integration</goal>
             </goals>
-          </execution>
-          <!-- Merge execution reports configuration-->
-          <execution>
-            <id>merge</id>
-            <goals>
-              <goal>merge</goal>
-            </goals>
-            <configuration>
-              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
-              <fileSets>
-                <fileSet>
-                  <directory>${project.basedir}</directory>
-                  <includes>
-                    <include>**/jacoco.exec</include>
-                    <include>**/jacoco-it.exec</include>
-                  </includes>
-                </fileSet>
-              </fileSets>
-              <destFile>${project.build.directory}/jacoco.exec</destFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>report-aggregate</id>
-            <goals>
-              <goal>report-aggregate</goal>
-            </goals>
-            <configuration>
-              <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-              <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
-            </configuration>
           </execution>
         </executions>
       </plugin>
