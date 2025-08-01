@@ -21,7 +21,7 @@ public class DeleteMe {
         return "this is a test method that is covered by unit tests in the same module";
     }
 
-    public String covertedITLocally() {
+    public String coveredITLocally() {
         return "this is a test method that is covered by integration tests in the same module";
     }
 
