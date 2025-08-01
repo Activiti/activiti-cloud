@@ -168,7 +168,6 @@
     <module>activiti-cloud-acceptance-scenarios</module>
     <module>activiti-cloud-examples</module>
     <module>activiti-cloud-dependencies</module>
-    <module>activiti-cloud-coverage</module>
   </modules>
   <scm>
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
@@ -495,7 +494,38 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <!-- Default configuration for jacoco:merge goal when run directly -->
+          <fileSets>
+            <fileSet>
+              <directory>${project.basedir}</directory>
+              <includes>
+                <include>**/*.exec</include>
+              </includes>
+            </fileSet>
+          </fileSets>
+          <destFile>${project.build.directory}/jacoco.exec</destFile>
+        </configuration>
         <executions>
+                 <!-- Merge execution reports configuration-->
+          <execution>
+            <id>merge</id>
+            <goals>
+              <goal>merge</goal>
+            </goals>
+            <configuration>
+              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
+              <fileSets>
+                <fileSet>
+                  <directory>${project.basedir}</directory>
+                  <includes>
+                    <include>**/*.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+            </configuration>
+          </execution>
           <!-- Unit tests configuration-->
           <execution>
             <id>pre-unit-test</id>
