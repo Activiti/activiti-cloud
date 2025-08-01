@@ -485,5 +485,3 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}
-
-

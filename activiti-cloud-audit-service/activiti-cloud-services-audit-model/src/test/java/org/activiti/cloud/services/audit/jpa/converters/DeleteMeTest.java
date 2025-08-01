@@ -25,6 +25,7 @@ public class DeleteMeTest {
 
     @Test
     void coveredUTLocally() {
-        assertThat(deleteMe.coveredUTLocally()).isEqualTo("this is a test method that is covered by unit tests in the same module");
+        assertThat(deleteMe.coveredUTLocally())
+            .isEqualTo("this is a test method that is covered by unit tests in the same module");
     }
 }

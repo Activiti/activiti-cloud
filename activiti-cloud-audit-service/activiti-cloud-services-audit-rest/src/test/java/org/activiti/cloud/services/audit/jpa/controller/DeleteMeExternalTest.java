@@ -21,8 +21,10 @@ import org.activiti.cloud.services.audit.jpa.converters.DeleteMe;
 import org.junit.jupiter.api.Test;
 
 public class DeleteMeExternalTest {
+
     @Test
-    void coveredUTExternally(){
-        assertThat(new DeleteMe().coveredUTExternally()).isEqualTo("this is a test method that is covered by unit tests in other modules");
+    void coveredUTExternally() {
+        assertThat(new DeleteMe().coveredUTExternally())
+            .isEqualTo("this is a test method that is covered by unit tests in other modules");
     }
 }
