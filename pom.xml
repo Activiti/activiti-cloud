@@ -560,6 +560,10 @@ limitations under the License.]]>
             <goals>
               <goal>report-aggregate</goal>
             </goals>
+            <configuration>
+              <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>

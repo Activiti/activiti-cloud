@@ -116,7 +116,7 @@ jobs:
 
       - name: Generate aggregate coverage report
         shell: bash
-        run: mvn jacoco:report-aggregate ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -N jacoco:report-aggregate ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
