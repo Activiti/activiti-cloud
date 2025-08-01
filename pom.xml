@@ -480,6 +480,7 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <argLine>@{argLine} -Xmx1024m</argLine>
           <properties>
             <configurationParameters>
               junit.jupiter.execution.parallel.enabled=${unitTests.parallel}
@@ -528,6 +529,9 @@ limitations under the License.]]>
             <goals>
               <goal>prepare-agent-integration</goal>
             </goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco-it.exec</destFile>
+            </configuration>
           </execution>
           <execution>
             <id>post-integration-test</id>
@@ -548,7 +552,8 @@ limitations under the License.]]>
                 <fileSet>
                   <directory>${project.basedir}</directory>
                   <includes>
-                    <include>**/*.exec</include>
+                    <include>**/jacoco.exec</include>
+                    <include>**/jacoco-it.exec</include>
                   </includes>
                 </fileSet>
               </fileSets>
@@ -669,6 +674,9 @@ limitations under the License.]]>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>@{argLine} -Xmx1024m</argLine>
+            </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
