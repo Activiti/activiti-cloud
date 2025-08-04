@@ -34,11 +34,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = RuntimeBundleApplication.class,
-    properties = {
-        "activiti.cloud.messaging.function-router.enabled=true",
-        "activiti.cloud.application.name=myapp",
-        "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=consumer",
-    }
+    properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
