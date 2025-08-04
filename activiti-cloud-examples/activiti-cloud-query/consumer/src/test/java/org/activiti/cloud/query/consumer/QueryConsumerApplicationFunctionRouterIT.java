@@ -86,6 +86,6 @@ public class QueryConsumerApplicationFunctionRouterIT {
             .isTrue();
 
         assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
-            .isEqualTo("query-consumer");
+            .isEqualTo("consumer");
     }
 }

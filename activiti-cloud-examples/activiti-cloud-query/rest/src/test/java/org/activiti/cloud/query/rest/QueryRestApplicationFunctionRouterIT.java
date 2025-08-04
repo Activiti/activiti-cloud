@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.query;
+package org.activiti.cloud.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -32,12 +31,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    classes = { QueryApplication.class },
+    classes = { QueryRestApplication.class },
     properties = { "activiti.cloud.messaging.function-router.enabled=true" }
 )
 @Testcontainers
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-public class QueryApplicationFunctionRouterIT {
+public class QueryRestApplicationFunctionRouterIT {
 
     @ServiceConnection
     @Container
@@ -53,17 +52,14 @@ public class QueryApplicationFunctionRouterIT {
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
 
-    @Autowired
-    private Environment environment;
-
     @Test
     void contextLoads() {}
 
     @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsKey("functionRouterInput");
+            .doesNotContainKeys("auditConsumer", "queryConsumer", "functionRouterInput")
+            .containsOnlyKeys("graphQLEngineEventsConsumerSource", "producer");
     }
 
     @Test
@@ -72,20 +68,6 @@ public class QueryApplicationFunctionRouterIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getFunctionRoutes()).containsOnly("auditConsumer", "queryConsumer");
-    }
-
-    @Test
-    void environment() {
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
-                Boolean.class
-            )
-        )
-            .isTrue();
-
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
-            .isEqualTo("consumer");
+        assertThat(functionRouter.destinations()).isEmpty();
     }
 }
