@@ -153,16 +153,13 @@ jobs:
       max-parallel: 2
       fail-fast: true
       matrix:
-#        messaging-broker: [ rabbitmq, kafka ]
-#        messaging-partitioned: [ partitioned, non-partitioned ]
-#        messaging-destinations: [ default-destinations ]
+        messaging-broker: [ rabbitmq, kafka ]
+        messaging-partitioned: [ partitioned, non-partitioned ]
+        messaging-destinations: [ default-destinations ]
         include:
-#          - messaging-broker: kafka
-#            messaging-partitioned: partitioned
-#            messaging-destinations: override-destinations
-          - messaging-broker: rabbitmq
-            messaging-partitioned: non-partitioned
-            messaging-destinations: default-destinations
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
           - messaging-broker: rabbitmq
             messaging-partitioned: non-partitioned
             messaging-destinations: pdb
@@ -306,11 +303,11 @@ jobs:
         run: |
           make test/runtime-acceptance-tests
 
-#      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-#        if: always()
-#        run: |
-#          echo "Delete Helm release"
-#          make delete
+      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+        if: always()
+        run: |
+          echo "Delete Helm release"
+          make delete
 
   delete-test-images:
     runs-on: ubuntu-latest
