@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -39,7 +41,7 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
         streamBridge.send(
             destination,
-            MessageBuilder.fromMessage(message).setHeader("spring.cloud.function.destination", destination).build()
+            MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build()
         );
     }
 }

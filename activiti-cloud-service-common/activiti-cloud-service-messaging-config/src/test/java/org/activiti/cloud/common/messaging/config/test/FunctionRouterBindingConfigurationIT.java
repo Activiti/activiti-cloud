@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
@@ -340,7 +341,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "engine-events")
+            .setHeader(FUNCTION_DESTINATION, "engine-events")
             .build();
 
         // when
@@ -368,7 +369,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("Test")
             .setHeader("type", "Test Consumer")
-            .setHeader("spring.cloud.function.destination", "command-consumer")
+            .setHeader(FUNCTION_DESTINATION, "command-consumer")
             .build();
 
         // when
@@ -403,7 +404,7 @@ public class FunctionRouterBindingConfigurationIT {
         // given
         Message<String> message = MessageBuilder
             .withPayload("run_test();")
-            .setHeader("spring.cloud.function.destination", "script.EXECUTE")
+            .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
             .build();
 
         // when
