@@ -73,6 +73,17 @@ public class QueryConsumerApplicationFunctionRouterIT {
         assertThat(functionRouter.isEnabled()).isTrue();
 
         assertThat(functionRouter.getFunctionRoutes()).containsOnly("auditConsumer", "queryConsumer");
+        assertThat(functionRouter.destinations()).containsOnlyKeys("auditConsumer", "queryConsumer");
+        assertThat(functionRouter.registrations())
+            .containsOnlyKeys("engineEvents")
+            .satisfies(registrations ->
+                assertThat(registrations.get("engineEvents"))
+                    .containsOnly(
+                        "queryConsumerFunction_registration",
+                        "auditConsumerChannelHandlerConsumer_registration"
+                    )
+                    .isNotEmpty()
+            );
     }
 
     @Test
