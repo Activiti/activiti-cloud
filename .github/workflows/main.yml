@@ -211,8 +211,6 @@ jobs:
           kubectl delete ns $PREVIEW_NAME || true
 
       - name: Install release for ${{ matrix.messaging-broker }}
-        env:
-          ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: feature/AAE-35743-igdianov-multiples-function-binding-config
         run: |
           ### Variables ###
           export SSO_PROTOCOL=https
