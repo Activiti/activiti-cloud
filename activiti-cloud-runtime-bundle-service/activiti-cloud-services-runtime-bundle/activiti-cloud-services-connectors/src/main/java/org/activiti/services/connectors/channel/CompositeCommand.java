@@ -36,7 +36,12 @@ class CompositeCommand implements Command<Void> {
 
     @Override
     public Void execute(CommandContext commandContext) {
-        commands.forEach(command -> command.execute(commandContext));
+        try {
+            commands.forEach(command -> command.execute(commandContext));
+        } catch (Exception e) {
+            commandContext.exception(e);
+        }
+
         return null;
     }
 
