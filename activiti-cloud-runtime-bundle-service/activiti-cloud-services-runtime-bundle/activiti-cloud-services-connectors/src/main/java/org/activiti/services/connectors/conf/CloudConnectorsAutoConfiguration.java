@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -45,7 +46,6 @@ import org.activiti.services.connectors.message.IntegrationContextMessageBuilder
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -119,18 +119,19 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(
         StreamBridge streamBridge,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory
+        IntegrationContextMessageBuilderFactory messageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new IntegrationRequestSender(streamBridge, messageBuilderFactory);
+        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestBuilder integrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingServiceProperties);
+        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingResolver);
     }
 
     @Bean

@@ -20,6 +20,7 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties.MessagingBroker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -31,6 +32,8 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
     protected static final String ACTIVITI_CLOUD_MESSAGING_BROKER_KEY = "activiti.cloud.messaging.broker";
     protected static final String SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY = "spring.cloud.stream.default-binder";
     protected static final String MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY = "management.health.rabbit.enabled";
+    protected static final String ACTIVITI_CLOUD_MESSAGING_FUNCTION_ROUTER_ENABLED_KEY =
+        "activiti.cloud.messaging.function-router.enabled";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -44,14 +47,31 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
             .getPropertySources()
             .addAfter(
                 SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                new MapPropertySource(this.getClass().getSimpleName(), resolvePropertiesToSet(messagingBroker))
+                new MapPropertySource(
+                    this.getClass().getSimpleName(),
+                    resolvePropertiesToSet(messagingBroker, environment)
+                )
             );
     }
 
-    private Map<String, Object> resolvePropertiesToSet(MessagingBroker messagingBroker) {
+    private Map<String, Object> resolvePropertiesToSet(
+        MessagingBroker messagingBroker,
+        ConfigurableEnvironment environment
+    ) {
         Map<String, Object> extraProperties = new HashMap<>();
         extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, MessagingBroker.rabbitmq.equals(messagingBroker));
         extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveDefaultBinder(messagingBroker));
+
+        Optional
+            .ofNullable(environment.getProperty(ACTIVITI_CLOUD_MESSAGING_FUNCTION_ROUTER_ENABLED_KEY, Boolean.class))
+            .filter(Boolean.TRUE::equals)
+            .ifPresent(value ->
+                extraProperties.put(
+                    "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
+                    "true"
+                )
+            );
+
         return extraProperties;
     }
 
