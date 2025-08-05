@@ -224,6 +224,8 @@
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
     <openfeign.querydsl.version>7.0</openfeign.querydsl.version>
+    <jakarta.inject-api.version>2.0.1</jakarta.inject-api.version>
+    <mysema-commons-lang.version>0.2.4</mysema-commons-lang.version>
 
     <!-- dependencies versions -->
     <hibernate.version>6.5.3.Final</hibernate.version>
