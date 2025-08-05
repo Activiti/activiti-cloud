@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -168,8 +167,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
@@ -202,8 +200,7 @@ class ProcessDefinitionAdminControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .willReturn(processDefinitionPage);
+        given(processAdminRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
         MvcResult result =
@@ -240,8 +237,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var givenVariableDefinition = new VariableDefinition();
@@ -280,8 +276,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
