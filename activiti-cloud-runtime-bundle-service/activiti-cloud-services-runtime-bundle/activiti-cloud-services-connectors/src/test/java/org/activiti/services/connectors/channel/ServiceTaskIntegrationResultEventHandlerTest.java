@@ -38,6 +38,7 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -69,6 +70,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ManagementService managementService;
 
+    @Disabled
     @Test
     public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
         //given

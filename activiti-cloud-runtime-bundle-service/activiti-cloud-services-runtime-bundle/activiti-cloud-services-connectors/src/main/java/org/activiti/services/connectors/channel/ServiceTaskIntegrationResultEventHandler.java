@@ -21,7 +21,12 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IntegrationError;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
@@ -31,6 +36,7 @@ import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
@@ -125,7 +131,52 @@ public class ServiceTaskIntegrationResultEventHandler {
                 )
             );
 
-            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+            //DeleteIntegrationContextCmd
+            managementService.executeCommand(commands.get(0));
+
+            try {
+                //try to do the normal job: TriggerCmd
+                managementService.executeCommand(commands.get(1));
+                //execute cleanup AggregateIntegrationResultReceivedEventCmd only if TriggerCmd was successful
+                managementService.executeCommand(commands.get(2));
+            } catch (Exception e) {
+                handleTriggerCmdIssues(e, integrationContext, executions);
+            }
         }
+    }
+
+    private void handleTriggerCmdIssues(
+        Exception e,
+        IntegrationContext integrationContext,
+        List<Execution> executions
+    ) {
+        List<Command<?>> errorCommands = new ArrayList<>();
+        LOGGER.error("Failed to execute TriggerCmd command : {}", e.getMessage());
+        IntegrationRequest fakeIntegrationRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeIntegrationRequest, e);
+        if (!executions.isEmpty()) {
+            ExecutionEntity execution = (ExecutionEntity) executions.getFirst();
+            errorCommands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
+        } else {
+            String message =
+                "No task is in this RB is waiting for integration result with execution id `" +
+                integrationContext.getExecutionId() +
+                ", flow node id `" +
+                integrationContext.getClientId() +
+                "`. The integration result for the integration context `" +
+                integrationContext.getId() +
+                "` will be ignored.";
+            LOGGER.warn(message);
+        }
+
+        //error cleanup
+        errorCommands.add(
+            new AggregateIntegrationErrorReceivedEventCmd(
+                integrationError,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            )
+        );
+        managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
     }
 }
