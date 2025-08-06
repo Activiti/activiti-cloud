@@ -129,17 +129,11 @@ public class ServiceTaskIntegrationResultEventHandler {
                     processEngineEventsAggregator
                 )
             );
-
-            //DeleteIntegrationContextCmd
-            managementService.executeCommand(commands.get(0));
-
             try {
-                //try to do the normal job: TriggerCmd
-                managementService.executeCommand(commands.get(1));
-                //execute cleanup AggregateIntegrationResultReceivedEventCmd only if TriggerCmd was successful
-                managementService.executeCommand(commands.get(2));
+                managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
             } catch (Exception e) {
-                handleTriggerCmdIssues(e, integrationContext, executions);
+                //triggerCmd failed, handle the issue
+                handleTriggerCmdIssues(e, integrationContext, executions, commands);
             }
         }
     }
@@ -147,7 +141,8 @@ public class ServiceTaskIntegrationResultEventHandler {
     private void handleTriggerCmdIssues(
         Exception e,
         IntegrationContext integrationContext,
-        List<Execution> executions
+        List<Execution> executions,
+        List<Command<?>> commands
     ) {
         List<Command<?>> errorCommands = new ArrayList<>();
         LOGGER.error("Failed to execute TriggerCmd command : {}", e.getMessage());
@@ -184,7 +179,7 @@ public class ServiceTaskIntegrationResultEventHandler {
             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
             // cleaned the commands list from PropagateCloudBpmnErrorCmd and
             // AggregateIntegrationErrorReceivedClosingEventCmd
-            errorCommands = restoreCommandList(errorCommands);
+            errorCommands = restoreCommandList(commands);
         }
 
         errorCommands.add(
