@@ -20,6 +20,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -175,6 +176,32 @@ public class ServiceTaskIntegrationResultEventHandler {
                 processEngineEventsAggregator
             )
         );
+
+        try {
+            //run all error commands
+            managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
+        } catch (Throwable cause) {
+            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+            // cleaned the commands list from PropagateCloudBpmnErrorCmd and
+            // AggregateIntegrationErrorReceivedClosingEventCmd
+            errorCommands = restoreCommandList(errorCommands);
+        }
+
+        errorCommands.add(
+            new AggregateIntegrationErrorReceivedEventCmd(
+                integrationError,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            )
+        );
+        //run without propagate CloudBpmnError
         managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
+    }
+
+    private List<Command<?>> restoreCommandList(List<Command<?>> commands) {
+        return commands
+            .stream()
+            .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
+            .collect(Collectors.toList());
     }
 }
