@@ -144,7 +144,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         List<Execution> executions,
         List<Command<?>> commands
     ) {
-        List<Command<?>> errorCommands = new ArrayList<>();
+        //passing original DeleteIntegrationContextCmd
+        List<Command<?>> errorCommands = restoreCommandList(commands);
         LOGGER.error("Failed to execute TriggerCmd command : {}", e.getMessage());
         IntegrationRequest fakeIntegrationRequest = new IntegrationRequestImpl(integrationContext);
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeIntegrationRequest, e);
@@ -175,6 +176,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         try {
             //run all error commands
             managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
+            return;
         } catch (Throwable cause) {
             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
             // cleaned the commands list from PropagateCloudBpmnErrorCmd and
