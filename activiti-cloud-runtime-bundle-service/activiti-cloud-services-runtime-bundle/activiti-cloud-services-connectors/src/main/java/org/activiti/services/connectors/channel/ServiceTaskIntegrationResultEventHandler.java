@@ -18,9 +18,9 @@ package org.activiti.services.connectors.channel;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -32,6 +32,7 @@ import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
@@ -48,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServiceTaskIntegrationResultEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultEventHandler.class);
+    private static final String ERROR_VARIABLE_NAME = "integrationError";
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
@@ -84,88 +86,88 @@ public class ServiceTaskIntegrationResultEventHandler {
             integrationContext.getId()
         );
 
-        if (integrationContextEntity != null) {
-            List<Command<?>> commands = new ArrayList<>();
+        if (integrationContextEntity == null) {
+            return;
+        }
 
-            commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
+        List<Execution> executions = runtimeService
+            .createExecutionQuery()
+            .executionId(integrationContext.getExecutionId())
+            .list();
 
-            String executionId = integrationContext.getExecutionId();
-            List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
-            if (executions.size() > 0) {
-                Execution execution = executions.get(0);
-
-                if (execution.getActivityId().equals(integrationContext.getClientId())) {
-                    commands.add(
-                        new TriggerCmd(
-                            integrationContext.getExecutionId(),
-                            integrationContext.getOutBoundVariables(),
-                            variablesPropagator
-                        )
-                    );
-                } else {
-                    LOGGER.warn(
-                        "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
-                        integrationContext.getClientId(),
-                        integrationResult,
-                        execution.getId()
-                    );
-                }
-            } else {
-                String message =
-                    "No task is in this RB is waiting for integration result with execution id `" +
-                    executionId +
-                    ", flow node id `" +
-                    integrationContext.getClientId() +
-                    "`. The integration result for the integration context `" +
-                    integrationContext.getId() +
-                    "` will be ignored.";
-                LOGGER.warn(message);
-            }
-
-            commands.add(
-                new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator
-                )
+        if (executions.isEmpty()) {
+            LOGGER.warn(
+                "No task is in this RB is waiting for integration result with execution id `{}`, flow node id `{}`. The integration result for the integration context `{}` will be ignored.",
+                integrationContext.getExecutionId(),
+                integrationContext.getClientId(),
+                integrationContext.getId()
             );
-            try {
-                managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
-            } catch (Exception e) {
-                //triggerCmd failed, handle the issue
-                handleTriggerCmdIssues(e, integrationContext, executions, commands);
-            }
+            Command<?> cleanupCmd = getCleanupCmd(integrationContextEntity, integrationContext);
+            managementService.executeCommand(cleanupCmd);
+            return;
+        }
+
+        ExecutionEntity execution = (ExecutionEntity) executions.getFirst();
+        if (execution.getActivityId().equals(integrationContext.getClientId())) {
+            executeTriggerOrHandleError(integrationResult, execution, integrationContextEntity);
+        } else {
+            LOGGER.warn(
+                "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                integrationContext.getClientId(),
+                integrationResult,
+                execution.getId()
+            );
+            // If activity doesn't match, just delete the context and aggregate the event.
+            Command<?> cleanupCmd = getCleanupCmd(integrationContextEntity, integrationContext);
+            managementService.executeCommand(cleanupCmd);
         }
     }
 
-    private void handleTriggerCmdIssues(
-        Exception e,
-        IntegrationContext integrationContext,
-        List<Execution> executions,
-        List<Command<?>> commands
+    private void executeTriggerOrHandleError(
+        IntegrationResult integrationResult,
+        ExecutionEntity execution,
+        IntegrationContextEntity integrationContextEntity
     ) {
-        //passing original DeleteIntegrationContextCmd
-        List<Command<?>> errorCommands = restoreCommandList(commands);
-        LOGGER.error("Failed to execute TriggerCmd command : {}", e.getMessage());
-        IntegrationRequest fakeIntegrationRequest = new IntegrationRequestImpl(integrationContext);
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeIntegrationRequest, e);
-        if (!executions.isEmpty()) {
-            ExecutionEntity execution = (ExecutionEntity) executions.getFirst();
-            errorCommands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
-        } else {
-            String message =
-                "No task is in this RB is waiting for integration result with execution id `" +
-                integrationContext.getExecutionId() +
-                ", flow node id `" +
-                integrationContext.getClientId() +
-                "`. The integration result for the integration context `" +
-                integrationContext.getId() +
-                "` will be ignored.";
-            LOGGER.warn(message);
-        }
+        IntegrationContext integrationContext = integrationResult.getIntegrationContext();
 
-        //error cleanup
-        errorCommands.add(
+        Command<?> triggerAndCleanupCmd = CompositeCommand.of(
+            new TriggerCmd(
+                integrationContext.getExecutionId(),
+                integrationContext.getOutBoundVariables(),
+                variablesPropagator
+            ),
+            new DeleteIntegrationContextCmd(integrationContextEntity),
+            new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            )
+        );
+
+        try {
+            managementService.executeCommand(triggerAndCleanupCmd);
+        } catch (Exception triggerException) {
+            LOGGER.error(
+                "Failed to trigger execution '{}' with integration result. Attempting to propagate as BPMN error.",
+                execution.getId(),
+                triggerException
+            );
+            handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
+        }
+    }
+
+    private void handleTriggerFailure(
+        Exception triggerException,
+        IntegrationContext integrationContext,
+        ExecutionEntity execution,
+        IntegrationContextEntity integrationContextEntity
+    ) {
+        IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
+
+        Command<?> propagateErrorCmd = CompositeCommand.of(
+            new PropagateCloudBpmnErrorCmd(integrationError, execution),
+            new DeleteIntegrationContextCmd(integrationContextEntity),
             new AggregateIntegrationErrorReceivedEventCmd(
                 integrationError,
                 runtimeBundleProperties,
@@ -174,31 +176,53 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         try {
-            //run all error commands
-            managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
-            return;
-        } catch (Throwable cause) {
-            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
-            // cleaned the commands list from PropagateCloudBpmnErrorCmd and
-            // AggregateIntegrationErrorReceivedClosingEventCmd
-            errorCommands = restoreCommandList(commands);
+            managementService.executeCommand(propagateErrorCmd);
+        } catch (Exception propagationException) {
+            LOGGER.error(
+                "Could not propagate BPMN error for execution '{}'. Setting an error variable on the execution.",
+                execution.getId(),
+                propagationException
+            );
+            handlePropagationFailure(propagationException, integrationError, execution, integrationContextEntity);
         }
+    }
 
-        errorCommands.add(
+    private void handlePropagationFailure(
+        Exception propagationException,
+        IntegrationErrorImpl integrationError,
+        ExecutionEntity execution,
+        IntegrationContextEntity integrationContextEntity
+    ) {
+        Map<String, Object> errorVariable = Collections.singletonMap(
+            ERROR_VARIABLE_NAME,
+            "BPMN error propagation failed: " + propagationException.getMessage()
+        );
+
+        Command<?> finalErrorHandlingCmd = CompositeCommand.of(
+            new SetExecutionVariablesCmd(execution.getId(), errorVariable, false),
+            new DeleteIntegrationContextCmd(integrationContextEntity),
             new AggregateIntegrationErrorReceivedEventCmd(
                 integrationError,
                 runtimeBundleProperties,
                 processEngineEventsAggregator
             )
         );
-        //run without propagate CloudBpmnError
-        managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
+
+        managementService.executeCommand(finalErrorHandlingCmd);
     }
 
-    private List<Command<?>> restoreCommandList(List<Command<?>> commands) {
-        return commands
-            .stream()
-            .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
-            .collect(Collectors.toList());
+    private Command<?> getCleanupCmd(
+        IntegrationContextEntity integrationContextEntity,
+        IntegrationContext integrationContext
+    ) {
+        // If no execution is found, just delete the context and aggregate the event.
+        return CompositeCommand.of(
+            new DeleteIntegrationContextCmd(integrationContextEntity),
+            new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            )
+        );
     }
 }
