@@ -39,6 +39,10 @@ public interface ProcessDefinitionAdminController {
             value = "include",
             required = false
         ) List<String> include,
+        @Parameter(description = "Process definition category to exclude from results") @RequestParam(
+            value = "excludedCategory",
+            required = false
+        ) String excludedCategory,
         Pageable pageable
     );
 }
