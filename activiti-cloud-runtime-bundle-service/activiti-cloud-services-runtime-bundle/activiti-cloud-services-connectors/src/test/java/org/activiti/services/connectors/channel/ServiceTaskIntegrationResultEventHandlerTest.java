@@ -18,6 +18,7 @@ package org.activiti.services.connectors.channel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -32,13 +33,13 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -70,9 +71,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ManagementService managementService;
 
-    @Disabled
     @Test
-    public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
+    void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
@@ -90,8 +90,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(3);
-        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
@@ -111,7 +111,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
+    void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
@@ -121,6 +121,87 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
         //then
         verify(managementService, never()).executeCommand(any());
+    }
+
+    @Test
+    void receiveShouldHandleTriggerFailureWhenTriggerFails() {
+        //given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        List<Execution> executions = Collections.singletonList(buildExecutionEntity());
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        //when
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        // first trigger command fails
+        doThrow(new RuntimeException("Trigger failed"))
+            .doReturn(null)
+            .when(managementService)
+            .executeCommand(captor.capture());
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        //then
+        List<CompositeCommand> commands = captor.getAllValues();
+        assertThat(commands).hasSize(2);
+        CompositeCommand triggerComposite = commands.getFirst();
+        assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
+        assertThat(triggerComposite.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(triggerComposite.getCommands()
+                       .get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        CompositeCommand errorPropagation = commands.getLast();
+        assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
+        assertThat(errorPropagation.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(errorPropagation.getCommands().get(2)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+    }
+
+    @Test
+    void receiveShouldSetErrorVariableWhenTriggerAndPropagationFail() {
+        //given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        List<Execution> executions = Collections.singletonList(buildExecutionEntity());
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        //when
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        // first trigger command fails, second propagate error command fails
+        doThrow(new RuntimeException("Trigger failed"))
+            .doThrow(new RuntimeException("Propagation failed"))
+            .doReturn(null)
+            .when(managementService)
+            .executeCommand(captor.capture());
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        //then
+        List<CompositeCommand> commands = captor.getAllValues();
+        assertThat(commands).hasSize(3);
+
+        CompositeCommand triggerComposite = commands.get(0);
+        assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
+
+        CompositeCommand errorPropagation = commands.get(1);
+        assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
+
+        CompositeCommand setVariable = commands.get(2);
+        SetExecutionVariablesCmd setExecutionVariablesCmd = (SetExecutionVariablesCmd) setVariable
+            .getCommands()
+            .get(0);
+        assertThat(setExecutionVariablesCmd).isInstanceOf(SetExecutionVariablesCmd.class);
+        assertThat(setExecutionVariablesCmd)
+            .extracting("variables")
+            .isInstanceOf(Map.class)
+            .satisfies(variables ->
+                           assertThat((Map<String, Object>) variables)
+                               .containsEntry("integrationError", "BPMN error propagation failed: Propagation failed")
+            );
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
