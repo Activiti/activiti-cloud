@@ -42,7 +42,6 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -157,7 +156,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                 execution.getId(),
                 triggerException
             );
-            getSelf().handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
+            handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
         }
     }
 
@@ -165,8 +164,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         return applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class);
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
-    public void handleTriggerFailure(
+    private void handleTriggerFailure(
         Exception triggerException,
         IntegrationContext integrationContext,
         ExecutionEntity execution,
@@ -193,11 +191,13 @@ public class ServiceTaskIntegrationResultEventHandler {
                 execution.getId(),
                 propagationException
             );
-            handlePropagationFailure(propagationException, integrationError, execution, integrationContextEntity);
+            getSelf()
+                .handlePropagationFailure(propagationException, integrationError, execution, integrationContextEntity);
         }
     }
 
-    private void handlePropagationFailure(
+    @Transactional(propagation = REQUIRES_NEW)
+    public void handlePropagationFailure(
         Exception propagationException,
         IntegrationErrorImpl integrationError,
         ExecutionEntity execution,
