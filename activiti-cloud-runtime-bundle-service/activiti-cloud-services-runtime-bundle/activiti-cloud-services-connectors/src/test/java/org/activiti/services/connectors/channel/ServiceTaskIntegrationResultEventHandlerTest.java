@@ -150,8 +150,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         CompositeCommand triggerComposite = commands.getFirst();
         assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
         assertThat(triggerComposite.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
-        assertThat(triggerComposite.getCommands()
-                       .get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        assertThat(triggerComposite.getCommands().get(2))
+            .isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
         CompositeCommand errorPropagation = commands.getLast();
         assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
         assertThat(errorPropagation.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
@@ -191,16 +191,14 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
 
         CompositeCommand setVariable = commands.get(2);
-        SetExecutionVariablesCmd setExecutionVariablesCmd = (SetExecutionVariablesCmd) setVariable
-            .getCommands()
-            .get(0);
+        SetExecutionVariablesCmd setExecutionVariablesCmd = (SetExecutionVariablesCmd) setVariable.getCommands().get(0);
         assertThat(setExecutionVariablesCmd).isInstanceOf(SetExecutionVariablesCmd.class);
         assertThat(setExecutionVariablesCmd)
             .extracting("variables")
             .isInstanceOf(Map.class)
             .satisfies(variables ->
-                           assertThat((Map<String, Object>) variables)
-                               .containsEntry("integrationError", "BPMN error propagation failed: Propagation failed")
+                assertThat((Map<String, Object>) variables)
+                    .containsEntry("integrationError", "BPMN error propagation failed: Propagation failed")
             );
     }
 
