@@ -129,7 +129,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receiveShouldHandleTriggerFailureWhenTriggerFails() {
-        when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(handler);
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
@@ -206,6 +205,66 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
                 assertThat((Map<String, Object>) variables)
                     .containsEntry("integrationError", "BPMN error propagation failed: Propagation failed")
             );
+    }
+
+    @Test
+    void receiveShouldCleanupWhenNoExecutionsFound() {
+        // given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        // Return empty executions list
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(Collections.emptyList());
+
+        // when
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        // then
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        verify(managementService).executeCommand(captor.capture());
+
+        // Verify cleanup command was executed
+        final CompositeCommand command = captor.getValue();
+        assertThat(command.getCommands()).hasSize(2);
+        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+
+        // Verify trigger was never attempted
+        verify(managementService, never()).executeCommand(any(TriggerCmd.class));
+    }
+
+    @Test
+    void receiveShouldCleanupWhenActivityIdDoesNotMatch() {
+        // given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        // Create execution with DIFFERENT activityId than the clientId in integration context
+        ExecutionEntity execution = buildExecutionEntity();
+        when(execution.getActivityId()).thenReturn("differentActivityId"); // Not matching CLIENT_ID
+
+        List<Execution> executions = Collections.singletonList(execution);
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        // when
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        // then
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        verify(managementService).executeCommand(captor.capture());
+
+        // Verify only cleanup command was executed
+        final CompositeCommand command = captor.getValue();
+        assertThat(command.getCommands()).hasSize(2);
+        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+
+        // Verify trigger was never attempted
+        verify(managementService, never()).executeCommand(any(TriggerCmd.class));
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
