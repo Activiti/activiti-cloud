@@ -42,6 +42,8 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +59,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
+    private final ApplicationContext applicationContext;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -64,7 +67,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator
+        VariablesPropagator variablesPropagator,
+        ApplicationContext applicationContext
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -72,6 +76,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
+        this.applicationContext = applicationContext;
     }
 
     @Retryable(
@@ -79,7 +84,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
@@ -152,11 +157,16 @@ public class ServiceTaskIntegrationResultEventHandler {
                 execution.getId(),
                 triggerException
             );
-            handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
+            getSelf().handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
         }
     }
 
-    private void handleTriggerFailure(
+    private ServiceTaskIntegrationResultEventHandler getSelf() {
+        return applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class);
+    }
+
+    @Transactional(propagation = REQUIRES_NEW)
+    public void handleTriggerFailure(
         Exception triggerException,
         IntegrationContext integrationContext,
         ExecutionEntity execution,

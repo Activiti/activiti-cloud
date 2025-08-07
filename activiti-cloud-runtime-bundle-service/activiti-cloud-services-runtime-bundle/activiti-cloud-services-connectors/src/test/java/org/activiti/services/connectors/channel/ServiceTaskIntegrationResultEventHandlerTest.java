@@ -47,6 +47,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationResultEventHandlerTest {
@@ -70,6 +71,9 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ManagementService managementService;
+
+    @Mock
+    private ApplicationContext applicationContext;
 
     @Test
     void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
@@ -125,6 +129,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receiveShouldHandleTriggerFailureWhenTriggerFails() {
+        when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(handler);
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
@@ -160,6 +165,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receiveShouldSetErrorVariableWhenTriggerAndPropagationFail() {
+        when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(handler);
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
