@@ -16,8 +16,6 @@
 
 package org.activiti.services.connectors.channel;
 
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
