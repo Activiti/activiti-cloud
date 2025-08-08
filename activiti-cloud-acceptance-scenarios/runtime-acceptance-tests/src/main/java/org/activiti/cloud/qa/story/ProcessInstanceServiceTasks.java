@@ -367,6 +367,7 @@ public class ProcessInstanceServiceTasks {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(Duration.ofSeconds(30))
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> generatedEvents = auditSteps
                     .getEventsByProcessInstanceId(processId)

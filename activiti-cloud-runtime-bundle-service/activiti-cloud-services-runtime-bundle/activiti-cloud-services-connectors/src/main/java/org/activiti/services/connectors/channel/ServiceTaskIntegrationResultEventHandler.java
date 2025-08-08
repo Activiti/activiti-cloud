@@ -79,9 +79,9 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     @Retryable(
-        value = ActivitiOptimisticLockingException.class,
+        retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:50}")
+        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
     @Transactional
     public void receive(IntegrationResult integrationResult) {
@@ -97,7 +97,6 @@ public class ServiceTaskIntegrationResultEventHandler {
         List<Execution> executions = runtimeService
             .createExecutionQuery()
             .executionId(integrationContext.getExecutionId())
-            .activityId(integrationContext.getClientId())
             .list();
 
         if (executions.isEmpty()) {

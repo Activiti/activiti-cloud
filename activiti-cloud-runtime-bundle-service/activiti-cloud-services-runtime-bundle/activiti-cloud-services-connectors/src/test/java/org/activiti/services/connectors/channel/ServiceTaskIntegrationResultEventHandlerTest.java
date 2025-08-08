@@ -87,7 +87,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
             runtimeService
                 .createExecutionQuery()
                 .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
                 .list()
         )
             .thenReturn(executions);
@@ -145,7 +144,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
             runtimeService
                 .createExecutionQuery()
                 .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
                 .list()
         )
             .thenReturn(executions);
@@ -187,7 +185,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
             runtimeService
                 .createExecutionQuery()
                 .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
                 .list()
         )
             .thenReturn(executions);
@@ -237,7 +234,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
             runtimeService
                 .createExecutionQuery()
                 .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
                 .list()
         )
             .thenReturn(Collections.emptyList());
@@ -275,7 +271,6 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
             runtimeService
                 .createExecutionQuery()
                 .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
                 .list()
         )
             .thenReturn(executions);
