@@ -97,6 +97,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         List<Execution> executions = runtimeService
             .createExecutionQuery()
             .executionId(integrationContext.getExecutionId())
+            .activityId(integrationContext.getClientId())
             .list();
 
         if (executions.isEmpty()) {
