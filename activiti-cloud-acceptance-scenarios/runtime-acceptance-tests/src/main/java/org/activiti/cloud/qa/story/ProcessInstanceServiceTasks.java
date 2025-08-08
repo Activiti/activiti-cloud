@@ -27,6 +27,7 @@ import feign.FeignException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -381,7 +382,52 @@ public class ProcessInstanceServiceTasks {
                     )
                     .collect(Collectors.toList());
 
+                // Debug information
+                System.out.println("Found " + generatedEvents.size() + " completed events out of expected " + count);
+                generatedEvents.forEach(event ->
+                    System.out.println(
+                        "Event execution ID: " + BPMNActivityEvent.class.cast(event).getEntity().getExecutionId()
+                    )
+                );
+
+                // Get all events for this process instance to see what else is happening
+                Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
+                System.out.println("Total events for process: " + allEvents.size());
+
                 assertThat(generatedEvents).hasSize(count);
+            });
+    }
+
+    @Then("all integration contexts are completed for element $elementId")
+    public void verifyAllIntegrationContextsCompleted(String elementId) {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await()
+            .atMost(Duration.ofSeconds(30))
+            .untilAsserted(() -> {
+                // First get all service tasks for the process
+                PagedModel<CloudServiceTask> serviceTasks = processQueryAdminSteps.getServiceTasks(processId);
+
+                // Filter service tasks by elementId
+                List<CloudServiceTask> matchingTasks = serviceTasks
+                    .getContent()
+                    .stream()
+                    .filter(task -> task.getElementId().equals(elementId))
+                    .collect(Collectors.toList());
+
+                // Debug info
+                System.out.println("Found " + matchingTasks.size() + " service tasks for element " + elementId);
+
+                // Verify we have 3 service tasks
+                assertThat(matchingTasks).hasSize(3);
+
+                // Check the integration context for each service task
+                for (CloudServiceTask task : matchingTasks) {
+                    CloudIntegrationContext context = processQueryAdminSteps.getCloudIntegrationContext(task.getId());
+                    System.out.println("Task ID: " + task.getId() + ", Context status: " + context.getStatus());
+                    assertThat(context.getStatus())
+                        .isEqualTo(CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+                }
             });
     }
 }
