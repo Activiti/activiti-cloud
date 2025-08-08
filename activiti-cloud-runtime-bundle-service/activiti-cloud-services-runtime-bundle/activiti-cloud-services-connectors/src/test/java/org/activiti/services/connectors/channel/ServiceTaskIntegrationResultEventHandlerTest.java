@@ -83,13 +83,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(
-            runtimeService
-                .createExecutionQuery()
-                .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
-                .list()
-        )
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(executions);
 
         //when
@@ -100,8 +94,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(3);
-        assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
@@ -141,13 +135,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(
-            runtimeService
-                .createExecutionQuery()
-                .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
-                .list()
-        )
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(executions);
 
         //when
@@ -164,13 +152,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         List<CompositeCommand> commands = captor.getAllValues();
         assertThat(commands).hasSize(2);
         CompositeCommand triggerComposite = commands.getFirst();
-        assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(triggerComposite.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(triggerComposite.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(triggerComposite.getCommands().get(2))
             .isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
         CompositeCommand errorPropagation = commands.getLast();
-        assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
-        assertThat(errorPropagation.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(errorPropagation.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
+        assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(errorPropagation.getCommands().get(2)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
@@ -183,13 +171,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(
-            runtimeService
-                .createExecutionQuery()
-                .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
-                .list()
-        )
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(executions);
 
         //when
@@ -208,13 +190,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         assertThat(commands).hasSize(3);
 
         CompositeCommand triggerComposite = commands.get(0);
-        assertThat(triggerComposite.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
+        assertThat(triggerComposite.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
 
         CompositeCommand errorPropagation = commands.get(1);
-        assertThat(errorPropagation.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
+        assertThat(errorPropagation.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
 
         CompositeCommand setVariable = commands.get(2);
-        SetExecutionVariablesCmd setExecutionVariablesCmd = (SetExecutionVariablesCmd) setVariable.getCommands().get(0);
+        SetExecutionVariablesCmd setExecutionVariablesCmd = (SetExecutionVariablesCmd) setVariable.getCommands().get(1);
         assertThat(setExecutionVariablesCmd).isInstanceOf(SetExecutionVariablesCmd.class);
         assertThat(setExecutionVariablesCmd)
             .extracting("variables")
@@ -233,13 +215,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         // Return empty executions list
-        when(
-            runtimeService
-                .createExecutionQuery()
-                .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
-                .list()
-        )
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(Collections.emptyList());
 
         // when
@@ -271,13 +247,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         when(execution.getActivityId()).thenReturn("differentActivityId"); // Not matching CLIENT_ID
 
         List<Execution> executions = Collections.singletonList(execution);
-        when(
-            runtimeService
-                .createExecutionQuery()
-                .executionId(integrationContext.getExecutionId())
-                .activityId(integrationContext.getClientId())
-                .list()
-        )
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(executions);
 
         // when

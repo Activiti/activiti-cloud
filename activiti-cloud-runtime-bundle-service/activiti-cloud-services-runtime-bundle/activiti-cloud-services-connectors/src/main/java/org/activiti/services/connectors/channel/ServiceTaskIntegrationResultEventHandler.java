@@ -79,9 +79,9 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     @Retryable(
-        value = ActivitiOptimisticLockingException.class,
+        retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:50}")
+        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
     @Transactional
     public void receive(IntegrationResult integrationResult) {
@@ -97,7 +97,6 @@ public class ServiceTaskIntegrationResultEventHandler {
         List<Execution> executions = runtimeService
             .createExecutionQuery()
             .executionId(integrationContext.getExecutionId())
-            .activityId(integrationContext.getClientId())
             .list();
 
         if (executions.isEmpty()) {
@@ -136,12 +135,12 @@ public class ServiceTaskIntegrationResultEventHandler {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
 
         Command<?> triggerAndCleanupCmd = CompositeCommand.of(
+            new DeleteIntegrationContextCmd(integrationContextEntity),
             new TriggerCmd(
                 integrationContext.getExecutionId(),
                 integrationContext.getOutBoundVariables(),
                 variablesPropagator
             ),
-            new DeleteIntegrationContextCmd(integrationContextEntity),
             new AggregateIntegrationResultReceivedEventCmd(
                 integrationContext,
                 runtimeBundleProperties,
@@ -175,8 +174,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
 
         Command<?> propagateErrorCmd = CompositeCommand.of(
-            new PropagateCloudBpmnErrorCmd(integrationError, execution),
             new DeleteIntegrationContextCmd(integrationContextEntity),
+            new PropagateCloudBpmnErrorCmd(integrationError, execution),
             new AggregateIntegrationErrorReceivedEventCmd(
                 integrationError,
                 runtimeBundleProperties,
@@ -210,8 +209,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         Command<?> finalErrorHandlingCmd = CompositeCommand.of(
-            new SetExecutionVariablesCmd(execution.getId(), errorVariable, false),
             new DeleteIntegrationContextCmd(integrationContextEntity),
+            new SetExecutionVariablesCmd(execution.getId(), errorVariable, false),
             new AggregateIntegrationErrorReceivedEventCmd(
                 integrationError,
                 runtimeBundleProperties,
