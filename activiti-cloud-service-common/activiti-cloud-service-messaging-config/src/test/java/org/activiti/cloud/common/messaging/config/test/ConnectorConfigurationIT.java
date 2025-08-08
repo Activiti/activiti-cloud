@@ -266,7 +266,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(condition)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
             );
     }
 
@@ -279,7 +279,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(expression)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
             );
     }
 
@@ -334,7 +334,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -354,7 +354,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(2000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply).isNull();
     }
 
@@ -371,7 +371,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -418,14 +418,14 @@ public class ConnectorConfigurationIT {
         input.send(message, "rest-connector.GET");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(INTEGRATION_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
             .isEqualTo("GetResult".getBytes(StandardCharsets.UTF_8));
 
-        assertThat(output.receive(1, bindingResolver.apply(INTEGRATION_RESULTS))).isNull();
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
     }
 
     @Test
@@ -442,14 +442,14 @@ public class ConnectorConfigurationIT {
         input.send(message, "rest-connector.POST");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(INTEGRATION_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
             .isEqualTo("PostResult".getBytes(StandardCharsets.UTF_8));
 
-        assertThat(output.receive(1, bindingResolver.apply(INTEGRATION_RESULTS))).isNull();
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
     }
 
     private String resolveExpression(String value) {

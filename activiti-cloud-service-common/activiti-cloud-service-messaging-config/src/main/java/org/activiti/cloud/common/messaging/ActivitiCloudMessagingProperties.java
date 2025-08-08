@@ -16,12 +16,25 @@
 
 package org.activiti.cloud.common.messaging;
 
-import jakarta.validation.constraints.*;
-import java.util.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
@@ -97,6 +110,12 @@ public class ActivitiCloudMessagingProperties {
     private String destinationIllegalCharsReplacement = "-";
 
     /**
+     * Configure functionRouter destinations for a single binding
+     */
+    @NestedConfigurationProperty
+    private FunctionRouterProperties functionRouter = new FunctionRouterProperties();
+
+    /**
      * Configure destination properties to apply customization to producers and consumer channel bindings with matching destination key.
      */
     private Map<String, DestinationProperties> destinations = new LinkedCaseInsensitiveMap<>();
@@ -128,7 +147,7 @@ public class ActivitiCloudMessagingProperties {
         }
     }
 
-    ActivitiCloudMessagingProperties() {}
+    public ActivitiCloudMessagingProperties() {}
 
     public RabbitMqProperties getRabbitmq() {
         return rabbitmq;
@@ -210,6 +229,14 @@ public class ActivitiCloudMessagingProperties {
         this.destinationIllegalCharsReplacement = destinationIllegalCharsReplacement;
     }
 
+    public FunctionRouterProperties getFunctionRouter() {
+        return functionRouter;
+    }
+
+    public void setFunctionRouter(FunctionRouterProperties functionRouter) {
+        this.functionRouter = functionRouter;
+    }
+
     public Function<String, String> transformDestination() {
         return input -> {
             InputConverter<String> converter = new InputConverter<>(input);
@@ -248,7 +275,8 @@ public class ActivitiCloudMessagingProperties {
             Objects.equals(instanceIndex, that.instanceIndex) &&
             Objects.equals(destinationSeparator, that.destinationSeparator) &&
             Objects.equals(destinationPrefix, that.destinationPrefix) &&
-            Objects.equals(destinations, that.destinations)
+            Objects.equals(destinations, that.destinations) &&
+            Objects.equals(functionRouter, that.functionRouter)
         );
     }
 
@@ -352,22 +380,199 @@ public class ActivitiCloudMessagingProperties {
 
         @Override
         public String toString() {
+            return new StringJoiner(", ", DestinationProperties.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("scope='" + scope + "'")
+                .add("prefix='" + prefix + "'")
+                .add("separator='" + separator + "'")
+                .toString();
+        }
+    }
+
+    @Validated
+    public static class FunctionRouterProperties {
+
+        private boolean enabled;
+
+        private final Map<String, BindingFunctionRouterProperties> routes = new LinkedCaseInsensitiveMap<>();
+
+        private final Map<String, String> destinations = new LinkedCaseInsensitiveMap<>();
+
+        private final Map<String, List<String>> registrations = new LinkedCaseInsensitiveMap<>();
+
+        private String group;
+
+        private int maxRetries = 3;
+
+        private Duration retryInterval = Duration.ofMillis(10);
+
+        @NestedConfigurationProperty
+        private ConsumerProperties consumer = new ConsumerProperties();
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Map<String, String> destinations() {
+            return destinations;
+        }
+
+        public Map<String, List<String>> registrations() {
+            return registrations;
+        }
+
+        public Map<String, BindingFunctionRouterProperties> getRoutes() {
+            return routes;
+        }
+
+        public boolean isFunctionRoute(String bindingName) {
+            return routes.containsKey(bindingName) && routes.get(bindingName).isEnabled();
+        }
+
+        public List<String> getFunctionRoutes() {
+            return routes.keySet().stream().filter(this::isFunctionRoute).toList();
+        }
+
+        public String getGroup() {
+            return group;
+        }
+
+        public void setGroup(String group) {
+            this.group = group;
+        }
+
+        public ConsumerProperties getConsumer() {
+            return consumer;
+        }
+
+        public void setConsumer(ConsumerProperties consumer) {
+            this.consumer = consumer;
+        }
+
+        public boolean isExcludeRequiredProducerGroup(String bindingName) {
+            return Optional
+                .ofNullable(routes.get(bindingName))
+                .map(BindingFunctionRouterProperties::isExcludeRequiredProducerGroups)
+                .orElse(false);
+        }
+
+        public boolean isOverrideRequiredProducerGroup(String bindingName) {
+            return Optional
+                .ofNullable(routes.get(bindingName))
+                .map(BindingFunctionRouterProperties::getOverrideRequiredProducerGroups)
+                .map(it -> !it.isEmpty())
+                .orElse(false);
+        }
+
+        public int getMaxRetries() {
+            return maxRetries;
+        }
+
+        public void setMaxRetries(int maxRetries) {
+            this.maxRetries = maxRetries;
+        }
+
+        public Duration getRetryInterval() {
+            return retryInterval;
+        }
+
+        public void setRetryInterval(Duration retryInterval) {
+            this.retryInterval = retryInterval;
+        }
+
+        public void register(String bindingName, String functionBeanName) {
+            Optional
+                .ofNullable(destinations.get(bindingName))
+                .ifPresent(destination -> {
+                    registrations.computeIfAbsent(destination, key -> new ArrayList<>()).add(functionBeanName);
+                });
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FunctionRouterProperties that)) return false;
             return (
-                "DestinationProperties{" +
-                ", name='" +
-                name +
-                '\'' +
-                ", scope='" +
-                scope +
-                '\'' +
-                ", prefix='" +
-                prefix +
-                '\'' +
-                ", separator='" +
-                separator +
-                '\'' +
-                '}'
+                enabled == that.enabled &&
+                maxRetries == that.maxRetries &&
+                Objects.equals(routes, that.routes) &&
+                Objects.equals(destinations, that.destinations) &&
+                Objects.equals(registrations, that.registrations) &&
+                Objects.equals(group, that.group) &&
+                Objects.equals(retryInterval, that.retryInterval) &&
+                Objects.equals(consumer, that.consumer)
             );
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                enabled,
+                routes,
+                destinations,
+                registrations,
+                group,
+                maxRetries,
+                retryInterval,
+                consumer
+            );
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", FunctionRouterProperties.class.getSimpleName() + "[", "]")
+                .add("enabled=" + enabled)
+                .add("routes=" + routes)
+                .add("destinations=" + destinations)
+                .add("registrations=" + registrations)
+                .add("group='" + group + "'")
+                .add("maxRetries=" + maxRetries)
+                .add("retryInterval=" + retryInterval)
+                .add("consumer=" + consumer)
+                .toString();
+        }
+    }
+
+    public static class BindingFunctionRouterProperties {
+
+        private boolean enabled;
+        private boolean excludeRequiredProducerGroups = true;
+        private List<String> overrideRequiredProducerGroups = new ArrayList<>();
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isExcludeRequiredProducerGroups() {
+            return excludeRequiredProducerGroups;
+        }
+
+        public void setExcludeRequiredProducerGroups(boolean excludeRequiredProducerGroups) {
+            this.excludeRequiredProducerGroups = excludeRequiredProducerGroups;
+        }
+
+        public List<String> getOverrideRequiredProducerGroups() {
+            return overrideRequiredProducerGroups;
+        }
+
+        public void setOverrideRequiredProducerGroups(List<String> overrideRequiredProducerGroups) {
+            this.overrideRequiredProducerGroups = overrideRequiredProducerGroups;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", BindingFunctionRouterProperties.class.getSimpleName() + "[", "]")
+                .add("enabled=" + enabled)
+                .add("excludeRequiredProducerGroups=" + excludeRequiredProducerGroups)
+                .add("overrideRequiredProducerGroups=" + overrideRequiredProducerGroups)
+                .toString();
         }
     }
 

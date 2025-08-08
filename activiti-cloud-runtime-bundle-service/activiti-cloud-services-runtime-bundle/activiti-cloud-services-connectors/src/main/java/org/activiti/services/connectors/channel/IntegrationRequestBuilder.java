@@ -16,37 +16,33 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
+
 import java.io.Serializable;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 
 public class IntegrationRequestBuilder implements Serializable {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final BindingServiceProperties bindingServiceProperties;
+    private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public IntegrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.bindingServiceProperties = bindingServiceProperties;
+        this.bindingResolver = bindingResolver;
     }
 
     public IntegrationRequestImpl build(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
-        String resultDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER
-        );
-        String errorDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER
-        );
-
-        integrationRequest.setErrorDestination(errorDestination);
-        integrationRequest.setResultDestination(resultDestination);
+        integrationRequest.setErrorDestination(bindingResolver.getBindingDestination(INTEGRATION_ERRORS_CONSUMER));
+        integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
         return integrationRequest;

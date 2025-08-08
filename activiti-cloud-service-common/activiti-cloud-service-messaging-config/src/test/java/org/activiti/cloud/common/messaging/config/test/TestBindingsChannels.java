@@ -36,17 +36,19 @@ public interface TestBindingsChannels {
 
     String INTEGRATION_RESULTS = "integrationResults";
 
-    @InputBinding(COMMAND_CONSUMER)
+    String SCRIPT_RUNTIME_CONSUMER = "scriptRuntimeConsumer";
+
+    @InputBinding(value = COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
     }
 
-    @InputBinding(QUERY_CONSUMER)
+    @InputBinding(value = QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
     }
 
-    @InputBinding(AUDIT_CONSUMER)
+    @InputBinding(value = AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
     }
@@ -61,7 +63,7 @@ public interface TestBindingsChannels {
         return MessageChannels.direct(AUDIT_PRODUCER).getObject();
     }
 
-    @InputBinding(INTEGRATION_REQUESTS)
+    @InputBinding(value = INTEGRATION_REQUESTS)
     default SubscribableChannel integrationRequests() {
         return MessageChannels.publishSubscribe(INTEGRATION_REQUESTS).getObject();
     }
@@ -69,5 +71,10 @@ public interface TestBindingsChannels {
     @OutputBinding(INTEGRATION_RESULTS)
     default MessageChannel integrationResults() {
         return MessageChannels.direct(INTEGRATION_RESULTS).getObject();
+    }
+
+    @InputBinding(value = SCRIPT_RUNTIME_CONSUMER)
+    default SubscribableChannel scriptRuntimeConsumer() {
+        return MessageChannels.publishSubscribe(SCRIPT_RUNTIME_CONSUMER).getObject();
     }
 }
