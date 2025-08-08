@@ -245,4 +245,22 @@ public class TaskControllerHelper {
             .collect(Collectors.groupingBy(TaskCandidateGroupEntity::getTaskId, Collectors.toSet()));
         tasks.forEach(task -> task.setTaskCandidateGroups(candidatesByTaskId.get(task.getId())));
     }
+
+    // TODO
+    @Transactional(readOnly = true)
+    public Long countTasksUnrestricted(TaskSearchRequest taskSearchRequest) {
+        TaskSpecification unrestrictedTaskSpecification = TaskSpecification.unrestricted(taskSearchRequest);
+        return taskRepository.count(unrestrictedTaskSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countTasksRestricted(TaskSearchRequest taskSearchRequest) {
+        TaskSpecification restrictedTaskSpecification = TaskSpecification.restricted(
+            taskSearchRequest,
+            securityManager.getAuthenticatedUserId(),
+            securityManager.getAuthenticatedUserGroups()
+        );
+
+        return taskRepository.count(restrictedTaskSpecification);
+    }
 }
