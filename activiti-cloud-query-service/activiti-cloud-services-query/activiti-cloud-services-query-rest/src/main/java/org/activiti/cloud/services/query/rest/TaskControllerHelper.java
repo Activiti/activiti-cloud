@@ -246,7 +246,6 @@ public class TaskControllerHelper {
         tasks.forEach(task -> task.setTaskCandidateGroups(candidatesByTaskId.get(task.getId())));
     }
 
-    // TODO
     @Transactional(readOnly = true)
     public Long countTasksUnrestricted(TaskSearchRequest taskSearchRequest) {
         TaskSpecification unrestrictedTaskSpecification = TaskSpecification.unrestricted(taskSearchRequest);
