@@ -15,13 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static org.activiti.cloud.services.query.rest.TaskControllerIT.CURRENT_USER;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-
-import java.util.List;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -38,6 +31,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.List;
+
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.activiti.cloud.services.query.rest.TaskControllerIT.CURRENT_USER;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 @SpringBootTest(
     classes = { QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class },
