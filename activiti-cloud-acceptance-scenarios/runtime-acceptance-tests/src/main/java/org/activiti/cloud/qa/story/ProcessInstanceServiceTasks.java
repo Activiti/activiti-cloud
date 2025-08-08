@@ -25,6 +25,7 @@ import static org.awaitility.Awaitility.await;
 
 import feign.FeignException;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
