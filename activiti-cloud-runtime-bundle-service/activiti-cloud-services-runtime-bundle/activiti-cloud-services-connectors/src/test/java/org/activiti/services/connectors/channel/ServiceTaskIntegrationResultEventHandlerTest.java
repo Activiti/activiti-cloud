@@ -83,7 +83,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).activityId(integrationContext.getClientId()).list())
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .activityId(integrationContext.getClientId())
+                .list()
+        )
             .thenReturn(executions);
 
         //when
@@ -135,7 +141,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).activityId(integrationContext.getClientId()).list())
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .activityId(integrationContext.getClientId())
+                .list()
+        )
             .thenReturn(executions);
 
         //when
@@ -171,7 +183,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).activityId(integrationContext.getClientId()).list())
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .activityId(integrationContext.getClientId())
+                .list()
+        )
             .thenReturn(executions);
 
         //when
@@ -215,7 +233,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         // Return empty executions list
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).activityId(integrationContext.getClientId()).list())
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .activityId(integrationContext.getClientId())
+                .list()
+        )
             .thenReturn(Collections.emptyList());
 
         // when
@@ -247,7 +271,13 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         when(execution.getActivityId()).thenReturn("differentActivityId"); // Not matching CLIENT_ID
 
         List<Execution> executions = Collections.singletonList(execution);
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).activityId(integrationContext.getClientId()).list())
+        when(
+            runtimeService
+                .createExecutionQuery()
+                .executionId(integrationContext.getExecutionId())
+                .activityId(integrationContext.getClientId())
+                .list()
+        )
             .thenReturn(executions);
 
         // when
