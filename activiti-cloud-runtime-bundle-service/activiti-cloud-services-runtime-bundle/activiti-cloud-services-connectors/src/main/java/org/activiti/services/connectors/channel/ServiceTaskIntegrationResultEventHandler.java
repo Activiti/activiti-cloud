@@ -72,7 +72,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
