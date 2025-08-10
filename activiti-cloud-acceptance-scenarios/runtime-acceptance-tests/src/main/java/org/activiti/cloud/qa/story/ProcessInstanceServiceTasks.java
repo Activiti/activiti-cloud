@@ -371,15 +371,41 @@ public class ProcessInstanceServiceTasks {
     public void verifyEventActivityCompleted(String elementId, Integer count) throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
-        // Add additional logging to help diagnose the issue
+        // Log initial information about all events - outside the lambda
         Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
         Serenity
             .recordReportData()
             .withTitle("Process Events Summary")
             .andContents("Total events for process " + processId + ": " + allEvents.size());
 
-        // Get and log all events for the specific element
-        Collection<CloudRuntimeEvent> elementEvents = allEvents
+        // Log element-specific events - outside the lambda
+        logElementEvents(elementId, allEvents);
+
+        // Use a simpler approach inside the await lambda
+        await()
+            .atMost(Duration.ofSeconds(30))
+            .untilAsserted(() -> {
+                Collection<CloudRuntimeEvent> generatedEvents = getCompletedEventsForElement(processId, elementId);
+                assertThat(generatedEvents).hasSize(count);
+            });
+
+        // After await completes successfully, record the final state
+        Collection<CloudRuntimeEvent> finalEvents = getCompletedEventsForElement(processId, elementId);
+        Serenity
+            .recordReportData()
+            .withTitle("Completed Events Count")
+            .andContents(
+                String.format(
+                    "Found %d ACTIVITY_COMPLETED events for element %s (expected %d)",
+                    finalEvents.size(),
+                    elementId,
+                    count
+                )
+            );
+    }
+
+    private void logElementEvents(String elementId, Collection<CloudRuntimeEvent> events) {
+        Collection<CloudRuntimeEvent> elementEvents = events
             .stream()
             .filter(event -> {
                 if (event instanceof BPMNActivityEvent) {
@@ -390,7 +416,6 @@ public class ProcessInstanceServiceTasks {
             })
             .collect(Collectors.toList());
 
-        // Record details about element-specific events
         StringBuilder eventDetails = new StringBuilder();
         eventDetails
             .append("Events found for element ")
@@ -412,40 +437,19 @@ public class ProcessInstanceServiceTasks {
         });
 
         Serenity.recordReportData().withTitle("Element Events Detail").andContents(eventDetails.toString());
+    }
 
-        // Original verification code
-        await()
-            .atMost(Duration.ofSeconds(30))
-            .untilAsserted(() -> {
-                Collection<CloudRuntimeEvent> generatedEvents = auditSteps
-                    .getEventsByProcessInstanceId(processId)
-                    .stream()
-                    .filter(cloudRuntimeEvent ->
-                        cloudRuntimeEvent.getEventType().equals(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED)
-                    )
-                    .filter(cloudRuntimeEvent ->
-                        BPMNActivityEvent.class.cast(cloudRuntimeEvent).getEntity().getElementId().equals(elementId)
-                    )
-                    .collect(Collectors.toList());
-
-                // Additional debug info using Serenity reporting
-                Serenity
-                    .recordReportData()
-                    .withTitle("Completed Events Count")
-                    .andContents(
-                        String.format(
-                            "Found %d ACTIVITY_COMPLETED events for element %s (expected %d)",
-                            generatedEvents.size(),
-                            elementId,
-                            count
-                        )
-                    );
-
-                // Use reportThat for the assertion
-                Serenity.reportThat(
-                    "Verifying completed events count",
-                    () -> assertThat(generatedEvents).hasSize(count)
-                );
-            });
+    private Collection<CloudRuntimeEvent> getCompletedEventsForElement(String processId, String elementId)
+        throws Exception {
+        return auditSteps
+            .getEventsByProcessInstanceId(processId)
+            .stream()
+            .filter(cloudRuntimeEvent ->
+                cloudRuntimeEvent.getEventType().equals(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED)
+            )
+            .filter(cloudRuntimeEvent ->
+                BPMNActivityEvent.class.cast(cloudRuntimeEvent).getEntity().getElementId().equals(elementId)
+            )
+            .collect(Collectors.toList());
     }
 }
