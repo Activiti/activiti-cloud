@@ -373,7 +373,10 @@ public class ProcessInstanceServiceTasks {
 
         // Add additional logging to help diagnose the issue
         Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
-        LOGGER.info("Total events for process {}: {}", processId, allEvents.size());
+        Serenity
+            .recordReportData()
+            .withTitle("Process Events Summary")
+            .andContents("Total events for process " + processId + ": " + allEvents.size());
 
         // Get and log all events for the specific element
         Collection<CloudRuntimeEvent> elementEvents = allEvents
@@ -387,16 +390,28 @@ public class ProcessInstanceServiceTasks {
             })
             .collect(Collectors.toList());
 
-        LOGGER.info("Events for element {}: {}", elementId, elementEvents.size());
+        // Record details about element-specific events
+        StringBuilder eventDetails = new StringBuilder();
+        eventDetails
+            .append("Events found for element ")
+            .append(elementId)
+            .append(": ")
+            .append(elementEvents.size())
+            .append("\n\n");
+
         elementEvents.forEach(event -> {
             BPMNActivityEvent activityEvent = (BPMNActivityEvent) event;
-            LOGGER.info(
-                "Event: type={}, executionId={}, timestamp={}",
-                activityEvent.getEventType(),
-                activityEvent.getEntity().getExecutionId(),
-                activityEvent.getTimestamp()
+            eventDetails.append(
+                String.format(
+                    "Event: type=%s, executionId=%s, timestamp=%s\n",
+                    activityEvent.getEventType(),
+                    activityEvent.getEntity().getExecutionId(),
+                    activityEvent.getTimestamp()
+                )
             );
         });
+
+        Serenity.recordReportData().withTitle("Element Events Detail").andContents(eventDetails.toString());
 
         // Original verification code
         await()
@@ -413,15 +428,24 @@ public class ProcessInstanceServiceTasks {
                     )
                     .collect(Collectors.toList());
 
-                // Additional debug info
-                LOGGER.info(
-                    "Found {} completed events for element {} (expected {})",
-                    generatedEvents.size(),
-                    elementId,
-                    count
-                );
+                // Additional debug info using Serenity reporting
+                Serenity
+                    .recordReportData()
+                    .withTitle("Completed Events Count")
+                    .andContents(
+                        String.format(
+                            "Found %d ACTIVITY_COMPLETED events for element %s (expected %d)",
+                            generatedEvents.size(),
+                            elementId,
+                            count
+                        )
+                    );
 
-                assertThat(generatedEvents).hasSize(count);
+                // Use reportThat for the assertion
+                Serenity.reportThat(
+                    "Verifying completed events count",
+                    () -> assertThat(generatedEvents).hasSize(count)
+                );
             });
     }
 }
