@@ -15,7 +15,11 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
+
+import java.util.List;
 import java.util.Optional;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -38,15 +42,27 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
     public BeanPostProcessor inputBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         BindingServiceProperties bindingServiceProperties,
-        StreamFunctionProperties streamFunctionProperties
+        StreamFunctionProperties streamFunctionProperties,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
+                    final var functionRouter = messagingProperties.getFunctionRouter();
+
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
+                        .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
+                        )
                         .ifPresent(functionBinding -> {
+                            if (
+                                List.of(functionBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
+                                functionRouter.destinations().isEmpty()
+                            ) {
+                                return;
+                            }
+
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
 
                             String inputBindings = bindingServiceProperties.getInputBindings();

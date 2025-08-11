@@ -15,11 +15,13 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
@@ -37,6 +39,9 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
         String destination = resolver.resolveDestination(request);
 
-        streamBridge.send(destination, message);
+        streamBridge.send(
+            destination,
+            MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build()
+        );
     }
 }
