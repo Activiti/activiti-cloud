@@ -21,6 +21,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -160,9 +161,14 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     private void handleTriggerFailure(Exception triggerException, IntegrationContext integrationContext) {
+        CloudBpmnError cloudBpmnError = new CloudBpmnError(
+            "TRIGGER_FAILURE",
+            triggerException.getMessage(),
+            triggerException
+        );
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(
             new IntegrationRequestImpl(integrationContext),
-            triggerException
+            cloudBpmnError
         );
         Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationError).build();
         streamBridge.send(INTEGRATION_ERRORS_CONSUMER, message);
