@@ -35,6 +35,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.BpmnError;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
@@ -214,9 +215,10 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
 
         var compositeCommand = compositeCommands.get(1);
-        assertThat(compositeCommand.getCommands()).hasSize(2);
+        assertThat(compositeCommand.getCommands()).hasSize(3);
         assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
-        assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+        assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(SetExecutionVariablesCmd.class);
+        assertThat(compositeCommand.getCommands().get(2)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
     private IntegrationContextEntityImpl buildIntegrationContextEntity() {

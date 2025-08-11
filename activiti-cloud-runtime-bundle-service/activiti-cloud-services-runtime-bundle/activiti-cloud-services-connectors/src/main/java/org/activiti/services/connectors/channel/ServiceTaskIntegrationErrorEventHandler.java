@@ -17,7 +17,9 @@
 package org.activiti.services.connectors.channel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -27,6 +29,7 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
@@ -41,6 +44,7 @@ import org.springframework.retry.annotation.Retryable;
 public class ServiceTaskIntegrationErrorEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationErrorEventHandler.class);
+    private static final String ERROR_VARIABLE_NAME = "integrationError";
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
@@ -121,6 +125,13 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
                             // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
                             commands = restoreCommandList(commands);
+
+                            //TODO consider making it optional
+                            Map<String, Object> errorVariable = Collections.singletonMap(
+                                ERROR_VARIABLE_NAME,
+                                "BPMN error propagation failed: " + cause.getMessage()
+                            );
+                            commands.add(new SetExecutionVariablesCmd(execution.getId(), errorVariable, false));
                         }
                     } else {
                         LOGGER.warn(
