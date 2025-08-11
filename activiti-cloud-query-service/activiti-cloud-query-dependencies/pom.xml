@@ -11,7 +11,6 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <properties>
-    <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
     <graphql-jpa-query.version>1.2.15</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
