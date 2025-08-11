@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
@@ -65,7 +66,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     public BeanPostProcessor connectorBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
-        Function<String, String> resolveExpression
+        Function<String, String> resolveExpression,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -76,12 +78,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
-                            Type functionType = discoverFunctionType(bean, beanName);
+                            final Type functionType = discoverFunctionType(bean, beanName);
+                            final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            registerFunctionRegistration(beanName, functionRegistration);
+                            final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+
+                            if (functionRouter.isEnabled()) {
+                                functionRouter.register(connectorBinding.input(), functionBeanName);
+                            }
 
                             responseDestination.set(connectorBinding.outputHeader());
 
@@ -116,7 +123,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .map(ConnectorBinding::connectorType)
                                 .filter(StringUtils::hasText)
                                 .map(resolveExpression)
-                                .map(it -> "headers['connectorType']=='" + it + "'")
+                                .map(it ->
+                                    "headers.containsKey('connectorType') && headers['connectorType']=='" + it + "'"
+                                )
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 

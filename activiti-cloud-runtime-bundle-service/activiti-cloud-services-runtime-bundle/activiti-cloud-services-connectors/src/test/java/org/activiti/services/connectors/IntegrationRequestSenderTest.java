@@ -15,6 +15,7 @@
  */
 package org.activiti.services.connectors;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +28,7 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -101,6 +103,9 @@ public class IntegrationRequestSenderTest {
     @Mock
     private ExpressionManager expressionManager;
 
+    @Mock
+    private FunctionBindingConfiguration.BindingResolver bindingResolver;
+
     private DelegateExecution delegateExecution;
 
     @Captor
@@ -113,11 +118,12 @@ public class IntegrationRequestSenderTest {
         configureDeploymentManager();
         messageBuilderFactory = new IntegrationContextMessageBuilderFactory(runtimeBundleProperties);
 
-        integrationRequestSender = new IntegrationRequestSender(streamBridge, messageBuilderFactory);
+        integrationRequestSender = new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
 
         configureProperties();
         configureExecution();
 
+        when(bindingResolver.getBindingDestination(CONNECTOR_TYPE)).thenReturn(CONNECTOR_TYPE);
         when(runtimeBundleProperties.getServiceFullName()).thenReturn(APP_NAME);
 
         IntegrationContextEntity contextEntity = mock(IntegrationContextEntity.class);
@@ -187,6 +193,7 @@ public class IntegrationRequestSenderTest {
         assertThat(sentIntegrationRequestEvent).isEqualTo(integrationRequest);
         assertThat(integrationRequestMessage.getHeaders().get(IntegrationRequestSender.CONNECTOR_TYPE))
             .isEqualTo(CONNECTOR_TYPE);
+        assertThat(integrationRequestMessage.getHeaders().get(FUNCTION_DESTINATION)).isEqualTo(CONNECTOR_TYPE);
 
         TransactionSynchronizationManager.clear();
     }

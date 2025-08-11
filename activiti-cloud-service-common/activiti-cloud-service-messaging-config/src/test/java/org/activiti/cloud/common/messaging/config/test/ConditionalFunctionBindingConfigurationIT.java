@@ -171,7 +171,10 @@ public class ConditionalFunctionBindingConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(
+            10000,
+            bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
+        );
 
         assertThat(reply)
             .isNotNull()
