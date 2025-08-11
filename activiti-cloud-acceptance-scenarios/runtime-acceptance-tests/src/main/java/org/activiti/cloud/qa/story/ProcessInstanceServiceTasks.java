@@ -370,7 +370,7 @@ public class ProcessInstanceServiceTasks {
     }
 
     @Then("the generated ACTIVITY_COMPLETED events for activity $elementId have the expected count of $count")
-    public void verifyEventActivityCompleted(String elementId, Integer count) {
+    public void verifyEventActivityCompleted(String elementId, Integer count) throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
         // First wait only for the presence of events
