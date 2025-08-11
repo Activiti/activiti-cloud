@@ -156,6 +156,32 @@
           <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>io.github.openfeign.querydsl</groupId>
+              <artifactId>querydsl-apt</artifactId>
+              <version>${openfeign.querydsl.version}</version>
+            </path>
+            <path>
+              <groupId>jakarta.inject</groupId>
+              <artifactId>jakarta.inject-api</artifactId>
+              <version>${jakarta.inject-api.version}</version>
+            </path>
+            <path>
+              <groupId>com.mysema.commons</groupId>
+              <artifactId>mysema-commons-lang</artifactId>
+              <version>${mysema-commons-lang.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <annotationProcessors>
+            <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
+          </annotationProcessors>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
