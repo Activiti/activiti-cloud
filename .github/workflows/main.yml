@@ -55,6 +55,8 @@ jobs:
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+    env:
+      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
 
     steps:
 
@@ -108,11 +110,11 @@ jobs:
 
       - name: Merge JaCoCo execution files
         shell: bash
-        run: mvn -N jacoco:merge -Djacoco.destFile=${{ github.workspace }}/target/jacoco-merged.exec
+        run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
 
       - name: Generate coverage reports
         shell: bash
-        run: mvn jacoco:report -Djacoco.dataFile=${{ github.workspace }}/target/jacoco-merged.exec
+        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
 
       - name: Run SonarCloud analysis
         if: ${{ env.SONAR_TOKEN != '' }}
