@@ -27,8 +27,10 @@ import feign.FeignException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -368,40 +370,58 @@ public class ProcessInstanceServiceTasks {
     }
 
     @Then("the generated ACTIVITY_COMPLETED events for activity $elementId have the expected count of $count")
-    public void verifyEventActivityCompleted(String elementId, Integer count) throws Exception {
+    public void verifyEventActivityCompleted(String elementId, Integer count) {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
-        // Log initial information about all events - outside the lambda
-        Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
-        Serenity
-            .recordReportData()
-            .withTitle("Process Events Summary")
-            .andContents("Total events for process " + processId + ": " + allEvents.size());
-
-        // Log element-specific events - outside the lambda
-        logElementEvents(elementId, allEvents);
-
-        // Use a simpler approach inside the await lambda
+        // First wait only for the presence of events
         await()
             .atMost(Duration.ofSeconds(30))
             .untilAsserted(() -> {
-                Collection<CloudRuntimeEvent> generatedEvents = getCompletedEventsForElement(processId, elementId);
-                assertThat(generatedEvents).hasSize(count);
+                Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
+
+                List<BPMNActivityEvent> completedEvents = allEvents
+                    .stream()
+                    .filter(event -> event instanceof BPMNActivityEvent)
+                    .map(event -> (BPMNActivityEvent) event)
+                    .filter(event -> event.getEventType().equals(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED))
+                    .filter(event -> event.getEntity().getElementId().equals(elementId))
+                    .collect(Collectors.toList());
+
+                // Only assert on count - this is what we wait for
+                assertThat(completedEvents).isNotEmpty();
             });
 
-        // After await completes successfully, record the final state
-        Collection<CloudRuntimeEvent> finalEvents = getCompletedEventsForElement(processId, elementId);
-        Serenity
-            .recordReportData()
-            .withTitle("Completed Events Count")
-            .andContents(
-                String.format(
-                    "Found %d ACTIVITY_COMPLETED events for element %s (expected %d)",
-                    finalEvents.size(),
-                    elementId,
-                    count
-                )
-            );
+        // Now perform all assertions without timeout
+        Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
+
+        List<BPMNActivityEvent> completedEvents = allEvents
+            .stream()
+            .filter(event -> event instanceof BPMNActivityEvent)
+            .map(event -> (BPMNActivityEvent) event)
+            .filter(event -> event.getEventType().equals(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED))
+            .filter(event -> event.getEntity().getElementId().equals(elementId))
+            .collect(Collectors.toList());
+
+        // Check count
+        assertThat(completedEvents).hasSize(count);
+
+        // Additional assertions on each event
+        completedEvents.forEach(event -> {
+            assertThat(event.getProcessInstanceId()).isEqualTo(processId);
+            assertThat(event.getEntity().getElementId()).isEqualTo(elementId);
+            assertThat(event.getEntity().getExecutionId()).isNotNull();
+            assertThat(event.getTimestamp()).isGreaterThan(0);
+        });
+
+        // Check for unique execution IDs in multi-instance tasks
+        if (count > 1) {
+            Set<String> executionIds = completedEvents
+                .stream()
+                .map(event -> event.getEntity().getExecutionId())
+                .collect(Collectors.toSet());
+
+            assertThat(executionIds).hasSizeGreaterThanOrEqualTo(count);
+        }
     }
 
     private void logElementEvents(String elementId, Collection<CloudRuntimeEvent> events) {
