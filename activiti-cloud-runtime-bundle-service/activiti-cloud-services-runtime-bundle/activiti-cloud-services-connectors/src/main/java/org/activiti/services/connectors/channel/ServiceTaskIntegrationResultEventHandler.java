@@ -162,7 +162,7 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private void handleTriggerFailure(Exception triggerException, IntegrationContext integrationContext) {
         CloudBpmnError cloudBpmnError = new CloudBpmnError(
-            "TRIGGER_FAILURE",
+            "INTEGRATION_ERROR_RECEIVED",
             triggerException.getMessage(),
             triggerException
         );
