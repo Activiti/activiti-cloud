@@ -175,9 +175,15 @@
               <artifactId>mysema-commons-lang</artifactId>
               <version>${mysema-commons-lang.version}</version>
             </path>
+            <path>
+              <groupId>org.hibernate</groupId>
+              <artifactId>hibernate-jpamodelgen</artifactId>
+              <version>6.5.2.Final</version>
+            </path>
           </annotationProcessorPaths>
           <annotationProcessors>
             <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
+            <annotationProcessor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</annotationProcessor>
           </annotationProcessors>
         </configuration>
       </plugin>
