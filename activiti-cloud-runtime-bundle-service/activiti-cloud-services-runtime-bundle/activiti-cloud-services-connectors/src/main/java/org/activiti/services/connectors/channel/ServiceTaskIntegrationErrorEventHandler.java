@@ -122,7 +122,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
                             return;
                         } catch (Throwable cause) {
-                            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            LOGGER.info("Error propagating CloudBpmnError: {}", cause.getMessage());
                             // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
                             commands = restoreCommandList(commands);
 
