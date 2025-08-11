@@ -48,5 +48,16 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+      <version>${jakarta.inject-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.mysema.commons</groupId>
+      <artifactId>mysema-commons-lang</artifactId>
+      <version>${mysema-commons-lang.version}</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>
