@@ -72,7 +72,7 @@ public class CloudConnectorsAutoConfiguration {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        @Qualifier("integrationErrorConsumer") MessageChannel integrationErrorConsumer
+        StreamBridge streamBridge
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -81,7 +81,7 @@ public class CloudConnectorsAutoConfiguration {
             managementService,
             processEngineEventsAggregator,
             variablesPropagator,
-            integrationErrorConsumer
+            streamBridge
         );
     }
 

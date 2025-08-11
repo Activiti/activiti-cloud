@@ -16,13 +16,14 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
-import java.util.Arrays;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
@@ -38,8 +39,9 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +56,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
-    private final MessageChannel integrationErrorConsumer;
+    private final StreamBridge streamBridge;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -63,7 +65,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        MessageChannel integrationErrorConsumer
+        StreamBridge streamBridge
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -71,7 +73,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
-        this.integrationErrorConsumer = integrationErrorConsumer;
+        this.streamBridge = streamBridge;
     }
 
     @Retryable(
@@ -97,7 +99,8 @@ public class ServiceTaskIntegrationResultEventHandler {
 
         if (executions.isEmpty()) {
             LOGGER.warn(
-                "No task is in this RB is waiting for integration result with execution id `{}`, flow node id `{}`. The integration result for the integration context `{}` will be ignored.",
+                "No task is in this RB is waiting for integration result with execution id `{}`, flow node id `{}`. " +
+                "The integration result for the integration context `{}` will be ignored.",
                 integrationContext.getExecutionId(),
                 integrationContext.getClientId(),
                 integrationContext.getId()
@@ -157,15 +160,12 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     private void handleTriggerFailure(Exception triggerException, IntegrationContext integrationContext) {
-        CloudIntegrationErrorReceivedEventImpl errorEvent = new CloudIntegrationErrorReceivedEventImpl(
-            integrationContext,
-            "TRIGGER_FAILURE",
-            triggerException.getMessage(),
-            triggerException.getClass().getName(),
-            Arrays.asList(triggerException.getStackTrace())
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(
+            new IntegrationRequestImpl(integrationContext),
+            triggerException
         );
-
-        integrationErrorConsumer.send(MessageBuilder.withPayload(errorEvent).build());
+        Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationError).build();
+        streamBridge.send(INTEGRATION_ERRORS_CONSUMER, message);
     }
 
     private Command<?> getCleanupCmd(
