@@ -91,7 +91,6 @@
         <artifactId>querydsl-apt</artifactId>
         <version>${openfeign.querydsl.version}</version>
         <scope>provided</scope>
-        <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.openfeign.querydsl</groupId>
@@ -102,7 +101,6 @@
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
         <version>${openfeign.querydsl.version}</version>
-        <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.classgraph</groupId>

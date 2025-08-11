@@ -72,7 +72,6 @@
       <artifactId>querydsl-apt</artifactId>
       <version>${openfeign.querydsl.version}</version>
       <scope>provided</scope>
-      <classifier>jakarta</classifier>
     </dependency>
     <dependency>
       <groupId>io.github.openfeign.querydsl</groupId>
