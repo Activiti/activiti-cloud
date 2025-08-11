@@ -21,6 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,7 @@ import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
@@ -74,6 +76,30 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ApplicationContext applicationContext;
+
+    @Test
+    void receive_shouldRetryWhenOptimisticLockingExceptionIsThrown() {
+        //given
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        List<Execution> executions = Collections.singletonList(buildExecutionEntity());
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        // Instruct the mock to throw an exception on the first call, then succeed on the second
+        when(managementService.executeCommand(any(CompositeCommand.class)))
+            .thenThrow(new ActivitiOptimisticLockingException("Optimistic lock"))
+            .thenReturn(null); // Use thenReturn for non-void methods
+
+        //when
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        //then
+        // Verify that executeCommand was called twice (initial attempt + one retry)
+        verify(managementService, times(2)).executeCommand(any(CompositeCommand.class));
+    }
 
     @Test
     void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {

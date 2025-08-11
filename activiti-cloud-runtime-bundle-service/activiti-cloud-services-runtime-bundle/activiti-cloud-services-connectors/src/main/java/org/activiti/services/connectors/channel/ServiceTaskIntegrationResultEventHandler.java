@@ -81,7 +81,10 @@ public class ServiceTaskIntegrationResultEventHandler {
     @Retryable(
         retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
+        backoff = @Backoff(
+            delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:50}",
+            multiplierExpression = "${activiti.cloud.integration.result.retry.backoff.multiplier:2}"
+        )
     )
     @Transactional
     public void receive(IntegrationResult integrationResult) {
@@ -101,7 +104,8 @@ public class ServiceTaskIntegrationResultEventHandler {
 
         if (executions.isEmpty()) {
             LOGGER.warn(
-                "No task is in this RB is waiting for integration result with execution id `{}`, flow node id `{}`. The integration result for the integration context `{}` will be ignored.",
+                "No task is in this RB is waiting for integration result with execution id `{}`, flow node id `{}`. " +
+                "The integration result for the integration context `{}` will be ignored.",
                 integrationContext.getExecutionId(),
                 integrationContext.getClientId(),
                 integrationContext.getId()
