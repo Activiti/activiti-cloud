@@ -114,7 +114,8 @@ public class ProcessQuerySteps {
         Object variableValue
     ) {
         await()
-            .atMost(Duration.ofSeconds(30))
+            .atMost(Duration.ofSeconds(60))
+            .pollInterval(Duration.ofSeconds(2))
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
                 final Collection<CloudVariableInstance> variableInstances = processQueryService

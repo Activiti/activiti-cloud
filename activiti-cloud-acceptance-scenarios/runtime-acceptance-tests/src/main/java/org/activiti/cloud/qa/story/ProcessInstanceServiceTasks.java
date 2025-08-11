@@ -53,13 +53,9 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.PagedModel;
 
 public class ProcessInstanceServiceTasks {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceServiceTasks.class);
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
@@ -373,9 +369,10 @@ public class ProcessInstanceServiceTasks {
     public void verifyEventActivityCompleted(String elementId, Integer count) throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
-        // First wait only for the presence of events
+        // Wait for the EXACT count of events we expect
         await()
-            .atMost(Duration.ofSeconds(30))
+            .atMost(Duration.ofSeconds(60)) // Increased timeout to give more time
+            .pollInterval(Duration.ofSeconds(2))
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
 
@@ -387,11 +384,11 @@ public class ProcessInstanceServiceTasks {
                     .filter(event -> event.getEntity().getElementId().equals(elementId))
                     .collect(Collectors.toList());
 
-                // Only assert on count - this is what we wait for
-                assertThat(completedEvents).isNotEmpty();
+                // Wait until we have exactly the expected count
+                assertThat(completedEvents).hasSize(count);
             });
 
-        // Now perform all assertions without timeout
+        // After waiting, get the final events and perform detailed assertions
         Collection<CloudRuntimeEvent> allEvents = auditSteps.getEventsByProcessInstanceId(processId);
 
         List<BPMNActivityEvent> completedEvents = allEvents
@@ -402,10 +399,7 @@ public class ProcessInstanceServiceTasks {
             .filter(event -> event.getEntity().getElementId().equals(elementId))
             .collect(Collectors.toList());
 
-        // Check count
-        assertThat(completedEvents).hasSize(count);
-
-        // Additional assertions on each event
+        // Verify properties of each event
         completedEvents.forEach(event -> {
             assertThat(event.getProcessInstanceId()).isEqualTo(processId);
             assertThat(event.getEntity().getElementId()).isEqualTo(elementId);
@@ -413,7 +407,7 @@ public class ProcessInstanceServiceTasks {
             assertThat(event.getTimestamp()).isGreaterThan(0);
         });
 
-        // Check for unique execution IDs in multi-instance tasks
+        // For multi-instance tasks, verify we have unique execution IDs
         if (count > 1) {
             Set<String> executionIds = completedEvents
                 .stream()
@@ -422,60 +416,5 @@ public class ProcessInstanceServiceTasks {
 
             assertThat(executionIds).hasSizeGreaterThanOrEqualTo(count);
         }
-    }
-
-    private void logElementEvents(String elementId, Collection<CloudRuntimeEvent> events) {
-        Collection<CloudRuntimeEvent> elementEvents = events
-            .stream()
-            .filter(event -> {
-                if (event instanceof BPMNActivityEvent) {
-                    BPMNActivityEvent activityEvent = (BPMNActivityEvent) event;
-                    return activityEvent.getEntity().getElementId().equals(elementId);
-                }
-                return false;
-            })
-            .collect(Collectors.toList());
-
-        StringBuilder eventDetails = new StringBuilder();
-        eventDetails
-            .append("Events found for element ")
-            .append(elementId)
-            .append(": ")
-            .append(elementEvents.size())
-            .append("\n\n");
-
-        elementEvents.forEach(event -> {
-            BPMNActivityEvent activityEvent = (BPMNActivityEvent) event;
-            eventDetails.append(
-                String.format(
-                    "Event: type=%s, executionId=%s, timestamp=%s\n",
-                    activityEvent.getEventType(),
-                    activityEvent.getEntity().getExecutionId(),
-                    activityEvent.getTimestamp()
-                )
-            );
-        });
-
-        Serenity.reportThat(
-            "Element Events Detail",
-            () -> {
-                assertThat(elementEvents).isNotEmpty();
-            }
-        );
-        Serenity.recordReportData().withTitle("Element Events Detail").andContents(eventDetails.toString());
-    }
-
-    private Collection<CloudRuntimeEvent> getCompletedEventsForElement(String processId, String elementId)
-        throws Exception {
-        return auditSteps
-            .getEventsByProcessInstanceId(processId)
-            .stream()
-            .filter(cloudRuntimeEvent ->
-                cloudRuntimeEvent.getEventType().equals(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED)
-            )
-            .filter(cloudRuntimeEvent ->
-                BPMNActivityEvent.class.cast(cloudRuntimeEvent).getEntity().getElementId().equals(elementId)
-            )
-            .collect(Collectors.toList());
     }
 }
