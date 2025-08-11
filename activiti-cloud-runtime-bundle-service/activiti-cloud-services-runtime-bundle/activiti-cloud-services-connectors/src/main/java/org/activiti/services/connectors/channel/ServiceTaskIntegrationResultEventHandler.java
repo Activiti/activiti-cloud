@@ -18,21 +18,17 @@ package org.activiti.services.connectors.channel;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
-import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
@@ -42,7 +38,8 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServiceTaskIntegrationResultEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultEventHandler.class);
-    private static final String ERROR_VARIABLE_NAME = "integrationError";
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
@@ -58,7 +54,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
-    private final ApplicationContext applicationContext;
+    private final MessageChannel integrationErrorConsumer;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -67,7 +63,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ApplicationContext applicationContext
+        MessageChannel integrationErrorConsumer
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -75,7 +71,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
-        this.applicationContext = applicationContext;
+        this.integrationErrorConsumer = integrationErrorConsumer;
     }
 
     @Retryable(
@@ -83,7 +79,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
-    @Transactional
+    @Transactional(propagation = REQUIRES_NEW)
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
@@ -156,69 +152,20 @@ public class ServiceTaskIntegrationResultEventHandler {
                 execution.getId(),
                 triggerException
             );
-            handleTriggerFailure(triggerException, integrationContext, execution, integrationContextEntity);
+            handleTriggerFailure(triggerException, integrationContext);
         }
     }
 
-    private ServiceTaskIntegrationResultEventHandler getSelf() {
-        return applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class);
-    }
-
-    private void handleTriggerFailure(
-        Exception triggerException,
-        IntegrationContext integrationContext,
-        ExecutionEntity execution,
-        IntegrationContextEntity integrationContextEntity
-    ) {
-        IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
-
-        Command<?> propagateErrorCmd = CompositeCommand.of(
-            new PropagateCloudBpmnErrorCmd(integrationError, execution),
-            new DeleteIntegrationContextCmd(integrationContextEntity),
-            new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            )
+    private void handleTriggerFailure(Exception triggerException, IntegrationContext integrationContext) {
+        CloudIntegrationErrorReceivedEventImpl errorEvent = new CloudIntegrationErrorReceivedEventImpl(
+            integrationContext,
+            "TRIGGER_FAILURE",
+            triggerException.getMessage(),
+            triggerException.getClass().getName(),
+            Arrays.asList(triggerException.getStackTrace())
         );
 
-        try {
-            managementService.executeCommand(propagateErrorCmd);
-        } catch (Exception propagationException) {
-            LOGGER.error(
-                "Could not propagate BPMN error for execution '{}'. Setting an error variable on the execution.",
-                execution.getId(),
-                propagationException
-            );
-            getSelf()
-                .handlePropagationFailure(propagationException, integrationError, execution, integrationContextEntity);
-        }
-    }
-
-    @Transactional(propagation = REQUIRES_NEW)
-    public void handlePropagationFailure(
-        Exception propagationException,
-        IntegrationErrorImpl integrationError,
-        ExecutionEntity execution,
-        IntegrationContextEntity integrationContextEntity
-    ) {
-        Map<String, Object> errorVariable = Collections.singletonMap(
-            ERROR_VARIABLE_NAME,
-            "BPMN error propagation failed: " + propagationException.getMessage()
-        );
-
-        Command<?> finalErrorHandlingCmd = CompositeCommand.of(
-            new SetExecutionVariablesCmd(execution.getId(), errorVariable, false),
-            new DeleteIntegrationContextCmd(integrationContextEntity),
-            new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            )
-        );
-
-        managementService.executeCommand(finalErrorHandlingCmd);
+        integrationErrorConsumer.send(MessageBuilder.withPayload(errorEvent).build());
     }
 
     private Command<?> getCleanupCmd(

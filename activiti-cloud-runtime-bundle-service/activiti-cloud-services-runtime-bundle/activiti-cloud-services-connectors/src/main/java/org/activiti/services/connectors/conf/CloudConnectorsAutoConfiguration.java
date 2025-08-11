@@ -43,6 +43,7 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEvent
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -51,6 +52,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.retry.annotation.EnableRetry;
 
 @AutoConfiguration
@@ -70,7 +72,7 @@ public class CloudConnectorsAutoConfiguration {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ApplicationContext applicationContext
+        @Qualifier("integrationErrorConsumer") MessageChannel integrationErrorConsumer
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -79,7 +81,7 @@ public class CloudConnectorsAutoConfiguration {
             managementService,
             processEngineEventsAggregator,
             variablesPropagator,
-            applicationContext
+            integrationErrorConsumer
         );
     }
 
@@ -166,7 +168,8 @@ public class CloudConnectorsAutoConfiguration {
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
         // of DefaultServiceTaskBehavior will not impact the constructor of MQServiceTaskBehavior.
         // LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME will be injected in MQServiceTaskBehavior;
-        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud environment:
+        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud
+        // environment:
         // MQServiceTaskBehavior will replace it for cloud environment.
         return new DefaultServiceTaskBehavior(applicationContext, integrationContextBuilder, variablesPropagator);
     }
