@@ -85,6 +85,16 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>io.github.openfeign.querydsl</groupId>
+      <artifactId>querydsl-core</artifactId>
+      <version>${openfeign.querydsl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.openfeign.querydsl</groupId>
+      <artifactId>querydsl-jpa</artifactId>
+      <version>${openfeign.querydsl.version}</version>
+    </dependency>
+    <dependency>
       <groupId>jakarta.inject</groupId>
       <artifactId>jakarta.inject-api</artifactId>
       <version>${jakarta.inject-api.version}</version>
@@ -185,6 +195,7 @@
             <path>
               <groupId>jakarta.persistence</groupId>
               <artifactId>jakarta.persistence-api</artifactId>
+              <version>3.1.0</version>
             </path>
             <path>
               <groupId>org.hibernate</groupId>
