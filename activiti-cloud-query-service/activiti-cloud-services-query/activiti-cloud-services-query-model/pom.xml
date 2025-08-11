@@ -182,6 +182,11 @@
               <version>3.1.0</version>
             </path>
             <path>
+              <groupId>javax.persistence</groupId>
+              <artifactId>javax.persistence-api</artifactId>
+              <version>2.2</version>
+            </path>
+            <path>
               <groupId>org.hibernate</groupId>
               <artifactId>hibernate-jpamodelgen</artifactId>
               <version>6.5.2.Final</version>
