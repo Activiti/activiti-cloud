@@ -436,6 +436,9 @@ public class ProcessInstanceServiceTasks {
             );
         });
 
+        Serenity.reportThat("Element Events Detail", () -> {
+            assertThat(elementEvents).isNotEmpty();
+        });
         Serenity.recordReportData().withTitle("Element Events Detail").andContents(eventDetails.toString());
     }
 
