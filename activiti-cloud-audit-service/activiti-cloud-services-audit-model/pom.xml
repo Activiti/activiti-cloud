@@ -183,6 +183,10 @@
               <version>${mysema-commons-lang.version}</version>
             </path>
             <path>
+              <groupId>jakarta.persistence</groupId>
+              <artifactId>jakarta.persistence-api</artifactId>
+            </path>
+            <path>
               <groupId>org.hibernate</groupId>
               <artifactId>hibernate-jpamodelgen</artifactId>
               <version>6.5.2.Final</version>
