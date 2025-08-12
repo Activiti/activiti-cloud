@@ -11,6 +11,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <properties>
+    <openfeign.querydsl.version>5.6.1</openfeign.querydsl.version>
     <graphql-jpa-query.version>1.2.15</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
@@ -102,6 +103,7 @@
         <groupId>io.github.openfeign.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
         <version>${openfeign.querydsl.version}</version>
+        <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>io.github.classgraph</groupId>
@@ -114,17 +116,6 @@
         <version>${graphql-jpa-query.version}</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.inject</groupId>
-        <artifactId>jakarta.inject-api</artifactId>
-        <version>${jakarta.inject-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.mysema.commons</groupId>
-        <artifactId>mysema-commons-lang</artifactId>
-        <version>${mysema-commons-lang.version}</version>
-        <scope>runtime</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
