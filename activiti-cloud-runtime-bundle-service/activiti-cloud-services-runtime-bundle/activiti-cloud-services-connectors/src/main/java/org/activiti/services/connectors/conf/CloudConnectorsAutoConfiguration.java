@@ -69,8 +69,7 @@ public class CloudConnectorsAutoConfiguration {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator,
-        StreamBridge streamBridge
+        VariablesPropagator variablesPropagator
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -78,8 +77,7 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties,
             managementService,
             processEngineEventsAggregator,
-            variablesPropagator,
-            streamBridge
+            variablesPropagator
         );
     }
 
