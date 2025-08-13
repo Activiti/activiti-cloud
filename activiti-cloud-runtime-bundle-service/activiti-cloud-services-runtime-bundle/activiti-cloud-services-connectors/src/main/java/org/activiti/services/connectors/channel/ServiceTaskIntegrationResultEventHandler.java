@@ -21,9 +21,13 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -68,8 +72,9 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     @Retryable(
-        value = ActivitiOptimisticLockingException.class,
+        retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
+        noRetryFor = ActivitiException.class,
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
     @Transactional(propagation = REQUIRES_NEW)
@@ -125,7 +130,27 @@ public class ServiceTaskIntegrationResultEventHandler {
                 )
             );
 
-            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+            try {
+                managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+            } catch (Exception triggerException) {
+                String message =
+                    "Error processing integration result for integration context " + integrationContext.getId();
+                LOGGER.error(message, triggerException);
+
+                IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
+                IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
+
+                managementService.executeCommand(
+                    CompositeCommand.of(
+                        new DeleteIntegrationContextCmd(integrationContextEntity),
+                        new AggregateIntegrationErrorReceivedEventCmd(
+                            integrationError,
+                            runtimeBundleProperties,
+                            processEngineEventsAggregator
+                        )
+                    )
+                );
+            }
         }
     }
 }
