@@ -66,8 +66,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -76,8 +76,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -97,6 +97,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/v1/tasks/count": {
+      "post": {
+        "tags": [
+          "task-controller"
+        ],
+        "summary": "Count tasks",
+        "operationId": "countTasks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -168,8 +244,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -178,8 +254,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -199,6 +275,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/v1/process-instances/count": {
+      "post": {
+        "tags": [
+          "process-instance-controller"
+        ],
+        "summary": "Count process instances",
+        "operationId": "countProcessInstances",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -597,8 +749,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -607,8 +759,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -999,8 +1151,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1009,8 +1161,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -1348,8 +1500,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1358,8 +1510,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -1450,8 +1602,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1460,8 +1612,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -1481,6 +1633,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/tasks/count": {
+      "post": {
+        "tags": [
+          "task-admin-controller"
+        ],
+        "summary": "Count tasks",
+        "operationId": "countTasks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -1772,8 +2000,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1782,8 +2010,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -2087,8 +2315,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2097,8 +2325,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -2367,8 +2595,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2377,8 +2605,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -2469,8 +2697,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2479,8 +2707,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -2500,6 +2728,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/process-instances/count": {
+      "post": {
+        "tags": [
+          "process-instance-admin-controller"
+        ],
+        "summary": "Count process instances",
+        "operationId": "searchProcessInstances",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -2898,8 +3202,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2908,8 +3212,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3013,8 +3317,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3023,8 +3327,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3087,8 +3391,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3097,8 +3401,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3161,8 +3465,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3171,8 +3475,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3241,8 +3545,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3251,8 +3555,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3569,8 +3873,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3579,8 +3883,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3643,8 +3947,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3653,8 +3957,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3772,8 +4076,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3782,8 +4086,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -3886,8 +4190,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3896,8 +4200,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4219,8 +4523,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4229,8 +4533,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4293,8 +4597,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4303,8 +4607,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4444,8 +4748,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4454,8 +4758,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4518,8 +4822,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4528,8 +4832,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4626,8 +4930,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4636,8 +4940,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4741,8 +5045,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4751,8 +5055,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4815,8 +5119,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4825,8 +5129,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4889,8 +5193,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4899,8 +5203,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -4969,8 +5273,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4979,8 +5283,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5099,8 +5403,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5109,8 +5413,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5173,8 +5477,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5183,8 +5487,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5247,8 +5551,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5257,8 +5561,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5321,8 +5625,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5331,8 +5635,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5450,8 +5754,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5460,8 +5764,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5550,8 +5854,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5560,8 +5864,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5682,8 +5986,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5692,8 +5996,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -5756,8 +6060,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5766,8 +6070,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -6033,8 +6337,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6043,8 +6347,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -6197,8 +6501,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6207,8 +6511,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -6271,8 +6575,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6281,8 +6585,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -6379,8 +6683,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6389,8 +6693,8 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -6701,10 +7005,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -6722,14 +7026,14 @@
           "type": {
             "type": "string"
           },
+          "taskVariable": {
+            "type": "boolean"
+          },
           "taskId": {
             "type": "string"
           },
           "processInstanceId": {
             "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance_ProcessVariables"
@@ -6807,6 +7111,12 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
@@ -6814,22 +7124,16 @@
             },
             "uniqueItems": true
           },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "appName": {
             "type": "string"
           },
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -6858,12 +7162,12 @@
           "standalone": {
             "type": "boolean"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "description": {
             "type": "string"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date-time"
           },
           "status": {
             "type": "string",
@@ -6876,10 +7180,31 @@
               "DELETED"
             ]
           },
-          "processInstanceId": {
+          "formKey": {
             "type": "string"
           },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "completedBy": {
+            "type": "string"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6894,38 +7219,17 @@
               "type": "string"
             }
           },
+          "processDefinitionId": {
+            "type": "string"
+          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "assignee": {
-            "type": "string"
-          },
           "parentTaskId": {
             "type": "string"
           },
-          "formKey": {
-            "type": "string"
-          },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "claimedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionId": {
             "type": "string"
           }
         },
@@ -7096,10 +7400,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7114,6 +7418,22 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7124,38 +7444,22 @@
               "COMPLETED"
             ]
           },
-          "parentId": {
-            "type": "string"
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "businessKey": {
-            "type": "string"
-          },
           "startDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionId": {
+          "businessKey": {
             "type": "string"
           },
           "initiator": {
             "type": "string"
           },
-          "processDefinitionKey": {
+          "processDefinitionId": {
             "type": "string"
           },
-          "processDefinitionName": {
-            "type": "string"
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "title": "QueryCloudProcessInstance_ProcessVariables"
@@ -7227,10 +7531,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7248,14 +7552,14 @@
           "type": {
             "type": "string"
           },
+          "taskVariable": {
+            "type": "boolean"
+          },
           "taskId": {
             "type": "string"
           },
           "processInstanceId": {
             "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance"
@@ -7327,10 +7631,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7348,14 +7652,14 @@
           "type": {
             "type": "string"
           },
+          "taskVariable": {
+            "type": "boolean"
+          },
           "taskId": {
             "type": "string"
           },
           "processInstanceId": {
             "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
           }
         },
         "title": "CloudVariableInstance_General"
@@ -7384,6 +7688,12 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
@@ -7391,22 +7701,16 @@
             },
             "uniqueItems": true
           },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "appName": {
             "type": "string"
           },
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7435,12 +7739,12 @@
           "standalone": {
             "type": "boolean"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "description": {
             "type": "string"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date-time"
           },
           "status": {
             "type": "string",
@@ -7453,10 +7757,31 @@
               "DELETED"
             ]
           },
-          "processInstanceId": {
+          "formKey": {
             "type": "string"
           },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "completedBy": {
+            "type": "string"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7471,38 +7796,17 @@
               "type": "string"
             }
           },
+          "processDefinitionId": {
+            "type": "string"
+          },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "assignee": {
-            "type": "string"
-          },
           "parentTaskId": {
             "type": "string"
           },
-          "formKey": {
-            "type": "string"
-          },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "claimedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionId": {
             "type": "string"
           }
         },
@@ -7533,10 +7837,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7551,6 +7855,22 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7561,38 +7881,22 @@
               "COMPLETED"
             ]
           },
-          "parentId": {
-            "type": "string"
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "businessKey": {
-            "type": "string"
-          },
           "startDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionId": {
+          "businessKey": {
             "type": "string"
           },
           "initiator": {
             "type": "string"
           },
-          "processDefinitionKey": {
+          "processDefinitionId": {
             "type": "string"
           },
-          "processDefinitionName": {
-            "type": "string"
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "title": "QueryCloudProcessInstance_General"
@@ -7654,10 +7958,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7675,14 +7979,14 @@
           "type": {
             "type": "string"
           },
+          "taskVariable": {
+            "type": "boolean"
+          },
           "taskId": {
             "type": "string"
           },
           "processInstanceId": {
             "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
           }
         },
         "title": "QueryCloudVariableInstance"
@@ -7769,10 +8073,10 @@
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7893,6 +8197,13 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7902,18 +8213,7 @@
               "ERROR"
             ]
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
           "businessKey": {
-            "type": "string"
-          },
-          "processDefinitionKey": {
             "type": "string"
           },
           "startedDate": {
@@ -7924,16 +8224,20 @@
             "type": "string",
             "format": "date-time"
           },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "appName": {
             "type": "string"
           },
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {
@@ -7945,19 +8249,19 @@
           "executionId": {
             "type": "string"
           },
+          "activityName": {
+            "type": "string"
+          },
           "activityType": {
             "type": "string"
           },
-          "activityName": {
+          "elementId": {
             "type": "string"
           },
           "processInstanceId": {
             "type": "string"
           },
           "processDefinitionId": {
-            "type": "string"
-          },
-          "elementId": {
             "type": "string"
           }
         },
@@ -8010,6 +8314,24 @@
               "INTEGRATION_ERROR_RECEIVED"
             ]
           },
+          "errorCode": {
+            "type": "string"
+          },
+          "requestDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resultDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "errorDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "errorClassName": {
+            "type": "string"
+          },
           "stackTraceElements": {
             "type": "array",
             "items": {
@@ -8043,59 +8365,47 @@
               }
             }
           },
-          "errorCode": {
-            "type": "string"
-          },
-          "requestDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resultDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "errorDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "errorClassName": {
-            "type": "string"
-          },
           "id": {
             "type": "string"
           },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
+          "parentProcessInstanceId": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
           },
-          "businessKey": {
-            "type": "string"
-          },
-          "processDefinitionId": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
           "processDefinitionKey": {
             "type": "string"
           },
-          "parentProcessInstanceId": {
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientName": {
             "type": "string"
           },
           "executionId": {
             "type": "string"
           },
-          "connectorType": {
+          "clientType": {
             "type": "string"
           },
-          "clientName": {
+          "appVersion": {
+            "type": "string"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "connectorType": {
             "type": "string"
           },
           "inBoundVariables": {
@@ -8110,22 +8420,16 @@
               "type": "object"
             }
           },
-          "clientId": {
-            "type": "string"
-          },
-          "clientType": {
-            "type": "string"
-          },
           "appName": {
             "type": "string"
           },
           "serviceName": {
             "type": "string"
           },
-          "serviceFullName": {
+          "serviceType": {
             "type": "string"
           },
-          "serviceType": {
+          "serviceFullName": {
             "type": "string"
           },
           "serviceVersion": {

@@ -244,4 +244,11 @@ public class TaskController extends TaskControllerAdvice {
                 .collect(Collectors.toList())
             : null;
     }
+
+    @Operation(summary = "Count tasks")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/count")
+    public Long countTasks(@RequestBody TaskSearchRequest taskSearchRequest) {
+        return taskControllerHelper.countTasksRestricted(taskSearchRequest);
+    }
 }
