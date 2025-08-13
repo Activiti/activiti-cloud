@@ -19,6 +19,7 @@ package org.activiti.services.connectors.channel;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -29,7 +30,9 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.BpmnError;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
@@ -174,16 +177,51 @@ public class ServiceTaskIntegrationResultEventHandler {
             cloudBpmnError
         );
 
-        CompositeCommand bpmnErrorPropagation = CompositeCommand.of(
-            new PropagateCloudBpmnErrorCmd(integrationError, execution),
-            new DeleteIntegrationContextCmd(integrationContextEntity),
-            new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            )
-        );
-        managementService.executeCommand(bpmnErrorPropagation);
+        try {
+            //letting the PropagateCloudBpmnErrorCmd handle the error propagation (default propagation)
+            managementService.executeCommand(
+                CompositeCommand.of(
+                    new PropagateCloudBpmnErrorCmd(integrationError, execution),
+                    new DeleteIntegrationContextCmd(integrationContextEntity),
+                    new AggregateIntegrationErrorReceivedEventCmd(
+                        integrationError,
+                        runtimeBundleProperties,
+                        processEngineEventsAggregator
+                    )
+                )
+            );
+        } catch (BpmnError unhandled) {
+            //it happens when there is no BPMN error handler in the process
+            Map<String, Object> localVars = Map.of(
+                "integrationErrorType",
+                unhandled.getClass().getName(),
+                "integrationErrorCode",
+                unhandled.getErrorCode(),
+                "integrationErrorMessage",
+                unhandled.getMessage()
+            );
+            Map<String, Object> piVars = Map.of(
+                "processStatus",
+                "FAILED",
+                "failedActivityId",
+                execution.getCurrentActivityId(),
+                "failureTime",
+                System.currentTimeMillis()
+            );
+            managementService.executeCommand(
+                CompositeCommand.of(
+                    new SetExecutionVariablesCmd(execution.getId(), localVars, true),
+                    new SetExecutionVariablesCmd(execution.getProcessInstanceId(), piVars, false),
+                    new DeleteIntegrationContextCmd(integrationContextEntity),
+                    new AggregateIntegrationErrorReceivedEventCmd(
+                        integrationError,
+                        runtimeBundleProperties,
+                        processEngineEventsAggregator
+                    )
+                )
+            );
+            // Rethrow or log depending on caller expectations
+        }
     }
 
     private Command<?> getCleanupCmd(
