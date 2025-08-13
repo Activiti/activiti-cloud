@@ -130,4 +130,9 @@ public class ProcessInstanceAdminService {
     public Page<ProcessInstanceEntity> search(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return processInstanceSearchService.searchUnrestricted(searchRequest, pageable);
     }
+
+    @Transactional(readOnly = true)
+    public Long count(ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceSearchService.countUnrestricted(searchRequest);
+    }
 }
