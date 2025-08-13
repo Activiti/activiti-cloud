@@ -190,13 +190,13 @@ public class ServiceTaskIntegrationResultEventHandler {
                     )
                 )
             );
-        } catch (BpmnError unhandled) {
+        } catch (Exception unhandled) {
             //it happens when there is no BPMN error handler in the process
             Map<String, Object> localVars = Map.of(
                 "integrationErrorType",
                 unhandled.getClass().getName(),
                 "integrationErrorCode",
-                unhandled.getErrorCode(),
+                "INTEGRATION_ERROR_RECEIVED",
                 "integrationErrorMessage",
                 unhandled.getMessage()
             );
