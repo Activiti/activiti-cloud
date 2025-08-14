@@ -20,6 +20,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -27,11 +28,11 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
+import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.interceptor.Command;
@@ -74,7 +75,6 @@ public class ServiceTaskIntegrationResultEventHandler {
     @Retryable(
         retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
-        noRetryFor = ActivitiException.class,
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
     @Transactional(propagation = REQUIRES_NEW)
@@ -86,14 +86,13 @@ public class ServiceTaskIntegrationResultEventHandler {
 
         if (integrationContextEntity != null) {
             List<Command<?>> commands = new ArrayList<>();
-
             commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
             String executionId = integrationContext.getExecutionId();
+            Execution execution = null;
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
-            if (executions.size() > 0) {
-                Execution execution = executions.get(0);
-
+            if (!executions.isEmpty()) {
+                execution = executions.get(0);
                 if (execution.getActivityId().equals(integrationContext.getClientId())) {
                     commands.add(
                         new TriggerCmd(
@@ -107,19 +106,17 @@ public class ServiceTaskIntegrationResultEventHandler {
                         "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
                         integrationContext.getClientId(),
                         integrationResult,
-                        execution.getId()
+                        executions.get(0).getId()
                     );
                 }
             } else {
-                String message =
-                    "No task is in this RB is waiting for integration result with execution id `" +
-                    executionId +
-                    ", flow node id `" +
-                    integrationContext.getClientId() +
-                    "`. The integration result for the integration context `" +
-                    integrationContext.getId() +
-                    "` will be ignored.";
-                LOGGER.warn(message);
+                LOGGER.warn(
+                    "No task is waiting for integration result with execution id `{}`, flow node id `{}`. " +
+                    "Integration context `{}` result will be ignored.",
+                    executionId,
+                    integrationContext.getClientId(),
+                    integrationContext.getId()
+                );
             }
 
             commands.add(
@@ -140,16 +137,45 @@ public class ServiceTaskIntegrationResultEventHandler {
                 IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
                 IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
 
-                managementService.executeCommand(
-                    CompositeCommand.of(
-                        new DeleteIntegrationContextCmd(integrationContextEntity),
-                        new AggregateIntegrationErrorReceivedEventCmd(
-                            integrationError,
-                            runtimeBundleProperties,
-                            processEngineEventsAggregator
+                List<Command<?>> errorCommands = new ArrayList<>();
+
+                if (execution != null) {
+                    // mark failure (local + process variables)
+                    errorCommands.add(
+                        new SetExecutionVariablesCmd(
+                            execution.getId(),
+                            Map.of(
+                                "integrationFailure",
+                                true,
+                                "failureActivityId",
+                                execution.getActivityId(),
+                                "failureMessage",
+                                integrationError.getErrorMessage()
+                            ),
+                            true
                         )
+                    );
+                    errorCommands.add(
+                        new SetExecutionVariablesCmd(
+                            execution.getProcessInstanceId(),
+                            Map.of("processStatus", "FAILED", "lastFailureTime", System.currentTimeMillis()),
+                            false
+                        )
+                    );
+                } else {
+                    LOGGER.warn("Skipping failure variable recording: execution `{}` no longer exists.", executionId);
+                }
+
+                errorCommands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
+                errorCommands.add(
+                    new AggregateIntegrationErrorReceivedEventCmd(
+                        integrationError,
+                        runtimeBundleProperties,
+                        processEngineEventsAggregator
                     )
                 );
+
+                managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
             }
         }
     }
