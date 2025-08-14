@@ -39,6 +39,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +54,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
+    private final ApplicationContext applicationContext;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -60,7 +62,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator
+        VariablesPropagator variablesPropagator,
+        ApplicationContext applicationContext
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -68,6 +71,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
+        this.applicationContext = applicationContext;
     }
 
     @Retryable(
@@ -138,7 +142,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                 );
                 IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
                 IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
-                handlePropagationFailure(integrationError, integrationContextEntity);
+                getSelf().handlePropagationFailure(integrationError, integrationContextEntity);
             }
         }
     }
@@ -158,5 +162,9 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         managementService.executeCommand(finalErrorHandlingCmd);
+    }
+
+    private ServiceTaskIntegrationResultEventHandler getSelf() {
+        return applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class);
     }
 }
