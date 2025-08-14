@@ -88,8 +88,8 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(3);
-        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
         assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
