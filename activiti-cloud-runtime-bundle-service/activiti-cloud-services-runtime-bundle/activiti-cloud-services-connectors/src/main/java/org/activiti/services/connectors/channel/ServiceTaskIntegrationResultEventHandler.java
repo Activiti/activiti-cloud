@@ -89,10 +89,9 @@ public class ServiceTaskIntegrationResultEventHandler {
             commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
             String executionId = integrationContext.getExecutionId();
-            Execution execution = null;
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
             if (!executions.isEmpty()) {
-                execution = executions.get(0);
+                Execution execution = executions.get(0);
                 if (execution.getActivityId().equals(integrationContext.getClientId())) {
                     commands.add(
                         new TriggerCmd(
@@ -134,21 +133,27 @@ public class ServiceTaskIntegrationResultEventHandler {
                     "Error processing integration result for integration context " + integrationContext.getId();
                 LOGGER.error(message, triggerException);
 
+                // Requery execution because state may have changed
+                Execution execAfterFailure = runtimeService
+                    .createExecutionQuery()
+                    .executionId(executionId)
+                    .singleResult();
+
                 IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
                 IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
 
                 List<Command<?>> errorCommands = new ArrayList<>();
 
-                if (execution != null) {
+                if (execAfterFailure != null) {
                     // mark failure (local + process variables)
                     errorCommands.add(
                         new SetExecutionVariablesCmd(
-                            execution.getId(),
+                            execAfterFailure.getId(),
                             Map.of(
                                 "integrationFailure",
                                 true,
                                 "failureActivityId",
-                                execution.getActivityId(),
+                                execAfterFailure.getActivityId(),
                                 "failureMessage",
                                 integrationError.getErrorMessage()
                             ),
@@ -157,7 +162,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                     );
                     errorCommands.add(
                         new SetExecutionVariablesCmd(
-                            execution.getProcessInstanceId(),
+                            execAfterFailure.getProcessInstanceId(),
                             Map.of("processStatus", "FAILED", "lastFailureTime", System.currentTimeMillis()),
                             false
                         )
@@ -166,7 +171,6 @@ public class ServiceTaskIntegrationResultEventHandler {
                     LOGGER.warn("Skipping failure variable recording: execution `{}` no longer exists.", executionId);
                 }
 
-                errorCommands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
                 errorCommands.add(
                     new AggregateIntegrationErrorReceivedEventCmd(
                         integrationError,
@@ -174,6 +178,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                         processEngineEventsAggregator
                     )
                 );
+                errorCommands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
                 managementService.executeCommand(CompositeCommand.of(errorCommands.toArray(Command[]::new)));
             }
