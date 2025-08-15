@@ -36,6 +36,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private int priority;
     private String processDefinitionId;
     private String processInstanceId;
+    private String rootProcessInstanceId;
     private String parentTaskId;
     private String formKey;
     private String completedBy;
@@ -190,6 +191,15 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     @Override
     public String getProcessInstanceId() {
         return processInstanceId;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId    ;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public void setProcessInstanceId(String processInstanceId) {
