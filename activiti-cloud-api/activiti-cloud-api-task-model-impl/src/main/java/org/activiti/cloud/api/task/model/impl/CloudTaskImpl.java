@@ -195,7 +195,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     @Override
     public String getRootProcessInstanceId() {
-        return rootProcessInstanceId    ;
+        return rootProcessInstanceId;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
