@@ -134,7 +134,11 @@ public class ServiceTaskIntegrationResultEventHandler {
 
             try {
                 managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
-            } catch (Exception triggerException) {
+            }
+            catch (ActivitiOptimisticLockingException e){
+                throw e;
+            }
+            catch (Exception triggerException) {
                 LOGGER.warn(
                     "Failed to update integration context {}. It might have been already deleted.",
                     integrationContext.getId(),
