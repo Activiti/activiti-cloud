@@ -16,8 +16,13 @@
 package org.activiti.services.connectors.channel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,10 +31,13 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.TriggerCmd;
@@ -38,16 +46,19 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceTaskIntegrationResultEventHandlerTest {
+class ServiceTaskIntegrationResultEventHandlerTest {
 
     private static final String EXECUTION_ID = "execId";
     private static final String ENTITY_ID = "entityId";
@@ -68,6 +79,101 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ManagementService managementService;
+
+    @Mock
+    private ApplicationContext applicationContext;
+
+    @BeforeEach
+    void configureSelfBean() {
+        // getSelf() looks up the bean; return the same handler (spy to verify internal call if needed)
+        lenient().when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(handler);
+    }
+
+    @Test
+    void receive_should_skipTriggerWhenActivityIdMismatch() {
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        Execution executionEntity = buildExecutionEntity();
+        when(executionEntity.getActivityId()).thenReturn("differentActivityId");
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(List.of(executionEntity));
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        verify(managementService).executeCommand(captor.capture());
+        CompositeCommand composite = captor.getValue();
+
+        // Expect only aggregate + delete
+        assertThat(composite.getCommands()).hasSize(2);
+        assertThat(composite.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+    }
+
+    @Test
+    void receive_should_bubbleOptimisticLockingExceptionForRetry() {
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        Execution executionEntity = buildExecutionEntity();
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(List.of(executionEntity));
+
+        ActivitiOptimisticLockingException ex = new ActivitiOptimisticLockingException("concurrent update");
+        doThrow(ex).when(managementService).executeCommand(any());
+
+        assertThatThrownBy(() ->
+                handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
+            )
+            .isSameAs(ex);
+    }
+
+    @Test
+    void receive_should_delegateGenericExceptionToHandlePropagationFailure() {
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        Execution executionEntity = buildExecutionEntity();
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(List.of(executionEntity));
+
+        RuntimeException generic = new RuntimeException("boom");
+        AtomicInteger callCount = new AtomicInteger(0);
+        doAnswer(invocation -> {
+                if (callCount.getAndIncrement() == 0) {
+                    throw generic; // First call fails
+                }
+                return null; // Subsequent calls succeed
+            })
+            .when(managementService)
+            .executeCommand(any());
+
+        // Spy handler to verify transactional error path invocation via self bean
+        ServiceTaskIntegrationResultEventHandler spyHandler = Mockito.spy(handler);
+        when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(spyHandler);
+        spyHandler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        verify(spyHandler).handlePropagationFailure(any(), eq(integrationContextEntity));
+    }
+
+    @Test
+    void handlePropagationFailure_should_buildErrorComposite() {
+        IntegrationContextEntityImpl entity = buildIntegrationContextEntity();
+
+        ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+
+        IntegrationErrorImpl error = mock(IntegrationErrorImpl.class);
+
+        handler.handlePropagationFailure(error, entity);
+
+        verify(managementService).executeCommand(captor.capture());
+        CompositeCommand composite = captor.getValue();
+        assertThat(composite.getCommands()).hasSize(2);
+        assertThat(composite.getCommands().get(0)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+        assertThat(composite.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+    }
 
     @Test
     public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
@@ -109,7 +215,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    public void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
+    void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
         //given
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
