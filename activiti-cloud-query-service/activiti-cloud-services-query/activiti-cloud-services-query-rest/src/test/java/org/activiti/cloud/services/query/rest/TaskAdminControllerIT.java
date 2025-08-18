@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -59,8 +60,13 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
         return "/admin/v1/tasks/search";
     }
 
+    @Override
+    protected String getCountEndpointHttpPost() {
+        return "/admin/v1/tasks/count";
+    }
+
     @Test
-    void should_returnTasks_unrestrictedTasks() {
+    void should_returnTasksAndCount_unrestrictedTasks() {
         String otherUser = "other-user";
 
         TaskEntity task1 = queryTestUtils.buildTask().withOwner(otherUser).buildAndSave();
@@ -78,5 +84,14 @@ class TaskAdminControllerIT extends AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId(), task3.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post("/admin/v1/tasks/count")
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 }

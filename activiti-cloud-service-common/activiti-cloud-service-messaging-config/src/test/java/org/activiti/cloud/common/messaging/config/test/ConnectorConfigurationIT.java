@@ -17,6 +17,8 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_RESULTS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,6 +77,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+        "spring.cloud.stream.bindings.integrationRequests.destination=rest-connector.GET,rest-connector.POST",
+        "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
     }
 )
@@ -182,6 +186,32 @@ public class ConnectorConfigurationIT {
         public MyErrorHandler myErrorHandler() {
             return new MyErrorHandler();
         }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.GET"
+        )
+        public Connector<?, ?> connectorGet() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("GetRequest");
+                return "GetResult";
+            };
+        }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.POST"
+        )
+        public Connector<?, ?> connectorPost() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("PostRequest");
+                return "PostResult";
+            };
+        }
     }
 
     @BeforeEach
@@ -218,6 +248,8 @@ public class ConnectorConfigurationIT {
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_D + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorGet" + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorPost" + REGISTRATION_NAME_SUFFIX)).isNotNull();
     }
 
     @Test
@@ -234,7 +266,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(condition)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
             );
     }
 
@@ -247,7 +279,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(expression)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
             );
     }
 
@@ -302,7 +334,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -322,7 +354,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(2000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply).isNull();
     }
 
@@ -339,7 +371,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -370,6 +402,54 @@ public class ConnectorConfigurationIT {
             .extracting(Throwable::getCause)
             .extracting(Throwable::getMessage)
             .isEqualTo("Test Audit Consumer Error");
+    }
+
+    @Test
+    public void testConnectorsDemultiplexGetRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("GetRequest")
+            .setHeader("connectorType", "rest-connector.GET")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.GET");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("GetResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
+    }
+
+    @Test
+    public void testConnectorsDemultiplexPostRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("PostRequest")
+            .setHeader("connectorType", "rest-connector.POST")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.POST");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("PostResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
     }
 
     private String resolveExpression(String value) {

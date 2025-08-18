@@ -83,4 +83,21 @@ public class ProcessInstanceSearchService {
         );
         return processInstances;
     }
+
+    @Transactional(readOnly = true)
+    public Long countRestricted(ProcessInstanceSearchRequest searchRequest) {
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restricted(
+            searchRequest,
+            securityManager.getAuthenticatedUserId()
+        );
+        return processInstanceRepository.count(restrictedSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countUnrestricted(ProcessInstanceSearchRequest searchRequest) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestricted(
+            searchRequest
+        );
+        return processInstanceRepository.count(unrestrictedSpecification);
+    }
 }

@@ -24,6 +24,7 @@ import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -56,6 +57,11 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
         return "/v1/process-instances/search";
     }
 
+    @Override
+    protected String getCountEndpoint() {
+        return "/v1/process-instances/count";
+    }
+
     @Test
     void should_return_RestrictedProcessInstances() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
@@ -73,6 +79,15 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body("_embedded.processInstances[0].id", equalTo(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(IsEqual.equalTo("1"));
     }
 
     @Test
@@ -106,5 +121,14 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(IsEqual.equalTo("2"));
     }
 }

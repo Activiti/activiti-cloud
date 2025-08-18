@@ -29,10 +29,12 @@ public @interface ConnectorBinding {
 
     String input() default "";
 
-    String condition() default "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}" +
+    String condition() default "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}" +
     " and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}";
 
     String outputHeader() default "resultDestination";
 
     int retry() default 0;
+  
+    String connectorType() default "";
 }

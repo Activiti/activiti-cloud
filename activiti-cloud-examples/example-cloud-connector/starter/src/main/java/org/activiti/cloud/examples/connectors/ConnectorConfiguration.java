@@ -19,12 +19,4 @@ package org.activiti.cloud.examples.connectors;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ConnectorConfiguration
-    implements
-        ExampleConnectorChannels,
-        HeadersConnectorChannels,
-        MoviesDescriptionConnectorChannels,
-        MultiInstanceConnector.Channels,
-        TestBpmnErrorConnector.Channels,
-        RestConnector.Channels,
-        TestErrorConnector.Channels {}
+public class ConnectorConfiguration implements ExampleConnectorChannels {}

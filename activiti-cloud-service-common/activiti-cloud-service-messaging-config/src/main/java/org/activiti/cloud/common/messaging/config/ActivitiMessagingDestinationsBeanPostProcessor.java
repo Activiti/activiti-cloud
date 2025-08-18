@@ -16,12 +16,21 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
+
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
@@ -29,18 +38,26 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
+    private final ActivitiCloudMessagingProperties messagingProperties;
+    private final FunctionBindingPropertySource functionBindingPropertySource;
+    private final StreamFunctionConfigurationProperties streamFunctionProperties;
 
     public ActivitiMessagingDestinationsBeanPostProcessor(
-        ActivitiMessagingDestinationTransformer destinationTransformer
+        ActivitiMessagingDestinationTransformer destinationTransformer,
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionBindingPropertySource functionBindingPropertySource,
+        StreamFunctionConfigurationProperties streamFunctionProperties
     ) {
         this.destinationTransformer = destinationTransformer;
+        this.messagingProperties = messagingProperties;
+        this.functionBindingPropertySource = functionBindingPropertySource;
+        this.streamFunctionProperties = streamFunctionProperties;
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (BindingServiceProperties.class.isInstance(bean)) {
-            BindingServiceProperties bindingServiceProperties = BindingServiceProperties.class.cast(bean);
-
+        if (bean instanceof BindingServiceProperties bindingServiceProperties) {
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
+            final var functionRouter = messagingProperties.getFunctionRouter();
 
             bindingServiceProperties
                 .getBindings()
@@ -53,6 +70,92 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                     log.warn("Configured destination '{}' for binding '{}'", destination, bindingName);
                 });
+
+            if (functionRouter.isEnabled()) {
+                final var functionRouterInput = new BindingProperties();
+
+                functionRouter
+                    .getFunctionRoutes()
+                    .stream()
+                    .filter(bindingServiceProperties.getBindings()::containsKey)
+                    .forEach(bindingName -> {
+                        var value = bindingServiceProperties.getBindings().remove(bindingName);
+                        functionRouter.destinations().put(bindingName, value.getDestination());
+
+                        log.warn(
+                            "Configured function route '{}' for destination '{}'",
+                            bindingName,
+                            value.getDestination()
+                        );
+
+                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(bindingName)) {
+                            bindingServiceProperties
+                                .getBindings()
+                                .entrySet()
+                                .stream()
+                                .filter(entry -> entry.getValue().getProducer() != null)
+                                .filter(entry ->
+                                    Objects.equals(entry.getValue().getDestination(), value.getDestination())
+                                )
+                                .forEach(entry -> {
+                                    var producer = entry.getValue().getProducer();
+                                    var excludedGroups = value.getGroup();
+                                    var producerGroups = producer.getRequiredGroups();
+                                    var requiredGroups = Stream
+                                        .of(producerGroups)
+                                        .filter(Predicate.not(excludedGroups::equals))
+                                        .toList();
+
+                                    producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
+
+                                    log.warn(
+                                        "Excluded producer required groups '{}' for binding '{}'",
+                                        excludedGroups,
+                                        entry.getKey()
+                                    );
+                                });
+                        }
+                    });
+
+                functionRouter
+                    .getRoutes()
+                    .keySet()
+                    .stream()
+                    .filter(Predicate.not(functionRouter::isFunctionRoute))
+                    .filter(functionRouter::isOverrideRequiredProducerGroup)
+                    .forEach(bindingName -> {
+                        Optional
+                            .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
+                            .map(BindingProperties::getProducer)
+                            .ifPresent(producer -> {
+                                var overrideGroups = functionRouter
+                                    .getRoutes()
+                                    .get(bindingName)
+                                    .getOverrideRequiredProducerGroups();
+                                producer.setRequiredGroups(overrideGroups.toArray(new String[] {}));
+
+                                log.warn(
+                                    "Override producer required groups '{}' for binding '{}'",
+                                    overrideGroups,
+                                    bindingName
+                                );
+                            });
+                    });
+
+                functionRouterInput.setDestination(
+                    functionRouter.destinations().values().stream().distinct().collect(Collectors.joining(","))
+                );
+                functionRouterInput.setGroup(functionRouter.getGroup());
+                functionRouterInput.setConsumer(functionRouter.getConsumer());
+
+                if (!functionRouter.destinations().isEmpty()) {
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
+
+                    log.warn("Configured function router binding '{}'", functionRouterInput);
+                } else {
+                    log.warn("Skipping function router configuration with empty destinations");
+                }
+            }
         }
 
         return bean;

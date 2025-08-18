@@ -22,7 +22,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -32,7 +31,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -42,7 +40,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -115,6 +112,82 @@
         ]
       }
     },
+    "/v1/tasks/count": {
+      "post": {
+        "tags": [
+          "task-controller"
+        ],
+        "summary": "Count tasks",
+        "operationId": "countTasks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
     "/v1/process-instances/search": {
       "post": {
         "tags": [
@@ -127,7 +200,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -137,7 +209,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -147,7 +218,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -205,6 +275,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/v1/process-instances/count": {
+      "post": {
+        "tags": [
+          "process-instance-controller"
+        ],
+        "summary": "Count process instances",
+        "operationId": "countProcessInstances",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -284,7 +430,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -294,7 +439,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -304,7 +448,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -680,7 +823,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -690,7 +832,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -700,7 +841,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -1418,7 +1558,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1428,7 +1567,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1438,7 +1576,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -1511,6 +1648,82 @@
         ]
       }
     },
+    "/admin/v1/tasks/count": {
+      "post": {
+        "tags": [
+          "task-admin-controller"
+        ],
+        "summary": "Count tasks",
+        "operationId": "countTasks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
     "/admin/v1/process-instances": {
       "get": {
         "tags": [
@@ -1537,7 +1750,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1547,7 +1759,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1557,7 +1768,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -1846,7 +2056,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1856,7 +2065,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1866,7 +2074,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -2446,7 +2653,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2456,7 +2662,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2466,7 +2671,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -2524,6 +2728,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/process-instances/count": {
+      "post": {
+        "tags": [
+          "process-instance-admin-controller"
+        ],
+        "summary": "Count process instances",
+        "operationId": "searchProcessInstances",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
                 }
               }
             }
@@ -2603,7 +2883,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2613,7 +2892,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2623,7 +2901,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -2991,7 +3268,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3001,7 +3277,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3011,7 +3286,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3349,7 +3623,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3359,7 +3632,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3369,7 +3641,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3742,7 +4013,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3752,7 +4022,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3762,7 +4031,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -3888,7 +4156,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3898,7 +4165,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3908,7 +4174,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4008,7 +4273,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4018,7 +4282,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4028,7 +4291,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4388,7 +4650,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4398,7 +4659,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4408,7 +4668,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4616,7 +4875,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4626,7 +4884,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4636,7 +4893,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -4740,7 +4996,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4750,7 +5005,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4760,7 +5014,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5084,7 +5337,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5094,7 +5346,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5104,7 +5355,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5441,7 +5691,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5451,7 +5700,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5461,7 +5709,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5573,7 +5820,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5583,7 +5829,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5593,7 +5838,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -5676,7 +5920,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5686,7 +5929,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -5696,7 +5938,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6162,7 +6403,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6172,7 +6412,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6182,7 +6421,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6390,7 +6628,6 @@
             "name": "maxItems",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6400,7 +6637,6 @@
             "name": "skipCount",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6410,7 +6646,6 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "style": "form",
             "schema": {
               "type": "string"
             }
@@ -6791,11 +7026,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -6876,15 +7111,18 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_ProcessVariables"
             },
             "uniqueItems": true
-          },
-          "processDefinitionName": {
-            "type": "string"
           },
           "appName": {
             "type": "string"
@@ -6904,12 +7142,6 @@
           "appVersion": {
             "type": "string"
           },
-          "standalone": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
@@ -6920,11 +7152,33 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "owner": {
             "type": "string"
           },
-          "assignee": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "standalone": {
+            "type": "boolean"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "formKey": {
             "type": "string"
@@ -6944,25 +7198,13 @@
           "completedBy": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "description": {
+          "businessKey": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "assignee": {
+            "type": "string"
+          },
+          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6977,7 +7219,7 @@
               "type": "string"
             }
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
@@ -6988,13 +7230,6 @@
             "type": "string"
           },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rootProcessInstanceId": {
             "type": "string"
           }
         },
@@ -7109,6 +7344,9 @@
           },
           "sort": {
             "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
+          },
+          "excludeByProcessCategoryName": {
+            "type": "string"
           }
         },
         "title": "ProcessInstanceSearchRequest_ProcessVariables"
@@ -7180,15 +7418,18 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
             "type": "string"
           },
-          "initiator": {
+          "processDefinitionName": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
+          "rootProcessInstanceId": {
+            "type": "string"
           },
           "parentId": {
             "type": "string"
@@ -7203,25 +7444,22 @@
               "COMPLETED"
             ]
           },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
           "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
-          },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_ProcessVariables"
@@ -7314,11 +7552,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -7358,84 +7596,6 @@
           }
         },
         "title": "ListResponseContentCloudVariableInstance"
-      },
-      "QueryCloudVariableInstance": {
-        "title": "QueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "appName": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
-          "serviceFullName": {
-            "type": "string"
-          },
-          "serviceVersion": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "value": {
-            "type": "object"
-          },
-          "type": {
-            "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
-          },
-          "taskId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "ephemeral": {
-            "type": "boolean"
-          }
-        }
-      },
-      "EntriesResponseContentQueryCloudVariableInstance": {
-        "title": "EntriesResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntryResponseContentQueryCloudVariableInstance"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetadata"
-          }
-        }
-      },
-      "EntryResponseContentQueryCloudVariableInstance": {
-        "title": "EntryResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/QueryCloudVariableInstance"
-          }
-        }
-      },
-      "ListResponseContentQueryCloudVariableInstance": {
-        "title": "ListResponseContentQueryCloudVariableInstance",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudVariableInstance"
-          }
-        }
       },
       "PaginationMetadata": {
         "type": "object",
@@ -7492,11 +7652,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -7528,15 +7688,18 @@
               ]
             }
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
           "processVariables": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_General"
             },
             "uniqueItems": true
-          },
-          "processDefinitionName": {
-            "type": "string"
           },
           "appName": {
             "type": "string"
@@ -7556,12 +7719,6 @@
           "appVersion": {
             "type": "string"
           },
-          "standalone": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
@@ -7572,11 +7729,33 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "owner": {
             "type": "string"
           },
-          "assignee": {
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "standalone": {
+            "type": "boolean"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "formKey": {
             "type": "string"
@@ -7596,25 +7775,13 @@
           "completedBy": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "description": {
+          "businessKey": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "assignee": {
+            "type": "string"
+          },
+          "processInstanceId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7629,7 +7796,7 @@
               "type": "string"
             }
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
@@ -7640,13 +7807,6 @@
             "type": "string"
           },
           "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rootProcessInstanceId": {
             "type": "string"
           }
         },
@@ -7695,15 +7855,18 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
             "type": "string"
           },
-          "initiator": {
+          "processDefinitionName": {
             "type": "string"
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
+          "rootProcessInstanceId": {
+            "type": "string"
           },
           "parentId": {
             "type": "string"
@@ -7718,25 +7881,22 @@
               "COMPLETED"
             ]
           },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
           "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
-          },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           }
         },
         "title": "QueryCloudProcessInstance_General"
@@ -7752,6 +7912,84 @@
           }
         },
         "title": "QueryCloudSubprocessInstance_General"
+      },
+      "EntriesResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudVariableInstance"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title": "EntriesResponseContentQueryCloudVariableInstance"
+      },
+      "EntryResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/QueryCloudVariableInstance"
+          }
+        },
+        "title": "EntryResponseContentQueryCloudVariableInstance"
+      },
+      "ListResponseContentQueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudVariableInstance"
+          }
+        },
+        "title": "ListResponseContentQueryCloudVariableInstance"
+      },
+      "QueryCloudVariableInstance": {
+        "type": "object",
+        "properties": {
+          "ephemeral": {
+            "type": "boolean"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          }
+        },
+        "title": "QueryCloudVariableInstance"
       },
       "EntriesResponseContentQueryCloudTask_General": {
         "type": "object",
@@ -7847,10 +8085,6 @@
           "appVersion": {
             "type": "string"
           },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          },
           "name": {
             "type": "string"
           },
@@ -7860,13 +8094,17 @@
           "id": {
             "type": "string"
           },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
           "formKey": {
             "type": "string"
           },
           "category": {
-            "type": "string"
-          },
-          "description": {
             "type": "string"
           }
         },
@@ -7908,13 +8146,13 @@
       "CloudApplication": {
         "type": "object",
         "properties": {
-          "version": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
           "id": {
+            "type": "string"
+          },
+          "version": {
             "type": "string"
           }
         },
@@ -7959,12 +8197,12 @@
           "id": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           },
-          "startedDate": {
-            "type": "string",
-            "format": "date-time"
+          "processDefinitionKey": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7975,7 +8213,10 @@
               "ERROR"
             ]
           },
-          "completedDate": {
+          "businessKey": {
+            "type": "string"
+          },
+          "startedDate": {
             "type": "string",
             "format": "date-time"
           },
@@ -7983,12 +8224,9 @@
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
           },
           "appName": {
             "type": "string"
@@ -8020,10 +8258,10 @@
           "elementId": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "processInstanceId": {
             "type": "string"
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           }
         },
@@ -8068,6 +8306,17 @@
           "errorMessage": {
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INTEGRATION_REQUESTED",
+              "INTEGRATION_RESULT_RECEIVED",
+              "INTEGRATION_ERROR_RECEIVED"
+            ]
+          },
+          "errorCode": {
+            "type": "string"
+          },
           "requestDate": {
             "type": "string",
             "format": "date-time"
@@ -8079,17 +8328,6 @@
           "errorDate": {
             "type": "string",
             "format": "date-time"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INTEGRATION_REQUESTED",
-              "INTEGRATION_RESULT_RECEIVED",
-              "INTEGRATION_ERROR_RECEIVED"
-            ]
-          },
-          "errorCode": {
-            "type": "string"
           },
           "errorClassName": {
             "type": "string"
@@ -8118,16 +8356,29 @@
                   "type": "integer",
                   "format": "int32"
                 },
-                "nativeMethod": {
-                  "type": "boolean"
-                },
                 "className": {
                   "type": "string"
+                },
+                "nativeMethod": {
+                  "type": "boolean"
                 }
               }
             }
           },
           "id": {
+            "type": "string"
+          },
+          "parentProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "rootProcessInstanceId": {
             "type": "string"
           },
           "clientId": {
@@ -8136,22 +8387,22 @@
           "clientName": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
-          },
-          "appVersion": {
+          "executionId": {
             "type": "string"
           },
           "clientType": {
             "type": "string"
           },
-          "executionId": {
+          "appVersion": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "businessKey": {
             "type": "string"
           },
           "processInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionId": {
             "type": "string"
           },
           "connectorType": {
@@ -8168,19 +8419,6 @@
             "additionalProperties": {
               "type": "object"
             }
-          },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "parentProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
           },
           "appName": {
             "type": "string"
