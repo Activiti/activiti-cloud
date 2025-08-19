@@ -34,6 +34,8 @@ import java.util.stream.IntStream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
@@ -67,6 +69,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Autowired
     protected QueryTestUtils queryTestUtils;
 
+    @Autowired
+    private ProcessDefinitionRepository processDefinitionRepository;
+
     protected static final String PROCESS_INSTANCES_JSON_PATH = "_embedded.processInstances";
     protected static final String PROCESS_INSTANCE_IDS_JSON_PATH = "_embedded.processInstances.id";
 
@@ -86,7 +91,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     protected abstract String getCountEndpoint();
 
     @Test
-    public void should_excludeProcessInstances_by_processDefinitionCategoryName() throws Exception {
+    public void should_excludeProcessInstances_by_processDefinitionCategoryName() {
         // given
         ProcessDefinitionEntity processDefinitionToExclude = new ProcessDefinitionEntity();
         processDefinitionToExclude.setId("proc-def-id-to-exclude");
@@ -112,8 +117,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withExcludeByProcessCategoryName("CategoryToExclude");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder();
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

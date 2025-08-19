@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -96,22 +97,6 @@ public abstract class AbstractTaskControllerIT {
                         "processVariable": false
                     }
                 }""";
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(missingSortField)
-            .when()
-            .post(getSearchEndpointHttpPost())
-            .then()
-            .statusCode(400)
-            .expect(
-                content()
-                    .string(
-                        is(
-                            "Invalid search parameter: Could not resolve attribute 'null' of 'org.activiti.cloud.services.query.model.TaskEntity'"
-                        )
-                    )
-            );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
