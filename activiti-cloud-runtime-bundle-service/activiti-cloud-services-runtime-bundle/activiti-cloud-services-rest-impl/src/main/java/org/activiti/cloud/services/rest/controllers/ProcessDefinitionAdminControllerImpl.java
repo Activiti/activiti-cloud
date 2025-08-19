@@ -80,8 +80,8 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
         Page<ProcessDefinition> page = processDefinitionAdminService.getProcessDefinitions(
             pageConverter.toAPIPageable(pageable),
             include,
+            excludedCategory,
             latestVersions
-            excludedCategory
         );
         return pagedCollectionModelAssembler.toModel(
             pageable,

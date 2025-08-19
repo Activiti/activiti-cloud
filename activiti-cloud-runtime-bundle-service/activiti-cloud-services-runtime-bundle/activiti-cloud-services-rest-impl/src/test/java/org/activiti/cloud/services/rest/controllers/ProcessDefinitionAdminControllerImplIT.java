@@ -234,7 +234,6 @@ class ProcessDefinitionAdminControllerImplIT {
         when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(processDefinitionPage);
 
-
         var extension = new Extension();
         var givenVariableDefinition = new VariableDefinition();
         givenVariableDefinition.setId("VAR_ID");
@@ -272,10 +271,9 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        
+
         when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(processDefinitionPage);
-
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
@@ -342,5 +340,27 @@ class ProcessDefinitionAdminControllerImplIT {
         processDefinition.setDescription(description);
         processDefinition.setVersion(version);
         return processDefinition;
+    }
+
+    @Test
+    void should_getProcessDefinitionsWithLatestVersions() throws Exception {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("procId");
+        processDefinition.setName("my process");
+        processDefinition.setDescription("this is my process");
+        processDefinition.setVersion(1);
+        String procId = "procId";
+        String processName = "my process";
+        String processDescription = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId, processName, processDescription, version));
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
+        this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersions=true").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 }

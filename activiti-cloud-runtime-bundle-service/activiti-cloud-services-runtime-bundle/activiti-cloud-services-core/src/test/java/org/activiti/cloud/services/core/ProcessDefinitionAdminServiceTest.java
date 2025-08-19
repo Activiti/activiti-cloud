@@ -82,7 +82,7 @@ class ProcessDefinitionAdminServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), false)
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), null, false)
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -107,7 +107,7 @@ class ProcessDefinitionAdminServiceTest {
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), include, false)
+            .getProcessDefinitions(Pageable.of(0, 50), include, null, false)
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -157,7 +157,7 @@ class ProcessDefinitionAdminServiceTest {
     }
 
     @Test
-    void should_getProcessDefinitionsWithLatestVersion_whenVersionsIsFalse() {
+    void should_getProcessDefinitionsWithLatestVersion_whenLatestVersionsIsTrue() {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("id");
         processDefinition.setVersion(2);
@@ -186,7 +186,7 @@ class ProcessDefinitionAdminServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), true)
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), null, true)
             .getContent();
 
         verify(processAdminRuntime).processDefinitions(any(Pageable.class), payloadCaptor.capture());
