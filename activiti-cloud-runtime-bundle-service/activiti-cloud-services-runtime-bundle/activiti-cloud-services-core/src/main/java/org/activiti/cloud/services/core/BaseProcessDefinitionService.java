@@ -86,9 +86,9 @@ public abstract class BaseProcessDefinitionService {
 
     protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayloadWithLatestVersion(
         String excludedCategory,
-        boolean latestVersions
+        boolean latestVersion
     ) {
-        return getGetProcessDefinitionsPayloadBuilder(excludedCategory).withLatestVersionOnly(latestVersions).build();
+        return getGetProcessDefinitionsPayloadBuilder(excludedCategory).withLatestVersionOnly(latestVersion).build();
     }
 
     protected boolean validateInput(String excludedCategory) {

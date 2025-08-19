@@ -73,7 +73,7 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
     @Override
     public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
         @RequestParam(required = false, defaultValue = "") List<String> include,
-        @RequestParam(required = false, defaultValue = "false") boolean latestVersions,
+        @RequestParam(required = false, defaultValue = "false") boolean latestVersion,
         String excludedCategory,
         Pageable pageable
     ) {
@@ -81,7 +81,7 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
             pageConverter.toAPIPageable(pageable),
             include,
             excludedCategory,
-            latestVersions
+            latestVersion
         );
         return pagedCollectionModelAssembler.toModel(
             pageable,

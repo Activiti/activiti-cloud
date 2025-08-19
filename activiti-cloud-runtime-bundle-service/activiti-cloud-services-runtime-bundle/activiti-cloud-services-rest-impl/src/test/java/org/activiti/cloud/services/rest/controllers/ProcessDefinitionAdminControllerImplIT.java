@@ -343,7 +343,7 @@ class ProcessDefinitionAdminControllerImplIT {
     }
 
     @Test
-    void should_getProcessDefinitionsWithLatestVersions() throws Exception {
+    void should_getProcessDefinitionsWithLatestVersion() throws Exception {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("procId");
         processDefinition.setName("my process");
@@ -360,7 +360,7 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList.size()
         );
         when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
-        this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersions=true").accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
     }
 }

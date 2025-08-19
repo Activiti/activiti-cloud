@@ -41,7 +41,7 @@ public interface ProcessDefinitionAdminController {
         ) List<String> include,
         @Parameter(
             description = "Specifies whether to include latest versions only (true) or all the versions (false) of each process definition"
-        ) @RequestParam(value = "latestVersions", required = false, defaultValue = "false") boolean latestVersions,
+        ) @RequestParam(value = "latestVersion", required = false, defaultValue = "false") boolean latestVersion,
         @Parameter(description = "Process definition category to exclude from results") @RequestParam(
             value = "excludedCategory",
             required = false

@@ -39,11 +39,11 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         Pageable pageable,
         List<String> include,
         String excludedCategory,
-        boolean latestVersions
+        boolean latestVersion
     ) {
         GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayloadWithLatestVersion(
             excludedCategory,
-            latestVersions
+            latestVersion
         );
         Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(
             pageable,

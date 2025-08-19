@@ -157,7 +157,7 @@ class ProcessDefinitionAdminServiceTest {
     }
 
     @Test
-    void should_getProcessDefinitionsWithLatestVersion_whenLatestVersionsIsTrue() {
+    void should_getProcessDefinitionsWithLatestVersion_whenLatestVersionIsTrue() {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("id");
         processDefinition.setVersion(2);
