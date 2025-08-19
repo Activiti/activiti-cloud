@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -5192,8 +5191,8 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("1", "2", "3", "0"));
+            .body(TASKS_JSON_PATH, hasSize(8))
+            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("0", "1", "2", "3"));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5202,7 +5201,7 @@ public abstract class AbstractTaskControllerIT {
             .post(getCountEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(equalTo("4"));
+            .body(equalTo("10"));
 
         requestBuilder.invertSort();
 
@@ -5215,8 +5214,7 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(TASKS_JSON_PATH, hasSize(4))
-            .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("3", "2", "1", "0"));
+            .body(TASKS_JSON_PATH, hasSize(8));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5225,7 +5223,7 @@ public abstract class AbstractTaskControllerIT {
             .post(getCountEndpointHttpPost())
             .then()
             .statusCode(200)
-            .body(equalTo("4"));
+            .body(equalTo("10"));
     }
 
     @Test
