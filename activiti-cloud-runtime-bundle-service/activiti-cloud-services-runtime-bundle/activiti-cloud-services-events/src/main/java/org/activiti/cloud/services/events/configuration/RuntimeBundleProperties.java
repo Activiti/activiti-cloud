@@ -39,6 +39,8 @@ public class RuntimeBundleProperties {
     @Value("${activiti.cloud.application.name:}")
     private String appName;
 
+    private RuntimeBundleMessagingProperties messaging;
+
     @Valid
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
 
@@ -92,6 +94,14 @@ public class RuntimeBundleProperties {
         this.eventsProperties = eventsProperties;
     }
 
+    public RuntimeBundleMessagingProperties getMessaging() {
+        return messaging;
+    }
+
+    public void setMessaging(RuntimeBundleMessagingProperties messaging) {
+        this.messaging = messaging;
+    }
+
     public static class RuntimeBundleEventsProperties {
 
         private boolean integrationAuditEventsEnabled = true;
@@ -113,6 +123,19 @@ public class RuntimeBundleProperties {
 
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
+        }
+    }
+
+    public static class RuntimeBundleMessagingProperties {
+
+        private String[] requiredAuditProducerGroups;
+
+        public String[] getRequiredAuditProducerGroups() {
+            return requiredAuditProducerGroups;
+        }
+
+        public void setRequiredAuditProducerGroups(String[] requiredAuditProducerGroups) {
+            this.requiredAuditProducerGroups = requiredAuditProducerGroups;
         }
     }
 }

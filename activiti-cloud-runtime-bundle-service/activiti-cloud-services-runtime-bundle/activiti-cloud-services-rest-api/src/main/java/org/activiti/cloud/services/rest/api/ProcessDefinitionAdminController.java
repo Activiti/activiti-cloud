@@ -42,6 +42,10 @@ public interface ProcessDefinitionAdminController {
         @Parameter(
             description = "Specifies whether to include latest versions only (true) or all the versions (false) of each process definition"
         ) @RequestParam(value = "latestVersions", required = false, defaultValue = "false") boolean latestVersions,
+        @Parameter(description = "Process definition category to exclude from results") @RequestParam(
+            value = "excludedCategory",
+            required = false
+        ) String excludedCategory,
         Pageable pageable
     );
 }
