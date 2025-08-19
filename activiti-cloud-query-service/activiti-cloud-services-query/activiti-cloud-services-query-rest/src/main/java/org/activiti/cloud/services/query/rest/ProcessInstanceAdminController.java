@@ -183,4 +183,11 @@ public class ProcessInstanceAdminController {
     ) {
         return processInstanceAdminService.findAllAppVersions(predicate);
     }
+
+    @Operation(summary = "Count process instances")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/count")
+    public Long searchProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceAdminService.count(searchRequest);
+    }
 }

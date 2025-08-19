@@ -228,4 +228,11 @@ public class TaskAdminController {
                 .collect(Collectors.toList())
             : null;
     }
+
+    @Operation(summary = "Count tasks")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/count")
+    public Long countTasks(@RequestBody TaskSearchRequest taskSearchRequest) {
+        return taskControllerHelper.countTasksUnrestricted(taskSearchRequest);
+    }
 }

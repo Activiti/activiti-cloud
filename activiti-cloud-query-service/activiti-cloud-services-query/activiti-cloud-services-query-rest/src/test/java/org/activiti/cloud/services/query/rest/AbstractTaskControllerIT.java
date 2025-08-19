@@ -70,6 +70,8 @@ public abstract class AbstractTaskControllerIT {
 
     protected abstract String getSearchEndpointHttpPost();
 
+    protected abstract String getCountEndpointHttpPost();
+
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
@@ -79,6 +81,30 @@ public abstract class AbstractTaskControllerIT {
     @AfterEach
     public void cleanUp() {
         queryTestUtils.cleanUp();
+    }
+
+    @Test
+    void should_return400_whenInvalidSearchParameterIsProvided() {
+        String missingSortField =
+            """
+                {
+                    "sort": {
+                        "direction": "ASC",
+                        "isProcessVariable": false,
+                        "processDefinitionKey": null,
+                        "type": "bigdecimal",
+                        "processVariable": false
+                    }
+                }""";
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(missingSortField)
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -142,6 +168,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("skipCount", 0)
             .param("maxItems", 2)
             .body(requestBuilder.buildJson())
@@ -151,6 +186,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -166,6 +210,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("skipCount", 4)
             .param("maxItems", 2)
             .body(requestBuilder.buildJson())
@@ -175,6 +228,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
     }
 
     @Test
@@ -208,6 +270,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
             .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -227,6 +298,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, contains("id0", "id2"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -257,6 +337,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -306,6 +395,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -343,6 +441,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASKS_JSON_PATH + "[0].processVariables", hasSize(1))
             .body(TASKS_JSON_PATH + "[0].processVariables[0].name", is(VAR_NAME));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -384,6 +491,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -425,6 +541,15 @@ public abstract class AbstractTaskControllerIT {
             .then()
             .statusCode(200)
             .body("page.totalElements", equalTo(0));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -466,6 +591,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -509,6 +643,15 @@ public abstract class AbstractTaskControllerIT {
             .then()
             .statusCode(200)
             .body("page.totalElements", equalTo(0));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -547,6 +690,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -582,6 +734,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -620,6 +781,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -656,6 +826,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -694,6 +873,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -735,6 +923,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -778,6 +975,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -812,6 +1018,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -855,6 +1070,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -890,6 +1114,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -934,6 +1167,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -953,6 +1195,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -989,6 +1240,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(
                 null,
@@ -1008,6 +1268,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1052,6 +1321,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -1071,6 +1349,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1101,6 +1388,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(
                 null,
@@ -1120,6 +1416,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1165,6 +1470,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -1191,6 +1505,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1228,6 +1551,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(42), FilterOperator.GREATER_THAN),
             new VariableFilter(
@@ -1248,6 +1580,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1293,6 +1634,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1329,6 +1679,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1374,6 +1733,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1412,6 +1780,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1456,6 +1833,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -1475,6 +1861,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1511,6 +1906,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             null,
             VAR_NAME,
@@ -1530,6 +1934,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1574,6 +1987,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -1593,6 +2015,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1629,6 +2060,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             null,
             VAR_NAME,
@@ -1648,6 +2088,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1694,6 +2143,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -1720,6 +2178,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1764,6 +2231,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(
                 null,
@@ -1790,6 +2266,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1833,6 +2318,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1868,6 +2362,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1911,6 +2414,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1947,6 +2459,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1993,6 +2514,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -2012,6 +2542,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2049,6 +2588,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             null,
             VAR_NAME,
@@ -2068,6 +2616,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2114,6 +2671,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -2133,6 +2699,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2170,6 +2745,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             null,
             VAR_NAME,
@@ -2189,6 +2773,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2236,6 +2829,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -2262,6 +2864,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2300,6 +2911,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(null, VAR_NAME, VariableType.DATE, "2024-08-02", FilterOperator.GREATER_THAN),
             new VariableFilter(null, VAR_NAME, VariableType.DATE, "2024-08-04", FilterOperator.LESS_THAN_OR_EQUAL)
@@ -2314,6 +2934,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2363,6 +2992,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2402,6 +3040,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2451,6 +3098,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2491,6 +3147,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2543,6 +3208,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -2562,6 +3236,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2603,6 +3286,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGte = new VariableFilter(
             null,
             VAR_NAME,
@@ -2622,6 +3314,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2674,6 +3375,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -2693,6 +3403,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2734,6 +3453,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterLte = new VariableFilter(
             null,
             VAR_NAME,
@@ -2753,6 +3481,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2803,6 +3540,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withProcessVariableFilters(
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -2829,6 +3575,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2877,6 +3632,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         taskSearchRequestBuilder.withTaskVariableFilters(
             new VariableFilter(
                 null,
@@ -2903,6 +3667,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2949,6 +3722,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         variableFilter =
             new VariableFilter(
                 PROCESS_DEFINITION_KEY,
@@ -2969,6 +3751,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -3006,6 +3797,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         variableFilter =
             new VariableFilter(null, VAR_NAME, VariableType.BOOLEAN, String.valueOf(false), FilterOperator.EQUALS);
 
@@ -3020,6 +3820,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -3039,6 +3848,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -3057,6 +3875,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -3076,6 +3903,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3096,6 +3932,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3116,6 +3961,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3135,6 +3989,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3155,6 +4018,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3175,6 +4047,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3205,6 +4086,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3225,6 +4115,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3245,6 +4144,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3265,6 +4173,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3285,6 +4202,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3305,6 +4231,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3325,6 +4260,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3345,6 +4289,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3365,6 +4318,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3385,6 +4347,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3405,6 +4376,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3435,6 +4415,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3465,6 +4454,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, containsInAnyOrder(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -3487,6 +4485,15 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(400);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(400)
+            .body(equalTo(""));
     }
 
     @Test
@@ -3531,6 +4538,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2, TASK_ID_3));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         taskSearchRequestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(new CloudRuntimeEntitySort("priority", Sort.Direction.DESC, false, null, null));
@@ -3544,6 +4560,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_3, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
 
         taskSearchRequestBuilder =
             new TaskSearchRequestBuilder()
@@ -3559,6 +4584,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2, TASK_ID_3));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         taskSearchRequestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(new CloudRuntimeEntitySort("lastModified", Sort.Direction.DESC, false, null, null));
@@ -3572,6 +4606,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_3, TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3621,6 +4664,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_3, TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3642,6 +4694,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_3, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3691,6 +4752,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_3, TASK_ID_2));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3712,6 +4782,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_3, TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3761,6 +4840,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_3, TASK_ID_2));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3782,6 +4870,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_3, TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3831,6 +4928,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2, TASK_ID_3));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3852,6 +4958,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_3, TASK_ID_2, TASK_ID_1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3907,6 +5022,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_1, TASK_ID_3));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3928,6 +5052,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(3))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_3, TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -3969,6 +5102,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_2, TASK_ID_1));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(
@@ -3990,12 +5132,21 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(2))
             .body(TASK_IDS_JSON_PATH, contains(TASK_ID_1, TASK_ID_2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     /**
      * From Postgres documentation: https://www.postgresql.org/docs/current/queries-order.html
-     *  By default, null values sort as if larger than any non-null value;
-     *  that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
+     * By default, null values sort as if larger than any non-null value;
+     * that is, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
      */
     @Test
     void should_returnTasks_sortedByProcessVariables_respectingDefaultNullBehaviour() {
@@ -4042,6 +5193,37 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(TASKS_JSON_PATH, hasSize(8))
             .body(TASK_IDS_JSON_PATH + "[0,1,2,3]", contains("0", "1", "2", "3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+
+        requestBuilder.invertSort();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("maxItems", 8)
+            .param("skipCount", 0)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(8));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
     }
 
     @Test
@@ -4057,6 +5239,15 @@ public abstract class AbstractTaskControllerIT {
             .then()
             .statusCode(400);
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+
         requestBuilder =
             new TaskSearchRequestBuilder()
                 .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
@@ -4068,6 +5259,15 @@ public abstract class AbstractTaskControllerIT {
             .post(getSearchEndpointHttpPost())
             .then()
             .statusCode(400);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -4115,6 +5315,15 @@ public abstract class AbstractTaskControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
             .param("maxItems", 4)
             .param("skipCount", 4)
             .when()
@@ -4131,6 +5340,15 @@ public abstract class AbstractTaskControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
             .param("maxItems", 4)
             .param("skipCount", 8)
             .when()
@@ -4143,6 +5361,15 @@ public abstract class AbstractTaskControllerIT {
             .body("page.totalPages", is(3))
             .body("page.size", is(4))
             .body("page.number", is(2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
     }
 
     @Test
@@ -4223,6 +5450,15 @@ public abstract class AbstractTaskControllerIT {
                 TASK_IDS_JSON_PATH,
                 contains(IntStream.range(0, 10).mapToObj(String::valueOf).toList().reversed().toArray())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
     }
 
     @Test
@@ -4309,6 +5545,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("maxItems", 2)
             .param("skipCount", 2)
             .body(requestBuilder.build())
@@ -4319,6 +5564,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains("1"))
             .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
 
         requestBuilder.invertSort();
 
@@ -4337,6 +5591,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("maxItems", 2)
             .param("skipCount", 2)
             .body(requestBuilder.build())
@@ -4347,6 +5610,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains("2"))
             .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -4438,6 +5710,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("maxItems", 2)
             .param("skipCount", 2)
             .body(requestBuilder.build())
@@ -4448,6 +5729,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains("1"))
             .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
 
         requestBuilder.invertSort();
 
@@ -4466,6 +5756,15 @@ public abstract class AbstractTaskControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("maxItems", 2)
             .param("skipCount", 2)
             .body(requestBuilder.build())
@@ -4476,6 +5775,15 @@ public abstract class AbstractTaskControllerIT {
             .body(TASKS_JSON_PATH, hasSize(1))
             .body(TASK_IDS_JSON_PATH, contains("2"))
             .body("page.totalElements", is(3));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
