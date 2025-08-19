@@ -17,6 +17,7 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.builders.GetProcessDefinitionsPayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.runtime.shared.query.Page;
@@ -69,13 +70,25 @@ public abstract class BaseProcessDefinitionService {
     }
 
     protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(String excludedCategory) {
+        var processDefinitionsPayloadBuilder = getGetProcessDefinitionsPayloadBuilder(excludedCategory);
+        return processDefinitionsPayloadBuilder.build();
+    }
+
+    private GetProcessDefinitionsPayloadBuilder getGetProcessDefinitionsPayloadBuilder(String excludedCategory) {
         var processDefinitionsPayloadBuilder = ProcessPayloadBuilder.processDefinitions();
         if (validateInput(excludedCategory)) {
             LOGGER.debug("Excluding process definitions with category: {}", excludedCategory);
 
             processDefinitionsPayloadBuilder.withProcessCategoryToExclude(excludedCategory);
         }
-        return processDefinitionsPayloadBuilder.build();
+        return processDefinitionsPayloadBuilder;
+    }
+
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayloadWithLatestVersion(
+        String excludedCategory,
+        boolean latestVersions
+    ) {
+        return getGetProcessDefinitionsPayloadBuilder(excludedCategory).withLatestVersionOnly(latestVersions).build();
     }
 
     protected boolean validateInput(String excludedCategory) {
