@@ -77,7 +77,8 @@ public class TaskCreatedEventHandlerTest {
         assertThat(taskEntity.getId()).isEqualTo(expectedEventEntity.getId());
         assertThat(taskEntity.getName()).isEqualTo(expectedEventEntity.getName());
         assertThat(taskEntity.getProcessInstanceId()).isEqualTo(expectedEventEntity.getProcessInstanceId());
-        assertThat(taskEntity.getTaskProcessRootProcessInstanceId()).isEqualTo(processInstanceEntity.getRootProcessInstanceId());
+        assertThat(taskEntity.getTaskProcessRootProcessInstanceId())
+            .isEqualTo(processInstanceEntity.getRootProcessInstanceId());
     }
 
     private ProcessInstanceEntity buildProcessInstanceEntity() {
