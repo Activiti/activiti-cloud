@@ -36,7 +36,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private int priority;
     private String processDefinitionId;
     private String processInstanceId;
-    private String rootProcessInstanceId;
+    private String taskProcessRootProcessInstanceId;
     private String parentTaskId;
     private String formKey;
     private String completedBy;
@@ -70,7 +70,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         priority = task.getPriority();
         processDefinitionId = task.getProcessDefinitionId();
         processInstanceId = task.getProcessInstanceId();
-        rootProcessInstanceId = task.getRootProcessInstanceId();
+        taskProcessRootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
         parentTaskId = task.getParentTaskId();
         formKey = task.getFormKey();
         status = task.getStatus();
@@ -195,12 +195,12 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
-    public String getRootProcessInstanceId() {
-        return rootProcessInstanceId;
+    public String getTaskProcessRootProcessInstanceId() {
+        return taskProcessRootProcessInstanceId;
     }
 
-    public void setRootProcessInstanceId(String rootProcessInstanceId) {
-        this.rootProcessInstanceId = rootProcessInstanceId;
+    public void setTaskProcessRootProcessInstanceId(String rootProcessInstanceId) {
+        this.taskProcessRootProcessInstanceId = rootProcessInstanceId;
     }
 
     public void setProcessInstanceId(String processInstanceId) {
@@ -326,8 +326,8 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             ", processInstanceId='" +
             processInstanceId +
             '\'' +
-            ", rootProcessInstanceId='" +
-            rootProcessInstanceId +
+            ", taskProcessRootProcessInstanceId='" +
+                taskProcessRootProcessInstanceId +
             '\'' +
             ", parentTaskId='" +
             parentTaskId +
@@ -368,7 +368,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             Objects.equals(dueDate, task.dueDate) &&
             Objects.equals(processDefinitionId, task.processDefinitionId) &&
             Objects.equals(processInstanceId, task.processInstanceId) &&
-            Objects.equals(rootProcessInstanceId, task.rootProcessInstanceId) &&
+            Objects.equals(taskProcessRootProcessInstanceId, task.taskProcessRootProcessInstanceId) &&
             Objects.equals(parentTaskId, task.parentTaskId) &&
             Objects.equals(formKey, task.formKey) &&
             Objects.equals(processDefinitionVersion, task.processDefinitionVersion) &&

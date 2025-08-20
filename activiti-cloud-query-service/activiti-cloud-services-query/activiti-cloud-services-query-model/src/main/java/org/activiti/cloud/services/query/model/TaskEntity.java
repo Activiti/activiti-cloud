@@ -266,6 +266,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
+        this.rootProcessInstanceId = task.getRootProcessInstanceId();
+
     }
 
     @Override
