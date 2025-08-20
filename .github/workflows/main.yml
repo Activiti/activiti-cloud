@@ -339,7 +339,6 @@ jobs:
     needs:
       - pre-checks
       - build
-      - delete-test-images
     if: ${{ github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
