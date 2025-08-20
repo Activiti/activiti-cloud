@@ -327,7 +327,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             processInstanceId +
             '\'' +
             ", taskProcessRootProcessInstanceId='" +
-                taskProcessRootProcessInstanceId +
+            taskProcessRootProcessInstanceId +
             '\'' +
             ", parentTaskId='" +
             parentTaskId +
