@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.api.task.model.impl.events;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents> {
+
+    private static Logger log = LoggerFactory.getLogger(CloudTaskEventImpl.class);
 
     public CloudTaskEventImpl() {}
 
@@ -35,6 +39,9 @@ public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, Tas
         setProcessDefinitionVersion(task.getProcessDefinitionVersion());
         setBusinessKey(task.getBusinessKey());
         setAppVersion(task.getAppVersion());
+        setParentProcessInstanceId(task.getTaskProcessRootProcessInstanceId());
+        log.debug("Flattened information for task event: id={}, processDefinitionId={}, processInstanceId={}, businessKey={}, appVersion={}, parentProcessInstanceId={}",
+                getEntityId(), getProcessDefinitionId(), getProcessInstanceId(), getBusinessKey(), getAppVersion(), getParentProcessInstanceId());
     }
 
     public CloudTaskEventImpl(String id, Long timestamp, Task task) {
