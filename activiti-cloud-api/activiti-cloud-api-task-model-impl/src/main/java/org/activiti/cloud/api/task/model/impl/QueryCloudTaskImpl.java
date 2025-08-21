@@ -55,7 +55,7 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     }
 
     @Override
-    public String getTaskProcessRootProcessInstanceId() {
+    public String getRootProcessInstanceId() {
         return rootProcessInstanceId;
     }
 

@@ -28,7 +28,7 @@ public interface QueryCloudTask extends CloudTask {
 
     Set<? extends CloudVariableInstance> getProcessVariables();
 
-    String getTaskProcessRootProcessInstanceId();
+    String getRootProcessInstanceId();
 
     enum TaskPermissions {
         VIEW,

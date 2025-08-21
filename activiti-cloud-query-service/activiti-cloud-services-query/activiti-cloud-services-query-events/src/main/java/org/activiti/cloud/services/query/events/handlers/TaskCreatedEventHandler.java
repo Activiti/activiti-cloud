@@ -60,7 +60,7 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
                                         processInstanceEntity.getProcessDefinitionName()
                                     );
                                     queryTaskEntity.setProcessVariables(processInstanceEntity.getVariables());
-                                    queryTaskEntity.setTaskProcessRootProcessInstanceId(
+                                    queryTaskEntity.setRootProcessInstanceId(
                                         processInstanceEntity.getRootProcessInstanceId()
                                     );
 

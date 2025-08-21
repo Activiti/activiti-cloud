@@ -81,7 +81,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String assignee;
     private String name;
     private String description;
-    private String taskProcessRootProcessInstanceId;
+    private String rootProcessInstanceId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
@@ -266,7 +266,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
-        this.taskProcessRootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
+        this.rootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
     }
 
     @Override
@@ -317,6 +317,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @Override
     public String getProcessInstanceId() {
         return processInstanceId;
+    }
+
+    @Override
+    public String getTaskProcessRootProcessInstanceId() {
+        return "";
     }
 
     @Override
@@ -642,12 +647,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
-    public String getTaskProcessRootProcessInstanceId() {
-        return taskProcessRootProcessInstanceId;
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
     }
 
-    public void setTaskProcessRootProcessInstanceId(String taskProcessRootProcessInstanceId) {
-        this.taskProcessRootProcessInstanceId = taskProcessRootProcessInstanceId;
+    public void setRootProcessInstanceId(String taskProcessRootProcessInstanceId) {
+        this.rootProcessInstanceId = taskProcessRootProcessInstanceId;
     }
 
     public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {
