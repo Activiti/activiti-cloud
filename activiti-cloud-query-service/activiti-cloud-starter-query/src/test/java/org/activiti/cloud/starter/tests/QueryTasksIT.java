@@ -418,7 +418,7 @@ public class QueryTasksIT {
                     .orElse(null);
 
                 assertThat(fetchedTask).isNotNull();
-                assertThat(fetchedTask.getTaskProcessRootProcessInstanceId())
+                assertThat(fetchedTask.getRootProcessInstanceId())
                     .isEqualTo(processInstance.getRootProcessInstanceId());
 
                 //when
@@ -427,7 +427,7 @@ public class QueryTasksIT {
                     responseEntity
                 );
                 assertThat(retrieveTaskEntity.getBody()).isNotNull();
-                assertThat(retrieveTaskEntity.getBody().getTaskProcessRootProcessInstanceId())
+                assertThat(retrieveTaskEntity.getBody().getRootProcessInstanceId())
                     .isEqualTo(processInstance.getRootProcessInstanceId());
             });
     }
