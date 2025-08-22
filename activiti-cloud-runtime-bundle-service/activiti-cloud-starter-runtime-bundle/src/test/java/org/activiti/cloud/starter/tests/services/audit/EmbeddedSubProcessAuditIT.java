@@ -327,7 +327,12 @@ public class EmbeddedSubProcessAuditIT {
                         ),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
-                        tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                        )
                     );
 
                 assertThat(receivedEvents)
@@ -493,7 +498,12 @@ public class EmbeddedSubProcessAuditIT {
                             SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
                         ),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
+                        )
                     );
             });
 
@@ -590,8 +600,18 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_ASSIGNED, processInstanceId, rootRootProcessInstanceId, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        ),
+                        tuple(
+                            TASK_ASSIGNED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        )
                     );
             });
 
@@ -665,8 +685,18 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_CREATED, processInstanceId, processInstanceId, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_ASSIGNED, processInstanceId, processInstanceId, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            processInstanceId,
+                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        ),
+                        tuple(
+                            TASK_ASSIGNED,
+                            processInstanceId,
+                            processInstanceId,
+                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        )
                     );
             });
 
