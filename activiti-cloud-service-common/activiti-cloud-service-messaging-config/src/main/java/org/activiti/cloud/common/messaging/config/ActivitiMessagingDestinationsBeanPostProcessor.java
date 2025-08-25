@@ -34,6 +34,7 @@ import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
+import org.springframework.util.StringUtils;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
 
@@ -87,6 +88,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                         Optional
                             .ofNullable(value.getGroup())
+                            .filter(StringUtils::hasText)
                             .ifPresentOrElse(
                                 it -> destinations.add(value.getDestination()),
                                 () -> anonymous.add(value.getDestination())
