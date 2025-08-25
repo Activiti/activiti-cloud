@@ -16,18 +16,20 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
@@ -72,7 +74,8 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 });
 
             if (functionRouter.isEnabled()) {
-                final var functionRouterInput = new BindingProperties();
+                final var destinations = new LinkedHashSet<String>();
+                final var anonymous = new LinkedHashSet<String>();
 
                 functionRouter
                     .getFunctionRoutes()
@@ -82,39 +85,49 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
                         functionRouter.destinations().put(bindingName, value.getDestination());
 
+                        Optional
+                            .ofNullable(value.getGroup())
+                            .ifPresentOrElse(
+                                it -> destinations.add(value.getDestination()),
+                                () -> anonymous.add(value.getDestination())
+                            );
+
                         log.warn(
                             "Configured function route '{}' for destination '{}'",
                             bindingName,
                             value.getDestination()
                         );
 
-                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(bindingName)) {
-                            bindingServiceProperties
-                                .getBindings()
-                                .entrySet()
-                                .stream()
-                                .filter(entry -> entry.getValue().getProducer() != null)
-                                .filter(entry ->
-                                    Objects.equals(entry.getValue().getDestination(), value.getDestination())
-                                )
-                                .forEach(entry -> {
-                                    var producer = entry.getValue().getProducer();
-                                    var excludedGroups = value.getGroup();
-                                    var producerGroups = producer.getRequiredGroups();
-                                    var requiredGroups = Stream
-                                        .of(producerGroups)
-                                        .filter(Predicate.not(excludedGroups::equals))
-                                        .toList();
+                        Optional
+                            .ofNullable(value.getGroup())
+                            .filter(it -> functionRouter.isExcludeRequiredProducerGroup(bindingName))
+                            .ifPresent(group -> {
+                                bindingServiceProperties
+                                    .getBindings()
+                                    .entrySet()
+                                    .stream()
+                                    .filter(entry -> entry.getValue().getProducer() != null)
+                                    .filter(entry ->
+                                        Objects.equals(entry.getValue().getDestination(), value.getDestination())
+                                    )
+                                    .forEach(entry -> {
+                                        var producer = entry.getValue().getProducer();
+                                        var excludedGroups = value.getGroup();
+                                        var producerGroups = producer.getRequiredGroups();
+                                        var requiredGroups = Stream
+                                            .of(producerGroups)
+                                            .filter(Predicate.not(excludedGroups::equals))
+                                            .toList();
 
-                                    producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
+                                        producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
 
-                                    log.warn(
-                                        "Excluded producer required groups '{}' for binding '{}'",
-                                        excludedGroups,
-                                        entry.getKey()
-                                    );
-                                });
-                        }
+                                        log.warn(
+                                            "Excluded producer required groups '{}' for binding '{}'",
+                                            excludedGroups,
+                                            entry.getKey()
+                                        );
+                                    });
+                            });
                     });
 
                 functionRouter
@@ -142,16 +155,27 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             });
                     });
 
-                functionRouterInput.setDestination(
-                    functionRouter.destinations().values().stream().distinct().collect(Collectors.joining(","))
-                );
-                functionRouterInput.setGroup(functionRouter.getGroup());
-                functionRouterInput.setConsumer(functionRouter.getConsumer());
+                if (!anonymous.isEmpty()) {
+                    final var bindingProperties = new BindingProperties();
 
-                if (!functionRouter.destinations().isEmpty()) {
-                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
+                    bindingProperties.setDestination(String.join(",", anonymous));
+                    bindingProperties.setConsumer(new ConsumerProperties());
 
-                    log.warn("Configured function router binding '{}'", functionRouterInput);
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
+
+                    log.warn("Configured anonymous function router binding '{}'", bindingProperties);
+                }
+
+                if (!destinations.isEmpty()) {
+                    final var bindingProperties = new BindingProperties();
+
+                    bindingProperties.setDestination(String.join(",", destinations));
+                    bindingProperties.setGroup(functionRouter.getGroup());
+                    bindingProperties.setConsumer(functionRouter.getConsumer());
+
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
+
+                    log.warn("Configured function router binding '{}'", bindingProperties);
                 } else {
                     log.warn("Skipping function router configuration with empty destinations");
                 }

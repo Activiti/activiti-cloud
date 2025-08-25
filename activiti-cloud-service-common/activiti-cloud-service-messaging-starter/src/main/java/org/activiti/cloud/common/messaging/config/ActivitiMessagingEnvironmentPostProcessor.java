@@ -65,12 +65,16 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
         Optional
             .ofNullable(environment.getProperty(ACTIVITI_CLOUD_MESSAGING_FUNCTION_ROUTER_ENABLED_KEY, Boolean.class))
             .filter(Boolean.TRUE::equals)
-            .ifPresent(value ->
+            .ifPresent(value -> {
                 extraProperties.put(
                     "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
                     "true"
-                )
-            );
+                );
+                extraProperties.put(
+                    "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
+                    "true"
+                );
+            });
 
         return extraProperties;
     }

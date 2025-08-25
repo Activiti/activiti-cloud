@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
-
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.beans.BeansException;
@@ -57,8 +56,10 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                         )
                         .ifPresent(functionBinding -> {
                             if (
-                                List.of(functionBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
-                                functionRouter.destinations().isEmpty()
+                                Stream
+                                    .of(functionBinding.value())
+                                    .filter(it -> it.startsWith("functionRouter"))
+                                    .anyMatch(Predicate.not(bindingServiceProperties.getBindings()::containsKey))
                             ) {
                                 return;
                             }

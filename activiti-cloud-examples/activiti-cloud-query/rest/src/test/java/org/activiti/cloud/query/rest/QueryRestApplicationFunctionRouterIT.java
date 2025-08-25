@@ -17,6 +17,7 @@ package org.activiti.cloud.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -58,8 +59,8 @@ public class QueryRestApplicationFunctionRouterIT {
     @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys("auditConsumer", "queryConsumer", "functionRouterInput")
-            .containsOnlyKeys("graphQLEngineEventsConsumerSource", "producer");
+            .doesNotContainKeys("auditConsumer", "queryConsumer")
+            .containsOnlyKeys("functionRouterAnonymousInput", "producer");
     }
 
     @Test
@@ -68,6 +69,18 @@ public class QueryRestApplicationFunctionRouterIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.destinations()).isEmpty();
+        assertThat(functionRouter.getRoutes())
+            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+
+        assertThat(functionRouter.destinations())
+            .containsOnly(Map.entry("graphQLEngineEventsConsumerSource", "engineEvents"));
+
+        assertThat(functionRouter.registrations())
+            .containsOnlyKeys("engineEvents")
+            .satisfies(registrations ->
+                assertThat(registrations.get("engineEvents"))
+                    .containsOnly("engineEventsGraphQlSourceConsumer_registration")
+                    .isNotEmpty()
+            );
     }
 }

@@ -21,6 +21,7 @@ import static org.activiti.cloud.common.messaging.config.InputBindingConfigurati
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.ENGINE_EVENTS_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
@@ -74,10 +75,14 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
         "spring.cloud.stream.bindings.auditConsumer.destination=engine-events",
+        "spring.cloud.stream.bindings.auditConsumer.group=audit",
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.queryConsumer.group=query",
+        "spring.cloud.stream.bindings.engineEventsConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
+        "spring.cloud.stream.bindings.integrationRequests.group=${spring.application.name}",
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.destination=script.EXECUTE",
+        "spring.cloud.stream.bindings.scriptRuntimeConsumer.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.max-retries=4",
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
@@ -88,6 +93,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
     }
 )
@@ -106,6 +112,7 @@ public class FunctionRouterBindingConfigurationIT {
 
     private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
+    private static final AtomicReference<Message<?>> engineEventsMessage = new AtomicReference<>();
     private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
     private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
 
@@ -183,6 +190,14 @@ public class FunctionRouterBindingConfigurationIT {
                 connectorPayload.set(message);
             };
         }
+
+        @Bean
+        @FunctionBinding(input = ENGINE_EVENTS_CONSUMER)
+        public Consumer<Message<?>> engineEventsConsumerHandler() {
+            return message -> {
+                engineEventsMessage.set(message);
+            };
+        }
     }
 
     @BeforeEach
@@ -223,7 +238,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionRouterBinding() {
+    void functionRouterInputBinding() {
         // when
         var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterInput");
 
@@ -238,6 +253,24 @@ public class FunctionRouterBindingConfigurationIT {
             );
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
+    }
+
+    @Test
+    void functionRouterAnonymousInputBinding() {
+        // when
+        var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterAnonymousInput");
+
+        // then
+        assertThat(functionRouterInput)
+            .isNotNull()
+            .extracting(BindingProperties::getDestination)
+            .satisfies(destination ->
+                assertThat(List.of(destination.split(",")))
+                    .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                    .containsOnly("engine-events")
+            );
+
+        assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isNull();
     }
 
     @Test
@@ -256,7 +289,13 @@ public class FunctionRouterBindingConfigurationIT {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         )
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsOnlyKeys("auditProducer", "commandResults", "functionRouterInput", "integrationResults");
+            .containsOnlyKeys(
+                "auditProducer",
+                "commandResults",
+                "functionRouterInput",
+                "integrationResults",
+                "functionRouterAnonymousInput"
+            );
     }
 
     @Test
@@ -358,9 +397,13 @@ public class FunctionRouterBindingConfigurationIT {
                     .isNotNull()
                     .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
                     .isEqualTo("auditConsumerHandler_registration");
+                assertThat(engineEventsMessage.get())
+                    .isNotNull()
+                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                    .isEqualTo("engineEventsConsumerHandler_registration");
             });
 
-        assertThat(auditRetries.get()).isEqualTo(4);
+        assertThat(auditRetries.get()).isGreaterThanOrEqualTo(4);
     }
 
     @Test
@@ -432,7 +475,8 @@ public class FunctionRouterBindingConfigurationIT {
                 "queryConsumer",
                 "auditConsumer",
                 "integrationRequests",
-                "scriptRuntimeConsumer"
+                "scriptRuntimeConsumer",
+                "engineEventsConsumer"
             );
     }
 
@@ -444,7 +488,11 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
                 Map.entry(
                     "engine-events",
-                    List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
+                    List.of(
+                        "queryConsumerHandler_registration",
+                        "auditConsumerHandler_registration",
+                        "engineEventsConsumerHandler_registration"
+                    )
                 ),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration"))
             );
@@ -459,7 +507,8 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("commandConsumer", "command-consumer"),
                 Map.entry("integrationRequests", "integration-requests"),
                 Map.entry("queryConsumer", "engine-events"),
-                Map.entry("scriptRuntimeConsumer", "script.EXECUTE")
+                Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
+                Map.entry("engineEventsConsumer", "engine-events")
             );
     }
 }

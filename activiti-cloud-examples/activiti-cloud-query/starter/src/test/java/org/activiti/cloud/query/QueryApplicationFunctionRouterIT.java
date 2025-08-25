@@ -72,15 +72,18 @@ public class QueryApplicationFunctionRouterIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getFunctionRoutes()).containsOnly("auditConsumer", "queryConsumer");
-        assertThat(functionRouter.destinations()).containsOnlyKeys("auditConsumer", "queryConsumer");
+        assertThat(functionRouter.getFunctionRoutes())
+            .containsOnly("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+        assertThat(functionRouter.destinations())
+            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
         assertThat(functionRouter.registrations())
             .containsOnlyKeys("engineEvents")
             .satisfies(registrations ->
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
                         "queryConsumerFunction_registration",
-                        "auditConsumerChannelHandlerConsumer_registration"
+                        "auditConsumerChannelHandlerConsumer_registration",
+                        "engineEventsGraphQlSourceConsumer_registration"
                     )
                     .isNotEmpty()
             );
@@ -91,6 +94,14 @@ public class QueryApplicationFunctionRouterIT {
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
                 Boolean.class
             )
         )

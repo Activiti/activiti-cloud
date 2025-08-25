@@ -66,6 +66,7 @@ public class FunctionRouterConfiguration {
 
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
+    public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
 
     @Bean
     ApplicationRunner functionRouterConfigurationApplicationRunner(
@@ -81,11 +82,27 @@ public class FunctionRouterConfiguration {
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
         }
+
+        @InputBinding(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+        SubscribableChannel functionRouterAnonymousInput() {
+            return MessageChannels.publishSubscribe(FUNCTION_ROUTER_ANONYMOUS_INPUT).getObject();
+        }
     }
 
     @Bean
     @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-    Consumer<Message<?>> functionRouterConsumer(
+    Consumer<Message<?>> functionRouterConsumer(Consumer<Message<?>> functionRouterMessageHandler) {
+        return functionRouterMessageHandler;
+    }
+
+    @Bean
+    @FunctionBinding(input = FUNCTION_ROUTER_ANONYMOUS_INPUT)
+    Consumer<Message<?>> functionRouterAnonymousConsumer(Consumer<Message<?>> functionRouterMessageHandler) {
+        return functionRouterMessageHandler;
+    }
+
+    @Bean
+    Consumer<Message<?>> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties
     ) {
