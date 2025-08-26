@@ -47,7 +47,6 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.Task;
-import org.activiti.bpmn.model.Process;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
