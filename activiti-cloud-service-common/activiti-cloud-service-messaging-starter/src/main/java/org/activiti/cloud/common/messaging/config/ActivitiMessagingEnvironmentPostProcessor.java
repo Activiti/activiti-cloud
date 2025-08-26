@@ -74,6 +74,14 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
                     "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
                     "true"
                 );
+                extraProperties.put(
+                    "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.durable-subscription",
+                    "false"
+                );
+                extraProperties.put(
+                    "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.exclusive",
+                    "true"
+                );
             });
 
         return extraProperties;

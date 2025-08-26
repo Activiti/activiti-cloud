@@ -34,6 +34,8 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -87,6 +89,19 @@ public class FunctionRouterConfiguration {
         SubscribableChannel functionRouterAnonymousInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_ANONYMOUS_INPUT).getObject();
         }
+    }
+
+    @Bean
+    DeclarableCustomizer functionRouterAnonymousQueueCustomizer() {
+        return declarable -> {
+            if (declarable instanceof Queue queue) {
+                if (queue.getName().startsWith("anonymous.")) {
+                    queue.setLeaderLocator("client-local");
+                }
+            }
+
+            return declarable;
+        };
     }
 
     @Bean

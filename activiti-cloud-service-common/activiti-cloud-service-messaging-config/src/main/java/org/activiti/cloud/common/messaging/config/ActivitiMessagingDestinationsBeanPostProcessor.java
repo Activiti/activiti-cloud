@@ -22,6 +22,7 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -159,9 +160,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                 if (!anonymous.isEmpty()) {
                     final var bindingProperties = new BindingProperties();
+                    final var consumerProperties = new ConsumerProperties();
 
                     bindingProperties.setDestination(String.join(",", anonymous));
-                    bindingProperties.setConsumer(new ConsumerProperties());
+                    bindingProperties.setGroup("anonymous.".concat(UUID.randomUUID().toString()));
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
 
