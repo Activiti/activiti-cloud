@@ -250,8 +250,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         Task task = taskCreatedEvent.getEntity();
         this.id = task.getId();
         this.assignee = task.getAssignee();
-        this.name = task.getName();
-        this.description = task.getDescription();
+        this.name = truncate(task.getName(), 255);
+        this.description = truncate(task.getDescription(), 255);
         this.createdDate = task.getCreatedDate();
         this.dueDate = task.getDueDate();
         this.priority = task.getPriority();
@@ -351,11 +351,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = truncate(name, 255);
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = truncate(description, 255);
     }
 
     public void setCreatedDate(Date createdDate) {
@@ -666,5 +666,12 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         if (getClass() != obj.getClass()) return false;
         TaskEntity other = (TaskEntity) obj;
         return this.id != null && Objects.equals(id, other.id);
+    }
+
+    private String truncate(String string, int maxLength) {
+        if (string != null) {
+            return string.length() > maxLength ? string.substring(0, maxLength) : string;
+        }
+        return null;
     }
 }
