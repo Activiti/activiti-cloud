@@ -95,6 +95,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
+        "activiti.cloud.messaging.function-router.anonymous.group-prefix=foobar.",
+        "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
     }
 )
 @EnableTestBinder
@@ -258,10 +260,12 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionRouterAnonymousInputBinding() {
         // when
-        var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterAnonymousInput");
+        var functionRouterAnonymousInput = bindingServiceProperties.getBindingProperties(
+            "functionRouterAnonymousInput"
+        );
 
         // then
-        assertThat(functionRouterInput)
+        assertThat(functionRouterAnonymousInput)
             .isNotNull()
             .extracting(BindingProperties::getDestination)
             .satisfies(destination ->
@@ -270,10 +274,15 @@ public class FunctionRouterBindingConfigurationIT {
                     .containsOnly("engine-events")
             );
 
-        assertThat(functionRouterInput)
+        assertThat(functionRouterAnonymousInput)
             .isNotNull()
             .extracting(BindingProperties::getGroup)
-            .satisfies(group -> assertThat(group).startsWith("anonymous."));
+            .satisfies(group -> assertThat(group).startsWith("foobar."));
+
+        assertThat(functionRouterAnonymousInput)
+            .isNotNull()
+            .extracting(BindingProperties::getConsumer)
+            .satisfies(consumer -> assertThat(consumer.getConcurrency()).isEqualTo(2));
     }
 
     @Test

@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.cloud.stream.binder.ConsumerProperties;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
@@ -160,14 +159,18 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                 if (!anonymous.isEmpty()) {
                     final var bindingProperties = new BindingProperties();
-                    final var consumerProperties = new ConsumerProperties();
 
                     bindingProperties.setDestination(String.join(",", anonymous));
-                    bindingProperties.setGroup("anonymous.".concat(UUID.randomUUID().toString()));
+                    bindingProperties.setGroup(
+                        functionRouter.getAnonymous().getGroupPrefix().concat(UUID.randomUUID().toString())
+                    );
+                    bindingProperties.setConsumer(functionRouter.getAnonymous().getConsumer());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
 
                     log.warn("Configured anonymous function router binding '{}'", bindingProperties);
+                } else {
+                    log.warn("Skipping anonymous function router configuration with empty destinations");
                 }
 
                 if (!destinations.isEmpty()) {

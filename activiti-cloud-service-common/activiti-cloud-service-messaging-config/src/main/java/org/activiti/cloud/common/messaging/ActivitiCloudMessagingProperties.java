@@ -407,6 +407,9 @@ public class ActivitiCloudMessagingProperties {
         private Duration retryInterval = Duration.ofMillis(10);
 
         @NestedConfigurationProperty
+        private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
+
+        @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
 
         public boolean isEnabled() {
@@ -503,7 +506,8 @@ public class ActivitiCloudMessagingProperties {
                 Objects.equals(registrations, that.registrations) &&
                 Objects.equals(group, that.group) &&
                 Objects.equals(retryInterval, that.retryInterval) &&
-                Objects.equals(consumer, that.consumer)
+                Objects.equals(consumer, that.consumer) &&
+                Objects.equals(anonymous, that.anonymous)
             );
         }
 
@@ -517,7 +521,8 @@ public class ActivitiCloudMessagingProperties {
                 group,
                 maxRetries,
                 retryInterval,
-                consumer
+                consumer,
+                anonymous
             );
         }
 
@@ -532,7 +537,12 @@ public class ActivitiCloudMessagingProperties {
                 .add("maxRetries=" + maxRetries)
                 .add("retryInterval=" + retryInterval)
                 .add("consumer=" + consumer)
+                .add("anonymous=" + anonymous)
                 .toString();
+        }
+
+        public FunctionRouterAnonymousProperties getAnonymous() {
+            return anonymous;
         }
     }
 
@@ -573,6 +583,46 @@ public class ActivitiCloudMessagingProperties {
                 .add("excludeRequiredProducerGroups=" + excludeRequiredProducerGroups)
                 .add("overrideRequiredProducerGroups=" + overrideRequiredProducerGroups)
                 .toString();
+        }
+    }
+
+    public static class FunctionRouterAnonymousProperties {
+
+        private String groupPrefix = "anonymous.";
+
+        @NestedConfigurationProperty
+        private final ConsumerProperties consumer = new ConsumerProperties();
+
+        public String getGroupPrefix() {
+            return groupPrefix;
+        }
+
+        public void setGroupPrefix(String groupPrefix) {
+            this.groupPrefix = groupPrefix;
+        }
+
+        public ConsumerProperties getConsumer() {
+            return consumer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FunctionRouterAnonymousProperties that)) return false;
+            return Objects.equals(groupPrefix, that.groupPrefix) && Objects.equals(consumer, that.consumer);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(groupPrefix, consumer);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer("FunctionRouterAnonymousProperties{");
+            sb.append("groupPrefix='").append(groupPrefix).append('\'');
+            sb.append(", consumer=").append(consumer);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
