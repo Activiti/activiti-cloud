@@ -194,6 +194,10 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         return processInstanceId;
     }
 
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
     @Override
     public String getTaskProcessRootProcessInstanceId() {
         return taskProcessRootProcessInstanceId;
@@ -201,10 +205,6 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
 
     public void setTaskProcessRootProcessInstanceId(String rootProcessInstanceId) {
         this.taskProcessRootProcessInstanceId = rootProcessInstanceId;
-    }
-
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
     }
 
     @Override
