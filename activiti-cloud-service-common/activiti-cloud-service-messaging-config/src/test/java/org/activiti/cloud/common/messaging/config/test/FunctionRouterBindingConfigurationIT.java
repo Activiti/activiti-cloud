@@ -270,7 +270,10 @@ public class FunctionRouterBindingConfigurationIT {
                     .containsOnly("engine-events")
             );
 
-        assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isNull();
+        assertThat(functionRouterInput)
+            .isNotNull()
+            .extracting(BindingProperties::getGroup)
+            .satisfies(group -> assertThat(group).startsWith("anonymous."));
     }
 
     @Test
