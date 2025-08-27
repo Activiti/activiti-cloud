@@ -16,8 +16,6 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.slf4j.Logger;
@@ -55,22 +53,21 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
 
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
-                        .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
-                        )
-                        .ifPresent(inputBinding -> {
-                            if (
-                                Stream
-                                    .of(inputBinding.value())
-                                    .anyMatch(Predicate.not(bindingServiceProperties.getBindings()::containsKey))
-                            ) {
+                        .filter(inputBinding -> {
+                            final var hasBindingConfiguration = bindingServiceProperties
+                                .getBindings()
+                                .containsKey(inputBinding.value()[0]);
+
+                            if (!hasBindingConfiguration) {
                                 log.warn(
                                     "Skipping input binding {} configuration due to missing binding service properties",
                                     inputBinding.value()[0]
                                 );
-
-                                return;
                             }
 
+                            return hasBindingConfiguration;
+                        })
+                        .ifPresent(inputBinding -> {
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
 
                             String inputBindings = bindingServiceProperties.getInputBindings();
