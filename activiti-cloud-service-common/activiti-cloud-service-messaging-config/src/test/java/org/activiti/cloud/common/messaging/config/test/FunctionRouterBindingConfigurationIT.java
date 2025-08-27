@@ -531,6 +531,16 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void functionRouterInputDestinations() {
+        Assertions
+            .assertThat(bindingServiceProperties.getBindingDestination(FUNCTION_ROUTER_INPUT))
+            .satisfies(destination ->
+                assertThat(destination.split(","))
+                    .containsOnlyOnce("command-consumer", "script.EXECUTE", "engine-events", "integration-requests")
+            );
+    }
+
+    @Test
     void functionRouterAnonymousInputRegistrations() {
         Assertions
             .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_ANONYMOUS_INPUT))
