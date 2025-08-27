@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import static jakarta.persistence.TemporalType.TIMESTAMP;
+import static org.activiti.cloud.services.query.model.StringUtils.truncate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -666,12 +667,5 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         if (getClass() != obj.getClass()) return false;
         TaskEntity other = (TaskEntity) obj;
         return this.id != null && Objects.equals(id, other.id);
-    }
-
-    private String truncate(String string, int maxLength) {
-        if (string != null) {
-            return string.length() > maxLength ? string.substring(0, maxLength) : string;
-        }
-        return null;
     }
 }
