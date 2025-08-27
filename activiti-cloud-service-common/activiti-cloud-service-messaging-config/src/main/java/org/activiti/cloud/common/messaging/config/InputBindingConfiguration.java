@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -36,6 +38,7 @@ import org.springframework.util.StringUtils;
 public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String INPUT_BINDING = "_sink";
+    private static final Logger log = LoggerFactory.getLogger(InputBindingConfiguration.class);
 
     @Bean
     public BeanPostProcessor inputBindingBeanPostProcessor(
@@ -54,13 +57,17 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
                         .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
                         )
-                        .ifPresent(functionBinding -> {
+                        .ifPresent(inputBinding -> {
                             if (
                                 Stream
-                                    .of(functionBinding.value())
-                                    .filter(it -> it.startsWith("functionRouter"))
+                                    .of(inputBinding.value())
                                     .anyMatch(Predicate.not(bindingServiceProperties.getBindings()::containsKey))
                             ) {
+                                log.warn(
+                                    "Skipping input binding {} configuration due to missing binding service properties",
+                                    inputBinding.value()[0]
+                                );
+
                                 return;
                             }
 

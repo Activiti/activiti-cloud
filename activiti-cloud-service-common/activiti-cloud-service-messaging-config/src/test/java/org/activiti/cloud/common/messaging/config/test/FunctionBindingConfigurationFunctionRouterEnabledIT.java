@@ -52,10 +52,7 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
                 "integrationResults",
                 "auditConsumer",
                 "queryConsumer",
-                "commandConsumer",
-                "scriptRuntimeConsumer",
-                "integrationRequests",
-                "engineEventsConsumer"
+                "commandConsumer"
             );
     }
 }
