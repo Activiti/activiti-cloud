@@ -21,6 +21,7 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -164,7 +165,10 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     final var bindingProperties = new BindingProperties();
 
                     bindingProperties.setDestination(
-                        String.join(",", functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
+                        String.join(
+                            ",",
+                            Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
+                        )
                     );
                     bindingProperties.setGroup(
                         functionRouter.getAnonymous().getGroupPrefix().concat(UUID.randomUUID().toString())
@@ -182,7 +186,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     final var bindingProperties = new BindingProperties();
 
                     bindingProperties.setDestination(
-                        String.join(",", functionRouter.destinations(FUNCTION_ROUTER_INPUT).values())
+                        String.join(",", Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_INPUT).values()))
                     );
                     bindingProperties.setGroup(functionRouter.getGroup());
                     bindingProperties.setConsumer(functionRouter.getConsumer());
