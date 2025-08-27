@@ -621,6 +621,7 @@ public class ActivitiCloudMessagingProperties {
 
     public static class FunctionRouterAnonymousProperties {
 
+        @NotEmpty
         private String groupPrefix = "anonymous.";
 
         @NestedConfigurationProperty

@@ -22,12 +22,12 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Base64UrlNamingStrategy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingProperties;
@@ -163,16 +163,19 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                 if (!functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).isEmpty()) {
                     final var bindingProperties = new BindingProperties();
+                    final var groupPrefix = functionRouter
+                        .getAnonymous()
+                        .getGroupPrefix()
+                        .concat(functionRouter.getGroup())
+                        .concat(".");
 
-                    bindingProperties.setDestination(
-                        String.join(
-                            ",",
-                            Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
-                        )
+                    final var destination = String.join(
+                        ",",
+                        Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
                     );
-                    bindingProperties.setGroup(
-                        functionRouter.getAnonymous().getGroupPrefix().concat(UUID.randomUUID().toString())
-                    );
+
+                    bindingProperties.setDestination(destination);
+                    bindingProperties.setGroup(new Base64UrlNamingStrategy(groupPrefix).generateName());
                     bindingProperties.setConsumer(functionRouter.getAnonymous().getConsumer());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
@@ -184,11 +187,14 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                 if (!functionRouter.destinations(FUNCTION_ROUTER_INPUT).isEmpty()) {
                     final var bindingProperties = new BindingProperties();
-
-                    bindingProperties.setDestination(
-                        String.join(",", Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_INPUT).values()))
+                    final var group = functionRouter.getGroup();
+                    final var destination = String.join(
+                        ",",
+                        Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_INPUT).values())
                     );
-                    bindingProperties.setGroup(functionRouter.getGroup());
+
+                    bindingProperties.setDestination(destination);
+                    bindingProperties.setGroup(group);
                     bindingProperties.setConsumer(functionRouter.getConsumer());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
