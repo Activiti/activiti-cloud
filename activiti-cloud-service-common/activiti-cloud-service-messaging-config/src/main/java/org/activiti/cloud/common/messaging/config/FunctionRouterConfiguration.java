@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -109,28 +110,28 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-    Consumer<Message<?>> functionRouterConsumer(Consumer<Message<?>> functionRouterMessageHandler) {
-        return functionRouterMessageHandler;
+    Consumer<Message<?>> functionRouterConsumer(BiConsumer<Message<?>, String> functionRouterMessageHandler) {
+        return message -> functionRouterMessageHandler.accept(message, FUNCTION_ROUTER_INPUT);
     }
 
     @Bean
     @FunctionBinding(input = FUNCTION_ROUTER_ANONYMOUS_INPUT)
-    Consumer<Message<?>> functionRouterAnonymousConsumer(Consumer<Message<?>> functionRouterMessageHandler) {
-        return functionRouterMessageHandler;
+    Consumer<Message<?>> functionRouterAnonymousConsumer(BiConsumer<Message<?>, String> functionRouterMessageHandler) {
+        return message -> functionRouterMessageHandler.accept(message, FUNCTION_ROUTER_ANONYMOUS_INPUT);
     }
 
     @Bean
-    Consumer<Message<?>> functionRouterMessageHandler(
+    BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
-        return message -> {
+        return (message, routingContext) -> {
             Optional
                 .of(message)
                 .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
                 .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
-                .map(messagingProperties.getFunctionRouter().registrations()::get)
+                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
                     registrations -> {
@@ -205,7 +206,7 @@ public class FunctionRouterConfiguration {
 
                         final var registration = Optional
                             .ofNullable(destination)
-                            .map(it -> messagingProperties.getFunctionRouter().registrations().get(it))
+                            .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
                             .orElse(List.of());
 
                         log.warn(

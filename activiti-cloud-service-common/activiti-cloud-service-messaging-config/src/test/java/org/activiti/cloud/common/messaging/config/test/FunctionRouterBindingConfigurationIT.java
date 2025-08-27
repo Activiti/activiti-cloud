@@ -62,11 +62,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
     properties = {
+        "logging.level.org.activiti.cloud.common.messaging.config=DEBUG",
         "activiti.cloud.application.name=foo",
         "spring.application.name=bar",
         "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
@@ -163,10 +163,6 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = AUDIT_CONSUMER)
         public Consumer<Message<?>> auditConsumerHandler() {
             return message -> {
-                if (auditRetries.getAndSet(auditRetries.get() + 1) < 3) {
-                    throw new MessageHandlingException(message, "test error");
-                }
-
                 auditMessage.set(message);
             };
         }
@@ -197,6 +193,10 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = ENGINE_EVENTS_CONSUMER)
         public Consumer<Message<?>> engineEventsConsumerHandler() {
             return message -> {
+                if (auditRetries.getAndSet(auditRetries.get() + 1) < 3) {
+                    throw new RuntimeException("test error");
+                }
+
                 engineEventsMessage.set(message);
             };
         }
@@ -415,7 +415,7 @@ public class FunctionRouterBindingConfigurationIT {
                     .isEqualTo("engineEventsConsumerHandler_registration");
             });
 
-        assertThat(auditRetries.get()).isGreaterThanOrEqualTo(4);
+        assertThat(auditRetries.get()).isEqualTo(4);
     }
 
     @Test

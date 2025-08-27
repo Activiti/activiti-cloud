@@ -19,7 +19,6 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -75,23 +74,27 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 });
 
             if (functionRouter.isEnabled()) {
-                final var destinations = new LinkedHashSet<String>();
-                final var anonymous = new LinkedHashSet<String>();
-
                 functionRouter
                     .getFunctionRoutes()
                     .stream()
                     .filter(bindingServiceProperties.getBindings()::containsKey)
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
-                        functionRouter.destinations().put(bindingName, value.getDestination());
 
                         Optional
                             .ofNullable(value.getGroup())
                             .filter(StringUtils::hasText)
                             .ifPresentOrElse(
-                                it -> destinations.add(value.getDestination()),
-                                () -> anonymous.add(value.getDestination())
+                                it -> {
+                                    functionRouter
+                                        .destinations(FUNCTION_ROUTER_INPUT)
+                                        .put(bindingName, value.getDestination());
+                                },
+                                () -> {
+                                    functionRouter
+                                        .destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+                                        .put(bindingName, value.getDestination());
+                                }
                             );
 
                         log.warn(
@@ -157,10 +160,12 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             });
                     });
 
-                if (!anonymous.isEmpty()) {
+                if (!functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).isEmpty()) {
                     final var bindingProperties = new BindingProperties();
 
-                    bindingProperties.setDestination(String.join(",", anonymous));
+                    bindingProperties.setDestination(
+                        String.join(",", functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
+                    );
                     bindingProperties.setGroup(
                         functionRouter.getAnonymous().getGroupPrefix().concat(UUID.randomUUID().toString())
                     );
@@ -173,10 +178,12 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     log.warn("Skipping anonymous function router configuration with empty destinations");
                 }
 
-                if (!destinations.isEmpty()) {
+                if (!functionRouter.destinations(FUNCTION_ROUTER_INPUT).isEmpty()) {
                     final var bindingProperties = new BindingProperties();
 
-                    bindingProperties.setDestination(String.join(",", destinations));
+                    bindingProperties.setDestination(
+                        String.join(",", functionRouter.destinations(FUNCTION_ROUTER_INPUT).values())
+                    );
                     bindingProperties.setGroup(functionRouter.getGroup());
                     bindingProperties.setConsumer(functionRouter.getConsumer());
 

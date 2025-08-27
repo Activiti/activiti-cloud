@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -396,9 +397,9 @@ public class ActivitiCloudMessagingProperties {
 
         private final Map<String, BindingFunctionRouterProperties> routes = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, String> destinations = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, Map<String, String>> destinations = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, List<String>> registrations = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, Map<String, List<String>>> registrations = new LinkedCaseInsensitiveMap<>();
 
         private String group;
 
@@ -421,11 +422,36 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public Map<String, String> destinations() {
-            return destinations;
+            Map<String, String> result = new LinkedCaseInsensitiveMap<>();
+
+            destinations.forEach((key, value) -> result.putAll(value));
+
+            return result;
+        }
+
+        public Map<String, String> destinations(String routingContext) {
+            return destinations.computeIfAbsent(routingContext, key -> new LinkedCaseInsensitiveMap<>());
         }
 
         public Map<String, List<String>> registrations() {
-            return registrations;
+            Map<String, List<String>> result = new LinkedCaseInsensitiveMap<>();
+
+            registrations
+                .values()
+                .forEach(it -> {
+                    it.forEach((key, value) ->
+                        result.compute(
+                            key,
+                            (k, v) -> v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
+                        )
+                    );
+                });
+
+            return result;
+        }
+
+        public Map<String, List<String>> registrations(String routingContext) {
+            return registrations.computeIfAbsent(routingContext, key -> new LinkedCaseInsensitiveMap<>());
         }
 
         public Map<String, BindingFunctionRouterProperties> getRoutes() {
@@ -488,11 +514,18 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public void register(String bindingName, String functionBeanName) {
-            Optional
-                .ofNullable(destinations.get(bindingName))
-                .ifPresent(destination -> {
-                    registrations.computeIfAbsent(destination, key -> new ArrayList<>()).add(functionBeanName);
-                });
+            destinations
+                .keySet()
+                .forEach(routingContext ->
+                    Optional
+                        .ofNullable(destinations.get(routingContext))
+                        .map(it -> it.get(bindingName))
+                        .ifPresent(destination ->
+                            registrations(routingContext)
+                                .computeIfAbsent(destination, key -> new ArrayList<>())
+                                .add(functionBeanName)
+                        )
+                );
         }
 
         @Override
