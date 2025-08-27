@@ -17,6 +17,8 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
@@ -47,6 +49,8 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -66,7 +70,6 @@ import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
     properties = {
-        "logging.level.org.activiti.cloud.common.messaging.config=DEBUG",
         "activiti.cloud.application.name=foo",
         "spring.application.name=bar",
         "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
@@ -147,6 +150,9 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    private DeclarableCustomizer functionRouterAnonymousQueueCustomizer;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -511,6 +517,27 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void functionRouterInputRegistrations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_INPUT))
+            .containsOnly(
+                Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
+                Map.entry(
+                    "engine-events",
+                    List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
+                ),
+                Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration"))
+            );
+    }
+
+    @Test
+    void functionRouterAnonymousInputRegistrations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_ANONYMOUS_INPUT))
+            .containsOnly(Map.entry("engine-events", List.of("engineEventsConsumerHandler_registration")));
+    }
+
+    @Test
     void functionRouterDestinations() {
         Assertions
             .assertThat(messagingProperties.getFunctionRouter().destinations())
@@ -522,5 +549,18 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
                 Map.entry("engineEventsConsumer", "engine-events")
             );
+    }
+
+    @Test
+    void functionRouterAnonymousQueueCustomizer() {
+        var queueName = messagingProperties.getFunctionRouter().getAnonymous().getGroupPrefix().concat("foobar");
+
+        var queue = new Queue(queueName);
+
+        functionRouterAnonymousQueueCustomizer.apply(queue);
+
+        assertThat(queue.getArguments())
+            .asInstanceOf(InstanceOfAssertFactories.MAP)
+            .containsEntry("x-queue-master-locator", "client-local");
     }
 }
