@@ -163,11 +163,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
                 if (!functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).isEmpty()) {
                     final var bindingProperties = new BindingProperties();
-                    final var groupPrefix = functionRouter
-                        .getAnonymous()
-                        .getGroupPrefix()
-                        .concat(functionRouter.getGroup())
-                        .concat(".");
+                    final var groupPrefix = functionRouter.groupPrefix();
 
                     final var destination = String.join(
                         ",",

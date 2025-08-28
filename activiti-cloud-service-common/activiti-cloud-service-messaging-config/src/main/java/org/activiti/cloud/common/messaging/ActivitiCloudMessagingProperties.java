@@ -401,7 +401,8 @@ public class ActivitiCloudMessagingProperties {
 
         private final Map<String, Map<String, List<String>>> registrations = new LinkedCaseInsensitiveMap<>();
 
-        private String group;
+        @NotEmpty
+        private String group = "function-router";
 
         private int maxRetries = 3;
 
@@ -465,6 +466,12 @@ public class ActivitiCloudMessagingProperties {
         public List<String> getFunctionRoutes() {
             return routes.keySet().stream().filter(this::isFunctionRoute).toList();
         }
+
+        public String groupPrefix() {
+            return group.concat(".");
+        }
+
+        public void setGroupPrefix(String group) {}
 
         public String getGroup() {
             return group;
@@ -621,19 +628,8 @@ public class ActivitiCloudMessagingProperties {
 
     public static class FunctionRouterAnonymousProperties {
 
-        @NotEmpty
-        private String groupPrefix = "anonymous.";
-
         @NestedConfigurationProperty
         private final ConsumerProperties consumer = new ConsumerProperties();
-
-        public String getGroupPrefix() {
-            return groupPrefix;
-        }
-
-        public void setGroupPrefix(String groupPrefix) {
-            this.groupPrefix = groupPrefix;
-        }
 
         public ConsumerProperties getConsumer() {
             return consumer;
@@ -642,19 +638,18 @@ public class ActivitiCloudMessagingProperties {
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof FunctionRouterAnonymousProperties that)) return false;
-            return Objects.equals(groupPrefix, that.groupPrefix) && Objects.equals(consumer, that.consumer);
+            return Objects.equals(consumer, that.consumer);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(groupPrefix, consumer);
+            return Objects.hash(consumer);
         }
 
         @Override
         public String toString() {
             final StringBuffer sb = new StringBuffer("FunctionRouterAnonymousProperties{");
-            sb.append("groupPrefix='").append(groupPrefix).append('\'');
-            sb.append(", consumer=").append(consumer);
+            sb.append("consumer=").append(consumer);
             sb.append('}');
             return sb.toString();
         }

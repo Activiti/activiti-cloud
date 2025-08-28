@@ -64,6 +64,7 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -98,7 +99,6 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
-        "activiti.cloud.messaging.function-router.anonymous.group-prefix=foobar.",
         "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
     }
 )
@@ -153,6 +153,9 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private DeclarableCustomizer functionRouterAnonymousQueueCustomizer;
+
+    @Autowired
+    private Environment environment;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -283,7 +286,7 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(functionRouterAnonymousInput)
             .isNotNull()
             .extracting(BindingProperties::getGroup)
-            .satisfies(group -> assertThat(group).startsWith("foobar."));
+            .satisfies(group -> assertThat(group).startsWith("bar."));
 
         assertThat(functionRouterAnonymousInput)
             .isNotNull()
@@ -563,7 +566,7 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void functionRouterAnonymousQueueCustomizer() {
-        var queueName = messagingProperties.getFunctionRouter().getAnonymous().getGroupPrefix().concat("foobar");
+        var queueName = messagingProperties.getFunctionRouter().getGroup().concat(".foobar");
 
         var queue = new Queue(queueName);
 
@@ -572,5 +575,56 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(queue.getArguments())
             .asInstanceOf(InstanceOfAssertFactories.MAP)
             .containsEntry("x-queue-master-locator", "client-local");
+    }
+
+    @Test
+    void environment() {
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.durable-subscription",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.exclusive",
+                Boolean.class
+            )
+        )
+            .isFalse();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.durable-subscription",
+                Boolean.class
+            )
+        )
+            .isFalse();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.exclusive",
+                Boolean.class
+            )
+        )
+            .isTrue();
     }
 }
