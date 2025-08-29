@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -128,9 +129,8 @@ public class FunctionRouterConfiguration {
         final var functionRouter = messagingProperties.getFunctionRouter();
         return (message, routingContext) -> {
             Optional
-                .of(message)
-                .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
-                .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
+                .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
                 .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(

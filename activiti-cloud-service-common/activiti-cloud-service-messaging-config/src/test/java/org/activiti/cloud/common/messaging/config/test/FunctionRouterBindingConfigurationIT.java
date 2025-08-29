@@ -51,6 +51,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -469,6 +470,24 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("run_test();")
             .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
+            .build();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .untilAsserted(() -> {
+                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+            });
+    }
+
+    @Test
+    void testConnectorBindingsAmqpHeaders() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("run_test();")
+            .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "script.EXECUTE")
             .build();
 
         // when
