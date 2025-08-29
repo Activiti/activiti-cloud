@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,64 +39,68 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
     private final StreamBridge streamBridge;
     private final ApplicationEventPublisher eventPublisher;
     private final JobMessageBuilderFactory jobMessageBuilderFactory;
+    private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public DefaultJobMessageProducer(
         StreamBridge streamBridge,
         ApplicationEventPublisher eventPublisher,
-        JobMessageBuilderFactory jobMessageBuilderFactory
+        JobMessageBuilderFactory jobMessageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
         this.streamBridge = streamBridge;
         this.eventPublisher = eventPublisher;
         this.jobMessageBuilderFactory = jobMessageBuilderFactory;
+        this.bindingResolver = bindingResolver;
     }
 
     @Override
-    public void sendMessage(@NonNull String destination, @NonNull Job job) {
+    public void sendMessage(@NonNull String bindingName, @NonNull Job job) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
         Assert.hasLength(job.getId(), "job id must not be empty");
-        Assert.hasLength(destination, "destination must not be empty");
+        Assert.hasLength(bindingName, "destination must not be empty");
 
         Message<String> message = jobMessageBuilderFactory
             .create(job)
             .withPayload(job.getId())
-            .setHeader(ROUTING_KEY, destination)
+            .setHeader(ROUTING_KEY, bindingName)
+            .setHeader(FUNCTION_DESTINATION, bindingResolver.getBindingDestination(bindingName))
             .build();
 
         // Let's send message right after the main transaction has successfully committed.
         TransactionSynchronizationManager.registerSynchronization(
-            new JobMessageTransactionSynchronization(message, destination)
+            new JobMessageTransactionSynchronization(message, bindingName)
         );
     }
 
     class JobMessageTransactionSynchronization implements TransactionSynchronization {
 
-        private final String destination;
+        private final String bindingName;
         private final Message<String> message;
 
-        public JobMessageTransactionSynchronization(Message<String> message, String destination) {
-            this.destination = destination;
+        public JobMessageTransactionSynchronization(Message<String> message, String bindingName) {
+            this.bindingName = bindingName;
             this.message = message;
         }
 
         @Override
         public void afterCommit() {
-            logger.debug("Sending job message '{}' via stream bridge to: {}", message, destination);
+            logger.debug("Sending job message '{}' via stream bridge to: {}", message, bindingName);
 
             try {
-                boolean sent = streamBridge.send(destination, message);
+                boolean sent = streamBridge.send(bindingName, message);
 
                 if (!sent) {
                     throw new MessageDispatchingException(message);
                 }
 
-                eventPublisher.publishEvent(new JobMessageSentEvent(message, destination));
+                eventPublisher.publishEvent(new JobMessageSentEvent(message, bindingName));
             } catch (Exception cause) {
                 logger.error("Sending job message {} failed due to error: {}", message, cause.getMessage());
 
-                eventPublisher.publishEvent(new JobMessageFailedEvent(message, cause, destination));
+                eventPublisher.publishEvent(new JobMessageFailedEvent(message, cause, bindingName));
             }
         }
     }
