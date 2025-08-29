@@ -30,7 +30,7 @@ jobs:
     outputs:
       skip: ${{ steps.dependabot.outputs.result }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Check dependabot build
         uses: Activiti/Activiti/.github/actions/check-ext-build@456be36569d3afea26c83755ee9e90f0697b5349 # 8.7.1
       - name: dependabot check
@@ -59,7 +59,7 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -165,7 +165,7 @@ jobs:
             messaging-destinations: pdb
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
@@ -317,7 +317,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -346,7 +346,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -397,7 +397,7 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
         with:
           version: ${{ needs.build.outputs.version }}
@@ -420,7 +420,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
