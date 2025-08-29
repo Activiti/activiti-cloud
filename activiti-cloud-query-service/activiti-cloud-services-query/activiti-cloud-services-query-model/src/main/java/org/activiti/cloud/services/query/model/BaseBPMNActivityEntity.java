@@ -146,7 +146,7 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
     }
 
     public void setActivityName(String activityName) {
-        this.activityName = activityName;
+        this.activityName = StringUtils.truncate(activityName, 255);
     }
 
     public void setActivityType(String activityType) {
