@@ -20,9 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,31 +29,30 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
 class ServiceTaskIntegrationResultEventHandlerTest {
@@ -81,13 +78,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     private ManagementService managementService;
 
     @Mock
-    private ApplicationContext applicationContext;
-
-    @BeforeEach
-    void configureSelfBean() {
-        // getSelf() looks up the bean; return the same handler (spy to verify internal call if needed)
-        lenient().when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(handler);
-    }
+    private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
     @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
@@ -131,7 +122,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     }
 
     @Test
-    void receive_should_delegateGenericExceptionToHandlePropagationFailure() {
+    void receive_should_delegateGenericExceptionToCompletionHandler() {
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -140,39 +131,15 @@ class ServiceTaskIntegrationResultEventHandlerTest {
             .thenReturn(List.of(executionEntity));
 
         RuntimeException generic = new RuntimeException("boom");
-        AtomicInteger callCount = new AtomicInteger(0);
-        doAnswer(invocation -> {
-                if (callCount.getAndIncrement() == 0) {
-                    throw generic; // First call fails
-                }
-                return null; // Subsequent calls succeed
-            })
-            .when(managementService)
-            .executeCommand(any());
+        doThrow(generic).when(managementService).executeCommand(any());
 
-        // Spy handler to verify transactional error path invocation via self bean
-        ServiceTaskIntegrationResultEventHandler spyHandler = Mockito.spy(handler);
-        when(applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class)).thenReturn(spyHandler);
-        spyHandler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
-        verify(spyHandler).handlePropagationFailure(any(), eq(integrationContextEntity));
-    }
-
-    @Test
-    void handlePropagationFailure_should_buildErrorComposite() {
-        IntegrationContextEntityImpl entity = buildIntegrationContextEntity();
-
-        ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
-
-        IntegrationErrorImpl error = mock(IntegrationErrorImpl.class);
-
-        handler.handlePropagationFailure(error, entity);
-
-        verify(managementService).executeCommand(captor.capture());
-        CompositeCommand composite = captor.getValue();
-        assertThat(composite.getCommands()).hasSize(2);
-        assertThat(composite.getCommands().get(0)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
-        assertThat(composite.getCommands().get(1)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        // verify delegation to external completion handler
+        ArgumentCaptor<IntegrationErrorImpl> errorCaptor = ArgumentCaptor.forClass(IntegrationErrorImpl.class);
+        verify(serviceTaskIntegrationCompletionHandler)
+            .handlePropagationFailure(errorCaptor.capture(), eq(integrationContextEntity));
+        assertThat(errorCaptor.getValue()).isNotNull();
     }
 
     @Test

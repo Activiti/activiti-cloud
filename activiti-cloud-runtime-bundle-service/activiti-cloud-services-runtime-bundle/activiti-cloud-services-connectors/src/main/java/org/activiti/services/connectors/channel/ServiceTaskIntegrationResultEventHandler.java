@@ -54,7 +54,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
-    private final ApplicationContext applicationContext;
+    private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -63,7 +63,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ApplicationContext applicationContext
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -71,7 +71,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
-        this.applicationContext = applicationContext;
+        this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
     }
 
     @Retryable(
@@ -144,29 +144,11 @@ public class ServiceTaskIntegrationResultEventHandler {
                 );
                 IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
                 IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
-                getSelf().handlePropagationFailure(integrationError, integrationContextEntity);
+                this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
+                        integrationError,
+                        integrationContextEntity
+                    );
             }
         }
-    }
-
-    @Transactional(propagation = REQUIRES_NEW)
-    public void handlePropagationFailure(
-        IntegrationErrorImpl integrationError,
-        IntegrationContextEntity integrationContextEntity
-    ) {
-        Command<?> finalErrorHandlingCmd = CompositeCommand.of(
-            new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError,
-                runtimeBundleProperties,
-                processEngineEventsAggregator
-            ),
-            new DeleteIntegrationContextCmd(integrationContextEntity)
-        );
-
-        managementService.executeCommand(finalErrorHandlingCmd);
-    }
-
-    private ServiceTaskIntegrationResultEventHandler getSelf() {
-        return applicationContext.getBean(ServiceTaskIntegrationResultEventHandler.class);
     }
 }
