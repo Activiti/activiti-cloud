@@ -20,16 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    classes = { CloudConnectorApp.class },
-    properties = { "activiti.cloud.messaging.function-router.enabled=true" }
-)
-public class CloudConnectorAppFunctionRouterIT {
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
+public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
