@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;

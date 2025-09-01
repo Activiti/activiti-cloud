@@ -18,7 +18,7 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;

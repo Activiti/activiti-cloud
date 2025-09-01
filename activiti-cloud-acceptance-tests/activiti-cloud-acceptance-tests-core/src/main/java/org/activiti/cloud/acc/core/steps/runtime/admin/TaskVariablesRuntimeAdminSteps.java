@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime.admin;
 
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.TaskVariablesRuntimeAdminService;

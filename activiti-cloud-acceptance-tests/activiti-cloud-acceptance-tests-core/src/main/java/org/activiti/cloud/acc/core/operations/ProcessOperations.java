@@ -17,7 +17,7 @@ package org.activiti.cloud.acc.core.operations;
 
 import java.io.IOException;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.operations.steps.runtime.ProcessRuntimeSteps;
 import org.jbehave.core.annotations.When;

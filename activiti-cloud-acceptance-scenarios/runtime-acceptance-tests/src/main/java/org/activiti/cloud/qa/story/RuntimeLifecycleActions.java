@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.qa.story;
 
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;

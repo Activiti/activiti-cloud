@@ -23,7 +23,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import java.util.List;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;

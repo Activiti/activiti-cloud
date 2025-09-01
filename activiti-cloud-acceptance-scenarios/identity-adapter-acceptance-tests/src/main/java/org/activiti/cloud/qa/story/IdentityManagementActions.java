@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.qa.story;
 
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.qa.story.step.IdentityManagementSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;

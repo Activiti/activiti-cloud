@@ -21,7 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import java.util.List;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;

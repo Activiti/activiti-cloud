@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime.admin;
 
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.runtime.admin.ServiceTasksAdminService;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;

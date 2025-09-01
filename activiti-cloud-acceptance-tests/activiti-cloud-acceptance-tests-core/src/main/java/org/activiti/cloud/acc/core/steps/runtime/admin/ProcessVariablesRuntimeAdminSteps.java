@@ -18,7 +18,7 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;

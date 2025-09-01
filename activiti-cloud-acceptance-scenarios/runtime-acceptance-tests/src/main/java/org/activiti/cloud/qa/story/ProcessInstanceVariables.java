@@ -21,7 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;

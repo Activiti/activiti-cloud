@@ -19,7 +19,7 @@ import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;

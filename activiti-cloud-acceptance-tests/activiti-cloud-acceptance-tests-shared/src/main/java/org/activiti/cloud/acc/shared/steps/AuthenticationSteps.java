@@ -17,7 +17,7 @@ package org.activiti.cloud.acc.shared.steps;
 
 import static org.assertj.core.api.Assertions.*;
 
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
 import org.activiti.cloud.acc.shared.rest.feign.EnableFeignContext;

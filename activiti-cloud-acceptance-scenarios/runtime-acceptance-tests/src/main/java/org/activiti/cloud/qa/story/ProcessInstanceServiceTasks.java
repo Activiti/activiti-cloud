@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.annotations.Steps;
+import net.thucydides.core.annotations.Steps;
 import net.thucydides.core.steps.StepEventBus;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.ProcessDefinition;

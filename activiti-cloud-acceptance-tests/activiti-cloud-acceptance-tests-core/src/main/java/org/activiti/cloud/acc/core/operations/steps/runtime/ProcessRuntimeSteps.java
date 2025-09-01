@@ -18,7 +18,7 @@ package org.activiti.cloud.acc.core.operations.steps.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;

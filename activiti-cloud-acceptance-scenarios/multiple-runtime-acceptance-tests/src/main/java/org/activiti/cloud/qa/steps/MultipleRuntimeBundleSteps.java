@@ -17,7 +17,7 @@ package org.activiti.cloud.qa.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.serenitybdd.annotations.Step;
+import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
