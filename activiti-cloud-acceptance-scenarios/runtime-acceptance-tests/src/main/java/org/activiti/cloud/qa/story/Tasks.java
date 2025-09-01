@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import net.thucydides.core.steps.StepEventBus;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.task.model.Task;
