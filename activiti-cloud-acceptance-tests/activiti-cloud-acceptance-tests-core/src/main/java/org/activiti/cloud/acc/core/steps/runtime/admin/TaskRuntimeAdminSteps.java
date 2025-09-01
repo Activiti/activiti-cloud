@@ -17,7 +17,7 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.thucydides.core.annotations.Step;
+import net.serenitybdd.annotations.Step;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;

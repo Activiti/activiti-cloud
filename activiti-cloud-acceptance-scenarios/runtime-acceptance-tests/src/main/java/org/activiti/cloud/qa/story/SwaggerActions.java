@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import org.activiti.cloud.acc.core.steps.audit.SwaggerAuditSteps;
 import org.activiti.cloud.acc.core.steps.query.SwaggerQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.SwaggerRuntimeBundleSteps;

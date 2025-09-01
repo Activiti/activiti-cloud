@@ -17,7 +17,7 @@ package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.jbehave.core.annotations.Then;

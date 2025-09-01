@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Collection;
+import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.BPMNActivityEvent;

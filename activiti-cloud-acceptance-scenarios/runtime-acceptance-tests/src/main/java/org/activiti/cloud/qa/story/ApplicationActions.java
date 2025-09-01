@@ -21,7 +21,7 @@ import static org.awaitility.Awaitility.await;
  */
 
 import java.util.Collection;
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
