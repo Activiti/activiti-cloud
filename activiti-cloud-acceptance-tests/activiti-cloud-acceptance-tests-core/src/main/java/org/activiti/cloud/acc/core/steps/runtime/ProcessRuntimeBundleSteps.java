@@ -218,7 +218,7 @@ public class ProcessRuntimeBundleSteps {
     @Step
     public Collection<ProcessDefinition> getProcessDefinitions() {
         return processDefinitionsApiClient
-            .getProcessDefinitions(List.of(), DEFAULT_PAGEABLE)
+            .getProcessDefinitions(List.of(), null, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)

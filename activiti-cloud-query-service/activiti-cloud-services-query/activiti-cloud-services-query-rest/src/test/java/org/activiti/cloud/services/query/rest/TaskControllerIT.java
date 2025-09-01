@@ -25,6 +25,7 @@ import org.activiti.QueryRestTestApplication;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -67,8 +68,13 @@ class TaskControllerIT extends AbstractTaskControllerIT {
         return "/v1/tasks/search";
     }
 
+    @Override
+    protected String getCountEndpointHttpPost() {
+        return "/v1/tasks/count";
+    }
+
     @Test
-    void should_returnTasks_restrictedToCurrentUser() {
+    void should_returnTasksAndCount_restrictedToCurrentUser() {
         String otherUser = "other-user";
         String testgroup = "testgroup";
         Mockito.when(securityManager.getAuthenticatedUserGroups()).thenReturn(List.of(testgroup));
@@ -106,5 +112,14 @@ class TaskControllerIT extends AbstractTaskControllerIT {
                 TASK_IDS_JSON_PATH,
                 containsInAnyOrder(task1.getId(), task2.getId(), task4.getId(), task6.getId(), task7.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post("/v1/tasks/count")
+            .then()
+            .statusCode(200)
+            .body(IsEqual.equalTo("5"));
     }
 }

@@ -68,7 +68,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -102,7 +102,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -115,19 +115,15 @@ class ProcessDefinitionServiceTest {
         verify(processDefinitionDecorator, never()).decorate(any());
     }
 
-    private static Stream<Arguments> emptyIncludeVariables() {
-        return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
-    }
-
     @Test
     void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
+        String excludedCategory = "#triggerableByForm";
         Pageable pageable = Pageable.of(0, 10);
 
         when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
-        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList());
+        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
 
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
@@ -136,5 +132,28 @@ class ProcessDefinitionServiceTest {
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
+    }
+
+    @Test
+    void should_setFilterForProcessDefinitionsWithoutExcludedCategory() {
+        String excludedCategory = "SELECT * FROM wrong_category";
+        Pageable pageable = Pageable.of(0, 10);
+
+        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
+
+        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+
+        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
+    }
+
+    private static Stream<Arguments> emptyIncludeVariables() {
+        return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
     }
 }

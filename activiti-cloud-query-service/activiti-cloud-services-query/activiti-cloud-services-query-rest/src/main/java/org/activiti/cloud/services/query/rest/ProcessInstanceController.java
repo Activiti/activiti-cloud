@@ -145,4 +145,11 @@ public class ProcessInstanceController {
             processInstanceRepresentationModelAssembler
         );
     }
+
+    @Operation(summary = "Count process instances")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/count")
+    public Long countProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceControllerHelper.countProcessInstances(searchRequest);
+    }
 }

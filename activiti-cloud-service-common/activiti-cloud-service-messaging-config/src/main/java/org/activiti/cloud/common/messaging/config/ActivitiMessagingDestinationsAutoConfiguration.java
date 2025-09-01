@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 
@@ -41,9 +42,17 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
-        ActivitiMessagingDestinationTransformer destinationTransformer
+        ActivitiMessagingDestinationTransformer destinationTransformer,
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionBindingPropertySource functionBindingPropertySource,
+        StreamFunctionConfigurationProperties streamFunctionProperties
     ) {
-        return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
+        return new ActivitiMessagingDestinationsBeanPostProcessor(
+            destinationTransformer,
+            messagingProperties,
+            functionBindingPropertySource,
+            streamFunctionProperties
+        );
     }
 
     @Bean

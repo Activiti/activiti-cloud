@@ -72,7 +72,7 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-public class QueryBPMNActivityIT {
+class QueryBPMNActivityIT {
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -112,7 +112,7 @@ public class QueryBPMNActivityIT {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         identityTokenProducer.withTestUser("hruser");
 
         eventsAggregator = new EventsAggregator(producer);
@@ -136,7 +136,7 @@ public class QueryBPMNActivityIT {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
         processInstanceRepository.deleteAll();
@@ -146,7 +146,7 @@ public class QueryBPMNActivityIT {
     }
 
     @Test
-    public void shouldHandleCyclicalBPMNActivityEvents() throws InterruptedException {
+    void shouldHandleCyclicalBPMNActivityEvents() {
         //given
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
@@ -270,22 +270,85 @@ public class QueryBPMNActivityIT {
     }
 
     @Test
-    public void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
+    void shouldSaveActivityWithLongNames() {
+        //given
+        ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setId(UUID.randomUUID().toString());
+        process.setName("process");
+        process.setProcessDefinitionKey("mySimpleProcess2");
+        process.setProcessDefinitionId(processDefinitionId);
+        process.setProcessDefinitionVersion(1);
+
+        BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "a".repeat(256), "startEvent");
+        startActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        startActivity.setProcessInstanceId(process.getId());
+        startActivity.setExecutionId("executionId");
+
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sf-1", "startEvent1", "reviewTaskActivity");
+        sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow.setProcessInstanceId(process.getId());
+
+        BPMNActivityImpl reviewTaskActivity = new BPMNActivityImpl("reviewTaskActivity", "a".repeat(256), "userTask");
+        reviewTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        reviewTaskActivity.setProcessInstanceId(process.getId());
+        reviewTaskActivity.setExecutionId("executionId");
+
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(process),
+            new CloudProcessStartedEventImpl(process, null, null),
+            new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
+            new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
+            new CloudSequenceFlowTakenEventImpl(sequenceFlow),
+            new CloudBPMNActivityStartedEventImpl(reviewTaskActivity, processDefinitionId, process.getId()),
+            new CloudBPMNActivityCompletedEventImpl(reviewTaskActivity, processDefinitionId, process.getId())
+        );
+
+        //when
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+
+                assertThat(activities).hasSize(2);
+                assertThat(activities)
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityType,
+                        BPMNActivityEntity::getStatus
+                    )
+                    .containsExactly(
+                        tuple(
+                            startActivity.getElementId(),
+                            startActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            reviewTaskActivity.getElementId(),
+                            reviewTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        )
+                    );
+            });
+    }
+
+    @Test
+    void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
         //given
         List<CloudRuntimeEvent> events = objectMapper.readValue(
             multiInstanceSequenceJson.getFile(),
-            new TypeReference<List<CloudRuntimeEvent>>() {}
+            new TypeReference<>() {}
         );
 
         replayAuditEvents(events);
     }
 
     @Test
-    public void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
+    void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
         //given
         List<CloudRuntimeEvent> events = objectMapper.readValue(
             multiInstanceSequenceJsonLegacy.getFile(),
-            new TypeReference<List<CloudRuntimeEvent>>() {}
+            new TypeReference<>() {}
         );
 
         replayAuditEvents(events);

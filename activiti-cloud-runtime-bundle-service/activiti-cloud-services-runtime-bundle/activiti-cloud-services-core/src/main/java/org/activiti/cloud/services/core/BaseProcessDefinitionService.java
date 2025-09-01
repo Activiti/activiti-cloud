@@ -17,23 +17,36 @@ package org.activiti.cloud.services.core;
 
 import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseProcessDefinitionService {
 
-    private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseProcessDefinitionService.class);
 
-    protected static final String PROCESS_CATEGORY_TO_EXCLUDE = "#triggerableByForm";
+    private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
     public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         this.processDefinitionDecorators = processDefinitionDecorators;
     }
 
-    public abstract Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include);
+    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
+        return getProcessDefinitions(pageable, include, null);
+    }
+
+    public abstract Page<ProcessDefinition> getProcessDefinitions(
+        Pageable pageable,
+        List<String> include,
+        String excludedCategory
+    );
 
     protected ExtendedCloudProcessDefinition decorateAll(ProcessDefinition processDefinition, List<String> include) {
         ExtendedCloudProcessDefinition decoratedProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
@@ -53,5 +66,19 @@ public abstract class BaseProcessDefinitionService {
             .findFirst()
             .map(decorator -> decorator.decorate(processDefinition))
             .orElse(processDefinition);
+    }
+
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(String excludedCategory) {
+        var processDefinitionsPayloadBuilder = ProcessPayloadBuilder.processDefinitions();
+        if (validateInput(excludedCategory)) {
+            LOGGER.debug("Excluding process definitions with category: {}", excludedCategory);
+
+            processDefinitionsPayloadBuilder.withProcessCategoryToExclude(excludedCategory);
+        }
+        return processDefinitionsPayloadBuilder.build();
+    }
+
+    protected boolean validateInput(String excludedCategory) {
+        return StringUtils.isNotEmpty(excludedCategory) && excludedCategory.matches("[a-zA-Z0-9_\\-#.]+");
     }
 }

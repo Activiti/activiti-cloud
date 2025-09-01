@@ -102,13 +102,15 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         );
     }
 
-    protected void registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
+    protected String registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
+        final String beanName = functionName + REGISTRATION_NAME_SUFFIX;
+
+        functionRegistration.setBeanName(beanName);
+
         GenericApplicationContext.class.cast(applicationContext)
-            .registerBean(
-                functionName + REGISTRATION_NAME_SUFFIX,
-                FunctionRegistration.class,
-                () -> functionRegistration
-            );
+            .registerBean(beanName, FunctionRegistration.class, () -> functionRegistration);
+
+        return beanName;
     }
 
     protected CompositeMessageConverter getMessageConverter() {

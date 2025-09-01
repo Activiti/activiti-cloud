@@ -49,7 +49,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessDefinitionAdminServiceTest {
+class ProcessDefinitionAdminServiceTest {
 
     private final ProcessAdminRuntime processAdminRuntime = Mockito.mock(ProcessAdminRuntime.class);
     private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
@@ -67,7 +67,7 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -101,7 +101,7 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(), any(GetProcessDefinitionsPayload.class)))
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -114,19 +114,15 @@ public class ProcessDefinitionAdminServiceTest {
         verify(processDefinitionDecorator, never()).decorate(any());
     }
 
-    private static Stream<Arguments> emptyIncludeVariables() {
-        return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
-    }
-
     @Test
     void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = BaseProcessDefinitionService.PROCESS_CATEGORY_TO_EXCLUDE;
+        String excludedCategory = "#triggerableByForm";
         Pageable pageable = Pageable.of(0, 10);
 
         when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
-        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList());
+        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
 
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
@@ -135,5 +131,28 @@ public class ProcessDefinitionAdminServiceTest {
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
+    }
+
+    @Test
+    void should_setFilterForProcessDefinitionsWithoutExcludedCategory() {
+        String excludedCategory = "#triggerableByForm SELECT * FROM wrong_category";
+        Pageable pageable = Pageable.of(0, 10);
+
+        when(processAdminRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
+
+        processDefinitionAdminService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+        verify(processAdminRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+
+        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
+        assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
+    }
+
+    private static Stream<Arguments> emptyIncludeVariables() {
+        return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
     }
 }
