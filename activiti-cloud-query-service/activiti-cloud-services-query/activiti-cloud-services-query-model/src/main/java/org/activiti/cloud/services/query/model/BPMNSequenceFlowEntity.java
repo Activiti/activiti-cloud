@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import static jakarta.persistence.TemporalType.TIMESTAMP;
+import static org.activiti.cloud.services.query.model.StringUtils.truncate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -173,7 +174,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     }
 
     public void setSourceActivityName(String sourceActivityName) {
-        this.sourceActivityName = sourceActivityName;
+        this.sourceActivityName = truncate(sourceActivityName, 255);
     }
 
     public void setTargetActivityElementId(String targetActivityElementId) {
@@ -185,7 +186,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     }
 
     public void setTargetActivityName(String targetActivityName) {
-        this.targetActivityName = targetActivityName;
+        this.targetActivityName = truncate(targetActivityName, 255);
     }
 
     public void setTargetActivityType(String targetActivityType) {
