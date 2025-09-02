@@ -99,7 +99,6 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                         .transactional()
                         .id(MESSAGE_GATEWAY)
                         .requiresReply(false)
-                        .async(true)
                         .replyTimeout(0L)
                         .advice(interceptor)
             );
