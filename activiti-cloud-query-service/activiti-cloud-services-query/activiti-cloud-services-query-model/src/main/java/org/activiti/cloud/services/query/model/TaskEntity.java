@@ -267,6 +267,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
+        this.rootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
     }
 
     @Override
@@ -317,6 +318,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @Override
     public String getProcessInstanceId() {
         return processInstanceId;
+    }
+
+    @Override
+    public String getTaskProcessRootProcessInstanceId() {
+        return rootProcessInstanceId;
     }
 
     @Override

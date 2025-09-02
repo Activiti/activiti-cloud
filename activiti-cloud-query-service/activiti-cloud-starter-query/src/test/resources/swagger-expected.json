@@ -7231,6 +7231,9 @@
           },
           "taskDefinitionKey": {
             "type": "string"
+          },
+          "taskProcessRootProcessInstanceId": {
+            "type": "string"
           }
         },
         "title": "QueryCloudTask_ProcessVariables"
@@ -7807,6 +7810,9 @@
             "type": "string"
           },
           "taskDefinitionKey": {
+            "type": "string"
+          },
+          "taskProcessRootProcessInstanceId": {
             "type": "string"
           }
         },
