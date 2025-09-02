@@ -31,6 +31,7 @@ public class CloudTaskCreatedEventImplTest {
         task.setProcessInstanceId("procInstId");
         task.setProcessDefinitionVersion(10);
         task.setBusinessKey("businessKey");
+        task.setTaskProcessRootProcessInstanceId("rootProcInstId");
 
         //when
         CloudTaskCreatedEventImpl taskCreatedEvent = new CloudTaskCreatedEventImpl(task);
@@ -41,5 +42,6 @@ public class CloudTaskCreatedEventImplTest {
         assertThat(taskCreatedEvent.getProcessInstanceId()).isEqualTo("procInstId");
         assertThat(taskCreatedEvent.getProcessDefinitionVersion()).isEqualTo(10);
         assertThat(taskCreatedEvent.getBusinessKey()).isEqualTo("businessKey");
+        assertThat(taskCreatedEvent.getParentProcessInstanceId()).isEqualTo("rootProcInstId");
     }
 }

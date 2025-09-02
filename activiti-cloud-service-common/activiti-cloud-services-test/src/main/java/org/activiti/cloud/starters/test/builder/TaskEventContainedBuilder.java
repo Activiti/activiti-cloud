@@ -234,6 +234,7 @@ public class TaskEventContainedBuilder {
         task.setCreatedDate(new Date());
         if (processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
+            task.setTaskProcessRootProcessInstanceId(processInstance.getRootProcessInstanceId());
         }
         return task;
     }
@@ -250,6 +251,7 @@ public class TaskEventContainedBuilder {
         task.setCreatedDate(new Date());
         if (processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
+            task.setTaskProcessRootProcessInstanceId(processInstance.getRootProcessInstanceId());
         }
         return task;
     }
