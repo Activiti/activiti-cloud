@@ -60,7 +60,7 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
         }
 
         Assert.hasLength(job.getId(), "job id must not be empty");
-        Assert.hasLength(bindingName, "destination must not be empty");
+        Assert.hasLength(bindingName, "job binding name must not be empty");
 
         Message<String> message = jobMessageBuilderFactory
             .create(job)
