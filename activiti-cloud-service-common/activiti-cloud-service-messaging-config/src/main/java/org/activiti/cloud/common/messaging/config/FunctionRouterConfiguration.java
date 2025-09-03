@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,6 +35,9 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -66,6 +70,7 @@ public class FunctionRouterConfiguration {
 
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
+    public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
 
     @Bean
     ApplicationRunner functionRouterConfigurationApplicationRunner(
@@ -81,21 +86,52 @@ public class FunctionRouterConfiguration {
         SubscribableChannel functionRouterInput() {
             return MessageChannels.publishSubscribe(FUNCTION_ROUTER_INPUT).getObject();
         }
+
+        @InputBinding(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+        SubscribableChannel functionRouterAnonymousInput() {
+            return MessageChannels.publishSubscribe(FUNCTION_ROUTER_ANONYMOUS_INPUT).getObject();
+        }
+    }
+
+    @Bean
+    DeclarableCustomizer functionRouterAnonymousQueueCustomizer(ActivitiCloudMessagingProperties messagingProperties) {
+        final var groupPrefix = messagingProperties.getFunctionRouter().groupPrefix();
+
+        return declarable -> {
+            if (declarable instanceof Queue queue) {
+                Optional
+                    .ofNullable(queue.getName())
+                    .filter(it -> it.startsWith(groupPrefix))
+                    .ifPresent(name -> queue.setLeaderLocator("client-local"));
+            }
+
+            return declarable;
+        };
     }
 
     @Bean
     @FunctionBinding(input = FUNCTION_ROUTER_INPUT)
-    Consumer<Message<?>> functionRouterConsumer(
+    Consumer<Message<?>> functionRouterConsumer(BiConsumer<Message<?>, String> functionRouterMessageHandler) {
+        return message -> functionRouterMessageHandler.accept(message, FUNCTION_ROUTER_INPUT);
+    }
+
+    @Bean
+    @FunctionBinding(input = FUNCTION_ROUTER_ANONYMOUS_INPUT)
+    Consumer<Message<?>> functionRouterAnonymousConsumer(BiConsumer<Message<?>, String> functionRouterMessageHandler) {
+        return message -> functionRouterMessageHandler.accept(message, FUNCTION_ROUTER_ANONYMOUS_INPUT);
+    }
+
+    @Bean
+    BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
-        return message -> {
+        return (message, routingContext) -> {
             Optional
-                .of(message)
-                .filter(it -> it.getHeaders().containsKey(FUNCTION_DESTINATION))
-                .map(it -> it.getHeaders().get(FUNCTION_DESTINATION, String.class))
-                .map(messagingProperties.getFunctionRouter().registrations()::get)
+                .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
+                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
                     registrations -> {
@@ -170,7 +206,7 @@ public class FunctionRouterConfiguration {
 
                         final var registration = Optional
                             .ofNullable(destination)
-                            .map(it -> messagingProperties.getFunctionRouter().registrations().get(it))
+                            .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
                             .orElse(List.of());
 
                         log.warn(

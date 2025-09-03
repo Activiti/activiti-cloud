@@ -18,38 +18,26 @@ package org.activiti.cloud.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
-    classes = RuntimeBundleApplication.class,
+@TestPropertySource(
     properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
 )
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
-public class RuntimeBundleFunctionRouterEnabledIT {
+public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicationIT {
 
     @ServiceConnection
     @Container
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
@@ -61,11 +49,6 @@ public class RuntimeBundleFunctionRouterEnabledIT {
     private Environment environment;
 
     @Test
-    void contextLoads() {
-        assertThat(applicationContext).isNotNull();
-    }
-
-    @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
             .doesNotContainKeys(
@@ -74,9 +57,25 @@ public class RuntimeBundleFunctionRouterEnabledIT {
                 "integrationResultsConsumer",
                 "myCmdResults",
                 "signalConsumer",
-                "messageConnectorInput"
-            )
-            .containsKey("functionRouterInput");
+                "messageConnectorInput",
+                "asyncExecutorJobsInput"
+            );
+
+        assertThat(bindingServiceProperties.getBindings())
+            .containsOnlyKeys(
+                "functionRouterInput",
+                "asyncExecutorJobsOutput",
+                "auditProducer",
+                "commandResults",
+                "messageConnectorOutput",
+                "messageEventsOutput",
+                "myCmdProducer",
+                "signalProducer"
+            );
+
+        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
+            .extracting(BindingProperties::getGroup)
+            .isEqualTo("my-runtime-bundle");
     }
 
     @Test
@@ -100,7 +99,29 @@ public class RuntimeBundleFunctionRouterEnabledIT {
                 "integrationResultsConsumer",
                 "myCmdResults",
                 "signalConsumer",
-                "messageConnectorInput"
+                "messageConnectorInput",
+                "asyncExecutorJobsInput"
+            );
+
+        assertThat(functionRouter.destinations())
+            .containsOnlyKeys(
+                "commandConsumer",
+                "integrationErrorsConsumer",
+                "integrationResultsConsumer",
+                "myCmdResults",
+                "signalConsumer",
+                "messageConnectorInput",
+                "asyncExecutorJobsInput"
+            );
+
+        assertThat(functionRouter.registrations())
+            .containsOnlyKeys(
+                "commandConsumer_myapp",
+                "asyncExecutorJobs_myapp",
+                "messageEvents_myapp",
+                "integrationResult_my-runtime-bundle",
+                "integrationError_my-runtime-bundle",
+                "signalEvent"
             );
     }
 
@@ -121,8 +142,5 @@ public class RuntimeBundleFunctionRouterEnabledIT {
             )
         )
             .isTrue();
-
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
-            .isEqualTo("my-runtime-bundle");
     }
 }

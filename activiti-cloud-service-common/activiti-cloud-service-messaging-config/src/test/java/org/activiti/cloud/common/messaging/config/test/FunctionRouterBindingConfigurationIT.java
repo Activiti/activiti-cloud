@@ -17,10 +17,13 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.ENGINE_EVENTS_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
@@ -46,6 +49,9 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -59,9 +65,9 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
@@ -74,10 +80,14 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
         "spring.cloud.stream.bindings.auditConsumer.destination=engine-events",
+        "spring.cloud.stream.bindings.auditConsumer.group=audit",
         "spring.cloud.stream.bindings.queryConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.queryConsumer.group=query",
+        "spring.cloud.stream.bindings.engineEventsConsumer.destination=engine-events",
         "spring.cloud.stream.bindings.integrationRequests.destination=integration-requests",
+        "spring.cloud.stream.bindings.integrationRequests.group=${spring.application.name}",
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.destination=script.EXECUTE",
+        "spring.cloud.stream.bindings.scriptRuntimeConsumer.group=${spring.application.name}",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.max-retries=4",
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
@@ -88,7 +98,9 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
+        "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
     }
 )
 @EnableTestBinder
@@ -106,6 +118,7 @@ public class FunctionRouterBindingConfigurationIT {
 
     private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
+    private static final AtomicReference<Message<?>> engineEventsMessage = new AtomicReference<>();
     private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
     private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
 
@@ -139,6 +152,12 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
 
+    @Autowired
+    private DeclarableCustomizer functionRouterAnonymousQueueCustomizer;
+
+    @Autowired
+    private Environment environment;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -154,10 +173,6 @@ public class FunctionRouterBindingConfigurationIT {
         @FunctionBinding(input = AUDIT_CONSUMER)
         public Consumer<Message<?>> auditConsumerHandler() {
             return message -> {
-                if (auditRetries.getAndSet(auditRetries.get() + 1) < 3) {
-                    throw new MessageHandlingException(message, "test error");
-                }
-
                 auditMessage.set(message);
             };
         }
@@ -181,6 +196,18 @@ public class FunctionRouterBindingConfigurationIT {
         public ConsumerConnector<String> scriptRuntimeExecutor() {
             return message -> {
                 connectorPayload.set(message);
+            };
+        }
+
+        @Bean
+        @FunctionBinding(input = ENGINE_EVENTS_CONSUMER)
+        public Consumer<Message<?>> engineEventsConsumerHandler() {
+            return message -> {
+                if (auditRetries.getAndSet(auditRetries.get() + 1) < 3) {
+                    throw new RuntimeException("test error");
+                }
+
+                engineEventsMessage.set(message);
             };
         }
     }
@@ -223,7 +250,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionRouterBinding() {
+    void functionRouterInputBinding() {
         // when
         var functionRouterInput = bindingServiceProperties.getBindingProperties("functionRouterInput");
 
@@ -238,6 +265,34 @@ public class FunctionRouterBindingConfigurationIT {
             );
 
         assertThat(functionRouterInput).isNotNull().extracting(BindingProperties::getGroup).isEqualTo("bar");
+    }
+
+    @Test
+    void functionRouterAnonymousInputBinding() {
+        // when
+        var functionRouterAnonymousInput = bindingServiceProperties.getBindingProperties(
+            "functionRouterAnonymousInput"
+        );
+
+        // then
+        assertThat(functionRouterAnonymousInput)
+            .isNotNull()
+            .extracting(BindingProperties::getDestination)
+            .satisfies(destination ->
+                assertThat(List.of(destination.split(",")))
+                    .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                    .containsOnly("engine-events")
+            );
+
+        assertThat(functionRouterAnonymousInput)
+            .isNotNull()
+            .extracting(BindingProperties::getGroup)
+            .satisfies(group -> assertThat(group).startsWith("bar."));
+
+        assertThat(functionRouterAnonymousInput)
+            .isNotNull()
+            .extracting(BindingProperties::getConsumer)
+            .satisfies(consumer -> assertThat(consumer.getConcurrency()).isEqualTo(2));
     }
 
     @Test
@@ -256,7 +311,13 @@ public class FunctionRouterBindingConfigurationIT {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         )
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
-            .containsOnlyKeys("auditProducer", "commandResults", "functionRouterInput", "integrationResults");
+            .containsOnlyKeys(
+                "auditProducer",
+                "commandResults",
+                "functionRouterInput",
+                "integrationResults",
+                "functionRouterAnonymousInput"
+            );
     }
 
     @Test
@@ -358,6 +419,10 @@ public class FunctionRouterBindingConfigurationIT {
                     .isNotNull()
                     .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
                     .isEqualTo("auditConsumerHandler_registration");
+                assertThat(engineEventsMessage.get())
+                    .isNotNull()
+                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                    .isEqualTo("engineEventsConsumerHandler_registration");
             });
 
         assertThat(auditRetries.get()).isEqualTo(4);
@@ -418,6 +483,24 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void testConnectorBindingsAmqpHeaders() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("run_test();")
+            .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "script.EXECUTE")
+            .build();
+
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        await()
+            .untilAsserted(() -> {
+                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+            });
+    }
+
+    @Test
     void messagingProperties() {
         assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
         assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
@@ -432,7 +515,8 @@ public class FunctionRouterBindingConfigurationIT {
                 "queryConsumer",
                 "auditConsumer",
                 "integrationRequests",
-                "scriptRuntimeConsumer"
+                "scriptRuntimeConsumer",
+                "engineEventsConsumer"
             );
     }
 
@@ -444,10 +528,45 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
                 Map.entry(
                     "engine-events",
+                    List.of(
+                        "queryConsumerHandler_registration",
+                        "auditConsumerHandler_registration",
+                        "engineEventsConsumerHandler_registration"
+                    )
+                ),
+                Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration"))
+            );
+    }
+
+    @Test
+    void functionRouterInputRegistrations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_INPUT))
+            .containsOnly(
+                Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
+                Map.entry(
+                    "engine-events",
                     List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
                 ),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration"))
             );
+    }
+
+    @Test
+    void functionRouterInputDestinations() {
+        Assertions
+            .assertThat(bindingServiceProperties.getBindingDestination(FUNCTION_ROUTER_INPUT))
+            .satisfies(destination ->
+                assertThat(destination.split(","))
+                    .containsOnlyOnce("command-consumer", "script.EXECUTE", "engine-events", "integration-requests")
+            );
+    }
+
+    @Test
+    void functionRouterAnonymousInputRegistrations() {
+        Assertions
+            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_ANONYMOUS_INPUT))
+            .containsOnly(Map.entry("engine-events", List.of("engineEventsConsumerHandler_registration")));
     }
 
     @Test
@@ -459,7 +578,72 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("commandConsumer", "command-consumer"),
                 Map.entry("integrationRequests", "integration-requests"),
                 Map.entry("queryConsumer", "engine-events"),
-                Map.entry("scriptRuntimeConsumer", "script.EXECUTE")
+                Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
+                Map.entry("engineEventsConsumer", "engine-events")
             );
+    }
+
+    @Test
+    void functionRouterAnonymousQueueCustomizer() {
+        var queueName = messagingProperties.getFunctionRouter().getGroup().concat(".foobar");
+
+        var queue = new Queue(queueName);
+
+        functionRouterAnonymousQueueCustomizer.apply(queue);
+
+        assertThat(queue.getArguments())
+            .asInstanceOf(InstanceOfAssertFactories.MAP)
+            .containsEntry("x-queue-master-locator", "client-local");
+    }
+
+    @Test
+    void environment() {
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.durable-subscription",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.exclusive",
+                Boolean.class
+            )
+        )
+            .isFalse();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.durable-subscription",
+                Boolean.class
+            )
+        )
+            .isFalse();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.exclusive",
+                Boolean.class
+            )
+        )
+            .isTrue();
     }
 }
