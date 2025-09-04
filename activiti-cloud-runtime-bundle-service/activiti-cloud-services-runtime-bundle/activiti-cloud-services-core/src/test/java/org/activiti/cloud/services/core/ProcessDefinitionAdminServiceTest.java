@@ -82,7 +82,7 @@ class ProcessDefinitionAdminServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"))
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), null, false)
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -107,7 +107,7 @@ class ProcessDefinitionAdminServiceTest {
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
         List<ProcessDefinition> result = processDefinitionAdminService
-            .getProcessDefinitions(Pageable.of(0, 50), include)
+            .getProcessDefinitions(Pageable.of(0, 50), include, null, false)
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -154,5 +154,47 @@ class ProcessDefinitionAdminServiceTest {
 
     private static Stream<Arguments> emptyIncludeVariables() {
         return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
+    }
+
+    @Test
+    void should_getProcessDefinitionsWithLatestVersion_whenLatestVersionIsTrue() {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("id");
+        processDefinition.setVersion(2);
+        processDefinition.setName("process1");
+        processDefinition.setKey("process1");
+
+        ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
+        processDefinitions.add(processDefinition);
+
+        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
+            GetProcessDefinitionsPayload.class
+        );
+
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
+
+        VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
+        when(processDefinitionDecorator.applies("variables")).thenReturn(true);
+        when(
+            processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
+        )
+            .thenAnswer(call -> {
+                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+                return cloudProcessDefinition;
+            });
+
+        List<ProcessDefinition> result = processDefinitionAdminService
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), null, true)
+            .getContent();
+
+        verify(processAdminRuntime).processDefinitions(any(Pageable.class), payloadCaptor.capture());
+        assertThat(result)
+            .hasSize(1)
+            .first()
+            .extracting(ProcessDefinition::getName, ProcessDefinition::getVersion)
+            .containsExactly("process1", 2);
+        assertThat(payloadCaptor.getValue().isLatestVersionOnly()).isTrue();
     }
 }
