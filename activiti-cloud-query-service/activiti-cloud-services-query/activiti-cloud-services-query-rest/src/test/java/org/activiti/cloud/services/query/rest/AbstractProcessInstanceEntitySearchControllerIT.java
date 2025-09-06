@@ -88,6 +88,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     protected abstract String getSearchEndpoint();
 
+    protected abstract String getCountEndpoint();
+
     @Test
     public void should_excludeProcessInstances_by_processDefinitionCategoryName() throws Exception {
         // given
@@ -128,6 +130,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body("_embedded.processInstances", hasSize(1))
             .body("_embedded.processInstances[0].id", equalTo(processInstanceToKeep.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -147,6 +158,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("id0", "id2"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -172,6 +192,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("id1", "id3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -201,6 +230,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -230,6 +268,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -265,6 +312,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem("id1"))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem("id2"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -288,6 +344,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -311,6 +376,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -334,6 +408,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -357,6 +440,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -380,6 +472,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -403,6 +504,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -426,6 +536,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -449,6 +568,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -486,6 +614,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("skipCount", 0)
             .param("maxItems", 2)
             .body(requestBuilder.buildJson())
@@ -495,6 +632,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -510,6 +656,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
             .param("skipCount", 4)
             .param("maxItems", 2)
             .body(requestBuilder.buildJson())
@@ -519,6 +674,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body("page.totalElements", equalTo(5));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("5"));
     }
 
     @Test
@@ -543,6 +707,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()))
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables", empty());
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -577,6 +750,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables", hasSize(2))
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem(VAR_NAME))
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem("var3"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -619,6 +801,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -660,6 +851,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .then()
             .statusCode(200)
             .body("page.totalElements", equalTo(0));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -697,6 +897,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -735,6 +944,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -773,6 +991,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -811,6 +1038,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -849,6 +1085,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -887,6 +1132,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -926,6 +1180,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -964,6 +1227,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1003,6 +1275,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1057,6 +1338,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -1086,6 +1376,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance3.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -1124,6 +1423,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1162,6 +1470,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body("page.totalElements", equalTo(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1200,6 +1517,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1239,6 +1565,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1277,6 +1612,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1316,6 +1660,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1370,6 +1723,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -1399,6 +1761,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance3.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -1437,6 +1808,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1475,6 +1855,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1513,6 +1902,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1552,6 +1950,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1590,6 +1997,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1629,6 +2045,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1683,6 +2108,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -1712,6 +2146,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance3.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -1754,6 +2197,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1796,6 +2248,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1838,6 +2299,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1881,6 +2351,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -1923,6 +2402,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -1966,6 +2454,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
     }
 
     @Test
@@ -2026,6 +2523,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
             VAR_NAME,
@@ -2055,6 +2561,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance3.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2093,6 +2608,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
     }
 
     @Test
@@ -2136,6 +2660,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance3.getId(), processInstance2.getId(), processInstance1.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(new CloudRuntimeEntitySort("startDate", Sort.Direction.DESC, false, null, null));
@@ -2151,6 +2684,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2200,6 +2742,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2224,6 +2775,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2273,6 +2833,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2297,6 +2866,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance2.getId(), processInstance1.getId(), processInstance3.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2346,6 +2924,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2370,6 +2957,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2419,6 +3015,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2443,6 +3048,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2498,6 +3112,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains(processInstance2.getId(), processInstance1.getId(), processInstance3.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2522,6 +3145,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     @Test
@@ -2575,6 +3207,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 containsInRelativeOrder(processInstance2.getId(), processInstance3.getId())
             );
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
@@ -2603,6 +3244,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 PROCESS_INSTANCE_IDS_JSON_PATH,
                 containsInRelativeOrder(processInstance3.getId(), processInstance2.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
     }
 
     /**
@@ -2670,6 +3320,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             )
             .body("page.totalElements", is(4));
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+
         requestBuilder.invertSort();
 
         given()
@@ -2687,6 +3346,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                 contains("cool", "best", "amazing", null)
             )
             .body("page.totalElements", is(4));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("4"));
     }
 
     @Test
@@ -2702,6 +3370,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .then()
             .statusCode(400);
 
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
@@ -2713,6 +3390,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .post(getSearchEndpoint())
             .then()
             .statusCode(400);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
     }
 
     @Test
@@ -2758,6 +3444,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
             .param("maxItems", 4)
             .param("skipCount", 4)
             .when()
@@ -2774,6 +3469,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
             .param("maxItems", 4)
             .param("skipCount", 8)
             .when()
@@ -2786,6 +3490,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body("page.totalPages", is(3))
             .body("page.size", is(4))
             .body("page.number", is(2));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
     }
 
     @Test
@@ -2831,5 +3544,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(10));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .when()
+            .post(getCountEndpoint())
+            .then()
+            .statusCode(200)
+            .body(equalTo("10"));
     }
 }

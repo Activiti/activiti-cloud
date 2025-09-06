@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
-
-import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -37,6 +36,7 @@ import org.springframework.util.StringUtils;
 public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String INPUT_BINDING = "_sink";
+    private static final Logger log = LoggerFactory.getLogger(InputBindingConfiguration.class);
 
     @Bean
     public BeanPostProcessor inputBindingBeanPostProcessor(
@@ -53,16 +53,21 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
 
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
-                        .filter(inputBinding -> !functionRouter.isEnabled() || !functionRouter.isFunctionRoute(beanName)
-                        )
-                        .ifPresent(functionBinding -> {
-                            if (
-                                List.of(functionBinding.value()).contains(FUNCTION_ROUTER_INPUT) &&
-                                functionRouter.destinations().isEmpty()
-                            ) {
-                                return;
+                        .filter(inputBinding -> {
+                            final var hasBindingConfiguration = bindingServiceProperties
+                                .getBindings()
+                                .containsKey(inputBinding.value()[0]);
+
+                            if (!hasBindingConfiguration) {
+                                log.warn(
+                                    "Skipping input binding {} configuration due to missing binding service properties",
+                                    inputBinding.value()[0]
+                                );
                             }
 
+                            return hasBindingConfiguration;
+                        })
+                        .ifPresent(inputBinding -> {
                             final String beanInName = getInBinding(beanName + INPUT_BINDING);
 
                             String inputBindings = bindingServiceProperties.getInputBindings();

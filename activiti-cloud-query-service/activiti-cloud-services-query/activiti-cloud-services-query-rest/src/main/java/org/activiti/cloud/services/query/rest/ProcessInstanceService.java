@@ -203,4 +203,9 @@ public class ProcessInstanceService {
 
         return taskRepository.exists(whereExpression);
     }
+
+    @Transactional(readOnly = true)
+    public Long count(ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceSearchService.countRestricted(searchRequest);
+    }
 }

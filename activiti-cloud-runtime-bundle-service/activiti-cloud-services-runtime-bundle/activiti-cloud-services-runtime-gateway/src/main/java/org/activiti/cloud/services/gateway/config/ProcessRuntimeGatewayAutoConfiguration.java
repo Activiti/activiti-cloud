@@ -23,7 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.activiti.api.model.shared.Result;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.gateway.ProcessRuntimeGateway;
 import org.activiti.cloud.services.gateway.channels.ProcessRuntimeGatewayChannelsConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -50,13 +53,15 @@ public class ProcessRuntimeGatewayAutoConfiguration {
 
     public static final String PROCESS_RUNTIME_GATEWAY_BEAN_NAME = "processRuntimeGateway";
     public static final String PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME = "processRuntimeGatewayResultChannelName";
+    public static final String PROCESS_RUNTIME_GATEWAY_RESULTS_FLOW_INPUT = "processRuntimeGatewayResultsFlowInput";
 
     @Bean
     IntegrationFlow processRuntimeGatewayProducerFlow(
         ProcessRuntimeGatewayProperties properties,
         StreamBridge streamBridge,
         BindingServiceProperties bindingServiceProperties,
-        HeaderChannelRegistry headerChannelRegistry
+        HeaderChannelRegistry headerChannelRegistry,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
         return IntegrationFlow
             .from(
@@ -76,19 +81,22 @@ public class ProcessRuntimeGatewayAutoConfiguration {
             )
             .handle(
                 message ->
-                    streamBridge.send(
-                        bindingServiceProperties.getBindingDestination(PROCESS_RUNTIME_GATEWAY_PRODUCER),
-                        message
-                    ),
+                    streamBridge.send(bindingResolver.getBindingDestination(PROCESS_RUNTIME_GATEWAY_PRODUCER), message),
                 messageHandlerSpec -> messageHandlerSpec.advice(new RequestHandlerRetryAdvice())
             )
             .get();
     }
 
+    @FunctionBinding(input = PROCESS_RUNTIME_GATEWAY_RESULTS)
+    @Bean
+    Consumer<Message<?>> processRuntimeGatewayResultsConsumer(IntegrationFlow processRuntimeGatewayResultsFlow) {
+        return message -> processRuntimeGatewayResultsFlow.getInputChannel().send(message);
+    }
+
     @Bean
     IntegrationFlow processRuntimeGatewayResultsFlow(HeaderChannelRegistry headerChannelRegistry) {
         return IntegrationFlow
-            .from(PROCESS_RUNTIME_GATEWAY_RESULTS)
+            .from(PROCESS_RUNTIME_GATEWAY_RESULTS_FLOW_INPUT)
             .filter(
                 Message.class,
                 message ->

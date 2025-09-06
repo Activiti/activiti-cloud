@@ -19,6 +19,8 @@ import java.util.Optional;
 
 public class StringUtils {
 
+    private StringUtils() {}
+
     /**
      *   Truncate a String to the given length with no warnings or error raised if it is bigger.
      *
@@ -28,7 +30,7 @@ public class StringUtils {
      *   @return Returns value if value is null or value.length() is less or equal to than length, otherwise a String representing
      *   value truncated to length.
      */
-    public static String truncate(String value, Integer length) {
+    public static String truncate(String value, int length) {
         return Optional
             .ofNullable(value)
             .filter(it -> it.length() > length)

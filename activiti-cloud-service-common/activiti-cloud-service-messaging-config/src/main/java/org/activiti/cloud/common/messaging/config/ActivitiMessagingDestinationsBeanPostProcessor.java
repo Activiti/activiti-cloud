@@ -16,22 +16,25 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Base64UrlNamingStrategy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
+import org.springframework.util.StringUtils;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
 
@@ -72,15 +75,28 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                 });
 
             if (functionRouter.isEnabled()) {
-                final var functionRouterInput = new BindingProperties();
-
                 functionRouter
                     .getFunctionRoutes()
                     .stream()
                     .filter(bindingServiceProperties.getBindings()::containsKey)
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
-                        functionRouter.destinations().put(bindingName, value.getDestination());
+
+                        Optional
+                            .ofNullable(value.getGroup())
+                            .filter(StringUtils::hasText)
+                            .ifPresentOrElse(
+                                it -> {
+                                    functionRouter
+                                        .destinations(FUNCTION_ROUTER_INPUT)
+                                        .put(bindingName, value.getDestination());
+                                },
+                                () -> {
+                                    functionRouter
+                                        .destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+                                        .put(bindingName, value.getDestination());
+                                }
+                            );
 
                         log.warn(
                             "Configured function route '{}' for destination '{}'",
@@ -88,33 +104,36 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             value.getDestination()
                         );
 
-                        if (value.getGroup() != null && functionRouter.isExcludeRequiredProducerGroup(bindingName)) {
-                            bindingServiceProperties
-                                .getBindings()
-                                .entrySet()
-                                .stream()
-                                .filter(entry -> entry.getValue().getProducer() != null)
-                                .filter(entry ->
-                                    Objects.equals(entry.getValue().getDestination(), value.getDestination())
-                                )
-                                .forEach(entry -> {
-                                    var producer = entry.getValue().getProducer();
-                                    var excludedGroups = value.getGroup();
-                                    var producerGroups = producer.getRequiredGroups();
-                                    var requiredGroups = Stream
-                                        .of(producerGroups)
-                                        .filter(Predicate.not(excludedGroups::equals))
-                                        .toList();
+                        Optional
+                            .ofNullable(value.getGroup())
+                            .filter(it -> functionRouter.isExcludeRequiredProducerGroup(bindingName))
+                            .ifPresent(group -> {
+                                bindingServiceProperties
+                                    .getBindings()
+                                    .entrySet()
+                                    .stream()
+                                    .filter(entry -> entry.getValue().getProducer() != null)
+                                    .filter(entry ->
+                                        Objects.equals(entry.getValue().getDestination(), value.getDestination())
+                                    )
+                                    .forEach(entry -> {
+                                        var producer = entry.getValue().getProducer();
+                                        var excludedGroups = value.getGroup();
+                                        var producerGroups = producer.getRequiredGroups();
+                                        var requiredGroups = Stream
+                                            .of(producerGroups)
+                                            .filter(Predicate.not(excludedGroups::equals))
+                                            .toList();
 
-                                    producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
+                                        producer.setRequiredGroups(requiredGroups.toArray(new String[] {}));
 
-                                    log.warn(
-                                        "Excluded producer required groups '{}' for binding '{}'",
-                                        excludedGroups,
-                                        entry.getKey()
-                                    );
-                                });
-                        }
+                                        log.warn(
+                                            "Excluded producer required groups '{}' for binding '{}'",
+                                            excludedGroups,
+                                            entry.getKey()
+                                        );
+                                    });
+                            });
                     });
 
                 functionRouter
@@ -142,16 +161,41 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             });
                     });
 
-                functionRouterInput.setDestination(
-                    functionRouter.destinations().values().stream().distinct().collect(Collectors.joining(","))
-                );
-                functionRouterInput.setGroup(functionRouter.getGroup());
-                functionRouterInput.setConsumer(functionRouter.getConsumer());
+                if (!functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).isEmpty()) {
+                    final var bindingProperties = new BindingProperties();
+                    final var groupPrefix = functionRouter.groupPrefix();
 
-                if (!functionRouter.destinations().isEmpty()) {
-                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, functionRouterInput);
+                    final var destination = String.join(
+                        ",",
+                        Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_ANONYMOUS_INPUT).values())
+                    );
 
-                    log.warn("Configured function router binding '{}'", functionRouterInput);
+                    bindingProperties.setDestination(destination);
+                    bindingProperties.setGroup(new Base64UrlNamingStrategy(groupPrefix).generateName());
+                    bindingProperties.setConsumer(functionRouter.getAnonymous().getConsumer());
+
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
+
+                    log.warn("Configured anonymous function router binding '{}'", bindingProperties);
+                } else {
+                    log.warn("Skipping anonymous function router configuration with empty destinations");
+                }
+
+                if (!functionRouter.destinations(FUNCTION_ROUTER_INPUT).isEmpty()) {
+                    final var bindingProperties = new BindingProperties();
+                    final var group = functionRouter.getGroup();
+                    final var destination = String.join(
+                        ",",
+                        Set.copyOf(functionRouter.destinations(FUNCTION_ROUTER_INPUT).values())
+                    );
+
+                    bindingProperties.setDestination(destination);
+                    bindingProperties.setGroup(group);
+                    bindingProperties.setConsumer(functionRouter.getConsumer());
+
+                    bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
+
+                    log.warn("Configured function router binding '{}'", bindingProperties);
                 } else {
                     log.warn("Skipping function router configuration with empty destinations");
                 }

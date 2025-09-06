@@ -18,26 +18,20 @@ package org.activiti.cloud.query.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.core.env.Environment;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
-    classes = { QueryConsumerApplication.class },
-    properties = { "activiti.cloud.messaging.function-router.enabled=true" }
-)
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 @Testcontainers
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-public class QueryConsumerApplicationFunctionRouterIT {
+public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerApplicationIT {
 
     @ServiceConnection
     @Container
@@ -53,17 +47,15 @@ public class QueryConsumerApplicationFunctionRouterIT {
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
 
-    @Autowired
-    private Environment environment;
-
-    @Test
-    void contextLoads() {}
-
     @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
             .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsKey("functionRouterInput");
+            .containsOnlyKeys("functionRouterInput", "producer");
+
+        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
+            .extracting(BindingProperties::getGroup)
+            .isEqualTo("consumer");
     }
 
     @Test
@@ -73,8 +65,10 @@ public class QueryConsumerApplicationFunctionRouterIT {
         assertThat(functionRouter.isEnabled()).isTrue();
 
         assertThat(functionRouter.getFunctionRoutes()).containsOnly("auditConsumer", "queryConsumer");
-        assertThat(functionRouter.destinations()).containsOnlyKeys("auditConsumer", "queryConsumer");
-        assertThat(functionRouter.registrations())
+        assertThat(functionRouter.destinations("functionRouterInput"))
+            .containsOnlyKeys("auditConsumer", "queryConsumer");
+        assertThat(functionRouter.destinations("functionRouterAnonymousInput")).isEmpty();
+        assertThat(functionRouter.registrations("functionRouterInput"))
             .containsOnlyKeys("engineEvents")
             .satisfies(registrations ->
                 assertThat(registrations.get("engineEvents"))
@@ -84,19 +78,6 @@ public class QueryConsumerApplicationFunctionRouterIT {
                     )
                     .isNotEmpty()
             );
-    }
-
-    @Test
-    void environment() {
-        assertThat(
-            environment.getProperty(
-                "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
-                Boolean.class
-            )
-        )
-            .isTrue();
-
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
-            .isEqualTo("consumer");
+        assertThat(functionRouter.registrations("functionRouterAnonymousInput")).isEmpty();
     }
 }

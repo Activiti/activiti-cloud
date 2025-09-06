@@ -17,6 +17,8 @@ package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -24,7 +26,6 @@ import org.activiti.cloud.services.notifications.graphql.events.transformer.Engi
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,9 +35,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -92,13 +94,26 @@ public class EngineEventsConsumerAutoConfiguration {
         }
 
         @Bean
+        @FunctionBinding(input = SOURCE)
+        public Consumer<Message<List<EngineEvent>>> engineEventsGraphQlSourceConsumer(
+            MessageChannel engineEventsPublisherInput
+        ) {
+            return engineEventsPublisherInput::send;
+        }
+
+        @Bean
+        MessageChannel engineEventsPublisherInput() {
+            return MessageChannels.direct("engineEventsPublisherInput").getObject();
+        }
+
+        @Bean
         @ConditionalOnMissingBean
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(
             EngineEventsConsumerMessageHandler engineEventsMessageHandler,
-            @Qualifier(SOURCE) SubscribableChannel source
+            MessageChannel engineEventsPublisherInput
         ) {
             return IntegrationFlow
-                .from(source)
+                .from(engineEventsPublisherInput)
                 .log(LoggingHandler.Level.DEBUG)
                 .transform(engineEventsMessageHandler)
                 .toReactivePublisher();
