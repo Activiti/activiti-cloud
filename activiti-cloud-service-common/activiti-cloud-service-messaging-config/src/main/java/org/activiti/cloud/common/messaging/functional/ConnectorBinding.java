@@ -35,4 +35,6 @@ public @interface ConnectorBinding {
     String outputHeader() default "resultDestination";
 
     String connectorType() default "";
+
+    int retry() default 0;
 }

@@ -25,6 +25,8 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -49,9 +51,16 @@ import org.springframework.util.StringUtils;
 )
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorConfiguration.class);
+
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW = "connectorBindingSelectorDiscardFlow";
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
+    public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_WITH_RETRY_FLOW =
+        "connectorBindingSelectorDiscardWithRetryFlow";
+    public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_WITH_RETRY_CHANNEL =
+        "connectorBindingSelectorDiscardWithRetryChannel";
     public static final String NULL_CHANNEL = "nullChannel";
+    public static final String RETRY_COUNT = "x-retry-count";
 
     @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
@@ -69,6 +78,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties
     ) {
+        System.out.println("Retry only if and fields no autowired and retry count");
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -137,10 +147,18 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationRequest")
                                 .filter(
                                     selector,
-                                    filter ->
-                                        filter
-                                            .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                            .throwExceptionOnRejection(false)
+                                    filter -> {
+                                        System.out.println("Retry count: " + connectorBinding.retry());
+                                        if (connectorBinding.retry() > 0) {
+                                            filter
+                                                .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                                .throwExceptionOnRejection(false);
+                                        } else {
+                                            filter
+                                                .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                                .throwExceptionOnRejection(false);
+                                        }
+                                    }
                                 )
                                 .filter(
                                     connectorType,
