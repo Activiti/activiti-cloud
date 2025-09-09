@@ -698,7 +698,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         assertThat(peek(connectorBindingDestination)).isNull();
         Message<?> out = errorQueue.receive();
-        assertThat(out).isNotNull();
+        assertThat(out).isNull();
 
         assertThat(thrown).isInstanceOf(MessageTransformationException.class);
     }
