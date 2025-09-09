@@ -36,7 +36,7 @@ install: release
 			--set global.keycloak.clientSecret=$(shell uuidgen) \
 			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-			--set rabbitmq.image.tag=3.8.9
+			--set rabbitmq.image.tag=3.8.9 \
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--values $(MESSAGING_DESTINATIONS)-values.yaml \
