@@ -286,7 +286,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         removeMessageGroup(correlationId);
 
         send(startMessage);
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
 
@@ -296,7 +296,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(out)
             .isNotNull()
@@ -537,6 +537,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         messageGroupStore.removeMessageGroup(correlationId);
 
         send(messageSentEvent(messageName, correlationKey, "sent1"));
+        assertThat(peek(connectorBindingDestination)).isNull();
         send(messageSentEvent(messageName, correlationKey, "sent2"));
 
         // when
@@ -552,7 +553,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             .asInstanceOf(InstanceOfAssertFactories.MAP)
             .containsEntry("key", "sent1");
 
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages())
             .hasSize(2)
@@ -576,7 +577,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
 
         // then
-        out = poll(TimeUnit.SECONDS.toMillis(0));
+        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(peek()).isNull();
 
@@ -598,7 +599,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageReceivedEvent(messageName, correlationKey, "received2"));
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).isEmpty();
     }
@@ -623,9 +624,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(subscriptionCancelled);
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
-        assertThat(messageGroup(groupName).getMessages()).isEmpty();
+        assertThat(messageGroup(groupName).getMessages().isEmpty());
     }
 
     @Test
@@ -695,11 +696,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         });
 
         // then
-        assertThat(peek(connectorBindingDestination)).isNull();
-
-        Message<?> out = errorQueue.receive(0);
-
+        Message<?> out = errorQueue.receive(1);
         assertThat(out).isNull();
+
         assertThat(thrown).isInstanceOf(MessageTransformationException.class);
     }
 
@@ -714,6 +713,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         });
 
         this.controlBus.send("@aggregator.start()");
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+        assertThat(out).isNull();
         assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
