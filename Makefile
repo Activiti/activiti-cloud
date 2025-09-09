@@ -36,7 +36,6 @@ install: release
 			--set global.keycloak.clientSecret=$(shell uuidgen) \
 			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
-			--set rabbitmq.image.tag=3.8.9 \
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--values $(MESSAGING_DESTINATIONS)-values.yaml \
@@ -53,7 +52,7 @@ delete:
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
 		git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git \
-			--branch $(ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH) \
+			--branch improvement/AAE-38055-Update-version-of-rabbimq-used-by-activiti-and-alfresco-charts \
 			$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) \
 			--depth 1
 
