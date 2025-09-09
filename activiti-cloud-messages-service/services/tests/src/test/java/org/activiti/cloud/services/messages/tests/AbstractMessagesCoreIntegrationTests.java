@@ -100,6 +100,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessagesCoreIntegrationTests.class);
 
+    private static final String connectorBindingDestination = "             -out-0";
+
     protected static final int TEST_TIMEOUT = 30;
 
     protected ObjectMapper objectMapper = new ObjectMapper()
@@ -199,6 +201,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         removeMessageGroup(correlationId);
 
         send(startMessage);
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
 
@@ -264,7 +267,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         IntStream
             .range(0, count)
-            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3))))
+            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3), connectorBindingDestination)))
             .forEach(out -> assertThat(out).isNotNull());
 
         exec.shutdownNow();
@@ -283,6 +286,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         removeMessageGroup(correlationId);
 
         send(startMessage);
+        assertThat(peek()).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
 
@@ -290,7 +294,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent1"));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(peek()).isNull();
 
@@ -298,7 +302,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             .isNotNull()
             .extracting(Message::getPayload)
             .extracting("name", "variables")
-            .contains("start1", singletonMap("key", "sent1"));
+           .contains("start1", singletonMap("key", "sent1"));
 
         assertThat(messageGroup(correlationId).getMessages())
             .hasSize(1)
@@ -310,9 +314,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent2"));
 
         // then
-        out = poll(TimeUnit.SECONDS.toMillis(0));
+        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(out)
             .isNotNull()
@@ -343,7 +347,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(startMessageDeployedEvent(messageName));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(peek()).isNull();
 
@@ -364,7 +368,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent2"));
 
         // then
-        out = poll(TimeUnit.SECONDS.toMillis(0));
+        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(peek()).isNull();
 
@@ -396,10 +400,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // when
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
+        assertThat(peek(connectorBindingDestination)).isNull();
         send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(out)
             .isNotNull()
@@ -421,7 +426,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageReceivedEvent(messageName, correlationKey));
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages())
             .hasSize(1)
@@ -434,7 +439,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, correlationKey, "sent2"));
 
         // then
-        out = poll(TimeUnit.SECONDS.toMillis(1));
+        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(out)
             .isNotNull()
@@ -455,7 +460,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         send(messageReceivedEvent(messageName, correlationKey));
 
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages()).isEmpty();
     }
@@ -477,7 +482,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, businessKey));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(out)
             .isNotNull()
@@ -508,7 +513,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, correlationKey, businessKey));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(out)
             .isNotNull()
@@ -538,7 +543,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
 
         // then
-        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
 
         assertThat(out)
             .isNotNull()
@@ -559,7 +564,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageReceivedEvent(messageName, correlationKey, "received1"));
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(messageGroup(correlationId).getMessages())
             .hasSize(1)
@@ -611,6 +616,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey));
         send(messageWaitingEvent(messageName, correlationKey));
 
+        assertThat(peek(connectorBindingDestination)).isNull();
         assertThat(messageGroup(groupName).getMessages()).hasSize(2);
 
         // when
@@ -637,7 +643,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(waitingMessage);
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(discardQueue.receive(0)).isNotNull();
 
@@ -650,7 +656,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(receivedMessage);
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(discardQueue.receive(0)).isNotNull();
 
@@ -689,7 +695,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         });
 
         // then
-        assertThat(peek()).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         Message<?> out = errorQueue.receive(0);
 
@@ -708,6 +714,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         });
 
         this.controlBus.send("@aggregator.start()");
+        assertThat(peek(connectorBindingDestination)).isNull();
 
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
     }
@@ -722,6 +729,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         send(startMessage);
 
+        assertThat(peek(connectorBindingDestination)).isNull();
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
 
         // when
@@ -760,7 +768,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             .setHeader(APP_NAME, activitiCloudApplicationName)
             .setHeader(
                 MESSAGE_EVENT_OUTPUT_DESTINATION,
-                bindingServiceProperties.getBindingDestination("messageConnectorInput-out-0")
+                bindingServiceProperties.getBindingDestination(connectorBindingDestination)
             )
             .setHeader(SERVICE_FULL_NAME, springApplicationName);
     }
@@ -844,6 +852,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @SuppressWarnings("unchecked")
+    protected <T> Message<T> poll(long timeout, String bindingName) {
+        Message<T> message = (Message<T>) this.outputDestination.receive(timeout, bindingName);
+
+        return (Message<T>) Optional
+            .ofNullable(message)
+            .map(it -> MessageBuilder.withPayload(messageEventPayload(it)).copyHeaders(it.getHeaders()).build())
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
     protected <T> Message<T> poll(long timeout) {
         Message<T> message = (Message<T>) this.outputDestination.receive(timeout);
 
@@ -851,6 +869,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             .ofNullable(message)
             .map(it -> MessageBuilder.withPayload(messageEventPayload(it)).copyHeaders(it.getHeaders()).build())
             .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> Message<T> peek(String bindingName) {
+        return (Message<T>) this.outputDestination.receive(1, bindingName);
     }
 
     @SuppressWarnings("unchecked")
