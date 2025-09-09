@@ -302,7 +302,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             .isNotNull()
             .extracting(Message::getPayload)
             .extracting("name", "variables")
-           .contains("start1", singletonMap("key", "sent1"));
+            .contains("start1", singletonMap("key", "sent1"));
 
         assertThat(messageGroup(correlationId).getMessages())
             .hasSize(1)
@@ -696,8 +696,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         });
 
         // then
-        Message<?> out = errorQueue.receive(1);
-        assertThat(out).isNull();
+        assertThat(peek(connectorBindingDestination)).isNull();
+        Message<?> out = errorQueue.receive();
+        assertThat(out).isNotNull();
 
         assertThat(thrown).isInstanceOf(MessageTransformationException.class);
     }
