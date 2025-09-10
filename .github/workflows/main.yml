@@ -286,12 +286,6 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/identity-adapter-acceptance-tests
-
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
@@ -300,9 +294,14 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+
+      - name: Run multiple-runtime-acceptance-tests for ${{ matrix.messaging-broker }}
         run: |
-          make test/runtime-acceptance-tests
+          make test/multiple-runtime-acceptance-tests
+
+      - name: Run security-policies-acceptance-tests for ${{ matrix.messaging-broker }}
+        run: |
+          make test/security-policies-acceptance-tests
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
