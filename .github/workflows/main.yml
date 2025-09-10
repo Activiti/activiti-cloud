@@ -207,8 +207,8 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
         with:
           url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          access-key: ${{ secrets.TEST_RANCHER_ACCESS_KEY }}
+          secret-key: ${{ secrets.TEST_RANCHER_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
       - uses: ./.github/actions/setup-env-for-broker
