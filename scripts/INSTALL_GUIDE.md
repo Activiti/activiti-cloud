@@ -24,6 +24,7 @@ This guide helps you set up and install Activiti Cloud locally, replicating the 
 If you prefer manual control or need to troubleshoot:
 
 **Install yq (YAML processor):**
+
 ```bash
 # macOS
 brew install yq
@@ -37,6 +38,7 @@ sudo chmod +x /usr/local/bin/yq
 ```
 
 **Install helm (if not already installed):**
+
 ```bash
 # macOS
 brew install helm
@@ -52,6 +54,7 @@ This project uses **Rancher** for Kubernetes cluster management. You have severa
 ### Option 1: Use Existing Cluster Access
 
 If you already have kubectl configured and working with any cluster:
+
 ```bash
 # Check current access
 kubectl cluster-info
@@ -64,12 +67,14 @@ kubectl get namespaces
 ### Option 2: Connect to Rancher (if you have access)
 
 **Step 1: Install Rancher CLI**
+
 ```bash
 # macOS
 brew install rancher-cli
 ```
 
 **Step 2: Connect and Switch Context**
+
 ```bash
 # Use the automated setup script
 ./scripts/setup-rancher.sh
@@ -82,6 +87,7 @@ rancher context switch  # Select activiti-hackathon cluster
 ### Option 3: Local Development Cluster
 
 **Using Docker Desktop + kind:**
+
 ```bash
 # Start Docker Desktop first, then:
 brew install kind
@@ -90,6 +96,7 @@ kubectl config use-context kind-activiti-local
 ```
 
 **Using minikube:**
+
 ```bash
 brew install minikube
 minikube start --profile activiti-local --cpus 4 --memory 8192
@@ -105,16 +112,19 @@ kubectl config use-context activiti-local
 3. **Updated installation scripts** - Modified `local-install.sh` and `Makefile` to use the wrapper
 
 ### Current Status
+
 - ✅ **kubectl** - Working via rancher kubectl wrapper
 - ✅ **Namespace operations** - Can create/delete namespaces
 - ✅ **Helm chart preparation** - Dependencies downloaded successfully
 - ⚠️ **Final helm installation** - Needs same cluster config as kubectl wrapper
 
 ### Final Step
+
 The installation process works perfectly up to the final `helm upgrade` command. You now have two options:
 
 **Option A: Use the kubectl wrapper setup**
 Your installation is working! The helm command just needs to use the same cluster as kubectl:
+
 ```bash
 # Ensure helm uses the same cluster context
 export KUBECONFIG=~/.kube/config
@@ -127,16 +137,19 @@ The scripts are now properly configured and will work once kubectl has proper cl
 ### 2. Run Installation
 
 **Basic installation for PR 123:**
+
 ```bash
 ./scripts/local-install.sh -p 123
 ```
 
 **Advanced configuration:**
+
 ```bash
 ./scripts/local-install.sh -p 456 -b kafka -pt true -d override
 ```
 
 **Check what would happen first (dry run):**
+
 ```bash
 ./scripts/local-install.sh --dry-run -p 123
 ```
@@ -144,9 +157,11 @@ The scripts are now properly configured and will work once kubectl has proper cl
 ## Available Scripts
 
 ### 1. `local-install.sh` - Complete Installation
+
 Main script that replicates the GitHub Actions installation process.
 
 **Features:**
+
 - ✅ Prerequisites checking
 - ✅ Environment variable generation
 - ✅ Namespace cleanup
@@ -154,19 +169,23 @@ Main script that replicates the GitHub Actions installation process.
 - ✅ Progress reporting
 
 **Usage:**
+
 ```bash
 ./scripts/local-install.sh [options]
 ```
 
 ### 2. `fix-makefile.sh` - Makefile Preparation
+
 Patches the Makefile for local development compatibility.
 
 **Fixes:**
+
 - ✅ Python command compatibility (`python` → `python3`)
 - ✅ Tool availability checks
 - ✅ Better error messages
 
 **Usage:**
+
 ```bash
 ./scripts/fix-makefile.sh
 ```
@@ -209,20 +228,24 @@ After successful installation, you'll have:
 ## Configuration Options
 
 ### Messaging Brokers
+
 - **rabbitmq** (default) - Uses RabbitMQ for messaging
 - **kafka** - Uses Apache Kafka for messaging
 
 ### Partitioning
+
 - **false** (default) - Non-partitioned messaging
 - **true** - Partitioned messaging (for scale)
 
 ### Destinations
+
 - **default** - Standard destination configuration
 - **override** - Custom destination configuration
 
 ## Examples
 
 ### Development Setup
+
 ```bash
 # Basic development environment
 ./scripts/local-install.sh -p 123
@@ -233,6 +256,7 @@ kubectl get services -n pr-123-rabbit-n-d
 ```
 
 ### Testing Different Configurations
+
 ```bash
 # Test with Kafka
 ./scripts/local-install.sh -p 124 -b kafka
@@ -245,6 +269,7 @@ kubectl get services -n pr-123-rabbit-n-d
 ```
 
 ### Cleanup
+
 ```bash
 # Clean up specific environment
 source scripts/quick-preview-env.sh 123
@@ -259,6 +284,7 @@ kubectl delete namespace pr-123-rabbit-n-d
 ### Common Issues
 
 1. **yq not found**
+
    ```bash
    brew install yq  # macOS
    # or
@@ -266,12 +292,14 @@ kubectl delete namespace pr-123-rabbit-n-d
    ```
 
 2. **kubectl not connected**
+
    ```bash
    kubectl config current-context
    kubectl cluster-info
    ```
 
 3. **Helm chart clone fails**
+
    - Check GitHub access
    - Verify network connectivity
    - Check repository permissions
@@ -283,11 +311,13 @@ kubectl delete namespace pr-123-rabbit-n-d
 ### Debug Mode
 
 Run with dry-run to see what would happen:
+
 ```bash
 ./scripts/local-install.sh --dry-run -p 123 -b kafka
 ```
 
 Check prerequisites separately:
+
 ```bash
 ./scripts/local-install.sh --help  # Shows prerequisites
 ```
@@ -295,6 +325,7 @@ Check prerequisites separately:
 ### Manual Installation
 
 If scripts fail, you can run manually:
+
 ```bash
 # 1. Set environment
 source scripts/quick-preview-env.sh 123

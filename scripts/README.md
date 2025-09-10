@@ -13,6 +13,7 @@ This directory contains scripts for complete Activiti Cloud environment setup an
 ```
 
 **Options:**
+
 - `-n, --name <name>` - Environment name (e.g., test-123, local-dev)
 - `-r, --run <number>` - GitHub run number (e.g., 456789)
 - `-b, --broker <broker>` - Messaging broker: `rabbitmq`|`kafka` (default: rabbitmq)
@@ -44,6 +45,7 @@ This directory contains scripts for complete Activiti Cloud environment setup an
 ## Setup Modes
 
 ### 1. **`--mode full`** (Default)
+
 Complete setup with installation, host configuration, and health checks.
 
 - ✅ Generate environment variables
@@ -53,6 +55,7 @@ Complete setup with installation, host configuration, and health checks.
 - ✅ Provide access instructions
 
 ### 2. **`--mode env-only`**
+
 Only generate and display environment variables.
 
 - ✅ Generate PREVIEW_NAME and all related variables
@@ -60,6 +63,7 @@ Only generate and display environment variables.
 - ✅ Compatible with existing workflows
 
 ### 3. **`--mode test-only`**
+
 Setup access and test existing deployment.
 
 - ✅ Setup /etc/hosts entries
@@ -68,6 +72,7 @@ Setup access and test existing deployment.
 - ✅ Verify service endpoints
 
 ### 4. **`--mode playwright`**
+
 Complete setup optimized for Playwright tests.
 
 - ✅ Full installation (if needed)
@@ -79,6 +84,7 @@ Complete setup optimized for Playwright tests.
 ## Supporting Scripts
 
 ### `local-install.sh` - **Main Installation Script**
+
 **Complete local installation that replicates the GitHub Actions workflow.**
 
 **Features:**
@@ -99,6 +105,7 @@ Complete setup optimized for Playwright tests.
 ```
 
 ### `check-deployment-status.sh` - **Deployment Status Checker**
+
 Check pod status and service availability for existing deployments.
 
 **Usage:**

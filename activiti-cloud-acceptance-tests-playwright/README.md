@@ -7,6 +7,7 @@ This directory contains Playwright-based acceptance tests for the Activiti Cloud
 Before running the tests, ensure you have the following:
 
 ### Required Tools
+
 - **Node.js** (v18 or higher)
 - **npm** (comes with Node.js)
 - **kubectl** (Kubernetes CLI tool)
@@ -15,12 +16,14 @@ Before running the tests, ensure you have the following:
 ### Environment Setup
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Configure environment variables:**
    Copy the `.env` file and update it with your environment-specific values:
+
    ```bash
    cp .env.example .env
    # Edit .env with your cluster and gateway details
@@ -30,11 +33,13 @@ Before running the tests, ensure you have the following:
    The tests require port-forwarding to access the Kubernetes services locally.
 
    **Option A - Using the helper script:**
+
    ```bash
    ./scripts/start-port-forward.sh
    ```
 
    **Option B - Manual setup:**
+
    ```bash
    kubectl port-forward svc/ingress-nginx-controller 8080:80 -n default
    ```
@@ -44,6 +49,7 @@ Before running the tests, ensure you have the following:
 ### Automatic Precondition Checks
 
 The test suite includes automatic precondition checks that verify:
+
 - ✅ `kubectl` is available and working
 - ✅ Port-forwarding is active and accessible
 - ✅ Gateway connectivity through the port-forward
@@ -73,11 +79,13 @@ npx playwright test --trace on
 ### Test Reports
 
 After running tests, reports are generated in:
+
 - **HTML Report:** `playwright-report/index.html`
 - **JUnit XML:** `reporter/junit.xml`
 - **JSON Results:** `reporter/results.json`
 
 View the HTML report:
+
 ```bash
 npx playwright show-report
 ```
@@ -87,11 +95,13 @@ npx playwright show-report
 ### Test Categories
 
 1. **Group Search Tests**
+
    - Search groups by name patterns
    - Empty search results handling
    - Search without parameters
 
 2. **User Search Tests**
+
    - Search users by name patterns
    - Empty search results handling
    - Search without parameters
@@ -115,16 +125,19 @@ npx playwright show-report
 If tests fail with connection errors:
 
 1. **Check if port-forwarding is running:**
+
    ```bash
    ps aux | grep "kubectl port-forward"
    ```
 
 2. **Verify the service exists:**
+
    ```bash
    kubectl get svc ingress-nginx-controller -n default
    ```
 
 3. **Test connectivity manually:**
+
    ```bash
    curl -H "Host: gateway-pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com" http://localhost:8080
    ```
@@ -140,6 +153,7 @@ If tests fail with connection errors:
 If tests fail with 401/403 errors:
 
 1. **Check Keycloak configuration:**
+
    - Verify the `activiti-keycloak` client exists in the `alfresco` realm
    - Ensure the client secret is correct
    - Confirm the client supports service accounts
@@ -170,6 +184,7 @@ CI=true npm test
 ### Environment Configuration
 
 The `.env` file supports environment-specific configuration:
+
 - `LOCAL_PORT` - Local port for port-forwarding (default: 8080)
 - `GATEWAY_HOST` - Gateway service hostname
 - `SSO_HOST` - Keycloak authentication endpoint
@@ -178,11 +193,13 @@ The `.env` file supports environment-specific configuration:
 ### Debugging
 
 Enable debug logging:
+
 ```bash
 DEBUG=pw:api npm test
 ```
 
 For more detailed debugging, use trace recording:
+
 ```bash
 npx playwright test --trace on
 npx playwright show-trace test-results/trace.zip
