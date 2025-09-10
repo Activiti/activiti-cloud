@@ -30,19 +30,19 @@ jobs:
     outputs:
       skip: ${{ steps.dependabot.outputs.result }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Check dependabot build
-        uses: Activiti/Activiti/.github/actions/check-ext-build@456be36569d3afea26c83755ee9e90f0697b5349 # 8.7.1
+        uses: Activiti/Activiti/.github/actions/check-ext-build@d93095fd93ebed502ee1a7520afbf43cfcaf510a # 8.7.0
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: 'dependabot[bot]'
           label: github_actions
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -55,17 +55,15 @@ jobs:
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
-    env:
-      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
 
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -85,7 +83,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -100,26 +98,15 @@ jobs:
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
           echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
+      - name: Set SONAR_SCANNER_OPTS
+        shell: bash
+        run: |
+          echo "JACOCO_REPORT_PATH=${{ github.workspace }}/activiti-cloud-coverage/target/site/jacoco-aggregate/jacoco.xml" >> $GITHUB_ENV
+          echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization='activiti' -Dsonar.projectKey='Activiti_activiti-cloud' -Dsonar.coverage.jacoco.xmlReportPaths=${{ env.JACOCO_REPORT_PATH }}" >> $GITHUB_ENV
+
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - name: Merge JaCoCo execution files
-        shell: bash
-        run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
-
-      - name: Generate coverage reports
-        shell: bash
-        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
-
-      - name: Run SonarCloud analysis
-        if: ${{ env.SONAR_TOKEN != '' }}
-        shell: bash
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
+        run: mvn -DskipTests -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}} ${{ env.SONAR_SCANNER_OPTS }}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -178,9 +165,9 @@ jobs:
             messaging-destinations: pdb
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -199,12 +186,12 @@ jobs:
           version: v1.19.6
 
       - name: Set up Helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v3
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v3
         with:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -330,7 +317,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -359,7 +346,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -369,7 +356,7 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -388,7 +375,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -410,8 +397,8 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -433,7 +420,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
@@ -449,12 +436,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -477,6 +464,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@de2559fee73a07043a86f828c38fcf02f7256acb # v8.28.2
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}
