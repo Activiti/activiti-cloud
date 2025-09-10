@@ -13,13 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.qa;
 
-import org.activiti.cloud.acc.shared.serenity.ExtendedSerenityStories;
+export interface User {
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+}
 
-public class IdentityManagementAcceptanceTests extends ExtendedSerenityStories {
+export interface Group {
+    name: string;
+    id?: string;
+}
 
-    protected String getRootPackage() {
-        return "org.activiti.cloud";
-    }
+export interface SearchUsersParams {
+    search?: string;
+    role?: string[];
+    group?: string[];
+    application?: string;
+}
+
+export interface SearchGroupsParams {
+    search?: string;
+    role?: string[];
+    application?: string;
 }

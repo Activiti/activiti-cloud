@@ -299,8 +299,15 @@ jobs:
       - name: Run Identity Adapter Acceptance Tests
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/identity-adapter-acceptance-tests
+        uses: ./.github/actions/playwright-run
+        env:
+          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
+          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
+          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
+          REALM: activiti
+        with:
+          script-command: 'npm run test:identity'
 
       - uses: ./.github/actions/check-service-health
         with:
