@@ -64,6 +64,8 @@ playwright/.cache/
 screenshots/
 videos/
 traces/
+port-forward.pid
+VERSION
 
 # TypeScript
 *.tsbuildinfo

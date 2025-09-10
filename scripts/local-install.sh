@@ -6,8 +6,7 @@
 # Usage: ./scripts/local-install.sh [options]
 #
 # Options:
-#   -p, --pr <number>           PR number (e.g., 123)
-#   -r, --run <number>          GitHub run number (e.g., 456789)
+#   -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
 #   -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
 #   -pt, --partitioned <bool>   Partitioned: true|false (default: false)
 #   -d, --destinations <type>   Destinations: default|override (default: default)
@@ -32,14 +31,14 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Default values
-PR_NUMBER=""
-RUN_NUMBER=""
+ENVIRONMENT_NAME=""
 MESSAGING_BROKER="rabbitmq"
 MESSAGING_PARTITIONED="false"
 MESSAGING_DESTINATIONS="default"
 VERSION=""
 DRY_RUN=false
-USE_LOCAL_IMAGES=false
+USE_LOCAL_IMAGES=true  # Always use local images by default
+CLUSTER_NAME=""        # Will be auto-detected or specified
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -54,46 +53,50 @@ USAGE:
     $0 [OPTIONS]
 
 OPTIONS:
-    -p, --pr <number>           PR number (e.g., 123)
-    -r, --run <number>          GitHub run number (e.g., 456789)
+    -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
+    -c, --cluster <name>        Cluster name (auto-detected if not specified)
     -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
     -pt, --partitioned <bool>   Partitioned: true|false (default: false)
     -d, --destinations <type>   Destinations: default|override (default: default)
     -v, --version <version>     Version to use (default: auto-generated)
-    --use-local-images          Use local-values.yaml with available image tags
+    --no-local-images           Don't use local-values.yaml (uses generated versions)
     --dry-run                   Show what would be executed without running
     -h, --help                  Show this help message
 
 EXAMPLES:
-    $0 -p 123                                    # Basic PR 123 with defaults
-    $0 -p 456 -b kafka -pt true -d override     # Full configuration
-    $0 --dry-run -p 123                         # See what would happen
-    $0 -r 789012 -v 1.0.0-SNAPSHOT             # Custom version
+    $0 -n michal-test                           # Basic environment with working image tags
+    $0 -n feature-xyz -b kafka -pt true        # Kafka with partitioning
+    $0 --dry-run -n test-env                    # See what would happen
+    $0 -n my-env -c activiti-hackathon         # Specify cluster explicitly
 
 PREREQUISITES:
-    - kubectl configured and connected to cluster
+    - kubectl configured and connected to cluster (or use rancher CLI)
     - helm installed (version 3+)
     - yq installed (for YAML processing)
     - python3 available (for version parsing)
-    - Access to activiti-cloud-full-chart repository
+
+WORKFLOW:
+    1. Checks/configures cluster connection
+    2. Ensures local-values.yaml exists with working image tags
+    3. Deploys Activiti Cloud with reliable configuration
+    4. Generates .env file for Playwright tests
 
 NOTES:
-    - Either --pr or --run must be specified
-    - Script checks for required tools before execution
-    - Uses same logic as GitHub Actions workflow
-    - Creates/updates Kubernetes namespace with PREVIEW_NAME
+    - Uses local-values.yaml by default for reliable deployments
+    - Auto-detects cluster or helps configure it
+    - Generates complete .env configuration at the end
 EOF
 }
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -p|--pr)
-            PR_NUMBER="$2"
+        -n|--name)
+            ENVIRONMENT_NAME="$2"
             shift 2
             ;;
-        -r|--run)
-            RUN_NUMBER="$2"
+        -c|--cluster)
+            CLUSTER_NAME="$2"
             shift 2
             ;;
         -b|--broker)
@@ -116,8 +119,12 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             shift
             ;;
+        --no-local-images)
+            USE_LOCAL_IMAGES=false
+            shift
+            ;;
         --use-local-images)
-            USE_LOCAL_IMAGES=true
+            USE_LOCAL_IMAGES=true  # Redundant since it's default, but keep for compatibility
             shift
             ;;
         -h|--help)
@@ -144,6 +151,115 @@ execute_command() {
         echo -e "${BLUE}${description}${NC}"
         echo -e "${YELLOW}Running: ${cmd}${NC}"
         eval "$cmd"
+    fi
+}
+
+# Function to configure cluster connection
+configure_cluster() {
+    echo -e "${BLUE}=== Configuring Cluster Connection ===${NC}"
+
+    # Check if kubectl is working
+    if kubectl cluster-info &> /dev/null; then
+        CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || echo "unknown")
+        echo -e "${GREEN}✓ kubectl already connected to: $CURRENT_CONTEXT${NC}"
+
+        # Auto-detect cluster name if not specified
+        if [[ -z "$CLUSTER_NAME" ]]; then
+            case "$CURRENT_CONTEXT" in
+                "activiti-hackathon")
+                    CLUSTER_NAME="activiti-hackathon"
+                    ;;
+                "activiti-community")
+                    CLUSTER_NAME="activiti-community"
+                    ;;
+                *rancher*)
+                    CLUSTER_NAME="activiti"
+                    ;;
+                *)
+                    # Use the context name directly for other clusters like aae-38098
+                    CLUSTER_NAME="$CURRENT_CONTEXT"
+                    ;;
+            esac
+            echo -e "${YELLOW}Auto-detected cluster: $CLUSTER_NAME${NC}"
+        fi
+        return 0
+    fi
+
+    # kubectl not working, try to configure it
+    echo -e "${YELLOW}kubectl not connected to cluster. Attempting to configure...${NC}"
+
+    # Check if rancher CLI is available
+    if command -v rancher >/dev/null 2>&1; then
+        echo -e "${YELLOW}Found rancher CLI, attempting to configure kubectl...${NC}"
+
+        local target_cluster="${CLUSTER_NAME:-activiti}"
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/fix-kubectl-config.sh $target_cluster${NC}"
+        else
+            if "$SCRIPT_DIR/fix-kubectl-config.sh" "$target_cluster"; then
+                echo -e "${GREEN}✓ kubectl configured successfully${NC}"
+                CLUSTER_NAME="$target_cluster"
+            else
+                echo -e "${RED}✗ Failed to configure kubectl${NC}" >&2
+                echo -e "${YELLOW}Please configure kubectl manually or run:${NC}"
+                echo -e "${CYAN}  ./scripts/fix-kubectl-config.sh [cluster-name]${NC}"
+                exit 1
+            fi
+        fi
+    else
+        echo -e "${RED}✗ kubectl not connected and rancher CLI not found${NC}" >&2
+        echo -e "${YELLOW}Please configure kubectl connection manually${NC}"
+        exit 1
+    fi
+}
+
+# Function to ensure local-values.yaml exists
+ensure_local_values() {
+    echo -e "${BLUE}=== Ensuring Local Docker Images Configuration ===${NC}"
+
+    if [[ "$USE_LOCAL_IMAGES" == "false" ]]; then
+        echo -e "${YELLOW}Skipping local-values.yaml (--no-local-images specified)${NC}"
+        return 0
+    fi
+
+    local local_values_file="$ROOT_DIR/local-values.yaml"
+
+    if [[ -f "$local_values_file" ]]; then
+        echo -e "${GREEN}✓ local-values.yaml already exists${NC}"
+        echo -e "${YELLOW}Using working image tags from local-values.yaml${NC}"
+
+        # Extract version from local-values.yaml for use as main VERSION
+        if command -v yq >/dev/null 2>&1; then
+            LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
+            if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
+                echo -e "${YELLOW}Detected working image version: $LOCAL_IMAGE_VERSION${NC}"
+                export LOCAL_IMAGE_VERSION
+            fi
+        fi
+    else
+        echo -e "${YELLOW}local-values.yaml not found, creating it...${NC}"
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
+        else
+            if "$SCRIPT_DIR/resolve-docker-images.sh"; then
+                echo -e "${GREEN}✓ local-values.yaml created with working image tags${NC}"
+
+                # Extract version from newly created local-values.yaml
+                if command -v yq >/dev/null 2>&1; then
+                    LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
+                    if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
+                        echo -e "${YELLOW}Using working image version: $LOCAL_IMAGE_VERSION${NC}"
+                        export LOCAL_IMAGE_VERSION
+                    fi
+                fi
+            else
+                echo -e "${RED}✗ Failed to create local-values.yaml${NC}" >&2
+                echo -e "${YELLOW}Will proceed without local image overrides${NC}"
+                USE_LOCAL_IMAGES=false
+            fi
+        fi
     fi
 }
 
@@ -242,40 +358,21 @@ check_prerequisites() {
 generate_environment() {
     echo -e "${BLUE}=== Generating Environment Variables ===${NC}"
 
-    # Auto-detect cluster information from kubectl context
-    if command -v kubectl >/dev/null 2>&1 && kubectl config current-context >/dev/null 2>&1; then
-        CURRENT_CONTEXT=$(kubectl config current-context)
-
-        # Map context names to proper cluster names
-        case "$CURRENT_CONTEXT" in
-            "activiti-hackathon")
-                CLUSTER_NAME="activiti-hackathon"
-                ;;
-            "activiti-community")
-                CLUSTER_NAME="activiti-community"
-                ;;
-            *rancher*)
-                CLUSTER_NAME="activiti"
-                ;;
-            *)
-                CLUSTER_NAME="${CURRENT_CONTEXT}"
-                ;;
-        esac
-    else
-        # Default cluster name when kubectl is not available
-        CLUSTER_NAME="activiti"
+    # CLUSTER_NAME should already be set by configure_cluster
+    if [[ -z "$CLUSTER_NAME" ]]; then
+        echo -e "${RED}Error: Cluster name not configured${NC}" >&2
+        exit 1
     fi
 
     CLUSTER_DOMAIN="envalfresco.com"
     GLOBAL_GATEWAY_DOMAIN="$CLUSTER_NAME.$CLUSTER_DOMAIN"
 
-    # Generate base PREVIEW_NAME (same logic as GitHub Actions)
-    if [[ -n "$PR_NUMBER" ]]; then
-        GITHUB_PR_NUMBER="$PR_NUMBER"
-        PREVIEW_NAME="pr-${GITHUB_PR_NUMBER}"
+    # Generate base PREVIEW_NAME using environment name
+    if [[ -n "$ENVIRONMENT_NAME" ]]; then
+        PREVIEW_NAME="pr-${ENVIRONMENT_NAME}"
     else
-        GITHUB_RUN_NUMBER="$RUN_NUMBER"
-        PREVIEW_NAME="gh-${GITHUB_RUN_NUMBER}"
+        echo -e "${RED}Error: Environment name is required${NC}" >&2
+        exit 1
     fi
 
     # Convert boolean partitioned to expected format
@@ -317,15 +414,19 @@ generate_environment() {
 
     # Generate version if not provided
     if [[ -z "$VERSION" ]]; then
-        if [[ -n "$PR_NUMBER" ]]; then
-            VERSION="0.0.1-PR-${PR_NUMBER}-SNAPSHOT"
+        if [[ "$USE_LOCAL_IMAGES" == "true" && -n "$LOCAL_IMAGE_VERSION" ]]; then
+            # When using local images, use the version from local-values.yaml
+            VERSION="$LOCAL_IMAGE_VERSION"
+            echo -e "${YELLOW}Using version from local-values.yaml: $VERSION${NC}"
         else
-            VERSION="0.0.1-gh-${RUN_NUMBER}-SNAPSHOT"
+            # When not using local images, generate custom version
+            VERSION="0.0.1-${ENVIRONMENT_NAME}-SNAPSHOT"
+            echo -e "${YELLOW}Generated custom version: $VERSION${NC}"
         fi
         export VERSION
     fi
 
-    echo -e "${GREEN}✅ Environment set for PR #${PR_NUMBER:-$RUN_NUMBER}${NC}"
+    echo -e "${GREEN}✅ Environment set for: ${ENVIRONMENT_NAME}${NC}"
     echo -e "   ${YELLOW}PREVIEW_NAME:${NC} $PREVIEW_NAME"
     echo -e "   ${YELLOW}GATEWAY_HOST:${NC} $GATEWAY_HOST"
     echo -e "   ${YELLOW}SSO_HOST:${NC} $SSO_HOST"
@@ -390,9 +491,87 @@ perform_installation() {
     fi
 }
 
+# Function to generate .env file for Playwright tests
+generate_env_file() {
+    echo -e "${BLUE}=== Generating .env Configuration ===${NC}"
+
+    local env_file="$ROOT_DIR/activiti-cloud-acceptance-tests-playwright/.env"
+    local local_port="8080"
+
+    # Determine realm based on what was actually deployed
+    local realm="activiti"
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo -e "${CYAN}[DRY-RUN] Would create .env file at: $env_file${NC}"
+        echo -e "${YELLOW}Environment variables that would be written:${NC}"
+    else
+        # Create the directory if it doesn't exist
+        mkdir -p "$(dirname "$env_file")"
+
+        cat > "$env_file" << EOF
+# Environment configuration for Playwright tests
+PREVIEW_NAME=$PREVIEW_NAME
+CLUSTER_NAME=$CLUSTER_NAME
+CLUSTER_DOMAIN=envalfresco.com
+LOCAL_PORT=$local_port
+
+# For CI detection
+CI=false
+GITHUB_ACTIONS=false
+
+# Application Configuration (environment-specific)
+GATEWAY_PROTOCOL=http
+SSO_PROTOCOL=http
+GATEWAY_HOST=$GATEWAY_HOST:$local_port
+IDENTITY_HOST=$SSO_HOST:$local_port
+SSO_HOST=http://$SSO_HOST:$local_port/auth/realms/$realm/protocol/openid-connect/token
+REALM=$realm
+
+# DEBUG=pw:api
+
+# User Credentials (from root .env)
+HRUSER_USERNAME="hruser"
+HRUSER_PASSWORD="password"
+PROCESSADMINUSER_USERNAME="processadminuser"
+PROCESSADMINUSER_PASSWORD="password"
+MODELER_USERNAME="modeler"
+MODELER_PASSWORD="password"
+MODELERQA_USERNAME="modeler-qa"
+MODELERQA_PASSWORD="password"
+DEVOPSUSER_USERNAME="devopsuser"
+DEVOPSUSER_PASSWORD="password"
+SUPERADMINUSER_USERNAME="superadminuser"
+SUPERADMINUSER_PASSWORD="password"
+SALESUSER_USERNAME="salesuser"
+SALESUSER_PASSWORD="password"
+TESTADMIN_USERNAME="testadmin"
+TESTADMIN_PASSWORD="password"
+TESTUSER_USERNAME="testuser"
+TESTUSER_PASSWORD="password"
+EOF
+
+        echo -e "${GREEN}✓ .env file created at: $env_file${NC}"
+    fi
+
+    echo ""
+    echo -e "${GREEN}=== 🎯 NEXT STEPS FOR PLAYWRIGHT TESTS ===${NC}"
+    echo -e "${YELLOW}1. Add the following entries to your /etc/hosts file:${NC}"
+    echo -e "${CYAN}   127.0.0.1 $GATEWAY_HOST${NC}"
+    echo -e "${CYAN}   127.0.0.1 $SSO_HOST${NC}"
+    echo ""
+    echo -e "${YELLOW}2. Start port forwarding to the ingress controller:${NC}"
+    echo -e "${CYAN}   kubectl port-forward svc/ingress-nginx-controller $local_port:80 -n default${NC}"
+    echo ""
+    echo -e "${YELLOW}3. Run the Playwright tests:${NC}"
+    echo -e "${CYAN}   cd activiti-cloud-acceptance-tests-playwright${NC}"
+    echo -e "${CYAN}   npm test${NC}"
+    echo ""
+    echo -e "${GREEN}The .env file has been automatically configured with the correct values!${NC}"
+}
+
 # Validation
-if [[ -z "$PR_NUMBER" && -z "$RUN_NUMBER" ]]; then
-    echo -e "${RED}Error: Either --pr or --run must be specified${NC}" >&2
+if [[ -z "$ENVIRONMENT_NAME" ]]; then
+    echo -e "${RED}Error: Environment name is required (use -n or --name)${NC}" >&2
     show_help
     exit 1
 fi
@@ -416,8 +595,11 @@ fi
 echo -e "${GREEN}=== Activiti Cloud Local Installation ===${NC}"
 echo ""
 
+configure_cluster
 check_prerequisites
+ensure_local_values
 generate_environment
 perform_installation
+generate_env_file
 
 echo -e "${GREEN}=== Done! ===${NC}"

@@ -26,7 +26,7 @@ NC='\033[0m' # No Color
 
 # Default values
 ENVIRONMENT_NAME=""
-RUN_NUMBER=""
+CLUSTER_NAME=""
 MESSAGING_BROKER="rabbitmq"
 MESSAGING_PARTITIONED="false"
 MESSAGING_DESTINATIONS="default"
@@ -34,7 +34,6 @@ MODE="full"
 SKIP_INSTALL=false
 SKIP_HEALTH_CHECK=false
 SKIP_PORT_FORWARD=false
-PLAYWRIGHT_SETUP=false
 DRY_RUN=false
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -52,7 +51,7 @@ USAGE:
 
 OPTIONS:
     -n, --name <name>           Environment name (e.g., test-123, local-dev)
-    -r, --run <number>          GitHub run number (e.g., 456789)
+    -c, --cluster <cluster>     Cluster name (e.g., activiti-hackathon, activiti-community)
     -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
     -pt, --partitioned <bool>   Partitioned: true|false (default: false)
     -d, --destinations <type>   Destinations: default|override (default: default)
@@ -71,22 +70,22 @@ OPTIONS:
 
 EXAMPLES:
     # Complete setup for environment "test-123"
-    $0 -n test-123
+    $0 -n test-123 -c activiti-hackathon
 
     # Just generate environment variables
-    $0 -n local-dev --mode env-only
+    $0 -n local-dev -c activiti-community --mode env-only
 
     # Setup for Playwright testing
-    $0 -n playwright-test --mode playwright
+    $0 -n playwright-test -c activiti-hackathon --mode playwright
 
     # Advanced configuration with installation
-    $0 -n kafka-test -b kafka -pt true -d override
+    $0 -n kafka-test -c activiti-hackathon -b kafka -pt true -d override
 
     # Test existing deployment
-    $0 -n test-123 --mode test-only
+    $0 -n test-123 -c activiti-hackathon --mode test-only
 
     # See what would happen
-    $0 --dry-run -n test-123
+    $0 --dry-run -n test-123 -c activiti-hackathon
 
 MODES:
     full        - Generate env → Install → Setup access → Health checks
@@ -103,8 +102,8 @@ while [[ $# -gt 0 ]]; do
             ENVIRONMENT_NAME="$2"
             shift 2
             ;;
-        -r|--run)
-            RUN_NUMBER="$2"
+        -c|--cluster)
+            CLUSTER_NAME="$2"
             shift 2
             ;;
         -b|--broker)
@@ -152,8 +151,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validation
-if [[ -z "$ENVIRONMENT_NAME" && -z "$RUN_NUMBER" ]]; then
-    echo -e "${RED}Error: Either --name or --run must be specified${NC}" >&2
+if [[ -z "$ENVIRONMENT_NAME" ]]; then
+    echo -e "${RED}Error: Environment name (--name) must be specified${NC}" >&2
+    show_help
+    exit 1
+fi
+
+if [[ -z "$CLUSTER_NAME" ]]; then
+    echo -e "${RED}Error: Cluster name (--cluster) must be specified${NC}" >&2
     show_help
     exit 1
 fi
@@ -189,7 +194,7 @@ case "$MODE" in
         SKIP_INSTALL=true
         ;;
     "playwright")
-        PLAYWRIGHT_SETUP=true
+        # Playwright mode - all logic handled in main execution
         ;;
 esac
 
@@ -211,40 +216,12 @@ execute_command() {
 generate_environment() {
     echo -e "${MAGENTA}=== 🔧 Generating Environment Variables ===${NC}"
 
-    # Auto-detect cluster information from kubectl context
-    if command -v kubectl >/dev/null 2>&1 && kubectl config current-context >/dev/null 2>&1; then
-        CURRENT_CONTEXT=$(kubectl config current-context)
-
-        # Map context names to proper cluster names
-        case "$CURRENT_CONTEXT" in
-            "activiti-hackathon")
-                CLUSTER_NAME="activiti-hackathon"
-                ;;
-            "activiti-community")
-                CLUSTER_NAME="activiti-community"
-                ;;
-            *rancher*)
-                CLUSTER_NAME="activiti"
-                ;;
-            *)
-                CLUSTER_NAME="${CURRENT_CONTEXT}"
-                ;;
-        esac
-    else
-        # Default cluster name when kubectl is not available
-        CLUSTER_NAME="activiti"
-    fi
-
+    # Use the provided cluster name
     CLUSTER_DOMAIN="envalfresco.com"
     GLOBAL_GATEWAY_DOMAIN="$CLUSTER_NAME.$CLUSTER_DOMAIN"
 
-    # Generate base PREVIEW_NAME
-    if [[ -n "$ENVIRONMENT_NAME" ]]; then
-        PREVIEW_NAME="$ENVIRONMENT_NAME"
-    else
-        GITHUB_RUN_NUMBER="$RUN_NUMBER"
-        PREVIEW_NAME="gh-${GITHUB_RUN_NUMBER}"
-    fi
+    # Generate base PREVIEW_NAME from environment name
+    PREVIEW_NAME="$ENVIRONMENT_NAME"
 
     # Convert boolean partitioned to expected format
     if [[ "$MESSAGING_PARTITIONED" == "true" ]]; then
@@ -272,19 +249,17 @@ generate_environment() {
     SSO_HOST="identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
 
     # Generate version
-    if [[ -n "$ENVIRONMENT_NAME" ]]; then
-        VERSION="0.0.1-${ENVIRONMENT_NAME}-SNAPSHOT"
-    else
-        VERSION="0.0.1-gh-${RUN_NUMBER}-SNAPSHOT"
-    fi
+    VERSION="0.0.1-${ENVIRONMENT_NAME}-SNAPSHOT"
 
     # Export all variables
     export PREVIEW_NAME
     export GLOBAL_GATEWAY_DOMAIN
     export GATEWAY_HOST
     export SSO_HOST
-    export MESSAGING_PARTITIONED="$MESSAGING_PARTITIONED_MAKE"
-    export MESSAGING_DESTINATIONS="$MESSAGING_DESTINATIONS_MAKE"
+    # Keep original MESSAGING_PARTITIONED for local-install.sh compatibility
+    export MESSAGING_PARTITIONED
+    # Keep original MESSAGING_DESTINATIONS for local-install.sh compatibility
+    export MESSAGING_DESTINATIONS
     export VERSION
     export CLUSTER_NAME
     export CLUSTER_DOMAIN
@@ -298,8 +273,8 @@ generate_environment() {
     echo -e "  ${YELLOW}CLUSTER_NAME:${NC} $CLUSTER_NAME"
     echo -e "  ${YELLOW}VERSION:${NC} $VERSION"
     echo -e "  ${YELLOW}MESSAGING_BROKER:${NC} $MESSAGING_BROKER"
-    echo -e "  ${YELLOW}MESSAGING_PARTITIONED:${NC} $MESSAGING_PARTITIONED"
-    echo -e "  ${YELLOW}MESSAGING_DESTINATIONS:${NC} $MESSAGING_DESTINATIONS"
+    echo -e "  ${YELLOW}MESSAGING_PARTITIONED:${NC} $MESSAGING_PARTITIONED_MAKE"
+    echo -e "  ${YELLOW}MESSAGING_DESTINATIONS:${NC} $MESSAGING_DESTINATIONS_MAKE"
     echo -e "  ${YELLOW}GATEWAY_HOST:${NC} $GATEWAY_HOST"
     echo -e "  ${YELLOW}SSO_HOST:${NC} $SSO_HOST"
     echo ""
@@ -316,7 +291,7 @@ generate_environment() {
         echo "export VERSION='$VERSION'"
         echo ""
         echo -e "${CYAN}💡 To use these variables in your current shell:${NC}"
-        echo "source <($0 -n ${ENVIRONMENT_NAME:-$RUN_NUMBER} --mode env-only 2>/dev/null | grep '^export')"
+        echo "source <($0 -n $ENVIRONMENT_NAME -c $CLUSTER_NAME --mode env-only 2>/dev/null | grep '^export')"
         echo ""
     fi
 }
@@ -388,8 +363,8 @@ GATEWAY_PROTOCOL=https
 SSO_PROTOCOL=https
 GATEWAY_HOST=$GATEWAY_HOST
 IDENTITY_HOST=$SSO_HOST
-SSO_HOST=https://$CLUSTER_NAME.$CLUSTER_DOMAIN/auth/realms/alfresco/protocol/openid-connect/token
-REALM=alfresco
+SSO_HOST=https://$CLUSTER_NAME.$CLUSTER_DOMAIN/auth/realms/activiti/protocol/openid-connect/token
+REALM=activiti
 
 DEBUG=pw:api
 EOF
@@ -428,10 +403,43 @@ EOF
 run_installation() {
     echo -e "${MAGENTA}=== 🚀 Running Installation ===${NC}"
 
+    # Resolve Docker images and create local-values.yaml with working tags
+    echo -e "${BLUE}Resolving Docker image versions...${NC}"
+    local use_local_images=false
+
+    # Run resolve script to ensure we have working image tags
+    if command -v ./scripts/resolve-docker-images.sh >/dev/null 2>&1; then
+        if [[ "$DRY_RUN" == "false" ]]; then
+            echo -e "${CYAN}Running image resolution for version $VERSION...${NC}"
+            ./scripts/resolve-docker-images.sh "$VERSION" >/dev/null 2>&1
+        else
+            echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh $VERSION${NC}"
+        fi
+
+        # If local-values.yaml exists, use it for reliable image tags
+        if [[ -f "local-values.yaml" ]]; then
+            echo -e "${GREEN}✓ Using local-values.yaml with verified working image tags${NC}"
+            use_local_images=true
+        fi
+    else
+        # If resolve script doesn't exist, check for existing local-values.yaml
+        if [[ -f "local-values.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using existing local-values.yaml (resolve script not found)${NC}"
+            use_local_images=true
+        else
+            echo -e "${YELLOW}⚠ No image resolution available - using default tags${NC}"
+        fi
+    fi
+
     # Note: local-install.sh still uses legacy PR-based logic internally
     # We pass our environment name as a "PR" to maintain compatibility
-    local pr_for_install="${ENVIRONMENT_NAME:-$RUN_NUMBER}"
+    local pr_for_install="$ENVIRONMENT_NAME"
     local install_cmd="./scripts/local-install.sh -p $pr_for_install -b $MESSAGING_BROKER -pt $MESSAGING_PARTITIONED -d $MESSAGING_DESTINATIONS"
+
+    # Add local images flag if needed
+    if [[ "$use_local_images" == "true" ]]; then
+        install_cmd="$install_cmd --use-local-images"
+    fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
         install_cmd="$install_cmd --dry-run"
@@ -445,11 +453,16 @@ run_installation() {
 setup_port_forwarding() {
     echo -e "${MAGENTA}=== 🔗 Setting up Port Forwarding ===${NC}"
 
-    # Check if namespace exists
-    if ! kubectl get namespace "$PREVIEW_NAME" >/dev/null 2>&1; then
-        echo -e "${RED}❌ Namespace '$PREVIEW_NAME' not found${NC}"
-        echo "Please run installation first or check the deployment."
-        return 1
+    # Check if namespace exists (try pr- prefix first as it's the standard naming)
+    local actual_namespace="pr-$PREVIEW_NAME"
+    if ! kubectl get namespace "$actual_namespace" >/dev/null 2>&1; then
+        # Fall back to non-prefixed namespace
+        actual_namespace="$PREVIEW_NAME"
+        if ! kubectl get namespace "$actual_namespace" >/dev/null 2>&1; then
+            echo -e "${RED}❌ Namespace 'pr-$PREVIEW_NAME' or '$PREVIEW_NAME' not found${NC}"
+            echo "Please run installation first or check the deployment."
+            return 1
+        fi
     fi
 
     if [[ "$DRY_RUN" == "false" ]]; then
@@ -474,10 +487,27 @@ setup_port_forwarding() {
 run_health_checks() {
     echo -e "${MAGENTA}=== 🏥 Running Health Checks ===${NC}"
 
-    # Check if namespace exists
-    if ! kubectl get namespace "$PREVIEW_NAME" >/dev/null 2>&1; then
-        echo -e "${RED}❌ Namespace '$PREVIEW_NAME' not found${NC}"
-        return 1
+    # Check if namespace exists, try pr- prefix first (standard naming from local-install.sh)
+    local actual_namespace="pr-$PREVIEW_NAME"
+    if ! kubectl get namespace "$actual_namespace" >/dev/null 2>&1; then
+        # Fall back to non-prefixed namespace (legacy naming)
+        actual_namespace="$PREVIEW_NAME"
+        if ! kubectl get namespace "$actual_namespace" >/dev/null 2>&1; then
+            echo -e "${RED}❌ Namespace 'pr-$PREVIEW_NAME' or '$PREVIEW_NAME' not found${NC}"
+            echo -e "${YELLOW}Available namespaces:${NC}"
+            kubectl get namespaces | grep -E "(michal|local|test)" || echo "No matching namespaces found"
+            return 1
+        else
+            echo -e "${GREEN}✓ Found namespace: $actual_namespace${NC}"
+            local actual_gateway_host="$GATEWAY_HOST"
+            local actual_sso_host="$SSO_HOST"
+        fi
+    else
+        echo -e "${GREEN}✓ Found namespace: $actual_namespace${NC}"
+        # Update hosts to match the actual namespace for health checks
+        local actual_gateway_host="gateway-$actual_namespace.$GLOBAL_GATEWAY_DOMAIN"
+        local actual_sso_host="identity-$actual_namespace.$GLOBAL_GATEWAY_DOMAIN"
+        echo -e "${BLUE}Using hosts: $actual_gateway_host, $actual_sso_host${NC}"
     fi
 
     # Function to test via port forwarding with ingress
@@ -522,18 +552,18 @@ run_health_checks() {
     }
 
     echo -e "${BLUE}Testing health endpoints via ingress...${NC}"
-    test_via_ingress "$GATEWAY_HOST" "/identity-adapter-service/actuator/health" "Identity Adapter"
-    test_via_ingress "$GATEWAY_HOST" "/rb/actuator/health" "Runtime Bundle"
-    test_via_ingress "$GATEWAY_HOST" "/query/actuator/health" "Query Service"
-    test_via_ingress "$SSO_HOST" "/auth/realms/activiti/.well-known/openid_configuration" "Keycloak"
+    test_via_ingress "$actual_gateway_host" "/identity-adapter-service/actuator/health" "Identity Adapter"
+    test_via_ingress "$actual_gateway_host" "/rb/actuator/health" "Runtime Bundle"
+    test_via_ingress "$actual_gateway_host" "/query/actuator/health" "Query Service"
+    test_via_ingress "$actual_sso_host" "/auth/realms/activiti/.well-known/openid_configuration" "Keycloak"
 
     echo ""
     echo -e "${GREEN}🎉 Health checks completed!${NC}"
     echo ""
     echo -e "${YELLOW}Your Activiti Cloud deployment is accessible at:${NC}"
-    echo "• Gateway: http://$GATEWAY_HOST:8080 (with port forwarding)"
-    echo "• Identity: http://$SSO_HOST:8080/auth (with port forwarding)"
-    echo "• Namespace: $PREVIEW_NAME"
+    echo "• Gateway: http://$actual_gateway_host:8080 (with port forwarding)"
+    echo "• Identity: http://$actual_sso_host:8080/auth (with port forwarding)"
+    echo "• Namespace: $actual_namespace"
     echo ""
 }
 
@@ -561,7 +591,7 @@ main() {
             fi
             if [[ "$SKIP_PORT_FORWARD" == "false" ]]; then
                 echo -e "${CYAN}💡 To start port forwarding:${NC}"
-                echo "$0 -n ${ENVIRONMENT_NAME:-$RUN_NUMBER} --mode test-only --skip-health"
+                echo "$0 -n $ENVIRONMENT_NAME -c $CLUSTER_NAME --mode test-only --skip-health"
                 echo "or manually: kubectl port-forward svc/ingress-nginx-controller 8080:80 -n default"
             fi
             ;;

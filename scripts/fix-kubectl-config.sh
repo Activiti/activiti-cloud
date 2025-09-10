@@ -7,6 +7,10 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Default cluster name
+DEFAULT_CLUSTER_NAME="activiti"
+CLUSTER_NAME="${1:-$DEFAULT_CLUSTER_NAME}"
+
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -14,7 +18,35 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Help function
+show_help() {
+    cat << EOF
+🔧 Rancher kubectl config generator
+
+Creates a proper kubectl config that both kubectl and helm can use.
+
+USAGE:
+    $0 [CLUSTER_NAME]
+
+ARGUMENTS:
+    CLUSTER_NAME    Name of the cluster to connect to (default: $DEFAULT_CLUSTER_NAME)
+
+EXAMPLES:
+    $0                           # Use default cluster: $DEFAULT_CLUSTER_NAME
+    $0 activiti-community        # Connect to activiti-community cluster
+    $0 my-custom-cluster         # Connect to my-custom-cluster
+
+EOF
+}
+
+# Check for help flag
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
 echo -e "${BLUE}=== Generating kubectl config from Rancher ===${NC}"
+echo -e "${YELLOW}Target cluster: $CLUSTER_NAME${NC}"
 
 # Check if rancher CLI is available
 if ! command -v rancher >/dev/null 2>&1; then
@@ -25,10 +57,10 @@ fi
 
 # Check current rancher context
 RANCHER_CONTEXT=$(rancher context current 2>/dev/null || echo "none")
-if [[ "$RANCHER_CONTEXT" == "none" ]] || [[ ! "$RANCHER_CONTEXT" =~ "activiti-hackathon" ]]; then
-    echo -e "${RED}Error: rancher not connected to activiti-hackathon cluster${NC}" >&2
+if [[ "$RANCHER_CONTEXT" == "none" ]] || [[ ! "$RANCHER_CONTEXT" =~ "$CLUSTER_NAME" ]]; then
+    echo -e "${RED}Error: rancher not connected to $CLUSTER_NAME cluster${NC}" >&2
     echo -e "${YELLOW}Please run: rancher context switch${NC}" >&2
-    echo -e "${YELLOW}And select the activiti-hackathon cluster${NC}" >&2
+    echo -e "${YELLOW}And select the $CLUSTER_NAME cluster${NC}" >&2
     exit 1
 fi
 
@@ -47,11 +79,13 @@ mkdir -p ~/.kube
 # Generate kubectl config using rancher clusters kubeconfig command
 echo -e "${BLUE}Generating kubectl config from Rancher...${NC}"
 
-# Get the activiti-hackathon cluster ID
-CLUSTER_ID=$(rancher clusters ls --format '{{.Cluster.ID}},{{.Cluster.Name}}' | grep activiti-hackathon | cut -d',' -f1)
+# Get the target cluster ID
+CLUSTER_ID=$(rancher clusters ls --format '{{.Cluster.ID}},{{.Cluster.Name}}' | grep "$CLUSTER_NAME" | cut -d',' -f1)
 
 if [ -z "$CLUSTER_ID" ]; then
-    echo -e "${RED}✗ Could not find activiti-hackathon cluster${NC}" >&2
+    echo -e "${RED}✗ Could not find $CLUSTER_NAME cluster${NC}" >&2
+    echo -e "${YELLOW}Available clusters:${NC}"
+    rancher clusters ls --format '{{.Cluster.Name}}' | sed 's/^/  - /' || true
     exit 1
 fi
 

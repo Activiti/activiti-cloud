@@ -4,7 +4,7 @@
   "description": "Playwright TypeScript tests for Activiti Cloud",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
+    "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
     "test:debug": "playwright test --debug",
     "report": "playwright show-report",
     "install:browsers": "playwright install",
@@ -17,7 +17,7 @@
     "typescript",
     "activiti-cloud"
   ],
-  "author": "Activiti Team",
+  "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
     "@playwright/test": "^1.47.2",

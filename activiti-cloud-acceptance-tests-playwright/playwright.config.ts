@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import dotenv from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
 import { paths } from './paths';
 import { testConfig } from './config/test-configuration';
+
+dotenv.config({ path: paths.dotEnvPath }); // Load environment variables from .env file
 
 export default defineConfig({
   testDir: './tests',
@@ -27,12 +30,13 @@ export default defineConfig({
 
   // Test configuration
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
+  //forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
 
   reporter: [
     ['html'],
+    ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
     ['json', { outputFile: `${paths.reporter}/results.json` }]
   ],
