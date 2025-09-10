@@ -64,6 +64,7 @@ playwright/.cache/
 screenshots/
 videos/
 traces/
+reporter/
 port-forward.pid
 VERSION
 

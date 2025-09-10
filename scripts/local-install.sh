@@ -529,25 +529,9 @@ REALM=$realm
 
 # DEBUG=pw:api
 
-# User Credentials (from root .env)
-HRUSER_USERNAME="hruser"
-HRUSER_PASSWORD="password"
-PROCESSADMINUSER_USERNAME="processadminuser"
-PROCESSADMINUSER_PASSWORD="password"
-MODELER_USERNAME="modeler"
-MODELER_PASSWORD="password"
-MODELERQA_USERNAME="modeler-qa"
-MODELERQA_PASSWORD="password"
-DEVOPSUSER_USERNAME="devopsuser"
-DEVOPSUSER_PASSWORD="password"
-SUPERADMINUSER_USERNAME="superadminuser"
-SUPERADMINUSER_PASSWORD="password"
-SALESUSER_USERNAME="salesuser"
-SALESUSER_PASSWORD="password"
-TESTADMIN_USERNAME="testadmin"
-TESTADMIN_PASSWORD="password"
-TESTUSER_USERNAME="testuser"
-TESTUSER_PASSWORD="password"
+# User Credentials - CONFIGURE THESE IN A SEPARATE .env.local FILE
+# Copy from root .env or configure with your test user credentials
+
 EOF
 
         echo -e "${GREEN}✓ .env file created at: $env_file${NC}"
@@ -562,7 +546,11 @@ EOF
     echo -e "${YELLOW}2. Start port forwarding to the ingress controller:${NC}"
     echo -e "${CYAN}   kubectl port-forward svc/ingress-nginx-controller $local_port:80 -n default${NC}"
     echo ""
-    echo -e "${YELLOW}3. Run the Playwright tests:${NC}"
+    echo -e "${YELLOW}3. Configure user credentials in the .env file:${NC}"
+    echo -e "${CYAN}   # Add your test user credentials to the .env file${NC}"
+    echo -e "${CYAN}   # Copy from root .env or use your own test credentials${NC}"
+    echo ""
+    echo -e "${YELLOW}4. Run the Playwright tests:${NC}"
     echo -e "${CYAN}   cd activiti-cloud-acceptance-tests-playwright${NC}"
     echo -e "${CYAN}   npm test${NC}"
     echo ""
