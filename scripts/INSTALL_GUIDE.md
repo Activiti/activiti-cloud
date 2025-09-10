@@ -1,357 +1,361 @@
 # Local Activiti Cloud Installation Guide
 
-This guide helps you set up and install Activiti Cloud locally, replicating the GitHub Actions workflow.
+This guide helps you set up and install Activiti Cloud locally with complete automation for DNS resolution, authentication, and testing.
 
-## Quick Start
+## ✅ Current Working Solution
 
-### 1. Complete Setup (Recommended)
+**Great news!** We have a fully working local development setup that handles everything automatically:
 
-**Use the new consolidated setup script:**
+- ✅ **DNS Resolution** - Port forwarding + /etc/hosts automation (no VPN needed)
+- ✅ **Authentication** - External Keycloak with proper JWT configuration
+- ✅ **Docker Images** - Working tags via local-values.yaml integration
+- ✅ **Playwright Tests** - Automated .env generation and test configuration
+- ✅ **Multi-Cluster** - Parameterized for any Rancher-managed cluster
+
+## Quick Start (Recommended)
+
+### One-Command Setup
 
 ```bash
-# Complete setup for environment "test-123"
-./scripts/setup-environment.sh -n test-123
+# Complete automated setup - handles everything
+./scripts/local-install.sh -p 123
 
-# Advanced configuration
-./scripts/setup-environment.sh -n kafka-test -b kafka -pt true -d override
+# Access immediately via localhost
+open http://localhost:8080
 
-# See what would happen first (dry run)
-./scripts/setup-environment.sh --dry-run -n test-123
+# Run Playwright tests
+cd activiti-cloud-acceptance-tests-playwright
+npm test
 ```
 
-### 2. Step-by-Step Setup
+That's it! The script handles cluster connection, deployment, DNS configuration, authentication setup, and test preparation automatically.
 
-If you prefer manual control or need to troubleshoot:
+## Prerequisites
 
-**Install yq (YAML processor):**
+Before running the installation, ensure you have:
+
+### Required Tools
 
 ```bash
-# macOS
-brew install yq
+# Check if you have the required tools
+kubectl version --client  # Kubernetes CLI
+helm version              # Helm package manager
+yq --version             # YAML processor
+python3 --version        # Python 3
+rancher --version        # Rancher CLI (for cluster access)
+```
 
-# Linux (Ubuntu/Debian)
-sudo apt-get update && sudo apt-get install yq
+### Install Missing Tools
 
-# Or download directly
+**macOS (using Homebrew):**
+```bash
+brew install kubectl helm yq python@3.11 rancher-cli
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# yq
 sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
 sudo chmod +x /usr/local/bin/yq
+
+# rancher CLI
+curl -sL "https://github.com/rancher/cli/releases/latest/download/rancher-linux-amd64-v2.7.0.tar.gz" | tar xz
+sudo mv ./rancher-v2.7.0/rancher /usr/local/bin/
 ```
 
-**Install helm (if not already installed):**
+### Cluster Access
 
-```bash
-# macOS
-brew install helm
-
-# Linux
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
-
-**Configure kubectl with Rancher CLI:**
-
-This project uses **Rancher** for Kubernetes cluster management. You have several options:
-
-### Option 1: Use Existing Cluster Access
-
-If you already have kubectl configured and working with any cluster:
-
-```bash
-# Check current access
-kubectl cluster-info
-kubectl get namespaces
-
-# If this works, you can proceed with installation
-./scripts/local-install.sh -p 123
-```
-
-### Option 2: Connect to Rancher (if you have access)
-
-**Step 1: Install Rancher CLI**
-
-```bash
-# macOS
-brew install rancher-cli
-```
-
-**Step 2: Connect and Switch Context**
-
-```bash
-# Use the automated setup script
-./scripts/setup-rancher.sh
-
-# Or manual steps:
-rancher login https://rancher2.envalfresco.com --token YOUR_TOKEN
-rancher context switch  # Select activiti-hackathon cluster
-```
-
-### Option 3: Local Development Cluster
-
-**Using Docker Desktop + kind:**
-
-```bash
-# Start Docker Desktop first, then:
-brew install kind
-kind create cluster --name activiti-local
-kubectl config use-context kind-activiti-local
-```
-
-**Using minikube:**
-
-```bash
-brew install minikube
-minikube start --profile activiti-local --cpus 4 --memory 8192
-kubectl config use-context activiti-local
-```
-
-## ✅ SUCCESS: Authentication Issues Resolved!
-
-**Great news!** We successfully resolved the kubectl authentication issues by:
-
-1. **Cleaning up old kubectl config** - Removed expired authentication tokens
-2. **Using Rancher CLI integration** - Created `kubectl-wrapper.sh` that uses `rancher kubectl`
-3. **Updated installation scripts** - Modified `local-install.sh` and `Makefile` to use the wrapper
-
-### Current Status
-
-- ✅ **kubectl** - Working via rancher kubectl wrapper
-- ✅ **Namespace operations** - Can create/delete namespaces
-- ✅ **Helm chart preparation** - Dependencies downloaded successfully
-- ⚠️ **Final helm installation** - Needs same cluster config as kubectl wrapper
-
-### Final Step
-
-The installation process works perfectly up to the final `helm upgrade` command. You now have two options:
-
-**Option A: Use the kubectl wrapper setup**
-Your installation is working! The helm command just needs to use the same cluster as kubectl:
-
-```bash
-# Ensure helm uses the same cluster context
-export KUBECONFIG=~/.kube/config
-./scripts/local-install.sh -p 123
-```
-
-**Option B: Continue with the current working setup**
-The scripts are now properly configured and will work once kubectl has proper cluster access.
-
-### 2. Run Installation
-
-**Basic installation for PR 123:**
-
-```bash
-./scripts/local-install.sh -p 123
-```
-
-**Advanced configuration:**
-
-```bash
-./scripts/local-install.sh -p 456 -b kafka -pt true -d override
-```
-
-**Check what would happen first (dry run):**
-
-```bash
-./scripts/local-install.sh --dry-run -p 123
-```
-
-## Available Scripts
-
-### 1. `local-install.sh` - Complete Installation
-
-Main script that replicates the GitHub Actions installation process.
-
-**Features:**
-
-- ✅ Prerequisites checking
-- ✅ Environment variable generation
-- ✅ Namespace cleanup
-- ✅ Helm chart installation
-- ✅ Progress reporting
-
-**Usage:**
-
-```bash
-./scripts/local-install.sh [options]
-```
-
-### 2. `fix-makefile.sh` - Makefile Preparation
-
-Patches the Makefile for local development compatibility.
-
-**Fixes:**
-
-- ✅ Python command compatibility (`python` → `python3`)
-- ✅ Tool availability checks
-- ✅ Better error messages
-
-**Usage:**
-
-```bash
-./scripts/fix-makefile.sh
-```
-
-### 3. Environment Generation Scripts (Legacy - Use setup-environment.sh instead)
-
-**Note: These examples now use the consolidated setup-environment.sh script.**
-
-**Quick environment setup:**
-
-```bash
-# Generate environment variables only
-./scripts/setup-environment.sh -p 123 --mode env-only
-
-# Use in current shell
-source <(./scripts/setup-environment.sh -p 123 --mode env-only 2>/dev/null | grep '^export')
-
-# Then use with make directly
-make install
-```
+You need access to a Rancher-managed Kubernetes cluster. The script supports any cluster, not just the default `activiti`.
 
 ## Installation Process
 
-The local installation follows this process:
+### Step 1: Basic Installation
 
-1. **Prerequisites Check** - Verify all required tools are available
-2. **Environment Setup** - Generate PREVIEW_NAME and related variables
-3. **Namespace Cleanup** - Remove existing namespace if present
-4. **Chart Download** - Clone activiti-cloud-full-chart repository
-5. **Helm Installation** - Deploy using helm with proper configuration
+```bash
+./scripts/local-install.sh -p 123
+
+# For different cluster
+./scripts/local-install.sh -p 123 -c my-cluster-name
+
+# To see what would happen first
+./scripts/local-install.sh --dry-run -p 123
+```
+
+### Step 2: What Happens Automatically
+
+The script performs these operations:
+
+1. **Cluster Configuration**
+   - Connects to Rancher and switches kubectl context
+   - Validates cluster access and permissions
+   - Confirms namespace creation capabilities
+
+2. **Environment Setup**
+   - Generates PREVIEW_NAME: `pr-123-rabbit-n-d`
+   - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
+   - Sets up all required environment variables
+
+3. **Kubernetes Deployment**
+   - Creates namespace with proper labels
+   - Deploys Activiti Cloud using Helm with local-values.yaml
+   - Patches all deployments with external Keycloak configuration
+
+4. **Local Access Configuration**
+   - Automatically adds entries to /etc/hosts (requires sudo password)
+   - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
+   - Configures DNS resolution for `pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com`
+
+5. **Authentication Setup**
+   - Configures external Keycloak URL: `https://activiti-hackathon.envalfresco.com/auth`
+   - Sets realm: `alfresco`
+   - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
+   - Validates JWT configuration across deployments
+
+6. **Playwright Configuration**
+   - Generates .env file with correct configuration
+   - Sets HTTP protocol for localhost:8080
+   - Configures SSO_HOST for external Keycloak authentication
+
+### Step 3: Immediate Access
+
+After installation completes:
+
+```bash
+# Access gateway via localhost
+curl http://localhost:8080/rb/actuator/health
+
+# Access with proper Host header
+curl -H "Host: pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com" \
+     http://localhost:8080/rb/actuator/health
+
+# Run Playwright tests
+cd activiti-cloud-acceptance-tests-playwright
+npm test
+```
+
+## Configuration Options and Advanced Usage
+
+### Different Brokers
+
+```bash
+# Use Kafka instead of default RabbitMQ
+./scripts/local-install.sh -p 123 -b kafka
+
+# Use partitioned messaging
+./scripts/local-install.sh -p 123 -pt true
+
+# Use override destinations
+./scripts/local-install.sh -p 123 -d override
+
+# Combine all options
+./scripts/local-install.sh -p 123 -b kafka -pt true -d override
+```
+
+### Different Clusters
+
+```bash
+# Use different cluster than default activiti-hackathon
+./scripts/local-install.sh -p 123 -c my-cluster-name
+
+# This creates: pr-123-rabbit-n-d.my-cluster-name.envalfresco.com
+```
+
+### Testing and Validation
+
+```bash
+# Dry run to see what would happen
+./scripts/local-install.sh --dry-run -p 123
+
+# Check deployment status after installation
+kubectl get pods -n pr-123-rabbit-n-d
+kubectl get services -n pr-123-rabbit-n-d
+
+# Validate health endpoints
+curl http://localhost:8080/rb/actuator/health
+curl http://localhost:8080/query/actuator/health
+```
 
 ## Generated Resources
 
 After successful installation, you'll have:
 
-- **Kubernetes Namespace**: `{PREVIEW_NAME}` (e.g., `pr-123-rabbit-n-d`)
-- **Helm Release**: Same name as namespace
-- **Services**: Gateway, SSO, Runtime Bundle, Query, Audit, etc.
+### Kubernetes Resources
+- **Namespace**: `pr-123-rabbit-n-d` (format: pr-{number}-{broker}-{partition}-{destination})
+- **Services**: Gateway, Runtime Bundle, Query, Audit, Notifications GraphQL
+- **Deployments**: All services with proper Keycloak configuration
+- **ConfigMaps**: Environment-specific configuration
+- **Secrets**: Generated authentication secrets
 
-## Configuration Options
+### Local Configuration
+- **DNS Resolution**: /etc/hosts entries for `*.{cluster}.envalfresco.com`
+- **Port Forwarding**: localhost:8080 → ingress-nginx-controller:80
+- **Environment Files**: .env for Playwright tests
+- **Working Images**: local-values.yaml with 8.8.0-alpha.108 tags
 
-### Messaging Brokers
+### Authentication Setup
+- **External Keycloak**: `https://{cluster}.envalfresco.com/auth`
+- **Realm**: `alfresco`
+- **Client**: `activiti-keycloak`
+- **JWT Validation**: Configured across all services
 
-- **rabbitmq** (default) - Uses RabbitMQ for messaging
-- **kafka** - Uses Apache Kafka for messaging
+## Cleanup and Management
 
-### Partitioning
-
-- **false** (default) - Non-partitioned messaging
-- **true** - Partitioned messaging (for scale)
-
-### Destinations
-
-- **default** - Standard destination configuration
-- **override** - Custom destination configuration
-
-## Examples
-
-### Development Setup
+### Remove Deployment
 
 ```bash
-# Basic development environment
-./scripts/local-install.sh -p 123
-
-# Check deployment
-kubectl get pods -n pr-123-rabbit-n-d
-kubectl get services -n pr-123-rabbit-n-d
-```
-
-### Testing Different Configurations
-
-```bash
-# Test with Kafka
-./scripts/local-install.sh -p 124 -b kafka
-
-# Test with partitioning
-./scripts/local-install.sh -p 125 -pt true
-
-# Test full configuration
-./scripts/local-install.sh -p 126 -b kafka -pt true -d override
-```
-
-### Cleanup
-
-```bash
-# Clean up specific environment
-source scripts/quick-preview-env.sh 123
-make delete
-
-# Or manually
+# Delete the namespace and all resources
 kubectl delete namespace pr-123-rabbit-n-d
+
+# Clean up /etc/hosts entries (manual)
+sudo vi /etc/hosts
+# Remove lines containing pr-123-rabbit-n-d
+
+# Stop port forwarding
+pkill -f "kubectl.*port-forward"
+```
+
+### Multiple Environments
+
+```bash
+# Run multiple environments simultaneously
+./scripts/local-install.sh -p 123  # Creates pr-123-rabbit-n-d
+./scripts/local-install.sh -p 456  # Creates pr-456-rabbit-n-d
+
+# Each has its own namespace but shares localhost:8080
+# Access via proper Host headers or /etc/hosts entries
 ```
 
 ## Troubleshooting
 
-### Common Issues
+### Common Issues and Solutions
 
-1. **yq not found**
-
+1. **"kubectl not connected" or authentication errors**
    ```bash
-   brew install yq  # macOS
-   # or
-   sudo apt-get install yq  # Linux
-   ```
-
-2. **kubectl not connected**
-
-   ```bash
-   kubectl config current-context
+   # Fix cluster configuration
+   ./scripts/fix-kubectl-config.sh
    kubectl cluster-info
+
+   # Or use specific cluster
+   ./scripts/fix-kubectl-config.sh my-cluster-name
    ```
 
-3. **Helm chart clone fails**
+2. **"Permission denied" for /etc/hosts**
+   ```bash
+   # The script needs sudo access to modify /etc/hosts
+   # Enter your password when prompted
+   sudo echo "Testing sudo access"
+   ```
 
-   - Check GitHub access
-   - Verify network connectivity
-   - Check repository permissions
+3. **Port forwarding issues**
+   ```bash
+   # Kill existing port forwards
+   pkill -f "kubectl.*port-forward"
 
-4. **Version parsing fails**
-   - Ensure `python3` is available
-   - Check if `pom.xml` exists in repository
+   # Check for processes using port 8080
+   lsof -i :8080
 
-### Debug Mode
+   # The script will recreate port forwarding automatically
+   ```
 
-Run with dry-run to see what would happen:
+4. **DNS resolution not working**
+   ```bash
+   # Check /etc/hosts entries
+   grep "envalfresco.com" /etc/hosts
+
+   # Should show entries like:
+   # 127.0.0.1 pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com
+
+   # Test DNS resolution
+   nslookup pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com
+   ```
+
+5. **Authentication/JWT errors**
+   ```bash
+   # Check Keycloak configuration
+   kubectl get configmap -n pr-123-rabbit-n-d
+   kubectl describe deployment runtime-bundle -n pr-123-rabbit-n-d
+
+   # Look for ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
+   ```
+
+6. **Playwright tests failing**
+   ```bash
+   # Check .env file generation
+   cat activiti-cloud-acceptance-tests-playwright/.env
+
+   # Should contain:
+   # GATEWAY_HOST=http://localhost:8080
+   # SSO_HOST=https://activiti-hackathon.envalfresco.com/auth
+   ```
+
+### Advanced Debugging
 
 ```bash
-./scripts/local-install.sh --dry-run -p 123 -b kafka
+# Check script prerequisites
+./scripts/local-install.sh --help
+
+# Run with verbose output (if supported)
+bash -x ./scripts/local-install.sh -p 123
+
+# Check individual components
+kubectl get pods -n pr-123-rabbit-n-d -o wide
+kubectl logs deployment/runtime-bundle -n pr-123-rabbit-n-d
+kubectl describe ingress -n pr-123-rabbit-n-d
 ```
 
-Check prerequisites separately:
+## Integration with Development Workflow
+
+### With Makefile
+
+The installation generates environment variables compatible with the existing Makefile:
 
 ```bash
-./scripts/local-install.sh --help  # Shows prerequisites
+# After running local-install.sh
+export PREVIEW_NAME=pr-123-rabbit-n-d
+make test
+make delete
 ```
 
-### Manual Installation
+### With GitHub Actions
 
-If scripts fail, you can run manually:
+The local environment mirrors the GitHub Actions setup:
 
-```bash
-# 1. Set environment
-source scripts/quick-preview-env.sh 123
+- Same PREVIEW_NAME format
+- Same Docker image tags (via local-values.yaml)
+- Same authentication configuration
+- Same service endpoints and routing
 
-# 2. Create VERSION file
-echo "0.0.1-PR-123-SNAPSHOT" > VERSION
+### With IDE Integration
 
-# 3. Run make (after fixing Makefile)
-./scripts/fix-makefile.sh
-make local-install
-```
+Most IDEs can use the generated configuration:
 
-## Integration with Existing Workflow
+- IntelliJ IDEA: Use .env files for run configurations
+- VS Code: Use .env files with plugins
+- Terminal: Source environment variables directly
 
-These scripts generate the same environment as GitHub Actions:
+## Security Considerations
 
-- **PREVIEW_NAME**: Same format as CI/CD
-- **Service URLs**: Identical hostname patterns
-- **Kubernetes Resources**: Same namespace and resource names
-- **Configuration**: Same Helm values and settings
+- **No Hardcoded Secrets**: All authentication uses external Keycloak
+- **Namespace Isolation**: Each deployment is isolated in its own namespace
+- **Local Only**: Port forwarding only binds to localhost
+- **Temporary Access**: /etc/hosts entries are for development only
+- **Clean State**: Scripts clean up previous deployments before creating new ones
 
-This ensures consistency between local development and CI/CD environments.
+## Best Practices
 
-## Security Notes
+1. **Use Consistent PR Numbers**: Use the same number for related development work
+2. **Clean Up Regularly**: Remove old namespaces to free cluster resources
+3. **Test Configuration**: Always use dry-run first for new configurations
+4. **Monitor Resources**: Check cluster capacity before creating multiple environments
+5. **Update Documentation**: Keep this guide updated as the workflow evolves
 
-- Scripts use `https` for service protocols (matching production)
-- Kubernetes namespace isolation prevents conflicts
-- Helm secrets are generated locally (not shared)
-- No sensitive data is logged or stored
+---
+
+This represents the current working state of our local development workflow, with all authentication issues resolved and complete automation for reliable deployments.

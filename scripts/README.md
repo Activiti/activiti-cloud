@@ -1,223 +1,267 @@
 # Activiti Cloud Scripts
 
-This directory contains scripts for complete Activiti Cloud environment setup and management, replicating the logic used in GitHub Actions.
+This directory contains scripts for complete Activiti Cloud local development setup with automated configuration and testing.
 
-## 🚀 Main Script: `setup-environment.sh`
+## 🚀 Main Script: `local-install.sh`
 
-**Complete environment setup tool that consolidates all functionality into one script.**
+**Complete automated local development setup that handles everything from cluster configuration to Playwright testing.**
 
 **Usage:**
 
 ```bash
-./scripts/setup-environment.sh [options]
+KEYCLOAK_CLIENT_SECRET=<grab-from-keycloak> ./scripts/local-install.sh [options]
 ```
+
+**Required Prerequisites:**
+
+- kubectl (with Rancher CLI integration)
+- helm (version 3+)
+- yq (YAML processor)
+- python3
+- sudo access (for /etc/hosts configuration)
 
 **Options:**
 
-- `-n, --name <name>` - Environment name (e.g., test-123, local-dev)
-- `-r, --run <number>` - GitHub run number (e.g., 456789)
+- `-p, --pr <number>` - PR number or identifier (e.g., 123, local-dev)
+- `-c, --cluster <name>` - Kubernetes cluster name (default: activiti-hackathon)
 - `-b, --broker <broker>` - Messaging broker: `rabbitmq`|`kafka` (default: rabbitmq)
 - `-pt, --partitioned <bool>` - Partitioned: `true`|`false` (default: false)
 - `-d, --destinations <type>` - Destinations: `default`|`override` (default: default)
-- `--mode <mode>` - Setup mode: `full`|`env-only`|`test-only`|`playwright`
 - `--dry-run` - Show what would be executed without running
 - `-h, --help` - Show help message
 
 **Examples:**
 
 ```bash
-# Complete setup for environment "test-123"
-./scripts/setup-environment.sh -n test-123
-
-# Just generate environment variables
-./scripts/setup-environment.sh -n local-dev --mode env-only
-
-# Setup for Playwright testing
-./scripts/setup-environment.sh -n playwright-test --mode playwright
-
-# Test existing deployment
-./scripts/setup-environment.sh -n test-123 --mode test-only
-
-# Advanced configuration
-./scripts/setup-environment.sh -n kafka-test -b kafka -pt true -d override
-```
-
-## Setup Modes
-
-### 1. **`--mode full`** (Default)
-
-Complete setup with installation, host configuration, and health checks.
-
-- ✅ Generate environment variables
-- ✅ Run complete installation (uses `local-install.sh`)
-- ✅ Setup /etc/hosts entries
-- ✅ Run health checks
-- ✅ Provide access instructions
-
-### 2. **`--mode env-only`**
-
-Only generate and display environment variables.
-
-- ✅ Generate PREVIEW_NAME and all related variables
-- ✅ Display export commands for manual use
-- ✅ Compatible with existing workflows
-
-### 3. **`--mode test-only`**
-
-Setup access and test existing deployment.
-
-- ✅ Setup /etc/hosts entries
-- ✅ Run comprehensive health checks
-- ✅ Optional port forwarding setup
-- ✅ Verify service endpoints
-
-### 4. **`--mode playwright`**
-
-Complete setup optimized for Playwright tests.
-
-- ✅ Full installation (if needed)
-- ✅ Setup /etc/hosts entries
-- ✅ Create Playwright .env configuration
-- ✅ Install dependencies
-- ✅ Run health checks
-
-## Supporting Scripts
-
-### `local-install.sh` - **Main Installation Script**
-
-**Complete local installation that replicates the GitHub Actions workflow.**
-
-**Features:**
-
-- ✅ Prerequisites checking (kubectl, helm, yq, python3)
-- ✅ Environment variable generation
-- ✅ Namespace cleanup and creation
-- ✅ Full Helm chart installation
-- ✅ Dry-run support
-- ✅ Progress reporting
-
-**Usage:**
-
-```bash
+# Complete setup for PR 123 (recommended)
 ./scripts/local-install.sh -p 123
-./scripts/local-install.sh -p 456 -b kafka -pt true -d override
+
+# Setup with different cluster
+./scripts/local-install.sh -p 123 -c my-cluster
+
+# Advanced configuration with Kafka
+./scripts/local-install.sh -p 123 -b kafka -pt true -d override
+
+# Dry run to see what would happen
 ./scripts/local-install.sh --dry-run -p 123
 ```
 
-### `check-deployment-status.sh` - **Deployment Status Checker**
+## What the Script Does
 
-Check pod status and service availability for existing deployments.
+### Complete Automated Setup
+
+The `local-install.sh` script provides a fully automated local development environment:
+
+1. **Cluster Configuration**
+   - Validates kubectl connection and cluster access
+   - Configures kubectl context using Rancher CLI integration
+   - Verifies cluster connectivity and namespace permissions
+
+2. **Environment Preparation**
+   - Generates PREVIEW_NAME in format: `pr-{number}-{broker}-{partition}-{destination}`
+   - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
+   - Sets up environment variables for consistent deployment
+
+3. **Kubernetes Deployment**
+   - Creates and configures namespace with proper labels
+   - Deploys Activiti Cloud using Helm with local-values.yaml by default
+   - Patches deployments with correct external Keycloak configuration
+
+4. **Local Access Configuration**
+   - Automatically configures /etc/hosts entries for gateway routing
+   - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
+   - Generates .env file for Playwright tests with proper SSO configuration
+
+5. **Keycloak Authentication Setup**
+   - Configures external Keycloak URL: `https://{cluster}.envalfresco.com/auth`
+   - Sets correct realm: `alfresco`
+   - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
+   - Validates JWT configuration across all deployments
+
+6. **Health Validation**
+   - Verifies all pods are running and ready
+   - Tests service endpoints and authentication
+   - Confirms Playwright test configuration
+
+## Key Features
+
+### ✅ DNS Resolution via localhost
+
+- Port forwarding from localhost:8080 to ingress-nginx-controller
+- Automated /etc/hosts configuration for gateway domains
+- No need for complex DNS setup or VPN connections
+
+### ✅ Working Docker Images
+
+- Integrates local-values.yaml with tested image tags by default
+- Uses 8.8.0-alpha.108 versions that are known to work
+- Prevents deployment failures from missing or broken images
+
+### ✅ Complete Keycloak Integration
+
+- External Keycloak URL configuration for all services
+- Proper realm and client configuration
+- JWT validation fixes for multi-namespace deployments
+- Automated secret configuration
+
+### ✅ Playwright Test Ready
+
+- Generates proper .env configuration automatically
+- HTTP protocol for localhost:8080 access
+- Correct SSO_HOST and authentication setup
+- Ready to run tests immediately after deployment
+
+### ✅ Multi-Cluster Support
+
+- Parameterized cluster names (not hardcoded to activiti-hackathon)
+- Works with any Rancher-managed Kubernetes cluster
+- Automatic kubectl context switching
+
+## Generated Environment
+
+The script creates this complete local development setup:
+
+- **Namespace**: `pr-{number}-rabbit-n-d` (e.g., `pr-123-rabbit-n-d`)
+- **Local Access**: `http://localhost:8080` → gateway services
+- **SSO Integration**: External Keycloak at `https://{cluster}.envalfresco.com/auth`
+- **DNS Resolution**: Automated /etc/hosts entries for `{namespace}.{cluster}.envalfresco.com`
+- **Test Configuration**: Ready-to-use .env file for Playwright tests
+
+## Supporting Scripts
+
+### `fix-kubectl-config.sh` - Cluster Configuration
+
+Parameterized script for connecting to different Kubernetes clusters via Rancher CLI.
 
 **Usage:**
-
 ```bash
-./scripts/check-deployment-status.sh -p 123
+./scripts/fix-kubectl-config.sh [cluster-name]
+# Default cluster: activiti
 ```
+
+**Features:**
+- Validates Rancher CLI connectivity
+- Switches kubectl context to specified cluster
+- Confirms cluster access and permissions
+- Works with any Rancher-managed cluster
 
 ### Utility Scripts
 
-- `fix-makefile.sh` - Patches the Makefile for local development compatibility
-- `fix-kubectl-config.sh` - kubectl configuration fixes
-- `setup-rancher.sh` - Rancher CLI setup
-- `kubectl-wrapper.sh` - kubectl wrapper for Rancher
-- `resolve-docker-images.sh` - Docker image resolution
-
-## Generated Environment Variables
-
-The scripts generate the following environment variables:
-
-- `PREVIEW_NAME` - The main preview environment name
-- `MESSAGING_BROKER` - The messaging broker configuration
-- `MESSAGING_PARTITIONED` - The partitioning configuration
-- `MESSAGING_DESTINATIONS` - The destinations configuration
-- `GLOBAL_GATEWAY_DOMAIN` - The global gateway domain
-- `GATEWAY_HOST` - The gateway host URL
-- `SSO_HOST` - The SSO host URL
+- `local-values.yaml` - Working Docker image tags and configuration
+- `check-deployment-status.sh` - Pod and service status checking
+- `health-check-local.sh` - Comprehensive health validation
 
 ## PREVIEW_NAME Format
 
-The `PREVIEW_NAME` follows this pattern:
+The deployment namespace follows this consistent pattern:
 
-```
-{type}-{number}-{broker}-{partition}-{destination}
+```text
+pr-{number}-{broker}-{partition}-{destination}
 ```
 
 Where:
-
-- **type**: `pr` (for pull requests) or `gh` (for GitHub runs)
-- **number**: PR number or GitHub run number
+- **number**: PR number or identifier (e.g., 123, local-dev)
 - **broker**: First 6 characters of broker name (`rabbit` or `kafka`)
-- **partition**: First character of partitioning (`p` for partitioned, `n` for non-partitioned)
-- **destination**: First character of destinations (`d` for default, `o` for override)
+- **partition**: `n` for non-partitioned, `p` for partitioned
+- **destination**: `d` for default, `o` for override
 
 **Examples:**
+- `pr-123-rabbit-n-d` - PR 123, RabbitMQ, non-partitioned, default destinations
+- `pr-456-kafka-p-o` - PR 456, Kafka, partitioned, override destinations
 
-- `pr-123-rabbit-n-d` - PR #123, RabbitMQ, non-partitioned, default destinations
-- `pr-456-kafka-p-o` - PR #456, Kafka, partitioned, override destinations
-- `gh-789012-rabbit-p-d` - GitHub run #789012, RabbitMQ, partitioned, default destinations
+## Usage Scenarios
 
-## Use Cases
-
-### Complete Environment Setup
+### Quick Local Development
 
 ```bash
-# Setup everything for environment "test-123"
-./scripts/setup-environment.sh -n test-123
+# One command setup - everything automated
+./scripts/local-install.sh -p 123
 
-# Advanced configuration
-./scripts/setup-environment.sh -n kafka-test -b kafka -pt true -d override
-```
+# Access your deployment immediately
+open http://localhost:8080
 
-### Environment Variables Only
-
-```bash
-# Generate variables and show export commands
-./scripts/setup-environment.sh -n local-dev --mode env-only
-
-# Use in current shell
-source <(./scripts/setup-environment.sh -n local-dev --mode env-only 2>/dev/null | grep '^export')
-```
-
-### Playwright Testing
-
-```bash
-# Complete Playwright setup
-./scripts/setup-environment.sh -n playwright-test --mode playwright
-
-# Then run tests
+# Run Playwright tests
 cd activiti-cloud-acceptance-tests-playwright
 npm test
 ```
 
-### Testing Existing Deployment
+### Different Cluster
 
 ```bash
-# Test and setup access to existing deployment
-./scripts/setup-environment.sh -n test-123 --mode test-only
-
-# Check detailed deployment status
-./scripts/check-deployment-status.sh -p 123
+# Use different cluster than default activiti
+./scripts/local-install.sh -p 123 -c my-cluster-name
 ```
 
-## Migration from Old Scripts
+### Advanced Configuration
 
-The new consolidated script replaces these previous scripts:
+```bash
+# Kafka with partitioning and override destinations
+./scripts/local-install.sh -p 123 -b kafka -pt true -d override
+```
 
-- `generate-preview-name.sh` → `setup-environment.sh --mode env-only`
-- `quick-preview-env.sh` → `setup-environment.sh --mode env-only`
-- `setup-playwright-local.sh` → `setup-environment.sh --mode playwright`
-- `setup-local-access.sh` → `setup-environment.sh --mode test-only`
-- `health-check-enhanced.sh` → Integrated into all modes
-- `test-health-checks-local.sh` → Integrated into all modes
+### Testing and Validation
 
-## Integration with Existing Tools
+```bash
+# See what would happen without executing
+./scripts/local-install.sh --dry-run -p 123
 
-These scripts generate the same `PREVIEW_NAME` format as the GitHub Actions workflow, ensuring consistency between local and CI/CD environments.
+# Check deployment after installation
+kubectl get pods -n pr-123-rabbit-n-d
+kubectl get services -n pr-123-rabbit-n-d
+```
 
-The generated environment variables can be used with:
+## Integration with Testing
 
-- Kubernetes deployments (`kubectl` commands)
-- Helm charts (`helm install/upgrade`)
-- Makefile targets
-- Local testing scripts
-- API endpoint configuration
+### Playwright Tests
+The script automatically generates a `.env` file for Playwright testing:
+
+```bash
+# After running local-install.sh
+cd activiti-cloud-acceptance-tests-playwright
+npm test  # Uses generated .env configuration
+```
+
+### Manual Testing
+Access services directly via localhost:
+
+```bash
+# Gateway endpoint
+curl http://localhost:8080/rb/actuator/health
+
+# With authentication
+curl -H "Host: pr-123-rabbit-n-d.activiti.envalfresco.com" \
+     http://localhost:8080/rb/actuator/health
+```
+
+## Troubleshooting
+
+### Common Solutions
+
+1. **kubectl connection issues**
+   ```bash
+   ./scripts/fix-kubectl-config.sh
+   kubectl cluster-info
+   ```
+
+2. **Port forwarding problems**
+   ```bash
+   # Kill existing port forwards
+   pkill -f "kubectl.*port-forward"
+   # Script will recreate automatically
+   ```
+
+3. **DNS resolution issues**
+   ```bash
+   # Check /etc/hosts entries
+   grep "envalfresco.com" /etc/hosts
+   # Script manages these automatically
+   ```
+
+4. **Authentication failures**
+   ```bash
+   # Check Keycloak configuration
+   kubectl get configmap -n pr-123-rabbit-n-d
+   kubectl describe deployment -n pr-123-rabbit-n-d
+   ```
+
+This represents the current working state of our local development workflow, with all authentication issues resolved and complete automation for reliable deployments.
