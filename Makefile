@@ -39,6 +39,7 @@ install: release
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
 			--values $(MESSAGING_DESTINATIONS)-values.yaml \
+			$(if $(LOCAL_VALUES_FILE),--values $(LOCAL_VALUES_FILE)) \
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \
@@ -47,7 +48,7 @@ install: release
 
 delete:
 	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
-	kubectl delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
+	$(or $(KUBECTL),kubectl) delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
 
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
@@ -78,7 +79,7 @@ release: update-chart
     helm lint && \
     cat Chart.yaml && \
 	  cat values.yaml && \
-	  ls charts -la
+	  ls -la charts
 
 mvn/%:
 	$(eval MODULE=$(word 1, $(subst mvn/, ,$@)))

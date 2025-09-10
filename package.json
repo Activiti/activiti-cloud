@@ -1,0 +1,35 @@
+{
+  "name": "activiti-cloud-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript tests for Activiti Cloud",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install",
+    "install:deps": "playwright install-deps"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "e2e",
+    "typescript",
+    "activiti-cloud"
+  ],
+  "author": "Activiti Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
+    "jwt-decode": "^4.0.0"
+  }
+}
