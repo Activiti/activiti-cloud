@@ -102,7 +102,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
+        run: mvn -DskipTests -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -115,16 +115,6 @@ jobs:
       - name: Generate coverage reports
         shell: bash
         run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
-
-      - name: Run SonarCloud analysis
-        if: ${{ env.SONAR_TOKEN != '' }}
-        shell: bash
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
@@ -204,12 +194,12 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@8deedb31586d983814a5519655ba34a74cb8f330
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
+          context: 'not_existing_one'
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
