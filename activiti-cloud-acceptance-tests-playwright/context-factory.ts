@@ -55,7 +55,7 @@ export class ContextFactory {
     }
 
     private static async getContextByParameters(accessToken: string, contextBaseUrl: 'GATEWAY_HOST', username: string): Promise<CustomAPIRequest> {
-        const tokenData = <ExtendedJwtPayload>jwtDecode(accessToken);
+        const tokenData = jwtDecode(accessToken);
         const { exp: expires_in } = tokenData;
 
         // Determine protocol and construct baseURL
@@ -63,12 +63,21 @@ export class ContextFactory {
         const host = process.env[contextBaseUrl];
         const baseURL = `${protocol}://${host}`;
 
+        // For localhost port forwarding, we need to set the proper Host header
+        const extraHeaders: Record<string, string> = {
+            Authorization: `Bearer ${accessToken}`,
+            accept: 'application/json, text/plain, */*'
+        };
+
+        // If using localhost port forwarding, set the Host header to the original domain
+        if (host?.includes('localhost')) {
+            const originalHost = `gateway-${process.env.PREVIEW_NAME}.${process.env.CLUSTER_NAME}.${process.env.CLUSTER_DOMAIN}`;
+            extraHeaders.Host = originalHost;
+        }
+
         const context = await request.newContext({
             baseURL: baseURL,
-            extraHTTPHeaders: {
-                Authorization: `Bearer ${accessToken}`,
-                accept: 'application/json, text/plain, */*'
-            }
+            extraHTTPHeaders: extraHeaders
         });
 
         return this.getCustomContextObject(context, accessToken, expires_in!.toString(), username);

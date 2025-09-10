@@ -74,12 +74,18 @@ PREREQUISITES:
     - helm installed (version 3+)
     - yq installed (for YAML processing)
     - python3 available (for version parsing)
+    - Keycloak client secret for 'activiti-keycloak' client
+
+ENVIRONMENT VARIABLES:
+    KEYCLOAK_CLIENT_SECRET    Set to avoid interactive prompt for client secret
 
 WORKFLOW:
     1. Checks/configures cluster connection
-    2. Ensures local-values.yaml exists with working image tags
-    3. Deploys Activiti Cloud with reliable configuration
-    4. Generates .env file for Playwright tests
+    2. Prompts for Keycloak client secret (if not set via env var)
+    3. Ensures local-values.yaml exists with working image tags
+    4. Deploys Activiti Cloud with reliable configuration
+    5. Configures identity adapter with correct Keycloak settings
+    6. Generates .env file for Playwright tests
 
 NOTES:
     - Uses local-values.yaml by default for reliable deployments
@@ -152,6 +158,145 @@ execute_command() {
         echo -e "${YELLOW}Running: ${cmd}${NC}"
         eval "$cmd"
     fi
+}
+
+# Function to configure Keycloak settings
+configure_keycloak() {
+    echo -e "${BLUE}=== Configuring Keycloak Settings ===${NC}"
+
+    # Determine correct Keycloak URL - use configured cluster domain
+    CLUSTER_DOMAIN="envalfresco.com"
+    KEYCLOAK_URL="https://$CLUSTER_NAME.$CLUSTER_DOMAIN/auth"
+    KEYCLOAK_REALM="alfresco"
+    KEYCLOAK_CLIENT_ID="activiti-keycloak"
+
+    echo -e "${YELLOW}Detected Keycloak configuration:${NC}"
+    echo -e "  ${CYAN}URL: $KEYCLOAK_URL${NC}"
+    echo -e "  ${CYAN}Realm: $KEYCLOAK_REALM${NC}"
+    echo -e "  ${CYAN}Client ID: $KEYCLOAK_CLIENT_ID${NC}"
+
+    # Check if client secret is provided as environment variable
+    if [[ -n "$KEYCLOAK_CLIENT_SECRET" ]]; then
+        echo -e "${GREEN}✓ Using Keycloak client secret from environment variable${NC}"
+    else
+        echo ""
+        echo -e "${YELLOW}🔑 Keycloak Client Secret Required${NC}"
+        echo ""
+        echo -e "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
+        echo -e "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
+        echo -e "  ${CYAN}1. Open: $KEYCLOAK_URL/admin/master/console/#{KEYCLOAK_REALM}/clients${NC}"
+        echo -e "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
+        echo -e "  ${CYAN}3. Go to Credentials tab${NC}"
+        echo -e "  ${CYAN}4. Copy the Client Secret${NC}"
+        echo ""
+        echo -e "${YELLOW}Or check existing deployments for the secret:${NC}"
+        echo -e "  ${CYAN}kubectl get secret activiti-keycloak-client -n [namespace] -o jsonpath='{.data.clientSecret}' | base64 -d${NC}"
+        echo ""
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo -e "${CYAN}[DRY-RUN] Would prompt for client secret${NC}"
+            KEYCLOAK_CLIENT_SECRET="<WOULD_PROMPT_FOR_SECRET>"
+        else
+            echo -n -e "${YELLOW}Enter the Keycloak client secret for '$KEYCLOAK_CLIENT_ID': ${NC}"
+            read -r KEYCLOAK_CLIENT_SECRET
+
+            if [[ -z "$KEYCLOAK_CLIENT_SECRET" ]]; then
+                echo -e "${RED}Error: Client secret is required${NC}" >&2
+                exit 1
+            fi
+        fi
+    fi
+
+    # Test the client credentials if not in dry-run mode
+    if [[ "$DRY_RUN" == "false" ]]; then
+        echo -e "${YELLOW}Testing client credentials...${NC}"
+        local test_response
+        test_response=$(curl -s -X POST "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials&client_id=$KEYCLOAK_CLIENT_ID&client_secret=$KEYCLOAK_CLIENT_SECRET" \
+            2>/dev/null || echo '{"error":"connection_failed"}')
+
+        if echo "$test_response" | grep -q '"access_token"'; then
+            echo -e "${GREEN}✓ Client credentials are valid${NC}"
+        else
+            echo -e "${RED}✗ Client credentials test failed${NC}" >&2
+            echo -e "${YELLOW}Response: $test_response${NC}" >&2
+            echo -e "${YELLOW}Please verify the client secret is correct${NC}" >&2
+            exit 1
+        fi
+    fi
+
+    # Export for use in deployment
+    export KEYCLOAK_URL
+    export KEYCLOAK_REALM
+    export KEYCLOAK_CLIENT_ID
+    export KEYCLOAK_CLIENT_SECRET
+
+    echo -e "${GREEN}✓ Keycloak configuration ready${NC}"
+    echo ""
+}
+
+# Function to configure /etc/hosts entries
+configure_hosts_file() {
+    echo -e "${BLUE}=== Configuring /etc/hosts ===${NC}"
+
+    local gateway_host="gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
+    local identity_host="identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
+
+    echo -e "${YELLOW}Checking /etc/hosts entries for local development...${NC}"
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo -e "${CYAN}[DRY-RUN] Would add to /etc/hosts:${NC}"
+        echo -e "${CYAN}127.0.0.1 $gateway_host${NC}"
+        echo -e "${CYAN}127.0.0.1 $identity_host${NC}"
+        return 0
+    fi
+
+    # Check if entries already exist
+    local needs_gateway=true
+    local needs_identity=true
+
+    if grep -q "127.0.0.1 $gateway_host" /etc/hosts 2>/dev/null; then
+        needs_gateway=false
+        echo -e "${GREEN}✓ Gateway host entry already exists${NC}"
+    fi
+
+    if grep -q "127.0.0.1 $identity_host" /etc/hosts 2>/dev/null; then
+        needs_identity=false
+        echo -e "${GREEN}✓ Identity host entry already exists${NC}"
+    fi
+
+    if [[ "$needs_gateway" == "true" || "$needs_identity" == "true" ]]; then
+        echo -e "${YELLOW}Adding entries to /etc/hosts...${NC}"
+        echo -e "${CYAN}This requires sudo access to modify /etc/hosts${NC}"
+
+        # Create temporary file with new entries
+        local temp_hosts=$(mktemp)
+        if [[ "$needs_gateway" == "true" ]]; then
+            echo "127.0.0.1 $gateway_host" >> "$temp_hosts"
+        fi
+        if [[ "$needs_identity" == "true" ]]; then
+            echo "127.0.0.1 $identity_host" >> "$temp_hosts"
+        fi
+
+        # Add to /etc/hosts
+        if sudo sh -c "cat '$temp_hosts' >> /etc/hosts"; then
+            echo -e "${GREEN}✓ /etc/hosts updated successfully${NC}"
+            [[ "$needs_gateway" == "true" ]] && echo -e "${GREEN}  Added: 127.0.0.1 $gateway_host${NC}"
+            [[ "$needs_identity" == "true" ]] && echo -e "${GREEN}  Added: 127.0.0.1 $identity_host${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Failed to update /etc/hosts automatically${NC}"
+            echo -e "${YELLOW}Please add these entries manually:${NC}"
+            [[ "$needs_gateway" == "true" ]] && echo -e "${CYAN}127.0.0.1 $gateway_host${NC}"
+            [[ "$needs_identity" == "true" ]] && echo -e "${CYAN}127.0.0.1 $identity_host${NC}"
+        fi
+
+        rm -f "$temp_hosts"
+    else
+        echo -e "${GREEN}✓ All required /etc/hosts entries already exist${NC}"
+    fi
+
+    echo ""
 }
 
 # Function to configure cluster connection
@@ -475,7 +620,40 @@ perform_installation() {
 
     execute_command "$make_cmd" "Running make install"
 
+    # Configure Keycloak settings in the deployed identity adapter
     if [[ "$DRY_RUN" == "false" ]]; then
+        echo -e "${BLUE}=== Configuring Identity Adapter ===${NC}"
+
+        # Dynamic deployment name based on preview name
+        local identity_deployment="${PREVIEW_NAME}-activiti-cloud-identity-adapter"
+
+        # Wait for deployment to be ready
+        echo -e "${YELLOW}Waiting for identity adapter deployment...${NC}"
+        kubectl wait --for=condition=available --timeout=300s deployment/$identity_deployment -n $PREVIEW_NAME || true
+
+        # Update the identity adapter with correct Keycloak configuration
+        echo -e "${YELLOW}Updating Keycloak client secret...${NC}"
+        kubectl patch secret activiti-keycloak-client -n $PREVIEW_NAME -p "{\"data\":{\"clientSecret\":\"$(echo -n "$KEYCLOAK_CLIENT_SECRET" | base64)\"}}"
+
+        # Update all deployments with correct Keycloak URL and realm
+        echo -e "${YELLOW}Updating Keycloak URL and realm configuration...${NC}"
+        local deployments=(
+            "$PREVIEW_NAME-activiti-cloud-connector"
+            "$PREVIEW_NAME-activiti-cloud-identity-adapter"
+            "$PREVIEW_NAME-activiti-cloud-query"
+            "$PREVIEW_NAME-runtime-bundle"
+        )
+
+        for deployment in "${deployments[@]}"; do
+            if kubectl get deployment "$deployment" -n $PREVIEW_NAME &>/dev/null; then
+                echo -e "${CYAN}  Updating $deployment...${NC}"
+                kubectl patch deployment "$deployment" -n $PREVIEW_NAME -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${deployment#$PREVIEW_NAME-}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"$KEYCLOAK_URL\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"$KEYCLOAK_REALM\"}]}]}}}}"
+            fi
+        done        # Restart the deployment to pick up the new secret
+        echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
+        kubectl rollout restart deployment/$identity_deployment -n $PREVIEW_NAME
+        kubectl rollout status deployment/$identity_deployment -n $PREVIEW_NAME
+
         echo -e "${GREEN}=== Installation Completed Successfully! ===${NC}"
         echo -e "${YELLOW}Your Activiti Cloud instance is available at:${NC}"
         echo -e "  ${CYAN}Gateway: https://$GATEWAY_HOST${NC}"
@@ -498,8 +676,8 @@ generate_env_file() {
     local env_file="$ROOT_DIR/activiti-cloud-acceptance-tests-playwright/.env"
     local local_port="8080"
 
-    # Determine realm based on what was actually deployed
-    local realm="activiti"
+    # Use the configured Keycloak realm
+    local realm="${KEYCLOAK_REALM:-alfresco}"
 
     if [[ "$DRY_RUN" == "true" ]]; then
         echo -e "${CYAN}[DRY-RUN] Would create .env file at: $env_file${NC}"
@@ -521,11 +699,20 @@ GITHUB_ACTIONS=false
 
 # Application Configuration (environment-specific)
 GATEWAY_PROTOCOL=http
+GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
+GATEWAY_URL=http://gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
 SSO_PROTOCOL=http
-GATEWAY_HOST=$GATEWAY_HOST:$local_port
-IDENTITY_HOST=$SSO_HOST:$local_port
-SSO_HOST=http://$SSO_HOST:$local_port/auth/realms/$realm/protocol/openid-connect/token
+IDENTITY_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
+SSO_HOST=$KEYCLOAK_URL/realms/$realm/protocol/openid-connect/token
 REALM=$realm
+
+# Keycloak Configuration
+KEYCLOAK_REALM=$realm
+KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
+KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
+
+# Application Configuration
+ACTIVITI_CLOUD_APPLICATION_NAME=default-app
 
 # DEBUG=pw:api
 
@@ -584,10 +771,20 @@ echo -e "${GREEN}=== Activiti Cloud Local Installation ===${NC}"
 echo ""
 
 configure_cluster
+configure_keycloak
 check_prerequisites
 ensure_local_values
 generate_environment
 perform_installation
+configure_hosts_file
 generate_env_file
 
 echo -e "${GREEN}=== Done! ===${NC}"
+echo ""
+echo -e "${BLUE}Next steps for local development:${NC}"
+echo -e "${CYAN}1. Port forwarding will be automatically started by Playwright tests${NC}"
+echo -e "${CYAN}2. Run tests: cd activiti-cloud-acceptance-tests-playwright && npm test${NC}"
+echo -e "${CYAN}3. Or start port forwarding manually:${NC}"
+echo -e "${CYAN}   kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80${NC}"
+echo -e "${CYAN}4. Access services via the configured /etc/hosts entries on localhost:8080${NC}"
+echo ""
