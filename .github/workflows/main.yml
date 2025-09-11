@@ -291,11 +291,11 @@ jobs:
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         uses: ./.github/actions/playwright-run
         env:
-          TEST_USERNAME: ${{ secrets.TESTUSER_USERNAME }}
-          TEST_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
+          TESTUSER_USERNAME: ${{ secrets.TESTUSER_USERNAME }}
+          TESTUSER_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
           GATEWAY_URL: ${{ env.GATEWAY_HOST }}
           SSO_HOST: ${{ env.SSO_HOST }}
-          REALM: Alfresco
+          REALM: alfresco
         with:
           script-command: 'npm run test:identity'
 
