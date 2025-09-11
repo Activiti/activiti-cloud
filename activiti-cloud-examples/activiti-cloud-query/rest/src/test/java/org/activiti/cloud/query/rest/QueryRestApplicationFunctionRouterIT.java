@@ -17,26 +17,23 @@ package org.activiti.cloud.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(
-    classes = { QueryRestApplication.class },
-    properties = { "activiti.cloud.messaging.function-router.enabled=true" }
+@TestPropertySource(
+    properties = { "activiti.cloud.messaging.function-router.enabled=true", "spring.sql.init.mode=always" }
 )
 @Testcontainers
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-public class QueryRestApplicationFunctionRouterIT {
+public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT {
 
     @ServiceConnection
     @Container
@@ -53,13 +50,10 @@ public class QueryRestApplicationFunctionRouterIT {
     private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
-    void contextLoads() {}
-
-    @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys("auditConsumer", "queryConsumer", "functionRouterInput")
-            .containsOnlyKeys("graphQLEngineEventsConsumerSource", "producer");
+            .doesNotContainKeys("auditConsumer", "queryConsumer")
+            .containsOnlyKeys("functionRouterAnonymousInput", "producer");
     }
 
     @Test
@@ -68,6 +62,22 @@ public class QueryRestApplicationFunctionRouterIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.destinations()).isEmpty();
+        assertThat(functionRouter.getRoutes())
+            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+
+        assertThat(functionRouter.destinations("functionRouterInput")).isEmpty();
+
+        assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
+            .containsOnly(Map.entry("graphQLEngineEventsConsumerSource", "engineEvents"));
+
+        assertThat(functionRouter.registrations("functionRouterInput")).isEmpty();
+
+        assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
+            .containsOnlyKeys("engineEvents")
+            .satisfies(registrations ->
+                assertThat(registrations.get("engineEvents"))
+                    .containsOnly("engineEventsGraphQlSourceConsumer_registration")
+                    .isNotEmpty()
+            );
     }
 }

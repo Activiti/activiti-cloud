@@ -18,8 +18,6 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -45,15 +43,7 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
 
         // then
         AssertionsForClassTypes
-            .assertThat(
-                bindings
-                    .entrySet()
-                    .stream()
-                    .filter(entry ->
-                        entry.getValue().getConsumer() == null || entry.getValue().getConsumer().isAutoStartup()
-                    )
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            )
+            .assertThat(bindings)
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .doesNotContainKeys("functionRouterInput")
             .containsOnlyKeys(
@@ -62,9 +52,7 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
                 "integrationResults",
                 "auditConsumer",
                 "queryConsumer",
-                "commandConsumer",
-                "scriptRuntimeConsumer",
-                "integrationRequests"
+                "commandConsumer"
             );
     }
 }

@@ -55,6 +55,8 @@ jobs:
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+    env:
+      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
 
     steps:
 
@@ -98,15 +100,26 @@ jobs:
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
           echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
-      - name: Set SONAR_SCANNER_OPTS
-        shell: bash
-        run: |
-          echo "JACOCO_REPORT_PATH=${{ github.workspace }}/activiti-cloud-coverage/target/site/jacoco-aggregate/jacoco.xml" >> $GITHUB_ENV
-          echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization='activiti' -Dsonar.projectKey='Activiti_activiti-cloud' -Dsonar.coverage.jacoco.xmlReportPaths=${{ env.JACOCO_REPORT_PATH }}" >> $GITHUB_ENV
-
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}} ${{ env.SONAR_SCANNER_OPTS }}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Merge JaCoCo execution files
+        shell: bash
+        run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
+
+      - name: Generate coverage reports
+        shell: bash
+        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
+
+      - name: Run SonarCloud analysis
+        if: ${{ env.SONAR_TOKEN != '' }}
+        shell: bash
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
