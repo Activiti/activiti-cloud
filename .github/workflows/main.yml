@@ -288,7 +288,7 @@ jobs:
 
       - name: Persist SSO_HOST
         run: |
-          echo "SSO_HOST=identity-$PREVIEW_NAME.$CLUSTER_NAME.$CLUSTER_DOMAIN" >> $GITHUB_ENV
+          echo "SSO_HOST=https://identity-$PREVIEW_NAME.$CLUSTER_NAME.$CLUSTER_DOMAIN" >> $GITHUB_ENV
 
       - name: Run Identity Adapter Acceptance Tests
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
