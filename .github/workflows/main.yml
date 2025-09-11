@@ -295,8 +295,8 @@ jobs:
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         uses: ./.github/actions/playwright-run
         env:
-          TESTUSER_USERNAME: ${{ secrets.TESTUSER_USERNAME }}
-          TESTUSER_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
+          TESTUSER_USERNAME: 'admin'
+          TESTUSER_PASSWORD: 'password'
           GATEWAY_URL: ${{ env.GATEWAY_HOST }}
           SSO_HOST: ${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
           REALM: activiti
