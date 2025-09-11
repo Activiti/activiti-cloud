@@ -115,57 +115,6 @@ kubectl get pods -n "$NAMESPACE" --no-headers | while read -r line; do
 done
 
 echo ""
-echo -e "${BLUE}=== Service Endpoints ===${NC}"
-
-# Test gateway health
-echo -n "Gateway health check... "
-if curl -k -s -f "https://$GATEWAY_HOST/rb/actuator/health" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ Available${NC}"
-elif curl -k -s -f "https://$GATEWAY_HOST/rb/actuator/health/readiness" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ Available (readiness)${NC}"
-else
-    response=$(curl -k -s -w "%{http_code}" -o /dev/null "https://$GATEWAY_HOST/rb" 2>/dev/null || echo "000")
-    if [ "$response" = "200" ] || [ "$response" = "401" ] || [ "$response" = "403" ]; then
-        echo -e "${YELLOW}⚠ Responding (HTTP $response)${NC}"
-    else
-        echo -e "${RED}✗ Not available (HTTP $response)${NC}"
-    fi
-fi
-
-# Test SSO
-echo -n "Identity service check... "
-response=$(curl -k -s -w "%{http_code}" -o /dev/null "https://$SSO_HOST/auth" 2>/dev/null || echo "000")
-if [ "$response" = "200" ]; then
-    echo -e "${GREEN}✓ Available${NC}"
-elif [ "$response" = "302" ] || [ "$response" = "401" ]; then
-    echo -e "${GREEN}✓ Available (redirect)${NC}"
-else
-    echo -e "${RED}✗ Not available (HTTP $response)${NC}"
-fi
-
-# Test query service
-echo -n "Query service check... "
-response=$(curl -k -s -w "%{http_code}" -o /dev/null "https://$GATEWAY_HOST/query/actuator/health" 2>/dev/null || echo "000")
-if [ "$response" = "200" ]; then
-    echo -e "${GREEN}✓ Available${NC}"
-elif [ "$response" = "401" ] || [ "$response" = "403" ]; then
-    echo -e "${YELLOW}⚠ Responding (HTTP $response)${NC}"
-else
-    echo -e "${RED}✗ Not available (HTTP $response)${NC}"
-fi
-
-# Test identity adapter
-echo -n "Identity adapter check... "
-response=$(curl -k -s -w "%{http_code}" -o /dev/null "https://$GATEWAY_HOST/identity-adapter-service/actuator/health" 2>/dev/null || echo "000")
-if [ "$response" = "200" ]; then
-    echo -e "${GREEN}✓ Available${NC}"
-elif [ "$response" = "401" ] || [ "$response" = "403" ]; then
-    echo -e "${YELLOW}⚠ Responding (HTTP $response)${NC}"
-else
-    echo -e "${RED}✗ Not available (HTTP $response)${NC}"
-fi
-
-echo ""
 echo -e "${BLUE}=== Image Information ===${NC}"
 kubectl get pods -n "$NAMESPACE" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .spec.containers[*]}{.name}: {.image}{"\n"}{end}{"\n"}{end}' | while read -r line; do
     if [[ "$line" =~ ^pr-.*-.*$ ]]; then
