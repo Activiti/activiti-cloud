@@ -290,6 +290,12 @@ jobs:
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         uses: ./.github/actions/playwright-run
+        env:
+          TEST_USERNAME: ${{ secrets.TESTUSER_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
+          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
+          SSO_HOST: ${{ env.SSO_HOST }}
+          REALM: Alfresco
         with:
           script-command: 'npm run test:identity'
 
