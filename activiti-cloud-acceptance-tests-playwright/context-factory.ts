@@ -27,6 +27,10 @@ export class ContextFactory {
         const requestContext = await request.newContext();
         const resp = await requestContext.post(ssoUrl, authFormData);
 
+        const rawBody = await resp.text();
+        console.log(`Request to ${ssoUrl}`);
+        console.log('[Auth] Response Body Raw:', rawBody);
+
         if (!/20\d/.exec(resp.status().toString())) {
             const errorMessage = `Error during sending a POST request: \n
             Endpoint: ${ssoUrl} \n
