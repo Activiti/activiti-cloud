@@ -18,20 +18,32 @@ import { CloudRuntimeEvent, EventQueryParams, EventsResponse } from '../models/a
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
 
-export class AuditService extends BaseService {
-    private readonly basePath = '/audit/v1';
+export class AuditAdminService extends BaseService {
+    private readonly basePath = '/audit/admin/v1';
 
     constructor(context: CustomAPIRequest) {
         super(context);
     }
 
-    async getAllEvents(): Promise<CloudRuntimeEvent[]> {
+    async getAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
         const response = await this.get(`${this.basePath}/events`);
         const result = response as EventsResponse;
         return result.content || [];
     }
 
-    async getEvents(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
+    async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
+        const searchParams = new URLSearchParams();
+        searchParams.append('search', `entityId:${entityId}`);
+
+        const response = await this.get(
+            `${this.basePath}/events?${searchParams.toString()}`
+        );
+
+        const result = response as EventsResponse;
+        return result.content || [];
+    }
+
+    async getEventsAdmin(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
         const searchParams = new URLSearchParams();
 
         if (params?.entityId) searchParams.append('entityId', params.entityId);
@@ -45,13 +57,5 @@ export class AuditService extends BaseService {
 
         const result = response as EventsResponse;
         return result.content || [];
-    }
-
-    async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ entityId });
-    }
-
-    async getEventsByProcessInstanceId(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ processInstanceId });
     }
 }

@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import { APIRequestContext, APIResponse } from '@playwright/test';
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { CloudTask, TaskQueryParams } from '../models/task.models';
+import { BaseService } from './base.service';
+import { CustomAPIRequest } from '../context.models';
 
-export class QueryService {
+export class QueryService extends BaseService {
     private readonly basePath = '/query/v1';
 
-    constructor(private readonly context: APIRequestContext) {}
+    constructor(context: CustomAPIRequest) {
+        super(context);
+    }
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        const response: APIResponse = await this.context.get(`${this.basePath}/process-instances`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to get process instances: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const response = await this.get(`${this.basePath}/process-instances`);
+        const result = response as any;
         return result.content || [];
     }
 
@@ -42,26 +40,17 @@ export class QueryService {
         if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response: APIResponse = await this.context.get(
+        const response = await this.get(
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        if (!response.ok()) {
-            throw new Error(`Failed to get process instances: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const result = response as any;
         return result.content || [];
     }
 
     async getAllTasks(): Promise<CloudTask[]> {
-        const response: APIResponse = await this.context.get(`${this.basePath}/tasks`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to get tasks: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const response = await this.get(`${this.basePath}/tasks`);
+        const result = response as any;
         return result.content || [];
     }
 
@@ -75,15 +64,11 @@ export class QueryService {
         if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response: APIResponse = await this.context.get(
+        const response = await this.get(
             `${this.basePath}/tasks?${searchParams.toString()}`
         );
 
-        if (!response.ok()) {
-            throw new Error(`Failed to get tasks: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const result = response as any;
         return result.content || [];
     }
 }

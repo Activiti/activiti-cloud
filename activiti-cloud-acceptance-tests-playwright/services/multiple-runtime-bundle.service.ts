@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import { APIRequestContext } from '@playwright/test';
 import { RuntimeBundleService } from './runtime-bundle.service';
 import {
     CloudProcessInstance,
     StartProcessPayload,
     ProcessInstanceStatus
 } from '../models/runtime-bundle.models';
+import { BaseService } from './base.service';
+import { CustomAPIRequest } from '../context.models';
 
-export class MultipleRuntimeBundleService {
+export class MultipleRuntimeBundleService extends BaseService {
     private readonly primaryRuntimeService: RuntimeBundleService;
     private readonly secondaryRuntimeService: RuntimeBundleService;
 
-    constructor(private readonly context: APIRequestContext) {
+    constructor(context: CustomAPIRequest) {
+        super(context);
         // Primary runtime bundle
         this.primaryRuntimeService = new RuntimeBundleService(context);
         // Secondary runtime bundle - in a real multi-runtime setup, this would use a different base path

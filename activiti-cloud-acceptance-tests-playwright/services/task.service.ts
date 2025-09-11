@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import { APIRequestContext, APIResponse } from '@playwright/test';
 import { CloudTask, TaskQueryParams, TaskResponse } from '../models/task.models';
+import { BaseService } from './base.service';
+import { CustomAPIRequest } from '../context.models';
 
-export class TaskService {
+export class TaskService extends BaseService {
     private readonly basePath = '/rb/v1';
 
-    constructor(private readonly context: APIRequestContext) {}
+    constructor(context: CustomAPIRequest) {
+        super(context);
+    }
 
     async getAllTasks(): Promise<CloudTask[]> {
-        const response: APIResponse = await this.context.get(`${this.basePath}/tasks`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to get tasks: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result: TaskResponse = await response.json();
+        const response = await this.get(`${this.basePath}/tasks`);
+        const result = response as TaskResponse;
         return result.content || [];
     }
 
@@ -43,15 +41,11 @@ export class TaskService {
         if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response: APIResponse = await this.context.get(
+        const response = await this.get(
             `${this.basePath}/tasks?${searchParams.toString()}`
         );
 
-        if (!response.ok()) {
-            throw new Error(`Failed to get tasks: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result: TaskResponse = await response.json();
+        const result = response as TaskResponse;
         return result.content || [];
     }
 

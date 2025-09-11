@@ -52,10 +52,6 @@ activiti.describe('Security Policies - HR User Actions', () => {
 
     activiti.describe('Process with Variables Restrictions', () => {
         activiti('should restrict hruser from starting process with variables', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user cannot start the process with variables', async () => {
                 await expect(async () => {
                     await securityPoliciesServiceHrUser.startProcess('PROCESS_INSTANCE_WITH_VARIABLES');
@@ -64,10 +60,6 @@ activiti.describe('Security Policies - HR User Actions', () => {
         });
 
         activiti('should restrict hruser from accessing process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user cannot get process with variables instances', async () => {
                 const processInstances = await securityPoliciesServiceHrUser.expectProcessInstancesForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
                 expect(processInstances).toHaveLength(0);
@@ -75,10 +67,6 @@ activiti.describe('Security Policies - HR User Actions', () => {
         });
 
         activiti('should restrict hruser from querying process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user cannot query process with variables instances', async () => {
                 const queryProcessInstances = await securityPoliciesServiceHrUser.expectQueryProcessInstancesForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
                 expect(queryProcessInstances).toHaveLength(0);
@@ -86,10 +74,6 @@ activiti.describe('Security Policies - HR User Actions', () => {
         });
 
         activiti('should restrict hruser from accessing events for process with variables', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user cannot get events for process with variables instances', async () => {
                 const events = await securityPoliciesServiceHrUser.expectEventsForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
                 expect(events).toHaveLength(0);
@@ -99,26 +83,16 @@ activiti.describe('Security Policies - HR User Actions', () => {
 
     activiti.describe('Task Access', () => {
         activiti('should allow hruser to access tasks', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user can get tasks', async () => {
                 const tasks = await securityPoliciesServiceHrUser.getAllTasks();
                 expect(tasks).toBeDefined();
-                // Tasks array can be empty, but the call should succeed
             });
         });
 
         activiti('should allow hruser to query tasks', async ({ securityPoliciesServiceHrUser }) => {
-            await activiti.step('Given the user is authenticated as hruser', async () => {
-                // Authentication is handled by the hrUserContext fixture
-            });
-
             await activiti.step('Then the user can query tasks', async () => {
                 const queryTasks = await securityPoliciesServiceHrUser.queryAllTasks();
                 expect(queryTasks).toBeDefined();
-                // Tasks array can be empty, but the call should succeed
             });
         });
     });

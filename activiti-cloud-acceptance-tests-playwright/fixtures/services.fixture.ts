@@ -21,7 +21,9 @@ import { contexts } from './context.fixture';
 
 interface ServicesFixture {
   multipleRuntimeServiceTestUser: MultipleRuntimeBundleService;
+  securityPoliciesServiceTestUser: SecurityPoliciesService;
   securityPoliciesServiceHrUser: SecurityPoliciesService;
+  securityPoliciesServiceHradmin: SecurityPoliciesService;
   securityPoliciesServiceProcessAdmin: SecurityPoliciesService;
   identityManagementServiceTestUser: IdentityManagementService;
 }
@@ -30,9 +32,15 @@ const activiti = contexts.extend<ServicesFixture>({
   multipleRuntimeServiceTestUser: async ({ testUserContext }, use) => {
     await use(new MultipleRuntimeBundleService(testUserContext));
   },
-
+  securityPoliciesServiceTestUser: async ({ testUserContext }, use) => {
+    await use(new SecurityPoliciesService(testUserContext));
+  },
   securityPoliciesServiceHrUser: async ({ hrUserContext }, use) => {
     await use(new SecurityPoliciesService(hrUserContext));
+  },
+
+  securityPoliciesServiceHradmin: async ({ hradminContext }, use) => {
+    await use(new SecurityPoliciesService(hradminContext));
   },
 
   securityPoliciesServiceProcessAdmin: async ({ processAdminContext }, use) => {

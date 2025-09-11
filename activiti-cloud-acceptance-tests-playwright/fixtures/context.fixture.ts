@@ -21,6 +21,7 @@ import { CustomAPIRequest } from '../context.models';
 
 interface UserContexts {
     hrUserContext: CustomAPIRequest;
+    hradminContext: CustomAPIRequest;
     processAdminContext: CustomAPIRequest;
     modelerUserContext: CustomAPIRequest;
     modelerqaUserContext: CustomAPIRequest;
@@ -32,31 +33,34 @@ interface UserContexts {
 }
 
 const contexts = base.extend<UserContexts>({
-    processAdminContext: async ({}, use) => {
+    processAdminContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('processadmin'));
     },
-    devopsUserContext: async ({}, use) => {
+    devopsUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('devopsuser'));
     },
-    hrUserContext: async ({}, use) => {
+    hrUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('hruser'));
     },
-    modelerUserContext: async ({}, use) => {
+    hradminContext: async ({ }, use) => {
+        await use(await ContextFactory.getContextByUserName('hradmin'));
+    },
+    modelerUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('modeler'));
     },
-    modelerqaUserContext: async ({}, use) => {
+    modelerqaUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('modelerqa'));
     },
-    superadminContext: async ({}, use) => {
+    superadminContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('superadminuser'));
     },
-    salesUserContext: async ({}, use) => {
+    salesUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('salesUser'));
     },
-    testAdminUserContext: async ({}, use) => {
+    testAdminUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('testAdminUser'));
     },
-    testUserContext: async ({}, use) => {
+    testUserContext: async ({ }, use) => {
         await use(await ContextFactory.getContextByUserName('testUser'));
     }
 });

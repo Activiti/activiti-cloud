@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { APIRequestContext, APIResponse } from '@playwright/test';
 import { User, Group, SearchUsersParams, SearchGroupsParams } from '../models/identity.models';
+import { BaseService } from './base.service';
+import { CustomAPIRequest } from '../context.models';
 
-export class IdentityManagementService {
+export class IdentityManagementService extends BaseService {
     private readonly basePath = '/identity-adapter-service/v1';
 
-    constructor(private readonly context: APIRequestContext) {}
+    constructor(context: CustomAPIRequest) {
+        super(context);
+    }
 
     async searchUsers(options: SearchUsersParams = {}): Promise<User[]> {
         const params = new URLSearchParams();
@@ -30,13 +33,8 @@ export class IdentityManagementService {
         if (options.group) options.group.forEach(g => params.append('group', g));
         if (options.application) params.append('application', options.application);
 
-        const response: APIResponse = await this.context.get(`${this.basePath}/users?${params.toString()}`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to search users: ${response.status()} ${response.statusText()}`);
-        }
-
-        return await response.json();
+        const response = await this.get(`${this.basePath}/users?${params.toString()}`);
+        return response as User[];
     }
 
     async searchGroups(options: SearchGroupsParams = {}): Promise<Group[]> {
@@ -46,12 +44,7 @@ export class IdentityManagementService {
         if (options.role) options.role.forEach(r => params.append('role', r));
         if (options.application) params.append('application', options.application);
 
-        const response: APIResponse = await this.context.get(`${this.basePath}/groups?${params.toString()}`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to search groups: ${response.status()} ${response.statusText()}`);
-        }
-
-        return await response.json();
+        const response = await this.get(`${this.basePath}/groups?${params.toString()}`);
+        return response as Group[];
     }
 }

@@ -14,42 +14,24 @@
  * limitations under the License.
  */
 
-import {
-    CloudProcessInstance,
-    StartProcessPayload,
-    ProcessInstanceResponse,
-    ProcessQueryParams
-} from '../models/runtime-bundle.models';
+import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
 
-export class RuntimeBundleService extends BaseService {
-    private readonly basePath = '/rb/v1';
+export class RuntimeAdminService extends BaseService {
+    private readonly basePath = '/rb/admin/v1';
 
     constructor(context: CustomAPIRequest) {
         super(context);
     }
 
-    async startProcess(payload: StartProcessPayload): Promise<CloudProcessInstance> {
-        const response = await this.post(
-            `${this.basePath}/process-instances`,
-            { data: payload }
-        );
-
-        const result = response as ProcessInstanceResponse;
-        return result.content;
+    async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances`);
+        const result = response as any;
+        return result.content || [];
     }
 
-    async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        const response = await this.get(
-            `${this.basePath}/process-instances/${processInstanceId}`
-        );
-
-        const result = response as ProcessInstanceResponse;
-        return result.content;
-    }
-
-    async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
+    async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
         const searchParams = new URLSearchParams();
 
         if (params?.status) searchParams.append('status', params.status);

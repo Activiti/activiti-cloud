@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import { APIRequestContext, APIResponse } from '@playwright/test';
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
+import { BaseService } from './base.service';
+import { CustomAPIRequest } from '../context.models';
 
-export class RuntimeAdminService {
+export class RuntimeAdminService extends BaseService {
     private readonly basePath = '/rb/admin/v1';
 
-    constructor(private readonly context: APIRequestContext) {}
+    constructor(context: CustomAPIRequest) {
+        super(context);
+    }
 
-    async getProcessInstances(): Promise<CloudProcessInstance[]> {
-        const response: APIResponse = await this.context.get(`${this.basePath}/process-instances`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to get admin process instances: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+    async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances`);
+        const result = response as any;
         return result.content || [];
     }
 
-    async getProcessInstancesAdmin(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
+    async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
         const searchParams = new URLSearchParams();
 
         if (params?.status) searchParams.append('status', params.status);
@@ -41,36 +39,29 @@ export class RuntimeAdminService {
         if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response: APIResponse = await this.context.get(
+        const response = await this.get(
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        if (!response.ok()) {
-            throw new Error(`Failed to get admin process instances: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const result = response as any;
         return result.content || [];
     }
 }
 
-export class QueryAdminService {
+export class QueryAdminService extends BaseService {
     private readonly basePath = '/query/admin/v1';
 
-    constructor(private readonly context: APIRequestContext) {}
+    constructor(context: CustomAPIRequest) {
+        super(context);
+    }
 
     async getAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
-        const response: APIResponse = await this.context.get(`${this.basePath}/process-instances`);
-
-        if (!response.ok()) {
-            throw new Error(`Failed to get admin process instances from query: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const response = await this.get(`${this.basePath}/process-instances`);
+        const result = response as any;
         return result.content || [];
     }
 
-    async getProcessInstancesAdmin(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
+    async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
         const searchParams = new URLSearchParams();
 
         if (params?.status) searchParams.append('status', params.status);
@@ -78,15 +69,11 @@ export class QueryAdminService {
         if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response: APIResponse = await this.context.get(
+        const response = await this.get(
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        if (!response.ok()) {
-            throw new Error(`Failed to get admin process instances from query: ${response.status()} ${response.statusText()}`);
-        }
-
-        const result = await response.json();
+        const result = response as any;
         return result.content || [];
     }
 }

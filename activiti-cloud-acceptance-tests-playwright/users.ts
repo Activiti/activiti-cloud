@@ -16,6 +16,10 @@ export const users = {
         username: env.HRUSER_USERNAME || 'no-HRUSER_USERNAME-data',
         password: env.HRUSER_PASSWORD || 'no-HRUSER_PASSWORD-data',
     },
+    hradmin: {
+        username: env.HRADMIN_USERNAME || 'no-HRADMIN_USERNAME-data',
+        password: env.HRADMIN_PASSWORD || 'no-HRADMIN_PASSWORD-data',
+    },
     processadmin: {
         username: env.PROCESSADMINUSER_USERNAME || 'no-PROCESSADMINUSER_USERNAME-data',
         password: env.PROCESSADMINUSER_PASSWORD || 'no-PROCESSADMINUSER_PASSWORD-data',
