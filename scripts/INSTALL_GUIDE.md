@@ -16,9 +16,22 @@ This guide helps you set up and install Activiti Cloud locally with complete aut
 
 ### One-Command Setup
 
+Switch context to desired context:
+
+```bash
+rancher context switch
+```
+
+Update kubeconfig:
+
+```bash
+./scripts/fix-kubectl-config.sh <context>
+```
+
+
 ```bash
 # Complete automated setup - handles everything
-./scripts/local-install.sh -p 123
+./scripts/local-install.sh -n 123
 
 # Access immediately via localhost
 open http://localhost:8080
@@ -79,13 +92,13 @@ You need access to a Rancher-managed Kubernetes cluster. The script supports any
 ### Step 1: Basic Installation
 
 ```bash
-./scripts/local-install.sh -p 123
+./scripts/local-install.sh -n 123
 
 # For different cluster
-./scripts/local-install.sh -p 123 -c my-cluster-name
+./scripts/local-install.sh -n 123 -c my-cluster-name
 
 # To see what would happen first
-./scripts/local-install.sh --dry-run -p 123
+./scripts/local-install.sh --dry-run -n 123
 ```
 
 ### Step 2: What Happens Automatically
@@ -146,23 +159,23 @@ npm test
 
 ```bash
 # Use Kafka instead of default RabbitMQ
-./scripts/local-install.sh -p 123 -b kafka
+./scripts/local-install.sh -n 123 -b kafka
 
 # Use partitioned messaging
-./scripts/local-install.sh -p 123 -pt true
+./scripts/local-install.sh -n 123 -pt true
 
 # Use override destinations
-./scripts/local-install.sh -p 123 -d override
+./scripts/local-install.sh -n 123 -d override
 
 # Combine all options
-./scripts/local-install.sh -p 123 -b kafka -pt true -d override
+./scripts/local-install.sh -n 123 -b kafka -pt true -d override
 ```
 
 ### Different Clusters
 
 ```bash
 # Use different cluster than default activiti-hackathon
-./scripts/local-install.sh -p 123 -c my-cluster-name
+./scripts/local-install.sh -n 123 -c my-cluster-name
 
 # This creates: pr-123-rabbit-n-d.my-cluster-name.envalfresco.com
 ```
@@ -171,7 +184,7 @@ npm test
 
 ```bash
 # Dry run to see what would happen
-./scripts/local-install.sh --dry-run -p 123
+./scripts/local-install.sh --dry-run -n 123
 
 # Check deployment status after installation
 kubectl get pods -n pr-123-rabbit-n-d
@@ -225,8 +238,8 @@ pkill -f "kubectl.*port-forward"
 
 ```bash
 # Run multiple environments simultaneously
-./scripts/local-install.sh -p 123  # Creates pr-123-rabbit-n-d
-./scripts/local-install.sh -p 456  # Creates pr-456-rabbit-n-d
+./scripts/local-install.sh -n 123  # Creates pr-123-rabbit-n-d
+./scripts/local-install.sh -n 456  # Creates pr-456-rabbit-n-d
 
 # Each has its own namespace but shares localhost:8080
 # Access via proper Host headers or /etc/hosts entries
@@ -302,7 +315,7 @@ pkill -f "kubectl.*port-forward"
 ./scripts/local-install.sh --help
 
 # Run with verbose output (if supported)
-bash -x ./scripts/local-install.sh -p 123
+bash -x ./scripts/local-install.sh -n 123
 
 # Check individual components
 kubectl get pods -n pr-123-rabbit-n-d -o wide

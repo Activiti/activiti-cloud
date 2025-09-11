@@ -14,7 +14,7 @@ The test suite is organized into separate projects for modular execution:
    - Authentication validation
 
 2. **`security-policies`** - Security and access control
-   - HR user permission tests  
+   - HR user permission tests
    - HR admin privilege tests
    - Process-level security enforcement
 
@@ -32,7 +32,7 @@ The test suite is organized into separate projects for modular execution:
 ```bash
 # Using npm scripts (recommended)
 npm run test:identity      # Identity tests only
-npm run test:security      # Security tests only  
+npm run test:security      # Security tests only
 npm run test:process       # Process tests only
 
 # Using Playwright CLI directly
@@ -125,7 +125,7 @@ npm test
 
 # Run specific test modules
 npm run test:identity      # Identity management tests only
-npm run test:security      # Security policies tests only  
+npm run test:security      # Security policies tests only
 npm run test:process       # Process instance actions tests only
 npm run test:all          # All tests (alternative to npm test)
 
