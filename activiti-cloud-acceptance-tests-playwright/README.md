@@ -2,6 +2,45 @@
 
 This directory contains Playwright-based acceptance tests for the Activiti Cloud functionality, migrated from the original Java/Serenity framework.
 
+## Test Projects
+
+The test suite is organized into separate projects for modular execution:
+
+### Available Projects
+
+1. **`identity-adapter`** - Identity management functionality
+   - User and group search operations
+   - Role-based and group-based filtering
+   - Authentication validation
+
+2. **`security-policies`** - Security and access control
+   - HR user permission tests  
+   - HR admin privilege tests
+   - Process-level security enforcement
+
+3. **`process-instance-actions`** - Process operations
+   - Signal communication between runtime bundles
+   - Process instance lifecycle management
+   - Cross-runtime bundle operations
+
+4. **`all-tests`** - Complete test suite
+   - All tests across all modules
+   - Comprehensive validation
+
+### Running Specific Projects
+
+```bash
+# Using npm scripts (recommended)
+npm run test:identity      # Identity tests only
+npm run test:security      # Security tests only  
+npm run test:process       # Process tests only
+
+# Using Playwright CLI directly
+npx playwright test --project=identity-adapter
+npx playwright test --project=security-policies
+npx playwright test --project=process-instance-actions
+```
+
 ## Test Coverage
 
 ### Identity Management Tests
@@ -84,17 +123,34 @@ These checks run automatically before each test execution and will provide clear
 # Run all tests
 npm test
 
-# Run tests with debugging
+# Run specific test modules
+npm run test:identity      # Identity management tests only
+npm run test:security      # Security policies tests only  
+npm run test:process       # Process instance actions tests only
+npm run test:all          # All tests (alternative to npm test)
+
+# Run with debugging
+npm run test:debug                # Debug all tests
+npm run test:identity:debug       # Debug identity tests only
+npm run test:security:debug       # Debug security tests only
+npm run test:process:debug        # Debug process tests only
+
+# Advanced options
 DEBUG=pw:api npm test
 
 # Run specific test file
-npx playwright test tests/identity-management.spec.ts
+npx playwright test tests/identity-adapter.spec.ts
 
 # Run tests in headed mode (with browser UI)
 npx playwright test --headed
 
 # Run tests with trace for debugging
 npx playwright test --trace on
+
+# Run specific project with Playwright CLI
+npx playwright test --project=identity-adapter
+npx playwright test --project=security-policies
+npx playwright test --project=process-instance-actions
 ```
 
 ### Test Reports

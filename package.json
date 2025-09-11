@@ -5,7 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
+    "test:identity": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
+    "test:security": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
+    "test:process": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
+    "test:all": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=all-tests",
     "test:debug": "playwright test --debug",
+    "test:identity:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
+    "test:security:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
+    "test:process:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
     "report": "playwright show-report",
     "install:browsers": "playwright install",
     "install:deps": "playwright install-deps"

@@ -54,7 +54,23 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'chromium',
+      name: 'identity-adapter',
+      testMatch: 'tests/identity-adapter.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'security-policies',
+      testMatch: 'tests/*security-policies.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'process-instance-actions',
+      testMatch: 'tests/process-instance-actions.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'all-tests',
+      testMatch: 'tests/**/*.spec.ts',
       use: { ...devices['Desktop Chrome'] },
     }
   ],
