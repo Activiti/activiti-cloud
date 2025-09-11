@@ -299,7 +299,7 @@ jobs:
           TESTUSER_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
           GATEWAY_URL: ${{ env.GATEWAY_HOST }}
           SSO_HOST: ${{ env.SSO_HOST }}/auth
-          REALM: alfresco
+          REALM: activiti
         with:
           script-command: 'npm run test:identity'
 
