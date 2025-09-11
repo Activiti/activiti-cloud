@@ -1,6 +1,27 @@
 # Activiti Cloud Playwright Tests
 
-This directory contains Playwright-based acceptance tests for the Activiti Cloud identity management functionality, migrated from the original Java/Serenity framework.
+This directory contains Playwright-based acceptance tests for the Activiti Cloud functionality, migrated from the original Java/Serenity framework.
+
+## Test Coverage
+
+### Identity Management Tests
+
+- User and group search functionality
+- Role-based and group-based searches
+- Authentication and authorization validation
+
+### Process Instance Actions Tests
+
+- Signal communication between multiple runtime bundles
+- Process instance lifecycle management
+- Cross-runtime bundle signal catch and throw processes
+
+### Security Policies Tests
+
+- HR user permissions and access control
+- HR admin privileges and endpoint access
+- Process-level security policy enforcement
+- Task and audit event access control
 
 ## Prerequisites
 
@@ -94,21 +115,40 @@ npx playwright show-report
 
 ### Test Categories
 
-1. **Group Search Tests**
+1. **Identity Management Tests**
 
-   - Search groups by name patterns
-   - Empty search results handling
-   - Search without parameters
+   - **Group Search Tests**
+     - Search groups by name patterns
+     - Empty search results handling
+     - Search without parameters
 
-2. **User Search Tests**
+   - **User Search Tests**
+     - Search users by name patterns
+     - Empty search results handling
+     - Search without parameters
 
-   - Search users by name patterns
-   - Empty search results handling
-   - Search without parameters
+   - **Advanced Search Tests**
+     - Search with role parameters
+     - Search with group parameters
 
-3. **Advanced Search Tests**
-   - Search with role parameters
-   - Search with group parameters
+2. **Process Instance Actions Tests**
+
+   - **Signal Communication Tests**
+     - Signal catch and throw between multiple runtime bundles
+     - Process instance status verification
+     - Cross-runtime bundle communication
+
+3. **Security Policies Tests**
+
+   - **HR User Permission Tests**
+     - Simple process instance access
+     - Process with variables restrictions
+     - Task access permissions
+
+   - **HR Admin Permission Tests**
+     - Admin endpoint access to restricted processes
+     - User-level access restrictions for admin users
+     - Audit event access via admin endpoints
 
 ### Architecture
 

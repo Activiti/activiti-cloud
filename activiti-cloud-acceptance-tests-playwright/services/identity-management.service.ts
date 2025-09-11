@@ -15,20 +15,20 @@
  */
 
 import { APIRequestContext, APIResponse } from '@playwright/test';
-import { User, Group } from '../models/identity.models';
+import { User, Group, SearchUsersParams, SearchGroupsParams } from '../models/identity.models';
 
 export class IdentityManagementService {
     private readonly basePath = '/identity-adapter-service/v1';
 
     constructor(private readonly context: APIRequestContext) {}
 
-    async searchUsers(search?: string, role?: string[], group?: string[], application?: string): Promise<User[]> {
+    async searchUsers(options: SearchUsersParams = {}): Promise<User[]> {
         const params = new URLSearchParams();
 
-        if (search) params.append('search', search);
-        if (role) role.forEach(r => params.append('role', r));
-        if (group) group.forEach(g => params.append('group', g));
-        if (application) params.append('application', application);
+        if (options.search) params.append('search', options.search);
+        if (options.role) options.role.forEach(r => params.append('role', r));
+        if (options.group) options.group.forEach(g => params.append('group', g));
+        if (options.application) params.append('application', options.application);
 
         const response: APIResponse = await this.context.get(`${this.basePath}/users?${params.toString()}`);
 
@@ -39,12 +39,12 @@ export class IdentityManagementService {
         return await response.json();
     }
 
-    async searchGroups(search?: string, role?: string[], application?: string): Promise<Group[]> {
+    async searchGroups(options: SearchGroupsParams = {}): Promise<Group[]> {
         const params = new URLSearchParams();
 
-        if (search) params.append('search', search);
-        if (role) role.forEach(r => params.append('role', r));
-        if (application) params.append('application', application);
+        if (options.search) params.append('search', options.search);
+        if (options.role) options.role.forEach(r => params.append('role', r));
+        if (options.application) params.append('application', options.application);
 
         const response: APIResponse = await this.context.get(`${this.basePath}/groups?${params.toString()}`);
 
