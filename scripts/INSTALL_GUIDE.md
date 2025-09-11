@@ -28,7 +28,6 @@ Update kubeconfig:
 ./scripts/fix-kubectl-config.sh <context>
 ```
 
-
 ```bash
 # Complete automated setup - handles everything
 ./scripts/local-install.sh -n 123
@@ -61,11 +60,13 @@ rancher --version        # Rancher CLI (for cluster access)
 ### Install Missing Tools
 
 **macOS (using Homebrew):**
+
 ```bash
 brew install kubectl helm yq python@3.11 rancher-cli
 ```
 
 **Linux (Ubuntu/Debian):**
+
 ```bash
 # kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -106,26 +107,31 @@ You need access to a Rancher-managed Kubernetes cluster. The script supports any
 The script performs these operations:
 
 1. **Cluster Configuration**
+
    - Connects to Rancher and switches kubectl context
    - Validates cluster access and permissions
    - Confirms namespace creation capabilities
 
 2. **Environment Setup**
+
    - Generates PREVIEW_NAME: `pr-123-rabbit-n-d`
    - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
    - Sets up all required environment variables
 
 3. **Kubernetes Deployment**
+
    - Creates namespace with proper labels
    - Deploys Activiti Cloud using Helm with local-values.yaml
    - Patches all deployments with external Keycloak configuration
 
 4. **Local Access Configuration**
+
    - Automatically adds entries to /etc/hosts (requires sudo password)
    - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
    - Configures DNS resolution for `pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com`
 
 5. **Authentication Setup**
+
    - Configures external Keycloak URL: `https://activiti-hackathon.envalfresco.com/auth`
    - Sets realm: `alfresco`
    - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
@@ -200,6 +206,7 @@ curl http://localhost:8080/query/actuator/health
 After successful installation, you'll have:
 
 ### Kubernetes Resources
+
 - **Namespace**: `pr-123-rabbit-n-d` (format: pr-{number}-{broker}-{partition}-{destination})
 - **Services**: Gateway, Runtime Bundle, Query, Audit, Notifications GraphQL
 - **Deployments**: All services with proper Keycloak configuration
@@ -207,12 +214,14 @@ After successful installation, you'll have:
 - **Secrets**: Generated authentication secrets
 
 ### Local Configuration
+
 - **DNS Resolution**: /etc/hosts entries for `*.{cluster}.envalfresco.com`
 - **Port Forwarding**: localhost:8080 → ingress-nginx-controller:80
 - **Environment Files**: .env for Playwright tests
 - **Working Images**: local-values.yaml with 8.8.0-alpha.108 tags
 
 ### Authentication Setup
+
 - **External Keycloak**: `https://{cluster}.envalfresco.com/auth`
 - **Realm**: `alfresco`
 - **Client**: `activiti-keycloak`
@@ -250,6 +259,7 @@ pkill -f "kubectl.*port-forward"
 ### Common Issues and Solutions
 
 1. **"kubectl not connected" or authentication errors**
+
    ```bash
    # Fix cluster configuration
    ./scripts/fix-kubectl-config.sh
@@ -260,6 +270,7 @@ pkill -f "kubectl.*port-forward"
    ```
 
 2. **"Permission denied" for /etc/hosts**
+
    ```bash
    # The script needs sudo access to modify /etc/hosts
    # Enter your password when prompted
@@ -267,6 +278,7 @@ pkill -f "kubectl.*port-forward"
    ```
 
 3. **Port forwarding issues**
+
    ```bash
    # Kill existing port forwards
    pkill -f "kubectl.*port-forward"
@@ -278,6 +290,7 @@ pkill -f "kubectl.*port-forward"
    ```
 
 4. **DNS resolution not working**
+
    ```bash
    # Check /etc/hosts entries
    grep "envalfresco.com" /etc/hosts
@@ -290,6 +303,7 @@ pkill -f "kubectl.*port-forward"
    ```
 
 5. **Authentication/JWT errors**
+
    ```bash
    # Check Keycloak configuration
    kubectl get configmap -n pr-123-rabbit-n-d
@@ -299,6 +313,7 @@ pkill -f "kubectl.*port-forward"
    ```
 
 6. **Playwright tests failing**
+
    ```bash
    # Check .env file generation
    cat activiti-cloud-acceptance-tests-playwright/.env

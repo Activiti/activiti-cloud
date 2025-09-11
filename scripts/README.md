@@ -53,26 +53,31 @@ KEYCLOAK_CLIENT_SECRET=<grab-from-keycloak> ./scripts/local-install.sh [options]
 The `local-install.sh` script provides a fully automated local development environment:
 
 1. **Cluster Configuration**
+
    - Validates kubectl connection and cluster access
    - Configures kubectl context using Rancher CLI integration
    - Verifies cluster connectivity and namespace permissions
 
 2. **Environment Preparation**
+
    - Generates PREVIEW_NAME in format: `pr-{number}-{broker}-{partition}-{destination}`
    - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
    - Sets up environment variables for consistent deployment
 
 3. **Kubernetes Deployment**
+
    - Creates and configures namespace with proper labels
    - Deploys Activiti Cloud using Helm with local-values.yaml by default
    - Patches deployments with correct external Keycloak configuration
 
 4. **Local Access Configuration**
+
    - Automatically configures /etc/hosts entries for gateway routing
    - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
    - Generates .env file for Playwright tests with proper SSO configuration
 
 5. **Keycloak Authentication Setup**
+
    - Configures external Keycloak URL: `https://{cluster}.envalfresco.com/auth`
    - Sets correct realm: `alfresco`
    - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
@@ -304,6 +309,7 @@ The script creates this complete local development setup:
 ### 🟢 **Essential Scripts**
 
 #### 1. **`local-install.sh`** - ⭐ **PRIMARY SCRIPT**
+
 **Complete automated local development setup**
 
 - **Purpose**: One-command solution for complete Activiti Cloud local environment
@@ -319,6 +325,7 @@ The script creates this complete local development setup:
   - Complete health validation
 
 **Usage:**
+
 ```bash
 # Basic setup (recommended)
 KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
@@ -331,6 +338,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 ```
 
 #### 2. **`fix-kubectl-config.sh`** - 🔧 **CLUSTER CONNECTOR**
+
 **Parameterized cluster configuration via Rancher CLI**
 
 - **Purpose**: Connects kubectl to different Kubernetes clusters via Rancher
@@ -343,6 +351,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
   - Supports multiple clusters (not hardcoded)
 
 **Usage:**
+
 ```bash
 # Connect to default cluster (activiti)
 ./scripts/fix-kubectl-config.sh
@@ -353,6 +362,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 ```
 
 #### 3. **`resolve-docker-images.sh`** - 🐳 **IMAGE RESOLVER**
+
 **Creates local-values.yaml with working Docker image tags**
 
 - **Purpose**: Finds and configures working Docker image versions
@@ -365,6 +375,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
   - Fallback to known working tags
 
 **Usage:**
+
 ```bash
 # Generate local-values.yaml (called automatically)
 ./scripts/resolve-docker-images.sh
@@ -376,6 +387,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 ### 🟡 **Advanced & Utility Scripts**
 
 #### 4. **`setup-environment.sh`** - 🚀 **ADVANCED SETUP**
+
 **Comprehensive environment setup with multiple modes**
 
 - **Purpose**: Advanced environment management with granular control
@@ -390,6 +402,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
   - Playwright-specific setup
 
 **Usage:**
+
 ```bash
 # Complete setup (similar to local-install.sh)
 ./scripts/setup-environment.sh -n test-123 -c activiti-hackathon --mode full
@@ -405,6 +418,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 ```
 
 #### 5. **`check-deployment-status.sh`** - 🏥 **STATUS CHECKER**
+
 **Pod and service status monitoring**
 
 - **Purpose**: Troubleshooting and monitoring deployed environments
@@ -418,6 +432,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
   - Automatic cluster detection
 
 **Usage:**
+
 ```bash
 # Check status of PR 123 deployment
 ./scripts/check-deployment-status.sh -p 123
@@ -427,6 +442,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 ```
 
 **Output includes:**
+
 - ✅ Running pods with ready status
 - 🌐 Service endpoint health checks
 - 🐳 Docker image versions in use

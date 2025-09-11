@@ -9,16 +9,19 @@ The test suite is organized into separate projects for modular execution:
 ### Available Projects
 
 1. **`identity-adapter`** - Identity management functionality
+
    - User and group search operations
    - Role-based and group-based filtering
    - Authentication validation
 
 2. **`security-policies`** - Security and access control
+
    - HR user permission tests
    - HR admin privilege tests
    - Process-level security enforcement
 
 3. **`process-instance-actions`** - Process operations
+
    - Signal communication between runtime bundles
    - Process instance lifecycle management
    - Cross-runtime bundle operations
@@ -174,11 +177,13 @@ npx playwright show-report
 1. **Identity Management Tests**
 
    - **Group Search Tests**
+
      - Search groups by name patterns
      - Empty search results handling
      - Search without parameters
 
    - **User Search Tests**
+
      - Search users by name patterns
      - Empty search results handling
      - Search without parameters
@@ -197,6 +202,7 @@ npx playwright show-report
 3. **Security Policies Tests**
 
    - **HR User Permission Tests**
+
      - Simple process instance access
      - Process with variables restrictions
      - Task access permissions
