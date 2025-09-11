@@ -184,13 +184,10 @@ configure_keycloak() {
         echo ""
         echo -e "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
         echo -e "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
-        echo -e "  ${CYAN}1. Open: $KEYCLOAK_URL/admin/master/console/#{KEYCLOAK_REALM}/clients${NC}"
+        echo -e "  ${CYAN}1. Open: $KEYCLOAK_URL/auth/admin/master/console/#/alfresco/clients"
         echo -e "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
         echo -e "  ${CYAN}3. Go to Credentials tab${NC}"
         echo -e "  ${CYAN}4. Copy the Client Secret${NC}"
-        echo ""
-        echo -e "${YELLOW}Or check existing deployments for the secret:${NC}"
-        echo -e "  ${CYAN}kubectl get secret activiti-keycloak-client -n [namespace] -o jsonpath='{.data.clientSecret}' | base64 -d${NC}"
         echo ""
 
         if [[ "$DRY_RUN" == "true" ]]; then

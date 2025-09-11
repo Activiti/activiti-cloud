@@ -22,7 +22,7 @@ KEYCLOAK_CLIENT_SECRET=<grab-from-keycloak> ./scripts/local-install.sh [options]
 
 **Options:**
 
-- `-p, --pr <number>` - PR number or identifier (e.g., 123, local-dev)
+- `-n, --name <number>` - Configuration name (e.g., 123, local-dev)
 - `-c, --cluster <name>` - Kubernetes cluster name (default: activiti-hackathon)
 - `-b, --broker <broker>` - Messaging broker: `rabbitmq`|`kafka` (default: rabbitmq)
 - `-pt, --partitioned <bool>` - Partitioned: `true`|`false` (default: false)
@@ -92,7 +92,7 @@ The `local-install.sh` script provides a fully automated local development envir
 **Complete automated local development setup**
 
 - **Purpose**: One-command solution for complete Activiti Cloud local environment
-- **Status**: **ESSENTIAL - Main script for all local development**  
+- **Status**: **ESSENTIAL - Main script for all local development**
 - **Dependencies**: `fix-kubectl-config.sh`, `resolve-docker-images.sh`
 - **Features**:
   - Cluster configuration and validation
@@ -251,7 +251,7 @@ check-deployment-status.sh (standalone utility)
 The following scripts were removed as they are no longer needed:
 
 - ❌ `fix-makefile.sh` - Deprecated (local-install.sh handles everything directly)
-- ❌ `kubectl-wrapper.sh` - Replaced by fix-kubectl-config.sh  
+- ❌ `kubectl-wrapper.sh` - Replaced by fix-kubectl-config.sh
 - ❌ `set-preview-env.sh` - Broken (referenced missing scripts)
 - ❌ `setup-rancher.sh` - Too complex (fix-kubectl-config.sh is simpler)
 
@@ -439,12 +439,12 @@ graph TD
     A[local-install.sh] --> B[fix-kubectl-config.sh]
     A --> C[resolve-docker-images.sh]
     A --> D[local-values.yaml]
-    
+
     E[setup-environment.sh] --> A
     E --> B
-    
+
     F[check-deployment-status.sh]
-    
+
     style A fill:#90EE90
     style B fill:#FFE4B5
     style C fill:#FFE4B5
@@ -462,7 +462,7 @@ graph TD
 The following scripts were removed as they are no longer needed:
 
 - ❌ `fix-makefile.sh` - Deprecated (local-install.sh handles everything directly)
-- ❌ `kubectl-wrapper.sh` - Replaced by fix-kubectl-config.sh  
+- ❌ `kubectl-wrapper.sh` - Replaced by fix-kubectl-config.sh
 - ❌ `set-preview-env.sh` - Broken (referenced missing scripts)
 - ❌ `setup-rancher.sh` - Too complex (fix-kubectl-config.sh is simpler)
 
@@ -477,7 +477,7 @@ pr-{number}-{broker}-{partition}-{destination}
 Where:
 
 - **number**: PR number or identifier (e.g., 123, local-dev)
-- **broker**: First 6 characters of broker name (`rabbit` or `kafka`)  
+- **broker**: First 6 characters of broker name (`rabbit` or `kafka`)
 - **partition**: `n` for non-partitioned, `p` for partitioned
 - **destination**: `d` for default, `o` for override
 
@@ -548,7 +548,7 @@ Access services directly via localhost:
 curl http://localhost:8080/rb/actuator/health
 
 # With authentication
-curl -H "Host: pr-123-rabbit-n-d.activiti.envalfresco.com" 
+curl -H "Host: pr-123-rabbit-n-d.activiti.envalfresco.com"
      http://localhost:8080/rb/actuator/health
 ```
 
