@@ -286,9 +286,9 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+      - name: Persist SSO_HOST
         run: |
-          make test/runtime-acceptance-tests
+          echo "SSO_HOST=identity-$PREVIEW_NAME.$CLUSTER_NAME.$CLUSTER_DOMAIN" >> $GITHUB_ENV
 
       - name: Run Identity Adapter Acceptance Tests
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
@@ -298,7 +298,7 @@ jobs:
           TESTUSER_USERNAME: ${{ secrets.TESTUSER_USERNAME }}
           TESTUSER_PASSWORD: ${{ secrets.TESTUSER_PASSWORD }}
           GATEWAY_URL: ${{ env.GATEWAY_HOST }}
-          SSO_HOST: ${{ env.SSO_HOST }}/auth/realms/alfresco/protocol/openid-connect/token
+          SSO_HOST: ${{ env.SSO_HOST }}/auth
           REALM: alfresco
         with:
           script-command: 'npm run test:identity'
