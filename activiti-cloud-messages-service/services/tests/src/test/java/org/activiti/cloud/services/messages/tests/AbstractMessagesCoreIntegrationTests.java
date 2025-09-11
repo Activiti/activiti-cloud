@@ -178,570 +178,570 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
     }
 
-//    @Test
-//    public void shouldConfigureInputHeadersToRemove() {
-//        assertThat(messageAggregatorProperties.getInputHeadersToRemove()).contains("kafka_consumer");
-//    }
-//
-//    @Test
-//    public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
-//        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression())
-//            .contains("headers['headerChannelsTTL']?:60000");
-//    }
-//
-//    @Test
-//    @Timeout(TEST_TIMEOUT)
-//    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
-//        // given
-//        String messageEventName = "start";
-//        Integer count = 100;
-//
-//        Message<?> startMessage = startMessageDeployedEvent(messageEventName);
-//        String correlationId = correlationId(startMessage);
-//        removeMessageGroup(correlationId);
-//
-//        send(startMessage);
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//
-//        // when
-//        final CountDownLatch start = new CountDownLatch(1);
-//        final CountDownLatch sent = new CountDownLatch(count);
-//
-//        ExecutorService exec = Executors.newSingleThreadExecutor();
-//
-//        IntStream.range(0, count).forEach(i -> sendAsync(messageSentEvent(messageEventName), start, sent, exec));
-//        start.countDown();
-//
-//        try {
-//            sent.await(10, TimeUnit.SECONDS);
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-//
-//        // then
-//        IntStream
-//            .range(0, count)
-//            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(1))))
-//            .forEach(out -> assertThat(out).isNotNull());
-//
-//        exec.shutdownNow();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//
-//        assertThat(peek()).isNull();
-//    }
+    //    @Test
+    //    public void shouldConfigureInputHeadersToRemove() {
+    //        assertThat(messageAggregatorProperties.getInputHeadersToRemove()).contains("kafka_consumer");
+    //    }
+    //
+    //    @Test
+    //    public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
+    //        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression())
+    //            .contains("headers['headerChannelsTTL']?:60000");
+    //    }
+    //
+    //    @Test
+    //    @Timeout(TEST_TIMEOUT)
+    //    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
+    //        // given
+    //        String messageEventName = "start";
+    //        Integer count = 100;
+    //
+    //        Message<?> startMessage = startMessageDeployedEvent(messageEventName);
+    //        String correlationId = correlationId(startMessage);
+    //        removeMessageGroup(correlationId);
+    //
+    //        send(startMessage);
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //
+    //        // when
+    //        final CountDownLatch start = new CountDownLatch(1);
+    //        final CountDownLatch sent = new CountDownLatch(count);
+    //
+    //        ExecutorService exec = Executors.newSingleThreadExecutor();
+    //
+    //        IntStream.range(0, count).forEach(i -> sendAsync(messageSentEvent(messageEventName), start, sent, exec));
+    //        start.countDown();
+    //
+    //        try {
+    //            sent.await(10, TimeUnit.SECONDS);
+    //        } catch (InterruptedException e) {
+    //            Thread.currentThread().interrupt();
+    //        }
+    //
+    //        // then
+    //        IntStream
+    //            .range(0, count)
+    //            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(1))))
+    //            .forEach(out -> assertThat(out).isNotNull());
+    //
+    //        exec.shutdownNow();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //
+    //        assertThat(peek()).isNull();
+    //    }
 
-//    @Test
-//    @Timeout(TEST_TIMEOUT)
-//    public void shouldProcessMessageEventsConcurrentlyInReversedOrder()
-//        throws InterruptedException, JsonProcessingException {
-//        // given
-//        String messageEventName = "start";
-//        Integer count = 100;
-//        Message<?> startMessage = startMessageDeployedEvent(messageEventName);
-//        String correlationId = correlationId(startMessage);
-//
-//        removeMessageGroup(correlationId);
-//
-//        final CountDownLatch start = new CountDownLatch(1);
-//        final CountDownLatch sent = new CountDownLatch(count);
-//
-//        ExecutorService exec = Executors.newSingleThreadExecutor();
-//
-//        IntStream.range(0, count).forEach(i -> sendAsync(messageSentEvent(messageEventName), start, sent, exec));
-//        start.countDown();
-//
-//        try {
-//            sent.await();
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(count);
-//
-//        // when
-//        send(startMessage);
-//
-//        // then
-//        IntStream
-//            .range(0, count)
-//            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3), connectorBindingDestination)))
-//            .forEach(out -> assertThat(out).isNotNull());
-//
-//        exec.shutdownNow();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//
-//        assertThat(peek()).isNull();
-//    }
-//
-//    @Test
-//    public void testStartMessageBeforeSent() throws Exception {
-//        // given
-//        String messageName = "start1";
-//        Message<?> startMessage = startMessageDeployedEvent(messageName);
-//        String correlationId = correlationId(startMessage);
-//        removeMessageGroup(correlationId);
-//
-//        send(startMessage);
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//
-//        // when
-//        send(messageSentEvent(messageName, null, "sent1"));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "variables")
-//            .contains("start1", singletonMap("key", "sent1"));
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("name")
-//            .containsOnly(messageName);
-//        // when
-//        send(messageSentEvent(messageName, null, "sent2"));
-//
-//        // then
-//        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "variables")
-//            .contains("start1", singletonMap("key", "sent2"));
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("name")
-//            .containsOnly(messageName);
-//    }
-//
-//    @Test
-//    public void testStartMessageAfterSent() throws Exception {
-//        // given
-//        String messageName = "start2";
-//        Message<?> messageSentEvent = messageSentEvent(messageName, null, "sent1");
-//        String correlationId = correlationId(messageSentEvent);
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        send(messageSentEvent);
-//
-//        // when
-//        send(startMessageDeployedEvent(messageName));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(peek()).isNull();
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "businessKey", "variables")
-//            .contains(messageName, "sent1", singletonMap("key", "sent1"));
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("name")
-//            .containsOnly("start2");
-//
-//        // when
-//        send(messageSentEvent(messageName, null, "sent2"));
-//
-//        // then
-//        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(peek()).isNull();
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "businessKey", "variables")
-//            .contains(messageName, "sent2", singletonMap("key", "sent2"));
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("name")
-//            .containsOnly("start2");
-//    }
-//
-//    @Test
-//    public void testSentMessagesWithBuffer() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = "1";
-//        Message<?> messageSentEvent = messageSentEvent(messageName, correlationKey, "sent1");
-//        String correlationId = correlationId(messageSentEvent);
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        send(messageSentEvent);
-//
-//        // when
-//        send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//        send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("variables")
-//            .asInstanceOf(InstanceOfAssertFactories.MAP)
-//            .containsEntry("key", "sent1");
-//
-//        assertThat(peek()).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(2)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .containsOnly(singletonMap("key", "waiting1"), singletonMap("key", "waiting2"));
-//
-//        // when
-//        send(messageReceivedEvent(messageName, correlationKey));
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .containsOnly(singletonMap("key", "waiting2"));
-//
-//        // when
-//        send(messageSentEvent(messageName, correlationKey, "sent2"));
-//
-//        // then
-//        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("variables")
-//            .asInstanceOf(InstanceOfAssertFactories.MAP)
-//            .containsEntry("key", "sent2");
-//
-//        assertThat(peek()).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .containsOnly(singletonMap("key", "waiting2"));
-//
-//        // then
-//        send(messageReceivedEvent(messageName, correlationKey));
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).isEmpty();
-//    }
-//
-//    @Test
-//    public void testReceiveMessagePayload() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = "1";
-//        String businessKey = "businessKey";
-//        Message<?> messageSentEvent = messageSentEvent(messageName, correlationKey, businessKey);
-//        String correlationId = correlationId(messageSentEvent);
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        send(messageSentEvent);
-//
-//        // when
-//        send(messageWaitingEvent(messageName, correlationKey, businessKey));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "correlationKey", "variables")
-//            .contains(messageName, correlationKey, singletonMap("key", businessKey));
-//
-//        assertThat(peek()).isNull();
-//
-//        // cleanup
-//        messageGroupStore.removeMessageGroup(correlationId);
-//    }
-//
-//    @Test
-//    public void testStartMessagePayload() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = null;
-//        String businessKey = "businessKey";
-//        Message<?> startMessageDeployedEvent = startMessageDeployedEvent(messageName);
-//        String correlationId = correlationId(startMessageDeployedEvent);
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        send(startMessageDeployedEvent);
-//
-//        // when
-//        send(messageSentEvent(messageName, correlationKey, businessKey));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("name", "businessKey", "variables")
-//            .contains(messageName, businessKey, singletonMap("key", businessKey));
-//
-//        assertThat(peek()).isNull();
-//
-//        // cleanup
-//        messageGroupStore.removeMessageGroup(correlationId);
-//    }
-//
-//    @Test
-//    public void testSentMessagesWithBufferInDifferentOrder() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = "1";
-//        String correlationId = correlationId(messageWaitingEvent(messageName, correlationKey));
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        send(messageSentEvent(messageName, correlationKey, "sent1"));
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//        send(messageSentEvent(messageName, correlationKey, "sent2"));
-//
-//        // when
-//        send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
-//
-//        // then
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("variables")
-//            .asInstanceOf(InstanceOfAssertFactories.MAP)
-//            .containsEntry("key", "sent1");
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(2)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .contains(singletonMap("key", "sent2"), singletonMap("key", "waiting1"));
-//        // when
-//        send(messageReceivedEvent(messageName, correlationKey, "received1"));
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .containsOnly(singletonMap("key", "sent2"));
-//        // when
-//        send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
-//
-//        // then
-//        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//
-//        assertThat(peek()).isNull();
-//
-//        assertThat(out)
-//            .isNotNull()
-//            .extracting(Message::getPayload)
-//            .extracting("variables")
-//            .asInstanceOf(InstanceOfAssertFactories.MAP)
-//            .containsEntry("key", "sent2");
-//
-//        assertThat(messageGroup(correlationId).getMessages())
-//            .hasSize(1)
-//            .extracting(Message::getPayload)
-//            .asList()
-//            .extracting("variables")
-//            .containsOnly(singletonMap("key", "waiting2"));
-//
-//        // when
-//        send(messageReceivedEvent(messageName, correlationKey, "received2"));
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).isEmpty();
-//    }
-//
-//    @Test
-//    public void testSubscriptionCancelled() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = "1";
-//        Message<?> subscriptionCancelled = subscriptionCancelledEvent(messageName, correlationKey);
-//        String groupName = correlationId(subscriptionCancelled);
-//
-//        messageGroupStore.removeMessageGroup(groupName);
-//
-//        send(messageWaitingEvent(messageName, correlationKey));
-//        send(messageWaitingEvent(messageName, correlationKey));
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//        assertThat(messageGroup(groupName).getMessages()).hasSize(2);
-//
-//        // when
-//        send(subscriptionCancelled);
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(messageGroup(groupName).getMessages().isEmpty());
-//    }
-//
-//    @Test
-//    public void testIdempotentMessageInterceptor() throws Exception {
-//        // given
-//        String messageName = "message";
-//        String correlationKey = "1";
-//        Message<MessageEventPayload> waitingMessage = messageWaitingEvent(messageName, correlationKey);
-//        String correlationId = correlationId(waitingMessage);
-//
-//        messageGroupStore.removeMessageGroup(correlationId);
-//
-//        // when
-//        send(waitingMessage);
-//        send(waitingMessage);
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(discardQueue.receive(0)).isNotNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).isNotNull().hasSize(1);
-//        // given
-//        Message<MessageEventPayload> receivedMessage = messageReceivedEvent(messageName, correlationKey);
-//
-//        // when
-//        send(receivedMessage);
-//        send(receivedMessage);
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(discardQueue.receive(0)).isNotNull();
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(0);
-//    }
-//
-//    @Test
-//    public void testMessageFilterDiscardChannel() throws Exception {
-//        // given
-//        Message<String> invalidMessage = MessageBuilder
-//            .withPayload("message")
-//            .setHeader(CONTENT_TYPE, "text/plain")
-//            .build();
-//        // when
-//        streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
-//
-//        // then
-//        assertThat(peek()).isNull();
-//
-//        Message<?> out = discardQueue.receive(0);
-//
-//        assertThat(new String((byte[]) out.getPayload())).isEqualTo("message");
-//    }
-//
-//    @Test
-//    public void testInvalidMessagePayloadDiscardChannel() throws Exception {
-//        // given
-//        Message<String> invalidMessage = MessageBuilder
-//            .withPayload("payload")
-//            .setHeader(CONTENT_TYPE, "text/plain")
-//            .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_SENT.name())
-//            .build();
-//        // when
-//        Throwable thrown = catchThrowable(() -> {
-//            streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
-//        });
-//
-//        // then
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//        Message<?> out = errorQueue.receive();
-//        assertThat(out).isNull();
-//
-//        assertThat(thrown).isInstanceOf(MessageTransformationException.class);
-//    }
-//
-//    @Test
-//    public void testControlBusStartStopComponents() throws Exception {
-//        String messageName = "test";
-//
-//        this.controlBus.send("@aggregator.stop()");
-//
-//        Throwable thrown = catchThrowable(() -> {
-//            send(messageSentEvent(messageName, null, "error"));
-//        });
-//
-//        this.controlBus.send("@aggregator.start()");
-//        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
-//        assertThat(out).isNull();
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//
-//        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
-//    }
-//
-//    @Test
-//    public void testTransactionException() throws Exception {
-//        // given
-//        String messageName = "start1";
-//        Message<?> startMessage = startMessageDeployedEvent(messageName);
-//        String correlationId = correlationId(startMessage);
-//        removeMessageGroup(correlationId);
-//
-//        send(startMessage);
-//
-//        assertThat(peek(connectorBindingDestination)).isNull();
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//
-//        // when
-//        Throwable thrown = catchThrowable(() -> {
-//            send(messageSentEvent("errorInterceptor", null, "errorInterceptor"));
-//        });
-//
-//        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
-//        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
-//    }
+    //    @Test
+    //    @Timeout(TEST_TIMEOUT)
+    //    public void shouldProcessMessageEventsConcurrentlyInReversedOrder()
+    //        throws InterruptedException, JsonProcessingException {
+    //        // given
+    //        String messageEventName = "start";
+    //        Integer count = 100;
+    //        Message<?> startMessage = startMessageDeployedEvent(messageEventName);
+    //        String correlationId = correlationId(startMessage);
+    //
+    //        removeMessageGroup(correlationId);
+    //
+    //        final CountDownLatch start = new CountDownLatch(1);
+    //        final CountDownLatch sent = new CountDownLatch(count);
+    //
+    //        ExecutorService exec = Executors.newSingleThreadExecutor();
+    //
+    //        IntStream.range(0, count).forEach(i -> sendAsync(messageSentEvent(messageEventName), start, sent, exec));
+    //        start.countDown();
+    //
+    //        try {
+    //            sent.await();
+    //        } catch (InterruptedException e) {
+    //            Thread.currentThread().interrupt();
+    //        }
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(count);
+    //
+    //        // when
+    //        send(startMessage);
+    //
+    //        // then
+    //        IntStream
+    //            .range(0, count)
+    //            .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3), connectorBindingDestination)))
+    //            .forEach(out -> assertThat(out).isNotNull());
+    //
+    //        exec.shutdownNow();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //
+    //        assertThat(peek()).isNull();
+    //    }
+    //
+    //    @Test
+    //    public void testStartMessageBeforeSent() throws Exception {
+    //        // given
+    //        String messageName = "start1";
+    //        Message<?> startMessage = startMessageDeployedEvent(messageName);
+    //        String correlationId = correlationId(startMessage);
+    //        removeMessageGroup(correlationId);
+    //
+    //        send(startMessage);
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //
+    //        // when
+    //        send(messageSentEvent(messageName, null, "sent1"));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "variables")
+    //            .contains("start1", singletonMap("key", "sent1"));
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("name")
+    //            .containsOnly(messageName);
+    //        // when
+    //        send(messageSentEvent(messageName, null, "sent2"));
+    //
+    //        // then
+    //        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "variables")
+    //            .contains("start1", singletonMap("key", "sent2"));
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("name")
+    //            .containsOnly(messageName);
+    //    }
+    //
+    //    @Test
+    //    public void testStartMessageAfterSent() throws Exception {
+    //        // given
+    //        String messageName = "start2";
+    //        Message<?> messageSentEvent = messageSentEvent(messageName, null, "sent1");
+    //        String correlationId = correlationId(messageSentEvent);
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        send(messageSentEvent);
+    //
+    //        // when
+    //        send(startMessageDeployedEvent(messageName));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "businessKey", "variables")
+    //            .contains(messageName, "sent1", singletonMap("key", "sent1"));
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("name")
+    //            .containsOnly("start2");
+    //
+    //        // when
+    //        send(messageSentEvent(messageName, null, "sent2"));
+    //
+    //        // then
+    //        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "businessKey", "variables")
+    //            .contains(messageName, "sent2", singletonMap("key", "sent2"));
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("name")
+    //            .containsOnly("start2");
+    //    }
+    //
+    //    @Test
+    //    public void testSentMessagesWithBuffer() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = "1";
+    //        Message<?> messageSentEvent = messageSentEvent(messageName, correlationKey, "sent1");
+    //        String correlationId = correlationId(messageSentEvent);
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        send(messageSentEvent);
+    //
+    //        // when
+    //        send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //        send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("variables")
+    //            .asInstanceOf(InstanceOfAssertFactories.MAP)
+    //            .containsEntry("key", "sent1");
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(2)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .containsOnly(singletonMap("key", "waiting1"), singletonMap("key", "waiting2"));
+    //
+    //        // when
+    //        send(messageReceivedEvent(messageName, correlationKey));
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .containsOnly(singletonMap("key", "waiting2"));
+    //
+    //        // when
+    //        send(messageSentEvent(messageName, correlationKey, "sent2"));
+    //
+    //        // then
+    //        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("variables")
+    //            .asInstanceOf(InstanceOfAssertFactories.MAP)
+    //            .containsEntry("key", "sent2");
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .containsOnly(singletonMap("key", "waiting2"));
+    //
+    //        // then
+    //        send(messageReceivedEvent(messageName, correlationKey));
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).isEmpty();
+    //    }
+    //
+    //    @Test
+    //    public void testReceiveMessagePayload() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = "1";
+    //        String businessKey = "businessKey";
+    //        Message<?> messageSentEvent = messageSentEvent(messageName, correlationKey, businessKey);
+    //        String correlationId = correlationId(messageSentEvent);
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        send(messageSentEvent);
+    //
+    //        // when
+    //        send(messageWaitingEvent(messageName, correlationKey, businessKey));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "correlationKey", "variables")
+    //            .contains(messageName, correlationKey, singletonMap("key", businessKey));
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        // cleanup
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //    }
+    //
+    //    @Test
+    //    public void testStartMessagePayload() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = null;
+    //        String businessKey = "businessKey";
+    //        Message<?> startMessageDeployedEvent = startMessageDeployedEvent(messageName);
+    //        String correlationId = correlationId(startMessageDeployedEvent);
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        send(startMessageDeployedEvent);
+    //
+    //        // when
+    //        send(messageSentEvent(messageName, correlationKey, businessKey));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("name", "businessKey", "variables")
+    //            .contains(messageName, businessKey, singletonMap("key", businessKey));
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        // cleanup
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //    }
+    //
+    //    @Test
+    //    public void testSentMessagesWithBufferInDifferentOrder() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = "1";
+    //        String correlationId = correlationId(messageWaitingEvent(messageName, correlationKey));
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        send(messageSentEvent(messageName, correlationKey, "sent1"));
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //        send(messageSentEvent(messageName, correlationKey, "sent2"));
+    //
+    //        // when
+    //        send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
+    //
+    //        // then
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("variables")
+    //            .asInstanceOf(InstanceOfAssertFactories.MAP)
+    //            .containsEntry("key", "sent1");
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(2)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .contains(singletonMap("key", "sent2"), singletonMap("key", "waiting1"));
+    //        // when
+    //        send(messageReceivedEvent(messageName, correlationKey, "received1"));
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .containsOnly(singletonMap("key", "sent2"));
+    //        // when
+    //        send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
+    //
+    //        // then
+    //        out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //
+    //        assertThat(peek()).isNull();
+    //
+    //        assertThat(out)
+    //            .isNotNull()
+    //            .extracting(Message::getPayload)
+    //            .extracting("variables")
+    //            .asInstanceOf(InstanceOfAssertFactories.MAP)
+    //            .containsEntry("key", "sent2");
+    //
+    //        assertThat(messageGroup(correlationId).getMessages())
+    //            .hasSize(1)
+    //            .extracting(Message::getPayload)
+    //            .asList()
+    //            .extracting("variables")
+    //            .containsOnly(singletonMap("key", "waiting2"));
+    //
+    //        // when
+    //        send(messageReceivedEvent(messageName, correlationKey, "received2"));
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).isEmpty();
+    //    }
+    //
+    //    @Test
+    //    public void testSubscriptionCancelled() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = "1";
+    //        Message<?> subscriptionCancelled = subscriptionCancelledEvent(messageName, correlationKey);
+    //        String groupName = correlationId(subscriptionCancelled);
+    //
+    //        messageGroupStore.removeMessageGroup(groupName);
+    //
+    //        send(messageWaitingEvent(messageName, correlationKey));
+    //        send(messageWaitingEvent(messageName, correlationKey));
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //        assertThat(messageGroup(groupName).getMessages()).hasSize(2);
+    //
+    //        // when
+    //        send(subscriptionCancelled);
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(messageGroup(groupName).getMessages().isEmpty());
+    //    }
+    //
+    //    @Test
+    //    public void testIdempotentMessageInterceptor() throws Exception {
+    //        // given
+    //        String messageName = "message";
+    //        String correlationKey = "1";
+    //        Message<MessageEventPayload> waitingMessage = messageWaitingEvent(messageName, correlationKey);
+    //        String correlationId = correlationId(waitingMessage);
+    //
+    //        messageGroupStore.removeMessageGroup(correlationId);
+    //
+    //        // when
+    //        send(waitingMessage);
+    //        send(waitingMessage);
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(discardQueue.receive(0)).isNotNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).isNotNull().hasSize(1);
+    //        // given
+    //        Message<MessageEventPayload> receivedMessage = messageReceivedEvent(messageName, correlationKey);
+    //
+    //        // when
+    //        send(receivedMessage);
+    //        send(receivedMessage);
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(discardQueue.receive(0)).isNotNull();
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(0);
+    //    }
+    //
+    //    @Test
+    //    public void testMessageFilterDiscardChannel() throws Exception {
+    //        // given
+    //        Message<String> invalidMessage = MessageBuilder
+    //            .withPayload("message")
+    //            .setHeader(CONTENT_TYPE, "text/plain")
+    //            .build();
+    //        // when
+    //        streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
+    //
+    //        // then
+    //        assertThat(peek()).isNull();
+    //
+    //        Message<?> out = discardQueue.receive(0);
+    //
+    //        assertThat(new String((byte[]) out.getPayload())).isEqualTo("message");
+    //    }
+    //
+    //    @Test
+    //    public void testInvalidMessagePayloadDiscardChannel() throws Exception {
+    //        // given
+    //        Message<String> invalidMessage = MessageBuilder
+    //            .withPayload("payload")
+    //            .setHeader(CONTENT_TYPE, "text/plain")
+    //            .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_SENT.name())
+    //            .build();
+    //        // when
+    //        Throwable thrown = catchThrowable(() -> {
+    //            streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
+    //        });
+    //
+    //        // then
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //        Message<?> out = errorQueue.receive();
+    //        assertThat(out).isNull();
+    //
+    //        assertThat(thrown).isInstanceOf(MessageTransformationException.class);
+    //    }
+    //
+    //    @Test
+    //    public void testControlBusStartStopComponents() throws Exception {
+    //        String messageName = "test";
+    //
+    //        this.controlBus.send("@aggregator.stop()");
+    //
+    //        Throwable thrown = catchThrowable(() -> {
+    //            send(messageSentEvent(messageName, null, "error"));
+    //        });
+    //
+    //        this.controlBus.send("@aggregator.start()");
+    //        Message<?> out = poll(TimeUnit.SECONDS.toMillis(1), connectorBindingDestination);
+    //        assertThat(out).isNull();
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //
+    //        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
+    //    }
+    //
+    //    @Test
+    //    public void testTransactionException() throws Exception {
+    //        // given
+    //        String messageName = "start1";
+    //        Message<?> startMessage = startMessageDeployedEvent(messageName);
+    //        String correlationId = correlationId(startMessage);
+    //        removeMessageGroup(correlationId);
+    //
+    //        send(startMessage);
+    //
+    //        assertThat(peek(connectorBindingDestination)).isNull();
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //
+    //        // when
+    //        Throwable thrown = catchThrowable(() -> {
+    //            send(messageSentEvent("errorInterceptor", null, "errorInterceptor"));
+    //        });
+    //
+    //        assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
+    //        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
+    //    }
 
     protected MessageBuilder<MessageEventPayload> messageBuilder(String messageName) {
         return messageBuilder(messageName, null, null);
