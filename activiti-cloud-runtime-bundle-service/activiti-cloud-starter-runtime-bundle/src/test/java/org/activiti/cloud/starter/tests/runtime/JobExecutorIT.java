@@ -194,6 +194,8 @@ public class JobExecutorIT {
     @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
+        RetryFailingDelegate.shallThrow = false;
+        RetryFailingDelegate.resetTimeList();
     }
 
     @Test
