@@ -29,6 +29,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.activiti.api.model.shared.Payload;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
@@ -180,7 +182,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
                                     FunctionInvocationWrapper function2 = functionWithCorrectedInput(function, GenericTypeResolver.resolveType(function.getInputType(), getRawType(functionType)));
-                                    return function2.apply(message);
+                                    FunctionInvocationWrapper function3 = functionWithCorrectedInput(function, Payload.class);
+                                    return function3.apply(message);
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
