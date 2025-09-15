@@ -61,7 +61,7 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
                     "processDefinitionKey",
                     "processInstanceId",
                     "businessKey",
-                    "actor",
+                    "initiator",
                 }
             );
     }
