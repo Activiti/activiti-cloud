@@ -99,8 +99,11 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     public FunctionInvocationWrapper functionWithCorrectedInput(FunctionInvocationWrapper function, Type inputType) {
         try {
-            SimpleFunctionRegistry simpleFunctionRegistry = (SimpleFunctionRegistry) applicationContext.getBean(FunctionRegistry.class);
-            Constructor<?>[] constructors = SimpleFunctionRegistry.FunctionInvocationWrapper.class.getDeclaredConstructors();
+            SimpleFunctionRegistry simpleFunctionRegistry = (SimpleFunctionRegistry) applicationContext.getBean(
+                FunctionRegistry.class
+            );
+            Constructor<?>[] constructors =
+                SimpleFunctionRegistry.FunctionInvocationWrapper.class.getDeclaredConstructors();
 
             Constructor<?> targetConstructor = null;
             for (Constructor<?> constructor : constructors) {
@@ -117,8 +120,13 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
             targetConstructor.setAccessible(true);
 
-            return (FunctionInvocationWrapper) targetConstructor.newInstance(simpleFunctionRegistry, function.getFunctionDefinition(), function.getTarget(), inputType, function.getOutputType());
-
+            return (FunctionInvocationWrapper) targetConstructor.newInstance(
+                simpleFunctionRegistry,
+                function.getFunctionDefinition(),
+                function.getTarget(),
+                inputType,
+                function.getOutputType()
+            );
         } catch (Exception e) {
             return createFunctionWrapperAlternative(function, inputType);
         }
@@ -127,7 +135,10 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     /**
      * Alternative approach: Create a functional wrapper instead of trying to instantiate FunctionInvocationWrapper
      */
-    private FunctionInvocationWrapper createFunctionWrapperAlternative(FunctionInvocationWrapper originalFunction, Type inputType) {
+    private FunctionInvocationWrapper createFunctionWrapperAlternative(
+        FunctionInvocationWrapper originalFunction,
+        Type inputType
+    ) {
         // Since we can't create a new FunctionInvocationWrapper reliably,
         // we'll register a new function that wraps the original one
         try {
@@ -139,7 +150,10 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             };
 
             // Create function registration with the corrected input type
-            FunctionRegistration<Function<Object, Object>> registration = new FunctionRegistration<>(wrapperFunction, wrapperName);
+            FunctionRegistration<Function<Object, Object>> registration = new FunctionRegistration<>(
+                wrapperFunction,
+                wrapperName
+            );
 
             // Try to set the type if the method exists
             try {
@@ -167,7 +181,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         System.err.println("Warning: Using original function without input type correction");
         return originalFunction;
     }
-
 
     protected Type discoverFunctionType(Object bean, String beanName) {
         return FunctionTypeUtils.discoverFunctionType(
