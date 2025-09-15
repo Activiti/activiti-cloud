@@ -73,7 +73,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # 4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -188,7 +188,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # 4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -364,7 +364,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
