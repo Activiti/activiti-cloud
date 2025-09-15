@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
@@ -755,6 +756,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -775,6 +777,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -795,6 +798,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
