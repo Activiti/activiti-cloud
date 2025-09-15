@@ -99,13 +99,12 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     public FunctionInvocationWrapper functionWithCorrectedInput(FunctionInvocationWrapper function, Type inputType) {
         try {
-            // First, let's discover what constructors are actually available
+            SimpleFunctionRegistry simpleFunctionRegistry = (SimpleFunctionRegistry) applicationContext.getBean(FunctionRegistry.class);
             Constructor<?>[] constructors = SimpleFunctionRegistry.FunctionInvocationWrapper.class.getDeclaredConstructors();
 
             Constructor<?> targetConstructor = null;
             for (Constructor<?> constructor : constructors) {
                 Class<?>[] paramTypes = constructor.getParameterTypes();
-                // Look for a constructor that takes the expected parameters
                 if (paramTypes.length >= 4) {
                     targetConstructor = constructor;
                     break;
@@ -113,38 +112,14 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             }
 
             if (targetConstructor == null) {
-                // If no suitable constructor found, use the alternative approach
                 return createFunctionWrapperAlternative(function, inputType);
             }
 
             targetConstructor.setAccessible(true);
 
-            // Get parameter types to match them correctly
-            Class<?>[] paramTypes = targetConstructor.getParameterTypes();
-            Object[] args = new Object[paramTypes.length];
-
-            // Try to fill parameters based on their types
-            for (int i = 0; i < paramTypes.length; i++) {
-                if (i == 0 && (paramTypes[i] == String.class || paramTypes[i] == Object.class)) {
-                    args[i] = function.getFunctionDefinition();
-                } else if (i == 1 && paramTypes[i] == Object.class) {
-                    args[i] = function.getTarget();
-                } else if (paramTypes[i] == Type.class) {
-                    // First Type parameter should be inputType, second should be outputType
-                    if (args[2] == null) {
-                        args[i] = inputType;
-                    } else {
-                        args[i] = function.getOutputType();
-                    }
-                } else {
-                    args[i] = null; // Use null for other parameters
-                }
-            }
-
-            return (FunctionInvocationWrapper) targetConstructor.newInstance(args);
+            return (FunctionInvocationWrapper) targetConstructor.newInstance(simpleFunctionRegistry, function.getFunctionDefinition(), function.getTarget(), inputType, function.getOutputType());
 
         } catch (Exception e) {
-            // If reflection fails, use alternative approach
             return createFunctionWrapperAlternative(function, inputType);
         }
     }
