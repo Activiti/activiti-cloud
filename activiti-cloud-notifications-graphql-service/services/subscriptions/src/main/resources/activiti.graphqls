@@ -21,7 +21,7 @@ type Subscription {
     processDefinitionKey : [String!],
     processInstanceId : [String!],
     businessKey : [String!],
-    actor : [String!]
+    initiator : [String!]
   ) : [EngineEvent]
 }
 
@@ -89,5 +89,5 @@ type EngineEvent {
   entity : ObjectScalar
   eventType : EngineEventType
 
-  actor : String
+  initiator : String
 }
