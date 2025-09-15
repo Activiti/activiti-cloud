@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.function.context.config.JsonMessageConverter;
 import org.springframework.cloud.function.context.config.SmartCompositeMessageConverter;
@@ -93,6 +94,20 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         Assert.notNull(function, "Failed to lookup function '" + definition + "'");
         return function;
     }
+
+    public FunctionInvocationWrapper functionWithCorrectedInput(FunctionInvocationWrapper function, Type inputType) {
+        SimpleFunctionRegistry functionRegistry = applicationContext.getBean(SimpleFunctionRegistry.class);
+        SimpleFunctionRegistry.FunctionInvocationWrapper function2 = functionRegistry.new FunctionInvocationWrapper(
+            function.getFunctionDefinition(),
+            function.getTarget(),
+            inputType,
+            function.getOutputType()
+        );
+
+        //return FunctionInvocationWrapper(function.getFunctionDefinition(), function.getTarget(), inputType, function.getOutputType());
+        return function2;
+    }
+
 
     protected Type discoverFunctionType(Object bean, String beanName) {
         return FunctionTypeUtils.discoverFunctionType(
