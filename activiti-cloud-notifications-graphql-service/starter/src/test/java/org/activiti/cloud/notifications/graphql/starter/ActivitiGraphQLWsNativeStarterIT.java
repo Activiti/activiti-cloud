@@ -255,7 +255,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         var document =
             """
             subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-              engineEvents(appName: [$appName], eventType: $eventTypes) {
+              engineEvents(appName: [$appName], eventType: $eventTypes, actor: "actor") {
                 processInstanceId
                 eventType
               }
