@@ -255,7 +255,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         var document =
             """
             subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-              engineEvents(appName: [$appName], eventType: $eventTypes, actor: "actor") {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
                 processInstanceId
                 eventType
               }
@@ -273,6 +273,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -289,6 +290,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -358,6 +360,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionVersion(1);
                 setProcessModelContent("processModelContent");
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -412,6 +415,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
         Flux<List> flux =
@@ -474,6 +478,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -539,6 +544,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -559,6 +565,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -579,6 +586,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -599,6 +607,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -619,6 +628,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -639,6 +649,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -755,6 +766,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -775,6 +787,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
@@ -795,6 +808,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 setProcessDefinitionKey("processDefinitionKey");
                 setProcessDefinitionVersion(1);
                 setBusinessKey("businessKey");
+                setActor("actor");
             }
         };
 
