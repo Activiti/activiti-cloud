@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 
 @AutoConfiguration
+@AutoConfigureAfter(ActivitiCloudMessagingAutoConfiguration.class)
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class ActivitiMessagingDestinationsAutoConfiguration {

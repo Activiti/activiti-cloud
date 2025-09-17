@@ -13,6 +13,22 @@
   <artifactId>activiti-cloud-service-messaging-config</artifactId>
 
   <dependencies>
+    <!-- KOTLIN -->
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-reactor</artifactId>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-model-shared</artifactId>
@@ -70,3 +86,8 @@
     </dependency>
   </dependencies>
 </project>
+
+
+
+
+

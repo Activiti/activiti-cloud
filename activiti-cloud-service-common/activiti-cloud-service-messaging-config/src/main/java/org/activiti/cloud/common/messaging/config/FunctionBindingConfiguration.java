@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.springframework.cloud.function.context.catalog.FunctionTypeUtils.getRawType;
+import static org.activiti.cloud.common.messaging.util.FunctionTypeUtils.getRawType;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -180,14 +180,15 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
-                                    FunctionInvocationWrapper function2 = functionWithCorrectedInput(
-                                        function,
-                                        GenericTypeResolver.resolveType(
-                                            function.getInputType(),
-                                            getRawType(functionType)
-                                        )
-                                    );
-                                    return function2.apply(message);
+                                    return function.apply(message);
+//                                    FunctionInvocationWrapper function2 = functionWithCorrectedInput(
+//                                        function,
+//                                        GenericTypeResolver.resolveType(
+//                                            function.getInputType(),
+//                                            getRawType(functionType)
+//                                        )
+//                                    );
+//                                    return function2.apply(message);
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
