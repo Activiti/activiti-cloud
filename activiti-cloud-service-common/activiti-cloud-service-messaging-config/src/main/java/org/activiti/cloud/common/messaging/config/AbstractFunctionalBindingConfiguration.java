@@ -115,7 +115,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             }
 
             if (targetConstructor == null) {
-                return createFunctionWrapperAlternative(function, inputType);
+                throw new IllegalStateException("Cannot find suitable constructor for FunctionInvocationWrapper");
             }
 
             targetConstructor.setAccessible(true);
@@ -124,62 +124,172 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
                 simpleFunctionRegistry,
                 function.getFunctionDefinition(),
                 function.getTarget(),
-                inputType,
+                inputType, // This MUST be the new input type (Payload.class)
                 function.getOutputType()
             );
         } catch (Exception e) {
-            return createFunctionWrapperAlternative(function, inputType);
+            throw new IllegalStateException("Failed to create function with corrected input type: " + inputType, e);
         }
     }
 
     /**
-     * Alternative approach: Create a functional wrapper instead of trying to instantiate FunctionInvocationWrapper
+     * Alternative approach: Create a functional wrapper with the correct input type
+     * This version ensures we always change the input type and never return the original
      */
     private FunctionInvocationWrapper createFunctionWrapperAlternative(
         FunctionInvocationWrapper originalFunction,
         Type inputType
     ) {
-        // Since we can't create a new FunctionInvocationWrapper reliably,
-        // we'll register a new function that wraps the original one
         try {
-            String wrapperName = originalFunction.getFunctionDefinition() + "_corrected_input";
-
-            Function<Object, Object> wrapperFunction = input -> {
-                // Apply the original function directly
-                return originalFunction.apply(input);
-            };
-
-            // Create function registration with the corrected input type
-            FunctionRegistration<Function<Object, Object>> registration = new FunctionRegistration<>(
-                wrapperFunction,
-                wrapperName
-            );
-
-            // Try to set the type if the method exists
-            try {
-                // Use ResolvableType to create the function type
-                registration.type(FunctionTypeUtils.functionType(inputType, originalFunction.getOutputType()));
-            } catch (Exception e) {
-                // If type setting fails, proceed without it
-                System.err.println("Warning: Could not set function type: " + e.getMessage());
-            }
-
-            String beanName = registerFunctionRegistration(wrapperName, registration);
-
-            // Lookup the newly registered function
+            // Get the function registry
             FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
-            FunctionInvocationWrapper newWrapper = functionRegistry.lookup(beanName);
 
-            if (newWrapper != null) {
-                return newWrapper;
+            if (functionRegistry instanceof SimpleFunctionRegistry) {
+                SimpleFunctionRegistry simpleFunctionRegistry = (SimpleFunctionRegistry) functionRegistry;
+
+                // Try alternative reflection approach to create wrapper without registration
+                Constructor<?>[] constructors =
+                    SimpleFunctionRegistry.FunctionInvocationWrapper.class.getDeclaredConstructors();
+
+                for (Constructor<?> constructor : constructors) {
+                    Class<?>[] paramTypes = constructor.getParameterTypes();
+                    // Try different constructor signatures (5 parameters, 6 parameters, etc.)
+                    if (paramTypes.length >= 4 && paramTypes.length <= 6) {
+                        try {
+                            constructor.setAccessible(true);
+
+                            // Try to instantiate with the available parameters
+                            if (paramTypes.length == 4) {
+                                return (FunctionInvocationWrapper) constructor.newInstance(
+                                    originalFunction.getFunctionDefinition(),
+                                    originalFunction.getTarget(),
+                                    inputType, // Use the new input type (Payload.class)
+                                    originalFunction.getOutputType()
+                                );
+                            } else if (paramTypes.length == 5) {
+                                return (FunctionInvocationWrapper) constructor.newInstance(
+                                    simpleFunctionRegistry,
+                                    originalFunction.getFunctionDefinition(),
+                                    originalFunction.getTarget(),
+                                    inputType, // Use the new input type (Payload.class)
+                                    originalFunction.getOutputType()
+                                );
+                            } else if (paramTypes.length == 6) {
+                                return (FunctionInvocationWrapper) constructor.newInstance(
+                                    simpleFunctionRegistry,
+                                    originalFunction.getFunctionDefinition(),
+                                    originalFunction.getTarget(),
+                                    inputType, // Use the new input type (Payload.class)
+                                    originalFunction.getOutputType(),
+                                    null // Additional parameter (often for function properties)
+                                );
+                            }
+                        } catch (Exception constructorException) {
+                            // Try next constructor
+                            continue;
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
-            System.err.println("Warning: Alternative function wrapper creation failed: " + e.getMessage());
+            throw new IllegalStateException(
+                "Failed to create alternative function wrapper with input type: " + inputType,
+                e
+            );
         }
 
-        // Final fallback: return the original function
-        System.err.println("Warning: Using original function without input type correction");
-        return originalFunction;
+        // If all reflection attempts fail, throw an exception instead of returning original
+        throw new IllegalStateException(
+            "Cannot create function with correct input type: " + inputType + ". All reflection approaches failed."
+        );
+    }
+
+    /**
+     * Creates a function with the correct input type and returns the FunctionInvocationWrapper.
+     * This method uses existing registered functions and relies on reflection for type correction.
+     *
+     * @param originalFunction The original function object to wrap
+     * @param newFunctionName The name for the new function registration
+     * @param inputType The desired input type (e.g., Payload.class)
+     * @return FunctionInvocationWrapper with correct type binding
+     */
+    protected FunctionInvocationWrapper createFunctionWithCorrectType(
+        Object originalFunction,
+        String newFunctionName,
+        Type inputType
+    ) {
+        // Get the function registry
+        FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
+
+        // First, try to find the existing function using multiple strategies
+        FunctionInvocationWrapper existingFunction = null;
+        try {
+            existingFunction = functionFromDefinition(newFunctionName);
+        } catch (Exception e) {
+            // Try alternative lookup strategies
+            try {
+                existingFunction = functionRegistry.lookup(newFunctionName);
+            } catch (Exception lookupException) {
+                // Try with registration suffix
+                try {
+                    existingFunction = functionRegistry.lookup(newFunctionName + REGISTRATION_NAME_SUFFIX);
+                } catch (Exception suffixException) {
+                    throw new IllegalStateException(
+                        "Cannot find function with name: " +
+                        newFunctionName +
+                        ". Tried: '" +
+                        newFunctionName +
+                        "', '" +
+                        newFunctionName +
+                        REGISTRATION_NAME_SUFFIX +
+                        "'",
+                        e
+                    );
+                }
+            }
+        }
+
+        // Now that we have the existing function, create a new one with the correct input type
+        if (existingFunction != null) {
+            return functionWithCorrectedInput(existingFunction, inputType);
+        }
+
+        throw new IllegalStateException("Cannot find function with name: " + newFunctionName);
+    }
+
+    /**
+     * Creates a function wrapper with Payload input/output type.
+     * This is a convenience method for the common case of Payload-to-Payload functions.
+     *
+     * @param originalFunction The original function object
+     * @param functionName The name for the function
+     * @return FunctionInvocationWrapper with Payload input/output types
+     */
+    protected FunctionInvocationWrapper createPayloadFunction(Object originalFunction, String functionName) {
+        return createFunctionWithCorrectType(
+            originalFunction,
+            functionName,
+            org.activiti.api.model.shared.Payload.class
+        );
+    }
+
+    /**
+     * Creates a function with the correct input type and returns the FunctionInvocationWrapper.
+     * This method uses existing registered functions and relies on reflection for type correction.
+     *
+     * @param originalFunction The original FunctionInvocationWrapper
+     * @param functionName The name for the function
+     * @param inputType The desired input type (e.g., Payload.class)
+     * @return FunctionInvocationWrapper with correct input type binding
+     */
+    protected FunctionInvocationWrapper createFunctionWithCorrectInputType(
+        FunctionInvocationWrapper originalFunction,
+        String functionName,
+        Type inputType
+    ) {
+        // Use the existing functionWithCorrectedInput method which uses reflection
+        // This avoids temporary registrations while still changing the input type
+        return functionWithCorrectedInput(originalFunction, inputType);
     }
 
     protected Type discoverFunctionType(Object bean, String beanName) {
