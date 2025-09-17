@@ -120,6 +120,35 @@ public class ProcessInstanceNotifications {
             .isTrue();
     }
 
+    @When("notifications: the user subscribes to $eventTypesString notifications with actor filter set to testadmin")
+    public void subscribeToEventTypesNotificationsWithActor(String eventTypesString)
+        throws URISyntaxException, InterruptedException {
+        processor = ReplayProcessor.create();
+
+        String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
+        String processDefinitionKey = sessionVariableCalled("process", String.class)
+            .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
+            .orElse("*");
+
+        String[] eventTypes = eventTypesString.split(",");
+        String actor = TokenHolder.getAuthToken().getSubject();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        Flux<List> flux = subscribeWithActor(
+            processor,
+            eventTypes,
+            businessKey,
+            processDefinitionKey,
+            actor,
+            countDownLatch
+        );
+        flux.subscribe(processor);
+        stepVerifier = StepVerifier.create(processor).expectSubscription();
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
+    }
+
     @When(
         "notifications: the user subscribes to $eventTypesString notifications with businessKey value from session variable called $variableName"
     )
@@ -302,11 +331,6 @@ public class ProcessInstanceNotifications {
         String processDefinitionKey,
         CountDownLatch countDownLatch
     ) throws URISyntaxException {
-        String serviceName = notificationsSteps.getRuntimeBundleServiceName();
-        AuthToken authToken = TokenHolder.getAuthToken();
-        subscriptionRef = new AtomicReference<>();
-        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
-
         // TODO: add processDefinitionKey when signal events are fixed
         String query =
             "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!, $processDefinitionKey: String!) {" +
@@ -316,6 +340,22 @@ public class ProcessInstanceNotifications {
             "    eventType " +
             "  }" +
             "}";
+
+        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
+    }
+
+    private Flux<List> subscribe(
+        String query,
+        ReplayProcessor<List> processor,
+        String[] eventTypes,
+        String businessKey,
+        String processDefinitionKey,
+        CountDownLatch countDownLatch
+    ) throws URISyntaxException {
+        String serviceName = notificationsSteps.getRuntimeBundleServiceName();
+        AuthToken authToken = TokenHolder.getAuthToken();
+        subscriptionRef = new AtomicReference<>();
+        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
 
         Map<String, Object> variables = new ObjectMap() {
             {
@@ -333,6 +373,27 @@ public class ProcessInstanceNotifications {
             () -> {}
         );
         return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, variables, action);
+    }
+
+    private Flux<List> subscribeWithActor(
+        ReplayProcessor<List> processor,
+        String[] eventTypes,
+        String businessKey,
+        String processDefinitionKey,
+        String actor,
+        CountDownLatch countDownLatch
+    ) throws URISyntaxException {
+        String query =
+            "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!, $processDefinitionKey: String!, $actor: String!) {" +
+            "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes, businessKey: [$businessKey], processDefinitionKey: [$processDefinitionKey], actor: [$actor]) {" +
+            "    serviceName " +
+            "    processDefinitionKey " +
+            "    eventType " +
+            "    actor " +
+            "  }" +
+            "}";
+
+        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
     }
 
     @SuppressWarnings("serial")
