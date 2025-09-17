@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
@@ -99,11 +98,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     }
 
     public FunctionInvocationWrapper functionWithCorrectedInput(FunctionInvocationWrapper function, Type inputType) {
-        // Check if the function is already a corrected wrapper to prevent circular references
-        if (function.getFunctionDefinition().endsWith("_corrected_input")) {
-            return function;
-        }
-
         try {
             SimpleFunctionRegistry simpleFunctionRegistry = (SimpleFunctionRegistry) applicationContext.getBean(
                 FunctionRegistry.class
@@ -150,27 +144,9 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         try {
             String wrapperName = originalFunction.getFunctionDefinition() + "_corrected_input";
 
-            // Check if wrapper already exists to prevent re-registration
-            FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
-            String existingBeanName = wrapperName + REGISTRATION_NAME_SUFFIX;
-            FunctionInvocationWrapper existingWrapper = functionRegistry.lookup(existingBeanName);
-            if (existingWrapper != null) {
-                return existingWrapper;
-            }
-
-            // Get the actual target function to prevent wrapping wrappers
-            Object actualTarget = originalFunction.getTarget();
-
             Function<Object, Object> wrapperFunction = input -> {
-                // Apply the actual target function directly, not through the wrapper
-                if (actualTarget instanceof Function) {
-                    return ((Function<Object, Object>) actualTarget).apply(input);
-                } else if (actualTarget instanceof Consumer) {
-                    ((Consumer<Object>) actualTarget).accept(input);
-                    return null;
-                } else {
-                    return input;
-                }
+                // Apply the original function directly
+                return originalFunction.apply(input);
             };
 
             // Create function registration with the corrected input type
@@ -191,7 +167,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             String beanName = registerFunctionRegistration(wrapperName, registration);
 
             // Lookup the newly registered function
-            functionRegistry = applicationContext.getBean(FunctionRegistry.class);
+            FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
             FunctionInvocationWrapper newWrapper = functionRegistry.lookup(beanName);
 
             if (newWrapper != null) {
