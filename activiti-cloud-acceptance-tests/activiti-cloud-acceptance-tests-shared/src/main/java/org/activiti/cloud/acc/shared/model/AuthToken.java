@@ -15,17 +15,12 @@
  */
 package org.activiti.cloud.acc.shared.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 public class AuthToken {
 
-    private final JwtDecoder jwtDecoder;
     private String access_token;
-
-    public AuthToken(JwtDecoder jwtDecoder) {
-        this.jwtDecoder = jwtDecoder;
-    }
 
     public String getAccess_token() {
         return access_token;
@@ -36,21 +31,32 @@ public class AuthToken {
         return access_token;
     }
 
+    public String getSubject() {
+        return getClaim("sub");
+    }
+
     public String getClaim(String claimName) {
         if (access_token == null) {
             return null;
         }
 
         try {
-            var jwt = jwtDecoder.decode(access_token);
-            var claim = (Map<String, Object>) jwt.getClaim(claimName);
-            return claim.toString();
+            String[] parts = access_token.split("\\.");
+            if (parts.length != 3) {
+                return null;
+            }
+
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payload, Map.class);
+
+            Object claim = claims.get(claimName);
+            if (claim instanceof Map) {
+                return claim.toString();
+            }
+            return claim != null ? claim.toString() : null;
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public String getSubject() {
-        return getClaim("sub");
     }
 }
