@@ -181,7 +181,7 @@ public class JobExecutorIT {
     @DynamicPropertySource
     public static void signalProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.activiti.asyncExecutorActivate", () -> true);
-        registry.add("spring.cloud.stream.bindings.asyncExecutorJobsInput.consumer.max-attempts", () -> 4);
+        registry.add("spring.cloud.stream.bindings.asyncExecutorJobsInput.consumer.max-attempts", () -> 5);
     }
 
     @BeforeEach
@@ -202,7 +202,7 @@ public class JobExecutorIT {
 
         assertThat(bindingProperties.getConsumer().getMaxAttempts())
             .as("should configure consumer properties")
-            .isEqualTo(4);
+            .isEqualTo(5);
     }
 
     @Test
@@ -346,6 +346,8 @@ public class JobExecutorIT {
             ActivitiEventType.JOB_EXECUTION_FAILURE
         );
 
+        logger.error("MBDEBUG 349");
+
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(FAILED_JOB_RETRY)
@@ -355,8 +357,10 @@ public class JobExecutorIT {
         //when
         runtimeService.createProcessInstanceBuilder().processDefinitionId(processDefinitionId).start();
         // then
+        logger.error("MBDEBUG 360");
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 5 times every 1 sec").isTrue();
 
+        logger.error("MBDEBUG 363");
         await("the async executions should exists with job exception")
             .untilAsserted(() -> {
                 assertThat(
@@ -378,11 +382,14 @@ public class JobExecutorIT {
                     .isEqualTo(1);
             });
 
+        logger.error("MBDEBUG 385");
         // message is sent
         verify(jobMessageProducer, times(retryCount))
             .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
         // message handler is invoked
+        logger.error("MBDEBUG 390");
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
+        logger.error("MBDEBUG 392");
     }
 
     @Test
