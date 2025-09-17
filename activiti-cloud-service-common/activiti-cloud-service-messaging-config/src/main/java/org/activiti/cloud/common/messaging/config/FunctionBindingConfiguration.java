@@ -180,14 +180,17 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
-                                    FunctionInvocationWrapper function2 = functionWithCorrectedInput(
-                                        function,
-                                        GenericTypeResolver.resolveType(
-                                            function.getInputType(),
-                                            getRawType(functionType)
-                                        )
-                                    );
-                                    return function2.apply(message);
+                                    if (function.getOutputType() != null) {
+                                        function =
+                                            functionWithCorrectedInput(
+                                                function,
+                                                GenericTypeResolver.resolveType(
+                                                    function.getInputType(),
+                                                    getRawType(functionType)
+                                                )
+                                            );
+                                    }
+                                    return function.apply(message);
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
