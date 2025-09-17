@@ -341,6 +341,23 @@ public class JobExecutorIT {
         int retryCount = 5;
         CountDownLatch jobRetries = new CountDownLatch(retryCount);
 
+        // Add a debug listener to see all events
+        ActivitiEventListener debugListener = new ActivitiEventListener() {
+            @Override
+            public void onEvent(ActivitiEvent event) {
+                logger.error("DEBUG EVENT: {} - {}", event.getType(), event);
+                if (event.getType() == ActivitiEventType.JOB_EXECUTION_FAILURE) {
+                    logger.error("JOB_EXECUTION_FAILURE event detected!");
+                }
+            }
+
+            @Override
+            public boolean isFailOnException() {
+                return false;
+            }
+        };
+
+        runtimeService.addEventListener(debugListener);
         runtimeService.addEventListener(
             new CountDownLatchActvitiEventListener(jobRetries),
             ActivitiEventType.JOB_EXECUTION_FAILURE
@@ -354,13 +371,24 @@ public class JobExecutorIT {
             .getId();
         //when
         runtimeService.createProcessInstanceBuilder().processDefinitionId(processDefinitionId).start();
-        // then
-        assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 5 times every 1 sec").isTrue();
 
-        logger.error("MBDEBUG 360");
+        logger.error("MBDEBUG 372 - About to wait for {} job retries", retryCount);
+        // then
+        boolean retriesCompleted = jobRetries.await(1, TimeUnit.MINUTES);
+        logger.error(
+            "MBDEBUG 375 - jobRetries.await returned: {}, remaining count: {}",
+            retriesCompleted,
+            jobRetries.getCount()
+        );
+
+        // Clean up the debug listener
+        runtimeService.removeEventListener(debugListener);
+
+        assertThat(retriesCompleted).as("should retry failed jobs 5 times every 1 sec").isTrue();
+
         // Give the system some time to move the job to dead letter queue after all retries are exhausted
         Thread.sleep(2000);
-        logger.error("MBDEBUG 363");
+        logger.error("MBDEBUG 384");
 
         // Check that the execution still exists and the job is in dead letter queue
         assertThat(
@@ -372,7 +400,7 @@ public class JobExecutorIT {
         )
             .as("should have one execution stuck at failing task")
             .isEqualTo(1);
-        logger.error("MBDEBUG 373");
+        logger.error("MBDEBUG 396");
         assertThat(
             managementService
                 .createDeadLetterJobQuery()
@@ -383,14 +411,14 @@ public class JobExecutorIT {
             .as("should have one dead letter job with exception")
             .isEqualTo(1);
 
-        logger.error("MBDEBUG 385");
+        logger.error("MBDEBUG 407");
         // message is sent
         verify(jobMessageProducer, times(retryCount))
             .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
         // message handler is invoked
-        logger.error("MBDEBUG 390");
+        logger.error("MBDEBUG 412");
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
-        logger.error("MBDEBUG 392");
+        logger.error("MBDEBUG 414");
     }
 
     @Test
