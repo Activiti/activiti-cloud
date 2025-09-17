@@ -30,6 +30,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.impl.interceptor.CommandContext;
@@ -137,6 +138,14 @@ class ToCloudProcessRuntimeEventConverterTest {
         processInstance.setProcessDefinitionId("myProcessDef");
         processInstance.setInitiator(USERNAME);
 
+        IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
+        identityLink.setDetails(USERNAME_GUID.getBytes());
+        identityLink.setType(ActorConstants.ACTOR_TYPE);
+
+        when(this.commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
+        when(executionEntityManager.findById(any())).thenReturn(executionEntity);
+        when(executionEntity.getIdentityLinks()).thenReturn(List.of(identityLink));
+
         ProcessCompletedImpl event = new ProcessCompletedImpl(processInstance);
 
         //when
@@ -149,8 +158,10 @@ class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processCompleted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processCompleted.getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processCompleted.getProcessInstanceId()).isEqualTo("10");
-        assertThat(processCompleted.getActor()).isEqualTo(SERVICE_USER);
+        assertThat(processCompleted.getActor()).isEqualTo(USERNAME_GUID);
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(this.processAuditServiceInfoAppender)
+            .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
     }
 }

@@ -534,7 +534,7 @@ public class AuditProducerIT {
                 assertThat(streamHandler.getLatestReceivedEvents())
                     .filteredOn(it -> Arrays.asList(TASK_COMPLETED, PROCESS_COMPLETED).contains(it.getEventType()))
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getActor)
-                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, "service_user"));
+                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, expectedActor));
             });
     }
 
