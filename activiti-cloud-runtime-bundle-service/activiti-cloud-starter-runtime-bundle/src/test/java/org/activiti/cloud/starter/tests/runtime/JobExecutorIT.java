@@ -369,7 +369,9 @@ public class JobExecutorIT {
                 .processDefinitionId(processDefinitionId)
                 .activityId("failingJobTask")
                 .count()
-        ).as("should have one execution stuck at failing task").isEqualTo(1);
+        )
+            .as("should have one execution stuck at failing task")
+            .isEqualTo(1);
         logger.error("MBDEBUG 373");
         assertThat(
             managementService
@@ -377,7 +379,9 @@ public class JobExecutorIT {
                 .processDefinitionId(processDefinitionId)
                 .withException()
                 .count()
-        ).as("should have one dead letter job with exception").isEqualTo(1);
+        )
+            .as("should have one dead letter job with exception")
+            .isEqualTo(1);
 
         logger.error("MBDEBUG 385");
         // message is sent
