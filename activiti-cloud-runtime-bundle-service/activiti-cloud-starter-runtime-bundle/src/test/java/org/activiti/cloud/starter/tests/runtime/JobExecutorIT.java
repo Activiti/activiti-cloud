@@ -346,8 +346,6 @@ public class JobExecutorIT {
             ActivitiEventType.JOB_EXECUTION_FAILURE
         );
 
-        logger.error("MBDEBUG 349");
-
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(FAILED_JOB_RETRY)
@@ -357,30 +355,29 @@ public class JobExecutorIT {
         //when
         runtimeService.createProcessInstanceBuilder().processDefinitionId(processDefinitionId).start();
         // then
-        logger.error("MBDEBUG 360");
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 5 times every 1 sec").isTrue();
 
+        logger.error("MBDEBUG 360");
+        // Give the system some time to move the job to dead letter queue after all retries are exhausted
+        Thread.sleep(2000);
         logger.error("MBDEBUG 363");
-        await("the async executions should exists with job exception")
-            .untilAsserted(() -> {
-                assertThat(
-                    runtimeService
-                        .createExecutionQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .activityId("failingJobTask")
-                        .count()
-                )
-                    .isEqualTo(1);
 
-                assertThat(
-                    managementService
-                        .createDeadLetterJobQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .withException()
-                        .count()
-                )
-                    .isEqualTo(1);
-            });
+        // Check that the execution still exists and the job is in dead letter queue
+        assertThat(
+            runtimeService
+                .createExecutionQuery()
+                .processDefinitionId(processDefinitionId)
+                .activityId("failingJobTask")
+                .count()
+        ).as("should have one execution stuck at failing task").isEqualTo(1);
+        logger.error("MBDEBUG 373");
+        assertThat(
+            managementService
+                .createDeadLetterJobQuery()
+                .processDefinitionId(processDefinitionId)
+                .withException()
+                .count()
+        ).as("should have one dead letter job with exception").isEqualTo(1);
 
         logger.error("MBDEBUG 385");
         // message is sent
