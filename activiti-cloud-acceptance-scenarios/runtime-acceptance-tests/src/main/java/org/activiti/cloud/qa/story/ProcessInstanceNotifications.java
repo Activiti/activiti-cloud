@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -341,7 +342,7 @@ public class ProcessInstanceNotifications {
             "  }" +
             "}";
 
-        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch, null);
     }
 
     private Flux<List> subscribe(
@@ -350,21 +351,22 @@ public class ProcessInstanceNotifications {
         String[] eventTypes,
         String businessKey,
         String processDefinitionKey,
-        CountDownLatch countDownLatch
+        CountDownLatch countDownLatch,
+        Map<String, Object> customVariables
     ) throws URISyntaxException {
         String serviceName = notificationsSteps.getRuntimeBundleServiceName();
         AuthToken authToken = TokenHolder.getAuthToken();
         subscriptionRef = new AtomicReference<>();
         long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
 
-        Map<String, Object> variables = new ObjectMap() {
-            {
-                put("serviceName", serviceName);
-                put("eventTypes", eventTypes);
-                put("businessKey", businessKey);
-                put("processDefinitionKey", processDefinitionKey);
-            }
-        };
+        if (customVariables == null) {
+            customVariables = new HashMap<>();
+        }
+
+        customVariables.put("serviceName", serviceName);
+        customVariables.put("eventTypes", eventTypes);
+        customVariables.put("businessKey", businessKey);
+        customVariables.put("processDefinitionKey", processDefinitionKey);
 
         Consumer<Subscription> action = countDownLatchAction(
             countDownLatch,
@@ -372,7 +374,7 @@ public class ProcessInstanceNotifications {
             Duration.ofSeconds(subscriptionTimeoutSeconds),
             () -> {}
         );
-        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, variables, action);
+        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, customVariables, action);
     }
 
     private Flux<List> subscribeWithActor(
@@ -393,7 +395,21 @@ public class ProcessInstanceNotifications {
             "  }" +
             "}";
 
-        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch);
+        Map<String, Object> customVariables = new ObjectMap() {
+            {
+                put("actor", actor);
+            }
+        };
+
+        return subscribe(
+            query,
+            processor,
+            eventTypes,
+            businessKey,
+            processDefinitionKey,
+            countDownLatch,
+            customVariables
+        );
     }
 
     @SuppressWarnings("serial")
