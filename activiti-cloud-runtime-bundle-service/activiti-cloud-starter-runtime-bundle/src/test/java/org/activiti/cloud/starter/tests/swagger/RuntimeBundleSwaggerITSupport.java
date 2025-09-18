@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +33,7 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,6 +41,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
+@TestPropertySource(properties = {
+    "spring.profiles.active=test",
+    "logging.level.org.testcontainers=WARN",
+    "logging.level.com.github.dockerjava=WARN"
+})
+@Timeout(value = 15, unit = java.util.concurrent.TimeUnit.MINUTES)
 class RuntimeBundleSwaggerITSupport {
 
     @Autowired
@@ -51,14 +59,23 @@ class RuntimeBundleSwaggerITSupport {
     private ProcessDeployedEventProducer producer;
 
     /**
-     * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
+     * This is not a test. It's actually generating the swagger.json and yaml definition of the service.
+     * It is used by maven generate-swagger profile build.
      */
     @Test
+    @Timeout(value = 10, unit = java.util.concurrent.TimeUnit.MINUTES)
     void generateSwagger() throws Exception {
         mockMvc
             .perform(get("/v3/api-docs/Runtime Bundle").accept(MediaType.APPLICATION_JSON))
             .andDo(result -> {
                 JsonNode jsonNodeTree = objectMapper.readTree(result.getResponse().getContentAsByteArray());
+
+                // Ensure target directory exists
+                File targetDir = new File("target");
+                if (!targetDir.exists() && !targetDir.mkdirs()) {
+                    throw new RuntimeException("Failed to create target directory");
+                }
+
                 Files.write(
                     new File("target/swagger.json").toPath(),
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree)

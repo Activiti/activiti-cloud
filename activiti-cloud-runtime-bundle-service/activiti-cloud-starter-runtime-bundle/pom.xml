@@ -264,6 +264,16 @@
                   </includes>
                   <skipTests>false</skipTests>
                   <skipITs>false</skipITs>
+                  <!-- Add timeout configurations to prevent hanging -->
+                  <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+                  <forkedProcessExitTimeoutInSeconds>30</forkedProcessExitTimeoutInSeconds>
+                  <!-- System properties to help with container startup -->
+                  <systemPropertyVariables>
+                    <testcontainers.reuse.enable>true</testcontainers.reuse.enable>
+                    <spring.profiles.active>test</spring.profiles.active>
+                  </systemPropertyVariables>
+                  <!-- JVM arguments for better performance -->
+                  <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
                 </configuration>
               </execution>
             </executions>
