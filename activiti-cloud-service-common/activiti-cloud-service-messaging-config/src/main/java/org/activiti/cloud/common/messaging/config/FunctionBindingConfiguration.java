@@ -181,14 +181,14 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
                                     return function.apply(message);
-//                                    FunctionInvocationWrapper function2 = functionWithCorrectedInput(
-//                                        function,
-//                                        GenericTypeResolver.resolveType(
-//                                            function.getInputType(),
-//                                            getRawType(functionType)
-//                                        )
-//                                    );
-//                                    return function2.apply(message);
+                                    //                                    FunctionInvocationWrapper function2 = functionWithCorrectedInput(
+                                    //                                        function,
+                                    //                                        GenericTypeResolver.resolveType(
+                                    //                                            function.getInputType(),
+                                    //                                            getRawType(functionType)
+                                    //                                        )
+                                    //                                    );
+                                    //                                    return function2.apply(message);
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow

@@ -63,8 +63,16 @@ public final class FunctionTypeUtils {
     /**
      * Delegates to our custom FunctionTypeUtils implementation.
      */
-    public static Type discoverFunctionType(Object bean, String beanName, GenericApplicationContext applicationContext) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionType(bean, beanName, applicationContext);
+    public static Type discoverFunctionType(
+        Object bean,
+        String beanName,
+        GenericApplicationContext applicationContext
+    ) {
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionType(
+            bean,
+            beanName,
+            applicationContext
+        );
     }
 
     /**
@@ -184,28 +192,37 @@ public final class FunctionTypeUtils {
      * Delegates to our custom FunctionTypeUtils implementation.
      */
     public static Type discoverFunctionTypeFromClass(Class<?> functionalClass) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromClass(functionalClass);
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromClass(
+            functionalClass
+        );
     }
 
     /**
      * Delegates to our custom FunctionTypeUtils implementation.
      */
     public static Type discoverFunctionTypeFromFunctionFactoryMethod(Class<?> clazz, String methodName) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionFactoryMethod(clazz, methodName);
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionFactoryMethod(
+            clazz,
+            methodName
+        );
     }
 
     /**
      * Delegates to our custom FunctionTypeUtils implementation.
      */
     public static Type discoverFunctionTypeFromFunctionFactoryMethod(Method method) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionFactoryMethod(method);
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionFactoryMethod(
+            method
+        );
     }
 
     /**
      * Delegates to our custom FunctionTypeUtils implementation.
      */
     public static Type discoverFunctionTypeFromFunctionMethod(Method functionMethod) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionMethod(functionMethod);
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionTypeFromFunctionMethod(
+            functionMethod
+        );
     }
 
     /**
@@ -240,7 +257,10 @@ public final class FunctionTypeUtils {
      * Delegates to our custom FunctionTypeUtils implementation.
      */
     public static String discoverBeanDefinitionNameByQualifier(ListableBeanFactory beanFactory, String qualifier) {
-        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverBeanDefinitionNameByQualifier(beanFactory, qualifier);
+        return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverBeanDefinitionNameByQualifier(
+            beanFactory,
+            qualifier
+        );
     }
 
     /**
@@ -268,6 +288,8 @@ public final class FunctionTypeUtils {
     // All methods delegate to our custom implementation
 
     static {
-        System.out.println("SUCCESS: Complete Shadow FunctionTypeUtils loaded - all calls will be delegated to Activiti Cloud's custom implementation");
+        System.out.println(
+            "SUCCESS: Complete Shadow FunctionTypeUtils loaded - all calls will be delegated to Activiti Cloud's custom implementation"
+        );
     }
 }

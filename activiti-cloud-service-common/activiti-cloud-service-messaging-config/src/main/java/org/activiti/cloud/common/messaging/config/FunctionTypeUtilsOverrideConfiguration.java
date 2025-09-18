@@ -25,7 +25,11 @@ import org.springframework.context.annotation.Primary;
  * This ensures our custom implementation is used throughout the Spring context.
  */
 @Configuration
-@ConditionalOnProperty(value = "activiti.cloud.function.type.utils.override", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+    value = "activiti.cloud.function.type.utils.override",
+    havingValue = "true",
+    matchIfMissing = true
+)
 public class FunctionTypeUtilsOverrideConfiguration {
 
     @Bean
@@ -48,9 +52,16 @@ public class FunctionTypeUtilsOverrideConfiguration {
             return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.getRawType(type);
         }
 
-        public java.lang.reflect.Type discoverFunctionType(Object bean, String beanName,
-                org.springframework.context.support.GenericApplicationContext applicationContext) {
-            return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionType(bean, beanName, applicationContext);
+        public java.lang.reflect.Type discoverFunctionType(
+            Object bean,
+            String beanName,
+            org.springframework.context.support.GenericApplicationContext applicationContext
+        ) {
+            return org.activiti.cloud.common.messaging.util.FunctionTypeUtils.discoverFunctionType(
+                bean,
+                beanName,
+                applicationContext
+            );
         }
     }
 }
