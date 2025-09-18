@@ -41,11 +41,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
-@TestPropertySource(properties = {
-    "spring.profiles.active=test",
-    "logging.level.org.testcontainers=WARN",
-    "logging.level.com.github.dockerjava=WARN"
-})
+@TestPropertySource(
+    properties = {
+        "spring.profiles.active=test",
+        "logging.level.org.testcontainers=WARN",
+        "logging.level.com.github.dockerjava=WARN",
+    }
+)
 @Timeout(value = 15, unit = java.util.concurrent.TimeUnit.MINUTES)
 class RuntimeBundleSwaggerITSupport {
 
