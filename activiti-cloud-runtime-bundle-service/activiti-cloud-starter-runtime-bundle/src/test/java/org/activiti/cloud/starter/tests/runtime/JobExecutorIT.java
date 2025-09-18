@@ -344,21 +344,11 @@ public class JobExecutorIT {
         // we need to count the actual job message handler invocations instead
         CountDownLatch messageHandlerInvocations = new CountDownLatch(5);
 
-        // Create a custom spy to count invocations
-        JobMessageHandler originalHandler = (JobMessageHandler) jobMessageHandler;
-        JobMessageHandler spyHandler = spy(originalHandler);
-
-        // Override the handleMessage method to count invocations
         doAnswer(invocation -> {
-                logger.error(
-                    "MBDEBUG - JobMessageHandler.handleMessage invoked, remaining count: {}",
-                    messageHandlerInvocations.getCount()
-                );
-                messageHandlerInvocations.countDown();
-                return invocation.callRealMethod();
-            })
-            .when(spyHandler)
-            .handleMessage(any(Message.class));
+            logger.error("MBDEBUG 1 - JobMessageHandler.handleMessage invoked, remaining count: {}", messageHandlerInvocations.getCount());
+            messageHandlerInvocations.countDown();
+            return invocation.callRealMethod();
+        }).when(jobMessageHandler).handleMessage(any(Message.class));
 
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
@@ -370,21 +360,18 @@ public class JobExecutorIT {
         //when
         runtimeService.createProcessInstanceBuilder().processDefinitionId(processDefinitionId).start();
 
-        logger.error("MBDEBUG 372 - About to wait for 5 message handler invocations");
+        logger.error("MBDEBUG 2 - About to wait for 5 message handler invocations");
 
         // Wait for 5 message handler invocations (initial + 4 retries)
         boolean retriesCompleted = messageHandlerInvocations.await(2, TimeUnit.MINUTES);
-        logger.error(
-            "MBDEBUG 375 - messageHandlerInvocations.await returned: {}, remaining count: {}",
-            retriesCompleted,
-            messageHandlerInvocations.getCount()
-        );
+        logger.error("MBDEBUG 3 - messageHandlerInvocations.await returned: {}, remaining count: {}",
+                    retriesCompleted, messageHandlerInvocations.getCount());
 
         assertThat(retriesCompleted).as("should invoke message handler 5 times (1 initial + 4 retries)").isTrue();
 
         // Give the system some time to move the job to dead letter queue after all retries are exhausted
         Thread.sleep(2000);
-        logger.error("MBDEBUG 384");
+        logger.error("MBDEBUG 4");
 
         // Check that the execution still exists and the job is in dead letter queue
         assertThat(
@@ -396,41 +383,26 @@ public class JobExecutorIT {
         )
             .as("should have one execution stuck at failing task")
             .isEqualTo(1);
-        logger.error("MBDEBUG 396");
+        logger.error("MBDEBUG 5");
 
-        // Since Spring Cloud Stream handles retries, we might not have a traditional dead letter job
-        // Let's check if there are any jobs left in any state
-        long totalJobs =
-            managementService.createJobQuery().processDefinitionId(processDefinitionId).count() +
-            managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count() +
-            managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count() +
-            managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count();
+        long totalJobs = managementService.createJobQuery().processDefinitionId(processDefinitionId).count() +
+                        managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count() +
+                        managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count() +
+                        managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count();
 
         logger.error("MBDEBUG - Total jobs found: {}", totalJobs);
-        logger.error(
-            "MBDEBUG - Regular jobs: {}",
-            managementService.createJobQuery().processDefinitionId(processDefinitionId).count()
-        );
-        logger.error(
-            "MBDEBUG - Timer jobs: {}",
-            managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count()
-        );
-        logger.error(
-            "MBDEBUG - Suspended jobs: {}",
-            managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count()
-        );
-        logger.error(
-            "MBDEBUG - Dead letter jobs: {}",
-            managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count()
-        );
+        logger.error("MBDEBUG - Regular jobs: {}", managementService.createJobQuery().processDefinitionId(processDefinitionId).count());
+        logger.error("MBDEBUG - Timer jobs: {}", managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count());
+        logger.error("MBDEBUG - Suspended jobs: {}", managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count());
+        logger.error("MBDEBUG - Dead letter jobs: {}", managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count());
 
-        logger.error("MBDEBUG 407");
+        logger.error("MBDEBUG 6");
 
         // Verify message producer and handler were called 5 times
         verify(jobMessageProducer, times(5))
             .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
 
-        logger.error("MBDEBUG 412");
+        logger.error("MBDEBUG 7");
     }
 
     @Test
