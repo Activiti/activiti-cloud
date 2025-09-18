@@ -345,10 +345,15 @@ public class JobExecutorIT {
         CountDownLatch messageHandlerInvocations = new CountDownLatch(5);
 
         doAnswer(invocation -> {
-            logger.error("MBDEBUG 1 - JobMessageHandler.handleMessage invoked, remaining count: {}", messageHandlerInvocations.getCount());
-            messageHandlerInvocations.countDown();
-            return invocation.callRealMethod();
-        }).when(jobMessageHandler).handleMessage(any(Message.class));
+                logger.error(
+                    "MBDEBUG 1 - JobMessageHandler.handleMessage invoked, remaining count: {}",
+                    messageHandlerInvocations.getCount()
+                );
+                messageHandlerInvocations.countDown();
+                return invocation.callRealMethod();
+            })
+            .when(jobMessageHandler)
+            .handleMessage(any(Message.class));
 
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
@@ -364,8 +369,11 @@ public class JobExecutorIT {
 
         // Wait for 5 message handler invocations (initial + 4 retries)
         boolean retriesCompleted = messageHandlerInvocations.await(2, TimeUnit.MINUTES);
-        logger.error("MBDEBUG 3 - messageHandlerInvocations.await returned: {}, remaining count: {}",
-                    retriesCompleted, messageHandlerInvocations.getCount());
+        logger.error(
+            "MBDEBUG 3 - messageHandlerInvocations.await returned: {}, remaining count: {}",
+            retriesCompleted,
+            messageHandlerInvocations.getCount()
+        );
 
         assertThat(retriesCompleted).as("should invoke message handler 5 times (1 initial + 4 retries)").isTrue();
 
@@ -385,16 +393,29 @@ public class JobExecutorIT {
             .isEqualTo(1);
         logger.error("MBDEBUG 5");
 
-        long totalJobs = managementService.createJobQuery().processDefinitionId(processDefinitionId).count() +
-                        managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count() +
-                        managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count() +
-                        managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count();
+        long totalJobs =
+            managementService.createJobQuery().processDefinitionId(processDefinitionId).count() +
+            managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count() +
+            managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count() +
+            managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count();
 
         logger.error("MBDEBUG - Total jobs found: {}", totalJobs);
-        logger.error("MBDEBUG - Regular jobs: {}", managementService.createJobQuery().processDefinitionId(processDefinitionId).count());
-        logger.error("MBDEBUG - Timer jobs: {}", managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count());
-        logger.error("MBDEBUG - Suspended jobs: {}", managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count());
-        logger.error("MBDEBUG - Dead letter jobs: {}", managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count());
+        logger.error(
+            "MBDEBUG - Regular jobs: {}",
+            managementService.createJobQuery().processDefinitionId(processDefinitionId).count()
+        );
+        logger.error(
+            "MBDEBUG - Timer jobs: {}",
+            managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count()
+        );
+        logger.error(
+            "MBDEBUG - Suspended jobs: {}",
+            managementService.createSuspendedJobQuery().processDefinitionId(processDefinitionId).count()
+        );
+        logger.error(
+            "MBDEBUG - Dead letter jobs: {}",
+            managementService.createDeadLetterJobQuery().processDefinitionId(processDefinitionId).count()
+        );
 
         logger.error("MBDEBUG 6");
 
