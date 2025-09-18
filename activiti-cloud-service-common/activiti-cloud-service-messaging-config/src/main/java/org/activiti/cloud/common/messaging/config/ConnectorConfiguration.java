@@ -25,6 +25,9 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
+import org.activiti.cloud.common.messaging.util.FunctionTypeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -48,6 +51,8 @@ import org.springframework.util.StringUtils;
     before = FunctionConfiguration.class
 )
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
+
+    private static final Log logger = LogFactory.getLog(ConnectorConfiguration.class);
 
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW = "connectorBindingSelectorDiscardFlow";
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
@@ -81,8 +86,49 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             final Type functionType = discoverFunctionType(bean, beanName);
                             final var functionRouter = messagingProperties.getFunctionRouter();
 
-                            FunctionRegistration functionRegistration = new FunctionRegistration(bean)
-                                .type(functionType);
+                            // Fix for ConsumerConnector: if this is a Consumer type, we need to handle it properly
+                            FunctionRegistration functionRegistration;
+                            if (ConsumerConnector.class.isInstance(bean)) {
+                                // For ConsumerConnector, create registration without calling .type() if output type is null
+                                functionRegistration = new FunctionRegistration(bean);
+
+                                // Only set the type if it's valid and won't cause NullPointerException
+                                if (functionType != null) {
+                                    try {
+                                        Type outputType = FunctionTypeUtils.getOutputType(functionType);
+                                        if (outputType != null) {
+                                            // If output type is not null, we can safely set the function type
+                                            functionRegistration = functionRegistration.type(functionType);
+                                        } else {
+                                            // For Consumer types with null output, create a proper Consumer type
+                                            Type inputType = FunctionTypeUtils.getInputType(functionType);
+                                            if (inputType != null) {
+                                                Type consumerType = FunctionTypeUtils.consumerType(inputType);
+                                                functionRegistration = functionRegistration.type(consumerType);
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        // If anything fails, just use the registration without type info
+                                        logger.debug(
+                                            "Could not set function type for ConsumerConnector, proceeding without type: " +
+                                            e.getMessage()
+                                        );
+                                    }
+                                }
+                            } else {
+                                // For regular Connector (Function type), use the original approach
+                                functionRegistration = new FunctionRegistration(bean);
+                                if (functionType != null) {
+                                    try {
+                                        functionRegistration = functionRegistration.type(functionType);
+                                    } catch (Exception e) {
+                                        logger.debug(
+                                            "Could not set function type for Connector, proceeding without type: " +
+                                            e.getMessage()
+                                        );
+                                    }
+                                }
+                            }
 
                             final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
