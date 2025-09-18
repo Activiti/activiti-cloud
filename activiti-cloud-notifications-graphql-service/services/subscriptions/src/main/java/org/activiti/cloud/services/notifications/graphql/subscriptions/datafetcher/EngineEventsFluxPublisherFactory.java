@@ -46,7 +46,7 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
 
         return Flux.from(
             engineEventsFlux
-                .log(logger, Level.CONFIG, true)
+                .log(logger, Level.ALL, true)
                 .flatMapSequential(message ->
                     Flux
                         .fromIterable(message.getPayload())
