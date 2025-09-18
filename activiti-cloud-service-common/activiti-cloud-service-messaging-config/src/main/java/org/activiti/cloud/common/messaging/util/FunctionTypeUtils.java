@@ -461,12 +461,33 @@ public final class FunctionTypeUtils {
     }
 
     public static String discoverBeanDefinitionNameByQualifier(ListableBeanFactory beanFactory, String qualifier) {
-        String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class);
+        try {
+            String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class);
 
-        for (String beanName : candidateBeans) {
-            if (BeanFactoryAnnotationUtils.isQualifierMatch(qualifier::equals, beanName, beanFactory)) {
-                return beanName;
+            // Add safety check to prevent processing too many beans
+            if (candidateBeans.length > 10000) {
+                logger.warn(
+                    "Large number of beans detected (" +
+                    candidateBeans.length +
+                    "), limiting search to prevent performance issues"
+                );
+                String[] limitedBeans = new String[Math.min(candidateBeans.length, 10000)];
+                System.arraycopy(candidateBeans, 0, limitedBeans, 0, limitedBeans.length);
+                candidateBeans = limitedBeans;
             }
+
+            for (String beanName : candidateBeans) {
+                try {
+                    if (BeanFactoryAnnotationUtils.isQualifierMatch(qualifier::equals, beanName, beanFactory)) {
+                        return beanName;
+                    }
+                } catch (Exception e) {
+                    // Log and continue if a specific bean causes issues
+                    logger.debug("Error checking qualifier match for bean: " + beanName, e);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error during bean discovery for qualifier: " + qualifier, e);
         }
         return null;
     }
