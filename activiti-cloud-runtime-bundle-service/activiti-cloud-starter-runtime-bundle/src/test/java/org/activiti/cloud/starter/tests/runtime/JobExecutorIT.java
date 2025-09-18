@@ -392,7 +392,6 @@ public class JobExecutorIT {
     //            .as("should have one execution stuck at failing task")
     //            .isEqualTo(1);
     //        logger.error("MBDEBUG 5");
-    //
     //        long totalJobs =
     //            managementService.createJobQuery().processDefinitionId(processDefinitionId).count() +
     //            managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count() +
