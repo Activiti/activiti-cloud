@@ -29,7 +29,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@TestPropertySource(properties = "activiti.cloud.messaging.function-router.enabled=true")
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 @Testcontainers
 public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
 
