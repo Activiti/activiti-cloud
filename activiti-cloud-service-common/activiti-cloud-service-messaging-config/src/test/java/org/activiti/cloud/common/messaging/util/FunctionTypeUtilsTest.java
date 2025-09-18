@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.common.messaging.util;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Type;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test to verify that our custom FunctionTypeUtils is being used instead of Spring Cloud Function's implementation.

@@ -30,12 +30,13 @@ import org.springframework.core.annotation.Order;
 @ComponentScan(basePackages = "org.activiti.cloud.common.messaging.util")
 @Order(-2000) // Even higher precedence to ensure this loads before everything else
 public class CustomFunctionTypeUtilsConfiguration {
-
     static {
         // Force early loading of our custom FunctionTypeUtils class to ensure it's loaded before
         // any Spring Cloud Function auto-configurations that might reference the original class
         try {
-            Class<?> customFunctionTypeUtils = Class.forName("org.activiti.cloud.common.messaging.util.FunctionTypeUtils");
+            Class<?> customFunctionTypeUtils = Class.forName(
+                "org.activiti.cloud.common.messaging.util.FunctionTypeUtils"
+            );
             System.setProperty("activiti.cloud.function.type.utils.class", customFunctionTypeUtils.getName());
             System.setProperty("activiti.cloud.function.type.utils.loaded", "true");
 
@@ -53,9 +54,11 @@ public class CustomFunctionTypeUtilsConfiguration {
             } catch (Exception ex) {
                 // Ignore if we can't set the property
             }
-
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("FATAL: Failed to load custom FunctionTypeUtils from org.activiti.cloud.common.messaging.util package", e);
+            throw new RuntimeException(
+                "FATAL: Failed to load custom FunctionTypeUtils from org.activiti.cloud.common.messaging.util package",
+                e
+            );
         }
     }
 
@@ -65,7 +68,9 @@ public class CustomFunctionTypeUtilsConfiguration {
 
         public EarlyFunctionTypeUtilsConfiguration() {
             // Ensure this configuration is processed early
-            System.out.println("SUCCESS: Activiti Cloud custom FunctionTypeUtils configuration loaded with highest priority");
+            System.out.println(
+                "SUCCESS: Activiti Cloud custom FunctionTypeUtils configuration loaded with highest priority"
+            );
         }
     }
 }
