@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.test.containers;
 
+import java.time.Duration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -25,7 +26,9 @@ public class RabbitMQContainerApplicationInitializer
 
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
         .withReuse(true)
-        .withExposedPorts(5672, 5671, 15672, 15671);
+        .withExposedPorts(5672, 5671, 15672, 15671)
+        .withStartupTimeout(Duration.ofMinutes(5)) // Add explicit timeout
+        .withStartupAttempts(3); // Add retry attempts
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -35,7 +38,11 @@ public class RabbitMQContainerApplicationInitializer
 
     public void initialize() {
         if (!rabbitMQContainer.isRunning()) {
-            rabbitMQContainer.start();
+            try {
+                rabbitMQContainer.start();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to start RabbitMQ container for tests", e);
+            }
         }
     }
 
@@ -45,7 +52,7 @@ public class RabbitMQContainerApplicationInitializer
 
     public static String[] getContainerProperties() {
         return new String[] {
-            "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
+            "spring.rabbitmq.host=" + rabbitMQContainer.getHost(),
             "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort(),
         };
     }
