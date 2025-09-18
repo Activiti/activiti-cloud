@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -270,6 +271,34 @@ public class ProcessInstanceNotifications {
         stepVerifier.expectNext(messagePayload);
     }
 
+    @Then("notifications: the payload with $eventTypes notifications with actor filter is expected")
+    public void expectPayloadWithEventTypesNotificationWithActor(String eventTypes) throws JsonProcessingException {
+        String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
+
+        List messagePayload = messagePayloadWithActor(eventTypes, processDefinitionKey);
+
+        System.out.println("=== EXPECTATION DEBUG (WITH ACTOR) ===");
+        System.out.println("Expected payload: " + messagePayload);
+        System.out.println("Expected actor: " + TokenHolder.getAuthToken().getSubject());
+        System.out.println("Process definition key: " + processDefinitionKey);
+        System.out.println("Event types: " + eventTypes);
+
+        // Check what the messagePayloadWithActor method creates
+        ObjectMap[] engineEvents = Stream
+            .of(eventTypes.split(","))
+            .map(eventType -> {
+                ObjectMap event = engineEventWithActor(eventType, processDefinitionKey);
+                System.out.println("Created engine event with actor: " + event);
+                return event;
+            })
+            .toArray(ObjectMap[]::new);
+
+        System.out.println("Full expected message payload: " + List.of(engineEvents));
+        System.out.println("=====================================");
+
+        stepVerifier.expectNext(messagePayload);
+    }
+
     private void cancelSubscription() {
         // signal to stop receiving notifications
         subscriptionRef.get().cancel();
@@ -316,10 +345,27 @@ public class ProcessInstanceNotifications {
         };
     }
 
-    private List messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+    @SuppressWarnings("serial")
+    private ObjectMap engineEventWithActor(String eventType, String processDefinitionKey) {
+        var engineEvent = engineEvent(eventType, processDefinitionKey);
+        engineEvent.put("actor", TokenHolder.getAuthToken().getSubject());
+
+        return engineEvent;
+    }
+
+    private List messagePayload(String eventTypes, String processDefinitionKey) {
         ObjectMap[] engineEvents = Stream
             .of(eventTypes.split(","))
             .map(eventType -> engineEvent(eventType, processDefinitionKey))
+            .toArray(ObjectMap[]::new);
+
+        return List.of(engineEvents);
+    }
+
+    private List messagePayloadWithActor(String eventTypes, String processDefinitionKey) {
+        ObjectMap[] engineEvents = Stream
+            .of(eventTypes.split(","))
+            .map(eventType -> engineEventWithActor(eventType, processDefinitionKey))
             .toArray(ObjectMap[]::new);
 
         return List.of(engineEvents);
@@ -374,7 +420,19 @@ public class ProcessInstanceNotifications {
             Duration.ofSeconds(subscriptionTimeoutSeconds),
             () -> {}
         );
-        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, customVariables, action);
+        //        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, customVariables, action).doOnError(error -> {
+        //            System.err.println("Error occurred during subscription: " + error.getMessage());
+        //            error.printStackTrace();
+        //            processor.onComplete(); // Ensure the processor is completed to avoid hanging
+        //        });
+        return notificationsSteps
+            .subscribe(processor, authToken.getAccess_token(), query, customVariables, action)
+            .doOnNext(list -> System.out.println(">>> SUBSCRIPTION EMISSION: " + list))
+            .doOnError(error -> {
+                System.err.println("Error occurred during subscription: " + error.getMessage());
+                error.printStackTrace();
+                processor.onComplete();
+            });
     }
 
     private Flux<List> subscribeWithActor(
