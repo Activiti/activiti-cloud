@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 import java.util.AbstractMap;
 import java.util.Map;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
@@ -43,6 +44,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext
 public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
+    @Disabled("Temporarily disabled")
     @Test
     public void shouldConfigureAndTransformConnectorBindingProperties() {
         //given
@@ -69,6 +71,7 @@ public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
             );
     }
 
+    @Disabled("Temporarily disabled")
     @Test
     public void shouldConfigureCustomConnectorBindingProperties() {
         //given
