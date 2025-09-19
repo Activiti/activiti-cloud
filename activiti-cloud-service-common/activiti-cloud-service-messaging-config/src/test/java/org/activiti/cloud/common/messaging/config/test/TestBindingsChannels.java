@@ -38,6 +38,8 @@ public interface TestBindingsChannels {
 
     String SCRIPT_RUNTIME_CONSUMER = "scriptRuntimeConsumer";
 
+    String ENGINE_EVENTS_CONSUMER = "engineEventsConsumer";
+
     @InputBinding(value = COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
@@ -76,5 +78,10 @@ public interface TestBindingsChannels {
     @InputBinding(value = SCRIPT_RUNTIME_CONSUMER)
     default SubscribableChannel scriptRuntimeConsumer() {
         return MessageChannels.publishSubscribe(SCRIPT_RUNTIME_CONSUMER).getObject();
+    }
+
+    @InputBinding(value = ENGINE_EVENTS_CONSUMER)
+    default SubscribableChannel engineEventsConsumer() {
+        return MessageChannels.publishSubscribe(ENGINE_EVENTS_CONSUMER).getObject();
     }
 }
