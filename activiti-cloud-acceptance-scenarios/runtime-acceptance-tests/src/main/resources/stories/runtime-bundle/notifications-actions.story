@@ -18,7 +18,6 @@ And notifications: the user completes the subscription
 And notifications: verify all expected notifications are received
 
 Scenario: complete a process instance that uses a simple process with subscription to PROCESS_COMPLETED event notifications with actor filter
-Meta: @current
 Given the user is authenticated as testadmin
 And notifications: generated random value for session variable called businessKey
 And notifications: session variable called process with value set to PROCESS_INSTANCE_WITH_VARIABLES
