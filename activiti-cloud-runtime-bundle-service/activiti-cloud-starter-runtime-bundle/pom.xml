@@ -272,8 +272,8 @@
                     <testcontainers.reuse.enable>true</testcontainers.reuse.enable>
                     <spring.profiles.active>test</spring.profiles.active>
                   </systemPropertyVariables>
-                  <!-- JVM arguments for better performance -->
-                  <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                  <!-- JVM arguments for Java 21 compatibility -->
+                  <argLine>-Xmx1024m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m</argLine>
                 </configuration>
               </execution>
             </executions>
