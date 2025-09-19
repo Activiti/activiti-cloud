@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.activiti.cloud.common.messaging.util.FunctionTypeUtils.getRawType;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,7 +28,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.activiti.api.model.shared.Payload;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
