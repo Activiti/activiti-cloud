@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml" />
-  <root level="OFF" />
+  <logger name="org.activiti.cloud" level="DEBUG" />
+  <logger name="org.springframework.cloud.function" level="DEBUG" />
+  <logger name="org.springframework.boot" level="INFO" />
+  <logger name="org.springframework.context" level="INFO" />
+  <root level="WARN" />
 </configuration>
