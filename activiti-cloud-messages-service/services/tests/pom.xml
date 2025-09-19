@@ -32,6 +32,23 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Add timeout configurations to prevent hanging tests -->
+          <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+          <forkedProcessExitTimeoutInSeconds>30</forkedProcessExitTimeoutInSeconds>
+          <!-- JVM arguments for Java 21 compatibility and timeout -->
+          <argLine>-Xmx1024m -XX:+UseG1GC -XX:MaxMetaspaceSize=256m -Dspring.main.lazy-initialization=true</argLine>
+          <!-- System properties to help with faster startup -->
+          <systemPropertyVariables>
+            <spring.profiles.active>test</spring.profiles.active>
+            <spring.cloud.function.scan.packages>NONE</spring.cloud.function.scan.packages>
+            <spring.cloud.function.definition></spring.cloud.function.definition>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
