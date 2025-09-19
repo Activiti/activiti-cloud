@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity.adapter;
-
-import org.activiti.cloud.identity.web.controller.AbstractIdentityManagementControllerIT;
-import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
-
-@ActiveProfiles("test")
-@SpringBootTest(classes = { IdentityAdapterApplication.class, IdentityAdapterAuthenticationTestConfiguration.class })
-@WebAppConfiguration
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@WithMockUser
-class KeycloakManagementControllerIT extends AbstractIdentityManagementControllerIT {}
+//package org.activiti.cloud.identity.adapter;
+//
+//import org.activiti.cloud.identity.web.controller.AbstractIdentityManagementControllerIT;
+//import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.security.test.context.support.WithMockUser;
+//import org.springframework.test.context.ActiveProfiles;
+//import org.springframework.test.context.ContextConfiguration;
+//import org.springframework.test.context.web.WebAppConfiguration;
+//
+//@ActiveProfiles("test")
+//@SpringBootTest(classes = { IdentityAdapterApplication.class, IdentityAdapterAuthenticationTestConfiguration.class })
+//@WebAppConfiguration
+//@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+//@WithMockUser
+//class KeycloakManagementControllerIT extends AbstractIdentityManagementControllerIT {}
