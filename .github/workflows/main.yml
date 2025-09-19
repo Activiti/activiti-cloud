@@ -36,13 +36,13 @@ jobs:
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: 'dependabot[bot]'
           label: github_actions
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -55,6 +55,8 @@ jobs:
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+    env:
+      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
 
     steps:
 
@@ -71,7 +73,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # 4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -83,7 +85,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -98,15 +100,26 @@ jobs:
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
           echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
-      - name: Set SONAR_SCANNER_OPTS
-        shell: bash
-        run: |
-          echo "JACOCO_REPORT_PATH=${{ github.workspace }}/activiti-cloud-coverage/target/site/jacoco-aggregate/jacoco.xml" >> $GITHUB_ENV
-          echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization='activiti' -Dsonar.projectKey='Activiti_activiti-cloud' -Dsonar.coverage.jacoco.xmlReportPaths=${{ env.JACOCO_REPORT_PATH }}" >> $GITHUB_ENV
-
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}} ${{ env.SONAR_SCANNER_OPTS }}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Merge JaCoCo execution files
+        shell: bash
+        run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
+
+      - name: Generate coverage reports
+        shell: bash
+        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
+
+      - name: Run SonarCloud analysis
+        if: ${{ env.SONAR_TOKEN != '' }}
+        shell: bash
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -175,7 +188,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # 4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -191,7 +204,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -351,7 +364,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -375,7 +388,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -398,7 +411,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -436,12 +449,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -464,6 +477,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@0a252c56211c9dd7f5da259692c8b97765dd4afc # v8.32.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@edb17074b511e2443b0dbaed57772b9f0b1d017a # v8.35.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

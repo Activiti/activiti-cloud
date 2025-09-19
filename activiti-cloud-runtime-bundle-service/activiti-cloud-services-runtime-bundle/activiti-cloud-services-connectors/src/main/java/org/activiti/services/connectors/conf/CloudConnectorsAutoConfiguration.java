@@ -39,6 +39,7 @@ import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.activiti.services.connectors.channel.ServiceTaskIntegrationCompletionHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
@@ -69,7 +70,8 @@ public class CloudConnectorsAutoConfiguration {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator
+        VariablesPropagator variablesPropagator,
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -77,7 +79,22 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties,
             managementService,
             processEngineEventsAggregator,
-            variablesPropagator
+            variablesPropagator,
+            serviceTaskIntegrationCompletionHandler
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
+        RuntimeBundleProperties runtimeBundleProperties,
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
+    ) {
+        return new ServiceTaskIntegrationCompletionHandler(
+            runtimeBundleProperties,
+            managementService,
+            processEngineEventsAggregator
         );
     }
 
@@ -164,7 +181,8 @@ public class CloudConnectorsAutoConfiguration {
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
         // of DefaultServiceTaskBehavior will not impact the constructor of MQServiceTaskBehavior.
         // LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME will be injected in MQServiceTaskBehavior;
-        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud environment:
+        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud
+        // environment:
         // MQServiceTaskBehavior will replace it for cloud environment.
         return new DefaultServiceTaskBehavior(applicationContext, integrationContextBuilder, variablesPropagator);
     }

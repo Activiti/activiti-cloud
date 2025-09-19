@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -396,15 +397,19 @@ public class ActivitiCloudMessagingProperties {
 
         private final Map<String, BindingFunctionRouterProperties> routes = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, String> destinations = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, Map<String, String>> destinations = new LinkedCaseInsensitiveMap<>();
 
-        private final Map<String, List<String>> registrations = new LinkedCaseInsensitiveMap<>();
+        private final Map<String, Map<String, List<String>>> registrations = new LinkedCaseInsensitiveMap<>();
 
-        private String group;
+        @NotEmpty
+        private String group = "function-router";
 
         private int maxRetries = 3;
 
         private Duration retryInterval = Duration.ofMillis(10);
+
+        @NestedConfigurationProperty
+        private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
         @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
@@ -418,11 +423,36 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public Map<String, String> destinations() {
-            return destinations;
+            Map<String, String> result = new LinkedCaseInsensitiveMap<>();
+
+            destinations.forEach((key, value) -> result.putAll(value));
+
+            return result;
+        }
+
+        public Map<String, String> destinations(String routingContext) {
+            return destinations.computeIfAbsent(routingContext, key -> new LinkedCaseInsensitiveMap<>());
         }
 
         public Map<String, List<String>> registrations() {
-            return registrations;
+            Map<String, List<String>> result = new LinkedCaseInsensitiveMap<>();
+
+            registrations
+                .values()
+                .forEach(it -> {
+                    it.forEach((key, value) ->
+                        result.compute(
+                            key,
+                            (k, v) -> v == null ? value : Stream.concat(v.stream(), value.stream()).distinct().toList()
+                        )
+                    );
+                });
+
+            return result;
+        }
+
+        public Map<String, List<String>> registrations(String routingContext) {
+            return registrations.computeIfAbsent(routingContext, key -> new LinkedCaseInsensitiveMap<>());
         }
 
         public Map<String, BindingFunctionRouterProperties> getRoutes() {
@@ -436,6 +466,12 @@ public class ActivitiCloudMessagingProperties {
         public List<String> getFunctionRoutes() {
             return routes.keySet().stream().filter(this::isFunctionRoute).toList();
         }
+
+        public String groupPrefix() {
+            return group.concat(".");
+        }
+
+        public void setGroupPrefix(String group) {}
 
         public String getGroup() {
             return group;
@@ -485,11 +521,18 @@ public class ActivitiCloudMessagingProperties {
         }
 
         public void register(String bindingName, String functionBeanName) {
-            Optional
-                .ofNullable(destinations.get(bindingName))
-                .ifPresent(destination -> {
-                    registrations.computeIfAbsent(destination, key -> new ArrayList<>()).add(functionBeanName);
-                });
+            destinations
+                .keySet()
+                .forEach(routingContext ->
+                    Optional
+                        .ofNullable(destinations.get(routingContext))
+                        .map(it -> it.get(bindingName))
+                        .ifPresent(destination ->
+                            registrations(routingContext)
+                                .computeIfAbsent(destination, key -> new ArrayList<>())
+                                .add(functionBeanName)
+                        )
+                );
         }
 
         @Override
@@ -503,7 +546,8 @@ public class ActivitiCloudMessagingProperties {
                 Objects.equals(registrations, that.registrations) &&
                 Objects.equals(group, that.group) &&
                 Objects.equals(retryInterval, that.retryInterval) &&
-                Objects.equals(consumer, that.consumer)
+                Objects.equals(consumer, that.consumer) &&
+                Objects.equals(anonymous, that.anonymous)
             );
         }
 
@@ -517,7 +561,8 @@ public class ActivitiCloudMessagingProperties {
                 group,
                 maxRetries,
                 retryInterval,
-                consumer
+                consumer,
+                anonymous
             );
         }
 
@@ -532,7 +577,12 @@ public class ActivitiCloudMessagingProperties {
                 .add("maxRetries=" + maxRetries)
                 .add("retryInterval=" + retryInterval)
                 .add("consumer=" + consumer)
+                .add("anonymous=" + anonymous)
                 .toString();
+        }
+
+        public FunctionRouterAnonymousProperties getAnonymous() {
+            return anonymous;
         }
     }
 
@@ -573,6 +623,35 @@ public class ActivitiCloudMessagingProperties {
                 .add("excludeRequiredProducerGroups=" + excludeRequiredProducerGroups)
                 .add("overrideRequiredProducerGroups=" + overrideRequiredProducerGroups)
                 .toString();
+        }
+    }
+
+    public static class FunctionRouterAnonymousProperties {
+
+        @NestedConfigurationProperty
+        private final ConsumerProperties consumer = new ConsumerProperties();
+
+        public ConsumerProperties getConsumer() {
+            return consumer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FunctionRouterAnonymousProperties that)) return false;
+            return Objects.equals(consumer, that.consumer);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(consumer);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuffer sb = new StringBuffer("FunctionRouterAnonymousProperties{");
+            sb.append("consumer=").append(consumer);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
