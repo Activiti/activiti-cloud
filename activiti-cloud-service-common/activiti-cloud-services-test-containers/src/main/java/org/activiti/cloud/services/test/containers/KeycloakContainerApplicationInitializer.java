@@ -24,9 +24,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final boolean IS_CI_ENVIRONMENT = System.getenv("CI") != null ||
-                                                   System.getenv("GITHUB_ACTIONS") != null ||
-                                                   System.getenv("JENKINS_URL") != null;
+    private static final boolean IS_CI_ENVIRONMENT =
+        System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null || System.getenv("JENKINS_URL") != null;
 
     private static final KeycloakContainer keycloakContainer = createKeycloakContainer();
 
@@ -51,11 +50,15 @@ public class KeycloakContainerApplicationInitializer
 
         // Add shutdown hook to ensure container stops in CI environments
         if (IS_CI_ENVIRONMENT) {
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                if (keycloakContainer != null && keycloakContainer.isRunning()) {
-                    keycloakContainer.stop();
-                }
-            }));
+            Runtime
+                .getRuntime()
+                .addShutdownHook(
+                    new Thread(() -> {
+                        if (keycloakContainer != null && keycloakContainer.isRunning()) {
+                            keycloakContainer.stop();
+                        }
+                    })
+                );
         }
     }
 
