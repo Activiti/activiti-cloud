@@ -101,15 +101,18 @@ jobs:
       - name: Enable testcontainers reuse option
         run: |
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
-          echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
+          echo "testcontainers.host.override=localhost" >> ~/.testcontainers.properties
+          echo "TESTCONTAINERS_RYUK_DISABLED=false" >> $GITHUB_ENV
+          echo "TESTCONTAINERS_REUSE_ENABLE=true" >> $GITHUB_ENV
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true install ${{ env.MAVEN_CLI_OPTS }}
         env:
           MAVEN_CLI_OPTS: --show-version --debug --errors --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        timeout-minutes: 45
 
       - name: Merge JaCoCo execution files
         shell: bash

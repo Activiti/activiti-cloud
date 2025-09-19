@@ -304,6 +304,15 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
+          <configuration>
+            <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
+            <forkedProcessExitTimeoutInSeconds>30</forkedProcessExitTimeoutInSeconds>
+            <shutdown>kill</shutdown>
+            <systemPropertyVariables>
+              <maven.wagon.rto>300000</maven.wagon.rto>
+              <maven.wagon.http.retries>3</maven.wagon.http.retries>
+            </systemPropertyVariables>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

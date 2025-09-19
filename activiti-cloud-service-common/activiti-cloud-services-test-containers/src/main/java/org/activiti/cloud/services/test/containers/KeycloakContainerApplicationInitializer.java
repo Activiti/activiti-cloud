@@ -24,16 +24,39 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.3")
-        .withAdminUsername("admin")
-        .withAdminPassword("admin")
-        .withRealmImportFile("activiti-realm.json")
-        .withReuse(true);
+    private static final boolean IS_CI_ENVIRONMENT = System.getenv("CI") != null ||
+                                                   System.getenv("GITHUB_ACTIONS") != null ||
+                                                   System.getenv("JENKINS_URL") != null;
+
+    private static final KeycloakContainer keycloakContainer = createKeycloakContainer();
+
+    private static KeycloakContainer createKeycloakContainer() {
+        KeycloakContainer container = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.3")
+            .withAdminUsername("admin")
+            .withAdminPassword("admin")
+            .withRealmImportFile("activiti-realm.json");
+
+        // Disable reuse in CI environments to ensure proper cleanup
+        if (!IS_CI_ENVIRONMENT) {
+            container.withReuse(true);
+        }
+
+        return container;
+    }
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
         initialize();
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+
+        // Add shutdown hook to ensure container stops in CI environments
+        if (IS_CI_ENVIRONMENT) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (keycloakContainer != null && keycloakContainer.isRunning()) {
+                    keycloakContainer.stop();
+                }
+            }));
+        }
     }
 
     public void initialize() {
