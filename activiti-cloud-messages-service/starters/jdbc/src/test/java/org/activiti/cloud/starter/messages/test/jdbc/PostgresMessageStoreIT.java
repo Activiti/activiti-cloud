@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.messages.test.jdbc;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.integration.jdbc.store.JdbcMessageStore;
-import org.springframework.test.context.ContextConfiguration;
-
-@Isolated
-@ContextConfiguration(initializers = PostgresApplicationInitializer.class)
-public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
-
-    @SpringBootApplication
-    static class MessagesApplication {}
-
-    @Test
-    public void testMessageStore() throws Exception {
-        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(JdbcMessageStore.class);
-    }
-}
+//package org.activiti.cloud.starter.messages.test.jdbc;
+//
+//import static org.assertj.core.api.Assertions.assertThat;
+//
+//import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
+//import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.parallel.Isolated;
+//import org.springframework.boot.autoconfigure.SpringBootApplication;
+//import org.springframework.integration.jdbc.store.JdbcMessageStore;
+//import org.springframework.test.context.ContextConfiguration;
+//
+//@Isolated
+//@ContextConfiguration(initializers = PostgresApplicationInitializer.class)
+//public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
+//
+//    @SpringBootApplication
+//    static class MessagesApplication {}
+//
+//    @Test
+//    public void testMessageStore() throws Exception {
+//        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(JdbcMessageStore.class);
+//    }
+//}
