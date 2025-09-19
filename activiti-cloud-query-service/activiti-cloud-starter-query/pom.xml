@@ -157,12 +157,12 @@
                       <type>json</type>
                       <classifier>api-docs</classifier>
                     </artifact>
-                    <!-- Swagger YAML-->
-                    <artifact>
-                      <file>target/swagger.yaml</file>
-                      <type>yaml</type>
-                      <classifier>api-docs</classifier>
-                    </artifact>
+<!--                    &lt;!&ndash; Swagger YAML&ndash;&gt;-->
+<!--                    <artifact>-->
+<!--                      <file>target/swagger.yaml</file>-->
+<!--                      <type>yaml</type>-->
+<!--                      <classifier>api-docs</classifier>-->
+<!--                    </artifact>-->
                   </artifacts>
                 </configuration>
               </execution>
@@ -173,3 +173,17 @@
     </profile>
   </profiles>
 </project>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
