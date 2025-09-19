@@ -16,13 +16,14 @@
 package org.activiti.cloud.qa.story;
 
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,9 +41,12 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
 import org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry;
@@ -67,12 +71,17 @@ public class ProcessInstanceNotifications {
     @Steps
     private NotificationsSteps notificationsSteps;
 
+    @Steps
+    private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
+
     private AtomicReference<ProcessInstance> processInstanceRef;
     private AtomicReference<Subscription> subscriptionRef;
 
     private Step<List> stepVerifier;
 
     ReplayProcessor<List> processor;
+
+    private Task currentTask;
 
     @When("notifications: services are started")
     public void checkServicesStatus() {
@@ -184,6 +193,25 @@ public class ProcessInstanceNotifications {
 
         processInstanceRef =
             new AtomicReference<>(processRuntimeBundleSteps.startProcess(processDefinitionKey, true, businessKey));
+        Serenity.setSessionVariable("processInstanceId").to(processInstanceRef.get().getId());
+        checkProcessWithTaskCreated(processName);
+    }
+
+    private void checkProcessWithTaskCreated(String processName) {
+        ProcessInstance processInstance = processInstanceRef.get();
+        assertThat(processInstance).isNotNull();
+
+        if (withTasks(processName)) {
+            List<Task> tasks = new ArrayList<>(
+                processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
+            );
+            assertThat(tasks).isNotEmpty();
+            currentTask = tasks.get(0);
+            assertThat(currentTask).isNotNull();
+            Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
+        }
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
     @When(
@@ -277,26 +305,15 @@ public class ProcessInstanceNotifications {
 
         List messagePayload = messagePayloadWithActor(eventTypes, processDefinitionKey);
 
-        System.out.println("=== EXPECTATION DEBUG (WITH ACTOR) ===");
-        System.out.println("Expected payload: " + messagePayload);
-        System.out.println("Expected actor: " + TokenHolder.getAuthToken().getSubject());
-        System.out.println("Process definition key: " + processDefinitionKey);
-        System.out.println("Event types: " + eventTypes);
-
-        // Check what the messagePayloadWithActor method creates
-        ObjectMap[] engineEvents = Stream
-            .of(eventTypes.split(","))
-            .map(eventType -> {
-                ObjectMap event = engineEventWithActor(eventType, processDefinitionKey);
-                System.out.println("Created engine event with actor: " + event);
-                return event;
-            })
-            .toArray(ObjectMap[]::new);
-
-        System.out.println("Full expected message payload: " + List.of(engineEvents));
-        System.out.println("=====================================");
-
         stepVerifier.expectNext(messagePayload);
+    }
+
+    @Then("the admin completes the task")
+    public void adminCompleteTask() throws Exception {
+        taskRuntimeAdminSteps.completeTask(
+            currentTask.getId(),
+            TaskPayloadBuilder.complete().withTaskId(currentTask.getId()).build()
+        );
     }
 
     private void cancelSubscription() {
@@ -420,14 +437,8 @@ public class ProcessInstanceNotifications {
             Duration.ofSeconds(subscriptionTimeoutSeconds),
             () -> {}
         );
-        //        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, customVariables, action).doOnError(error -> {
-        //            System.err.println("Error occurred during subscription: " + error.getMessage());
-        //            error.printStackTrace();
-        //            processor.onComplete(); // Ensure the processor is completed to avoid hanging
-        //        });
         return notificationsSteps
             .subscribe(processor, authToken.getAccess_token(), query, customVariables, action)
-            .doOnNext(list -> System.out.println(">>> SUBSCRIPTION EMISSION: " + list))
             .doOnError(error -> {
                 System.err.println("Error occurred during subscription: " + error.getMessage());
                 error.printStackTrace();

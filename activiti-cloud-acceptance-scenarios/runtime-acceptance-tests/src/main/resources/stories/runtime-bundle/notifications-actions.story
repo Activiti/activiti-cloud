@@ -17,15 +17,16 @@ And notifications: verify the status of the process is completed
 And notifications: the user completes the subscription
 And notifications: verify all expected notifications are received
 
-Scenario: complete a process instance that uses a connector with subscription to PROCESS_COMPLETED event notifications with actor filter
+Scenario: complete a process instance that uses a simple process with subscription to PROCESS_COMPLETED event notifications with actor filter
 Meta: @current
 Given the user is authenticated as testadmin
 And notifications: generated random value for session variable called businessKey
-And notifications: session variable called process with value set to CONNECTOR_PROCESS_INSTANCE
+And notifications: session variable called process with value set to PROCESS_INSTANCE_WITH_VARIABLES
 When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications with actor filter set to testadmin
-And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE
+And notifications: the user starts a process PROCESS_INSTANCE_WITH_VARIABLES
 Then notifications: verify process instance started response
 And notifications: the payload with PROCESS_STARTED notifications with actor filter is expected
+And the admin completes the task
 And notifications: the payload with PROCESS_COMPLETED notifications with actor filter is expected
 And notifications: verify the status of the process is completed
 And notifications: the user completes the subscription
