@@ -172,31 +172,31 @@ class MultipleRbMessagesIT {
         assertThat(rb2Context).isNotNull();
     }
 
-    //    @Test
-    //    void shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles() {
-    //        //given
-    //        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder
-    //            .start()
-    //            .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
-    //            .withBusinessKey(BUSINESS_KEY)
-    //            .build();
-    //
-    //        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder
-    //            .start()
-    //            .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-    //            .withBusinessKey(BUSINESS_KEY)
-    //            .build();
-    //
-    //        //when
-    //        executeCommand(rb1Context, throwProcessPayload);
-    //        executeCommand(rb2Context, throwProcessPayload);
-    //        executeCommand(rb1Context, catchProcessPayload);
-    //        executeCommand(rb2Context, catchProcessPayload);
-    //
-    //        //then
-    //        assertThrowCatchBpmnMessages(rb1Context);
-    //        assertThrowCatchBpmnMessages(rb2Context);
-    //    }
+    @Test
+    void shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles() {
+        //given
+        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder
+            .start()
+            .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
+            .withBusinessKey(BUSINESS_KEY)
+            .build();
+
+        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder
+            .start()
+            .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+            .withBusinessKey(BUSINESS_KEY)
+            .build();
+
+        //when
+        executeCommand(rb1Context, throwProcessPayload);
+        executeCommand(rb2Context, throwProcessPayload);
+        executeCommand(rb1Context, catchProcessPayload);
+        executeCommand(rb2Context, catchProcessPayload);
+
+        //then
+        assertThrowCatchBpmnMessages(rb1Context);
+        assertThrowCatchBpmnMessages(rb2Context);
+    }
 
     void executeCommand(ConfigurableApplicationContext context, Payload payload) {
         CommandEndpoint<Payload> commandEndpoint = context.getBean(CommandEndpoint.class);
