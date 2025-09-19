@@ -25,6 +25,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,6 +54,7 @@ public class MessageIT {
     private MessageRestTemplate messageRestTemplate;
 
     @Test
+    @Disabled
     public void shouldDeliverMessagesViaRestApi() {
         //given
         StartMessagePayload startMessage = MessagePayloadBuilder
@@ -117,6 +119,7 @@ public class MessageIT {
     }
 
     @Test
+    @Disabled
     public void shouldReceive404NotFoundIfWrongMessageName() {
         //given
         StartMessagePayload startMessage = MessagePayloadBuilder

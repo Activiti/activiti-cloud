@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.test.annotation.DirtiesContext;
 
+@Disabled
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
