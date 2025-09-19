@@ -138,6 +138,7 @@
               </execution>
             </executions>
           </plugin>
+          <!-- Commented out swagger artifact attachment since generation is disabled
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
@@ -150,24 +151,22 @@
                 </goals>
                 <configuration>
                   <artifacts>
-                    <!-- these are artifacts are produced by *ITSupport test-->
-                    <!-- Alfresco format JSON-->
                     <artifact>
                       <file>target/swagger.json</file>
                       <type>json</type>
                       <classifier>api-docs</classifier>
                     </artifact>
-<!--                    &lt;!&ndash; Swagger YAML&ndash;&gt;-->
-<!--                    <artifact>-->
-<!--                      <file>target/swagger.yaml</file>-->
-<!--                      <type>yaml</type>-->
-<!--                      <classifier>api-docs</classifier>-->
-<!--                    </artifact>-->
+                    <artifact>
+                      <file>target/swagger.yaml</file>
+                      <type>yaml</type>
+                      <classifier>api-docs</classifier>
+                    </artifact>
                   </artifacts>
                 </configuration>
               </execution>
             </executions>
           </plugin>
+          -->
         </plugins>
       </build>
     </profile>
