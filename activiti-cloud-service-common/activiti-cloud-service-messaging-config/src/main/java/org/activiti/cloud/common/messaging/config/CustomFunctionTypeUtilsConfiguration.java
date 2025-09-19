@@ -23,11 +23,10 @@ import org.springframework.core.annotation.Order;
 
 /**
  * Configuration to ensure our custom FunctionTypeUtils takes precedence over Spring Cloud Function's implementation.
- * This configuration forces early loading and scanning of our custom messaging utilities.
+ * This configuration forces early loading of our custom messaging utilities.
  */
 @AutoConfiguration
 @ConditionalOnClass(name = "org.activiti.cloud.common.messaging.util.FunctionTypeUtils")
-@ComponentScan(basePackages = "org.activiti.cloud.common.messaging.util")
 @Order(-2000) // Even higher precedence to ensure this loads before everything else
 public class CustomFunctionTypeUtilsConfiguration {
     static {
