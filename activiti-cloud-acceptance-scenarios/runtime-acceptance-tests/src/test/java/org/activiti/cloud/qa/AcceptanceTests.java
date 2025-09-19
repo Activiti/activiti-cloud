@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.qa;
 
-import net.serenitybdd.jbehave.annotations.Metafilter;
 import org.activiti.cloud.acc.shared.serenity.ExtendedSerenityStories;
 
 public class AcceptanceTests extends ExtendedSerenityStories {
