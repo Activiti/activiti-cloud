@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.activiti.cloud.services.messages.tests.simple;
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//
-//import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.boot.SpringBootConfiguration;
-//import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-//import org.springframework.integration.store.SimpleMessageStore;
-//
-//@SpringBootConfiguration
-//@EnableAutoConfiguration
-//public class SimpleMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
-//
-//    @Test
-//    public void testMessageStore() throws Exception {
-//        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(SimpleMessageStore.class);
-//    }
-//}
+package org.activiti.cloud.services.messages.tests.simple;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.integration.store.SimpleMessageStore;
+
+@SpringBootConfiguration
+@EnableAutoConfiguration
+public class SimpleMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
+
+    @Test
+    public void testMessageStore() throws Exception {
+        assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(SimpleMessageStore.class);
+    }
+}
