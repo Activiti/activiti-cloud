@@ -26,8 +26,8 @@ import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.util.FunctionTypeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -113,7 +113,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         }
                                     } catch (Exception e) {
                                         // If anything fails, just use the registration without type info
-                                        logger.debug(
+                                        LOGGER.debug(
                                             "Could not set function type for ConsumerConnector, proceeding without type: " +
                                             e.getMessage()
                                         );
@@ -126,7 +126,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     try {
                                         functionRegistration = functionRegistration.type(functionType);
                                     } catch (Exception e) {
-                                        logger.debug(
+                                        LOGGER.debug(
                                             "Could not set function type for Connector, proceeding without type: " +
                                             e.getMessage()
                                         );
