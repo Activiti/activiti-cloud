@@ -12,6 +12,13 @@
   <name>Activiti Cloud :: BOM (Bill of Materials)</name>
   <dependencyManagement>
     <dependencies>
+      <!-- IMPORTANT: activiti-cloud-service-messaging-config must be first to ensure
+           our custom FunctionTypeUtils override is loaded before Spring Cloud's version -->
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-service-messaging-config</artifactId>
+        <version>${activiti-cloud.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-api-dependencies</artifactId>
