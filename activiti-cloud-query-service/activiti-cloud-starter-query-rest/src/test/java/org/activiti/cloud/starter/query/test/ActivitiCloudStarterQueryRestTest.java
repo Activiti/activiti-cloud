@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-//package org.activiti.cloud.starter.query.test;
-//
-//import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.boot.autoconfigure.SpringBootApplication;
-//import org.springframework.boot.test.context.SpringBootTest;
-//
-//@SpringBootTest
-//@SpringBootApplication
-//@EnableActivitiQuery
-//public class ActivitiCloudStarterQueryRestTest {
-//
-//    @Test
-//    void contextLoads() {}
-//}
+package org.activiti.cloud.starter.query.test;
+
+import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+@SpringBootApplication
+@EnableActivitiQuery
+public class ActivitiCloudStarterQueryRestTest {
+
+    @Test
+    void contextLoads() {}
+}
