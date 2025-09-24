@@ -20,7 +20,9 @@ import org.activiti.cloud.starter.query.configuration.EnableActivitiQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJpaQueryGraphQlExecutionAutoConfiguration.class
+})
 @EnableActivitiQuery
 @EnableActivitiAudit
 public class QueryApplication {
