@@ -138,7 +138,6 @@
               </execution>
             </executions>
           </plugin>
-          <!-- Commented out swagger artifact attachment since generation is disabled
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
@@ -166,7 +165,6 @@
               </execution>
             </executions>
           </plugin>
-          -->
         </plugins>
       </build>
     </profile>
