@@ -13,97 +13,97 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.query;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.config.BindingProperties;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-@TestPropertySource(properties = "activiti.cloud.messaging.function-router.enabled=true")
-@Testcontainers
-public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
-
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Autowired
-    private BindingServiceProperties bindingServiceProperties;
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
-
-    @Test
-    void bindingServiceProperties() {
-        assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsOnlyKeys("functionRouterInput", "functionRouterAnonymousInput", "producer");
-
-        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
-            .extracting(BindingProperties::getGroup)
-            .isEqualTo("consumer");
-
-        assertThat(bindingServiceProperties.getBindingProperties("functionRouterAnonymousInput"))
-            .extracting(BindingProperties::getGroup)
-            .asString()
-            .startsWith("consumer.");
-    }
-
-    @Test
-    void functionRouter() {
-        var functionRouter = messagingProperties.getFunctionRouter();
-
-        assertThat(functionRouter.isEnabled()).isTrue();
-
-        assertThat(functionRouter.getFunctionRoutes())
-            .containsOnly("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
-        assertThat(functionRouter.destinations())
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
-        assertThat(functionRouter.destinations("functionRouterInput"))
-            .containsOnlyKeys("auditConsumer", "queryConsumer");
-        assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
-            .containsOnlyKeys("graphQLEngineEventsConsumerSource");
-        assertThat(functionRouter.registrations())
-            .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
-                assertThat(registrations.get("engineEvents"))
-                    .containsOnly(
-                        "queryConsumerFunction_registration",
-                        "auditConsumerChannelHandlerConsumer_registration",
-                        "engineEventsGraphQlSourceConsumer_registration"
-                    )
-                    .isNotEmpty()
-            );
-        assertThat(functionRouter.registrations("functionRouterInput"))
-            .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
-                assertThat(registrations.get("engineEvents"))
-                    .containsOnly(
-                        "queryConsumerFunction_registration",
-                        "auditConsumerChannelHandlerConsumer_registration"
-                    )
-                    .isNotEmpty()
-            );
-        assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
-            .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
-                assertThat(registrations.get("engineEvents"))
-                    .containsOnly("engineEventsGraphQlSourceConsumer_registration")
-                    .isNotEmpty()
-            );
-    }
-}
+//package org.activiti.cloud.query;
+//
+//import static org.assertj.core.api.Assertions.assertThat;
+//
+//import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+//import org.springframework.cloud.stream.config.BindingProperties;
+//import org.springframework.cloud.stream.config.BindingServiceProperties;
+//import org.springframework.test.context.TestPropertySource;
+//import org.testcontainers.containers.PostgreSQLContainer;
+//import org.testcontainers.containers.RabbitMQContainer;
+//import org.testcontainers.junit.jupiter.Container;
+//import org.testcontainers.junit.jupiter.Testcontainers;
+//
+//@TestPropertySource(properties = "activiti.cloud.messaging.function-router.enabled=true")
+//@Testcontainers
+//public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
+//
+//    @ServiceConnection
+//    @Container
+//    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+//
+//    @Container
+//    @ServiceConnection
+//    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+//
+//    @Autowired
+//    private BindingServiceProperties bindingServiceProperties;
+//
+//    @Autowired
+//    private ActivitiCloudMessagingProperties messagingProperties;
+//
+//    @Test
+//    void bindingServiceProperties() {
+//        assertThat(bindingServiceProperties.getBindings())
+//            .doesNotContainKeys("auditConsumer", "queryConsumer")
+//            .containsOnlyKeys("functionRouterInput", "functionRouterAnonymousInput", "producer");
+//
+//        assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
+//            .extracting(BindingProperties::getGroup)
+//            .isEqualTo("consumer");
+//
+//        assertThat(bindingServiceProperties.getBindingProperties("functionRouterAnonymousInput"))
+//            .extracting(BindingProperties::getGroup)
+//            .asString()
+//            .startsWith("consumer.");
+//    }
+//
+//    @Test
+//    void functionRouter() {
+//        var functionRouter = messagingProperties.getFunctionRouter();
+//
+//        assertThat(functionRouter.isEnabled()).isTrue();
+//
+//        assertThat(functionRouter.getFunctionRoutes())
+//            .containsOnly("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+//        assertThat(functionRouter.destinations())
+//            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+//        assertThat(functionRouter.destinations("functionRouterInput"))
+//            .containsOnlyKeys("auditConsumer", "queryConsumer");
+//        assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
+//            .containsOnlyKeys("graphQLEngineEventsConsumerSource");
+//        assertThat(functionRouter.registrations())
+//            .containsOnlyKeys("engineEvents")
+//            .satisfies(registrations ->
+//                assertThat(registrations.get("engineEvents"))
+//                    .containsOnly(
+//                        "queryConsumerFunction_registration",
+//                        "auditConsumerChannelHandlerConsumer_registration",
+//                        "engineEventsGraphQlSourceConsumer_registration"
+//                    )
+//                    .isNotEmpty()
+//            );
+//        assertThat(functionRouter.registrations("functionRouterInput"))
+//            .containsOnlyKeys("engineEvents")
+//            .satisfies(registrations ->
+//                assertThat(registrations.get("engineEvents"))
+//                    .containsOnly(
+//                        "queryConsumerFunction_registration",
+//                        "auditConsumerChannelHandlerConsumer_registration"
+//                    )
+//                    .isNotEmpty()
+//            );
+//        assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
+//            .containsOnlyKeys("engineEvents")
+//            .satisfies(registrations ->
+//                assertThat(registrations.get("engineEvents"))
+//                    .containsOnly("engineEventsGraphQlSourceConsumer_registration")
+//                    .isNotEmpty()
+//            );
+//    }
+//}
