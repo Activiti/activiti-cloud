@@ -1098,40 +1098,40 @@ class ActivitiGraphQLWsNativeStarterIT {
         assertThat(((Map<String, Object>) result.getData()).get("ProcessInstances")).isNotNull();
     }
 
-//    @Test
-//    void testGraphqlReverse() {
-//        // @formatter:off
-//        GraphQLQueryRequest query = new GraphQLQueryRequest(
-//                    " query {"
-//                    + " ProcessVariables {"
-//                    + "    select {"
-//                    + "      id"
-//                    + "      name"
-//                    + "      value"
-//                    + "      processInstance(where: {status: {EQ: RUNNING}}) {"
-//                    + "        id"
-//                    + "      }"
-//                    + "    }"
-//                    + "  }"
-//                    + "}"
-//            );
-//        // @formatter:on
-//
-//        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
-//            GRAPHQL_URL,
-//            new HttpEntity<>(query, authHeaders),
-//            GraphQLQueryResult.class
-//        );
-//
-//        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
-//
-//        GraphQLQueryResult result = entity.getBody();
-//
-//        assertThat(result).isNotNull();
-//        assertThat(result.getErrors()).isNull();
-//
-//        assertThat(result.getData().get("ProcessVariables")).isNotNull();
-//    }
+    //    @Test
+    //    void testGraphqlReverse() {
+    //        // @formatter:off
+    //        GraphQLQueryRequest query = new GraphQLQueryRequest(
+    //                    " query {"
+    //                    + " ProcessVariables {"
+    //                    + "    select {"
+    //                    + "      id"
+    //                    + "      name"
+    //                    + "      value"
+    //                    + "      processInstance(where: {status: {EQ: RUNNING}}) {"
+    //                    + "        id"
+    //                    + "      }"
+    //                    + "    }"
+    //                    + "  }"
+    //                    + "}"
+    //            );
+    //        // @formatter:on
+    //
+    //        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+    //            GRAPHQL_URL,
+    //            new HttpEntity<>(query, authHeaders),
+    //            GraphQLQueryResult.class
+    //        );
+    //
+    //        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+    //
+    //        GraphQLQueryResult result = entity.getBody();
+    //
+    //        assertThat(result).isNotNull();
+    //        assertThat(result.getErrors()).isNull();
+    //
+    //        assertThat(result.getData().get("ProcessVariables")).isNotNull();
+    //    }
 
     @Test
     void testGraphqlArguments() {
