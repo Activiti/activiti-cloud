@@ -104,6 +104,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         applyDueDateFilters(root, criteriaBuilder);
         applyCandidateUserFilter(root);
         applyCandidateGroupFilter(root);
+        applyTypeFilter(root);
         if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
             filterConditions.addAll(
