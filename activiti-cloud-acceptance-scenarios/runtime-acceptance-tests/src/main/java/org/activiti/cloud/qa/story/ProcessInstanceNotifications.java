@@ -16,12 +16,15 @@
 package org.activiti.cloud.qa.story;
 
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDefinitionKeyMatcher;
+import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +41,12 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.acc.core.steps.notifications.NotificationsSteps;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
+import org.activiti.cloud.acc.core.steps.runtime.admin.TaskRuntimeAdminSteps;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
 import org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry;
@@ -65,12 +71,17 @@ public class ProcessInstanceNotifications {
     @Steps
     private NotificationsSteps notificationsSteps;
 
+    @Steps
+    private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
+
     private AtomicReference<ProcessInstance> processInstanceRef;
     private AtomicReference<Subscription> subscriptionRef;
 
     private Step<List> stepVerifier;
 
     ReplayProcessor<List> processor;
+
+    private Task currentTask;
 
     @When("notifications: services are started")
     public void checkServicesStatus() {
@@ -120,6 +131,35 @@ public class ProcessInstanceNotifications {
             .isTrue();
     }
 
+    @When("notifications: the user subscribes to $eventTypesString notifications with actor filter set to testadmin")
+    public void subscribeToEventTypesNotificationsWithActor(String eventTypesString)
+        throws URISyntaxException, InterruptedException {
+        processor = ReplayProcessor.create();
+
+        String businessKey = sessionVariableCalled("businessKey", String.class).orElse("*");
+        String processDefinitionKey = sessionVariableCalled("process", String.class)
+            .map(ProcessDefinitionRegistry::processDefinitionKeyMatcher)
+            .orElse("*");
+
+        String[] eventTypes = eventTypesString.split(",");
+        String actor = TokenHolder.getAuthToken().getSubject();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        Flux<List> flux = subscribeWithActor(
+            processor,
+            eventTypes,
+            businessKey,
+            processDefinitionKey,
+            actor,
+            countDownLatch
+        );
+        flux.subscribe(processor);
+        stepVerifier = StepVerifier.create(processor).expectSubscription();
+        assertThat(countDownLatch.await(sessionTimeoutSeconds(), TimeUnit.SECONDS))
+            .as("should subscribe to notifications")
+            .isTrue();
+    }
+
     @When(
         "notifications: the user subscribes to $eventTypesString notifications with businessKey value from session variable called $variableName"
     )
@@ -153,6 +193,25 @@ public class ProcessInstanceNotifications {
 
         processInstanceRef =
             new AtomicReference<>(processRuntimeBundleSteps.startProcess(processDefinitionKey, true, businessKey));
+        Serenity.setSessionVariable("processInstanceId").to(processInstanceRef.get().getId());
+        checkProcessWithTaskCreated(processName);
+    }
+
+    private void checkProcessWithTaskCreated(String processName) {
+        ProcessInstance processInstance = processInstanceRef.get();
+        assertThat(processInstance).isNotNull();
+
+        if (withTasks(processName)) {
+            List<Task> tasks = new ArrayList<>(
+                processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
+            );
+            assertThat(tasks).isNotEmpty();
+            currentTask = tasks.get(0);
+            assertThat(currentTask).isNotNull();
+            Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
+        }
+
+        Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
     @When(
@@ -240,6 +299,23 @@ public class ProcessInstanceNotifications {
         stepVerifier.expectNext(messagePayload);
     }
 
+    @Then("notifications: the payload with $eventTypes notifications with actor filter is expected")
+    public void expectPayloadWithEventTypesNotificationWithActor(String eventTypes) throws JsonProcessingException {
+        String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
+
+        List messagePayload = messagePayloadWithActor(eventTypes, processDefinitionKey);
+
+        stepVerifier.expectNext(messagePayload);
+    }
+
+    @Then("the admin completes the task")
+    public void adminCompleteTask() throws Exception {
+        taskRuntimeAdminSteps.completeTask(
+            currentTask.getId(),
+            TaskPayloadBuilder.complete().withTaskId(currentTask.getId()).build()
+        );
+    }
+
     private void cancelSubscription() {
         // signal to stop receiving notifications
         subscriptionRef.get().cancel();
@@ -286,10 +362,27 @@ public class ProcessInstanceNotifications {
         };
     }
 
-    private List messagePayload(String eventTypes, String processDefinitionKey) throws JsonProcessingException {
+    @SuppressWarnings("serial")
+    private ObjectMap engineEventWithActor(String eventType, String processDefinitionKey) {
+        var engineEvent = engineEvent(eventType, processDefinitionKey);
+        engineEvent.put("actor", TokenHolder.getAuthToken().getSubject());
+
+        return engineEvent;
+    }
+
+    private List messagePayload(String eventTypes, String processDefinitionKey) {
         ObjectMap[] engineEvents = Stream
             .of(eventTypes.split(","))
             .map(eventType -> engineEvent(eventType, processDefinitionKey))
+            .toArray(ObjectMap[]::new);
+
+        return List.of(engineEvents);
+    }
+
+    private List messagePayloadWithActor(String eventTypes, String processDefinitionKey) {
+        ObjectMap[] engineEvents = Stream
+            .of(eventTypes.split(","))
+            .map(eventType -> engineEventWithActor(eventType, processDefinitionKey))
             .toArray(ObjectMap[]::new);
 
         return List.of(engineEvents);
@@ -302,11 +395,6 @@ public class ProcessInstanceNotifications {
         String processDefinitionKey,
         CountDownLatch countDownLatch
     ) throws URISyntaxException {
-        String serviceName = notificationsSteps.getRuntimeBundleServiceName();
-        AuthToken authToken = TokenHolder.getAuthToken();
-        subscriptionRef = new AtomicReference<>();
-        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
-
         // TODO: add processDefinitionKey when signal events are fixed
         String query =
             "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!, $processDefinitionKey: String!) {" +
@@ -317,14 +405,31 @@ public class ProcessInstanceNotifications {
             "  }" +
             "}";
 
-        Map<String, Object> variables = new ObjectMap() {
-            {
-                put("serviceName", serviceName);
-                put("eventTypes", eventTypes);
-                put("businessKey", businessKey);
-                put("processDefinitionKey", processDefinitionKey);
-            }
-        };
+        return subscribe(query, processor, eventTypes, businessKey, processDefinitionKey, countDownLatch, null);
+    }
+
+    private Flux<List> subscribe(
+        String query,
+        ReplayProcessor<List> processor,
+        String[] eventTypes,
+        String businessKey,
+        String processDefinitionKey,
+        CountDownLatch countDownLatch,
+        Map<String, Object> customVariables
+    ) throws URISyntaxException {
+        String serviceName = notificationsSteps.getRuntimeBundleServiceName();
+        AuthToken authToken = TokenHolder.getAuthToken();
+        subscriptionRef = new AtomicReference<>();
+        long subscriptionTimeoutSeconds = subscriptionTimeoutSeconds();
+
+        if (customVariables == null) {
+            customVariables = new HashMap<>();
+        }
+
+        customVariables.put("serviceName", serviceName);
+        customVariables.put("eventTypes", eventTypes);
+        customVariables.put("businessKey", businessKey);
+        customVariables.put("processDefinitionKey", processDefinitionKey);
 
         Consumer<Subscription> action = countDownLatchAction(
             countDownLatch,
@@ -332,7 +437,48 @@ public class ProcessInstanceNotifications {
             Duration.ofSeconds(subscriptionTimeoutSeconds),
             () -> {}
         );
-        return notificationsSteps.subscribe(processor, authToken.getAccess_token(), query, variables, action);
+        return notificationsSteps
+            .subscribe(processor, authToken.getAccess_token(), query, customVariables, action)
+            .doOnError(error -> {
+                System.err.println("Error occurred during subscription: " + error.getMessage());
+                error.printStackTrace();
+                processor.onComplete();
+            });
+    }
+
+    private Flux<List> subscribeWithActor(
+        ReplayProcessor<List> processor,
+        String[] eventTypes,
+        String businessKey,
+        String processDefinitionKey,
+        String actor,
+        CountDownLatch countDownLatch
+    ) throws URISyntaxException {
+        String query =
+            "subscription($serviceName: String!, $eventTypes: [EngineEventType!], $businessKey: String!, $processDefinitionKey: String!, $actor: String!) {" +
+            "  engineEvents(serviceName: [$serviceName], eventType: $eventTypes, businessKey: [$businessKey], processDefinitionKey: [$processDefinitionKey], actor: [$actor]) {" +
+            "    serviceName " +
+            "    processDefinitionKey " +
+            "    eventType " +
+            "    actor " +
+            "  }" +
+            "}";
+
+        Map<String, Object> customVariables = new ObjectMap() {
+            {
+                put("actor", actor);
+            }
+        };
+
+        return subscribe(
+            query,
+            processor,
+            eventTypes,
+            businessKey,
+            processDefinitionKey,
+            countDownLatch,
+            customVariables
+        );
     }
 
     @SuppressWarnings("serial")

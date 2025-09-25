@@ -37,6 +37,6 @@ public class SpELRoutingKeyTest {
 
         String routingKey = routingKeyResolver.resolveRoutingKey(notification);
 
-        assertThat(routingKey).isEqualTo("engineEvents.my-rb.app.PROCESS_STARTED.Simple.12._");
+        assertThat(routingKey).isEqualTo("engineEvents.my-rb.app.PROCESS_STARTED.Simple.12._._");
     }
 }
