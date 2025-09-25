@@ -21,7 +21,11 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@SpringBootApplication
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJpaQueryGraphQlExecutionAutoConfiguration;
+
+@SpringBootApplication(exclude = {
+    GraphQLJpaQueryGraphQlExecutionAutoConfiguration.class
+})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GrapqhQLApplication {
 
