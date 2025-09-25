@@ -240,6 +240,12 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
+    private void applyTypeFilter(Root<TaskEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.type())) {
+            predicates.add(root.get(TaskEntity_.type).in(searchRequest.type()));
+        }
+    }
+
     private void applyCompletedByFilter(Root<TaskEntity> root) {
         if (!CollectionUtils.isEmpty(searchRequest.completedBy())) {
             predicates.add(root.get(TaskEntity_.completedBy).in(searchRequest.completedBy()));
