@@ -11,8 +11,8 @@
   <url>http://activiti.org</url>
   <inceptionYear>2017</inceptionYear>
   <organization>
-    <name>Alfresco Software, Ltd</name>
-    <url>https://www.alfresco.com</url>
+    <name>Hyland Software, Inc. and its affiliates</name>
+    <url>https://www.hyland.com</url>
   </organization>
   <licenses>
     <license>
@@ -193,7 +193,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
-    <project.year>2020</project.year>
+    <project.year>2025</project.year>
 
     <spring-boot.version>3.5.4</spring-boot.version>
 
