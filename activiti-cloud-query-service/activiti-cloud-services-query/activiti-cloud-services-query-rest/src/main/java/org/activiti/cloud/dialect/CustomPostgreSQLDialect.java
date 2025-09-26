@@ -41,6 +41,8 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
      */
     public static final String EXTRACT_JSON_NUMERIC_VALUE = "jsonb_numeric_value_extract";
 
+    public static final String TSVECTOR_MATCH = "tsvector_match";
+
     private static final Map<Class<?>, String> extractionFunctionsByType = Map.of(
         String.class,
         EXTRACT_JSON_STRING_VALUE,
@@ -84,6 +86,16 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
             )
             .setExactArgumentCount(1)
             .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(TSVECTOR_MATCH, "?1 @@ ?2")
+            .setInvariantType(
+                functionContributions
+                    .getTypeConfiguration()
+                    .getBasicTypeRegistry()
+                    .resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
             .register();
     }
 }

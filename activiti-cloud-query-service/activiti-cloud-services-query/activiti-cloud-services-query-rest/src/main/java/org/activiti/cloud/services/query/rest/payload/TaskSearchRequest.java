@@ -35,6 +35,7 @@ public record TaskSearchRequest (
     Set<Task.TaskStatus> status,
     Set<String> completedBy,
     Set<String> assignee,
+    String fullTextSearch,
     Date createdFrom,
     Date createdTo,
     Date lastModifiedFrom,

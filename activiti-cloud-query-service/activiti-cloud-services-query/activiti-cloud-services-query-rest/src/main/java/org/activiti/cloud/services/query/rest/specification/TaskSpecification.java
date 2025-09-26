@@ -104,6 +104,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         applyDueDateFilters(root, criteriaBuilder);
         applyCandidateUserFilter(root);
         applyCandidateGroupFilter(root);
+        applyFullTextSearchFilter(root, criteriaBuilder);
         if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
             filterConditions.addAll(
@@ -309,6 +310,21 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                     )
                 )
             );
+        }
+    }
+
+    private void applyFullTextSearchFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (searchRequest.fullTextSearch() != null) {
+            predicates.add(criteriaBuilder.isTrue(
+                criteriaBuilder.function(
+                    "tsvector_match",
+                    Boolean.class,
+                    root.get(TaskEntity_.fts),
+                    criteriaBuilder.function(
+                        "plainto_tsquery", String.class, criteriaBuilder.literal(searchRequest.fullTextSearch())
+                    )
+                )
+            ));
         }
     }
 }
