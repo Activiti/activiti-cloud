@@ -18,8 +18,10 @@ package org.activiti.cloud.services.rest.api;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -82,4 +84,8 @@ public interface ProcessDefinitionController {
             value = "id"
         ) String id
     );
+
+    @GetMapping(value = "/v1/process-variable-definitions", produces = "application/json")
+    @ResponseBody
+    Set<ProcessVariableDefinition> getProcessVariableDefinitions();
 }

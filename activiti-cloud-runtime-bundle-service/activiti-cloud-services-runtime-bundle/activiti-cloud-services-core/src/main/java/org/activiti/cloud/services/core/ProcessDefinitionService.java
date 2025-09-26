@@ -15,24 +15,33 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.activiti.spring.process.ProcessExtensionService;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
+import org.activiti.spring.process.model.VariableDefinition;
 
 public class ProcessDefinitionService extends BaseProcessDefinitionService {
 
     private final ProcessRuntime processRuntime;
 
+    private final ProcessExtensionService processExtensionService;
+
     public ProcessDefinitionService(
         ProcessRuntime processRuntime,
-        List<ProcessDefinitionDecorator> processDefinitionDecorators
+        List<ProcessDefinitionDecorator> processDefinitionDecorators,
+        ProcessExtensionService processExtensionService
     ) {
         super(processDefinitionDecorators);
         this.processRuntime = processRuntime;
+        this.processExtensionService = processExtensionService;
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(
@@ -47,5 +56,48 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         );
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
+    }
+
+    public Set<ProcessVariableDefinition> getProcessVariableDefinitions() {
+        Set<ProcessVariableDefinition> customProcessVariables = new HashSet<>();
+
+        processRuntime
+            .processDefinitions()
+            .forEach(processDefinition ->
+                processExtensionService
+                    .getExtensionsForWithoutCallingDB(processDefinition)
+                    .getProperties()
+                    .values()
+                    .stream()
+                    .filter(VariableDefinition::getDisplay)
+                    .forEach(variableDefinition ->
+                        customProcessVariables.add(
+                            mapToProcessVariableDefinition(variableDefinition, processDefinition)
+                        )
+                    )
+            );
+
+        return customProcessVariables;
+    }
+
+    private ProcessVariableDefinition mapToProcessVariableDefinition(
+        VariableDefinition variableDefinition,
+        org.activiti.engine.repository.ProcessDefinition processDefinition
+    ) {
+        ProcessVariableDefinition processVariableDefinition = new ProcessVariableDefinition();
+        processVariableDefinition.setName(variableDefinition.getName());
+        processVariableDefinition.setType(variableDefinition.getType());
+        processVariableDefinition.setProcessDefinitionId(processDefinition.getId());
+        processVariableDefinition.setProcessDefinitionKey(processDefinition.getKey());
+        processVariableDefinition.setProcessDefinitionName(processDefinition.getName());
+        processVariableDefinition.setId(variableDefinition.getId());
+        processVariableDefinition.setDescription(variableDefinition.getDescription());
+        processVariableDefinition.setRequired(variableDefinition.isRequired());
+        processVariableDefinition.setDisplay(variableDefinition.getDisplay());
+        processVariableDefinition.setDisplayName(variableDefinition.getDisplayName());
+        processVariableDefinition.setAnalytics(variableDefinition.isAnalytics());
+        processVariableDefinition.setEphemeral(variableDefinition.isEphemeral());
+        processVariableDefinition.setValue(variableDefinition.getValue());
+        return processVariableDefinition;
     }
 }

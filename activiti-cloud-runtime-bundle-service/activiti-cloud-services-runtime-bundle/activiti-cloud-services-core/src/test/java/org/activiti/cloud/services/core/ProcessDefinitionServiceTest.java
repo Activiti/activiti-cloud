@@ -39,6 +39,7 @@ import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 import org.activiti.runtime.api.query.impl.PageImpl;
+import org.activiti.spring.process.ProcessExtensionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,9 +58,12 @@ class ProcessDefinitionServiceTest {
         ProcessDefinitionDecorator.class
     );
 
+    private ProcessExtensionService processExtensionService = Mockito.mock(ProcessExtensionService.class);
+
     private final ProcessDefinitionService processDefinitionService = new ProcessDefinitionService(
         processRuntime,
-        List.of(processDefinitionDecorator)
+        List.of(processDefinitionDecorator),
+        processExtensionService
     );
 
     @Test

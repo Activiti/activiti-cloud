@@ -94,5 +94,9 @@
       <version>${commons-fileupload.version}</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-process-extensions</artifactId>
+    </dependency>
   </dependencies>
 </project>

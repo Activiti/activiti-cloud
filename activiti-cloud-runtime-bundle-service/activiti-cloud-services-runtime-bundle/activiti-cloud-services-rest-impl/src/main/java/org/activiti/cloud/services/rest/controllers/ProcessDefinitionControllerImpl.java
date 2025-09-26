@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
@@ -54,6 +55,8 @@ import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
+import org.activiti.spring.process.model.VariableDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -180,5 +183,10 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     public Map<String, Object> getProcessModelConstantValuesForStartEvent(String id) {
         checkUserCanReadProcessDefinition(id);
         return processDefinitionValuesService.getProcessModelConstantValuesForStartEvent(id);
+    }
+
+    @Override
+    public Set<ProcessVariableDefinition> getProcessVariableDefinitions() {
+        return processDefinitionService.getProcessVariableDefinitions();
     }
 }
