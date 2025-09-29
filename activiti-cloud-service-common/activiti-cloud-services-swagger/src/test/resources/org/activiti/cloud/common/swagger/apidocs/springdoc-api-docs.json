@@ -458,9 +458,6 @@
           "fullName": {
             "type": "string"
           },
-          "allAnnotations": {
-            "$ref": "#/components/schemas/AnnotationMap"
-          },
           "typeContext": {
             "$ref": "#/components/schemas/TypeResolutionContext",
             "deprecated": true
@@ -479,6 +476,9 @@
                 "type": "boolean"
               }
             }
+          },
+          "allAnnotations": {
+            "$ref": "#/components/schemas/AnnotationMap"
           },
           "name": {
             "type": "string"
@@ -520,6 +520,23 @@
       "ExtendedJsonDeserializer": {
         "type": "object",
         "properties": {
+          "nullValue": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/ExtendedJsonDeserializer"
+            },
+            "uniqueItems": true
+          },
+          "delegatee": {
+            "$ref": "#/components/schemas/JsonDeserializerObject"
+          },
+          "cachable": {
+            "type": "boolean"
+          },
+          "emptyValue": {
+            "deprecated": true
+          },
           "nullAccessPattern": {
             "type": "string",
             "enum": [
@@ -543,23 +560,6 @@
             "type": "array",
             "items": {}
           },
-          "nullValue": {
-            "type": "array",
-            "deprecated": true,
-            "items": {
-              "$ref": "#/components/schemas/ExtendedJsonDeserializer"
-            },
-            "uniqueItems": true
-          },
-          "delegatee": {
-            "$ref": "#/components/schemas/JsonDeserializerObject"
-          },
-          "cachable": {
-            "type": "boolean"
-          },
-          "emptyValue": {
-            "deprecated": true
-          },
           "test": {
             "type": "string"
           }
@@ -582,6 +582,16 @@
       "JsonDeserializerObject": {
         "type": "object",
         "properties": {
+          "nullValue": {
+            "deprecated": true
+          },
+          "delegatee": {},
+          "cachable": {
+            "type": "boolean"
+          },
+          "emptyValue": {
+            "deprecated": true
+          },
           "nullAccessPattern": {
             "type": "string",
             "enum": [
@@ -598,20 +608,12 @@
               "DYNAMIC"
             ]
           },
-          "objectIdReader": {},
+          "objectIdReader": {
+            "$ref": "#/components/schemas/ObjectIdReader"
+          },
           "knownPropertyNames": {
             "type": "array",
             "items": {}
-          },
-          "nullValue": {
-            "deprecated": true
-          },
-          "delegatee": {},
-          "cachable": {
-            "type": "boolean"
-          },
-          "emptyValue": {
-            "deprecated": true
           }
         },
         "title": "JsonDeserializerObject"
@@ -648,11 +650,11 @@
       "ObjectIdInfo": {
         "type": "object",
         "properties": {
-          "propertyName": {
-            "$ref": "#/components/schemas/PropertyName"
-          },
           "alwaysAsId": {
             "type": "boolean"
+          },
+          "propertyName": {
+            "$ref": "#/components/schemas/PropertyName"
           }
         },
         "title": "ObjectIdInfo"
@@ -672,9 +674,7 @@
           "idProperty": {
             "$ref": "#/components/schemas/SettableBeanProperty"
           },
-          "deserializer": {
-            "$ref": "#/components/schemas/JsonDeserializerObject"
-          }
+          "deserializer": {}
         },
         "title": "ObjectIdReader"
       },
@@ -690,16 +690,6 @@
           "index": {
             "type": "integer",
             "format": "int32"
-          },
-          "contentNulls": {
-            "type": "string",
-            "enum": [
-              "SET",
-              "SKIP",
-              "FAIL",
-              "AS_EMPTY",
-              "DEFAULT"
-            ]
           },
           "valueNulls": {
             "type": "string",
@@ -719,6 +709,16 @@
           },
           "description": {
             "type": "string"
+          },
+          "contentNulls": {
+            "type": "string",
+            "enum": [
+              "SET",
+              "SKIP",
+              "FAIL",
+              "AS_EMPTY",
+              "DEFAULT"
+            ]
           }
         },
         "title": "PropertyMetadata"
@@ -753,6 +753,15 @@
           "valueTypeDeserializer": {
             "$ref": "#/components/schemas/TypeDeserializer"
           },
+          "wrapperName": {
+            "$ref": "#/components/schemas/PropertyName"
+          },
+          "member": {
+            "$ref": "#/components/schemas/AnnotatedMember"
+          },
+          "ignorable": {
+            "type": "boolean"
+          },
           "nullValueProvider": {
             "$ref": "#/components/schemas/NullValueProvider"
           },
@@ -768,20 +777,9 @@
           "injectionOnly": {
             "type": "boolean"
           },
-          "valueDeserializer": {
-            "$ref": "#/components/schemas/JsonDeserializerObject"
-          },
+          "valueDeserializer": {},
           "objectIdInfo": {
             "$ref": "#/components/schemas/ObjectIdInfo"
-          },
-          "wrapperName": {
-            "$ref": "#/components/schemas/PropertyName"
-          },
-          "member": {
-            "$ref": "#/components/schemas/AnnotatedMember"
-          },
-          "ignorable": {
-            "type": "boolean"
           },
           "virtual": {
             "type": "boolean"
@@ -820,9 +818,6 @@
       "TypeIdResolver": {
         "type": "object",
         "properties": {
-          "descForKnownTypeIds": {
-            "type": "string"
-          },
           "mechanism": {
             "type": "string",
             "enum": [
@@ -834,6 +829,9 @@
               "DEDUCTION",
               "CUSTOM"
             ]
+          },
+          "descForKnownTypeIds": {
+            "type": "string"
           }
         },
         "title": "TypeIdResolver"
