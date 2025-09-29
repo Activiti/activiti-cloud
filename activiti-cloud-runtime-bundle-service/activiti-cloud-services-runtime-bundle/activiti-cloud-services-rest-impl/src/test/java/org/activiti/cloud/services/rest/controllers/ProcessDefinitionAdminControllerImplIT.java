@@ -17,6 +17,8 @@ package org.activiti.cloud.services.rest.controllers;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
@@ -64,6 +67,7 @@ import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.ConstantDefinition;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.ProcessConstantsMapping;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -362,5 +366,50 @@ class ProcessDefinitionAdminControllerImplIT {
         when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
         this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_getProcessVariableDefinitions() throws Exception {
+        var processDefinition1 = mock(org.activiti.engine.repository.ProcessDefinition.class);
+        var processDefinition2 = mock(org.activiti.engine.repository.ProcessDefinition.class);
+        when(processDefinition1.getId()).thenReturn("id1");
+        when(processDefinition2.getId()).thenReturn("id2");
+
+        List<org.activiti.engine.repository.ProcessDefinition> processDefinitions = List.of(
+            processDefinition1,
+            processDefinition2
+        );
+        when(processAdminRuntime.processDefinitions()).thenReturn(processDefinitions);
+
+        Extension extension = new Extension();
+        extension.setProperties(
+            Map.of(
+                "var1",
+                new VariableDefinition() {
+                    {
+                        setName("var1");
+                        setType("string");
+                        setDisplay(true);
+                    }
+                },
+                "var2",
+                new VariableDefinition() {
+                    {
+                        setName("var2");
+                        setType("boolean");
+                        setDisplay(true);
+                    }
+                }
+            )
+        );
+        when(processExtensionService.getExtensionsForWithoutCallingDB(any())).thenReturn(extension);
+
+        // when & then
+        mockMvc
+            .perform(get("/admin/v1/process-variable-definitions").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].name", containsInAnyOrder("var1", "var2")))
+            .andExpect(jsonPath("$[*].type", containsInAnyOrder("string", "boolean")));
     }
 }

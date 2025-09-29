@@ -17,6 +17,8 @@ package org.activiti.cloud.services.rest.controllers;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -996,5 +998,50 @@ class ProcessDefinitionControllerImplIT {
         processDefinition.setDescription(description);
         processDefinition.setVersion(version);
         return processDefinition;
+    }
+
+    @Test
+    void should_getProcessVariableDefinitions() throws Exception {
+        var processDefinition1 = mock(org.activiti.engine.repository.ProcessDefinition.class);
+        var processDefinition2 = mock(org.activiti.engine.repository.ProcessDefinition.class);
+        when(processDefinition1.getId()).thenReturn("id1");
+        when(processDefinition2.getId()).thenReturn("id2");
+
+        List<org.activiti.engine.repository.ProcessDefinition> processDefinitions = List.of(
+            processDefinition1,
+            processDefinition2
+        );
+        when(processRuntime.processDefinitions()).thenReturn(processDefinitions);
+
+        Extension extension = new Extension();
+        extension.setProperties(
+            Map.of(
+                "var1",
+                new VariableDefinition() {
+                    {
+                        setName("var1");
+                        setType("string");
+                        setDisplay(true);
+                    }
+                },
+                "var2",
+                new VariableDefinition() {
+                    {
+                        setName("var2");
+                        setType("boolean");
+                        setDisplay(true);
+                    }
+                }
+            )
+        );
+        when(processExtensionService.getExtensionsForWithoutCallingDB(any())).thenReturn(extension);
+
+        // when & then
+        mockMvc
+            .perform(get("/v1/process-variable-definitions").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].name", containsInAnyOrder("var1", "var2")))
+            .andExpect(jsonPath("$[*].type", containsInAnyOrder("string", "boolean")));
     }
 }
