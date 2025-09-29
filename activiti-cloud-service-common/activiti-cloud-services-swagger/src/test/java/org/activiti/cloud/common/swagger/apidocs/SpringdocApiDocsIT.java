@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(BuildProperties.class)
 @SpringBootTest(classes = { TestSwaggerSpringdocConfig.class, BuildPropertiesConfig.class })
 @TestPropertySource("classpath:application-springdoc.properties")
-public class SpringdocApiDocsIT {
+class SpringdocApiDocsIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +51,7 @@ public class SpringdocApiDocsIT {
     private Resource springdocApiDocsFile;
 
     @Test
-    public void should_generateSpringdocApiDocs() throws Exception {
+    void should_generateSpringdocApiDocs() throws Exception {
         mockMvc
             .perform(get("/v3/api-docs").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -60,8 +61,16 @@ public class SpringdocApiDocsIT {
             )
             .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializerWrapper")))
             .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializer")))
+            .andExpect(result -> {
+                String json = result.getResponse().getContentAsString();
+                List<String> operationIds = com.jayway.jsonpath.JsonPath.read(json, "$.paths.*.*.operationId");
+                org.junit.jupiter.api.Assertions.assertEquals(
+                    new java.util.HashSet<>(operationIds).size(),
+                    operationIds.size(),
+                    "operationIds must be unique"
+                );
+            })
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
-            .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(
                 content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8))
             )
