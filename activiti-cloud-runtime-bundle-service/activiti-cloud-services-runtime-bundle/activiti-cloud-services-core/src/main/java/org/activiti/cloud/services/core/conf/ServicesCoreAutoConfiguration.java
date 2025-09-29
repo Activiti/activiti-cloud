@@ -33,6 +33,7 @@ import org.activiti.cloud.services.core.ProcessDefinitionValuesService;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
+import org.activiti.cloud.services.core.ProcessVariableDefinitionMapper;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueSpringConverter;
@@ -299,18 +300,31 @@ public class ServicesCoreAutoConfiguration {
     public ProcessDefinitionService processDefinitionService(
         ProcessRuntime processRuntime,
         List<ProcessDefinitionDecorator> processDefinitionDecorators,
-        ProcessExtensionService processExtensionService
+        ProcessExtensionService processExtensionService,
+        ProcessVariableDefinitionMapper processVariableDefinitionMapper
     ) {
-        return new ProcessDefinitionService(processRuntime, processDefinitionDecorators, processExtensionService);
+        return new ProcessDefinitionService(
+            processRuntime,
+            processDefinitionDecorators,
+            processExtensionService,
+            processVariableDefinitionMapper
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ProcessDefinitionAdminService processDefinitionAdminService(
         ProcessAdminRuntime processAdminRuntime,
-        List<ProcessDefinitionDecorator> processDefinitionDecorators
+        List<ProcessDefinitionDecorator> processDefinitionDecorators,
+        ProcessExtensionService processExtensionService,
+        ProcessVariableDefinitionMapper processVariableDefinitionMapper
     ) {
-        return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
+        return new ProcessDefinitionAdminService(
+            processAdminRuntime,
+            processDefinitionDecorators,
+            processExtensionService,
+            processVariableDefinitionMapper
+        );
     }
 
     @Bean
@@ -320,5 +334,11 @@ public class ServicesCoreAutoConfiguration {
         ProcessExtensionService processExtensionService
     ) {
         return new ProcessDefinitionValuesService(repositoryService, processExtensionService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableDefinitionMapper processVariableDefinitionMapper() {
+        return new ProcessVariableDefinitionMapper();
     }
 }

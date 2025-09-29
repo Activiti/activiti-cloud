@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.GetProcessDefinitionsPayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -25,6 +27,9 @@ import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.activiti.spring.process.ProcessExtensionService;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
+import org.activiti.spring.process.model.VariableDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +40,18 @@ public abstract class BaseProcessDefinitionService {
 
     private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
-    public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    private final ProcessExtensionService processExtensionService;
+
+    private final ProcessVariableDefinitionMapper processVariableDefinitionMapper;
+
+    public BaseProcessDefinitionService(
+        List<ProcessDefinitionDecorator> processDefinitionDecorators,
+        ProcessExtensionService processExtensionService,
+        ProcessVariableDefinitionMapper processVariableDefinitionMapper
+    ) {
         this.processDefinitionDecorators = processDefinitionDecorators;
+        this.processExtensionService = processExtensionService;
+        this.processVariableDefinitionMapper = processVariableDefinitionMapper;
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
@@ -93,5 +108,30 @@ public abstract class BaseProcessDefinitionService {
 
     protected boolean validateInput(String excludedCategory) {
         return StringUtils.isNotEmpty(excludedCategory) && excludedCategory.matches("[a-zA-Z0-9_\\-#.]+");
+    }
+
+    protected Set<ProcessVariableDefinition> extractProcessVariableDefinitions(
+        List<org.activiti.engine.repository.ProcessDefinition> processDefinitions
+    ) {
+        Set<ProcessVariableDefinition> customProcessVariables = new HashSet<>();
+
+        processDefinitions.forEach(processDefinition ->
+            processExtensionService
+                .getExtensionsForWithoutCallingDB(processDefinition)
+                .getProperties()
+                .values()
+                .stream()
+                .filter(VariableDefinition::getDisplay)
+                .forEach(variableDefinition ->
+                    customProcessVariables.add(
+                        processVariableDefinitionMapper.mapToProcessVariableDefinition(
+                            variableDefinition,
+                            processDefinition
+                        )
+                    )
+                )
+        );
+
+        return customProcessVariables;
     }
 }

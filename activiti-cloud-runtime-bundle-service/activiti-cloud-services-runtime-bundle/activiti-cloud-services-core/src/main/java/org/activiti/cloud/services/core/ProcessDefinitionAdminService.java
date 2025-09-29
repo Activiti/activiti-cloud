@@ -16,12 +16,15 @@
 package org.activiti.cloud.services.core;
 
 import java.util.List;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
+import org.activiti.spring.process.ProcessExtensionService;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
 
 public class ProcessDefinitionAdminService extends BaseProcessDefinitionService {
 
@@ -29,9 +32,11 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
 
     public ProcessDefinitionAdminService(
         ProcessAdminRuntime processAdminRuntime,
-        List<ProcessDefinitionDecorator> processDefinitionDecorators
+        List<ProcessDefinitionDecorator> processDefinitionDecorators,
+        ProcessExtensionService processExtensionService,
+        ProcessVariableDefinitionMapper processVariableDefinitionMapper
     ) {
-        super(processDefinitionDecorators);
+        super(processDefinitionDecorators, processExtensionService, processVariableDefinitionMapper);
         this.processAdminRuntime = processAdminRuntime;
     }
 
@@ -60,5 +65,9 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         String excludedCategory
     ) {
         return getProcessDefinitions(pageable, include, excludedCategory, false);
+    }
+
+    public Set<ProcessVariableDefinition> getProcessVariableDefinitions() {
+        return extractProcessVariableDefinitions(processAdminRuntime.processDefinitions());
     }
 }

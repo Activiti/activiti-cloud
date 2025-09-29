@@ -30,6 +30,7 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import java.util.List;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
@@ -38,6 +39,7 @@ import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.rest.assemblers.ExtendedCloudProcessDefinitionRepresentationModelAssembler;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -88,5 +90,10 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
             pageConverter.toSpringPage(pageable, page),
             extendedCloudProcessDefinitionRepresentationModelAssembler
         );
+    }
+
+    @Override
+    public Set<ProcessVariableDefinition> getProcessVariableDefinitions() {
+        return processDefinitionAdminService.getProcessVariableDefinitions();
     }
 }

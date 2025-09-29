@@ -16,24 +16,24 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Set;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
+import org.activiti.spring.process.model.ProcessVariableDefinition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-@RequestMapping(
-    value = "/admin/v1/process-definitions",
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
-)
 public interface ProcessDefinitionAdminController {
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping(
+        value = "/admin/v1/process-definitions",
+        produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    )
     PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
         @Parameter(description = "List of values to include in response") @RequestParam(
             value = "include",
@@ -48,4 +48,8 @@ public interface ProcessDefinitionAdminController {
         ) String excludedCategory,
         Pageable pageable
     );
+
+    @GetMapping(value = "/admin/v1/process-variable-definitions", produces = "application/json")
+    @ResponseBody
+    Set<ProcessVariableDefinition> getProcessVariableDefinitions();
 }
