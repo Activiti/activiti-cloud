@@ -64,6 +64,12 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public NamingOperationCustomizer namingOperationCustomizer() {
+        return new NamingOperationCustomizer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public PathPrefixOpenApiCustomizer pathPrefixCustomizer() {
         return new PathPrefixOpenApiCustomizer(swaggerBasePath);
     }
