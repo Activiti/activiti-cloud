@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.events.listeners;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -27,6 +29,7 @@ import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 @Transactional
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
@@ -37,6 +40,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private int chunkSize = 3;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
@@ -55,26 +59,39 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     @Override
     public void closed(CommandContext commandContext) {
         List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
-
-        if (events != null && !events.isEmpty()) {
-            ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
-
-            // Add runtime bundle context attributes to every event
-            CloudRuntimeEvent<?, ?>[] payload = events
-                .stream()
-                .filter(CloudRuntimeEventImpl.class::isInstance)
-                .map(CloudRuntimeEventImpl.class::cast)
-                .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
-                .toArray(CloudRuntimeEvent<?, ?>[]::new);
-
-            // Inject message headers with null execution context as there may be events from several process instances
-            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory
-                .create(rootExecutionContext)
-                .withPayload(payload)
-                .build();
-            // Send message to audit producer channel
-            producer.auditProducer().send(message);
+        if (CollectionUtils.isEmpty(events)) {
+            return;
         }
+
+        final var counter = new AtomicInteger();
+        ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
+
+        // Add runtime bundle context attributes to every event and split events in chunks to avoid large messages
+        events
+            .stream()
+            .filter(CloudRuntimeEventImpl.class::isInstance)
+            .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / this.chunkSize))
+            .values()
+            .stream()
+            .forEach(items -> {
+                CloudRuntimeEvent<?, ?>[] cloudRuntimeEvents = items
+                    .stream()
+                    .map(it -> {
+                        var runtimeEvent = ((CloudRuntimeEventImpl) it);
+                        this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(runtimeEvent);
+                        return runtimeEvent;
+                    })
+                    .toList()
+                    .toArray(CloudRuntimeEvent<?, ?>[]::new);
+
+                // Inject message headers with null execution context as there may be events from several process instances
+                Message<?> message =
+                    this.messageBuilderChainFactory.create(rootExecutionContext)
+                        .withPayload(cloudRuntimeEvents)
+                        .build();
+                // Send message to audit producer channel
+                this.producer.auditProducer().send(message);
+            });
     }
 
     @Override

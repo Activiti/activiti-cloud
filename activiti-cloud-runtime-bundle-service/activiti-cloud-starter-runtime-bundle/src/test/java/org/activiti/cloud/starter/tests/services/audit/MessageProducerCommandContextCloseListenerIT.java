@@ -57,7 +57,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class MessageProducerCommandContextCloseListenerIT {
+class MessageProducerCommandContextCloseListenerIT {
 
     @Autowired
     private RuntimeService runtimeService;
@@ -69,23 +69,23 @@ public class MessageProducerCommandContextCloseListenerIT {
     private AuditConsumerStreamHandler streamHandler;
 
     @DynamicPropertySource
-    public static void asyncProperties(DynamicPropertyRegistry registry) {
+    static void asyncProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.activiti.asyncExecutorActivate", () -> true);
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:msg-producer-test");
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         streamHandler.clear();
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         //
     }
 
     @Test
-    public void shouldNot_callCloseListener_when_exceptionOccursOnActivitiTransaction() {
+    void shouldNot_callCloseListener_when_exceptionOccursOnActivitiTransaction() {
         // given
         String processDefinitionKey = "rollbackProcess";
 
@@ -109,7 +109,7 @@ public class MessageProducerCommandContextCloseListenerIT {
      * of its binder. So, RabbitMQ container is required.
      */
     @Test
-    public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
+    void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given
         String processDefinitionKey = "SimpleProcess";
 
