@@ -71,7 +71,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-public class TimerAuditProducerIT {
+class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";
 
@@ -105,20 +105,20 @@ public class TimerAuditProducerIT {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         asyncExecutor.start();
         streamHandler.clear();
         processEngineConfiguration.getClock().reset();
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         processEngineConfiguration.getClock().reset();
         asyncExecutor.shutdown();
     }
 
     @Test
-    public void shouldProduceEventsForIntermediateTimerEvent() {
+    void shouldProduceEventsForIntermediateTimerEvent() {
         logger.info("Async config: " + asyncExecutor.getDefaultTimerJobAcquireWaitTimeInMillis());
 
         //given
@@ -251,7 +251,7 @@ public class TimerAuditProducerIT {
     }
 
     @Test
-    public void shouldGetTimerCanceledEventByProcessDelete() {
+    void shouldGetTimerCanceledEventByProcessDelete() {
         // GIVEN
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -305,7 +305,7 @@ public class TimerAuditProducerIT {
     }
 
     @Test
-    public void testTimerJobsFailRetry() throws InterruptedException {
+    void testTimerJobsFailRetry() throws InterruptedException {
         //given
         RetryFailingDelegate.shallThrow = true;
 

@@ -87,7 +87,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-public class EmbeddedSubProcessAuditIT {
+class EmbeddedSubProcessAuditIT {
 
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_EMBEDDED_SUB_PROCESS = "startSimpleSubProcess";
@@ -133,7 +133,7 @@ public class EmbeddedSubProcessAuditIT {
     private RuntimeService runtimeService;
 
     @Test
-    public void shouldExecuteProcessWithEmbeddedSubProcess() {
+    void shouldExecuteProcessWithEmbeddedSubProcess() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS)
@@ -272,7 +272,7 @@ public class EmbeddedSubProcessAuditIT {
     }
 
     @Test
-    public void shouldExecuteProcessWithEmbeddedSubProcessContainingCallActivity() {
+    void shouldExecuteProcessWithEmbeddedSubProcessContainingCallActivity() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
@@ -439,7 +439,7 @@ public class EmbeddedSubProcessAuditIT {
     }
 
     @Test
-    public void shouldExecuteProcessWithEmbeddedSubProcessContainingSignalIntermediateCatchEvent() {
+    void shouldExecuteProcessWithEmbeddedSubProcessContainingSignalIntermediateCatchEvent() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             buildStartProcessPayload(SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
@@ -571,7 +571,7 @@ public class EmbeddedSubProcessAuditIT {
     }
 
     @Test
-    public void shouldExecuteProcessWithMessageInterruptedEventSubProcess() {
+    void shouldExecuteProcessWithMessageInterruptedEventSubProcess() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             buildStartProcessPayload(INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
@@ -657,7 +657,7 @@ public class EmbeddedSubProcessAuditIT {
     }
 
     @Test
-    public void shouldExecuteProcessWithMessageNonInterruptedEventSubProcess() {
+    void shouldExecuteProcessWithMessageNonInterruptedEventSubProcess() {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             buildStartProcessPayload(NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)

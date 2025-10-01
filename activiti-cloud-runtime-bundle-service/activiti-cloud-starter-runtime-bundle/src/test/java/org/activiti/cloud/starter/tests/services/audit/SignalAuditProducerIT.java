@@ -69,7 +69,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @DirtiesContext
 @Import(TestChannelBinderConfiguration.class)
-public class SignalAuditProducerIT {
+class SignalAuditProducerIT {
 
     private static final String SIGNAL_PROCESS = "broadcastSignalCatchEventProcess";
 
@@ -94,19 +94,19 @@ public class SignalAuditProducerIT {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         streamHandler.clear();
     }
 
     @AfterEach
-    public void cleanUp() {
+    void cleanUp() {
         String processInstanceId = runtimeService.createProcessInstanceQuery().singleResult().getProcessInstanceId();
 
         runtimeService.deleteProcessInstance(processInstanceId, "clean up");
     }
 
     @Test
-    public void shouldProduceEventsWhenIntermediateSignalIsReceived() {
+    void shouldProduceEventsWhenIntermediateSignalIsReceived() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity1 = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -223,7 +223,7 @@ public class SignalAuditProducerIT {
     }
 
     @Test
-    public void testProcessExecutionWithThrowSignal() {
+    void testProcessExecutionWithThrowSignal() {
         //when
         streamHandler.getAllReceivedEvents().clear();
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
@@ -40,12 +41,13 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private int chunkSize = 3;
+    private final int chunkSize;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        RuntimeBundleProperties properties
     ) {
         Assert.notNull(producer, "producer must not be null");
         Assert.notNull(messageBuilderChainFactory, "messageBuilderChainFactory must not be null");
@@ -54,6 +56,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.chunkSize = properties.getEventsProperties().getChunkSize();
     }
 
     @Override
