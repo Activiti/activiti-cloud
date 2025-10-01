@@ -43,7 +43,8 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayload(excludedCategory);
         Page<ProcessDefinition> processDefinitions = processRuntime.processDefinitions(
             pageable,
-            processDefinitionsPayload
+            processDefinitionsPayload,
+            include
         );
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
