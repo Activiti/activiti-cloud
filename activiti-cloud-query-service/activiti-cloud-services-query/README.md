@@ -8,7 +8,29 @@ The service provides query endpoints with paging and sorting. So an example quer
 
 The approach is based upon https://github.com/spring-projects/spring-data-examples/tree/master/web/querydsl . It supports querying for nested objects and nested collections by specifying the path with '.'
 
-If the Q\* classes aren't present in the /target/generated-sources directory then run mvn generate-sources from this project directory
+If the Q\* classes aren't present in the /target/generated-sources directory then run mvn generate-sources from this project directory. If that doesn't work, try to add to **pom.xml** in **activiti-cloud-services-query-model** the following plugin:
+
+```xml
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-compiler-plugin</artifactId>
+<configuration>
+<annotationProcessorPaths>
+<path>
+<groupId>io.github.openfeign.querydsl</groupId>
+<artifactId>querydsl-apt</artifactId>
+<version>${openfeign.querydsl.version}</version>
+<classifier>jakarta</classifier>
+</path>
+<path>
+<groupId>org.hibernate.orm</groupId>
+<artifactId>hibernate-jpamodelgen</artifactId>
+<version>6.5.2.Final</version>
+</path>
+</annotationProcessorPaths>
+</configuration>
+</plugin>
+```
 
 ## Database Support
 
