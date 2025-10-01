@@ -15,10 +15,14 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
@@ -27,6 +31,7 @@ import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 @Transactional
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
@@ -37,11 +42,13 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final int chunkSize;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        RuntimeBundleProperties runtimeBundleProperties
     ) {
         Assert.notNull(producer, "producer must not be null");
         Assert.notNull(messageBuilderChainFactory, "messageBuilderChainFactory must not be null");
@@ -50,31 +57,52 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.chunkSize = runtimeBundleProperties.getEventsProperties().getChunkSize();
     }
 
     @Override
     public void closed(CommandContext commandContext) {
         List<CloudRuntimeEvent<?, ?>> events = commandContext.getGenericAttribute(PROCESS_ENGINE_EVENTS);
-
-        if (events != null && !events.isEmpty()) {
-            ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
-
-            // Add runtime bundle context attributes to every event
-            CloudRuntimeEvent<?, ?>[] payload = events
-                .stream()
-                .filter(CloudRuntimeEventImpl.class::isInstance)
-                .map(CloudRuntimeEventImpl.class::cast)
-                .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
-                .toArray(CloudRuntimeEvent<?, ?>[]::new);
-
-            // Inject message headers with null execution context as there may be events from several process instances
-            Message<CloudRuntimeEvent<?, ?>[]> message = messageBuilderChainFactory
-                .create(rootExecutionContext)
-                .withPayload(payload)
-                .build();
-            // Send message to audit producer channel
-            producer.auditProducer().send(message);
+        if (CollectionUtils.isEmpty(events)) {
+            return;
         }
+
+        ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
+
+        sendEvents(events, rootExecutionContext);
+    }
+
+    private void sendEvents(List<CloudRuntimeEvent<?, ?>> events, ExecutionContext rootExecutionContext) {
+        if (CollectionUtils.isEmpty(events)) {
+            return;
+        }
+
+        var eventChunks = createEventChunks(events);
+
+        eventChunks.forEach(chunk -> {
+            var eventArray = chunk.toArray(CloudRuntimeEvent<?, ?>[]::new);
+            createMessageAndSend(rootExecutionContext, eventArray);
+        });
+    }
+
+    private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {
+        final var chunkIndex = new AtomicInteger();
+
+        return events
+            .stream()
+            .filter(CloudRuntimeEventImpl.class::isInstance)
+            .map(CloudRuntimeEventImpl.class::cast)
+            .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
+            .collect(Collectors.groupingBy(event -> chunkIndex.getAndIncrement() / this.chunkSize))
+            .values();
+    }
+
+    private void createMessageAndSend(ExecutionContext rootExecutionContext, CloudRuntimeEvent<?, ?>[] items) {
+        // Inject message headers with null execution context as there may be events from several process instances
+        Message<CloudRuntimeEvent<?, ?>[]> message =
+            this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(items).build();
+        // Send message to audit producer channel
+        this.producer.auditProducer().send(message);
     }
 
     @Override

@@ -167,12 +167,14 @@ public class CloudEventsAutoConfiguration {
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        RuntimeBundleProperties runtimeBundleProperties
     ) {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
             executionContextMessageBuilderFactory,
-            runtimeBundleInfoAppender
+            runtimeBundleInfoAppender,
+            runtimeBundleProperties
         );
     }
 

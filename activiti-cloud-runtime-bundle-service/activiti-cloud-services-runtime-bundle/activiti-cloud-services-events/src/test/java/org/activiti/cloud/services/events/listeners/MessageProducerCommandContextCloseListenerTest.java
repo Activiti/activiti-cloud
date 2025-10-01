@@ -21,10 +21,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -90,6 +93,7 @@ class MessageProducerCommandContextCloseListenerTest {
             setServiceType(SERVICE_TYPE);
             setServiceVersion(SERVICE_VERSION);
             setRbSpringAppName(SPRING_APP_NAME);
+            getEventsProperties().setChunkSize(3);
         }
     };
 
@@ -206,6 +210,65 @@ class MessageProducerCommandContextCloseListenerTest {
             .containsEntry("serviceType", SERVICE_TYPE)
             .containsEntry("serviceVersion", SERVICE_VERSION)
             .containsEntry("serviceFullName", SPRING_APP_NAME);
+    }
+
+    @Test
+    void closedShouldSendEventsInChunksWhenMultipleEventsExist() {
+        List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(8);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        this.closeListener.closed(this.commandContext);
+
+        verify(this.auditChannel, times(3)).send(this.messageArgumentCaptor.capture());
+
+        List<Message<CloudRuntimeEvent<?, ?>[]>> capturedMessages = this.messageArgumentCaptor.getAllValues();
+
+        assertThat(capturedMessages.get(0).getPayload()).hasSize(3);
+        assertThat(capturedMessages.get(1).getPayload()).hasSize(3);
+        assertThat(capturedMessages.get(2).getPayload()).hasSize(2);
+
+        for (Message<CloudRuntimeEvent<?, ?>[]> message : capturedMessages) {
+            CloudRuntimeEvent<?, ?>[] payload = message.getPayload();
+            for (CloudRuntimeEvent<?, ?> event : payload) {
+                assertThat(event.getAppName()).isEqualTo(APP_NAME);
+                assertThat(event.getServiceName()).isEqualTo(SPRING_APP_NAME);
+                assertThat(event.getServiceType()).isEqualTo(SERVICE_TYPE);
+                assertThat(event.getServiceVersion()).isEqualTo(SERVICE_VERSION);
+            }
+        }
+    }
+
+    @Test
+    void closedShouldSendSingleMessageWhenEventsAreLessThanChunkSize() {
+        List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(2);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        this.closeListener.closed(this.commandContext);
+
+        verify(this.auditChannel, times(1)).send(this.messageArgumentCaptor.capture());
+
+        CloudRuntimeEvent<?, ?>[] payload = this.messageArgumentCaptor.getValue().getPayload();
+        assertThat(payload).hasSize(2);
+
+        for (CloudRuntimeEvent<?, ?> event : payload) {
+            assertThat(event.getAppName()).isEqualTo(APP_NAME);
+            assertThat(event.getServiceName()).isEqualTo(SPRING_APP_NAME);
+        }
+    }
+
+    private List<CloudRuntimeEventImpl<?, ?>> getCloudRuntimeEvents(int eventsCount) {
+        List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
+        for (int i = 0; i < eventsCount; i++) {
+            ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+            processInstance.setId(MOCK_PROCESS_INSTANCE_ID + "_" + i);
+            CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
+            events.add(event);
+        }
+        return events;
     }
 
     private ExecutionContext mockExecutionContext() {
