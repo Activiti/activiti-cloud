@@ -12,23 +12,23 @@ If the Q\* classes aren't present in the /target/generated-sources directory the
 
 ```xml
 <plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-compiler-plugin</artifactId>
-<configuration>
-<annotationProcessorPaths>
-<path>
-<groupId>io.github.openfeign.querydsl</groupId>
-<artifactId>querydsl-apt</artifactId>
-<version>${openfeign.querydsl.version}</version>
-<classifier>jakarta</classifier>
-</path>
-<path>
-<groupId>org.hibernate.orm</groupId>
-<artifactId>hibernate-jpamodelgen</artifactId>
-<version>6.5.2.Final</version>
-</path>
-</annotationProcessorPaths>
-</configuration>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <annotationProcessorPaths>
+            <path>
+              <groupId>io.github.openfeign.querydsl</groupId>
+              <artifactId>querydsl-apt</artifactId>
+              <version>${openfeign.querydsl.version}</version>
+                <classifier>jakarta</classifier>
+            </path>
+            <path>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-jpamodelgen</artifactId>
+                <version>6.5.2.Final</version>
+            </path>
+        </annotationProcessorPaths>
+    </configuration>
 </plugin>
 ```
 
