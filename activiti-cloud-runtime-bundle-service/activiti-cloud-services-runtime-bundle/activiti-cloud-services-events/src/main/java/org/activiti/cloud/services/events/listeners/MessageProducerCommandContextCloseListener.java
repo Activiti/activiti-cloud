@@ -63,32 +63,30 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             return;
         }
 
-        final var counter = new AtomicInteger();
         ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
 
+        sendEvents(events, rootExecutionContext);
+    }
+
+    private void sendEvents(List<CloudRuntimeEvent<?, ?>> events, ExecutionContext rootExecutionContext) {
+        final var counter = new AtomicInteger();
+
         // Add runtime bundle context attributes to every event and split events in chunks to avoid large messages
-        events
+        var values = events
             .stream()
             .filter(CloudRuntimeEventImpl.class::isInstance)
+            .map(CloudRuntimeEventImpl.class::cast)
+            .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / this.chunkSize))
-            .values()
-            .stream()
-            .forEach(items -> {
-                CloudRuntimeEvent<?, ?>[] cloudRuntimeEvents = items
-                    .stream()
-                    .map(it -> {
-                        var runtimeEvent = ((CloudRuntimeEventImpl) it);
-                        this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(runtimeEvent);
-                        return runtimeEvent;
-                    })
-                    .toList()
-                    .toArray(CloudRuntimeEvent<?, ?>[]::new);
+            .values();
 
+        values
+            .stream()
+            .map(items -> items.toArray(CloudRuntimeEvent<?, ?>[]::new))
+            .forEach(items -> {
                 // Inject message headers with null execution context as there may be events from several process instances
-                Message<?> message =
-                    this.messageBuilderChainFactory.create(rootExecutionContext)
-                        .withPayload(cloudRuntimeEvents)
-                        .build();
+                Message<CloudRuntimeEvent<?, ?>[]> message =
+                    this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(items).build();
                 // Send message to audit producer channel
                 this.producer.auditProducer().send(message);
             });

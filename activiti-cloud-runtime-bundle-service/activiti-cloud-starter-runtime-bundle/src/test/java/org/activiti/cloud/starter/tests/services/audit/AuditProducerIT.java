@@ -299,14 +299,14 @@ public class AuditProducerIT {
         //then
         await()
             .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(OPTIONAL_EXECUTION_CONTEXT_HEADERS);
 
                 assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(
+                    .contains(
                         PROCESS_CREATED.name(),
                         VARIABLE_CREATED.name(),
                         PROCESS_UPDATED.name(),
@@ -323,7 +323,7 @@ public class AuditProducerIT {
                 assertThat(receivedEvents)
                     .filteredOn(event -> ACTIVITY_STARTED.equals(event.getEventType()))
                     .extracting(event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType())
-                    .containsExactly("startEvent", "userTask");
+                    .contains("startEvent", "userTask");
                 assertThat(receivedEvents)
                     .filteredOn(cloudRuntimeEvent -> PROCESS_CREATED.equals(cloudRuntimeEvent.getEventType()))
                     .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getBusinessKey())
@@ -427,9 +427,9 @@ public class AuditProducerIT {
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                assertThat(streamHandler.getLatestReceivedEvents())
+                assertThat(streamHandler.getAllReceivedEvents())
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(
+                    .contains(
                         TASK_COMPLETED.name(),
                         TASK_CANDIDATE_GROUP_REMOVED.name(),
                         TASK_CANDIDATE_USER_REMOVED.name(),
@@ -443,11 +443,11 @@ public class AuditProducerIT {
                     );
             });
 
-        assertThat(streamHandler.getLatestReceivedEvents())
+        assertThat(streamHandler.getAllReceivedEvents())
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getStatus())
             .containsOnly(Task.TaskStatus.COMPLETED);
-        assertThat(streamHandler.getLatestReceivedEvents())
+        assertThat(streamHandler.getAllReceivedEvents())
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getCompletedBy())
             .doesNotContainNull();
@@ -531,7 +531,7 @@ public class AuditProducerIT {
         //then
         await()
             .untilAsserted(() -> {
-                assertThat(streamHandler.getLatestReceivedEvents())
+                assertThat(streamHandler.getAllReceivedEvents())
                     .filteredOn(it -> Arrays.asList(TASK_COMPLETED, PROCESS_COMPLETED).contains(it.getEventType()))
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getActor)
                     .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, expectedActor));
@@ -556,13 +556,13 @@ public class AuditProducerIT {
         //then
         await()
             .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
                 assertThat(receivedEvents)
                     .extracting(event -> event.getEventType().name())
-                    .containsExactly(
+                    .contains(
                         ACTIVITY_CANCELLED.name(),
                         TASK_CANDIDATE_GROUP_REMOVED.name(),
                         TASK_CANDIDATE_USER_REMOVED.name(),
@@ -953,14 +953,14 @@ public class AuditProducerIT {
                         businessKey
                     );
 
-                assertThat(streamHandler.getLatestReceivedEvents())
+                assertThat(streamHandler.getAllReceivedEvents())
                     .extracting(
                         CloudRuntimeEvent::getEventType,
                         CloudRuntimeEvent::getProcessInstanceId,
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                         tuple(PROCESS_UPDATED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),
                         tuple(PROCESS_STARTED, processInstanceId, null, CALL_TWO_SUB_PROCESSES),

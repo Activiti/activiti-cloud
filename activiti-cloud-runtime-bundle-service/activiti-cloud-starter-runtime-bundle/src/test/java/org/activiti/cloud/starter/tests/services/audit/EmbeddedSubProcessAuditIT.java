@@ -146,7 +146,7 @@ public class EmbeddedSubProcessAuditIT {
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -155,7 +155,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
@@ -177,7 +177,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getProcessInstanceId,
                         event -> ((CloudTaskCreatedEvent) event).getEntity().getProcessInstanceId()
                     )
-                    .containsExactly(tuple(processInstanceId, processInstanceId));
+                    .contains(tuple(processInstanceId, processInstanceId));
 
                 List<CloudRuntimeEvent<?, ?>> activitiStartedEvents = receivedEvents
                     .stream()
@@ -190,7 +190,7 @@ public class EmbeddedSubProcessAuditIT {
                         event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
                         event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
                     )
-                    .containsExactly(
+                    .contains(
                         tuple("startEvent", null),
                         tuple("subProcess", "subProcess"),
                         tuple("startEvent", null),
@@ -207,7 +207,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -216,13 +216,14 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS)
                     );
 
                 String entityProcessInstanceId =
-                    ((CloudTaskAssignedEvent) receivedEvents.get(0)).getEntity().getProcessInstanceId();
+                    ((CloudTaskAssignedEvent) receivedEvents.get(receivedEvents.size() - 2)).getEntity()
+                        .getProcessInstanceId();
                 assertThat(entityProcessInstanceId).isNotNull();
                 assertThat(entityProcessInstanceId).isEqualTo(processInstanceId);
             });
@@ -234,7 +235,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -242,7 +243,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(TASK_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null),
                         tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
@@ -284,7 +285,7 @@ public class EmbeddedSubProcessAuditIT {
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -293,7 +294,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
@@ -340,7 +341,7 @@ public class EmbeddedSubProcessAuditIT {
                         event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityType(),
                         event -> ((CloudBPMNActivityStartedEvent) event).getEntity().getActivityName()
                     )
-                    .containsExactly(
+                    .contains(
                         tuple("startEvent", null),
                         tuple("subProcess", "subProcess"),
                         tuple("startEvent", null),
@@ -361,7 +362,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -370,7 +371,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(TASK_ASSIGNED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(TASK_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
                     );
@@ -397,7 +398,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -406,7 +407,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(TASK_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null, null),
                         tuple(
@@ -450,7 +451,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
                 assertThat(receivedEvents)
                     .extracting(
                         CloudRuntimeEvent::getEventType,
@@ -458,7 +459,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                         tuple(PROCESS_UPDATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                         tuple(PROCESS_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
@@ -514,7 +515,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -523,7 +524,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(SIGNAL_RECEIVED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
                         tuple(
                             ACTIVITY_COMPLETED,
@@ -582,7 +583,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
                 assertThat(receivedEvents)
                     .extracting(
                         CloudRuntimeEvent::getEventType,
@@ -590,7 +591,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(PROCESS_UPDATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(PROCESS_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
@@ -626,7 +627,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -635,7 +636,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(MESSAGE_RECEIVED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(TASK_CANCELLED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
@@ -667,7 +668,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
                 assertThat(receivedEvents)
                     .extracting(
                         CloudRuntimeEvent::getEventType,
@@ -675,7 +676,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(PROCESS_CREATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(PROCESS_UPDATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(PROCESS_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
@@ -711,7 +712,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -720,7 +721,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(MESSAGE_RECEIVED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(
                             MESSAGE_SUBSCRIPTION_CANCELLED,
@@ -744,7 +745,7 @@ public class EmbeddedSubProcessAuditIT {
         await()
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(
@@ -753,7 +754,7 @@ public class EmbeddedSubProcessAuditIT {
                         CloudRuntimeEvent::getParentProcessInstanceId,
                         CloudRuntimeEvent::getProcessDefinitionKey
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(TASK_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),

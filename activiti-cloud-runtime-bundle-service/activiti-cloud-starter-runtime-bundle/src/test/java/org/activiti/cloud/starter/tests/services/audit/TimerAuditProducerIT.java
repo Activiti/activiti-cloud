@@ -190,7 +190,7 @@ public class TimerAuditProducerIT {
             .untilAsserted(() -> {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
                 assertThat(receivedEvents)
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
