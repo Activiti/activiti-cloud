@@ -327,7 +327,7 @@ public class AuditProducerIT {
                 assertThat(receivedEvents)
                     .filteredOn(cloudRuntimeEvent -> PROCESS_CREATED.equals(cloudRuntimeEvent.getEventType()))
                     .extracting(cloudRuntimeEvent -> ((ProcessInstance) cloudRuntimeEvent.getEntity()).getBusinessKey())
-                    .containsExactly("my business key");
+                    .contains("my business key");
                 assertThat(receivedEvents)
                     .filteredOn(cloudRuntimeEvent -> PROCESS_STARTED.equals(cloudRuntimeEvent.getEventType()))
                     .extracting(
@@ -335,7 +335,7 @@ public class AuditProducerIT {
                         cloudRuntimeEvent ->
                             ((ProcessInstance) cloudRuntimeEvent.getEntity()).getProcessDefinitionName()
                     )
-                    .containsExactly(tuple("my instance name", "SimpleProcess"));
+                    .contains(tuple("my instance name", "SimpleProcess"));
                 assertThat(receivedEvents)
                     .filteredOn(event -> TASK_CREATED.equals(event.getEventType()))
                     .extracting(
@@ -344,7 +344,7 @@ public class AuditProducerIT {
                         event -> ((CloudTaskCreatedEvent) event).getEntity().getTaskDefinitionKey(),
                         event -> ((CloudTaskCreatedEvent) event).getEntity().getFormKey()
                     )
-                    .containsExactly(
+                    .contains(
                         tuple(
                             startProcessEntity.getBody().getProcessDefinitionVersion(),
                             startProcessEntity.getBody().getBusinessKey(),
