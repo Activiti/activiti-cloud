@@ -25,6 +25,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
+import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
@@ -58,6 +59,9 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockitoBean
     private RuntimeBundleProperties runtimeBundleProperties;
+
+    @MockitoBean
+    private MessageProducerCommandContextCloseListener messageProducerCommandContextCloseListener;
 
     @MockitoBean
     private ApplicationEventPublisher eventPublisher;
