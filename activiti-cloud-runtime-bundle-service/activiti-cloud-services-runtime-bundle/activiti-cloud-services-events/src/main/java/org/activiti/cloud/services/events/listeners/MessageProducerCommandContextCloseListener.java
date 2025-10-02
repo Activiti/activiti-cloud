@@ -57,7 +57,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.chunkSize = runtimeBundleProperties.getEventsProperties().getChunkSize();
+        this.chunkSize = runtimeBundleProperties.getEventsProperties().getChunkSizeCloseListener();
     }
 
     @Override

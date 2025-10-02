@@ -93,7 +93,7 @@ class MessageProducerCommandContextCloseListenerTest {
             setServiceType(SERVICE_TYPE);
             setServiceVersion(SERVICE_VERSION);
             setRbSpringAppName(SPRING_APP_NAME);
-            getEventsProperties().setChunkSize(3);
+            getEventsProperties().setChunkSizeCloseListener(3);
         }
     };
 
