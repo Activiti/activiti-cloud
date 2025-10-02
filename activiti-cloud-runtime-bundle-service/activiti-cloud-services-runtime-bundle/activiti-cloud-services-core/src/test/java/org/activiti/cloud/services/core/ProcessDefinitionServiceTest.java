@@ -68,7 +68,13 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(
+            processRuntime.processDefinitions(
+                any(Pageable.class),
+                any(GetProcessDefinitionsPayload.class),
+                eq(List.of("variables"))
+            )
+        )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
@@ -102,7 +108,7 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), any()))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
@@ -120,7 +126,7 @@ class ProcessDefinitionServiceTest {
         String excludedCategory = "#triggerableByForm";
         Pageable pageable = Pageable.of(0, 10);
 
-        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), any()))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
         processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
@@ -128,7 +134,7 @@ class ProcessDefinitionServiceTest {
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
         );
-        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture(), any());
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
@@ -139,7 +145,7 @@ class ProcessDefinitionServiceTest {
         String excludedCategory = "SELECT * FROM wrong_category";
         Pageable pageable = Pageable.of(0, 10);
 
-        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class)))
+        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), any()))
             .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
 
         processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
@@ -147,10 +153,92 @@ class ProcessDefinitionServiceTest {
         ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
             GetProcessDefinitionsPayload.class
         );
-        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture());
+        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture(), any());
 
         GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
         assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
+    }
+
+    @Test
+    void should_getProcessDefinitionsWithVariablesAndNoUserStartableProcesses_whenIncludeVariablesAndNoUserStartableProcessesParametersPresent() {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("id");
+        ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
+        processDefinitions.add(processDefinition);
+        when(
+            processRuntime.processDefinitions(
+                any(Pageable.class),
+                any(GetProcessDefinitionsPayload.class),
+                eq(List.of("variables", "noUserStartableProcesses"))
+            )
+        )
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
+
+        VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
+        when(processDefinitionDecorator.applies("variables")).thenReturn(true);
+        when(
+            processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
+        )
+            .thenAnswer(call -> {
+                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+                return cloudProcessDefinition;
+            });
+
+        var pageable = Pageable.of(0, 50);
+
+        List<ProcessDefinition> result = processDefinitionService
+            .getProcessDefinitions(pageable, List.of("variables", "noUserStartableProcesses"), "")
+            .getContent();
+
+        assertThat(result).hasSize(1);
+        List<VariableDefinition> variableDefinitions =
+            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        assertThat(variableDefinitions).hasSize(1);
+        assertThat(variableDefinitions.getFirst()).isEqualTo(variableDefinition);
+        verify(processDefinitionDecorator)
+            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+
+        ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
+        verify(processRuntime)
+            .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
+        assertThat(includeParameter.getValue()).containsExactly("variables", "noUserStartableProcesses");
+    }
+
+    @Test
+    void should_getProcessDefinitionsWithNoUserStartableProcesses_whenIncludeNoUserStartableProcessesParameterPresent() {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId("id");
+        ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
+        processDefinitions.add(processDefinition);
+        when(
+            processRuntime.processDefinitions(
+                any(Pageable.class),
+                any(GetProcessDefinitionsPayload.class),
+                eq(List.of("noUserStartableProcesses"))
+            )
+        )
+            .thenReturn(new PageImpl<>(processDefinitions, 1));
+
+        when(processDefinitionDecorator.applies("variables")).thenReturn(false);
+
+        var pageable = Pageable.of(0, 50);
+
+        List<ProcessDefinition> result = processDefinitionService
+            .getProcessDefinitions(pageable, List.of("noUserStartableProcesses"), "")
+            .getContent();
+
+        assertThat(result).hasSize(1);
+        List<VariableDefinition> variableDefinitions =
+            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        assertThat(variableDefinitions).isEmpty();
+
+        verify(processDefinitionDecorator, never()).decorate(any());
+
+        ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
+        verify(processRuntime)
+            .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
+        assertThat(includeParameter.getValue()).containsExactly("noUserStartableProcesses");
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
