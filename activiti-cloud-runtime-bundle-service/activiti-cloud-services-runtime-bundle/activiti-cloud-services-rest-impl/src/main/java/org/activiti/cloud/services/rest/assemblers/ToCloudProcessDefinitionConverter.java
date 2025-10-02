@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,9 @@ public class ToCloudProcessDefinitionConverter {
     public ExtendedCloudProcessDefinition from(ProcessDefinition processDefinition) {
         CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDefinition);
-        if (processDefinition instanceof ExtendedCloudProcessDefinition) {
-            cloudProcessDefinition.setVariableDefinitions(
-                ((ExtendedCloudProcessDefinition) processDefinition).getVariableDefinitions()
-            );
+        if (processDefinition instanceof ExtendedCloudProcessDefinition extendedCloudProcessDefinition) {
+            cloudProcessDefinition.setVariableDefinitions(extendedCloudProcessDefinition.getVariableDefinitions());
+            cloudProcessDefinition.setConstantValues(extendedCloudProcessDefinition.getConstantValues());
         }
         return cloudProcessDefinition;
     }

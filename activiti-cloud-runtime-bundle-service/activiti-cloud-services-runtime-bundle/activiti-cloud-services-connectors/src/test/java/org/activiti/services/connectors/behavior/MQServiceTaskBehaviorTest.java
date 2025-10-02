@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.activiti.services.connectors.behavior;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -24,10 +25,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -39,6 +42,7 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
+import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,11 +52,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
-public class MQServiceTaskBehaviorTest {
+class MQServiceTaskBehaviorTest {
 
     private static final String CONNECTOR_TYPE = "payment";
     private static final String EXECUTION_ID = "execId";
@@ -88,16 +91,19 @@ public class MQServiceTaskBehaviorTest {
     private ArgumentCaptor<IntegrationRequestImpl> integrationRequestCaptor;
 
     @Mock
-    private BindingServiceProperties bindingServiceProperties;
+    private FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     @Mock
     private IntegrationRequestSender integrationRequestSender;
+
+    @Mock
+    private IntegrationContextEnricher integrationContextEnricher;
 
     @InjectMocks
     private IntegrationRequestBuilder integrationRequestBuilder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         behavior =
             spy(
                 new MQServiceTaskBehavior(
@@ -107,13 +113,14 @@ public class MQServiceTaskBehaviorTest {
                     defaultServiceTaskBehavior,
                     processEngineEventsAggregator,
                     runtimeBundleProperties,
-                    integrationRequestBuilder
+                    integrationRequestBuilder,
+                    Set.of(integrationContextEnricher)
                 )
             );
     }
 
     @Test
-    public void executeShouldDelegateToDefaultBehaviourWhenBeanIsAvailable() {
+    void executeShouldDelegateToDefaultBehaviourWhenBeanIsAvailable() {
         //given
         DelegateExecution execution = mock(DelegateExecution.class);
         given(defaultServiceTaskBehavior.hasConnectorBean(execution)).willReturn(true);
@@ -126,7 +133,7 @@ public class MQServiceTaskBehaviorTest {
     }
 
     @Test
-    public void executeShouldStoreTheIntegrationContextAndPublishASpringEvent() {
+    void executeShouldStoreTheIntegrationContextAndPublishASpringEvent() {
         //given
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setImplementation(CONNECTOR_TYPE);
@@ -163,5 +170,49 @@ public class MQServiceTaskBehaviorTest {
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
 
         verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
+    }
+
+    @Test
+    void should_enrichIntegrationContext() {
+        //given
+        DelegateExecution execution = mock(DelegateExecution.class);
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContext integrationContext = mock(IntegrationContext.class);
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        //when
+        behavior.apply(execution);
+
+        //then
+        verify(integrationContextEnricher).enrich(integrationContext);
+    }
+
+    @Test
+    void should_notThrow_whenEnrichersCollectionIsNull() {
+        //given
+        behavior =
+            spy(
+                new MQServiceTaskBehavior(
+                    integrationContextManager,
+                    integrationRequestSender,
+                    integrationContextBuilder,
+                    defaultServiceTaskBehavior,
+                    processEngineEventsAggregator,
+                    runtimeBundleProperties,
+                    integrationRequestBuilder,
+                    null
+                )
+            );
+        DelegateExecution execution = mock(DelegateExecution.class);
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContext integrationContext = mock(IntegrationContext.class);
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        //then
+        assertDoesNotThrow(() -> behavior.apply(execution));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,10 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
+import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -75,18 +77,20 @@ import org.activiti.spring.process.model.ProcessConstantsMapping;
 import org.activiti.spring.process.model.ProcessVariablesMapping;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -112,47 +116,50 @@ class ProcessDefinitionControllerImplIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private RepositoryService repositoryService;
 
-    @MockBean
+    @MockitoBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     @Autowired
     private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
+    @MockitoBean
     private ProcessRuntime processRuntime;
 
-    @MockBean
+    @MockitoBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockitoBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
+    @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
+    @MockitoBean
     private ProcessExtensionService processExtensionService;
 
-    @MockBean
+    @MockitoBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
-    @MockBean
+    @MockitoBean
     private RuntimeService runtimeService;
 
-    @MockBean
+    @MockitoBean
     private PrincipalIdentityProvider principalIdentityProvider;
 
-    @MockBean
+    @MockitoBean
     private ManagementService managementService;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionsSyncService processDefinitionsSyncService;
+
+    @Captor
+    ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor;
 
     private final ObjectMapper om = new ObjectMapper();
 
@@ -168,23 +175,38 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
     }
 
-    private ProcessDefinition buildProcessDefinition(
-        String processDefinitionId,
-        String name,
-        String description,
-        int version
-    ) {
-        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
-        processDefinition.setId(processDefinitionId);
-        processDefinition.setName(name);
-        processDefinition.setDescription(description);
-        processDefinition.setVersion(version);
-        return processDefinition;
+    @Test
+    void getProcessDefinitionsExcludingProcessTriggerableByFormCategory() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+
+        when(processRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture()))
+            .thenReturn(processDefinitionPage);
+
+        var excludedCategory = "#triggerableByForm";
+        mockMvc
+            .perform(
+                get("/v1/process-definitions")
+                    .queryParam("excludedCategory", excludedCategory)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
+
+        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isEqualTo(excludedCategory);
     }
 
     @Test
@@ -200,7 +222,8 @@ class ProcessDefinitionControllerImplIT {
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
-        given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
+        given(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .willReturn(processDefinitionPage);
 
         //when
         MvcResult result = mockMvc
@@ -210,26 +233,15 @@ class ProcessDefinitionControllerImplIT {
 
         //then
         String responseContent = result.getResponse().getContentAsString();
-        assertThatJson(responseContent)
-            .node("list.pagination.skipCount")
-            .isEqualTo(10)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(11);
-        assertThatJson(responseContent)
-            .node("list.entries[0].entry.id")
-            .isEqualTo(processDefId)
-            .node("list.entries[0].entry.name")
-            .isEqualTo("my process")
-            .node("list.entries[0].entry.description")
-            .isEqualTo("This is my process")
-            .node("list.entries[0].entry.version")
-            .isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.skipCount").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(responseContent).inPath("list.pagination.count").isEqualTo(1);
+        assertThatJson(responseContent).inPath("list.pagination.hasMoreItems").isEqualTo(false);
+        assertThatJson(responseContent).inPath("list.pagination.totalItems").isEqualTo(11);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.id").isEqualTo(processDefId);
+        assertThatJson(responseContent).inPath("list.entries[0].entry.name").isEqualTo("my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.description").isEqualTo("This is my process");
+        assertThatJson(responseContent).inPath("list.entries[0].entry.version").isEqualTo(1);
     }
 
     @Test
@@ -245,7 +257,8 @@ class ProcessDefinitionControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
         VariableDefinition givenVariableDefinition = new VariableDefinition();
@@ -293,15 +306,12 @@ class ProcessDefinitionControllerImplIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.id").isEqualTo(procDefId);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.name").isEqualTo("my process");
         assertThatJson(result.getResponse().getContentAsString())
-            .node("entry.id")
-            .isEqualTo(procDefId)
-            .node("entry.name")
-            .isEqualTo("my process")
-            .node("entry.description")
-            .isEqualTo("This is my process")
-            .node("entry.version")
-            .isEqualTo(1);
+            .inPath("entry.description")
+            .isEqualTo("This is my process");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("entry.version").isEqualTo(1);
     }
 
     @Test
@@ -972,5 +982,19 @@ class ProcessDefinitionControllerImplIT {
         Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
 
         assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    private ProcessDefinition buildProcessDefinition(
+        String processDefinitionId,
+        String name,
+        String description,
+        int version
+    ) {
+        ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
+        processDefinition.setId(processDefinitionId);
+        processDefinition.setName(name);
+        processDefinition.setDescription(description);
+        processDefinition.setVersion(version);
+        return processDefinition;
     }
 }

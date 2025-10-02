@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 package org.activiti.cloud.api.process.model;
 
 import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.VariableDefinition;
 
 public interface ExtendedCloudProcessDefinition extends CloudProcessDefinition {
     List<VariableDefinition> getVariableDefinitions();
+
+    Map<String, Object> getConstantValues();
 }

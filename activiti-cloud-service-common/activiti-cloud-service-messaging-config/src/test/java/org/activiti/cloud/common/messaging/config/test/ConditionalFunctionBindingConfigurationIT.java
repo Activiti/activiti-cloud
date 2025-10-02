@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,10 @@ public class ConditionalFunctionBindingConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(
+            10000,
+            bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
+        );
 
         assertThat(reply)
             .isNotNull()

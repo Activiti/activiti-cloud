@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.common.messaging.config;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -23,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 
@@ -41,9 +41,17 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
-        ActivitiMessagingDestinationTransformer destinationTransformer
+        ActivitiMessagingDestinationTransformer destinationTransformer,
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionBindingPropertySource functionBindingPropertySource,
+        StreamFunctionConfigurationProperties streamFunctionProperties
     ) {
-        return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
+        return new ActivitiMessagingDestinationsBeanPostProcessor(
+            destinationTransformer,
+            messagingProperties,
+            functionBindingPropertySource,
+            streamFunctionProperties
+        );
     }
 
     @Bean

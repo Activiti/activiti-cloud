@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public String processDefinitionName;
     public List<TaskPermissions> permissions;
     public Set<? extends CloudVariableInstance> processVariables;
+    private String rootProcessInstanceId;
 
     public QueryCloudTaskImpl() {}
 
@@ -51,5 +52,14 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     @Override
     public Set<? extends CloudVariableInstance> getProcessVariables() {
         return processVariables;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 }

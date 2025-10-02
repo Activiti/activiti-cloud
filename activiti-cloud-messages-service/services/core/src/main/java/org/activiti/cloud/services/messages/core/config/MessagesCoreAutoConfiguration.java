@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,16 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.activiti.cloud.services.messages.core.channels.MessageConnectorSink;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow;
 import org.activiti.cloud.services.messages.core.integration.MessageEventHeaders;
@@ -72,6 +75,7 @@ import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -115,6 +119,12 @@ public class MessagesCoreAutoConfiguration {
         CommandConsumerMessageRouter router
     ) {
         return new MessageConnectorIntegrationFlow(processor, aggregator, interceptor, adviceChain, properties, router);
+    }
+
+    @Bean
+    @FunctionBinding(input = MessageConnectorSink.INPUT)
+    Consumer<Message<?>> messageConnectorConsumer(IntegrationFlow messageConnectorIntegrationFlow) {
+        return messageConnectorIntegrationFlow.getInputChannel()::send;
     }
 
     @Bean

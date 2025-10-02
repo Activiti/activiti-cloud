@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,13 +102,15 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         );
     }
 
-    protected void registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
+    protected String registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
+        final String beanName = functionName + REGISTRATION_NAME_SUFFIX;
+
+        functionRegistration.setBeanName(beanName);
+
         GenericApplicationContext.class.cast(applicationContext)
-            .registerBean(
-                functionName + REGISTRATION_NAME_SUFFIX,
-                FunctionRegistration.class,
-                () -> functionRegistration
-            );
+            .registerBean(beanName, FunctionRegistration.class, () -> functionRegistration);
+
+        return beanName;
     }
 
     protected CompositeMessageConverter getMessageConverter() {

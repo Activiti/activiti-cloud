@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +61,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
@@ -83,49 +83,49 @@ public class ProcessInstanceEntityDeleteControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceRepository processInstanceRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private EntityFinder entityFinder;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
+    @MockitoBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
+    @MockitoBean
     private TaskRepository taskRepository;
 
-    @MockBean
+    @MockitoBean
     private VariableRepository variableRepository;
 
-    @MockBean
+    @MockitoBean
     private ServiceTaskRepository serviceTaskRepository;
 
-    @MockBean
+    @MockitoBean
     private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
 
-    @MockBean
+    @MockitoBean
     private BPMNActivityRepository bpmnActivityRepository;
 
-    @MockBean
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach

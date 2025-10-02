@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private int priority;
     private String processDefinitionId;
     private String processInstanceId;
+    private String taskProcessRootProcessInstanceId;
     private String parentTaskId;
     private String formKey;
     private String completedBy;
@@ -69,6 +70,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
         priority = task.getPriority();
         processDefinitionId = task.getProcessDefinitionId();
         processInstanceId = task.getProcessInstanceId();
+        taskProcessRootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
         parentTaskId = task.getParentTaskId();
         formKey = task.getFormKey();
         status = task.getStatus();
@@ -197,6 +199,15 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     }
 
     @Override
+    public String getTaskProcessRootProcessInstanceId() {
+        return taskProcessRootProcessInstanceId;
+    }
+
+    public void setTaskProcessRootProcessInstanceId(String rootProcessInstanceId) {
+        this.taskProcessRootProcessInstanceId = rootProcessInstanceId;
+    }
+
+    @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
@@ -315,6 +326,9 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             ", processInstanceId='" +
             processInstanceId +
             '\'' +
+            ", taskProcessRootProcessInstanceId='" +
+            taskProcessRootProcessInstanceId +
+            '\'' +
             ", parentTaskId='" +
             parentTaskId +
             '\'' +
@@ -354,6 +368,7 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
             Objects.equals(dueDate, task.dueDate) &&
             Objects.equals(processDefinitionId, task.processDefinitionId) &&
             Objects.equals(processInstanceId, task.processInstanceId) &&
+            Objects.equals(taskProcessRootProcessInstanceId, task.taskProcessRootProcessInstanceId) &&
             Objects.equals(parentTaskId, task.parentTaskId) &&
             Objects.equals(formKey, task.formKey) &&
             Objects.equals(processDefinitionVersion, task.processDefinitionVersion) &&

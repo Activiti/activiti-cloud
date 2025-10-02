@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
@@ -37,6 +39,9 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
         String destination = resolver.resolveDestination(request);
 
-        streamBridge.send(destination, message);
+        streamBridge.send(
+            destination,
+            MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build()
+        );
     }
 }

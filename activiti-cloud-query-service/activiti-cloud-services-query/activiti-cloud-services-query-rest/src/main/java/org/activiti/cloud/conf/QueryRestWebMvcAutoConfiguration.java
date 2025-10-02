@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.conf;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import jakarta.persistence.EntityManagerFactory;
+import java.util.List;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -43,6 +47,7 @@ import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentati
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
+import org.activiti.cloud.services.security.ActivitiRestrictedKeysProvider;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
@@ -55,8 +60,10 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -207,6 +214,41 @@ public class QueryRestWebMvcAutoConfiguration {
             restrictionBuilder,
             processDefinitionFilter
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.query.graphql.restricted-key-provider.enabled",
+        matchIfMissing = true
+    )
+    RestrictedKeysProvider restrictedKeysProvider(
+        EntityManagerFactory entityManagerFactory,
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService,
+        ProcessInstanceRestrictionService processInstanceRestrictionService,
+        ProcessVariableRestrictionService processVariableRestrictionService,
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        TaskVariableLookupRestrictionService taskVariableLookupRestrictionService,
+        @Value(
+            "${spring.activiti.cloud.services.notifications.graphql.restricted-key-provider.unrestricted-roles:ACTIVITI_ADMIN,APPLICATION_MANAGER}"
+        ) List<String> unrestrictedRoles,
+        @Value(
+            "${spring.activiti.cloud.services.notifications.graphql.restricted-key-provider.role-prefix:#{null}}"
+        ) String rolePrefix
+    ) {
+        var bean = new ActivitiRestrictedKeysProvider(
+            entityManagerFactory,
+            processDefinitionRestrictionService,
+            processInstanceRestrictionService,
+            processVariableRestrictionService,
+            taskLookupRestrictionService,
+            taskVariableLookupRestrictionService,
+            unrestrictedRoles
+        );
+
+        Optional.ofNullable(rolePrefix).ifPresent(bean::setRolePrefix);
+
+        return bean;
     }
 
     @Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
@@ -60,7 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-public class TaskAdminController {
+public class TaskAdminController extends TaskControllerAdvice {
 
     private final TaskRepository taskRepository;
 
@@ -227,5 +228,12 @@ public class TaskAdminController {
                 .map(TaskCandidateGroupEntity::getGroupId)
                 .collect(Collectors.toList())
             : null;
+    }
+
+    @Operation(summary = "Count tasks")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/count")
+    public Long countTasks(@RequestBody TaskSearchRequest taskSearchRequest) {
+        return taskControllerHelper.countTasksUnrestricted(taskSearchRequest);
     }
 }

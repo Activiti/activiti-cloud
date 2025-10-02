@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,6 +234,7 @@ public class TaskEventContainedBuilder {
         task.setCreatedDate(new Date());
         if (processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
+            task.setTaskProcessRootProcessInstanceId(processInstance.getRootProcessInstanceId());
         }
         return task;
     }
@@ -250,6 +251,7 @@ public class TaskEventContainedBuilder {
         task.setCreatedDate(new Date());
         if (processInstance != null) {
             task.setProcessInstanceId(processInstance.getId());
+            task.setTaskProcessRootProcessInstanceId(processInstance.getRootProcessInstanceId());
         }
         return task;
     }

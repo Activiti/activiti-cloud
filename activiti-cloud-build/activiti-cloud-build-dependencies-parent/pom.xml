@@ -12,15 +12,23 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2024.0.1</spring-cloud.version>
-    <testcontainers.version>1.20.1</testcontainers.version>
-    <h2.version>2.2.224</h2.version>
-    <graphql-java.version>22.1</graphql-java.version>
-    <postgresql.version>42.7.5</postgresql.version>
-    <liquibase.version>4.24.0</liquibase.version>
+    <spring-cloud.version>2024.0.0</spring-cloud.version>
+    <testcontainers.version>1.21.0</testcontainers.version>
+    <h2.version>2.3.232</h2.version>
+    <graphql-java.version>24.1</graphql-java.version>
+    <postgresql.version>42.7.7</postgresql.version>
+    <liquibase.version>4.31.1</liquibase.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- security fix AAE-36687, to be removed after Spring Boot update with that version included -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
+      <!-- security fix AAE-36687 -->
       <dependency>
         <groupId>org.aspectj</groupId>
         <artifactId>aspectjweaver</artifactId>

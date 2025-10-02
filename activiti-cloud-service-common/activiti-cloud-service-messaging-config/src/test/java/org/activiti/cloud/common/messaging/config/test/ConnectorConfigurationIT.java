@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,19 @@ package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_RESULTS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -37,19 +42,21 @@ import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -59,7 +66,9 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest(
     properties = {
@@ -75,6 +84,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+        "spring.cloud.stream.bindings.integrationRequests.destination=rest-connector.GET,rest-connector.POST,script.EXECUTE",
+        "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
     }
 )
@@ -85,6 +96,7 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_B = "auditConsumerHandlerB";
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
     private static final String FUNCTION_NAME_ERROR = "connectorTestMyErrorHandler";
+    private static final String FUNCTION_NAME_RETRY = "connectorWithRetry";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
@@ -113,8 +125,11 @@ public class ConnectorConfigurationIT {
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
-    @SpyBean
+    @MockitoSpyBean
     private MyErrorHandler myErrorHandler;
+
+    @MockitoSpyBean
+    private StreamBridge streamBridge;
 
     @Value("${application.min.version}")
     private String minVersion;
@@ -182,6 +197,46 @@ public class ConnectorConfigurationIT {
         public MyErrorHandler myErrorHandler() {
             return new MyErrorHandler();
         }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.GET"
+        )
+        public Connector<?, ?> connectorGet() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("GetRequest");
+                return "GetResult";
+            };
+        }
+
+        @Bean
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "rest-connector.POST"
+        )
+        public Connector<?, ?> connectorPost() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("PostRequest");
+                return "PostResult";
+            };
+        }
+
+        @Bean(FUNCTION_NAME_RETRY)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            retry = 3,
+            condition = "headers['type']=='TestRetry'"
+        )
+        public ConsumerConnector<?> auditConsumerRetry() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("TestRetry");
+            };
+        }
     }
 
     @BeforeEach
@@ -218,6 +273,8 @@ public class ConnectorConfigurationIT {
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_D + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorGet" + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup("connectorPost" + REGISTRATION_NAME_SUFFIX)).isNotNull();
     }
 
     @Test
@@ -234,7 +291,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(condition)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
             );
     }
 
@@ -247,7 +304,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(expression)
             .isEqualTo(
-                "T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
             );
     }
 
@@ -302,7 +359,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -322,8 +379,9 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(2000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply).isNull();
+        verify(streamBridge, never()).send(eq("script.EXECUTE"), any()); //never re-publish discarded message
     }
 
     @Test
@@ -339,7 +397,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
         assertThat(reply)
             .isNotNull()
             .extracting(Message::getPayload)
@@ -371,6 +429,80 @@ public class ConnectorConfigurationIT {
             .extracting(Throwable::getMessage)
             .isEqualTo("Test Audit Consumer Error");
     }
+
+    @Test
+    public void testConnectorsDemultiplexGetRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("GetRequest")
+            .setHeader("connectorType", "rest-connector.GET")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.GET");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("GetResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
+    }
+
+    @Test
+    public void testConnectorsDemultiplexPostRequests() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("PostRequest")
+            .setHeader("connectorType", "rest-connector.POST")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", INTEGRATION_RESULTS)
+            .build();
+
+        // when
+        input.send(message, "rest-connector.POST");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, bindingResolver.getBindingDestination(INTEGRATION_RESULTS));
+        assertThat(reply)
+            .isNotNull()
+            .extracting(Message::getPayload)
+            .isNotNull()
+            .isEqualTo("PostResult".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(output.receive(1, bindingResolver.getBindingDestination(INTEGRATION_RESULTS))).isNull();
+    }
+
+    @Test
+    public void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
+        // given
+        byte[] payload = "Test retry".getBytes();
+        Message<?> message = MessageBuilder
+            .withPayload(payload)
+            .setHeader("appVersion", "20")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("spring.cloud.function.destination", "script.EXECUTE")
+            .build();
+        // when
+        input.send(message, "script.EXECUTE");
+
+        // then
+        verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
+        List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
+        Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
+        Assertions.assertThat(retryMessages).extracting("headers").extracting("x-retry-count").containsExactly(1, 2);
+
+        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
+        assertThat(reply).isNull();
+    }
+
+    @Captor
+    private ArgumentCaptor<GenericMessage> retryMessageCaptor;
 
     private String resolveExpression(String value) {
         BeanExpressionResolver resolver = this.applicationContext.getBeanFactory().getBeanExpressionResolver();

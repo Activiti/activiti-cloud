@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
@@ -44,14 +43,21 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
             .getPropertySources()
             .addAfter(
                 SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                new MapPropertySource(this.getClass().getSimpleName(), resolvePropertiesToSet(messagingBroker))
+                new MapPropertySource(
+                    this.getClass().getSimpleName(),
+                    resolvePropertiesToSet(messagingBroker, environment)
+                )
             );
     }
 
-    private Map<String, Object> resolvePropertiesToSet(MessagingBroker messagingBroker) {
+    private Map<String, Object> resolvePropertiesToSet(
+        MessagingBroker messagingBroker,
+        ConfigurableEnvironment environment
+    ) {
         Map<String, Object> extraProperties = new HashMap<>();
         extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, MessagingBroker.rabbitmq.equals(messagingBroker));
         extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveDefaultBinder(messagingBroker));
+
         return extraProperties;
     }
 

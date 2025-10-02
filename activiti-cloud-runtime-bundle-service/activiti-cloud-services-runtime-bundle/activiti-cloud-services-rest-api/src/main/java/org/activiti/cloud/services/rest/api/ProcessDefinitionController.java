@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ public interface ProcessDefinitionController {
             value = "include",
             required = false
         ) List<String> include,
+        @Parameter(description = "Process definition category to exclude from results") @RequestParam(
+            value = "excludedCategory",
+            required = false
+        ) String excludedCategory,
         Pageable pageable
     );
 

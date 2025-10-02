@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.VariableDefinition;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
@@ -32,6 +35,7 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
     private String formKey;
     private String category;
     private List<VariableDefinition> variableDefinitions = new ArrayList<>();
+    private Map<String, Object> constantValues = new HashMap<>();
 
     public CloudProcessDefinitionImpl() {}
 
@@ -116,5 +120,54 @@ public class CloudProcessDefinitionImpl extends CloudRuntimeEntityImpl implement
 
     public void setVariableDefinitions(List<VariableDefinition> variableDefinitions) {
         this.variableDefinitions = variableDefinitions;
+    }
+
+    @Override
+    public Map<String, Object> getConstantValues() {
+        return constantValues;
+    }
+
+    public void setConstantValues(Map<String, Object> constantValues) {
+        this.constantValues = constantValues;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof CloudProcessDefinitionImpl that)) {
+            return false;
+        }
+        if (!super.equals(object)) {
+            return false;
+        }
+        return (
+            version == that.version &&
+            Objects.equals(id, that.id) &&
+            Objects.equals(name, that.name) &&
+            Objects.equals(key, that.key) &&
+            Objects.equals(description, that.description) &&
+            Objects.equals(formKey, that.formKey) &&
+            Objects.equals(category, that.category) &&
+            Objects.equals(variableDefinitions, that.variableDefinitions) &&
+            Objects.equals(constantValues, that.constantValues)
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            super.hashCode(),
+            id,
+            name,
+            key,
+            description,
+            version,
+            formKey,
+            category,
+            variableDefinitions,
+            constantValues
+        );
     }
 }

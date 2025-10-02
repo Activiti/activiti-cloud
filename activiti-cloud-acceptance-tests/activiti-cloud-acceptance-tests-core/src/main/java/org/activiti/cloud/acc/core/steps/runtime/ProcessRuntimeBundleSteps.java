@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ public class ProcessRuntimeBundleSteps {
     @Step
     public Collection<ProcessDefinition> getProcessDefinitions() {
         return processDefinitionsApiClient
-            .getProcessDefinitions(List.of(), DEFAULT_PAGEABLE)
+            .getProcessDefinitions(List.of(), null, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)

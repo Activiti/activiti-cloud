@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,12 @@ public @interface ConnectorBinding {
 
     String input() default "";
 
-    String condition() default "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}" +
+    String condition() default "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}" +
     " and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}";
 
     String outputHeader() default "resultDestination";
+
+    String connectorType() default "";
+
+    int retry() default 0;
 }

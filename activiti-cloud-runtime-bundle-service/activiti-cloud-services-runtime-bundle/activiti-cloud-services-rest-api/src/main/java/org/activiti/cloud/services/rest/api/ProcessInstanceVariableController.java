@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,26 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-@RequestMapping(
-    value = "/v1/process-instances/{processInstanceId}/variables",
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
-)
 public interface ProcessInstanceVariableController {
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping(path = "/v1/process-instances/{processInstanceId}/variables", consumes = APPLICATION_JSON_VALUE)
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
         @Parameter(description = "Enter the processInstanceId to get variables") @PathVariable String processInstanceId
     );
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @PutMapping(value = "/v1/process-instances/{processInstanceId}/variables", consumes = APPLICATION_JSON_VALUE)
     ResponseEntity<Void> updateVariables(
         @Parameter(
             description = "Enter the processInstanceId to update variables"

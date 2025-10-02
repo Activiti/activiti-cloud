@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.examples;
 
+import static org.activiti.cloud.examples.connectors.ExampleConnector.EXAMPLE_CONNECTOR_CONSUMER;
+import static org.activiti.cloud.examples.connectors.HeadersConnector.HEADERS_CONNECTOR_CONSUMER;
+import static org.activiti.cloud.examples.connectors.MoviesDescriptionConnector.MOVIES_DESCRIPTION_CONSUMER;
+import static org.activiti.cloud.examples.connectors.MultiInstanceConnector.MULTI_INSTANCE_CONSUMER;
+import static org.activiti.cloud.examples.connectors.TestBpmnErrorConnector.TEST_BPMN_ERROR_CONNECTOR_CONSUMER;
+import static org.activiti.cloud.examples.connectors.TestErrorConnector.TEST_ERROR_CONNECTOR_CONSUMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
@@ -32,7 +38,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application.properties")
+@TestPropertySource(locations = "classpath:test.properties")
 public class CloudConnectorAppIT {
 
     private static final String CONNECTOR_SUFFIX = "Connector";
@@ -60,35 +66,14 @@ public class CloudConnectorAppIT {
 
     @Test
     public void functionCatalogContainsFunctionDefinitions() {
-        assertThat(
-            functionCatalog.<Object>lookup(
-                getRegisteredConnectorName(ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER)
-            )
-        )
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(EXAMPLE_CONNECTOR_CONSUMER))).isNotNull();
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(HEADERS_CONNECTOR_CONSUMER))).isNotNull();
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(HEADERS_CONNECTOR_CONSUMER))).isNotNull();
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(MOVIES_DESCRIPTION_CONSUMER))).isNotNull();
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(MULTI_INSTANCE_CONSUMER))).isNotNull();
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_BPMN_ERROR_CONNECTOR_CONSUMER)))
             .isNotNull();
-        assertThat(
-            functionCatalog.<Object>lookup(
-                getRegisteredConnectorName(HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER)
-            )
-        )
-            .isNotNull();
-        assertThat(
-            functionCatalog.<Object>lookup(
-                getRegisteredConnectorName(HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER)
-            )
-        )
-            .isNotNull();
-        assertThat(
-            functionCatalog.<Object>lookup(
-                getRegisteredConnectorName(MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER)
-            )
-        )
-            .isNotNull();
-        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(MultiInstanceConnector.Channels.CHANNEL)))
-            .isNotNull();
-        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TestBpmnErrorConnector.Channels.CHANNEL)))
-            .isNotNull();
-        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TestErrorConnector.Channels.CHANNEL)))
+        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_ERROR_CONNECTOR_CONSUMER)))
             .isNotNull();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.process.model.BPMNActivity;
@@ -39,17 +39,11 @@ public class BPMNActivityJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(bpmnActivity);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("elementId")
-            .isEqualTo("element-id")
-            .node("activityName")
-            .isEqualTo("BPMN Activity Name")
-            .node("activityType")
-            .isEqualTo("Service Task")
-            .node("processDefinitionId")
-            .isEqualTo("proc-def-id")
-            .node("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("elementId").isEqualTo("element-id");
+        assertThatJson(jsonRepresentation).inPath("activityName").isEqualTo("BPMN Activity Name");
+        assertThatJson(jsonRepresentation).inPath("activityType").isEqualTo("Service Task");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     @Test

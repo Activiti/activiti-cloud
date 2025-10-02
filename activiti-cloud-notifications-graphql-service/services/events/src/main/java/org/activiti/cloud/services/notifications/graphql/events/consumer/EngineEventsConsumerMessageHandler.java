@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class EngineEventsConsumerMessageHandler {
         List<Map<String, Object>> events = message.getPayload();
         String routingKey = (String) message.getHeaders().get("routingKey");
 
-        logger.debug("Received source message {} with routingKey: {}", message, routingKey);
+        logger.debug("Received message with routingKey: {}", routingKey);
 
         return MessageBuilder.<List<EngineEvent>>createMessage(transformer.transform(events), message.getHeaders());
     }

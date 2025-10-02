@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.IdentityLink;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -533,7 +534,7 @@ public class AuditProducerIT {
                 assertThat(streamHandler.getLatestReceivedEvents())
                     .filteredOn(it -> Arrays.asList(TASK_COMPLETED, PROCESS_COMPLETED).contains(it.getEventType()))
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getActor)
-                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, "service_user"));
+                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, expectedActor));
             });
     }
 
@@ -915,18 +916,15 @@ public class AuditProducerIT {
         String processInstanceId = processInstance.getBody().getId();
 
         // when
-        List<String> subprocessIds = runtimeService
+        List<org.activiti.engine.runtime.ProcessInstance> childInstances = runtimeService
             .createProcessInstanceQuery()
             .superProcessInstanceId(processInstanceId)
-            .list()
-            .stream()
-            .map(it -> it.getProcessInstanceId())
-            .collect(Collectors.toList());
-        // then
-        assertThat(subprocessIds).hasSize(2);
+            .list();
 
-        String subProcessId1 = subprocessIds.get(0);
-        String subProcessId2 = subprocessIds.get(1);
+        String subProcessId1 = childInstances.get(0).getProcessInstanceId();
+        String subProcessId2 = childInstances.get(1).getProcessInstanceId();
+
+        assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).containsOnly(processInstanceId);
 
         await()
             .untilAsserted(() -> {
@@ -1364,6 +1362,7 @@ public class AuditProducerIT {
         );
 
         assertThat(childProcesses).isNotEmpty();
+        assertThat(childProcesses.getFirst().getRootProcessInstanceId()).isEqualTo(processInstance.getId());
 
         String childProcessInstanceId = childProcesses.iterator().next().getId();
 

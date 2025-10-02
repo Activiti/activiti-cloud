@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import java.util.Collection;
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -30,6 +31,7 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
+import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 
 public class MQServiceTaskBehavior implements DelegateExecutionFunction {
 
@@ -40,6 +42,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final IntegrationRequestSender integrationRequestSender;
+    private final Collection<IntegrationContextEnricher> integrationContextEnrichers;
 
     public MQServiceTaskBehavior(
         IntegrationContextManager integrationContextManager,
@@ -48,7 +51,8 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         DefaultServiceTaskBehavior defaultServiceTaskBehavior,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
-        IntegrationRequestBuilder integrationRequestBuilder
+        IntegrationRequestBuilder integrationRequestBuilder,
+        Collection<IntegrationContextEnricher> integrationContextEnrichers
     ) {
         this.integrationContextManager = integrationContextManager;
         this.integrationRequestSender = integrationRequestSender;
@@ -57,6 +61,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         this.defaultServiceTaskBehavior = defaultServiceTaskBehavior;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.runtimeBundleProperties = runtimeBundleProperties;
+        this.integrationContextEnrichers = integrationContextEnrichers;
     }
 
     @Override
@@ -70,10 +75,17 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
             storeIntegrationContext(execution),
             execution
         );
+        enrichIntegrationContext(integrationContext);
         sendIntegrationRequest(integrationContext);
         aggregateCloudIntegrationRequestedEvent(integrationContext);
 
         return DelegateExecutionOutcome.WAIT_FOR_TRIGGER;
+    }
+
+    private void enrichIntegrationContext(IntegrationContext integrationContext) {
+        if (integrationContextEnrichers != null) {
+            integrationContextEnrichers.forEach(enricher -> enricher.enrich(integrationContext));
+        }
     }
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {

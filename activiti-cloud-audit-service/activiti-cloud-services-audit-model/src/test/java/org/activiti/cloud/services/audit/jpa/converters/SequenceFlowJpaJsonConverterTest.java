@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.process.model.BPMNElement;
@@ -47,25 +47,15 @@ public class SequenceFlowJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(sequenceFlow);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("elementId")
-            .isEqualTo("sequence-flow-element-id")
-            .node("sourceActivityElementId")
-            .isEqualTo("source-element-id")
-            .node("sourceActivityName")
-            .isEqualTo("source-activity-name")
-            .node("sourceActivityType")
-            .isEqualTo("source-activity-type")
-            .node("targetActivityElementId")
-            .isEqualTo("target-element-id")
-            .node("targetActivityName")
-            .isEqualTo("target-activity-name")
-            .node("targetActivityType")
-            .isEqualTo("target-activity-type")
-            .node("processDefinitionId")
-            .isEqualTo("proc-def-id")
-            .node("processInstanceId")
-            .isEqualTo("proc-inst-id");
+        assertThatJson(jsonRepresentation).inPath("elementId").isEqualTo("sequence-flow-element-id");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityElementId").isEqualTo("source-element-id");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityName").isEqualTo("source-activity-name");
+        assertThatJson(jsonRepresentation).inPath("sourceActivityType").isEqualTo("source-activity-type");
+        assertThatJson(jsonRepresentation).inPath("targetActivityElementId").isEqualTo("target-element-id");
+        assertThatJson(jsonRepresentation).inPath("targetActivityName").isEqualTo("target-activity-name");
+        assertThatJson(jsonRepresentation).inPath("targetActivityType").isEqualTo("target-activity-type");
+        assertThatJson(jsonRepresentation).inPath("processDefinitionId").isEqualTo("proc-def-id");
+        assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }
 
     @Test

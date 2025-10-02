@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.BooleanBuilder;
@@ -202,5 +201,10 @@ public class ProcessInstanceService {
         Predicate whereExpression = taskEntity.processInstanceId.eq(processInstanceId).and(taskInvolved);
 
         return taskRepository.exists(whereExpression);
+    }
+
+    @Transactional(readOnly = true)
+    public Long count(ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceSearchService.countRestricted(searchRequest);
     }
 }

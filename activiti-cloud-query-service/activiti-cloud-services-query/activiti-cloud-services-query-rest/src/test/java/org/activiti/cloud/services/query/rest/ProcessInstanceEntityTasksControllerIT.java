@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +55,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -72,43 +72,43 @@ public class ProcessInstanceEntityTasksControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private TaskRepository taskRepository;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceRepository processInstanceRepository;
 
-    @MockBean
+    @MockitoBean
     private VariableRepository variableRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
-    @MockBean
+    @MockitoBean
     private UserGroupManager userGroupManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
+    @MockitoBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceAdminService processInstanceAdminService;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceService processInstanceService;
 
-    @MockBean
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -146,16 +146,12 @@ public class ProcessInstanceEntityTasksControllerIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.skipCount").isEqualTo(11);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.maxItems").isEqualTo(10);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.count").isEqualTo(1);
         assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(11)
-            .node("list.pagination.maxItems")
-            .isEqualTo(10)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(12);
+            .inPath("list.pagination.hasMoreItems")
+            .isEqualTo(false);
+        assertThatJson(result.getResponse().getContentAsString()).inPath("list.pagination.totalItems").isEqualTo(12);
     }
 }

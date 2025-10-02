@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.activiti.cloud.api.task.model.impl.conf.CloudTaskModelAutoConfigurati
 import org.activiti.cloud.services.rest.api.ProcessDefinitionsApiClient;
 import org.activiti.cloud.services.rest.api.ProcessInstanceApiClient;
 import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
+import org.activiti.cloud.services.rest.api.ProcessInstanceVariableApiClient;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -111,6 +112,14 @@ public class RuntimeFeignConfiguration {
             .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
             .contract(new SpringMvcContract())
             .target(TaskVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
+    }
+
+    @Bean
+    public ProcessInstanceVariableApiClient processInstanceVariableApiClient() {
+        return FeignRestDataClient
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .contract(new SpringMvcContract())
+            .target(ProcessInstanceVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean

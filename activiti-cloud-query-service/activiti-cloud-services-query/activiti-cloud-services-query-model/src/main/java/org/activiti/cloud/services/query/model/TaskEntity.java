@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import static jakarta.persistence.TemporalType.TIMESTAMP;
+import static org.activiti.cloud.services.query.model.StringUtils.truncate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -81,6 +82,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String assignee;
     private String name;
     private String description;
+    private String rootProcessInstanceId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
@@ -249,8 +251,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         Task task = taskCreatedEvent.getEntity();
         this.id = task.getId();
         this.assignee = task.getAssignee();
-        this.name = task.getName();
-        this.description = task.getDescription();
+        this.name = truncate(task.getName(), 255);
+        this.description = truncate(task.getDescription(), 255);
         this.createdDate = task.getCreatedDate();
         this.dueDate = task.getDueDate();
         this.priority = task.getPriority();
@@ -265,6 +267,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         this.processDefinitionVersion = taskCreatedEvent.getProcessDefinitionVersion();
         this.businessKey = taskCreatedEvent.getBusinessKey();
         this.taskDefinitionKey = task.getTaskDefinitionKey();
+        this.rootProcessInstanceId = task.getTaskProcessRootProcessInstanceId();
     }
 
     @Override
@@ -318,6 +321,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
+    public String getTaskProcessRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
@@ -350,11 +358,11 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = truncate(name, 255);
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = truncate(description, 255);
     }
 
     public void setCreatedDate(Date createdDate) {
@@ -637,6 +645,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @Override
     public Set<ProcessVariableEntity> getProcessVariables() {
         return processVariables;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {

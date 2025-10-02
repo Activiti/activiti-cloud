@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,19 +69,24 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
             scope
         );
 
-        StringBuilder value = new StringBuilder();
+        var target = Stream
+            .of(name.split(","))
+            .map(it -> {
+                var value = new StringBuilder();
 
-        if (StringUtils.hasText(prefix)) {
-            value.append(prefix).append(separator);
-        }
+                if (StringUtils.hasText(prefix)) {
+                    value.append(prefix).append(separator);
+                }
 
-        value.append(name);
+                value.append(it);
 
-        if (StringUtils.hasText(scope)) {
-            value.append(separator).append(scope);
-        }
+                if (StringUtils.hasText(scope)) {
+                    value.append(separator).append(scope);
+                }
 
-        String target = value.toString();
+                return value.toString();
+            })
+            .collect(Collectors.joining(","));
 
         return messagingProperties.isDestinationTransformersEnabled()
             ? messagingProperties.transformDestination().apply(target)

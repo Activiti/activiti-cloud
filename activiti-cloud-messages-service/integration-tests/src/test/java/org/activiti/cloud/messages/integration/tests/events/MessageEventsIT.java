@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,12 +56,12 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockReset;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockReset;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -102,25 +102,25 @@ class MessageEventsIT {
     @Autowired
     private RuntimeService runtimeService;
 
-    @SpyBean
+    @MockitoSpyBean
     private BpmnMessageReceivedEventMessageProducer bpmnMessageReceivedEventMessageProducer;
 
-    @SpyBean
+    @MockitoSpyBean
     private BpmnMessageSentEventMessageProducer bpmnMessageSentEventMessageProducer;
 
-    @SpyBean
+    @MockitoSpyBean
     private BpmnMessageWaitingEventMessageProducer bpmnMessageWaitingEventMessageProducer;
 
-    @SpyBean
+    @MockitoSpyBean
     private StartMessageCmdExecutor startMessageCmdExecutor;
 
-    @SpyBean
+    @MockitoSpyBean
     private ReceiveMessageCmdExecutor receiveMessageCmdExecutor;
 
-    @SpyBean
+    @MockitoSpyBean
     private MessageSubscriptionCancelledEventMessageProducer messageSubscriptionCancelledEventMessageProducer;
 
-    @SpyBean(reset = MockReset.NONE)
+    @MockitoSpyBean(reset = MockReset.NONE)
     private StartMessageDeployedEventMessageProducer startMessageDeployedEventMessageProducer;
 
     @Autowired

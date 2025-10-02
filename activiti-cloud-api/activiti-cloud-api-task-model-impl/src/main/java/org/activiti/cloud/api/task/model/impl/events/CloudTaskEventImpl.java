@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, Tas
         setProcessDefinitionVersion(task.getProcessDefinitionVersion());
         setBusinessKey(task.getBusinessKey());
         setAppVersion(task.getAppVersion());
+        setParentProcessInstanceId(task.getTaskProcessRootProcessInstanceId());
     }
 
     public CloudTaskEventImpl(String id, Long timestamp, Task task) {

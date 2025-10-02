@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.services.connectors.conf;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -37,13 +38,14 @@ import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.activiti.services.connectors.channel.ServiceTaskIntegrationCompletionHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
+import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +69,8 @@ public class CloudConnectorsAutoConfiguration {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator
+        VariablesPropagator variablesPropagator,
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -75,7 +78,22 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties,
             managementService,
             processEngineEventsAggregator,
-            variablesPropagator
+            variablesPropagator,
+            serviceTaskIntegrationCompletionHandler
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
+        RuntimeBundleProperties runtimeBundleProperties,
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
+    ) {
+        return new ServiceTaskIntegrationCompletionHandler(
+            runtimeBundleProperties,
+            managementService,
+            processEngineEventsAggregator
         );
     }
 
@@ -117,18 +135,19 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationRequestSender integrationRequestSender(
         StreamBridge streamBridge,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory
+        IntegrationContextMessageBuilderFactory messageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new IntegrationRequestSender(streamBridge, messageBuilderFactory);
+        return new IntegrationRequestSender(streamBridge, messageBuilderFactory, bindingResolver);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public IntegrationRequestBuilder integrationRequestBuilder(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        BindingServiceProperties bindingServiceProperties
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingServiceProperties);
+        return new IntegrationRequestBuilder(runtimeBundleInfoAppender, bindingResolver);
     }
 
     @Bean
@@ -161,7 +180,8 @@ public class CloudConnectorsAutoConfiguration {
         // to use composition instead of inheritance, this will make maintenance easier as changes in constructor
         // of DefaultServiceTaskBehavior will not impact the constructor of MQServiceTaskBehavior.
         // LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME will be injected in MQServiceTaskBehavior;
-        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud environment:
+        // DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME will be available only in non-cloud
+        // environment:
         // MQServiceTaskBehavior will replace it for cloud environment.
         return new DefaultServiceTaskBehavior(applicationContext, integrationContextBuilder, variablesPropagator);
     }
@@ -175,7 +195,8 @@ public class CloudConnectorsAutoConfiguration {
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
         IntegrationRequestBuilder integrationRequestBuilder,
-        IntegrationRequestSender integrationRequestSender
+        IntegrationRequestSender integrationRequestSender,
+        Set<IntegrationContextEnricher> integrationContextEnrichers
     ) {
         return new MQServiceTaskBehavior(
             integrationContextManager,
@@ -184,7 +205,8 @@ public class CloudConnectorsAutoConfiguration {
             defaultServiceTaskBehavior,
             processEngineEventsAggregator,
             runtimeBundleProperties,
-            integrationRequestBuilder
+            integrationRequestBuilder,
+            integrationContextEnrichers
         );
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.acc.shared.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+
 public class AuthToken {
 
     private String access_token;
@@ -26,5 +29,34 @@ public class AuthToken {
     @Override
     public String toString() {
         return access_token;
+    }
+
+    public String getSubject() {
+        return getClaim("sub");
+    }
+
+    public String getClaim(String claimName) {
+        if (access_token == null) {
+            return null;
+        }
+
+        try {
+            String[] parts = access_token.split("\\.");
+            if (parts.length != 3) {
+                return null;
+            }
+
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> claims = mapper.readValue(payload, Map.class);
+
+            Object claim = claims.get(claimName);
+            if (claim instanceof Map) {
+                return claim.toString();
+            }
+            return claim != null ? claim.toString() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,21 +34,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
-import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
+import org.activiti.cloud.services.core.ProcessDefinitionValuesService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionController;
@@ -58,11 +54,6 @@ import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.IoUtil;
-import org.activiti.spring.process.ProcessExtensionService;
-import org.activiti.spring.process.model.Extension;
-import org.activiti.spring.process.model.Mapping.SourceMappingType;
-import org.activiti.spring.process.model.ProcessConstantsMapping;
-import org.activiti.spring.process.model.ProcessVariablesMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -94,7 +85,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDefinitionService processDefinitionService;
 
-    private final ProcessExtensionService processExtensionService;
+    private final ProcessDefinitionValuesService processDefinitionValuesService;
 
     @Autowired
     public ProcessDefinitionControllerImpl(
@@ -106,7 +97,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         ProcessDefinitionService processDefinitionService,
-        ProcessExtensionService processExtensionService
+        ProcessDefinitionValuesService processDefinitionValuesService
     ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
@@ -117,17 +108,19 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
         this.processDefinitionService = processDefinitionService;
-        this.processExtensionService = processExtensionService;
+        this.processDefinitionValuesService = processDefinitionValuesService;
     }
 
     @Override
     public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(
         @RequestParam(required = false, defaultValue = "") List<String> include,
+        String excludedCategory,
         Pageable pageable
     ) {
         Page<ProcessDefinition> page = processDefinitionService.getProcessDefinitions(
             pageConverter.toAPIPageable(pageable),
-            include
+            include,
+            excludedCategory
         );
         return pagedCollectionModelAssembler.toModel(
             pageable,
@@ -179,76 +172,13 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     @Override
     public Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(String id) {
-        Map<String, Object> result = new HashMap<>();
-        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id, true);
-        if (
-            extensionsStartEventId != null &&
-            extensionsStartEventId.extensions() != null &&
-            extensionsStartEventId.id() != null
-        ) {
-            ProcessVariablesMapping startEventMappings = extensionsStartEventId
-                .extensions()
-                .getMappings()
-                .get(extensionsStartEventId.id());
-
-            if (startEventMappings != null) {
-                startEventMappings
-                    .getInputs()
-                    .forEach((input, mapping) -> {
-                        if (SourceMappingType.VALUE.equals(mapping.getType())) {
-                            result.put(input, mapping.getValue());
-                        }
-                    });
-            }
-        }
-
-        return result;
+        checkUserCanReadProcessDefinition(id);
+        return processDefinitionValuesService.getProcessModelStaticValuesMappingForStartEvent(id);
     }
 
     @Override
     public Map<String, Object> getProcessModelConstantValuesForStartEvent(String id) {
-        Map<String, Object> result = new HashMap<>();
-        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id, false);
-        if (
-            extensionsStartEventId != null &&
-            extensionsStartEventId.extensions() != null &&
-            extensionsStartEventId.id() != null
-        ) {
-            ProcessConstantsMapping startEventConstants = extensionsStartEventId
-                .extensions()
-                .getConstantForFlowElement(extensionsStartEventId.id());
-
-            if (startEventConstants != null) {
-                startEventConstants.keySet().forEach(key -> result.put(key, startEventConstants.get(key).getValue()));
-            }
-        }
-
-        return result;
-    }
-
-    private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id, boolean formRequired) {
         checkUserCanReadProcessDefinition(id);
-
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        Process process = bpmnModel.getMainProcess();
-
-        if (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null) {
-            Optional<FlowElement> startEvent = process
-                .getFlowElements()
-                .stream()
-                .filter(flowElement -> flowElement.getClass().equals(StartEvent.class))
-                .findFirst();
-
-            if (startEvent.isPresent()) {
-                return new ExtensionsStartEventId(
-                    startEvent.get().getId(),
-                    processExtensionService.getExtensionsForId(id)
-                );
-            }
-        }
-
-        return null;
+        return processDefinitionValuesService.getProcessModelConstantValuesForStartEvent(id);
     }
-
-    private record ExtensionsStartEventId(String id, Extension extensions) {}
 }

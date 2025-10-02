@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private Date completedDate;
     private Date suspendedDate;
 
+    private String rootProcessInstanceId;
+
     public CloudProcessInstanceImpl() {}
 
     public CloudProcessInstanceImpl(ProcessInstance processInstance) {
@@ -63,6 +65,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         parentId = processInstance.getParentId();
         processDefinitionVersion = processInstance.getProcessDefinitionVersion();
         processDefinitionName = processInstance.getProcessDefinitionName();
+        rootProcessInstanceId = processInstance.getRootProcessInstanceId();
     }
 
     @Override
@@ -173,6 +176,15 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     @Override
     public String getProcessDefinitionName() {
         return processDefinitionName;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public void setProcessDefinitionName(String processDefinitionName) {

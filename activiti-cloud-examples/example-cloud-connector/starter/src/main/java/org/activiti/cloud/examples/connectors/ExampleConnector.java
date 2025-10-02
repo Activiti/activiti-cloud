@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.activiti.cloud.examples.connectors;
 
 import static net.logstash.logback.marker.Markers.append;
+import static org.activiti.cloud.examples.connectors.ExampleConnector.EXAMPLE_CONNECTOR_CONSUMER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -37,9 +38,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-@ConnectorBinding(input = ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER, condition = "")
-@Component(ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER + "Connector")
+@ConnectorBinding(
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
+    condition = "",
+    connectorType = "ExampleConnector"
+)
+@Component(EXAMPLE_CONNECTOR_CONSUMER + "Connector")
 public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String EXAMPLE_CONNECTOR_CONSUMER = "exampleConnectorConsumer";
 
     private final Logger logger = LoggerFactory.getLogger(ExampleConnector.class);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.services.connectors.channel;
 
 import java.util.ArrayList;
@@ -118,7 +117,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
                             return;
                         } catch (Throwable cause) {
-                            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            LOGGER.info("Error propagating CloudBpmnError: {}", cause.getMessage());
                             // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
                             commands = restoreCommandList(commands);
                         }

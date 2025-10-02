@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.monitoring;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,13 +53,9 @@ public class ActuatorHealthIndicatorsIT {
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
 
-        assertThatJson(result.getResponse().getContentAsString())
-            .node("status")
-            .isEqualTo("UP")
-            .node("components.db.status")
-            .isEqualTo("UP")
-            .node("components.rabbit.status")
-            .isEqualTo("UP");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("status").isEqualTo("UP");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.db.status").isEqualTo("UP");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.rabbit.status").isEqualTo("UP");
     }
 
     @Test
@@ -72,13 +68,9 @@ public class ActuatorHealthIndicatorsIT {
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
 
-        assertThatJson(result.getResponse().getContentAsString())
-            .node("status")
-            .isEqualTo("UP")
-            .node("components.db.status")
-            .isAbsent()
-            .node("components.rabbit.status")
-            .isAbsent();
+        assertThatJson(result.getResponse().getContentAsString()).inPath("status").isEqualTo("UP");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.db.status").isAbsent();
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.rabbit.status").isAbsent();
     }
 
     @Test
@@ -90,12 +82,8 @@ public class ActuatorHealthIndicatorsIT {
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
 
-        assertThatJson(result.getResponse().getContentAsString())
-            .node("status")
-            .isEqualTo("UP")
-            .node("components.db.status")
-            .isAbsent()
-            .node("components.rabbit.status")
-            .isAbsent();
+        assertThatJson(result.getResponse().getContentAsString()).inPath("status").isEqualTo("UP");
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.db.status").isAbsent();
+        assertThatJson(result.getResponse().getContentAsString()).inPath("components.rabbit.status").isAbsent();
     }
 }

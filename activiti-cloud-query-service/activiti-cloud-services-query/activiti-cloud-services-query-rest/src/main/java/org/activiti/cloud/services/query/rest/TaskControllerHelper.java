@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
@@ -244,5 +243,22 @@ public class TaskControllerHelper {
             .stream()
             .collect(Collectors.groupingBy(TaskCandidateGroupEntity::getTaskId, Collectors.toSet()));
         tasks.forEach(task -> task.setTaskCandidateGroups(candidatesByTaskId.get(task.getId())));
+    }
+
+    @Transactional(readOnly = true)
+    public Long countTasksUnrestricted(TaskSearchRequest taskSearchRequest) {
+        TaskSpecification unrestrictedTaskSpecification = TaskSpecification.unrestricted(taskSearchRequest);
+        return taskRepository.count(unrestrictedTaskSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countTasksRestricted(TaskSearchRequest taskSearchRequest) {
+        TaskSpecification restrictedTaskSpecification = TaskSpecification.restricted(
+            taskSearchRequest,
+            securityManager.getAuthenticatedUserId(),
+            securityManager.getAuthenticatedUserGroups()
+        );
+
+        return taskRepository.count(restrictedTaskSpecification);
     }
 }

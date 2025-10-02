@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,7 @@ public class EmbeddedSubProcessAuditIT {
         );
 
         String processInstanceId = processInstance.getBody().getId();
+        String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
         await()
             .untilAsserted(() -> {
@@ -167,7 +168,7 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
-                        tuple(TASK_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS)
+                        tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
                     );
 
                 assertThat(receivedEvents)
@@ -277,6 +278,7 @@ public class EmbeddedSubProcessAuditIT {
         );
 
         String processInstanceId = processInstance.getBody().getId();
+        String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
         await()
             .untilAsserted(() -> {
@@ -324,7 +326,12 @@ public class EmbeddedSubProcessAuditIT {
                         ),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
                         tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
-                        tuple(TASK_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                        )
                     );
 
                 assertThat(receivedEvents)
@@ -438,6 +445,7 @@ public class EmbeddedSubProcessAuditIT {
         );
 
         String processInstanceId = processInstance.getBody().getId();
+        String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
         await()
             .untilAsserted(() -> {
@@ -489,7 +497,12 @@ public class EmbeddedSubProcessAuditIT {
                             SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
                         ),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT),
-                        tuple(TASK_CREATED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_SIGNAL_EVENT
+                        )
                     );
             });
 
@@ -564,6 +577,7 @@ public class EmbeddedSubProcessAuditIT {
         );
 
         String processInstanceId = processInstance.getBody().getId();
+        String rootRootProcessInstanceId = processInstance.getBody().getRootProcessInstanceId();
 
         await()
             .untilAsserted(() -> {
@@ -585,8 +599,18 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_CREATED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_ASSIGNED, processInstanceId, null, INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        ),
+                        tuple(
+                            TASK_ASSIGNED,
+                            processInstanceId,
+                            rootRootProcessInstanceId,
+                            INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        )
                     );
             });
 
@@ -660,8 +684,18 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_CREATED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS),
-                        tuple(TASK_ASSIGNED, processInstanceId, null, NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS)
+                        tuple(
+                            TASK_CREATED,
+                            processInstanceId,
+                            processInstanceId,
+                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        ),
+                        tuple(
+                            TASK_ASSIGNED,
+                            processInstanceId,
+                            processInstanceId,
+                            NON_INTERRUPTING_MESSAGE_EVENT_SUB_PROCESS
+                        )
                     );
             });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     public static final String DISCARD_CHANNEL = "discardChannel";
     public static final String REPLY_CHANNEL = "replyChannel";
     public static final String ERROR_CHANNEL = "errorChannel";
+    public static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW_INPUT = "messageConnectorIntegrationFlowInput";
 
     private final MessageConnectorProcessor processor;
     private final MessageConnectorAggregator aggregator;
@@ -73,7 +74,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(processor.input())
+        return this.from(MESSAGE_CONNECTOR_INTEGRATION_FLOW_INPUT)
             .headerFilter(properties.getInputHeadersToRemove())
             .gateway(
                 flow ->

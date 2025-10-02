@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,20 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
+import java.util.Collections;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity_;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -69,7 +74,24 @@ public class ProcessInstanceSpecification
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
+        applyProcessCategoryNameFilter(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    private void applyProcessCategoryNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (StringUtils.isNotEmpty(searchRequest.excludeByProcessCategoryName())) {
+            Subquery<String> subquery = criteriaBuilder.createQuery().subquery(String.class);
+            Root<ProcessDefinitionEntity> processDefinitionRoot = subquery.from(ProcessDefinitionEntity.class);
+            subquery.select(processDefinitionRoot.get(ProcessDefinitionEntity_.key));
+            subquery.where(
+                criteriaBuilder.equal(
+                    processDefinitionRoot.get(ProcessDefinitionEntity_.category),
+                    searchRequest.excludeByProcessCategoryName()
+                )
+            );
+
+            predicates.add(criteriaBuilder.not(root.get(ProcessInstanceEntity_.processDefinitionKey).in(subquery)));
+        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,14 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
+import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 import java.util.List;
 import java.util.Map;
+import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -39,6 +45,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -64,6 +71,12 @@ public class QueryRestApplicationIT {
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
+
+    @Autowired
+    private RestrictedKeysProvider restrictedKeysProvider;
+
+    @Autowired
+    private GraphQLSchema graphQLSchema;
 
     @Test
     public void contextLoads() {
@@ -109,6 +122,109 @@ public class QueryRestApplicationIT {
             .containsKeys("entries", "pagination");
     }
 
+    @Test
+    void graphQLSchema() {
+        assertThat(graphQLSchema)
+            .isNotNull()
+            .extracting(GraphQLSchema::getQueryType)
+            .extracting(GraphQLObjectType::getFields)
+            .asInstanceOf(InstanceOfAssertFactories.list(GraphQLFieldDefinition.class))
+            .extracting(GraphQLFieldDefinition::getName)
+            .containsOnly(
+                "TaskVariable",
+                "ProcessVariable",
+                "Application",
+                "ProcessDefinition",
+                "ProcessInstance",
+                "Task",
+                "TaskVariables",
+                "ProcessVariables",
+                "Applications",
+                "ProcessDefinitions",
+                "ProcessInstances",
+                "Tasks",
+                "ProcessModel",
+                "ProcessModels",
+                "ServiceTask",
+                "ServiceTasks",
+                "hello"
+            );
+    }
+
+    @Test
+    public void testGraphqlModelerUserShouldNotSeeTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("johnsnow", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat("{Tasks={select=[]}}").isEqualTo(result.getData().toString());
+    }
+
+    @Test
+    public void testGraphqlAdminUserShouldSeeAllTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("testadmin", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat(result.getData().toString())
+            .isEqualTo(
+                "{Tasks={select=[" +
+                "{name=task1, assignee=testuser, priority=5}, " +
+                "{name=task2, assignee=hruser, priority=10}, " +
+                "{name=task3, assignee=hruser, priority=5}, " +
+                "{name=task4, assignee=hruser, priority=10}, " +
+                "{name=task5, assignee=hruser, priority=10}, " +
+                "{name=task6, assignee=hruser, priority=10}" +
+                "]}}"
+            );
+    }
+
+    @Test
+    public void testGraphqlUserShouldSeeInvolvedTasks() {
+        GraphQLController.GraphQLQueryRequest query = new GraphQLController.GraphQLQueryRequest(
+            "{Tasks{select{name assignee priority}}}"
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = testRestTemplate.postForEntity(
+            "/graphql",
+            entityWithAcceptJsonContentHeaders(query, entityWithAuthorizationHeader("testuser", "password")),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+        assertThat(result.getData().toString())
+            .isEqualTo("{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}");
+    }
+
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {
         HttpEntity authEntity = identityTokenProducer.entityWithAuthorizationHeader(user, password);
         return new HttpEntity(authEntity.getHeaders());
@@ -120,5 +236,13 @@ public class QueryRestApplicationIT {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return new HttpEntity(headers);
+    }
+
+    private HttpEntity entityWithAcceptJsonContentHeaders(Object body, HttpEntity authEntity) {
+        var headers = new HttpHeaders();
+        headers.set("Authorization", authEntity.getHeaders().getFirst("Authorization"));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity(body, headers);
     }
 }

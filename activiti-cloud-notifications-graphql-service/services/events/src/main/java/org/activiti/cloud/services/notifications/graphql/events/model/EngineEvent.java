@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Map;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKey;
 
 @SpELTemplateRoutingKey(
-    "engineEvents.#{['serviceName']?:'_'}.#{['appName']?:'_'}.#{['eventType']?:'_'}.#{['processDefinitionKey']?:'_'}.#{['processInstanceId']?:'_'}.#{['businessKey']?:'_'}"
+    "engineEvents.#{['serviceName']?:'_'}.#{['appName']?:'_'}.#{['eventType']?:'_'}.#{['processDefinitionKey']?:'_'}.#{['processInstanceId']?:'_'}.#{['businessKey']?:'_'}.#{['actor']?:'_'}"
 )
 public class EngineEvent extends LinkedHashMap<String, Object> {
 

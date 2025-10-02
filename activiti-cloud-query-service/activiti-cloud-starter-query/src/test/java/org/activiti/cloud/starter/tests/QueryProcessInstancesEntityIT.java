@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,6 +264,33 @@ public class QueryProcessInstancesEntityIT {
                 ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
                 assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
                 assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
+            });
+    }
+
+    @Test
+    public void shouldGetProcessWithRootProcessInstanceId() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+                assertThat(processInstanceEntities)
+                    .extracting(
+                        ProcessInstanceEntity::getId,
+                        ProcessInstanceEntity::getStatus,
+                        ProcessInstanceEntity::getRootProcessInstanceId
+                    )
+                    .contains(tuple(process.getId(), RUNNING, process.getRootProcessInstanceId()));
             });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceVariablesMappingTypes {
 
@@ -184,13 +183,13 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(processVariableDate).isNotNull();
                 assertThat(processVariableDateTime).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                final Collection<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
                     processInstance.getId()
                 );
 
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-                assertThat(cloudVariableInstanceResource.getContent())
+                assertThat(cloudVariableInstanceResource)
+                    .isNotNull()
+                    .isNotEmpty()
                     .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, variableValue1),
@@ -214,13 +213,13 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(processVariableDate).isNotNull();
                 assertThat(processVariableDateTime).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                final Collection<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
                     processInstanceId
                 );
 
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-                assertThat(cloudVariableInstanceResource.getContent())
+                assertThat(cloudVariableInstanceResource)
+                    .isNotNull()
+                    .isNotEmpty()
                     .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, variableValue1),
@@ -244,13 +243,13 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(processVariableDate).isNotNull();
                 assertThat(processVariableDateTime).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                final Collection<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
                     processInstanceId
                 );
 
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-                assertThat(cloudVariableInstanceResource.getContent())
+                assertThat(cloudVariableInstanceResource)
+                    .isNotNull()
+                    .isNotEmpty()
                     .extracting(VariableInstance::getName, VariableInstance::getType)
                     .contains(
                         tuple(processVariableString, "string"),
@@ -268,28 +267,18 @@ public class ProcessInstanceVariablesMappingTypes {
 
         await()
             .untilAsserted(() -> {
-                final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
+                final Collection<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
                 assertThat(variableInstances).isNotNull();
                 assertThat(variableInstances).isNotEmpty();
-                assertThat(variableInstances.getContent())
-                    .extracting(VariableInstance::getName)
-                    .contains(processVariableString);
-                assertThat(variableInstances.getContent())
-                    .extracting(VariableInstance::getName)
-                    .contains(processVariableInteger);
-                assertThat(variableInstances.getContent())
-                    .extracting(VariableInstance::getName)
-                    .contains(processVariableBoolean);
-                assertThat(variableInstances.getContent())
-                    .extracting(VariableInstance::getName)
-                    .contains(processVariableDate);
-                assertThat(variableInstances.getContent())
-                    .extracting(VariableInstance::getName)
-                    .contains(processVariableDateTime);
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(processVariableString);
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(processVariableInteger);
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(processVariableBoolean);
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(processVariableDate);
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(processVariableDateTime);
             });
     }
 
-    public CollectionModel<CloudVariableInstance> getProcessVariables(String processInstanceId) {
+    public Collection<CloudVariableInstance> getProcessVariables(String processInstanceId) {
         return processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
     }
 
@@ -412,13 +401,13 @@ public class ProcessInstanceVariablesMappingTypes {
                 assertThat(processVariableDate).isNotNull();
                 assertThat(processVariableDateTime).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                final Collection<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
                     processInstanceId
                 );
 
-                assertThat(cloudVariableInstanceResource).isNotNull();
-                assertThat(cloudVariableInstanceResource).isNotEmpty();
-                assertThat(cloudVariableInstanceResource.getContent())
+                assertThat(cloudVariableInstanceResource)
+                    .isNotNull()
+                    .isNotEmpty()
                     .extracting(VariableInstance::getName, VariableInstance::getValue)
                     .contains(
                         tuple(processVariableString, "string321"),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
@@ -86,49 +86,49 @@ class ProcessInstanceVariableControllerImplIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProcessRuntime processRuntime;
 
-    @MockBean
+    @MockitoBean
     private RepositoryService repositoryService;
 
-    @MockBean
+    @MockitoBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockitoBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
+    @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
-    @MockBean
+    @MockitoBean
     private DateFormatterProvider dateFormatterProvider;
 
     @Autowired
     private ObjectMapper mapper;
 
-    @SpyBean
+    @MockitoSpyBean
     private CollectionModelAssembler resourcesAssembler;
 
     @Autowired
     private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
+    @MockitoBean
     private ProcessExtensionService processExtensionService;
 
-    @MockBean
+    @MockitoBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
-    @MockBean
+    @MockitoBean
     private RuntimeService runtimeService;
 
-    @MockBean
+    @MockitoBean
     private PrincipalIdentityProvider principalIdentityProvider;
 
-    @MockBean
+    @MockitoBean
     private ManagementService managementService;
 
     @BeforeEach
@@ -162,7 +162,9 @@ class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+                get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk());
     }

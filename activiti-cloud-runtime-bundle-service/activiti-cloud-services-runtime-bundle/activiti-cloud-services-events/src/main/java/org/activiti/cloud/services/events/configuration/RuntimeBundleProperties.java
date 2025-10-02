@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ public class RuntimeBundleProperties {
 
     @Value("${activiti.cloud.application.name:}")
     private String appName;
+
+    private RuntimeBundleMessagingProperties messaging;
 
     @Valid
     private RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
@@ -92,6 +94,14 @@ public class RuntimeBundleProperties {
         this.eventsProperties = eventsProperties;
     }
 
+    public RuntimeBundleMessagingProperties getMessaging() {
+        return messaging;
+    }
+
+    public void setMessaging(RuntimeBundleMessagingProperties messaging) {
+        this.messaging = messaging;
+    }
+
     public static class RuntimeBundleEventsProperties {
 
         private boolean integrationAuditEventsEnabled = true;
@@ -113,6 +123,19 @@ public class RuntimeBundleProperties {
 
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
+        }
+    }
+
+    public static class RuntimeBundleMessagingProperties {
+
+        private String[] requiredAuditProducerGroups;
+
+        public String[] getRequiredAuditProducerGroups() {
+            return requiredAuditProducerGroups;
+        }
+
+        public void setRequiredAuditProducerGroups(String[] requiredAuditProducerGroups) {
+            this.requiredAuditProducerGroups = requiredAuditProducerGroups;
         }
     }
 }

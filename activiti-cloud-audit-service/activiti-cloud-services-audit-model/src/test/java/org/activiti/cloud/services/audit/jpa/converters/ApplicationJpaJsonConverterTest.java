@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.process.model.Deployment;
@@ -39,13 +39,9 @@ public class ApplicationJpaJsonConverterTest {
         String jsonRepresentation = converter.convertToDatabaseColumn(deployment);
 
         //then
-        assertThatJson(jsonRepresentation)
-            .node("name")
-            .isEqualTo("DeploymentName")
-            .node("version")
-            .isEqualTo(1)
-            .node("id")
-            .isEqualTo("DeploymentId");
+        assertThatJson(jsonRepresentation).inPath("name").isEqualTo("DeploymentName");
+        assertThatJson(jsonRepresentation).inPath("version").isEqualTo(1);
+        assertThatJson(jsonRepresentation).inPath("id").isEqualTo("DeploymentId");
     }
 
     @Test

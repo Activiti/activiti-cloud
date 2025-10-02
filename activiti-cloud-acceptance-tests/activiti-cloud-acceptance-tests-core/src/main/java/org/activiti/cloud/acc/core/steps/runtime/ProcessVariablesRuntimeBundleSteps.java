@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,24 @@ package org.activiti.cloud.acc.core.steps.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
-import org.activiti.cloud.acc.core.services.runtime.ProcessVariablesRuntimeService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.services.rest.api.ProcessInstanceVariableApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 
 @EnableRuntimeFeignContext
 public class ProcessVariablesRuntimeBundleSteps {
 
     @Autowired
-    private ProcessVariablesRuntimeService processVariablesRuntimeService;
+    private ProcessInstanceVariableApiClient processInstanceVariableApiClient;
 
     @Autowired
     @Qualifier("runtimeBundleBaseService")
@@ -44,12 +46,17 @@ public class ProcessVariablesRuntimeBundleSteps {
     }
 
     @Step
-    public CollectionModel<CloudVariableInstance> getVariables(String id) {
-        return processVariablesRuntimeService.getVariables(id);
+    public Collection<CloudVariableInstance> getVariables(String processInstanceId) {
+        return processInstanceVariableApiClient
+            .getVariables(processInstanceId)
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList());
     }
 
     @Step
     public ResponseEntity<Void> updateVariables(String id, SetProcessVariablesPayload setProcessVariablesPayload) {
-        return processVariablesRuntimeService.updateVariables(id, setProcessVariablesPayload);
+        return processInstanceVariableApiClient.updateVariables(id, setProcessVariablesPayload);
     }
 }

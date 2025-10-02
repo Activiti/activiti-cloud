@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,51 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(ActivitiMessagingDestinationsAutoConfiguration.class)
 public class MessageBasedJobManagerAutoConfiguration {
 
+    @Configuration
+    static class AsyncExecutorJobMessageChannelsConfiguration implements AsyncExecutorJobMessageChannels {}
+
     @Bean
-    @ConditionalOnMissingBean
-    public JobMessageBuilderFactory jobMessageBuilderFactory(RuntimeBundleProperties properties) {
-        return new JobMessageBuilderFactory(properties);
+    @FunctionBinding(input = MessageBasedJobManagerChannelsConstants.INPUT)
+    Consumer<Message<?>> asyncExecutorJobsInputConsumer(MessageHandler jobMessageHandler) {
+        return jobMessageHandler::handleMessage;
+    }
+
+    @Bean
+    MessageHandler jobMessageHandler(
+        JobMessageHandlerFactory jobMessageHandlerFactory,
+        ProcessEngineConfigurationImpl processEngineConfiguration
+    ) {
+        return jobMessageHandlerFactory.create(processEngineConfiguration);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageInputChannelFactory jobMessageInputChannelFactory(
-        SubscribableChannelBindingTargetFactory bindingTargetFactory,
-        BindingServiceProperties bindingServiceProperties,
-        ConfigurableListableBeanFactory beanFactory
-    ) {
-        return new JobMessageInputChannelFactory(bindingTargetFactory, bindingServiceProperties, beanFactory);
+    public JobMessageBuilderFactory jobMessageBuilderFactory(RuntimeBundleProperties properties) {
+        return new JobMessageBuilderFactory(properties);
     }
 
     @Bean
@@ -64,9 +76,10 @@ public class MessageBasedJobManagerAutoConfiguration {
     public JobMessageProducer jobMessageProducer(
         StreamBridge streamBridge,
         ApplicationEventPublisher eventPublisher,
-        JobMessageBuilderFactory jobMessageBuilderFactory
+        JobMessageBuilderFactory jobMessageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return new DefaultJobMessageProducer(streamBridge, eventPublisher, jobMessageBuilderFactory);
+        return new DefaultJobMessageProducer(streamBridge, eventPublisher, jobMessageBuilderFactory, bindingResolver);
     }
 
     @Bean
@@ -79,17 +92,8 @@ public class MessageBasedJobManagerAutoConfiguration {
     @ConditionalOnMissingBean
     public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(
         ConfigurableListableBeanFactory beanFactory,
-        BindingService bindingService,
-        JobMessageInputChannelFactory jobMessageInputChannelFactory,
-        MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-        JobMessageHandlerFactory jobMessageHandlerFactory
+        MessageBasedJobManagerFactory messageBasedJobManagerFactory
     ) {
-        return new MessageBasedJobManagerConfigurator(
-            beanFactory,
-            bindingService,
-            jobMessageInputChannelFactory,
-            messageBasedJobManagerFactory,
-            jobMessageHandlerFactory
-        );
+        return new MessageBasedJobManagerConfigurator(beanFactory, messageBasedJobManagerFactory);
     }
 }

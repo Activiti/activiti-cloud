@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,42 +15,38 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import static org.activiti.cloud.examples.connectors.TestErrorConnector.TEST_ERROR_CONNECTOR_CONSUMER;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.activiti.cloud.examples.connectors.TestErrorConnector.Channels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
-@Component(Channels.CHANNEL + "Connector")
+@ConnectorBinding(
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
+    condition = "",
+    outputHeader = "",
+    connectorType = "test-error-connector.throwError"
+)
+@Component(TEST_ERROR_CONNECTOR_CONSUMER + "Connector")
 public class TestErrorConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String TEST_ERROR_CONNECTOR_CONSUMER = "testErrorConnectorInput";
 
     private static final Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
 
     private CountDownLatch countDownLatch;
-
-    public interface Channels {
-        String CHANNEL = "testErrorConnectorInput";
-
-        @InputBinding(CHANNEL)
-        default SubscribableChannel testErrorConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).getObject();
-        }
-    }
 
     public TestErrorConnector(
         IntegrationResultSender integrationResultSender,

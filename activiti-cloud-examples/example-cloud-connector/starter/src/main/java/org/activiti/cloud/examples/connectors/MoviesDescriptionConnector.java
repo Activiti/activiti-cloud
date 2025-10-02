@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import static org.activiti.cloud.examples.connectors.MoviesDescriptionConnector.MOVIES_DESCRIPTION_CONSUMER;
+
 import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -28,12 +30,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @ConnectorBinding(
-    input = MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER,
+    input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
     condition = "",
-    outputHeader = ""
+    outputHeader = "",
+    connectorType = "Movies.getMovieDesc"
 )
-@Component(MoviesDescriptionConnectorChannels.MOVIES_DESCRIPTION_CONSUMER + "Connector")
+@Component(MOVIES_DESCRIPTION_CONSUMER + "Connector")
 public class MoviesDescriptionConnector implements ConsumerConnector<IntegrationRequest> {
+
+    public static final String MOVIES_DESCRIPTION_CONSUMER = "moviesDescriptionConsumer";
 
     private Logger logger = LoggerFactory.getLogger(MoviesDescriptionConnector.class);
 

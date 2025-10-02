@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,5 +129,10 @@ public class ProcessInstanceAdminService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> search(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return processInstanceSearchService.searchUnrestricted(searchRequest, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Long count(ProcessInstanceSearchRequest searchRequest) {
+        return processInstanceSearchService.countUnrestricted(searchRequest);
     }
 }

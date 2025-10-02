@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,5 +82,22 @@ public class ProcessInstanceSearchService {
             processVariableKeys
         );
         return processInstances;
+    }
+
+    @Transactional(readOnly = true)
+    public Long countRestricted(ProcessInstanceSearchRequest searchRequest) {
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restricted(
+            searchRequest,
+            securityManager.getAuthenticatedUserId()
+        );
+        return processInstanceRepository.count(restrictedSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countUnrestricted(ProcessInstanceSearchRequest searchRequest) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestricted(
+            searchRequest
+        );
+        return processInstanceRepository.count(unrestrictedSpecification);
     }
 }

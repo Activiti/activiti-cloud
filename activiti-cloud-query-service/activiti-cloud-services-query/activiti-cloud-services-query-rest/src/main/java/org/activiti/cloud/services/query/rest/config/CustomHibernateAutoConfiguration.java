@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,5 +31,6 @@ public class CustomHibernateAutoConfiguration implements HibernatePropertiesCust
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put("hibernate.dialect", CustomPostgreSQLDialect.class.getName());
+        hibernateProperties.put("hibernate.order_by.default_null_ordering", "last");
     }
 }

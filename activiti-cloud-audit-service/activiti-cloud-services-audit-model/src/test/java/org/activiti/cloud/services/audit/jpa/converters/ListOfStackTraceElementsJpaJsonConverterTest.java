@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class ListOfStackTraceElementsJpaJsonConverterTest {
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("[0].methodName")
+            .inPath("[0].methodName")
             .isEqualTo("convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation");
     }
 

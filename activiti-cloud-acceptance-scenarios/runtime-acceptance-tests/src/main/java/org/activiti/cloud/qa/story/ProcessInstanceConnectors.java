@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceConnectors {
 
@@ -108,11 +107,12 @@ public class ProcessInstanceConnectors {
         assertThat(processInstanceId).isNotNull();
         await()
             .untilAsserted(() -> {
-                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     processInstanceId
                 );
-                assertThat(processVariables.getContent()).isNotNull();
-                assertThat(processVariables.getContent())
+
+                assertThat(processVariables)
+                    .isNotNull()
                     .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
                     .contains(tuple(variableName, variableValue));
             });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,12 +69,12 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
@@ -105,40 +105,40 @@ class ProcessInstanceAdminControllerImplIT {
     @Autowired
     private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
+    @MockitoBean
     private RepositoryService repositoryService;
 
-    @MockBean
+    @MockitoBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockitoBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
+    @MockitoBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
+    @MockitoBean
     private ProcessRuntime processRuntime;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeletedService cloudProcessDeletedService;
 
-    @MockBean
+    @MockitoBean
     private SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
-    @MockBean
+    @MockitoBean
     private RuntimeService runtimeService;
 
-    @MockBean
+    @MockitoBean
     private PrincipalIdentityProvider principalIdentityProvider;
 
-    @MockBean
+    @MockitoBean
     private ManagementService managementService;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionsSyncService processDefinitionsSyncService;
 
     @BeforeEach

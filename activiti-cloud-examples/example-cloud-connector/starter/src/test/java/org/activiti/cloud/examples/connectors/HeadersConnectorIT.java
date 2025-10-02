@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.examples.connectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,10 +59,14 @@ public class HeadersConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).setHeader("processDefinitionVersion", "1").build();
+        Message<?> message = MessageBuilder
+            .withPayload(payload)
+            .setHeader("processDefinitionVersion", "1")
+            .setHeader("connectorType", "headers.GET")
+            .build();
 
         //when
-        input.send(message, HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER);
+        input.send(message, "headers.GET");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");
@@ -83,10 +86,11 @@ public class HeadersConnectorIT {
         Message<IntegrationRequest> message = MessageBuilder
             .withPayload(integrationRequest)
             .setHeader("processDefinitionVersion", null)
+            .setHeader("connectorType", "headers.GET")
             .build();
 
         //when
-        input.send(message, HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER);
+        input.send(message, "headers.GET");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationResult_myApp");

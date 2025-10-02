@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,20 @@ import static graphql.schema.GraphQLScalarType.newScalar;
 import com.introproventures.graphql.jpa.query.autoconfigure.EnableGraphQLJpaQuerySchema;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuilderCustomizer;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
+import com.introproventures.graphql.jpa.query.schema.RestrictedKeysProvider;
 import graphql.GraphQL;
+import graphql.schema.visibility.GraphqlFieldVisibility;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -40,18 +45,34 @@ import org.springframework.context.annotation.Bean;
     matchIfMissing = true
 )
 @EnableGraphQLJpaQuerySchema(basePackageClasses = ProcessInstanceEntity.class)
+@EnableConfigurationProperties(ActivitiGraphQlJPASchemaProperties.class)
+@PropertySource("classpath:config/jpa-query.properties")
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
-    @Value("${spring.activiti.cloud.services.notifications.graphql.jpa-query.aggregate.enabled:true}")
-    private boolean isAggregateEnabled;
+    private final ActivitiGraphQlJPASchemaProperties properties;
+
+    public ActivitiGraphQLSchemaAutoConfiguration(ActivitiGraphQlJPASchemaProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
-    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer() {
-        return builder ->
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.services.notifications.graphql.jpa-query.fields-visibility.enabled",
+        matchIfMissing = true
+    )
+    Supplier<GraphqlFieldVisibility> activitiGraphQlFieldVisibilityProvider() {
+        return new ActivitiGraphQlFieldVisibilityProvider(properties);
+    }
+
+    @Bean
+    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(
+        ObjectProvider<RestrictedKeysProvider> restrictedKeysProvider
+    ) {
+        return builder -> {
             builder
                 .name("Query")
                 .description("Activiti Cloud Query Schema")
-                .enableAggregate(isAggregateEnabled)
+                .enableAggregate(properties.getAggregate().isEnabled())
                 .scalar(
                     VariableValue.class,
                     newScalar()
@@ -70,5 +91,12 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                         )
                         .build()
                 );
+
+            restrictedKeysProvider.ifAvailable(builder::restrictedKeysProvider);
+
+            Optional
+                .ofNullable(properties.getEntities())
+                .ifPresent(entities -> entities.forEach(entity -> builder.entityPath(entity.getName())));
+        };
     }
 }

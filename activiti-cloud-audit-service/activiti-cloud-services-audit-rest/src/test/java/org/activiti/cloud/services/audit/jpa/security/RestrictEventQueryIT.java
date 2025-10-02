@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
@@ -45,10 +45,10 @@ public class RestrictEventQueryIT {
     @Autowired
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private UserGroupManager userGroupManager;
 
     @Test

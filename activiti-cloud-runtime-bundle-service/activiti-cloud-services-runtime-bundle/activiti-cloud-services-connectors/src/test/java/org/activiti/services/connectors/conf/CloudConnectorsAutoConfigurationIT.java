@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -50,34 +50,34 @@ public class CloudConnectorsAutoConfigurationIT {
     @Autowired
     private MQServiceTaskBehavior behavior;
 
-    @MockBean
+    @MockitoBean
     private IntegrationContextManager integrationContextManager;
 
-    @MockBean
+    @MockitoBean
     private IntegrationContextService integrationContextService;
 
-    @MockBean
+    @MockitoBean
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @MockBean
+    @MockitoBean
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ProcessEngineChannels processEngineChannels;
 
-    @MockBean
+    @MockitoBean
     private TaskService taskService;
 
-    @MockBean
+    @MockitoBean
     private ManagementService managementService;
 
-    @MockBean
+    @MockitoBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
+    @MockitoBean
     private ConnectorImplementationsProvider connectorImplementationsProvider;
 
-    @MockBean
+    @MockitoBean
     private BuildProperties buildProperties;
 
     @BeforeEach

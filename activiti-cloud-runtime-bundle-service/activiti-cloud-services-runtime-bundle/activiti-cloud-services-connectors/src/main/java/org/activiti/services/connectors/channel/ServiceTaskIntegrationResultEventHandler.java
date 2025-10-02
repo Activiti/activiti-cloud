@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.services.connectors.channel;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
@@ -21,7 +20,10 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
@@ -50,6 +52,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ManagementService managementService;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
+    private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -57,7 +60,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator
+        VariablesPropagator variablesPropagator,
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -65,6 +69,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.managementService = managementService;
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
+        this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
     }
 
     @Retryable(
@@ -125,7 +130,23 @@ public class ServiceTaskIntegrationResultEventHandler {
                 )
             );
 
-            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+            try {
+                managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+            } catch (ActivitiOptimisticLockingException e) {
+                throw e;
+            } catch (Exception triggerException) {
+                LOGGER.warn(
+                    "Failed to update integration context {}. It might have been already deleted.",
+                    integrationContext.getId(),
+                    triggerException
+                );
+                IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
+                IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
+                this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
+                        integrationError,
+                        integrationContextEntity
+                    );
+            }
         }
     }
 }

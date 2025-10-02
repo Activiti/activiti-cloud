@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.examples.connectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,10 +65,13 @@ public class TestBpmnErrorConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder.withPayload(payload).build();
+        Message<?> message = MessageBuilder
+            .withPayload(payload)
+            .setHeader("connectorType", "test-bpmn-error-connector.throwError")
+            .build();
 
         //when
-        input.send(message, TestBpmnErrorConnector.Channels.CHANNEL);
+        input.send(message, "test-bpmn-error-connector.throwError");
 
         //then
         Message<?> outputMessage = output.receive(10000, "integrationError_myApp");

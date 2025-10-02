@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
         "activiti.cloud.messaging.destinations.commandResults.name=command-results",
         "activiti.cloud.messaging.destinations.commandResults.prefix=bar",
         "activiti.cloud.messaging.destinations.commandResults.separator=_",
+        "spring.cloud.stream.bindings.rest-connector.destination=rest-connector.GET,rest-connector.POST",
     }
 )
 public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
@@ -73,6 +74,12 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
     public void testBindingServicePropertiesCustomValues() {
         assertThat(bindingServiceProperties.getBindingProperties("commandResults").getDestination())
             .isEqualTo("bar_command-results_foo");
+    }
+
+    @Test
+    public void testBindingServicePropertiesMultiplexDestinations() {
+        assertThat(bindingServiceProperties.getBindingProperties("rest-connector").getDestination())
+            .isEqualTo("quix.baz.rest-connector.get,quix.baz.rest-connector.post");
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ExampleConnectorChannels {
-    String EXAMPLE_CONNECTOR_CONSUMER = "exampleConnectorConsumer";
+    String EXAMPLE_CONNECTOR = "example-connector";
 
-    @InputBinding(EXAMPLE_CONNECTOR_CONSUMER)
-    default SubscribableChannel exampleConnectorConsumer() {
-        return MessageChannels.publishSubscribe(EXAMPLE_CONNECTOR_CONSUMER).getObject();
+    @InputBinding(EXAMPLE_CONNECTOR)
+    default SubscribableChannel exampleConnector() {
+        return MessageChannels.publishSubscribe(EXAMPLE_CONNECTOR).getObject();
     }
 }

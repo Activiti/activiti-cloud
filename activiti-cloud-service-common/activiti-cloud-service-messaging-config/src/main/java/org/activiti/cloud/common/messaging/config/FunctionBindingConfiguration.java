@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -64,9 +66,21 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     public static final String NULL_CHANNEL = "nullChannel";
 
     @Bean
-    public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties) {
-        return destination ->
-            Optional.ofNullable(bindingServiceProperties.getBindingDestination(destination)).orElse(destination);
+    public BindingResolver bindingResolver(
+        BindingServiceProperties bindingServiceProperties,
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        return bindingName ->
+            Optional
+                .of(messagingProperties.getFunctionRouter())
+                .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
+                .map(functionRouter -> functionRouter.destinations().get(bindingName))
+                .or(() ->
+                    Optional
+                        .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
+                        .map(BindingProperties::getDestination)
+                )
+                .orElse(bindingName);
     }
 
     @Bean
@@ -111,7 +125,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     public BeanPostProcessor functionBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
-        Function<String, String> resolveExpression
+        Function<String, String> resolveExpression,
+        ActivitiCloudMessagingProperties messagingProperties
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -124,12 +139,17 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
                         .ifPresent(functionBinding -> {
-                            Type functionType = discoverFunctionType(bean, beanName);
+                            final Type functionType = discoverFunctionType(bean, beanName);
+                            final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            registerFunctionRegistration(beanName, functionRegistration);
+                            var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+
+                            if (functionRouter.isEnabled()) {
+                                functionRouter.register(functionBinding.input(), functionBeanName);
+                            }
 
                             GenericSelector<Message<?>> selector = Optional
                                 .ofNullable(functionBinding)
@@ -196,7 +216,11 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         };
     }
 
-    public interface BindingResolver extends Function<String, String> {}
+    public interface BindingResolver extends Function<String, String> {
+        default String getBindingDestination(String bindingName) {
+            return apply(bindingName);
+        }
+    }
 
     @Bean
     @ConditionalOnClass(JacksonMapper.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 package org.activiti.services.connectors;
 
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
+
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -29,13 +32,16 @@ public class IntegrationRequestSender {
 
     private final StreamBridge streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
+    private final FunctionBindingConfiguration.BindingResolver bindingResolver;
 
     public IntegrationRequestSender(
         StreamBridge streamBridge,
-        IntegrationContextMessageBuilderFactory messageBuilderFactory
+        IntegrationContextMessageBuilderFactory messageBuilderFactory,
+        FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
         this.streamBridge = streamBridge;
         this.messageBuilderFactory = messageBuilderFactory;
+        this.bindingResolver = bindingResolver;
     }
 
     public void sendIntegrationRequest(IntegrationRequest event) {
@@ -57,6 +63,12 @@ public class IntegrationRequestSender {
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
-        return messageBuilderFactory.create(event.getIntegrationContext()).withPayload(event).build();
+        var destination = bindingResolver.getBindingDestination(event.getIntegrationContext().getConnectorType());
+
+        return messageBuilderFactory
+            .create(event.getIntegrationContext())
+            .withPayload(event)
+            .setHeader(FUNCTION_DESTINATION, bindingResolver.getBindingDestination(destination))
+            .build();
     }
 }

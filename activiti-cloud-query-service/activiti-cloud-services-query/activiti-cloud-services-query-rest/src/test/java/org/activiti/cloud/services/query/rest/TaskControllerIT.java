@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,15 @@ import org.activiti.QueryRestTestApplication;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -50,7 +51,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @WithMockUser(username = CURRENT_USER, roles = "ACTIVITI_USER")
 class TaskControllerIT extends AbstractTaskControllerIT {
 
-    @SpyBean
+    @MockitoSpyBean
     private SecurityManager securityManager;
 
     @Container
@@ -67,8 +68,13 @@ class TaskControllerIT extends AbstractTaskControllerIT {
         return "/v1/tasks/search";
     }
 
+    @Override
+    protected String getCountEndpointHttpPost() {
+        return "/v1/tasks/count";
+    }
+
     @Test
-    void should_returnTasks_restrictedToCurrentUser() {
+    void should_returnTasksAndCount_restrictedToCurrentUser() {
         String otherUser = "other-user";
         String testgroup = "testgroup";
         Mockito.when(securityManager.getAuthenticatedUserGroups()).thenReturn(List.of(testgroup));
@@ -106,5 +112,14 @@ class TaskControllerIT extends AbstractTaskControllerIT {
                 TASK_IDS_JSON_PATH,
                 containsInAnyOrder(task1.getId(), task2.getId(), task4.getId(), task6.getId(), task7.getId())
             );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post("/v1/tasks/count")
+            .then()
+            .statusCode(200)
+            .body(IsEqual.equalTo("5"));
     }
 }

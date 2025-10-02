@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +51,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionAdminController.class)
@@ -66,43 +66,43 @@ public class ProcessDefinitionAdminControllerIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ProcessDefinitionRepository processDefinitionRepository;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceRepository processInstanceRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @MockBean
+    @MockitoBean
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
-    @MockBean
+    @MockitoBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesManager securityPoliciesManager;
 
-    @MockBean
+    @MockitoBean
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    @MockBean
+    @MockitoBean
     private TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @MockBean
+    @MockitoBean
     private TaskRepository taskRepository;
 
-    @MockBean
+    @MockitoBean
     private VariableRepository processVariableRepository;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceAdminService processInstanceAdminService;
 
-    @MockBean
+    @MockitoBean
     private ProcessInstanceService processInstanceService;
 
-    @MockBean
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
@@ -137,6 +137,23 @@ public class ProcessDefinitionAdminControllerIT {
         //when
         mockMvc
             .perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldReturnLatestProcessDefinition() throws Exception {
+        //given
+        given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+            );
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-definitions?latestVersion=true&skipCount=10&maxItems=10")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
             //then
             .andExpect(status().isOk());
     }

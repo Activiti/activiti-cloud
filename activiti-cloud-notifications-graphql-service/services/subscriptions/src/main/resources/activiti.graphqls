@@ -20,7 +20,8 @@ type Subscription {
     eventType: [EngineEventType!],
     processDefinitionKey : [String!],
     processInstanceId : [String!],
-    businessKey : [String!]
+    businessKey : [String!],
+    actor : [String!]
   ) : [EngineEvent]
 }
 
@@ -87,4 +88,6 @@ type EngineEvent {
   entityId : String
   entity : ObjectScalar
   eventType : EngineEventType
+
+  actor : String
 }
