@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Comparator;
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;

@@ -32,7 +32,7 @@ package org.activiti.cloud.acc.core.steps.query;
  */
 import static org.assertj.core.api.Assertions.assertThat;
 
-import net.thucydides.core.annotations.Step;
+import net.serenitybdd.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.ApplicationQueryService;
 import org.activiti.cloud.acc.shared.service.BaseService;

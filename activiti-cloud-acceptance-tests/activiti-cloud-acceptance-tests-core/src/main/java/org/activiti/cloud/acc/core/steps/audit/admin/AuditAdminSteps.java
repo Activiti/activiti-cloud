@@ -18,7 +18,7 @@ package org.activiti.cloud.acc.core.steps.audit.admin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
-import net.thucydides.core.annotations.Step;
+import net.serenitybdd.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.audit.admin.AuditAdminService;
 import org.activiti.cloud.acc.shared.service.BaseService;

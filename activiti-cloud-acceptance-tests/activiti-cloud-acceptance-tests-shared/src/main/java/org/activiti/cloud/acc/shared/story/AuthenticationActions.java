@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.shared.story;
 
-import net.thucydides.core.annotations.Steps;
+import net.serenitybdd.annotations.Steps;
 import org.activiti.cloud.acc.shared.steps.AuthenticationSteps;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;

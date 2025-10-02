@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime;
 
-import net.thucydides.core.annotations.Step;
+import net.serenitybdd.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.SwaggerService;
 import org.springframework.beans.factory.annotation.Autowired;

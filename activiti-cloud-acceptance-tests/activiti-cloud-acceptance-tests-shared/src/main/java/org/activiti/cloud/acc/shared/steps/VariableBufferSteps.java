@@ -17,7 +17,7 @@ package org.activiti.cloud.acc.shared.steps;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.thucydides.core.annotations.Step;
+import net.serenitybdd.annotations.Step;
 
 public class VariableBufferSteps {
 
