@@ -52,7 +52,7 @@ delete:
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
 		git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git \
-			--branch $(ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH) \
+			--branch temp/pin-kafka-chart-version \
 			$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) \
 			--depth 1
 
