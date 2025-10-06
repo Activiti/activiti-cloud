@@ -51,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionServiceTest {
 
+    private static final String NO_USER_STARTABLE_PROCESSES = "noUserStartableProcesses";
     private final ProcessRuntime processRuntime = Mockito.mock(ProcessRuntime.class);
 
     private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
@@ -169,7 +170,7 @@ class ProcessDefinitionServiceTest {
             processRuntime.processDefinitions(
                 any(Pageable.class),
                 any(GetProcessDefinitionsPayload.class),
-                eq(List.of("variables", "noUserStartableProcesses"))
+                eq(List.of("variables", NO_USER_STARTABLE_PROCESSES))
             )
         )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
@@ -188,21 +189,20 @@ class ProcessDefinitionServiceTest {
         var pageable = Pageable.of(0, 50);
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(pageable, List.of("variables", "noUserStartableProcesses"), "")
+            .getProcessDefinitions(pageable, List.of("variables", NO_USER_STARTABLE_PROCESSES), "")
             .getContent();
 
         assertThat(result).hasSize(1);
         List<VariableDefinition> variableDefinitions =
             ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
-        assertThat(variableDefinitions).hasSize(1);
-        assertThat(variableDefinitions.getFirst()).isEqualTo(variableDefinition);
+        assertThat(variableDefinitions).containsExactly(variableDefinition);
         verify(processDefinitionDecorator)
             .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
 
         ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
         verify(processRuntime)
             .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
-        assertThat(includeParameter.getValue()).containsExactly("variables", "noUserStartableProcesses");
+        assertThat(includeParameter.getValue()).containsExactly("variables", NO_USER_STARTABLE_PROCESSES);
     }
 
     @Test
@@ -215,7 +215,7 @@ class ProcessDefinitionServiceTest {
             processRuntime.processDefinitions(
                 any(Pageable.class),
                 any(GetProcessDefinitionsPayload.class),
-                eq(List.of("noUserStartableProcesses"))
+                eq(List.of(NO_USER_STARTABLE_PROCESSES))
             )
         )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
@@ -225,7 +225,7 @@ class ProcessDefinitionServiceTest {
         var pageable = Pageable.of(0, 50);
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(pageable, List.of("noUserStartableProcesses"), "")
+            .getProcessDefinitions(pageable, List.of(NO_USER_STARTABLE_PROCESSES), "")
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -238,7 +238,7 @@ class ProcessDefinitionServiceTest {
         ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
         verify(processRuntime)
             .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
-        assertThat(includeParameter.getValue()).containsExactly("noUserStartableProcesses");
+        assertThat(includeParameter.getValue()).containsExactly(NO_USER_STARTABLE_PROCESSES);
     }
 
     private static Stream<Arguments> emptyIncludeVariables() {
