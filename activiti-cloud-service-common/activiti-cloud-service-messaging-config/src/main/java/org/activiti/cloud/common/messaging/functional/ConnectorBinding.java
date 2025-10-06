@@ -37,4 +37,7 @@ public @interface ConnectorBinding {
     String connectorType() default "";
 
     int retry() default 0;
+
+    // Time to wait before retry in second
+    long retryDelay() default 0;
 }
