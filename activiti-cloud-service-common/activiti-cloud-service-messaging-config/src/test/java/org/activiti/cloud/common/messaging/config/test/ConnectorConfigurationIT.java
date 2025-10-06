@@ -23,9 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
@@ -230,9 +228,10 @@ public class ConnectorConfigurationIT {
             output = INTEGRATION_RESULTS,
             connectorType = "script.EXECUTE",
             retry = 3,
+            retryDelay = 1,
             condition = "headers['type']=='TestRetry'"
         )
-        public ConsumerConnector<?> auditConsumerRetry() {
+        public ConsumerConnector<?> consumerRetry() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestRetry");
             };
@@ -488,8 +487,14 @@ public class ConnectorConfigurationIT {
             .setHeader("resultDestination", "commandResults")
             .setHeader("spring.cloud.function.destination", "script.EXECUTE")
             .build();
+
         // when
+        long start = System.currentTimeMillis();
         input.send(message, "script.EXECUTE");
+        long end = System.currentTimeMillis();
+
+        //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
+        assertThat(end - start).isBetween(2000L, 2500L);
 
         // then
         verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
