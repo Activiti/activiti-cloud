@@ -1,0 +1,44 @@
+{
+  "name": "activiti-cloud-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript tests for Activiti Cloud",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
+    "test:identity": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
+    "test:security": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
+    "test:process": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
+    "test:all": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=all-tests",
+    "test:debug": "playwright test --debug",
+    "test:identity:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
+    "test:security:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
+    "test:process:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install",
+    "install:deps": "playwright install-deps"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "e2e",
+    "typescript",
+    "activiti-cloud"
+  ],
+  "author": "michal.fidor@hyland.com",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.2",
+    "jwt-decode": "^4.0.0",
+    "winston": "^3.14.2"
+  }
+}
