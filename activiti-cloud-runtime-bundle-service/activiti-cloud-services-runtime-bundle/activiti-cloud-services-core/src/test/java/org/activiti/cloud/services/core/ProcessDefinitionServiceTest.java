@@ -52,6 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ProcessDefinitionServiceTest {
 
     private static final String NO_USER_STARTABLE_PROCESSES = "noUserStartableProcesses";
+    private static final String VARIABLES = "variables";
     private final ProcessRuntime processRuntime = Mockito.mock(ProcessRuntime.class);
 
     private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
@@ -73,13 +74,13 @@ class ProcessDefinitionServiceTest {
             processRuntime.processDefinitions(
                 any(Pageable.class),
                 any(GetProcessDefinitionsPayload.class),
-                eq(List.of("variables"))
+                eq(List.of(VARIABLES))
             )
         )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
-        when(processDefinitionDecorator.applies("variables")).thenReturn(true);
+        when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
         )
@@ -90,7 +91,7 @@ class ProcessDefinitionServiceTest {
             });
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"))
+            .getProcessDefinitions(Pageable.of(0, 50), List.of(VARIABLES))
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -112,7 +113,7 @@ class ProcessDefinitionServiceTest {
         when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), any()))
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
-        lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
+        lenient().when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
 
         List<ProcessDefinition> result = processDefinitionService
             .getProcessDefinitions(Pageable.of(0, 50), include)
@@ -170,13 +171,13 @@ class ProcessDefinitionServiceTest {
             processRuntime.processDefinitions(
                 any(Pageable.class),
                 any(GetProcessDefinitionsPayload.class),
-                eq(List.of("variables", NO_USER_STARTABLE_PROCESSES))
+                eq(List.of(VARIABLES, NO_USER_STARTABLE_PROCESSES))
             )
         )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
-        when(processDefinitionDecorator.applies("variables")).thenReturn(true);
+        when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
         )
@@ -189,7 +190,7 @@ class ProcessDefinitionServiceTest {
         var pageable = Pageable.of(0, 50);
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(pageable, List.of("variables", NO_USER_STARTABLE_PROCESSES), "")
+            .getProcessDefinitions(pageable, List.of(VARIABLES, NO_USER_STARTABLE_PROCESSES), "")
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -202,7 +203,7 @@ class ProcessDefinitionServiceTest {
         ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
         verify(processRuntime)
             .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
-        assertThat(includeParameter.getValue()).containsExactly("variables", NO_USER_STARTABLE_PROCESSES);
+        assertThat(includeParameter.getValue()).containsExactly(VARIABLES, NO_USER_STARTABLE_PROCESSES);
     }
 
     @Test
@@ -220,7 +221,7 @@ class ProcessDefinitionServiceTest {
         )
             .thenReturn(new PageImpl<>(processDefinitions, 1));
 
-        when(processDefinitionDecorator.applies("variables")).thenReturn(false);
+        when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(false);
 
         var pageable = Pageable.of(0, 50);
 
