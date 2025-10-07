@@ -29,6 +29,8 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -44,7 +46,7 @@ import org.hibernate.annotations.DynamicUpdate;
 )
 @DynamicInsert
 @DynamicUpdate
-public class TaskVariableEntity extends AbstractVariableEntity {
+public class TaskVariableEntity extends AbstractVariableEntity implements QueryCloudVariableInstance {
 
     @Id
     @GeneratedValue(generator = "task_variable_sequence", strategy = GenerationType.SEQUENCE)
@@ -52,6 +54,8 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     private Long id;
 
     private String taskId;
+
+    private boolean ephemeral;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -80,7 +84,8 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         String taskId,
         Date createTime,
         Date lastUpdatedTime,
-        String executionId
+        String executionId,
+        boolean ephemeral
     ) {
         super(
             type,
@@ -97,6 +102,12 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         );
         this.id = id;
         this.taskId = taskId;
+        this.ephemeral = ephemeral;
+    }
+
+    public TaskVariableEntity(CloudVariableEvent variableEvent) {
+        super(variableEvent);
+        this.ephemeral = variableEvent.isEphemeralVariable();
     }
 
     @Override
@@ -138,5 +149,13 @@ public class TaskVariableEntity extends AbstractVariableEntity {
         if (getClass() != obj.getClass()) return false;
         TaskVariableEntity other = (TaskVariableEntity) obj;
         return this.getId() != null && Objects.equals(this.getId(), other.getId());
+    }
+
+    public boolean isEphemeral() {
+        return this.ephemeral;
+    }
+
+    public void setEphemeral(boolean ephemeral) {
+        this.ephemeral = ephemeral;
     }
 }

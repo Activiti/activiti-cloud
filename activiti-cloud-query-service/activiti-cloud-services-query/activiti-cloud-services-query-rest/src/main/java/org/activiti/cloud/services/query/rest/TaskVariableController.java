@@ -24,11 +24,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudTaskVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,14 +51,14 @@ public class TaskVariableController {
 
     private final TaskVariableRepository variableRepository;
 
-    private TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+    private QueryCloudTaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
 
     private AlfrescoPagedModelAssembler<TaskVariableEntity> pagedCollectionModelAssembler;
 
     @Autowired
     public TaskVariableController(
         TaskVariableRepository variableRepository,
-        TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        QueryCloudTaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<TaskVariableEntity> pagedCollectionModelAssembler
     ) {
         this.variableRepository = variableRepository;
@@ -67,7 +67,7 @@ public class TaskVariableController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesTask(
+    public PagedModel<EntityModel<QueryCloudVariableInstance>> getVariablesTask(
         @PathVariable String td,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskVariableEntity.class

@@ -134,7 +134,8 @@ public class VariableEntityAdminControllerIT {
             UUID.randomUUID().toString(),
             new Date(),
             new Date(),
-            UUID.randomUUID().toString()
+            UUID.randomUUID().toString(),
+            false
         );
         variableEntity.setValue("John");
 

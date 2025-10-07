@@ -35,15 +35,7 @@ import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
-import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.*;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -97,6 +89,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public TaskRepresentationModelAssembler taskRepresentationModelAssembler() {
         return new TaskRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueryCloudTaskVariableInstanceRepresentationModelAssembler queryCloudTaskVariableInstanceRepresentationModelAssembler() {
+        return new QueryCloudTaskVariableInstanceRepresentationModelAssembler();
     }
 
     @Bean

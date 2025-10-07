@@ -3342,12 +3342,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }

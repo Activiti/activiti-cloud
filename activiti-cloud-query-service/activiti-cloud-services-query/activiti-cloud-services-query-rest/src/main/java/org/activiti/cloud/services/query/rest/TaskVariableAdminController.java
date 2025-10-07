@@ -24,11 +24,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.QueryCloudTaskVariableInstanceRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -52,12 +52,12 @@ public class TaskVariableAdminController {
 
     private TaskVariableRepository variableRepository;
 
-    private TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler;
+    private QueryCloudTaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler;
 
     @Autowired
     public TaskVariableAdminController(
         TaskVariableRepository variableRepository,
-        TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        QueryCloudTaskVariableInstanceRepresentationModelAssembler variableRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<TaskVariableEntity> pagedVariablesCollectionModelAssembler
     ) {
         this.variableRepository = variableRepository;
@@ -66,7 +66,7 @@ public class TaskVariableAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesTaskAdmin(
+    public PagedModel<EntityModel<QueryCloudVariableInstance>> getVariablesTaskAdmin(
         @PathVariable String td,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskVariableEntity.class

@@ -73,21 +73,8 @@ public class TaskVariableCreatedEventHandler {
         TaskEntity taskEntity,
         ProcessInstanceEntity processInstanceEntity
     ) {
-        TaskVariableEntity taskVariableEntity = new TaskVariableEntity(
-            null,
-            variableCreatedEvent.getEntity().getType(),
-            variableCreatedEvent.getEntity().getName(),
-            variableCreatedEvent.getEntity().getProcessInstanceId(),
-            variableCreatedEvent.getServiceName(),
-            variableCreatedEvent.getServiceFullName(),
-            variableCreatedEvent.getServiceVersion(),
-            variableCreatedEvent.getAppName(),
-            variableCreatedEvent.getAppVersion(),
-            variableCreatedEvent.getEntity().getTaskId(),
-            new Date(variableCreatedEvent.getTimestamp()),
-            new Date(variableCreatedEvent.getTimestamp()),
-            null
-        );
+        TaskVariableEntity taskVariableEntity = new TaskVariableEntity(variableCreatedEvent);
+
         taskVariableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         taskVariableEntity.setProcessInstance(processInstanceEntity);
         taskVariableEntity.setTask(taskEntity);
