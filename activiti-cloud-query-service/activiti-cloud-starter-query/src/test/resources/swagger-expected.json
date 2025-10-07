@@ -3291,6 +3291,13 @@
             }
           },
           {
+            "name": "ephemeral",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -3303,13 +3310,6 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "ephemeral",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -5026,6 +5026,13 @@
             }
           },
           {
+            "name": "ephemeral",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "id",
             "in": "query",
             "schema": {
@@ -5038,13 +5045,6 @@
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "ephemeral",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -5084,12 +5084,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }
