@@ -74,7 +74,6 @@ public class TaskVariableCreatedEventHandler {
         ProcessInstanceEntity processInstanceEntity
     ) {
         TaskVariableEntity taskVariableEntity = new TaskVariableEntity(variableCreatedEvent);
-
         taskVariableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         taskVariableEntity.setProcessInstance(processInstanceEntity);
         taskVariableEntity.setTask(taskEntity);

@@ -107,6 +107,7 @@ public class TaskVariableEntity extends AbstractVariableEntity implements QueryC
 
     public TaskVariableEntity(CloudVariableEvent variableEvent) {
         super(variableEvent);
+        this.taskId = variableEvent.getEntity().getTaskId();
         this.ephemeral = variableEvent.isEphemeralVariable();
     }
 

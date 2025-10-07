@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.rest.assembler;
 
 import org.activiti.cloud.api.model.shared.QueryCloudVariableInstance;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
