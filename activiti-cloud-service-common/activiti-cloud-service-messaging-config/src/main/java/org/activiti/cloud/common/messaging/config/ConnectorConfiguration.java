@@ -19,6 +19,7 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -29,6 +30,7 @@ import org.activiti.cloud.common.messaging.util.FunctionTypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistration;
@@ -76,7 +78,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -184,19 +188,25 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     getGatewayInterface(Function.class.isInstance(bean)),
                                     gateway -> gateway.replyTimeout(0L)
                                 )
-                                .log(LoggingHandler.Level.DEBUG, beanName + ".integrationRequest")
+                                .log(DEBUG, beanName + ".integrationRequest")
                                 .filter(
                                     selector,
                                     filter -> {
-                                        int retry = connectorBinding.retry();
+                                        int retry = connectorBinding.retry() != 0
+                                            ? connectorBinding.retry()
+                                            : defaultMaxRetry;
                                         if (retry > 0) {
+                                            long retryDelay = connectorBinding.retryDelay() == 0
+                                                ? defaultRetryDelay
+                                                : connectorBinding.retryDelay();
                                             LOGGER.info(
-                                                "Configure filter retry count to {} for bean {}",
+                                                "Configure filter retry count to {} with delay {} for bean {}",
                                                 retry,
+                                                retryDelay,
                                                 beanName
                                             );
                                             filter
-                                                .discardFlow(flow -> handleRetryDiscardFlow(flow, retry))
+                                                .discardFlow(flow -> handleRetryDiscardFlow(flow, retry, retryDelay))
                                                 .throwExceptionOnRejection(false);
                                         } else {
                                             LOGGER.debug("Configure default discard for bean {}", beanName);
@@ -214,7 +224,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                             .throwExceptionOnRejection(false)
                                 )
                                 .handle(Message.class, handler)
-                                .log(LoggingHandler.Level.DEBUG, beanName + ".integrationResult")
+                                .log(DEBUG, beanName + ".integrationResult")
                                 .bridge()
                                 .get();
 
@@ -233,7 +243,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         };
     }
 
-    private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry) {
+    private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
         flow.handle((payload, headers) -> {
             Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers)
                 .orElse(buildNewMessage(headers, payload));
@@ -241,6 +251,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
                 if (retryCount < maxRetry - 1) {
+                    safeSleep(retryDelay);
                     getStreamBridge().send((String) destination, newMessage);
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
@@ -250,6 +261,14 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             }
             return null;
         });
+    }
+
+    private static void safeSleep(long retryDelay) {
+        try {
+            TimeUnit.SECONDS.sleep(retryDelay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Optional<Message<?>> handleMessagingExceptionIfPossible(Object payload, MessageHeaders headers) {

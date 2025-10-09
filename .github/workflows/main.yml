@@ -11,7 +11,7 @@ on:
       - opened
       - reopened
       - synchronize
-      - labeled
+      - milestoned
   workflow_dispatch:
 
 concurrency:
@@ -32,17 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Check dependabot build
-        uses: Activiti/Activiti/.github/actions/check-ext-build@456be36569d3afea26c83755ee9e90f0697b5349 # 8.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
+        with:
+          dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
+          none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: 'dependabot[bot]'
           label: github_actions
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -85,7 +88,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -204,7 +207,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -299,8 +302,15 @@ jobs:
       - name: Run Identity Adapter Acceptance Tests
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/identity-adapter-acceptance-tests
+        uses: ./.github/actions/playwright-run
+        env:
+          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
+          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
+          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
+          REALM: activiti
+        with:
+          script-command: 'npm run test:identity'
 
       - uses: ./.github/actions/check-service-health
         with:
@@ -388,7 +398,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -411,7 +421,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -449,12 +459,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -477,6 +487,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@7c33225b191ec9de4fa385b9a88c895211f04784 # v8.35.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}
