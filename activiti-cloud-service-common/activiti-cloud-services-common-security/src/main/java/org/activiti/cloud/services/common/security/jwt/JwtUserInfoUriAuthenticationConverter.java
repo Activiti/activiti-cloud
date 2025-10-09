@@ -17,6 +17,8 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.time.Instant;
 import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,11 +26,14 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserInfoUriAuthenticationConverter.class);
 
     public static final String SESSION_ID_CLAIM = "sid";
 
@@ -74,8 +79,13 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             String cacheKey = getCacheKey(jwt);
             if (cacheKey != null) {
-                OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
-                username = oAuth2User.getName();
+                try {
+                    OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
+                    username = oAuth2User.getName();
+                } catch (OAuth2AuthenticationException e) {
+                    LOGGER.warn("Cannot load user data for {}, probably the token hasn't the openid scope", cacheKey);
+                    username = cacheKey;
+                }
             }
         }
         return username;
