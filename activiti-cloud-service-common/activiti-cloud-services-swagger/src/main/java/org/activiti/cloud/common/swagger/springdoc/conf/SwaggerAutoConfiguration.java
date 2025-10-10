@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.swagger.springdoc.conf;
 
+import static org.springdoc.core.utils.Constants.GLOBAL_OPEN_API_CUSTOMIZER;
+
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.customizer.*;
@@ -29,6 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -62,6 +65,12 @@ public class SwaggerAutoConfiguration {
         return new BaseOpenApiBuilder(buildProperties, swaggerOAuthFlow);
     }
 
+    @Bean(GLOBAL_OPEN_API_CUSTOMIZER)
+    @Primary
+    public OperationIdCustomizer operationIdCustomizer() {
+        return new CustomOperationIdCustomizer();
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public PathPrefixOpenApiCustomizer pathPrefixCustomizer() {
@@ -90,12 +99,6 @@ public class SwaggerAutoConfiguration {
     @ConditionalOnMissingBean
     public SchemaTitleOpenApiCustomizer schemaTitleOpenApiCustomizer() {
         return new SchemaTitleOpenApiCustomizer();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public OperationIdCustomizer operationIdCustomizer() {
-        return new CustomOperationIdCustomizer();
     }
 
     @Bean
