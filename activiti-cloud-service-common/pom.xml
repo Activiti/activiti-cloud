@@ -46,7 +46,7 @@
     <xstream.version>1.4.21</xstream.version>
     <java-jwt.version>4.5.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
-    <james.apache-mime4j.version>0.8.12</james.apache-mime4j.version>
+    <james.apache-mime4j.version>0.8.13</james.apache-mime4j.version>
     <batik.version>1.19</batik.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
   </properties>
