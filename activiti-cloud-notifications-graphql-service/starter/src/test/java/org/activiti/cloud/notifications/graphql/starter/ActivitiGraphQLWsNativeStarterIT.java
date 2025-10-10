@@ -1103,12 +1103,12 @@ class ActivitiGraphQLWsNativeStarterIT {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                         " query {"
-                        + " ProcessVariables(where: {processInstance: {status: {EQ: RUNNING}}}) {"
+                        + " ProcessVariables {"
                         + "    select {"
                         + "      id"
                         + "      name"
                         + "      value"
-                        + "      processInstance {"
+                        + "      processInstance(where: {status: {EQ: RUNNING}}) {"
                         + "        id"
                         + "        status"
                         + "      }"
