@@ -1,0 +1,70 @@
+name: Run Playwright acceptance tests
+description: Executes Playwright acceptance test.
+inputs:
+  working-directory:
+    required: false
+    description: The directory from which to run tests
+    default: "."
+  script-command:
+    description: The npm command to execute playwright tests
+    required: true
+
+outputs:
+  outcome:
+    description: Tests outcome ('success', 'failure',...)
+    value: ${{ steps.launch-tests.outcome }}
+  message:
+    description: Message for notification
+    value: ${{ steps.rp-summarize.outputs.teams-message }}
+
+runs:
+  using: composite
+  steps:
+
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version: '20.18.3'
+
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+    - name: Setup cache
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      with:
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
+
+    - name: Add GitHub Step Summary
+      shell: bash
+      run: |
+        echo "#### ⏱ Before Playwright Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
+        echo "#### ⚙ Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- Script command: ${{ inputs.script-command }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Run Tests (continue on error)
+      id: launch-tests
+      shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.working-directory }}
+      run: |
+        npm clean-install
+        npx playwright install chromium
+        ${{ inputs.script-command }}
+      continue-on-error: true
+
+    - name: Update GitHub Step Summary
+      shell: bash
+      run: |
+        echo "#### ⏱ After Playwright Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
+
+    - name: Exit on failure
+      if: steps.launch-tests.outcome != 'success'
+      shell: bash
+      run: |
+        echo "::error title=run-playwright-tests::Tests failed: re-throwing on error."
+        exit 1
