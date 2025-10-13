@@ -290,7 +290,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(condition)
             .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)"
             );
     }
 
@@ -303,7 +303,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(expression)
             .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= 17 or 17 == -1)"
             );
     }
 
