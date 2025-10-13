@@ -2923,6 +2923,12 @@
             "type" : "string"
           }
         }, {
+            "name": "ephemeral",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }, {
           "name" : "id",
           "in" : "query",
           "schema" : {
@@ -2972,12 +2978,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }
@@ -4481,6 +4487,12 @@
             "type" : "string"
           }
         }, {
+          "name": "ephemeral",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }, {
           "name" : "id",
           "in" : "query",
           "schema" : {
@@ -4530,12 +4542,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudVariableInstance"
+                  "$ref" : "#/components/schemas/ListResponseContentQueryCloudVariableInstance"
                 }
               }
             }
@@ -6777,79 +6789,6 @@
           }
         },
         "title" : "ProcessInstanceQueryBody"
-      },
-      "CloudVariableInstance" : {
-        "type" : "object",
-        "properties" : {
-          "serviceFullName" : {
-            "type" : "string"
-          },
-          "serviceVersion" : {
-            "type" : "string"
-          },
-          "appName" : {
-            "type" : "string"
-          },
-          "serviceName" : {
-            "type" : "string"
-          },
-          "serviceType" : {
-            "type" : "string"
-          },
-          "appVersion" : {
-            "type" : "string"
-          },
-          "name" : {
-            "type" : "string"
-          },
-          "value" : { },
-          "type" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "taskId" : {
-            "type" : "string"
-          },
-          "taskVariable" : {
-            "type" : "boolean"
-          }
-        },
-        "title" : "CloudVariableInstance"
-      },
-      "EntriesResponseContentCloudVariableInstance" : {
-        "type" : "object",
-        "properties" : {
-          "entries" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/EntryResponseContentCloudVariableInstance"
-            }
-          },
-          "pagination" : {
-            "$ref" : "#/components/schemas/PaginationMetadata"
-          }
-        },
-        "title" : "EntriesResponseContentCloudVariableInstance"
-      },
-      "EntryResponseContentCloudVariableInstance" : {
-        "type" : "object",
-        "properties" : {
-          "entry" : {
-            "$ref" : "#/components/schemas/CloudVariableInstance"
-          }
-        },
-        "title" : "EntryResponseContentCloudVariableInstance"
-      },
-      "ListResponseContentCloudVariableInstance" : {
-        "type" : "object",
-        "properties" : {
-          "list" : {
-            "$ref" : "#/components/schemas/EntriesResponseContentCloudVariableInstance"
-          }
-        },
-        "title" : "ListResponseContentCloudVariableInstance"
       },
       "PaginationMetadata" : {
         "type" : "object",
