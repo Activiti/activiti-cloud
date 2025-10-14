@@ -48,6 +48,30 @@ class ProcessVariableEntityTest {
         assertHasSameAttributeValues(processVariableEntity, variableEvent);
     }
 
+    @Test
+    void should_supportNullableVariableIsEphemeralAttribute() {
+        //given
+        ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
+
+        //when
+        processVariableEntity.setEphemeral(null);
+
+        //then
+        assertThat(processVariableEntity.isEphemeral()).isFalse();
+
+        //when
+        processVariableEntity.setEphemeral(false);
+
+        //then
+        assertThat(processVariableEntity.isEphemeral()).isFalse();
+
+        //when
+        processVariableEntity.setEphemeral(true);
+
+        //then
+        assertThat(processVariableEntity.isEphemeral()).isTrue();
+    }
+
     private CloudVariableCreatedEventImpl buildVariableCreatedEvent(boolean ephemeral) {
         VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>(
             "variable-name",
