@@ -38,12 +38,10 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     public static final String ROOT_EXECUTION_CONTEXT = "rootExecutionContext";
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
 
-    private static final int DISABLE_CHUNKING = 0;
-
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final int chunkSize;
+    private RuntimeBundleProperties runtimeBundleProperties;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
@@ -58,7 +56,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.chunkSize = runtimeBundleProperties.getEventsProperties().getChunkSizeCloseListener();
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     @Override
@@ -97,16 +95,13 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             .toList();
     }
 
-    private boolean isChunkingDisabled() {
-        return this.chunkSize <= DISABLE_CHUNKING;
-    }
-
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> chunkEvents(List<CloudRuntimeEventImpl<?, ?>> events) {
         var chunkIndex = new AtomicInteger();
 
+        var chunkSize = this.runtimeBundleProperties.getEventsProperties().getChunkSizeCloseListener();
         return events
             .stream()
-            .collect(Collectors.groupingBy(event -> chunkIndex.getAndIncrement() / this.chunkSize))
+            .collect(Collectors.groupingBy(event -> chunkIndex.getAndIncrement() / chunkSize))
             .values();
     }
 
@@ -115,6 +110,10 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         var message = this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(eventArray).build();
 
         this.producer.auditProducer().send(message);
+    }
+
+    private boolean isChunkingDisabled() {
+        return this.runtimeBundleProperties.getEventsProperties().isChunkingCloseListenerDisabled();
     }
 
     @Override
