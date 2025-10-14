@@ -260,6 +260,41 @@ class MessageProducerCommandContextCloseListenerTest {
         }
     }
 
+    @Test
+    void closedShouldSendSingleMessageWhenChunkSizeIsZero() {
+        var testListener = getMessageProducerCommandContextCloseListener();
+        List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(10);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        testListener.closed(this.commandContext);
+
+        verify(this.auditChannel, times(1)).send(this.messageArgumentCaptor.capture());
+
+        var payload = this.messageArgumentCaptor.getValue().getPayload();
+        assertThat(payload).hasSize(10);
+    }
+
+    private MessageProducerCommandContextCloseListener getMessageProducerCommandContextCloseListener() {
+        var runtimeBundleProperties = new RuntimeBundleProperties() {
+            {
+                setAppName(APP_NAME);
+                setServiceType(SERVICE_TYPE);
+                setServiceVersion(SERVICE_VERSION);
+                setRbSpringAppName(SPRING_APP_NAME);
+                getEventsProperties().setChunkSizeCloseListener(0);
+            }
+        };
+
+        return new MessageProducerCommandContextCloseListener(
+            producer,
+            messageBuilderChainFactory,
+            runtimeBundleInfoAppender,
+            runtimeBundleProperties
+        );
+    }
+
     private List<CloudRuntimeEventImpl<?, ?>> getCloudRuntimeEvents(int eventsCount) {
         List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
         for (int i = 0; i < eventsCount; i++) {
@@ -285,13 +320,13 @@ class MessageProducerCommandContextCloseListenerTest {
         when(processInstance.getBusinessKey()).thenReturn(MOCK_BUSINESS_KEY);
         when(processInstance.getName()).thenReturn(MOCK_PROCESS_NAME);
 
-        ExecutionEntity superExectuion = mock(ExecutionEntity.class);
+        ExecutionEntity superExecution = mock(ExecutionEntity.class);
         when(processInstance.getSuperExecutionId()).thenReturn(MOCK_SUPER_EXECTUION_ID);
-        when(processInstance.getSuperExecution()).thenReturn(superExectuion);
+        when(processInstance.getSuperExecution()).thenReturn(superExecution);
 
         ExecutionEntity parentProcessInstance = mock(ExecutionEntity.class);
-        when(superExectuion.getProcessInstanceId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        when(superExectuion.getProcessInstance()).thenReturn(parentProcessInstance);
+        when(superExecution.getProcessInstanceId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
+        when(superExecution.getProcessInstance()).thenReturn(parentProcessInstance);
         when(parentProcessInstance.getId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
         when(parentProcessInstance.getName()).thenReturn(MOCK_PARENT_PROCESS_NAME);
 

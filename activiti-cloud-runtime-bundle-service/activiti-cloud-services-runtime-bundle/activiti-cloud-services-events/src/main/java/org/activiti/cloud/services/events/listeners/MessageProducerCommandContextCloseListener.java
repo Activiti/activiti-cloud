@@ -28,7 +28,6 @@ import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
-import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -38,6 +37,8 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     public static final String ROOT_EXECUTION_CONTEXT = "rootExecutionContext";
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
+
+    private static final int DISABLE_CHUNKING = 0;
 
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
@@ -68,40 +69,51 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         }
 
         ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(ROOT_EXECUTION_CONTEXT);
-
         sendEvents(events, rootExecutionContext);
     }
 
     private void sendEvents(List<CloudRuntimeEvent<?, ?>> events, ExecutionContext rootExecutionContext) {
-        if (CollectionUtils.isEmpty(events)) {
-            return;
-        }
-
         var eventChunks = createEventChunks(events);
 
-        eventChunks.forEach(chunk -> {
-            var eventArray = chunk.toArray(CloudRuntimeEvent<?, ?>[]::new);
-            createMessageAndSend(rootExecutionContext, eventArray);
-        });
+        eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {
-        final var chunkIndex = new AtomicInteger();
+        var processedEvents = processEvents(events);
 
+        if (isChunkingDisabled()) {
+            return List.of(processedEvents);
+        }
+
+        return chunkEvents(processedEvents);
+    }
+
+    private List<CloudRuntimeEventImpl<?, ?>> processEvents(List<CloudRuntimeEvent<?, ?>> events) {
         return events
             .stream()
             .filter(CloudRuntimeEventImpl.class::isInstance)
             .map(CloudRuntimeEventImpl.class::cast)
-            .map(runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
+            .map(this.runtimeBundleInfoAppender::appendRuntimeBundleInfoTo)
+            .toList();
+    }
+
+    private boolean isChunkingDisabled() {
+        return this.chunkSize <= DISABLE_CHUNKING;
+    }
+
+    private Collection<List<CloudRuntimeEventImpl<?, ?>>> chunkEvents(List<CloudRuntimeEventImpl<?, ?>> events) {
+        var chunkIndex = new AtomicInteger();
+
+        return events
+            .stream()
             .collect(Collectors.groupingBy(event -> chunkIndex.getAndIncrement() / this.chunkSize))
             .values();
     }
 
-    private void createMessageAndSend(ExecutionContext rootExecutionContext, CloudRuntimeEvent<?, ?>[] items) {
-        // Inject message headers with null execution context as there may be events from several process instances
-        Message<CloudRuntimeEvent<?, ?>[]> message =
-            this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(items).build();
-        // Send message to audit producer channel
+    private void sendChunk(ExecutionContext rootExecutionContext, List<CloudRuntimeEventImpl<?, ?>> chunk) {
+        var eventArray = chunk.toArray(CloudRuntimeEvent<?, ?>[]::new);
+        var message = this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(eventArray).build();
+
         this.producer.auditProducer().send(message);
     }
 
