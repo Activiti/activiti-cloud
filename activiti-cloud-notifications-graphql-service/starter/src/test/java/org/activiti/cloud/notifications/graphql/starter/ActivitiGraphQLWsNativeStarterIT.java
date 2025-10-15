@@ -1102,19 +1102,19 @@ class ActivitiGraphQLWsNativeStarterIT {
     void testGraphqlReverse() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-                        " query {"
-                        + " ProcessVariables {"
-                        + "    select {"
-                        + "      id"
-                        + "      name"
-                        + "      value"
-                        + "      processInstance(where: {status: {EQ: RUNNING}}) {"
-                        + "        id"
-                        + "        status"
-                        + "      }"
-                        + "    }"
-                        + "  }"
-                        + "}"
+                    " query {"
+                    + " ProcessVariables {"
+                    + "    select {"
+                    + "      id"
+                    + "      name"
+                    + "      value"
+                    + "      processInstance(where: {status: {EQ: RUNNING}}) {"
+                    + "        id"
+                    + "        status"
+                    + "      }"
+                    + "    }"
+                    + "  }"
+                    + "}"
                 );
         // @formatter:on
 
