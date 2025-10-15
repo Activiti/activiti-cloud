@@ -85,7 +85,7 @@ public class TaskVariableEntity extends AbstractVariableEntity implements QueryC
         Date createTime,
         Date lastUpdatedTime,
         String executionId,
-        boolean ephemeral
+        Boolean ephemeral
     ) {
         super(
             type,
