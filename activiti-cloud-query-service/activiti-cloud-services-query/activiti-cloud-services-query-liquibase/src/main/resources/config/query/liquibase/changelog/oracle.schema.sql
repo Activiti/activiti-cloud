@@ -213,4 +213,3 @@ create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
- alter table task_variable add column ephemeral NUMBER(1,0);

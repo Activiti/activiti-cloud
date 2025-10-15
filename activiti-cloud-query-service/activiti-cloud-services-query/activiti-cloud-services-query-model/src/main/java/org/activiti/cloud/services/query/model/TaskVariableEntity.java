@@ -55,7 +55,7 @@ public class TaskVariableEntity extends AbstractVariableEntity implements QueryC
 
     private String taskId;
 
-    private boolean ephemeral;
+    private Boolean ephemeral;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -153,10 +153,10 @@ public class TaskVariableEntity extends AbstractVariableEntity implements QueryC
     }
 
     public boolean isEphemeral() {
-        return this.ephemeral;
+        return Boolean.TRUE.equals(this.ephemeral);
     }
 
-    public void setEphemeral(boolean ephemeral) {
+    public void setEphemeral(Boolean ephemeral) {
         this.ephemeral = ephemeral;
     }
 }
