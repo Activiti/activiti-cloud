@@ -39,8 +39,7 @@ CREATE TABLE IF NOT EXISTS TASK_VARIABLE (
   service_version VARCHAR(255),
   task_id VARCHAR(255),
   type VARCHAR(255),
-  "value" JSON,
-  ephemeral BOOLEAN,
+  "value" JSON
   PRIMARY KEY (id)
 );
 
@@ -58,10 +57,10 @@ INSERT INTO task (id, assignee, created_date, description, due_date, last_modifi
 INSERT INTO PROCESS_VARIABLE (id,create_time, execution_id, last_updated_time, name, process_instance_id, type, ephemeral, "value") VALUES
   (1,CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', false, JSON '{"value": { "key" : ["1","2","3","4","5"]}}');
 
-INSERT INTO TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value", ephemeral) VALUES
-  (2, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '1', 'String', '{"value": "10"}', false),
-  (3, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable2', 0, '1', 'String', '{"value": true}', false),
-  (4, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable3', 0, '2', 'String', '{"value": null}', false),
-  (5, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable4', 0, '2', 'map', '{"value": { "key" : "data" }}', false),
-  (6, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable5', 1, '4', 'String', '{"value": 1.0}', false),
-  (7, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable6', 1, '4', 'list', '{"value": [1,2,3,4,5]}', false);
+INSERT INTO TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value") VALUES
+  (2, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '1', 'String', '{"value": "10"}'),
+  (3, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable2', 0, '1', 'String', '{"value": true}'),
+  (4, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable3', 0, '2', 'String', '{"value": null}'),
+  (5, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable4', 0, '2', 'map', '{"value": { "key" : "data" }}'),
+  (6, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable5', 1, '4', 'String', '{"value": 1.0}'),
+  (7, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable6', 1, '4', 'list', '{"value": [1,2,3,4,5]}');
