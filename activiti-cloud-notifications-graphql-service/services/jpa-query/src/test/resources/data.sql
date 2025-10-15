@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS TASK_VARIABLE (
   service_version VARCHAR(255),
   task_id VARCHAR(255),
   type VARCHAR(255),
-  "value" JSON
+  "value" JSON,
   PRIMARY KEY (id)
 );
 
