@@ -25,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
@@ -79,6 +81,9 @@ class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
     private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
+
+    @Spy
+    private EventChunker eventChunker = new EventChunker(new ObjectMapper());
 
     @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
@@ -291,7 +296,8 @@ class MessageProducerCommandContextCloseListenerTest {
             producer,
             messageBuilderChainFactory,
             runtimeBundleInfoAppender,
-            runtimeBundleProperties
+            runtimeBundleProperties,
+            eventChunker
         );
     }
 

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.configuration;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -71,6 +72,7 @@ import org.activiti.cloud.services.events.listeners.MessageProducerCommandContex
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
+import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
@@ -164,17 +166,25 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public EventChunker eventChunker(ObjectMapper objectMapper) {
+        return new EventChunker(objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        RuntimeBundleProperties runtimeBundleProperties
+        RuntimeBundleProperties runtimeBundleProperties,
+        EventChunker eventChunker
     ) {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
             executionContextMessageBuilderFactory,
             runtimeBundleInfoAppender,
-            runtimeBundleProperties
+            runtimeBundleProperties,
+            eventChunker
         );
     }
 
