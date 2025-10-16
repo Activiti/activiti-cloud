@@ -82,9 +82,6 @@ class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
 
-    @Spy
-    private EventChunker eventChunker = new EventChunker(new ObjectMapper());
-
     @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
 
@@ -98,9 +95,12 @@ class MessageProducerCommandContextCloseListenerTest {
             setServiceType(SERVICE_TYPE);
             setServiceVersion(SERVICE_VERSION);
             setRbSpringAppName(SPRING_APP_NAME);
-            getEventsProperties().setChunkSizeCloseListener(3);
+            getEventsProperties().setChunkSizeInBytesCloseListener(3000);
         }
     };
+
+    @Spy
+    private EventChunker eventChunker = new EventChunker(new ObjectMapper(), properties);
 
     @Spy
     private ExecutionContextMessageBuilderFactory messageBuilderChainFactory = new ExecutionContextMessageBuilderFactory(
@@ -267,7 +267,7 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @Test
     void closedShouldSendSingleMessageWhenChunkSizeIsZero() {
-        var testListener = getMessageProducerCommandContextCloseListener();
+        var testListener = getMessageProducerCloseListenerWithDisabledChunker();
         List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(10);
 
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -323,14 +323,14 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(2);
     }
 
-    private MessageProducerCommandContextCloseListener getMessageProducerCommandContextCloseListener() {
+    private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {
         var runtimeBundleProperties = new RuntimeBundleProperties() {
             {
                 setAppName(APP_NAME);
                 setServiceType(SERVICE_TYPE);
                 setServiceVersion(SERVICE_VERSION);
                 setRbSpringAppName(SPRING_APP_NAME);
-                getEventsProperties().setChunkSizeCloseListener(0);
+                getEventsProperties().setChunkSizeInBytesCloseListener(0);
             }
         };
 

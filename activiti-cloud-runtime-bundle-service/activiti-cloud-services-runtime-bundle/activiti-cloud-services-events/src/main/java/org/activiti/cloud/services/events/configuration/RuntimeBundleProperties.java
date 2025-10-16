@@ -127,11 +127,11 @@ public class RuntimeBundleProperties {
             this.chunkSize = chunkSize;
         }
 
-        public int getChunkSizeCloseListener() {
+        public int getChunkSizeInBytesCloseListener() {
             return chunkSizeCloseListener;
         }
 
-        public void setChunkSizeCloseListener(int chunkSizeCloseListener) {
+        public void setChunkSizeInBytesCloseListener(int chunkSizeCloseListener) {
             this.chunkSizeCloseListener = chunkSizeCloseListener;
         }
 

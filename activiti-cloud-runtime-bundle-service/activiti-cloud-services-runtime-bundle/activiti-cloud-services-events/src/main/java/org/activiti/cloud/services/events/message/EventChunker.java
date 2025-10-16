@@ -21,15 +21,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 
 public class EventChunker {
 
-    private static final int MAX_MESSAGE_SIZE_BYTES = 3000;
-
     private final ObjectMapper objectMapper;
+    private final RuntimeBundleProperties runtimeBundleProperties;
 
-    public EventChunker(ObjectMapper objectMapper) {
+    public EventChunker(ObjectMapper objectMapper, RuntimeBundleProperties runtimeBundleProperties) {
         this.objectMapper = objectMapper;
+        this.runtimeBundleProperties = runtimeBundleProperties;
     }
 
     public Collection<List<CloudRuntimeEventImpl<?, ?>>> chunk(List<CloudRuntimeEventImpl<?, ?>> events) {
@@ -65,12 +66,7 @@ public class EventChunker {
             chunks.add(currentChunk);
         }
 
-        System.out.printf(
-            "Created %d chunks from %d events, max chunk size: %d bytes%n",
-            chunks.size(),
-            events.size(),
-            MAX_MESSAGE_SIZE_BYTES
-        );
+        System.out.printf("Created %d chunks from %d events", chunks.size(), events.size());
 
         return chunks;
     }
@@ -80,7 +76,12 @@ public class EventChunker {
         int eventSizeInBytes,
         List<CloudRuntimeEventImpl<?, ?>> currentChunk
     ) {
-        return currentChunkSize + eventSizeInBytes > MAX_MESSAGE_SIZE_BYTES && !currentChunk.isEmpty();
+        return (
+            currentChunkSize +
+            eventSizeInBytes >
+            this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener() &&
+            !currentChunk.isEmpty()
+        );
     }
 
     private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {

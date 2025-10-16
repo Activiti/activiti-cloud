@@ -166,8 +166,8 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EventChunker eventChunker(ObjectMapper objectMapper) {
-        return new EventChunker(objectMapper);
+    public EventChunker eventChunker(ObjectMapper objectMapper, RuntimeBundleProperties properties) {
+        return new EventChunker(objectMapper, properties);
     }
 
     @Bean

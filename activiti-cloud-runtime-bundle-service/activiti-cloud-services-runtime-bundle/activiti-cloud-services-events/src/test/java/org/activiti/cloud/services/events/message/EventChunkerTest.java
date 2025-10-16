@@ -30,6 +30,8 @@ import java.util.List;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties.RuntimeBundleEventsProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +46,10 @@ class EventChunkerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        eventChunker = new EventChunker(objectMapper);
+        RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
+        runtimeBundleProperties.setEventsProperties(new RuntimeBundleEventsProperties());
+        runtimeBundleProperties.getEventsProperties().setChunkSizeInBytesCloseListener(3000);
+        eventChunker = new EventChunker(objectMapper, runtimeBundleProperties);
     }
 
     @Test
@@ -124,7 +129,7 @@ class EventChunkerTest {
     @Test
     void shouldThrowExceptionWhenObjectMapperFails() throws JsonProcessingException {
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        EventChunker chunkerWithMockMapper = new EventChunker(mockMapper);
+        EventChunker chunkerWithMockMapper = new EventChunker(mockMapper, null);
 
         when(mockMapper.writeValueAsBytes(any())).thenThrow(JsonProcessingException.class);
 
