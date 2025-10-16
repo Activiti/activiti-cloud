@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.message;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +40,7 @@ public class EventChunker {
         for (CloudRuntimeEventImpl<?, ?> event : events) {
             var eventSizeInBytes = getEventSizeInBytes(event);
 
-            if (currentChunkSize + eventSizeInBytes > MAX_MESSAGE_SIZE_BYTES && !currentChunk.isEmpty()) {
+            if (isExceedingMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
                 chunks.add(new ArrayList<>(currentChunk));
                 currentChunk.clear();
                 currentChunkSize = 0;
@@ -74,11 +75,19 @@ public class EventChunker {
         return chunks;
     }
 
+    private boolean isExceedingMaxLimit(
+        int currentChunkSize,
+        int eventSizeInBytes,
+        List<CloudRuntimeEventImpl<?, ?>> currentChunk
+    ) {
+        return currentChunkSize + eventSizeInBytes > MAX_MESSAGE_SIZE_BYTES && !currentChunk.isEmpty();
+    }
+
     private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
         try {
             return objectMapper.writeValueAsBytes(event).length;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize event to JSON", e);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to serialize event to JSON", e);
         }
     }
 }

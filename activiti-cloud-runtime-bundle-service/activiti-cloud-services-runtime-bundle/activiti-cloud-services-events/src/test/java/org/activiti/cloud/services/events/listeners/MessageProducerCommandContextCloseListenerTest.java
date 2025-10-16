@@ -281,6 +281,48 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(payload).hasSize(10);
     }
 
+    @Test
+    void closedShouldSendMessageWhenSingleEventIsLargerThanLimit() {
+        // given
+        List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        // when
+        this.closeListener.closed(this.commandContext);
+
+        // then
+        verify(this.auditChannel, times(1)).send(this.messageArgumentCaptor.capture());
+
+        CloudRuntimeEvent<?, ?>[] payload = this.messageArgumentCaptor.getValue().getPayload();
+        assertThat(payload).hasSize(1);
+
+        // Verify the event properties are correctly set
+        CloudRuntimeEvent<?, ?> event = payload[0];
+        assertThat(event.getAppName()).isEqualTo(APP_NAME);
+        assertThat(event.getServiceName()).isEqualTo(SPRING_APP_NAME);
+        assertThat(event.getServiceType()).isEqualTo(SERVICE_TYPE);
+        assertThat(event.getServiceVersion()).isEqualTo(SERVICE_VERSION);
+
+        // Verify the event contains the large data
+        assertThat(event.getProcessInstanceId()).contains("LARGE_DATA");
+    }
+
+    @Test
+    void closedShouldSendMessageWhenTwoEventAreLargerThatLimit() {
+        List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(2);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        this.closeListener.closed(this.commandContext);
+
+        verify(this.auditChannel, times(2)).send(this.messageArgumentCaptor.capture());
+
+        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(2);
+    }
+
     private MessageProducerCommandContextCloseListener getMessageProducerCommandContextCloseListener() {
         var runtimeBundleProperties = new RuntimeBundleProperties() {
             {
@@ -306,6 +348,22 @@ class MessageProducerCommandContextCloseListenerTest {
         for (int i = 0; i < eventsCount; i++) {
             ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
             processInstance.setId(MOCK_PROCESS_INSTANCE_ID + "_" + i);
+            CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
+            events.add(event);
+        }
+        return events;
+    }
+
+    private List<CloudRuntimeEventImpl<?, ?>> getLargeCloudRuntimeEvents(int eventsCount) {
+        List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
+        for (int i = 0; i < eventsCount; i++) {
+            ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+            StringBuilder largeData = new StringBuilder("LARGE_DATA_");
+            for (int j = 0; j < 500; j++) {
+                largeData.append("This_is_large_test_data_to_exceed_bytes_limit_");
+            }
+            processInstance.setId(MOCK_PROCESS_INSTANCE_ID + "_" + largeData + "_" + i);
+            processInstance.setBusinessKey(largeData.toString());
             CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
             events.add(event);
         }
