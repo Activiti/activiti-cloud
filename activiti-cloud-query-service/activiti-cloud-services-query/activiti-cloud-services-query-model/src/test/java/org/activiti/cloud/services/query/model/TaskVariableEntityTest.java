@@ -48,6 +48,30 @@ class TaskVariableEntityTest {
         assertHasSameAttributeValues(taskVariableEntity, variableEvent);
     }
 
+    @Test
+    void should_supportNullable_VariableIsEphemeralAttribute() {
+        //given
+        TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
+
+        //when
+        taskVariableEntity.setEphemeral(null);
+
+        //then
+        assertThat(taskVariableEntity.isEphemeral()).isFalse();
+
+        //when
+        taskVariableEntity.setEphemeral(true);
+
+        //then
+        assertThat(taskVariableEntity.isEphemeral()).isTrue();
+
+        //when
+        taskVariableEntity.setEphemeral(false);
+
+        //then
+        assertThat(taskVariableEntity.isEphemeral()).isFalse();
+    }
+
     private CloudVariableCreatedEventImpl buildVariableCreatedEvent(boolean ephemeral) {
         VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>(
             "variable-name",
