@@ -101,6 +101,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 Optional
                                     .ofNullable(connectorBinding.connectorType())
                                     .filter(StringUtils::hasText)
+                                    .map(resolveExpression)
                                     .ifPresentOrElse(
                                         connectorType ->
                                             functionRouter.register(

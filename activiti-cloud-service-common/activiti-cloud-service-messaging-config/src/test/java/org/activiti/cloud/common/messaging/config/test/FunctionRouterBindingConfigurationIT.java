@@ -218,7 +218,7 @@ public class FunctionRouterBindingConfigurationIT {
         }
 
         @Bean
-        @ConnectorBinding(input = REST_CONSUMER, connectorType = "rest.GET", condition = "true")
+        @ConnectorBinding(input = REST_CONSUMER, connectorType = "${FOOBAR:rest.GET}", condition = "true")
         public ConsumerConnector<String> restConsumerGetHandler() {
             return message -> {
                 getPayload.set(message);
