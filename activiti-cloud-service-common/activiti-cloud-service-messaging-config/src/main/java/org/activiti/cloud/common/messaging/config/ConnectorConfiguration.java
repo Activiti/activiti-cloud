@@ -99,7 +99,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
 
                             if (functionRouter.isEnabled()) {
-                                functionRouter.register(connectorBinding.input(), functionBeanName);
+                                Optional
+                                    .ofNullable(connectorBinding.connectorType())
+                                    .ifPresentOrElse(
+                                        connectorType ->
+                                            functionRouter.register(
+                                                connectorBinding.input(),
+                                                functionBeanName,
+                                                connectorType
+                                            ),
+                                        () -> functionRouter.register(connectorBinding.input(), functionBeanName)
+                                    );
                             }
 
                             responseDestination.set(connectorBinding.outputHeader());

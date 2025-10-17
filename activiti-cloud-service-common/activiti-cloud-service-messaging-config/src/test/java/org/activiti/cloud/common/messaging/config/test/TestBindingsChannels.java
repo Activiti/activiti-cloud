@@ -40,6 +40,8 @@ public interface TestBindingsChannels {
 
     String ENGINE_EVENTS_CONSUMER = "engineEventsConsumer";
 
+    String REST_CONSUMER = "restConsumer";
+
     @InputBinding(value = COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
@@ -83,5 +85,10 @@ public interface TestBindingsChannels {
     @InputBinding(value = ENGINE_EVENTS_CONSUMER)
     default SubscribableChannel engineEventsConsumer() {
         return MessageChannels.publishSubscribe(ENGINE_EVENTS_CONSUMER).getObject();
+    }
+
+    @InputBinding(value = REST_CONSUMER)
+    default SubscribableChannel restConsumer() {
+        return MessageChannels.publishSubscribe(REST_CONSUMER).getObject();
     }
 }
