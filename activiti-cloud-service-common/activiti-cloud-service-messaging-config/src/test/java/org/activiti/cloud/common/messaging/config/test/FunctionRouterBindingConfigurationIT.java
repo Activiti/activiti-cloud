@@ -198,7 +198,7 @@ public class FunctionRouterBindingConfigurationIT {
         }
 
         @Bean
-        @ConnectorBinding(input = SCRIPT_RUNTIME_CONSUMER, connectorType = "script.EXECUTE", condition = "true")
+        @ConnectorBinding(input = SCRIPT_RUNTIME_CONSUMER, condition = "true")
         public ConsumerConnector<String> scriptRuntimeExecutor() {
             return message -> {
                 connectorPayload.set(message);

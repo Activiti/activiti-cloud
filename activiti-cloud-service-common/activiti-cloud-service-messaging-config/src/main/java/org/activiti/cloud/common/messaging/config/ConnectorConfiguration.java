@@ -43,7 +43,6 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
@@ -101,6 +100,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             if (functionRouter.isEnabled()) {
                                 Optional
                                     .ofNullable(connectorBinding.connectorType())
+                                    .filter(StringUtils::hasText)
                                     .ifPresentOrElse(
                                         connectorType ->
                                             functionRouter.register(
