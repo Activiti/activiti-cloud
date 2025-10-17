@@ -534,6 +534,27 @@ public class ActivitiCloudMessagingProperties {
                 );
         }
 
+        public void register(String bindingName, String functionBeanName, String connectorType) {
+            destinations
+                .keySet()
+                .forEach(routingContext ->
+                    Optional
+                        .ofNullable(destinations.get(routingContext))
+                        .map(it -> it.get(bindingName))
+                        .ifPresent(destinations ->
+                            Stream
+                                .of(destinations.split(","))
+                                .filter(connectorType::equals)
+                                .findFirst()
+                                .ifPresent(destination ->
+                                    registrations(routingContext)
+                                        .computeIfAbsent(destination, key -> new ArrayList<>())
+                                        .add(functionBeanName)
+                                )
+                        )
+                );
+        }
+
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof FunctionRouterProperties that)) return false;
