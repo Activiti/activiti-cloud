@@ -150,7 +150,11 @@ class ProcessInstanceControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
             .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
-            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()))
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceId")
+                    .value(processInstanceEntity.getLinkedProcessInstanceId())
+            );
     }
 
     @Test

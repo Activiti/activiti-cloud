@@ -41,7 +41,8 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort,
-    Boolean includeSubprocesses
+    Boolean includeSubprocesses,
+    Set<String> linkedProcessInstanceId
 ) implements CloudRuntimeEntityFilterRequest {
     public ProcessInstanceSearchRequest {
         if(includeSubprocesses == null) includeSubprocesses = true;

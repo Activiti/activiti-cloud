@@ -56,6 +56,7 @@ public class ProcessVariablesPayloadConverter {
                     .withName(payload.getName())
                     .withProcessDefinitionId(payload.getProcessDefinitionId())
                     .withProcessDefinitionKey(payload.getProcessDefinitionKey())
+                    .withLinkedProcessInstanceId(payload.getLinkedProcessInstanceId())
                     .withVariables(mapVariableValues(variables))
                     .build()
             )

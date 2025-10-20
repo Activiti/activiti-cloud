@@ -50,6 +50,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
     private Boolean includeSubprocesses;
+    private Set<String> linkedProcessInstanceId;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -160,6 +161,11 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder withLinkedProcessInstanceId(String... linkedProcessInstanceIds) {
+        this.linkedProcessInstanceId = Set.of(linkedProcessInstanceIds);
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -193,7 +199,8 @@ public class ProcessInstanceSearchRequestBuilder {
             processVariableFilters,
             processVariableKeys,
             sort,
-            includeSubprocesses
+            includeSubprocesses,
+            linkedProcessInstanceId
         );
     }
 
