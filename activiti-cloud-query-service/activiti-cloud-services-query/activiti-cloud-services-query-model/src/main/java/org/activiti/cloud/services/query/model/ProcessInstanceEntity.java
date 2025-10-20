@@ -227,6 +227,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     @Transient
     private Set<QueryCloudSubprocessInstance> subprocesses;
 
+    private String linkedProcessInstanceId;
+
     public ProcessInstanceEntity() {}
 
     public ProcessInstanceEntity(
@@ -333,6 +335,10 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         this.processDefinitionKey = processDefinitionKey;
     }
 
+    public void setLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        this.linkedProcessInstanceId = linkedProcessInstanceId;
+    }
+
     @Override
     public String getId() {
         return id;
@@ -395,6 +401,11 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     @Override
     public String getRootProcessInstanceId() {
         return rootProcessInstanceId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceId() {
+        return linkedProcessInstanceId;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {

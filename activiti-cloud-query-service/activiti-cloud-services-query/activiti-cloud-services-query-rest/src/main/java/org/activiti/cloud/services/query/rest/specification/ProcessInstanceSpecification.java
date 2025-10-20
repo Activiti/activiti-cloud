@@ -76,6 +76,7 @@ public class ProcessInstanceSpecification
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessCategoryNameFilter(root, criteriaBuilder);
         applyIncludeSubprocesses(root);
+        applyLinkedProcessInstanceId(root);
         return super.toPredicate(root, query, criteriaBuilder);
     }
 
@@ -114,6 +115,14 @@ public class ProcessInstanceSpecification
     private void applyParentIdFilter(Root<ProcessInstanceEntity> root) {
         if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
             predicates.add(root.get(ProcessInstanceEntity_.parentId).in(searchRequest.parentId()));
+        }
+    }
+
+    private void applyLinkedProcessInstanceId(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.linkedProcessInstanceId())) {
+            predicates.add(
+                root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.linkedProcessInstanceId())
+            );
         }
     }
 

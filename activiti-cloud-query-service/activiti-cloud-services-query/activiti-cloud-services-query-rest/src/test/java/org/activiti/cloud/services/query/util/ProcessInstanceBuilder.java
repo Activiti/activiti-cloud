@@ -139,6 +139,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        process.setLinkedProcessInstanceId(linkedProcessInstanceId);
+        return this;
+    }
+
     public ProcessInstanceBuilder subprocessOf(ProcessInstanceEntity processInstance) {
         process.setParentId(processInstance.getId());
         return this;
