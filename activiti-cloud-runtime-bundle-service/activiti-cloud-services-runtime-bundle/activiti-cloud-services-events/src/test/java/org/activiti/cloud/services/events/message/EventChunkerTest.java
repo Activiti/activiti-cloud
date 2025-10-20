@@ -48,7 +48,7 @@ class EventChunkerTest {
         objectMapper = new ObjectMapper();
         RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
         runtimeBundleProperties.setEventsProperties(new RuntimeBundleEventsProperties());
-        runtimeBundleProperties.getEventsProperties().setChunkSizeInBytesCloseListener(3000);
+        runtimeBundleProperties.getEventsProperties().setChunkSizeInBytesCloseListener(5000);
         eventChunker = new EventChunker(objectMapper, runtimeBundleProperties);
     }
 
@@ -94,13 +94,12 @@ class EventChunkerTest {
 
         Collection<List<CloudRuntimeEventImpl<?, ?>>> result = eventChunker.chunk(events);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.iterator().next()).hasSize(1);
+        assertThat(result).hasSize(0);
     }
 
     @Test
-    void shouldCreateSeparateChunkForEachVeryLargeEvent() {
-        List<CloudRuntimeEventImpl<?, ?>> events = createVeryLargeEvents(3);
+    void shouldCreateSeparateChunkForEachLargeEvent() {
+        List<CloudRuntimeEventImpl<?, ?>> events = createLargeEvents(3);
 
         Collection<List<CloudRuntimeEventImpl<?, ?>>> result = eventChunker.chunk(events);
 
@@ -115,7 +114,7 @@ class EventChunkerTest {
     void shouldHandleMixedSizeEvents() {
         List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
         events.addAll(createSmallEvents(2));
-        events.addAll(createVeryLargeEvents(1));
+        events.addAll(createLargeEvents(1));
         events.addAll(createSmallEvents(2));
 
         Collection<List<CloudRuntimeEventImpl<?, ?>>> result = eventChunker.chunk(events);
@@ -169,7 +168,7 @@ class EventChunkerTest {
     }
 
     private List<CloudRuntimeEventImpl<?, ?>> createMediumSizeEvents(int count) {
-        return createEvents(count, 1800);
+        return createEvents(count, 1000);
     }
 
     private List<CloudRuntimeEventImpl<?, ?>> createEvents(int count, int targetSizeBytes) {

@@ -282,35 +282,21 @@ class MessageProducerCommandContextCloseListenerTest {
     }
 
     @Test
-    void closedShouldSendMessageWhenSingleEventIsLargerThanLimit() {
-        // given
+    void closedShouldNotSendMessageWhenSingleEventIsLargerThanLimit() {
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
 
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        // when
         this.closeListener.closed(this.commandContext);
 
-        // then
-        verify(this.auditChannel, times(1)).send(this.messageArgumentCaptor.capture());
+        verify(this.auditChannel, never()).send(this.messageArgumentCaptor.capture());
 
-        CloudRuntimeEvent<?, ?>[] payload = this.messageArgumentCaptor.getValue().getPayload();
-        assertThat(payload).hasSize(1);
-
-        // Verify the event properties are correctly set
-        CloudRuntimeEvent<?, ?> event = payload[0];
-        assertThat(event.getAppName()).isEqualTo(APP_NAME);
-        assertThat(event.getServiceName()).isEqualTo(SPRING_APP_NAME);
-        assertThat(event.getServiceType()).isEqualTo(SERVICE_TYPE);
-        assertThat(event.getServiceVersion()).isEqualTo(SERVICE_VERSION);
-
-        // Verify the event contains the large data
-        assertThat(event.getProcessInstanceId()).contains("LARGE_DATA");
+        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(0);
     }
 
     @Test
-    void closedShouldSendMessageWhenTwoEventAreLargerThatLimit() {
+    void closedShouldNotSendMessageWhenTwoEventAreLargerThatLimit() {
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(2);
 
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -318,9 +304,9 @@ class MessageProducerCommandContextCloseListenerTest {
 
         this.closeListener.closed(this.commandContext);
 
-        verify(this.auditChannel, times(2)).send(this.messageArgumentCaptor.capture());
+        verify(this.auditChannel, never()).send(this.messageArgumentCaptor.capture());
 
-        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(2);
+        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(0);
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {

@@ -36,30 +36,36 @@ public class EventChunker {
     public Collection<List<CloudRuntimeEventImpl<?, ?>>> chunk(List<CloudRuntimeEventImpl<?, ?>> events) {
         List<List<CloudRuntimeEventImpl<?, ?>>> chunks = new ArrayList<>();
         List<CloudRuntimeEventImpl<?, ?>> currentChunk = new ArrayList<>();
-        int currentChunkSize = 0;
+        var currentChunkSize = 0;
 
         for (CloudRuntimeEventImpl<?, ?> event : events) {
             var eventSizeInBytes = getEventSizeInBytes(event);
 
-            if (isExceedingMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
-                chunks.add(new ArrayList<>(currentChunk));
-                currentChunk.clear();
-                currentChunkSize = 0;
+            if (
+                eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener()
+            ) {
+                System.out.printf("Dropping event of size %d bytes (exceeds max chunk size bytes)%n", eventSizeInBytes);
+            } else {
+                if (isExceedingMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
+                    chunks.add(new ArrayList<>(currentChunk));
+                    currentChunk.clear();
+                    currentChunkSize = 0;
+
+                    System.out.printf(
+                        "Created chunk with %d events, starting new chunk due to size limit%n",
+                        chunks.get(chunks.size() - 1).size()
+                    );
+                }
+
+                currentChunk.add(event);
+                currentChunkSize += eventSizeInBytes;
 
                 System.out.printf(
-                    "Created chunk with %d events, starting new chunk due to size limit%n",
-                    chunks.get(chunks.size() - 1).size()
+                    "Added event of size %d bytes to chunk, current chunk size: %d bytes%n",
+                    eventSizeInBytes,
+                    currentChunkSize
                 );
             }
-
-            currentChunk.add(event);
-            currentChunkSize += eventSizeInBytes;
-
-            System.out.printf(
-                "Added event of size %d bytes to chunk, current chunk size: %d bytes%n",
-                eventSizeInBytes,
-                currentChunkSize
-            );
         }
 
         if (!currentChunk.isEmpty()) {
@@ -86,7 +92,7 @@ public class EventChunker {
 
     private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
         try {
-            return objectMapper.writeValueAsBytes(event).length;
+            return this.objectMapper.writeValueAsBytes(event).length;
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to serialize event to JSON", e);
         }
