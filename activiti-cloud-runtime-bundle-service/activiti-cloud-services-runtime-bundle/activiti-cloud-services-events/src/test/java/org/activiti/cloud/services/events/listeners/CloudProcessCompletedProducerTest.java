@@ -22,6 +22,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import org.activiti.api.model.shared.model.IdentityLink;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -30,6 +32,7 @@ import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppen
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,19 +50,19 @@ class CloudProcessCompletedProducerTest {
     @Mock
     private CommandContext commandContext;
 
-    private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(
         new RuntimeBundleProperties()
     );
 
-    private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
+    private final ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
         new ProcessAuditServiceInfoAppender(() -> commandContext)
     );
 
-    private ToCloudProcessRuntimeEventConverter eventConverter = spy(
+    private final ToCloudProcessRuntimeEventConverter eventConverter = spy(
         new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender)
     );
 
-    private ProcessEngineEventsAggregator eventsAggregator = spy(
+    private final ProcessEngineEventsAggregator eventsAggregator = spy(
         new ProcessEngineEventsAggregator(mock(MessageProducerCommandContextCloseListener.class))
     );
 
@@ -77,7 +80,8 @@ class CloudProcessCompletedProducerTest {
 
     @Test
     void should_setDefaultActor_when_invokeCloudProcessCompletedProducerOnEvent() {
-        ProcessCompletedEvent processCompletedEvent = buildProcessCompletedEvent();
+        ProcessCompletedEvent processCompletedEvent = buildProcessCompletedEvent(null);
+        when(commandContext.getExecutionEntityManager()).thenReturn(mock(ExecutionEntityManager.class));
 
         this.cloudProcessCompletedProducer.onEvent(processCompletedEvent);
 
@@ -85,11 +89,32 @@ class CloudProcessCompletedProducerTest {
         assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo("service_user");
     }
 
+    @Test
+    void should_setActor_when_invokeCloudProcessCompletedProducerOnEvent() {
+        IdentityLink identityLink = mock(IdentityLink.class);
+        when(identityLink.getType()).thenReturn("actor");
+        when(identityLink.getDetails()).thenReturn("actor_id".getBytes());
+
+        ProcessCompletedEvent processCompletedEvent = buildProcessCompletedEvent(identityLink);
+
+        when(commandContext.getExecutionEntityManager()).thenReturn(mock(ExecutionEntityManager.class));
+
+        this.cloudProcessCompletedProducer.onEvent(processCompletedEvent);
+
+        verify(this.eventsAggregator).add(this.argumentCaptor.capture());
+        assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo("actor_id");
+    }
+
     @NotNull
-    private ProcessCompletedEvent buildProcessCompletedEvent() {
+    private ProcessCompletedEvent buildProcessCompletedEvent(IdentityLink identityLink) {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setInitiator(USERNAME);
-        ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);
-        return processCompletedEvent;
+        processInstance.setId("10");
+
+        if (identityLink != null) {
+            processInstance.setIdentityLinks(List.of(identityLink));
+        }
+
+        return new ProcessCompletedImpl(processInstance);
     }
 }

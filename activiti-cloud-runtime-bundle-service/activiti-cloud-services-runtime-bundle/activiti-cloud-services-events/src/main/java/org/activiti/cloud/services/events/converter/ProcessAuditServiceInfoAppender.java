@@ -17,12 +17,14 @@ package org.activiti.cloud.services.events.converter;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import org.activiti.api.model.shared.model.IdentityLink;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.task.IdentityLink;
 
 public class ProcessAuditServiceInfoAppender {
 
@@ -35,22 +37,69 @@ public class ProcessAuditServiceInfoAppender {
     public CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> appendAuditServiceInfoTo(
         CloudRuntimeEventImpl cloudRuntimeEvent
     ) {
+        // First try to get identity links from the event entity
+        Optional<String> actorFromEvent = getActorFromEvent(cloudRuntimeEvent);
+
+        // If not found in event entity, fall back to database lookup
+        if (actorFromEvent.isEmpty()) {
+            getActorFromDb(cloudRuntimeEvent);
+        } else {
+            clearIdentityLinksIfPresent(cloudRuntimeEvent);
+            actorFromEvent.ifPresent(cloudRuntimeEvent::setActor);
+        }
+
+        return cloudRuntimeEvent;
+    }
+
+    private static Optional<String> extractActorFromIdentityLinks(Stream<?> identityLinksStream) {
+        return identityLinksStream
+            .filter(link -> link instanceof IdentityLink || link instanceof org.activiti.engine.task.IdentityLink)
+            .filter(link ->
+                ActorConstants.ACTOR_TYPE.equalsIgnoreCase(
+                    link instanceof IdentityLink
+                        ? ((IdentityLink) link).getType()
+                        : ((org.activiti.engine.task.IdentityLink) link).getType()
+                )
+            )
+            .map(link ->
+                link instanceof IdentityLink
+                    ? ((IdentityLink) link).getDetails()
+                    : ((org.activiti.engine.task.IdentityLink) link).getDetails()
+            )
+            .map(String::new)
+            .findFirst();
+    }
+
+    private void getActorFromDb(CloudRuntimeEventImpl cloudRuntimeEvent) {
         Optional
             .ofNullable(commandContext)
             .map(Supplier::get)
             .map(CommandContext::getExecutionEntityManager)
             .map(it -> it.findById(cloudRuntimeEvent.getProcessInstanceId()))
-            .flatMap(processInstance ->
-                processInstance
-                    .getIdentityLinks()
-                    .stream()
-                    .filter(identityLink -> ActorConstants.ACTOR_TYPE.equalsIgnoreCase(identityLink.getType()))
-                    .map(IdentityLink::getDetails)
-                    .map(String::new)
-                    .findFirst()
-            )
+            .flatMap(processInstance -> extractActorFromIdentityLinks(processInstance.getIdentityLinks().stream()))
             .ifPresent(cloudRuntimeEvent::setActor);
+    }
 
-        return cloudRuntimeEvent;
+    private static Optional<String> getActorFromEvent(CloudRuntimeEventImpl cloudRuntimeEvent) {
+        return Optional
+            .ofNullable(cloudRuntimeEvent.getEntity())
+            .filter(entity -> entity instanceof ProcessInstanceImpl)
+            .map(entity -> (ProcessInstanceImpl) entity)
+            .filter(processInstance ->
+                processInstance.getId() != null &&
+                processInstance.getId().equals(cloudRuntimeEvent.getProcessInstanceId())
+            )
+            .flatMap(processInstance ->
+                Optional
+                    .ofNullable(processInstance.getIdentityLinks())
+                    .filter(identityLinks -> !identityLinks.isEmpty())
+                    .flatMap(identityLinks -> extractActorFromIdentityLinks(identityLinks.stream()))
+            );
+    }
+
+    private void clearIdentityLinksIfPresent(CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> event) {
+        if (event.getEntity() instanceof ProcessInstanceImpl) {
+            ((ProcessInstanceImpl) event.getEntity()).setIdentityLinks(null);
+        }
     }
 }

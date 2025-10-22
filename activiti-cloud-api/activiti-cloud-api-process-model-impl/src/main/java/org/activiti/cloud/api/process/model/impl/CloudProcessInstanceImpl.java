@@ -17,6 +17,8 @@ package org.activiti.cloud.api.process.model.impl;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
+import java.util.List;
+import org.activiti.api.model.shared.model.IdentityLink;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -50,6 +52,8 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     private String rootProcessInstanceId;
 
+    private List<IdentityLink> identityLinks;
+
     public CloudProcessInstanceImpl() {}
 
     public CloudProcessInstanceImpl(ProcessInstance processInstance) {
@@ -66,6 +70,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         processDefinitionVersion = processInstance.getProcessDefinitionVersion();
         processDefinitionName = processInstance.getProcessDefinitionName();
         rootProcessInstanceId = processInstance.getRootProcessInstanceId();
+        identityLinks = processInstance.getIdentityLinks();
     }
 
     @Override
@@ -181,6 +186,11 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     @Override
     public String getRootProcessInstanceId() {
         return rootProcessInstanceId;
+    }
+
+    @Override
+    public List<IdentityLink> getIdentityLinks() {
+        return identityLinks;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
