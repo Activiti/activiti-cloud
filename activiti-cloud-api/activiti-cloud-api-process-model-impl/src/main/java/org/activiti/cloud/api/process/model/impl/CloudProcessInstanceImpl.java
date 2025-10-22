@@ -70,7 +70,6 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         processDefinitionVersion = processInstance.getProcessDefinitionVersion();
         processDefinitionName = processInstance.getProcessDefinitionName();
         rootProcessInstanceId = processInstance.getRootProcessInstanceId();
-        identityLinks = processInstance.getIdentityLinks();
     }
 
     @Override
@@ -188,9 +187,12 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         return rootProcessInstanceId;
     }
 
-    @Override
     public List<IdentityLink> getIdentityLinks() {
         return identityLinks;
+    }
+
+    public void setIdentityLinks(List<IdentityLink> identityLinks) {
+        this.identityLinks = identityLinks;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
