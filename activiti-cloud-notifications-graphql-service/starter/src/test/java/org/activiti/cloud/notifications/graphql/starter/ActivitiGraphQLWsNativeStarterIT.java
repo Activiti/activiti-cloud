@@ -1110,6 +1110,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                     + "      value"
                     + "      processInstance(where: {status: {EQ: RUNNING}}) {"
                     + "        id"
+                    + "        status"
                     + "      }"
                     + "    }"
                     + "  }"

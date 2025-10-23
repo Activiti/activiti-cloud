@@ -202,10 +202,10 @@ public class ServicesCoreAutoConfiguration {
 
     @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
     @Bean("commandConnectorConsumer")
-    public <T extends Payload, R> Function<Message<T>, R> commandEndpointConnector(
+    public <T extends Payload, R> Function<Message<Payload>, R> commandEndpointConnector(
         @Qualifier("commandEndpoint") CommandEndpoint<T> commandEndpoint
     ) {
-        return message -> commandEndpoint.execute(message.getPayload());
+        return message -> commandEndpoint.execute((T) message.getPayload());
     }
 
     @Bean
