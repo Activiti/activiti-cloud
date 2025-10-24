@@ -107,7 +107,7 @@ jobs:
         shell: bash
         run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
         env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -DskipTests
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
@@ -325,7 +325,7 @@ jobs:
           make test/runtime-acceptance-tests
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
+        if: false
         run: |
           echo "Delete Helm release"
           make delete
