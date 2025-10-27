@@ -17,6 +17,12 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +36,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserInfoUriAuthenticationConverter.class);
+
     public static final String SESSION_ID_CLAIM = "sid";
 
     private static final String SUBJECT_CLAIM = "sub";
@@ -38,15 +46,18 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private ClientRegistration clientRegistration;
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
     private String usernameClaim = "preferred_username";
+    private CacheManager cacheManager;
 
     public JwtUserInfoUriAuthenticationConverter(
         Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
         ClientRegistration clientRegistration,
-        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable,
+        CacheManager cacheManager
     ) {
         this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
         this.clientRegistration = clientRegistration;
         this.oAuth2UserServiceCacheable = oAuth2UserServiceCacheable;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -73,9 +84,31 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             );
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             String cacheKey = getCacheKey(jwt);
-            if (cacheKey != null) {
+
+            if (cacheKey != null && jwt.getClaimAsStringList("scope").contains("openid")) {
                 OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
                 username = oAuth2User.getName();
+            } else {
+                LOGGER.warn("Cannot load user data for {}, probably the token hasn't the openid scope", cacheKey);
+                username = cacheKey;
+                Cache userInfoApiCall = cacheManager.getCache("userInfoApiCall");
+                OAuth2User oAuth2User = new OAuth2User() {
+                    @Override
+                    public Map<String, Object> getAttributes() {
+                        return Map.of();
+                    }
+
+                    @Override
+                    public Collection<? extends GrantedAuthority> getAuthorities() {
+                        return List.of();
+                    }
+
+                    @Override
+                    public String getName() {
+                        return cacheKey;
+                    }
+                };
+                userInfoApiCall.put(cacheKey, oAuth2User);
             }
         }
         return username;

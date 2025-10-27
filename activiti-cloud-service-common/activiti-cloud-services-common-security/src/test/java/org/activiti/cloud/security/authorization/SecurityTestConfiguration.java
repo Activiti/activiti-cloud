@@ -95,7 +95,8 @@ public class SecurityTestConfiguration {
         JwtUserInfoUriAuthenticationConverter converter = new JwtUserInfoUriAuthenticationConverter(
             jwtGrantedAuthorityConverter,
             clientRegistrationRepository.findByRegistrationId("keycloak"),
-            oAuth2UserServiceCacheable
+            oAuth2UserServiceCacheable,
+            null
         );
         JwtUserInfoUriAuthenticationConverter spy = spy(converter);
         doReturn("test").when(spy).getPrincipalClaimName(any(Jwt.class));
