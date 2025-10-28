@@ -80,6 +80,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "functionRouterInput",
                 "asyncExecutorJobsOutput",
                 "auditProducer",
+                "auditProducerIncidents",
                 "commandResults",
                 "messageConnectorOutput",
                 "messageEventsOutput",
@@ -98,6 +99,8 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
             .containsOnly("consumer");
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups())
+            .containsOnly("auditIncidents");
     }
 
     @Test
@@ -152,6 +155,14 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.auditProducer.producer.queue-name-group-only",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.auditProducerIncidents.producer.queue-name-group-only",
                 Boolean.class
             )
         )

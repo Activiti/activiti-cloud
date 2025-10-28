@@ -13,14 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.api.streams;
+package org.activiti.cloud.services.events.message;
 
 import java.util.Map;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.messaging.handler.annotation.Headers;
 
-public interface AuditConsumerChannelHandler {
-    void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
+public class AuditProducerIncidentsRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
 
-    void receiveCloudRuntimeEventIncidents(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
+    public final String ROUTING_KEY_PREFIX = "engineEventsIncidents";
+
+    public final String[] HEADER_KEYS = {
+        RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
+        RuntimeBundleInfoMessageHeaders.APP_NAME,
+    };
+
+    @Override
+    public String resolve(Map<String, Object> headers) {
+        return build(headers, HEADER_KEYS);
+    }
+
+    @Override
+    public String getPrefix() {
+        return ROUTING_KEY_PREFIX;
+    }
 }

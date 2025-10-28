@@ -72,4 +72,9 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
             eventsRepository.saveAll(entities);
         }
     }
+
+    @Override
+    public void receiveCloudRuntimeEventIncidents(Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
+        LOGGER.error("Incidents received for events: {}", (Object) events);
+    }
 }

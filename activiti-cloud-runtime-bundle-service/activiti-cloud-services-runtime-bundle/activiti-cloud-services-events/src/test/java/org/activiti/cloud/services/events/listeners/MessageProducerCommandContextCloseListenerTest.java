@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.EventChunker;
+import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
@@ -49,7 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,7 +83,6 @@ class MessageProducerCommandContextCloseListenerTest {
     private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
     private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
 
-    @InjectMocks
     private MessageProducerCommandContextCloseListener closeListener;
 
     @Mock
@@ -107,6 +107,11 @@ class MessageProducerCommandContextCloseListenerTest {
         properties
     );
 
+    @Spy
+    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
+        properties
+    );
+
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @Spy
@@ -114,6 +119,9 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @Mock
     private MessageChannel auditChannel;
+
+    @Mock
+    private MessageChannel auditIncidentsChannel;
 
     @Mock
     private CommandContext commandContext;
@@ -125,10 +133,21 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        closeListener =
+            new MessageProducerCommandContextCloseListener(
+                producer,
+                messageBuilderChainFactory,
+                messageBuilderChainIncidentFactory,
+                runtimeBundleInfoAppender,
+                properties,
+                eventChunker
+            );
+
         ProcessInstance processInstance = new ProcessInstanceImpl();
         event = new CloudProcessCreatedEventImpl(processInstance);
 
         when(producer.auditProducer()).thenReturn(auditChannel);
+        when(producer.auditProducerIncidents()).thenReturn(auditIncidentsChannel);
 
         processEngineEventsAggregator = spy(new ProcessEngineEventsAggregator(closeListener));
 
@@ -136,6 +155,8 @@ class MessageProducerCommandContextCloseListenerTest {
 
         ExecutionContext executionContext = mockExecutionContext();
         given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
+        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+            .willReturn(executionContext);
     }
 
     @Test
@@ -206,6 +227,7 @@ class MessageProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         // then
+        verify(auditIncidentsChannel, never()).send(any());
         verify(auditChannel).send(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getHeaders())
             .containsEntry("routingKey", MOCK_ROUTING_KEY)
@@ -288,11 +310,9 @@ class MessageProducerCommandContextCloseListenerTest {
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        this.closeListener.closed(this.commandContext);
+        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
 
-        verify(this.auditChannel, never()).send(this.messageArgumentCaptor.capture());
-
-        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(0);
+        assertMessageNotSent(exception);
     }
 
     @Test
@@ -302,11 +322,9 @@ class MessageProducerCommandContextCloseListenerTest {
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        this.closeListener.closed(this.commandContext);
+        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
 
-        verify(this.auditChannel, never()).send(this.messageArgumentCaptor.capture());
-
-        assertThat(this.messageArgumentCaptor.getAllValues()).hasSize(0);
+        assertMessageNotSent(exception);
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {
@@ -323,10 +341,18 @@ class MessageProducerCommandContextCloseListenerTest {
         return new MessageProducerCommandContextCloseListener(
             producer,
             messageBuilderChainFactory,
+            messageBuilderChainIncidentFactory,
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
             eventChunker
         );
+    }
+
+    private void assertMessageNotSent(RuntimeException exception) {
+        verify(this.auditChannel, never()).send(any());
+        verify(auditIncidentsChannel).send(any());
+        assertThat(exception).hasMessage("Chunk size limit exceeded");
+        assertThat(exception.getClass()).isEqualTo(RuntimeException.class);
     }
 
     private List<CloudRuntimeEventImpl<?, ?>> getCloudRuntimeEvents(int eventsCount) {

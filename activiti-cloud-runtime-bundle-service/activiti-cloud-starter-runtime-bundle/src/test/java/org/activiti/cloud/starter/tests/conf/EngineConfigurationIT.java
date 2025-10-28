@@ -119,6 +119,21 @@ class EngineConfigurationIT {
     }
 
     @Test
+    void shouldHaveRequiredGroupsSetForAuditProducerIncidents() {
+        //when
+        var auditProducerIncidents = bindingServiceProperties.getBindingProperties("auditProducerIncidents");
+
+        //then
+        assertThat(auditProducerIncidents.getDestination())
+            .as("should have required groups set for audit producer incidents")
+            .isEqualTo("namespace.engineeventsincidents");
+
+        assertThat(auditProducerIncidents.getProducer().getRequiredGroups())
+            .as("should have required groups set for audit producer")
+            .containsExactly("auditIncidents");
+    }
+
+    @Test
     void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
         BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");

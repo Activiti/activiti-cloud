@@ -45,6 +45,8 @@ public class EventChunker {
                 eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener()
             ) {
                 System.out.printf("Dropping event of size %d bytes (exceeds max chunk size bytes)%n", eventSizeInBytes);
+
+                throw new IllegalArgumentException("Chunk size limit exceeded");
             } else {
                 if (isExceedingMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
                     chunks.add(new ArrayList<>(currentChunk));

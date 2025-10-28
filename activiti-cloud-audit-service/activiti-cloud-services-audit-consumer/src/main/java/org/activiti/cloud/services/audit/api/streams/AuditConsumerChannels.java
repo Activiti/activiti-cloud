@@ -21,9 +21,15 @@ import org.springframework.messaging.SubscribableChannel;
 
 public interface AuditConsumerChannels {
     String AUDIT_CONSUMER = "auditConsumer";
+    String AUDIT_CONSUMER_INCIDENTS = "auditConsumerIncidents";
 
     @InputBinding(AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
+    }
+
+    @InputBinding(AUDIT_CONSUMER_INCIDENTS)
+    default SubscribableChannel auditConsumerIncidents() {
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER_INCIDENTS).getObject();
     }
 }

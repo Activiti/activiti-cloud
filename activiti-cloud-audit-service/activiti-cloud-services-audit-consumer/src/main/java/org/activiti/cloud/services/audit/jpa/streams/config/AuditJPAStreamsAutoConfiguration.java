@@ -58,4 +58,20 @@ public class AuditJPAStreamsAutoConfiguration {
             );
         };
     }
+
+    @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER_INCIDENTS)
+    @Bean
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerIncidentsChannelHandlerConsumer(
+        AuditConsumerChannelHandler handler
+    ) {
+        return message -> {
+            handler.receiveCloudRuntimeEventIncidents(
+                message.getHeaders(),
+                Optional
+                    .ofNullable(message.getPayload())
+                    .orElse(Collections.emptyList())
+                    .toArray(new CloudRuntimeEvent[0])
+            );
+        };
+    }
 }

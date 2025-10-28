@@ -39,6 +39,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
+    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private RuntimeBundleProperties runtimeBundleProperties;
     private final EventChunker eventChunker;
@@ -46,17 +47,20 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
+        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
         EventChunker eventChunker
     ) {
         Assert.notNull(producer, "producer must not be null");
         Assert.notNull(messageBuilderChainFactory, "messageBuilderChainFactory must not be null");
+        Assert.notNull(messageBuilderIncidentsChainFactory, "messageBuilderIncidentsChainFactory must not be null");
         Assert.notNull(runtimeBundleInfoAppender, "runtimeBundleInfoAppender must not be null");
         Assert.notNull(eventChunker, "eventChunker must not be null");
 
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
+        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.eventChunker = eventChunker;
@@ -74,9 +78,20 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     }
 
     private void sendEvents(List<CloudRuntimeEvent<?, ?>> events, ExecutionContext rootExecutionContext) {
-        var eventChunks = createEventChunks(events);
+        try {
+            var eventChunks = createEventChunks(events);
 
-        eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
+            eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
+        } catch (IllegalArgumentException e) {
+            var errorMessage =
+                this.messageBuilderIncidentsChainFactory.create(rootExecutionContext)
+                    .withPayload("Error chunking events: " + e.getMessage())
+                    .build();
+
+            this.producer.auditProducerIncidents().send(errorMessage);
+
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {

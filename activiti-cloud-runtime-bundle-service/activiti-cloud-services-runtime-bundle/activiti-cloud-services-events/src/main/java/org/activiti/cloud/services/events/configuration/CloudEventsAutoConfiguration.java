@@ -73,6 +73,7 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.EventChunker;
+import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
@@ -140,6 +141,14 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ExecutionContextIncidentEventMessageBuilderFactory executionContextIncidentEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
+        return new ExecutionContextIncidentEventMessageBuilderFactory(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory(
         RuntimeBundleProperties properties
     ) {
@@ -175,6 +184,7 @@ public class CloudEventsAutoConfiguration {
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
+        ExecutionContextIncidentEventMessageBuilderFactory executionContextIncidentEventMessageBuilderFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
         EventChunker eventChunker
@@ -182,6 +192,7 @@ public class CloudEventsAutoConfiguration {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
             executionContextMessageBuilderFactory,
+            executionContextIncidentEventMessageBuilderFactory,
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
             eventChunker
