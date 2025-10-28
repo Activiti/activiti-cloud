@@ -137,9 +137,9 @@ public class EngineEventsConsumerAutoConfiguration {
                 .from(engineEventsPublisher)
                 .publish()
                 .autoConnect(0)
-                .onBackpressureDrop(message -> logger.warn("Message dropped due to overflow: {}", message.getHeaders()))
                 .share()
-                .publishOn(engineEventsScheduler);
+                .publishOn(engineEventsScheduler)
+                .onBackpressureDrop(message -> logger.warn("Message {} dropped due to overflow", message.getHeaders()));
         }
 
         @Bean
@@ -153,7 +153,7 @@ public class EngineEventsConsumerAutoConfiguration {
             return () -> {
                 logger.info("Initializing engineEventsFlux consumer");
 
-                engineEventsFlux.subscribe(message -> logger.debug("Received engine events {}", message));
+                engineEventsFlux.subscribe(message -> logger.debug("Received engine events {}", message.getHeaders()));
             };
         }
     }
