@@ -38,7 +38,12 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
         assertThat(functionRouter.isEnabled()).isTrue();
 
         assertThat(functionRouter.getRoutes())
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+            .containsOnlyKeys(
+                "auditConsumer",
+                "queryConsumer",
+                "graphQLEngineEventsConsumerSource",
+                "auditConsumerIncidents"
+            );
 
         assertThat(functionRouter.destinations("functionRouterInput")).isEmpty();
 
