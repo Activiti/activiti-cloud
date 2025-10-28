@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -45,39 +43,14 @@ public class IntegrationRequestedEventConverter extends BaseEventToEntityConvert
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         IntegrationRequestSentEventEntity entity = (IntegrationRequestSentEventEntity) auditEventEntity;
 
-        Map<String, Object> filteredInboundVariables = getFilteredInboundVariables(
-            entity.getIntegrationContext().getInBoundVariables()
-        );
-        entity.getIntegrationContext().getInBoundVariables().putAll(filteredInboundVariables);
+        if (entity.getIntegrationContext().hasEphemeralMapping()) {
+            entity.getIntegrationContext().getInBoundVariables().replaceAll((k, v) -> null);
+        }
 
         return new CloudIntegrationRequestedEventImpl(
             entity.getEventId(),
             entity.getTimestamp(),
             entity.getIntegrationContext()
         );
-    }
-
-    public Map<String, Object> getFilteredInboundVariables(Map<String, Object> inboundVariables) {
-        if (inboundVariables == null) {
-            return Map.of();
-        }
-        return inboundVariables
-            .entrySet()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> {
-                        Object value = entry.getValue();
-                        if (value instanceof Map<?, ?> mapValue) {
-                            Object ephemeral = mapValue.get("ephemeral");
-                            if (Boolean.TRUE.equals(ephemeral)) {
-                                return null;
-                            }
-                        }
-                        return value;
-                    }
-                )
-            );
     }
 }

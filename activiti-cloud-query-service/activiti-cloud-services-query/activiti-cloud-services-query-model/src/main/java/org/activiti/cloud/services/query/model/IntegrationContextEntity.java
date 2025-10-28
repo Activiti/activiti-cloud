@@ -430,6 +430,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
+    @Override
+    public boolean hasEphemeralMapping() {
+        return false;
+    }
+
     public static class IdBuilderHelper {
 
         public static String from(IntegrationContext integrationContext) {
