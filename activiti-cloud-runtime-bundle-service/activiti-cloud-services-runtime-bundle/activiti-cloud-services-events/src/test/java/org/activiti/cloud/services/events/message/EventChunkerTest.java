@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -92,9 +93,8 @@ class EventChunkerTest {
     void shouldHandleSingleEventLargerThanMaxSize() {
         List<CloudRuntimeEventImpl<?, ?>> events = createVeryLargeEvents(1);
 
-        Collection<List<CloudRuntimeEventImpl<?, ?>>> result = eventChunker.chunk(events);
-
-        assertThat(result).hasSize(0);
+        var exception = assertThrows(IllegalArgumentException.class, () -> eventChunker.chunk(events));
+        assertThat(exception).hasMessage("Chunk size limit exceeded");
     }
 
     @Test
