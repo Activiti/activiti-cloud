@@ -88,7 +88,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
                     OAuth2User oAuth2User = new DefaultOAuth2User(
                         jwtGrantedAuthoritiesConverter.convert(jwt),
                         jwt.getClaims(),
-                        "sub"
+                        SUBJECT_CLAIM
                     );
                     oAuth2UserServiceCacheable.putUser(oAuth2User, cacheKey);
                 }
