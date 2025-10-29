@@ -23,7 +23,6 @@ import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticat
 import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.context.annotation.Bean;
@@ -65,8 +64,7 @@ public class CommonJwtAuthenticationConverterConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
         JwtAccessTokenProvider jwtAccessTokenProvider,
-        OAuth2UserServiceCacheable oAuth2UserServiceCacheable,
-        CacheManager cacheManager
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
     ) {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(iamName);
         JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(
@@ -75,8 +73,7 @@ public class CommonJwtAuthenticationConverterConfiguration {
         return new JwtUserInfoUriAuthenticationConverter(
             jwtGrantedAuthoritiesConverter,
             clientRegistration,
-            oAuth2UserServiceCacheable,
-            cacheManager
+            oAuth2UserServiceCacheable
         );
     }
 
