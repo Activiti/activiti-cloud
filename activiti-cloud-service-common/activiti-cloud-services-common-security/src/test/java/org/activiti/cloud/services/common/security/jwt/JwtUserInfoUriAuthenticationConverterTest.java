@@ -28,6 +28,7 @@ import org.activiti.cloud.security.authorization.SecurityTestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -50,6 +51,7 @@ public class JwtUserInfoUriAuthenticationConverterTest {
     private CaffeineCacheManager caffeineCacheManager;
 
     @Autowired
+    @Qualifier("jwtAuthenticationConverter")
     private JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter;
 
     @Test

@@ -88,7 +88,7 @@ public class SecurityTestConfiguration {
     }
 
     @Bean
-    public Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter(
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
         JwtGrantedAuthorityConverter jwtGrantedAuthorityConverter,
         ClientRegistrationRepository clientRegistrationRepository,
         OAuth2UserServiceCacheable oAuth2UserServiceCacheable,
