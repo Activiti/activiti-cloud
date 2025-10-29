@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
@@ -61,7 +62,7 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER_INCIDENTS)
     @Bean
-    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerIncidentsChannelHandlerConsumer(
+    public Consumer<Message<List<CloudRuntimeEntity>>> auditConsumerIncidentsChannelHandlerConsumer(
         AuditConsumerChannelHandler handler
     ) {
         return message -> {
@@ -70,7 +71,7 @@ public class AuditJPAStreamsAutoConfiguration {
                 Optional
                     .ofNullable(message.getPayload())
                     .orElse(Collections.emptyList())
-                    .toArray(new CloudRuntimeEvent[0])
+                    .toArray(new CloudRuntimeEntity[0])
             );
         };
     }

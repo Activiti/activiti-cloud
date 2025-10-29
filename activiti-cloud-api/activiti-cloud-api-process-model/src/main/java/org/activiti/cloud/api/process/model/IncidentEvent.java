@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.api.streams;
+package org.activiti.cloud.api.process.model;
 
-import java.util.Map;
+import java.util.List;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.messaging.handler.annotation.Headers;
 
-public interface AuditConsumerChannelHandler {
-    void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
+public interface IncidentEvent extends CloudRuntimeEntity {
+    String getErrorCode();
 
-    void receiveCloudRuntimeEventIncidents(@Headers Map<String, Object> headers, CloudRuntimeEntity... events);
+    List<StackTraceElement> getStackTraceElements();
+
+    String getErrorMessage();
+
+    String getErrorClassName();
 }

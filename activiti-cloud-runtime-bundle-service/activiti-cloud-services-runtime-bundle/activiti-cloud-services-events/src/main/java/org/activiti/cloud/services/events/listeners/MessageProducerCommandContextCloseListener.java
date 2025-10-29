@@ -15,10 +15,13 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.impl.IncidentEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -82,6 +85,17 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             var eventChunks = createEventChunks(events);
 
             eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
+
+            System.out.println("Sending error via incident channel test");
+
+            List<CloudRuntimeEntityImpl> errorEvents = new ArrayList<>();
+            var incident = new IncidentEventImpl(new IllegalArgumentException("Test incident for chunking"));
+            errorEvents.add(incident);
+            var errorMessage =
+                this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
+
+            this.producer.auditProducerIncidents().send(errorMessage);
+            System.out.println("Sent error incident for chunking issues");
         } catch (IllegalArgumentException e) {
             var errorMessage =
                 this.messageBuilderIncidentsChainFactory.create(rootExecutionContext)
