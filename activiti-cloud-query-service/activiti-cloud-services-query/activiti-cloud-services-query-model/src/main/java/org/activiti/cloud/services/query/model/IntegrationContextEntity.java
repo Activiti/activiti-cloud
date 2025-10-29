@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import jakarta.persistence.Transient;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.hibernate.annotations.DynamicInsert;
@@ -125,6 +126,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @MapsId
     @JoinColumn(name = "id")
     private ServiceTaskEntity serviceTask;
+
+    @Transient
+    private Boolean ephemeralVariables;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -431,8 +435,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public boolean hasEphemeralMapping() {
-        return false;
+    public boolean hasEphemeralVariables() {
+        return Boolean.TRUE.equals(this.ephemeralVariables);
     }
 
     public static class IdBuilderHelper {

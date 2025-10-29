@@ -51,6 +51,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private IntegrationContextStatus status;
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
+    private Boolean ephemeralVariables;
 
     public CloudIntegrationContextImpl() {}
 
@@ -296,8 +297,12 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public boolean hasEphemeralMapping() {
-        return false;
+    public boolean hasEphemeralVariables() {
+        return Boolean.TRUE.equals(this.ephemeralVariables);
+    }
+
+    public void setEphemeralVariables(Boolean ephemeralVariables) {
+        this.ephemeralVariables = ephemeralVariables;
     }
 
     @Override
@@ -330,7 +335,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                 requestDate,
                 resultDate,
                 stackTraceElements,
-                status
+                status,
+                ephemeralVariables
             );
         return result;
     }
@@ -370,7 +376,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             Objects.equals(requestDate, other.requestDate) &&
             Objects.equals(resultDate, other.resultDate) &&
             Objects.equals(stackTraceElements, other.stackTraceElements) &&
-            status == other.status
+            status == other.status &&
+            Objects.equals(ephemeralVariables, other.ephemeralVariables)
         );
     }
 
@@ -425,6 +432,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
             .append(", outBoundVariables=")
             .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
+            .append(", ephemeralVariables=")
+            .append(ephemeralVariables)
             .append("]");
         return builder.toString();
     }
