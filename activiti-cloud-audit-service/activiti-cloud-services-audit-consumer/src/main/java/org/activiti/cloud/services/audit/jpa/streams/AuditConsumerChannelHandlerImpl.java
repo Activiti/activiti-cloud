@@ -76,6 +76,6 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     @Override
     public void receiveCloudRuntimeEventIncidents(Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
-        LOGGER.error("Incidents received for events: {}", (Object) events);
+        LOGGER.error("Incidents received for events: {}", events);
     }
 }
