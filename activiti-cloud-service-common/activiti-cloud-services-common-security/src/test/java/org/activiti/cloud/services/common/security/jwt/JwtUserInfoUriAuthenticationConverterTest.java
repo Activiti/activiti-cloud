@@ -39,7 +39,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest(classes = { SecurityTestConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class JwtUserInfoUriAuthenticationConverterTest {
+class JwtUserInfoUriAuthenticationConverterTest {
 
     @MockitoSpyBean
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
