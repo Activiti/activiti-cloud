@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 
@@ -297,6 +298,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
+    @JsonProperty("ephemeralVariables")
     public boolean hasEphemeralVariables() {
         return Boolean.TRUE.equals(this.ephemeralVariables);
     }
