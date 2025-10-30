@@ -85,26 +85,25 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
             eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
 
-            System.out.println("Sending error via incident channel test");
-
-            List<CloudRuntimeEventImpl> errorEvents = new ArrayList<>();
-            var incident = new IncidentEventImpl(new IllegalArgumentException("Test incident for chunking"));
-            errorEvents.add(incident);
-            var errorMessage =
-                this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
-
-            this.producer.auditProducerIncidents().send(errorMessage);
-            System.out.println("Sent error incident for chunking issues");
+            createAndSendIncidentEvent(rootExecutionContext);
         } catch (IllegalArgumentException e) {
-            var errorMessage =
-                this.messageBuilderIncidentsChainFactory.create(rootExecutionContext)
-                    .withPayload("Error chunking events: " + e.getMessage())
-                    .build();
-
-            this.producer.auditProducerIncidents().send(errorMessage);
-
-            throw new RuntimeException(e.getMessage());
+            createAndSendIncidentEvent(rootExecutionContext);
+            // throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private void createAndSendIncidentEvent(ExecutionContext rootExecutionContext) {
+        System.out.println("Sending error via incident channel test");
+
+        var errorEvents = new ArrayList<>();
+        var incident = new IncidentEventImpl(new IllegalArgumentException("Test incident for chunking"));
+        errorEvents.add(incident);
+        var errorMessage =
+            this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
+
+        this.producer.auditProducerIncidents().send(errorMessage);
+
+        System.out.println("Sent error incident for chunking issues");
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {
