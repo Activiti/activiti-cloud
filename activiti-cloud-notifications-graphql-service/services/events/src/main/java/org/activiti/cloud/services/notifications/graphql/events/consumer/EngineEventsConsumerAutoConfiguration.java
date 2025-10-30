@@ -43,6 +43,7 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -135,11 +136,14 @@ public class EngineEventsConsumerAutoConfiguration {
         ) {
             return Flux
                 .from(engineEventsPublisher)
+                .doOnError(error -> logger.error("Error while publishing engine events: {}", error.getMessage(), error))
+                .onErrorResume(e -> Mono.empty())
                 .publish()
-                .autoConnect(0)
-                .share()
-                .publishOn(engineEventsScheduler)
-                .onBackpressureDrop(message -> logger.warn("Message {} dropped due to overflow", message.getHeaders()));
+                .autoConnect()
+                .parallel()
+                .runOn(engineEventsScheduler)
+                .sequential()
+                .onBackpressureLatest();
         }
 
         @Bean
