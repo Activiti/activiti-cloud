@@ -58,7 +58,7 @@ class JwtUserInfoUriAuthenticationConverterTest {
     void should_notTryToLoadUser_whenOpenidScopeIsMissing() {
         String sub = "abc-123";
         Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaimAsString(jwtUserInfoUriAuthenticationConverter.usernameClaim)).thenReturn(null);
+        when(jwt.getClaimAsString(JwtUserInfoUriAuthenticationConverter.USERNAME_CLAIM)).thenReturn(null);
         when(jwt.hasClaim(JwtUserInfoUriAuthenticationConverter.SESSION_ID_CLAIM)).thenReturn(false);
         when(jwt.getClaimAsString(JwtUserInfoUriAuthenticationConverter.SUBJECT_CLAIM)).thenReturn(sub);
         when(jwt.getClaimAsStringList("scope")).thenReturn(List.of());

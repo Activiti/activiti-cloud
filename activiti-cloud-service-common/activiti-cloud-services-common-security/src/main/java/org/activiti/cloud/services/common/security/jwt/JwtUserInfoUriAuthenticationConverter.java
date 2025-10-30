@@ -17,6 +17,7 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -36,13 +37,12 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserInfoUriAuthenticationConverter.class);
 
     public static final String SESSION_ID_CLAIM = "sid";
-
     protected static final String SUBJECT_CLAIM = "sub";
+    protected static final String USERNAME_CLAIM = "preferred_username";
 
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
-    private ClientRegistration clientRegistration;
-    private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
-    protected static final String USERNAME_CLAIM = "preferred_username";
+    private final ClientRegistration clientRegistration;
+    private final OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
 
     public JwtUserInfoUriAuthenticationConverter(
         Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
@@ -61,16 +61,13 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
         return new JwtAuthenticationToken(jwt, authorities, principalClaimValue);
     }
 
-    public void setUsernameClaim(String usernameClaim) {
-        this.usernameClaim = usernameClaim;
-    }
-
     public String getPrincipalClaimName(Jwt jwt) {
-        String username = jwt.getClaimAsString(usernameClaim);
+        String username = jwt.getClaimAsString(USERNAME_CLAIM);
         if (username == null) {
             String cacheKey = getCacheKey(jwt);
             if (cacheKey != null) {
-                if (jwt.getClaimAsStringList("scope").contains("openid")) {
+                List<String> scope = jwt.getClaimAsStringList("scope");
+                if (scope != null && scope.contains("openid")) {
                     Instant issuedAt = jwt.getIssuedAt();
                     Instant expiresAt = jwt.getExpiresAt();
                     OAuth2AccessToken accessToken = new OAuth2AccessToken(
