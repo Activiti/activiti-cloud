@@ -26,4 +26,8 @@ public interface IncidentEvent extends CloudRuntimeEntity {
     String getErrorMessage();
 
     String getErrorClassName();
+
+    enum IncidentEventType {
+        INCIDENT_CREATED,
+    }
 }
