@@ -32,7 +32,7 @@ public class IncidentEventImpl extends CloudRuntimeEventImpl<ProcessInstance, Pr
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
 
-    IncidentEventImpl() {}
+    public IncidentEventImpl() {}
 
     public IncidentEventImpl(Throwable error) {
         this.errorClassName = error.getClass().getName();
