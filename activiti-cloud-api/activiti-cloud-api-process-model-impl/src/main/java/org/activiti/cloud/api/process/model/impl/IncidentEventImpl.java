@@ -19,11 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 
-public class IncidentEventImpl extends CloudRuntimeEntityImpl implements IncidentEvent {
+public class IncidentEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> implements IncidentEvent {
 
     private String errorCode;
     private String errorMessage;
@@ -46,6 +48,11 @@ public class IncidentEventImpl extends CloudRuntimeEntityImpl implements Inciden
 
         this.errorMessage = cause.getMessage();
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
+    }
+
+    @Override
+    public ProcessEvents getEventType() {
+        return ProcessEvents.PROCESS_CANCELLED;
     }
 
     @Override

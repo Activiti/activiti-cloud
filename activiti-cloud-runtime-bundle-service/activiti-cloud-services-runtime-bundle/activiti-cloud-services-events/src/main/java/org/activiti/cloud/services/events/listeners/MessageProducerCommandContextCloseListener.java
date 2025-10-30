@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.IncidentEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -88,7 +87,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
             System.out.println("Sending error via incident channel test");
 
-            List<CloudRuntimeEntityImpl> errorEvents = new ArrayList<>();
+            List<CloudRuntimeEventImpl> errorEvents = new ArrayList<>();
             var incident = new IncidentEventImpl(new IllegalArgumentException("Test incident for chunking"));
             errorEvents.add(incident);
             var errorMessage =
