@@ -71,7 +71,7 @@ public class AuditJPAStreamsAutoConfiguration {
                 Optional
                     .ofNullable(message.getPayload())
                     .orElse(Collections.emptyList())
-                    .toArray(new CloudRuntimeEntity[0])
+                    .toArray(new CloudRuntimeEvent[0])
             );
         };
     }
