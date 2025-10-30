@@ -42,7 +42,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
-    protected String usernameClaim = "preferred_username";
+    protected static final String USERNAME_CLAIM = "preferred_username";
 
     public JwtUserInfoUriAuthenticationConverter(
         Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
