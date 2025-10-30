@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -32,5 +33,10 @@ public class OAuth2UserServiceCacheable {
     @Cacheable(value = "userInfoApiCall", key = "#cacheKey", sync = true)
     public OAuth2User loadUser(OAuth2UserRequest userRequest, String cacheKey) throws OAuth2AuthenticationException {
         return oAuth2UserService.loadUser(userRequest);
+    }
+
+    @CachePut(value = "userInfoApiCall", key = "#cacheKey")
+    public OAuth2User putUser(OAuth2User user, String cacheKey) {
+        return user;
     }
 }
