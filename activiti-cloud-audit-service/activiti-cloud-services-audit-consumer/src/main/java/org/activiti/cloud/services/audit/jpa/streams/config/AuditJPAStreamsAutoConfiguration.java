@@ -62,7 +62,7 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER_INCIDENTS)
     @Bean
-    public Consumer<Message<List<CloudRuntimeEntity>>> auditConsumerIncidentsChannelHandlerConsumer(
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerIncidentsChannelHandlerConsumer(
         AuditConsumerChannelHandler handler
     ) {
         return message -> {
