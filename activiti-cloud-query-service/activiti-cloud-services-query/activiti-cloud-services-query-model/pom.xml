@@ -145,6 +145,15 @@
             </goals>
           </execution>
         </executions>
+        <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
+        <dependencies>
+          <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${byte-buddy.version}</version>
+          </dependency>
+        </dependencies>
+        <!-- End Temporary Dependency -->
       </plugin>
     </plugins>
   </build>

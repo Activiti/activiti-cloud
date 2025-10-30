@@ -184,7 +184,7 @@
   </ciManagement>
   <properties>
     <java.release>${java.version}</java.release>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <skipAcceptanceTests>false</skipAcceptanceTests>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -224,7 +224,10 @@
     <json-unit.version>4.1.1</json-unit.version>
 
     <!-- dependencies versions -->
-    <hibernate.version>6.5.3.Final</hibernate.version>
+    <hibernate.version>6.6.4.Final</hibernate.version>
+    <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
+    <byte-buddy.version>1.17.8</byte-buddy.version>
+    <!-- End Temporary Dependency -->
     <classgraph.version>4.8.179</classgraph.version>
 
     <!-- Tests Config -->

@@ -7,7 +7,7 @@ RUN wget -P /etc/apk/keys/ https://cdn.azul.com/public_keys/alpine-signing@azul.
 RUN echo "https://repos.azul.com/zulu/alpine" | tee -a /etc/apk/repositories
 
 # update the list of packages and install java
-RUN apk update && apk add --no-cache zulu21-jre && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache zulu25-jre && rm -rf /var/cache/apk/*
 
 # install missing fontconfig package
 RUN apk add --no-cache fontconfig ttf-dejavu
