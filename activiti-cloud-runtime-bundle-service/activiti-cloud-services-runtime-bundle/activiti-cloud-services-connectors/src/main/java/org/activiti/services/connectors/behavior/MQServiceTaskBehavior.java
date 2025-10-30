@@ -17,7 +17,10 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.api.runtime.model.impl.ProcessVariablesMap;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -26,6 +29,7 @@ import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionFunction;
 import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionOutcome;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
+import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
@@ -90,10 +94,11 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            if (integrationContext.hasEphemeralVariables()) {
-                integrationContext.getInBoundVariables().replaceAll((k, v) -> null);
+            IntegrationContext copy = new IntegrationContextImpl((IntegrationContextImpl) integrationContext);
+            if (copy.hasEphemeralVariables()) {
+                copy.getInBoundVariables().clear();
             }
-            CloudIntegrationRequestedEventImpl cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+            CloudIntegrationRequestedEventImpl cloudEvent = new CloudIntegrationRequestedEventImpl(copy);
 
             processEngineEventsAggregator.add(cloudEvent);
         }
