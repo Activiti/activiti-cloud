@@ -97,6 +97,16 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
         var errorEvents = new ArrayList<>();
         var incident = new IncidentCreatedEventImpl(new IllegalArgumentException("Test incident for chunking"));
+        incident.setAppName(runtimeBundleProperties.getAppName());
+        incident.setServiceName(runtimeBundleProperties.getServiceName());
+        incident.setServiceFullName(runtimeBundleProperties.getServiceFullName());
+        incident.setServiceType(runtimeBundleProperties.getServiceType());
+        incident.setServiceVersion(runtimeBundleProperties.getServiceVersion());
+        incident.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
+        incident.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
+        incident.setProcessDefinitionKey(rootExecutionContext.getProcessDefinition().getKey());
+        incident.setProcessDefinitionVersion(rootExecutionContext.getProcessDefinition().getVersion());
+        incident.setBusinessKey(rootExecutionContext.getProcessInstance().getBusinessKey());
         errorEvents.add(incident);
         var errorMessage =
             this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
