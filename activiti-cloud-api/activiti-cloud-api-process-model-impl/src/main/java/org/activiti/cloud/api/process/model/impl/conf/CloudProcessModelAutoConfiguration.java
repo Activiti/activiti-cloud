@@ -59,7 +59,7 @@ import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudServiceTaskImpl;
 import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
-import org.activiti.cloud.api.process.model.impl.IncidentEventImpl;
+import org.activiti.cloud.api.process.model.impl.IncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -301,7 +301,7 @@ public class CloudProcessModelAutoConfiguration {
         );
 
         module.registerSubtypes(
-            new NamedType(IncidentEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
+            new NamedType(IncidentCreatedEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
         );
 
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {

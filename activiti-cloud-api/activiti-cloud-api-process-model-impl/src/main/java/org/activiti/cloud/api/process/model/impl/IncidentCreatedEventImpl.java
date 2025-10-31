@@ -23,16 +23,16 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 
-public class IncidentEventImpl extends CloudRuntimeEventImpl implements IncidentEvent {
+public class IncidentCreatedEventImpl extends CloudRuntimeEventImpl implements IncidentEvent {
 
     private String errorCode;
     private String errorMessage;
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
 
-    public IncidentEventImpl() {}
+    public IncidentCreatedEventImpl() {}
 
-    public IncidentEventImpl(Throwable error) {
+    public IncidentCreatedEventImpl(Throwable error) {
         this.errorClassName = error.getClass().getName();
         this.errorCode =
             Optional

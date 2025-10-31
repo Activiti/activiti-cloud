@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
@@ -75,7 +74,12 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     }
 
     @Override
-    public void receiveCloudRuntimeEventIncidents(Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
-        LOGGER.error("Incidents received for events: {}", events);
+    public void receiveCloudRuntimeEventIncidents(
+        @Headers Map<String, Object> headers,
+        CloudRuntimeEvent<?, ?>... events
+    ) {
+        var converter = eventConverters.getConverterByEventTypeName(events[0].getEventType().name());
+
+        LOGGER.error("Incidents received: {}", converter.convertToEntity(events[0]));
     }
 }
