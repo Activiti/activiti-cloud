@@ -48,6 +48,18 @@ public class IncidentCreatedEventImpl extends CloudRuntimeEventImpl implements I
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
+    public IncidentCreatedEventImpl(
+        String errorClassName,
+        String errorCode,
+        String errorMessage,
+        List<StackTraceElement> stackTraceElements
+    ) {
+        this.errorClassName = errorClassName;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.stackTraceElements = stackTraceElements;
+    }
+
     @Override
     public IncidentEventType getEventType() {
         return IncidentEventType.INCIDENT_CREATED;
