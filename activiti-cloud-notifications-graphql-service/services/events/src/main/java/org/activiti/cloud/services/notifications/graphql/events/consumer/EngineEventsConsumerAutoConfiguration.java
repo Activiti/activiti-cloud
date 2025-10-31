@@ -155,9 +155,13 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         InitializingBean engineEventsFluxConsumer(Flux<Message<List<EngineEvent>>> engineEventsFlux) {
             return () -> {
-                logger.info("Initializing engineEventsFlux consumer");
+                logger.info("Subscribing engineEventsFlux consumer");
 
-                engineEventsFlux.subscribe(message -> logger.debug("Received engine events {}", message.getHeaders()));
+                engineEventsFlux.subscribe(
+                    message -> logger.debug("Received engine events {}", message.getHeaders()),
+                    e -> logger.error("Error while receiving engine events", e),
+                    () -> logger.warn("Completing engineEventsFlux consumer")
+                );
             };
         }
     }
