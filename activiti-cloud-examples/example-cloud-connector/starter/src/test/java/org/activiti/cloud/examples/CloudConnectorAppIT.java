@@ -26,6 +26,7 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.examples.connectors.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
@@ -54,6 +56,12 @@ public class CloudConnectorAppIT {
 
     @Autowired
     private FunctionCatalog functionCatalog;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     public void contextShouldLoad() throws Exception {
@@ -83,6 +91,20 @@ public class CloudConnectorAppIT {
         Object jsonValue = objectMapper.readValue(json, Object.class);
         CustomPojo customPojo = objectMapper.convertValue(jsonValue, CustomPojo.class);
         assertThat(customPojo).isNotNull();
+    }
+
+    @Test
+    void rabbitBinderCompression() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
+            .isEqualTo(9);
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
+            .isTrue();
+    }
+
+    @Test
+    void messagingPropertiesRabbitMqCompression() {
+        assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
+        assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
     }
 
     private static String getRegisteredConnectorName(String functionName) {

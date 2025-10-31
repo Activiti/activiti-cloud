@@ -122,6 +122,7 @@ public class ActivitiCloudMessagingProperties {
 
     private Map<String, InputConverterFunction> inputConverters;
 
+    @NestedConfigurationProperty
     private RabbitMqProperties rabbitmq = new RabbitMqProperties();
 
     public static class RabbitMqProperties {
@@ -129,6 +130,10 @@ public class ActivitiCloudMessagingProperties {
         private Boolean missingAnonymousQueuesFatal;
 
         private Boolean missingDurableQueuesFatal;
+
+        private Boolean compress = false;
+
+        private Integer compressionLevel = 1;
 
         public Boolean getMissingAnonymousQueuesFatal() {
             return missingAnonymousQueuesFatal;
@@ -144,6 +149,22 @@ public class ActivitiCloudMessagingProperties {
 
         public void setMissingDurableQueuesFatal(Boolean missingDurableQueuesFatal) {
             this.missingDurableQueuesFatal = missingDurableQueuesFatal;
+        }
+
+        public Boolean isCompress() {
+            return compress;
+        }
+
+        public void setCompress(Boolean compress) {
+            this.compress = compress;
+        }
+
+        public Integer getCompressionLevel() {
+            return compressionLevel;
+        }
+
+        public void setCompressionLevel(Integer compressionLevel) {
+            this.compressionLevel = compressionLevel;
         }
     }
 

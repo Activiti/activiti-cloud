@@ -24,14 +24,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.ListenerContainerCustomizer;
+import org.springframework.core.env.Environment;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-@SpringBootTest
+@SpringBootTest(
+    properties = {
+        "activiti.cloud.messaging.rabbitmq.compress=true", "activiti.cloud.messaging.rabbitmq.compression-level=9",
+    }
+)
 @SpringBootApplication
 public class ActivitiCloudMessagingAutoConfigurationTests {
 
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    private Environment environment;
 
     @Autowired(required = false)
     private ListenerContainerCustomizer<MessageListenerContainer> activitiRabbitMqMessageListenerContainerCustomizer;
@@ -47,5 +55,16 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
         assertThat(messagingProperties.getRabbitmq().getMissingDurableQueuesFatal()).isTrue();
 
         assertThat(activitiRabbitMqMessageListenerContainerCustomizer).isNotNull();
+    }
+
+    @Test
+    public void rabbitMqCompressionConfiguration() {
+        assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+        assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
+            .isEqualTo(9);
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
+            .isTrue();
     }
 }
