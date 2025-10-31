@@ -29,6 +29,7 @@ import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConver
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
 import org.activiti.spring.cache.config.ActivitiSpringCacheManagerAutoConfiguration;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -70,7 +71,7 @@ public class SecurityTestConfiguration {
     }
 
     @Bean
-    public Jwt jwt() {
+    public Jwt mockJwt() {
         return mock(Jwt.class);
     }
 
@@ -90,7 +91,8 @@ public class SecurityTestConfiguration {
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
         JwtGrantedAuthorityConverter jwtGrantedAuthorityConverter,
         ClientRegistrationRepository clientRegistrationRepository,
-        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable,
+        @Qualifier("mockJwt") Jwt jwt
     ) {
         JwtUserInfoUriAuthenticationConverter converter = new JwtUserInfoUriAuthenticationConverter(
             jwtGrantedAuthorityConverter,
@@ -98,7 +100,7 @@ public class SecurityTestConfiguration {
             oAuth2UserServiceCacheable
         );
         JwtUserInfoUriAuthenticationConverter spy = spy(converter);
-        doReturn("test").when(spy).getPrincipalClaimName(any(Jwt.class));
+        doReturn("test").when(spy).getPrincipalClaimName(jwt);
         return spy;
     }
 }
