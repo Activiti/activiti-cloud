@@ -25,6 +25,9 @@ import org.activiti.cloud.services.notifications.graphql.events.model.EngineEven
 import org.activiti.cloud.services.notifications.graphql.events.transformer.EngineEventsTransformer;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -40,6 +43,7 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -63,6 +67,8 @@ public class EngineEventsConsumerAutoConfiguration {
 
     @Configuration
     public static class DefaultEngineEventsConsumerConfiguration implements EngineEventsConsumerChannels {
+
+        private static final Logger logger = LoggerFactory.getLogger(DefaultEngineEventsConsumerConfiguration.class);
 
         public static final String ENGINE_EVENTS_FLUX_SCHEDULER = "engineEventsScheduler";
         private final EngineEventsConsumerProperties properties;
@@ -115,7 +121,10 @@ public class EngineEventsConsumerAutoConfiguration {
             return IntegrationFlow
                 .from(engineEventsPublisherInput)
                 .log(LoggingHandler.Level.DEBUG)
-                .transform(engineEventsMessageHandler)
+                .gateway(
+                    gatewayFlow -> gatewayFlow.transform(engineEventsMessageHandler),
+                    gatewaySpec -> gatewaySpec.sendTimeout(-1).requestTimeout(-1L).requiresReply(false)
+                )
                 .toReactivePublisher();
         }
 
@@ -125,13 +134,35 @@ public class EngineEventsConsumerAutoConfiguration {
             Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
             Scheduler engineEventsScheduler
         ) {
-            return Flux.from(engineEventsPublisher).publish().autoConnect(0).share().publishOn(engineEventsScheduler);
+            return Flux
+                .from(engineEventsPublisher)
+                .doOnError(error -> logger.error("Error while publishing engine events: {}", error.getMessage(), error))
+                .onErrorResume(e -> Mono.empty())
+                .publish()
+                .autoConnect()
+                .parallel()
+                .runOn(engineEventsScheduler)
+                .sequential()
+                .onBackpressureLatest();
         }
 
         @Bean
         @ConditionalOnMissingBean(name = ENGINE_EVENTS_FLUX_SCHEDULER)
         public Scheduler engineEventsScheduler() {
             return Schedulers.boundedElastic();
+        }
+
+        @Bean
+        InitializingBean engineEventsFluxConsumer(Flux<Message<List<EngineEvent>>> engineEventsFlux) {
+            return () -> {
+                logger.info("Subscribing engineEventsFlux consumer");
+
+                engineEventsFlux.subscribe(
+                    message -> logger.debug("Received engine events {}", message.getHeaders()),
+                    e -> logger.error("Error while receiving engine events", e),
+                    () -> logger.warn("Completing engineEventsFlux consumer")
+                );
+            };
         }
     }
 }
