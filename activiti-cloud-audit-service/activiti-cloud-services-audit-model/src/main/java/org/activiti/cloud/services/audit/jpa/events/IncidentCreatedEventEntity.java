@@ -45,6 +45,7 @@ public class IncidentCreatedEventEntity extends AuditEventEntity {
     protected IncidentCreatedEventEntity() {}
 
     public IncidentCreatedEventEntity(IncidentEvent event) {
+        super(event);
         this.errorCode = event.getErrorCode();
         this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
