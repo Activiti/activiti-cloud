@@ -59,7 +59,6 @@ import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudServiceTaskImpl;
 import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
-import org.activiti.cloud.api.process.model.impl.IncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -81,6 +80,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
@@ -301,7 +301,7 @@ public class CloudProcessModelAutoConfiguration {
         );
 
         module.registerSubtypes(
-            new NamedType(IncidentCreatedEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
+            new NamedType(CloudIncidentCreatedEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
         );
 
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.impl.IncidentCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -95,7 +95,7 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         System.out.println("Sending error via incident channel test");
 
         var errorEvents = new ArrayList<>();
-        var incident = new IncidentCreatedEventImpl(new IllegalArgumentException("Test incident for chunking"));
+        var incident = new CloudIncidentCreatedEventImpl(new IllegalArgumentException("Test incident for chunking"));
         incident.setAppName(runtimeBundleProperties.getAppName());
         incident.setServiceName(runtimeBundleProperties.getServiceName());
         incident.setServiceFullName(runtimeBundleProperties.getServiceFullName());

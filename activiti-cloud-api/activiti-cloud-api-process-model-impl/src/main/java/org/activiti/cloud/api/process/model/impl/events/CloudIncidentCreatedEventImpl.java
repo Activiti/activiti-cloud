@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model.impl;
+package org.activiti.cloud.api.process.model.impl.events;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,16 +23,16 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 
-public class IncidentCreatedEventImpl extends CloudRuntimeEventImpl implements IncidentEvent {
+public class CloudIncidentCreatedEventImpl extends CloudRuntimeEventImpl implements IncidentEvent {
 
     private String errorCode;
     private String errorMessage;
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
 
-    public IncidentCreatedEventImpl() {}
+    public CloudIncidentCreatedEventImpl() {}
 
-    public IncidentCreatedEventImpl(Throwable error) {
+    public CloudIncidentCreatedEventImpl(Throwable error) {
         this.errorClassName = error.getClass().getName();
         this.errorCode =
             Optional
@@ -48,12 +48,16 @@ public class IncidentCreatedEventImpl extends CloudRuntimeEventImpl implements I
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
-    public IncidentCreatedEventImpl(
+    public CloudIncidentCreatedEventImpl(
+        String id,
+        Long timestamp,
+        Object entity,
         String errorClassName,
         String errorCode,
         String errorMessage,
         List<StackTraceElement> stackTraceElements
     ) {
+        super(id, timestamp, entity);
         this.errorClassName = errorClassName;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;

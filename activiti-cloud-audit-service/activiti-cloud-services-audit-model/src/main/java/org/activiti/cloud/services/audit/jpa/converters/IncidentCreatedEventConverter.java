@@ -19,7 +19,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
-import org.activiti.cloud.api.process.model.impl.IncidentCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.IncidentCreatedEventEntity;
 
@@ -43,7 +43,10 @@ public class IncidentCreatedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         IncidentCreatedEventEntity entity = IncidentCreatedEventEntity.class.cast(auditEventEntity);
 
-        return new IncidentCreatedEventImpl(
+        return new CloudIncidentCreatedEventImpl(
+            entity.getEventId(),
+            entity.getTimestamp(),
+            null,
             entity.getErrorClassName(),
             entity.getErrorCode(),
             entity.getErrorMessage(),
