@@ -118,6 +118,7 @@ class EngineEventsFluxPublisherIT {
             .then(secondClient::dispose)
             .then(sendEngineEvent(event1))
             .expectNextCount(1)
+            .thenAwait(Duration.ofSeconds(1))
             .thenCancel()
             .log()
             .verify(Duration.ofSeconds(10));
@@ -159,6 +160,7 @@ class EngineEventsFluxPublisherIT {
             .then(sendEngineEvent(event1))
             .then(sendEngineEvent(event1))
             .expectNextCount(2)
+            .thenAwait(Duration.ofSeconds(1))
             .thenCancel()
             .log()
             .verify(Duration.ofSeconds(10));
@@ -244,6 +246,7 @@ class EngineEventsFluxPublisherIT {
             .create(engineEventsFlux)
             .then(() -> IntStream.range(0, 300).forEach(i -> sendEngineEvent(event1).run()))
             .expectNextCount(300)
+            .thenAwait(Duration.ofSeconds(1))
             .thenCancel()
             .log()
             .verify(Duration.ofSeconds(10));
