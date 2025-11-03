@@ -45,24 +45,28 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived;
             if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
-                IntegrationContext sanitizedContext = new IntegrationContextImpl((IntegrationContextImpl) integrationError.getIntegrationContext());
+                IntegrationContext sanitizedContext = new IntegrationContextImpl(
+                    (IntegrationContextImpl) integrationError.getIntegrationContext()
+                );
                 sanitizedContext.getOutBoundVariables().clear();
                 sanitizedContext.getInBoundVariables().clear();
-                integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
-                    sanitizedContext,
-                    integrationError.getErrorCode(),
-                    integrationError.getErrorMessage(),
-                    integrationError.getErrorClassName(),
-                    integrationError.getStackTraceElements()
-                );
+                integrationErrorReceived =
+                    new CloudIntegrationErrorReceivedEventImpl(
+                        sanitizedContext,
+                        integrationError.getErrorCode(),
+                        integrationError.getErrorMessage(),
+                        integrationError.getErrorClassName(),
+                        integrationError.getStackTraceElements()
+                    );
             } else {
-                integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
-                    integrationError.getIntegrationContext(),
-                    integrationError.getErrorCode(),
-                    integrationError.getErrorMessage(),
-                    integrationError.getErrorClassName(),
-                    integrationError.getStackTraceElements()
-                );
+                integrationErrorReceived =
+                    new CloudIntegrationErrorReceivedEventImpl(
+                        integrationError.getIntegrationContext(),
+                        integrationError.getErrorCode(),
+                        integrationError.getErrorMessage(),
+                        integrationError.getErrorClassName(),
+                        integrationError.getStackTraceElements()
+                    );
             }
             processEngineEventsAggregator.add(integrationErrorReceived);
         }
