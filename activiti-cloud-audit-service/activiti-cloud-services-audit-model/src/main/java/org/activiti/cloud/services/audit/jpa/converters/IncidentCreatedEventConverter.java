@@ -41,16 +41,16 @@ public class IncidentCreatedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        IncidentCreatedEventEntity entity = IncidentCreatedEventEntity.class.cast(auditEventEntity);
+        var incidentCreatedEventEntity = IncidentCreatedEventEntity.class.cast(auditEventEntity);
 
         return new CloudIncidentCreatedEventImpl(
-            entity.getEventId(),
-            entity.getTimestamp(),
-            null,
-            entity.getErrorClassName(),
-            entity.getErrorCode(),
-            entity.getErrorMessage(),
-            entity.getStackTraceElements()
+            incidentCreatedEventEntity.getEventId(),
+            incidentCreatedEventEntity.getTimestamp(),
+            incidentCreatedEventEntity.getProcessInstance(),
+            incidentCreatedEventEntity.getErrorClassName(),
+            incidentCreatedEventEntity.getErrorCode(),
+            incidentCreatedEventEntity.getErrorMessage(),
+            incidentCreatedEventEntity.getStackTraceElements()
         );
     }
 }

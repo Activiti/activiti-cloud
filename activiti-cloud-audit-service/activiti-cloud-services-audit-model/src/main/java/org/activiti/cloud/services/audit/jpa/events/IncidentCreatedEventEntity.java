@@ -25,7 +25,7 @@ import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceEle
 
 @Entity(name = IncidentCreatedEventEntity.INCIDENT_CREATED_EVENT)
 @DiscriminatorValue(value = IncidentCreatedEventEntity.INCIDENT_CREATED_EVENT)
-public class IncidentCreatedEventEntity extends AuditEventEntity {
+public class IncidentCreatedEventEntity extends ProcessAuditEventEntity {
 
     private static final int ERROR_MESSAGE_LENGTH = 255;
 
@@ -89,6 +89,8 @@ public class IncidentCreatedEventEntity extends AuditEventEntity {
             .append(errorCode)
             .append(", errorCode=")
             .append(errorMessage)
+            .append(", processInstance=")
+            .append(getProcessInstance())
             .append(", errorClassName=")
             .append(errorClassName)
             .append(", stackTraceElements=")

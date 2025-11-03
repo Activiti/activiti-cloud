@@ -19,11 +19,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentEvent;
+import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
 
-public class CloudIncidentCreatedEventImpl extends CloudRuntimeEventImpl implements IncidentEvent {
+public class CloudIncidentCreatedEventImpl
+    extends CloudRuntimeEventImpl<ProcessInstance, IncidentEventType>
+    implements IncidentEvent {
 
     private String errorCode;
     private String errorMessage;
@@ -32,7 +36,8 @@ public class CloudIncidentCreatedEventImpl extends CloudRuntimeEventImpl impleme
 
     public CloudIncidentCreatedEventImpl() {}
 
-    public CloudIncidentCreatedEventImpl(Throwable error) {
+    public CloudIncidentCreatedEventImpl(Throwable error, ProcessInstance processInstance) {
+        super(processInstance);
         this.errorClassName = error.getClass().getName();
         this.errorCode =
             Optional
@@ -43,7 +48,6 @@ public class CloudIncidentCreatedEventImpl extends CloudRuntimeEventImpl impleme
                 .orElse(null);
 
         Throwable cause = findRootCause(error);
-
         this.errorMessage = cause.getMessage();
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
@@ -51,7 +55,7 @@ public class CloudIncidentCreatedEventImpl extends CloudRuntimeEventImpl impleme
     public CloudIncidentCreatedEventImpl(
         String id,
         Long timestamp,
-        Object entity,
+        ProcessInstance entity,
         String errorClassName,
         String errorCode,
         String errorMessage,

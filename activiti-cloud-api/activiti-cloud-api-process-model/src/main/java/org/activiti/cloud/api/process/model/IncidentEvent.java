@@ -16,9 +16,11 @@
 package org.activiti.cloud.api.process.model;
 
 import java.util.List;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
 
-public interface IncidentEvent extends CloudRuntimeEvent {
+public interface IncidentEvent extends CloudRuntimeEvent<ProcessInstance, IncidentEventType> {
     String getErrorCode();
 
     List<StackTraceElement> getStackTraceElements();

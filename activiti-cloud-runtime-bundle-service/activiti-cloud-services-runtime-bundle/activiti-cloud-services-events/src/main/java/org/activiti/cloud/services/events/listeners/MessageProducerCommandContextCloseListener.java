@@ -18,6 +18,7 @@ package org.activiti.cloud.services.events.listeners;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
@@ -95,7 +96,32 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         System.out.println("Sending error via incident channel test");
 
         var errorEvents = new ArrayList<>();
-        var incident = new CloudIncidentCreatedEventImpl(new IllegalArgumentException("Test incident for chunking"));
+        var incident = getCloudIncidentCreatedEvent(rootExecutionContext);
+        errorEvents.add(incident);
+        var errorMessage =
+            this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
+
+        this.producer.auditProducerIncidents().send(errorMessage);
+
+        System.out.println("Sent error incident for chunking issues");
+    }
+
+    private CloudIncidentCreatedEventImpl getCloudIncidentCreatedEvent(ExecutionContext rootExecutionContext) {
+        var processInstance = new ProcessInstanceImpl();
+        processInstance.setId(rootExecutionContext.getProcessInstance().getId());
+        processInstance.setBusinessKey(rootExecutionContext.getProcessInstance().getBusinessKey());
+        processInstance.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
+        processInstance.setProcessDefinitionKey(rootExecutionContext.getProcessDefinition().getKey());
+        processInstance.setProcessDefinitionName(rootExecutionContext.getProcessDefinition().getName());
+        processInstance.setProcessDefinitionVersion(rootExecutionContext.getProcessDefinition().getVersion());
+        processInstance.setName(rootExecutionContext.getProcessInstance().getName());
+        processInstance.setInitiator(rootExecutionContext.getProcessInstance().getStartUserId());
+        processInstance.setStartDate(rootExecutionContext.getProcessInstance().getStartTime());
+
+        var incident = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test incident for chunking"),
+            processInstance
+        );
         incident.setAppName(runtimeBundleProperties.getAppName());
         incident.setServiceName(runtimeBundleProperties.getServiceName());
         incident.setServiceFullName(runtimeBundleProperties.getServiceFullName());
@@ -106,13 +132,8 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         incident.setProcessDefinitionKey(rootExecutionContext.getProcessDefinition().getKey());
         incident.setProcessDefinitionVersion(rootExecutionContext.getProcessDefinition().getVersion());
         incident.setBusinessKey(rootExecutionContext.getProcessInstance().getBusinessKey());
-        errorEvents.add(incident);
-        var errorMessage =
-            this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
 
-        this.producer.auditProducerIncidents().send(errorMessage);
-
-        System.out.println("Sent error incident for chunking issues");
+        return incident;
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {
