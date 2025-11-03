@@ -17,6 +17,9 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,20 +27,22 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-    public static final String SESSION_ID_CLAIM = "sid";
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserInfoUriAuthenticationConverter.class);
 
-    private static final String SUBJECT_CLAIM = "sub";
+    public static final String SESSION_ID_CLAIM = "sid";
+    protected static final String SUBJECT_CLAIM = "sub";
+    protected static final String USERNAME_CLAIM = "preferred_username";
 
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
-    private ClientRegistration clientRegistration;
-    private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
-    private String usernameClaim = "preferred_username";
+    private final ClientRegistration clientRegistration;
+    private final OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
 
     public JwtUserInfoUriAuthenticationConverter(
         Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
@@ -56,26 +61,34 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
         return new JwtAuthenticationToken(jwt, authorities, principalClaimValue);
     }
 
-    public void setUsernameClaim(String usernameClaim) {
-        this.usernameClaim = usernameClaim;
-    }
-
     public String getPrincipalClaimName(Jwt jwt) {
-        String username = jwt.getClaimAsString(usernameClaim);
+        String username = jwt.getClaimAsString(USERNAME_CLAIM);
         if (username == null) {
-            Instant issuedAt = jwt.getIssuedAt();
-            Instant expiresAt = jwt.getExpiresAt();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                TokenType.BEARER,
-                jwt.getTokenValue(),
-                issuedAt,
-                expiresAt
-            );
-            OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             String cacheKey = getCacheKey(jwt);
             if (cacheKey != null) {
-                OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
-                username = oAuth2User.getName();
+                List<String> scope = jwt.getClaimAsStringList("scope");
+                if (scope != null && scope.contains("openid")) {
+                    Instant issuedAt = jwt.getIssuedAt();
+                    Instant expiresAt = jwt.getExpiresAt();
+                    OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                        TokenType.BEARER,
+                        jwt.getTokenValue(),
+                        issuedAt,
+                        expiresAt
+                    );
+                    OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+                    OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
+                    username = oAuth2User.getName();
+                } else {
+                    LOGGER.warn("Cannot load user data for {} because the token has not openid scope", cacheKey);
+                    username = cacheKey;
+                    OAuth2User oAuth2User = new DefaultOAuth2User(
+                        jwtGrantedAuthoritiesConverter.convert(jwt),
+                        jwt.getClaims(),
+                        SUBJECT_CLAIM
+                    );
+                    oAuth2UserServiceCacheable.putUser(oAuth2User, cacheKey);
+                }
             }
         }
         return username;

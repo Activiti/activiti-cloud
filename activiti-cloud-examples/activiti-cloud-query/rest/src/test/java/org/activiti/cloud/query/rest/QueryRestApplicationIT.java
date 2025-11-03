@@ -30,6 +30,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import java.util.List;
 import java.util.Map;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -40,6 +41,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -77,6 +79,12 @@ public class QueryRestApplicationIT {
 
     @Autowired
     private GraphQLSchema graphQLSchema;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     public void contextLoads() {
@@ -223,6 +231,20 @@ public class QueryRestApplicationIT {
         assertThat(result.getErrors()).isNull();
         assertThat(result.getData().toString())
             .isEqualTo("{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}");
+    }
+
+    @Test
+    void rabbitBinderCompression() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
+            .isEqualTo(9);
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
+            .isTrue();
+    }
+
+    @Test
+    void messagingPropertiesRabbitMqCompression() {
+        assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
+        assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {

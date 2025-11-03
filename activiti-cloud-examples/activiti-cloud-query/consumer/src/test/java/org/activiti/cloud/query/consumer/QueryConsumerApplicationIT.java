@@ -15,12 +15,37 @@
  */
 package org.activiti.cloud.query.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 
 @SpringBootTest(classes = { QueryConsumerApplication.class })
 public class QueryConsumerApplicationIT {
 
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
+
     @Test
     public void contextLoads() {}
+
+    @Test
+    void rabbitBinderCompression() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
+            .isEqualTo(9);
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
+            .isTrue();
+    }
+
+    @Test
+    void messagingPropertiesRabbitMqCompression() {
+        assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
+        assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
 }
