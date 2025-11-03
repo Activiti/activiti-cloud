@@ -43,10 +43,6 @@ public class IntegrationRequestedEventConverter extends BaseEventToEntityConvert
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         IntegrationRequestSentEventEntity entity = (IntegrationRequestSentEventEntity) auditEventEntity;
 
-        if (entity.getIntegrationContext().hasEphemeralVariables()) {
-            entity.getIntegrationContext().getInBoundVariables().replaceAll((k, v) -> null);
-        }
-
         return new CloudIntegrationRequestedEventImpl(
             entity.getEventId(),
             entity.getTimestamp(),
