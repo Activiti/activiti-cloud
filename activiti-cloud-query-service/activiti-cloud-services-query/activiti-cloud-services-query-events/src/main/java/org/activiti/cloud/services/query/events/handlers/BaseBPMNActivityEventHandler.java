@@ -41,7 +41,7 @@ public abstract class BaseBPMNActivityEventHandler {
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
+            bpmnActivityEntity = null;
         } else {
             bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
         }
