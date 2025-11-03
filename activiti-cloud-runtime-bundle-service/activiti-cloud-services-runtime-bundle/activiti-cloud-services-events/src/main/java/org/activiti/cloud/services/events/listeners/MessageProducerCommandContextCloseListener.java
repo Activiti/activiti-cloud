@@ -84,11 +84,10 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             var eventChunks = createEventChunks(events);
 
             eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
-
-            createAndSendIncidentEvent(rootExecutionContext);
         } catch (IllegalArgumentException e) {
             createAndSendIncidentEvent(rootExecutionContext);
-            // throw new RuntimeException(e.getMessage());
+
+            throw new RuntimeException(e.getMessage());
         }
     }
 
