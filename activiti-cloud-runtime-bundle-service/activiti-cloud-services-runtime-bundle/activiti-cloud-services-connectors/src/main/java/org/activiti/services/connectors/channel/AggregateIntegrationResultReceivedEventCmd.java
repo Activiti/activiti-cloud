@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.channel;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -41,12 +42,19 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationResultReceivedEventImpl integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(
-                integrationContext
-            );
+            CloudIntegrationResultReceivedEventImpl integrationResultReceived;
+            if (integrationContext.hasEphemeralVariables()) {
+                IntegrationContext sanitizedContext = new IntegrationContextImpl((IntegrationContextImpl) integrationContext);
+                sanitizedContext.getOutBoundVariables().clear();
+                sanitizedContext.getInBoundVariables().clear();
+                integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(sanitizedContext);
+            } else {
+                integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(
+                    integrationContext
+                );
+            }
             processEngineEventsAggregator.add(integrationResultReceived);
         }
-
         return null;
     }
 }

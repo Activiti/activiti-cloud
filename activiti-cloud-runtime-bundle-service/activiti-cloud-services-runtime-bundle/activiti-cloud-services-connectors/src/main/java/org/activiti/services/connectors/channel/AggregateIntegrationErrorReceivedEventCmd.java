@@ -15,6 +15,8 @@
  */
 package org.activiti.services.connectors.channel;
 
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -41,13 +43,27 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
-                integrationError.getIntegrationContext(),
-                integrationError.getErrorCode(),
-                integrationError.getErrorMessage(),
-                integrationError.getErrorClassName(),
-                integrationError.getStackTraceElements()
-            );
+            CloudIntegrationErrorReceivedEventImpl integrationErrorReceived;
+            if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
+                IntegrationContext sanitizedContext = new IntegrationContextImpl((IntegrationContextImpl) integrationError.getIntegrationContext());
+                sanitizedContext.getOutBoundVariables().clear();
+                sanitizedContext.getInBoundVariables().clear();
+                integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
+                    sanitizedContext,
+                    integrationError.getErrorCode(),
+                    integrationError.getErrorMessage(),
+                    integrationError.getErrorClassName(),
+                    integrationError.getStackTraceElements()
+                );
+            } else {
+                integrationErrorReceived = new CloudIntegrationErrorReceivedEventImpl(
+                    integrationError.getIntegrationContext(),
+                    integrationError.getErrorCode(),
+                    integrationError.getErrorMessage(),
+                    integrationError.getErrorClassName(),
+                    integrationError.getStackTraceElements()
+                );
+            }
             processEngineEventsAggregator.add(integrationErrorReceived);
         }
 
