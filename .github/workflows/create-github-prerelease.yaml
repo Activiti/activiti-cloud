@@ -20,13 +20,13 @@ jobs:
 
       - run: touch release.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@de5e037bf9a2ac174c1993dab82002a2278a6506 # v9.3.2
         with:
           release-descriptor: release.yaml
           project: activiti
           tag: ${{ steps.resolve-versions.outputs.activiti-tag }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@348e767723102af8cff995773904a2c16b098d11 # v9.3.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@de5e037bf9a2ac174c1993dab82002a2278a6506 # v9.3.2
         with:
           release-descriptor: release.yaml
           project: activitiCloud
