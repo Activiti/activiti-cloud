@@ -61,6 +61,11 @@ jobs:
     env:
       JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
 
+      # Enhanced logging configuration
+      ACTIONS_STEP_DEBUG: true
+      ACTIONS_RUNNER_DEBUG: true
+      MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
     steps:
 
       - name: Checkout repository
@@ -107,7 +112,7 @@ jobs:
         shell: bash
         run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS }}
         env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_CLI_OPTS: --show-version --debug --errors --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
