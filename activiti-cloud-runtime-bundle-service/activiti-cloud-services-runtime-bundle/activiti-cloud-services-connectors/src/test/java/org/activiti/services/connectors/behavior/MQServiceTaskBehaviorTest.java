@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -43,6 +44,7 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -166,7 +168,6 @@ class MQServiceTaskBehaviorTest {
         verify(integrationRequestSender).sendIntegrationRequest(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
         assertThat(integrationRequest.getIntegrationContext()).isEqualTo(integrationContext);
-
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
 
         verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
@@ -214,5 +215,41 @@ class MQServiceTaskBehaviorTest {
 
         //then
         assertDoesNotThrow(() -> behavior.apply(execution));
+    }
+
+    @Test
+    void should_notPreserveInboundVariablesInIntegrationRequestedEvent_whenEphemeralVariablesArePresent() {
+        ArgumentCaptor<CloudIntegrationRequestedEvent> eventCaptor = ArgumentCaptor.forClass(
+            CloudIntegrationRequestedEvent.class
+        );
+
+        //given
+        DelegateExecution execution = anExecution()
+            .withId(EXECUTION_ID)
+            .withProcessInstanceId(PROC_INST_ID)
+            .withProcessDefinitionId(PROC_DEF_ID)
+            .withFlowNodeId(FLOW_NODE_ID)
+            .build();
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId(INTEGRATION_CONTEXT_ID);
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContext integrationContext = new IntegrationContextImpl();
+        ((IntegrationContextImpl) integrationContext).setId(INTEGRATION_CONTEXT_ID);
+        ((IntegrationContextImpl) integrationContext).addInBoundVariable("key", "value");
+        ((IntegrationContextImpl) integrationContext).setEphemeralVariables(true);
+        ((IntegrationContextImpl) integrationContext).setAppVersion("1");
+
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
+
+        //when
+        behavior.apply(execution);
+
+        //then
+        verify(processEngineEventsAggregator).add(eventCaptor.capture());
+        CloudIntegrationRequestedEvent event = eventCaptor.getValue();
+        Assertions.assertThat(event.getEntity().getInBoundVariables()).isEmpty();
     }
 }

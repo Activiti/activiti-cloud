@@ -17,10 +17,8 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
-import org.activiti.api.runtime.model.impl.ProcessVariablesMap;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -29,7 +27,6 @@ import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionFunction;
 import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionOutcome;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
-import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
@@ -93,17 +90,19 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
     }
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
-        CloudIntegrationRequestedEventImpl cloudEvent;
-        if (integrationContext.hasEphemeralVariables()) {
-            IntegrationContext sanitizedContext = new IntegrationContextImpl(
-                (IntegrationContextImpl) integrationContext
-            );
-            sanitizedContext.getInBoundVariables().clear();
-            cloudEvent = new CloudIntegrationRequestedEventImpl(sanitizedContext);
-        } else {
-            cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+        if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
+            CloudIntegrationRequestedEventImpl cloudEvent;
+            if (integrationContext.hasEphemeralVariables()) {
+                IntegrationContext sanitizedContext = new IntegrationContextImpl(
+                    (IntegrationContextImpl) integrationContext
+                );
+                sanitizedContext.getInBoundVariables().clear();
+                cloudEvent = new CloudIntegrationRequestedEventImpl(sanitizedContext);
+            } else {
+                cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+            }
+            processEngineEventsAggregator.add(cloudEvent);
         }
-        processEngineEventsAggregator.add(cloudEvent);
     }
 
     private void sendIntegrationRequest(IntegrationContext integrationContext) {
