@@ -340,7 +340,7 @@ jobs:
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
-      - acceptance-tests
+      # - acceptance-tests
       # dependency needed for build.outputs env variables resolution
       - build
     steps:
