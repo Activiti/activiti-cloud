@@ -22,8 +22,12 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseBPMNActivityEventHandler {
+
+    Logger logger = LoggerFactory.getLogger(BaseBPMNActivityEventHandler.class);
 
     protected final EntityManager entityManager;
 
@@ -32,15 +36,18 @@ public abstract class BaseBPMNActivityEventHandler {
     }
 
     protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
+        logger.error("AAE-39414: Handling CloudBPMNActivityEvent");
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
+        logger.error("AAE-39415: pkId " + pkId);
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
+            logger.error("AAE-39416: BPMNActivityEntity type is serviceTask");
             bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
         } else {
             bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
@@ -59,6 +66,7 @@ public abstract class BaseBPMNActivityEventHandler {
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
+        logger.error("AAE-39417: Creating new BaseBPMNActivityEntity with pkId: " + pkId);
 
         BaseBPMNActivityEntity bpmnActivityEntity;
 
