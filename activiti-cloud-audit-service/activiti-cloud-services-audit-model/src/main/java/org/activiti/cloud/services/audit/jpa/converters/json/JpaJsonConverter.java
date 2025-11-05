@@ -52,6 +52,8 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
+import org.activiti.cloud.api.process.model.IncidentContext;
+import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
 
 public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
@@ -82,6 +84,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
             resolver.addMapping(BPMNMessage.class, BPMNMessageImpl.class);
             resolver.addMapping(MessageSubscription.class, MessageSubscriptionImpl.class);
             resolver.addMapping(IntegrationContext.class, IntegrationContextImpl.class);
+            resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
             resolver.addMapping(Deployment.class, DeploymentImpl.class);
 
             module.setAbstractTypes(resolver);
