@@ -21,7 +21,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
-import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public abstract class BaseBPMNActivityEventHandler {
@@ -32,82 +31,34 @@ public abstract class BaseBPMNActivityEventHandler {
         this.entityManager = entityManager;
     }
 
-    /**
-     * Retrieves the IntegrationContextEntity associated with a BPMNActivityEntity.
-     * Since IntegrationContext has a one-to-one relationship with ServiceTask,
-     * this method will only return a value for service task activities.
-     *
-     * @param bpmnActivityEntity the BPMN activity entity
-     * @return the associated IntegrationContextEntity, or null if not found or not a service task
-     */
-    protected IntegrationContextEntity getIntegrationContext(BaseBPMNActivityEntity bpmnActivityEntity) {
-        if (bpmnActivityEntity == null) {
-            return null;
-        }
-
-        // Only service tasks have integration context
-        if (bpmnActivityEntity instanceof ServiceTaskEntity) {
-            ServiceTaskEntity serviceTaskEntity = (ServiceTaskEntity) bpmnActivityEntity;
-            return serviceTaskEntity.getIntegrationContext();
-        }
-
-        return null;
-    }
-
-    /**
-     * Retrieves the IntegrationContextEntity associated with a BPMNActivity.
-     * Since IntegrationContext has a one-to-one relationship with ServiceTask,
-     * this method will only return a value for service task activities.
-     *
-     * @param bpmnActivity the BPMN activity domain model
-     * @return the associated IntegrationContextEntity, or null if not found or not a service task
-     */
-    protected IntegrationContextEntity getIntegrationContext(BPMNActivity bpmnActivity) {
-        if (bpmnActivity == null || !"serviceTask".equals(bpmnActivity.getActivityType())) {
-            return null;
-        }
-
-        // Build the primary key for the service task
-        String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
-
-        // Find the service task entity
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, pkId);
-
-        if (serviceTaskEntity != null) {
-            return serviceTaskEntity.getIntegrationContext();
-        }
-
-        return null;
-    }
-
     protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
 
-        String pkId;
+        String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            pkId = IntegrationContextEntity.IdBuilderHelper.from(getIntegrationContext(bpmnActivity));
             bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
         } else {
-            pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
             bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
         }
 
         if (bpmnActivityEntity == null) {
-            bpmnActivityEntity = createBpmnActivityEntity(event, pkId);
+            bpmnActivityEntity = createBpmnActivityEntity(event);
         }
 
         return bpmnActivityEntity;
     }
 
-    public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event, String pkId) {
+    public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
+
+        String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
 
         BaseBPMNActivityEntity bpmnActivityEntity;
 
