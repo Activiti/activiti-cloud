@@ -195,7 +195,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2025</project.year>
 
-    <spring-boot.version>3.5.6</spring-boot.version>
+    <spring-boot.version>3.5.7</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
