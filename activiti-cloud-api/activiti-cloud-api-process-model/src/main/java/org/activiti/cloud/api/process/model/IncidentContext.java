@@ -15,20 +15,14 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.util.List;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+public interface IncidentContext {
+    String getProcessInstanceId();
 
-public interface IncidentEvent extends CloudRuntimeEvent<IncidentContext, IncidentEventType> {
-    String getErrorCode();
+    String getProcessDefinitionId();
 
-    List<StackTraceElement> getStackTraceElements();
+    String getActivityId();
 
-    String getErrorMessage();
+    String getExecutionId();
 
-    String getErrorClassName();
-
-    enum IncidentEventType {
-        INCIDENT_CREATED,
-    }
+    String getContext();
 }

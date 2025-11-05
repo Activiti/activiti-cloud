@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
+import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
 
 public class CloudIncidentCreatedEventImpl
-    extends CloudRuntimeEventImpl<ProcessInstance, IncidentEventType>
+    extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
     implements IncidentEvent {
 
     private String errorCode;
@@ -36,8 +36,8 @@ public class CloudIncidentCreatedEventImpl
 
     public CloudIncidentCreatedEventImpl() {}
 
-    public CloudIncidentCreatedEventImpl(Throwable error, ProcessInstance processInstance) {
-        super(processInstance);
+    public CloudIncidentCreatedEventImpl(Throwable error, IncidentContext incidentContext) {
+        super(incidentContext);
         this.errorClassName = error.getClass().getName();
         this.errorCode =
             Optional
@@ -55,7 +55,7 @@ public class CloudIncidentCreatedEventImpl
     public CloudIncidentCreatedEventImpl(
         String id,
         Long timestamp,
-        ProcessInstance entity,
+        IncidentContext entity,
         String errorClassName,
         String errorCode,
         String errorMessage,

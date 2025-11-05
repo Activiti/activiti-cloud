@@ -46,7 +46,7 @@ public class IncidentCreatedEventConverter extends BaseEventToEntityConverter {
         return new CloudIncidentCreatedEventImpl(
             incidentCreatedEventEntity.getEventId(),
             incidentCreatedEventEntity.getTimestamp(),
-            incidentCreatedEventEntity.getProcessInstance(),
+            incidentCreatedEventEntity.getIncidentContext(),
             incidentCreatedEventEntity.getErrorClassName(),
             incidentCreatedEventEntity.getErrorCode(),
             incidentCreatedEventEntity.getErrorMessage(),

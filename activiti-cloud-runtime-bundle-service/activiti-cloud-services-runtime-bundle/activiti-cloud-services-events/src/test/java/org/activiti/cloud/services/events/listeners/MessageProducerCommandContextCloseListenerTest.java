@@ -391,6 +391,7 @@ class MessageProducerCommandContextCloseListenerTest {
         when(context.getProcessInstance()).thenReturn(processInstance);
         when(context.getDeployment()).thenReturn(deploymentEntity);
         when(context.getProcessDefinition()).thenReturn(processDefinition);
+        when(context.getExecution()).thenReturn(processInstance);
 
         when(processInstance.getId()).thenReturn(MOCK_PROCESS_INSTANCE_ID);
         when(processInstance.getBusinessKey()).thenReturn(MOCK_BUSINESS_KEY);

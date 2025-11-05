@@ -18,9 +18,9 @@ package org.activiti.cloud.services.events.listeners;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -106,21 +106,16 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         System.out.println("Sent error incident for chunking issues");
     }
 
-    private CloudIncidentCreatedEventImpl getCloudIncidentCreatedEvent(ExecutionContext rootExecutionContext) {
-        var processInstance = new ProcessInstanceImpl();
-        processInstance.setId(rootExecutionContext.getProcessInstance().getId());
-        processInstance.setBusinessKey(rootExecutionContext.getProcessInstance().getBusinessKey());
-        processInstance.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
-        processInstance.setProcessDefinitionKey(rootExecutionContext.getProcessDefinition().getKey());
-        processInstance.setProcessDefinitionName(rootExecutionContext.getProcessDefinition().getName());
-        processInstance.setProcessDefinitionVersion(rootExecutionContext.getProcessDefinition().getVersion());
-        processInstance.setName(rootExecutionContext.getProcessInstance().getName());
-        processInstance.setInitiator(rootExecutionContext.getProcessInstance().getStartUserId());
-        processInstance.setStartDate(rootExecutionContext.getProcessInstance().getStartTime());
+    public CloudIncidentCreatedEventImpl getCloudIncidentCreatedEvent(ExecutionContext rootExecutionContext) {
+        var incidentContext = new IncidentContextImpl();
+        incidentContext.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
+        incidentContext.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
+        incidentContext.setActivityId(rootExecutionContext.getProcessInstance().getActivityId());
+        incidentContext.setExecutionId(rootExecutionContext.getExecution().getId());
 
         var incident = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test incident for chunking"),
-            processInstance
+            incidentContext
         );
         incident.setAppName(runtimeBundleProperties.getAppName());
         incident.setServiceName(runtimeBundleProperties.getServiceName());
