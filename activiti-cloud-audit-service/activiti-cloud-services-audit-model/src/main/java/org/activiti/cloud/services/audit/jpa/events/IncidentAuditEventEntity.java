@@ -21,12 +21,12 @@ import jakarta.persistence.MappedSuperclass;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
+import org.activiti.cloud.services.audit.jpa.converters.json.IncidentContextJpaJsonConverter;
 
 @MappedSuperclass
 public abstract class IncidentAuditEventEntity extends AuditEventEntity {
 
-    @Convert(converter = ProcessInstanceJpaJsonConverter.class)
+    @Convert(converter = IncidentContextJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private IncidentContext incidentContext;
 
