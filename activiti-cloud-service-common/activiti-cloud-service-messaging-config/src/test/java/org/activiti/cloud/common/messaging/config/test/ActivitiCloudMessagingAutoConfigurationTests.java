@@ -29,7 +29,10 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 @SpringBootTest(
     properties = {
-        "activiti.cloud.messaging.rabbitmq.compress=true", "activiti.cloud.messaging.rabbitmq.compression-level=9",
+        "activiti.cloud.application.name=myapp",
+        "activiti.cloud.messaging.rabbitmq.compress=true",
+        "activiti.cloud.messaging.rabbitmq.compression-level=9",
+        "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}",
     }
 )
 @SpringBootApplication
@@ -66,5 +69,14 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
             .isEqualTo(9);
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
             .isTrue();
+    }
+
+    @Test
+    public void rabbitMqPrefixConfiguration() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("myapp");
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isEqualTo("myapp");
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isEqualTo("myapp");
     }
 }
