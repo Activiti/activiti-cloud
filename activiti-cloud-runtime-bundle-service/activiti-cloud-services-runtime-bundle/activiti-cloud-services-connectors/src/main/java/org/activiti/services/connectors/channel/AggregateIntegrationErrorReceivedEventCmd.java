@@ -50,27 +50,25 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
                 );
                 sanitizedContext.getOutBoundVariables().clear();
                 sanitizedContext.getInBoundVariables().clear();
-                integrationErrorReceived =
-                    new CloudIntegrationErrorReceivedEventImpl(
-                        sanitizedContext,
-                        integrationError.getErrorCode(),
-                        integrationError.getErrorMessage(),
-                        integrationError.getErrorClassName(),
-                        integrationError.getStackTraceElements()
-                    );
+                integrationErrorReceived = createIntegrationErrorReceivedEvent(sanitizedContext);
             } else {
                 integrationErrorReceived =
-                    new CloudIntegrationErrorReceivedEventImpl(
-                        integrationError.getIntegrationContext(),
-                        integrationError.getErrorCode(),
-                        integrationError.getErrorMessage(),
-                        integrationError.getErrorClassName(),
-                        integrationError.getStackTraceElements()
-                    );
+                    createIntegrationErrorReceivedEvent(integrationError.getIntegrationContext());
             }
             processEngineEventsAggregator.add(integrationErrorReceived);
         }
-
         return null;
+    }
+
+    private CloudIntegrationErrorReceivedEventImpl createIntegrationErrorReceivedEvent(
+        IntegrationContext sanitizedContext
+    ) {
+        return new CloudIntegrationErrorReceivedEventImpl(
+            sanitizedContext,
+            integrationError.getErrorCode(),
+            integrationError.getErrorMessage(),
+            integrationError.getErrorClassName(),
+            integrationError.getStackTraceElements()
+        );
     }
 }

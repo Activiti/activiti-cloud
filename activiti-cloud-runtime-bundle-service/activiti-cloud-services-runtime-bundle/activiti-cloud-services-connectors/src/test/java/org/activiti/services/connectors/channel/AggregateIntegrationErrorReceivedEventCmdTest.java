@@ -20,9 +20,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
@@ -76,5 +79,69 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
         assertThat(errorReceivedEvent.getErrorMessage()).isEqualTo("my error message");
         assertThat(errorReceivedEvent.getErrorClassName()).isEqualTo("className");
         assertThat(errorReceivedEvent.getStackTraceElements()).isEqualTo(stackTraceElements);
+    }
+
+    @Test
+    void should_notRetainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
+        //given
+        final IntegrationError integrationError = mock(IntegrationError.class);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setEphemeralVariables(true);
+        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
+        integrationContext.addOutBoundVariables(
+            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+        );
+
+        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
+
+        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator
+        );
+
+        //when
+        command.execute(mock(CommandContext.class));
+
+        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
+        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
+        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
+        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
+        assertThat(sanitizedContext.getOutBoundVariables()).isEmpty();
+    }
+
+    @Test
+    void should_retainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
+        //given
+        final IntegrationError integrationError = mock(IntegrationError.class);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setEphemeralVariables(false);
+        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
+        integrationContext.addOutBoundVariables(
+            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+        );
+
+        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
+
+        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator
+        );
+
+        //when
+        command.execute(mock(CommandContext.class));
+
+        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
+        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
+        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
+        assertThat(sanitizedContext.getInBoundVariables())
+            .containsExactlyInAnyOrderEntriesOf(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
+        assertThat(sanitizedContext.getOutBoundVariables())
+            .containsExactlyInAnyOrderEntriesOf(
+                Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+            );
     }
 }
