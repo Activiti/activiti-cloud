@@ -90,7 +90,6 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         CloudRuntimeEvent<?, ?> event
     ) {
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
             event.getServiceName(),
@@ -99,7 +98,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
             event.getAppName(),
             event.getAppVersion()
         );
-        serviceTaskEntity.setId(entityId);
+        serviceTaskEntity.setId(integrationContext.getId());
         serviceTaskEntity.setElementId(integrationContext.getClientId());
         serviceTaskEntity.setActivityName(integrationContext.getClientName());
         serviceTaskEntity.setActivityType("serviceTask");
@@ -117,6 +116,8 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         String serviceTaskInfo =
             "ServiceName: " +
             event.getServiceName() +
+            "Id: " +
+            integrationContext.getId() +
             ", ServiceFullName: " +
             event.getServiceFullName() +
             ", ServiceVersion: " +
