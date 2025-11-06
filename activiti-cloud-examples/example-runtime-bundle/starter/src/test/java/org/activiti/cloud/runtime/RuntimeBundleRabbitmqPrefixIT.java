@@ -52,7 +52,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
     }
 
     @Test
-    void environment() {
+    void rabbitBinderDefaultPrefix() {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
             .isEqualTo("default-app.");
 

@@ -40,13 +40,13 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     @Autowired
-    private BindingServiceProperties bindingServiceProperties;
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Test
     void bindingServiceProperties() {
