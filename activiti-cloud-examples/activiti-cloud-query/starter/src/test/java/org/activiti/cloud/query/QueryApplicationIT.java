@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Map;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -34,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -64,6 +66,12 @@ public class QueryApplicationIT {
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     public void contextLoads() {
@@ -107,6 +115,20 @@ public class QueryApplicationIT {
             .extracting("list")
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
             .containsKeys("entries", "pagination");
+    }
+
+    @Test
+    void rabbitBinderCompression() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
+            .isEqualTo(9);
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
+            .isTrue();
+    }
+
+    @Test
+    void messagingPropertiesRabbitMqCompression() {
+        assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
+        assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {
