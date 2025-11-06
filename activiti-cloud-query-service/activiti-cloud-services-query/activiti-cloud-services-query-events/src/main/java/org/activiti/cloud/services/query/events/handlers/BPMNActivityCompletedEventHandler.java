@@ -24,8 +24,12 @@ import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
+
+    Logger logger = LoggerFactory.getLogger(BPMNActivityCompletedEventHandler.class);
 
     public BPMNActivityCompletedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -38,6 +42,12 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
         Optional<ServiceTaskEntity> optionalServiceTaskEntity = findServiceTaskEntity(activityEvent);
 
+        if (activityEvent.getEntity().getActivityType().equals("serviceTask")) {
+            logger.error(
+                "AAE-39416: Activiti completed for ActivitiName: " + activityEvent.getEntity().getActivityName()
+            );
+        }
+
         if (optionalBaseBPMNActivityEntity.isPresent()) {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
             bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
@@ -47,6 +57,7 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
         }
 
         if (optionalServiceTaskEntity.isPresent()) {
+            logger.error("AAE-39417: Persisting ServiceTaskEntity as completed");
             ServiceTaskEntity serviceTaskEntity = optionalServiceTaskEntity.get();
             serviceTaskEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
             serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
