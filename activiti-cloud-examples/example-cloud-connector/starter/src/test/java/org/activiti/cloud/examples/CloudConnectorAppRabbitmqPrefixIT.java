@@ -18,40 +18,21 @@ package org.activiti.cloud.examples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @TestPropertySource(properties = { "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}." })
 public class CloudConnectorAppRabbitmqPrefixIT extends CloudConnectorAppIT {
 
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
-
-    @Autowired
-    private Environment environment;
-
     @Test
-    void contextLoads() {}
-
-    @Test
-    void messagingProperties() {
+    @Override
+    void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("default-app.");
     }
 
     @Test
-    void environment() {
+    @Override
+    void rabbitBinderDefaultPrefix() {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
             .isEqualTo("default-app.");
 

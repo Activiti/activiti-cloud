@@ -13,36 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.runtime;
+
+package org.activiti.cloud.examples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 
-@TestPropertySource(
-    properties = {
-        "activiti.cloud.application.name=default-app",
-        "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}.",
-    }
-)
-public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
-
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
-
-    @Autowired
-    private Environment environment;
+@TestPropertySource(properties = { "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}." })
+public class CloudConnectorAppFunctionRouterRabbitmqPrefixIT extends CloudConnectorAppFunctionRouterIT {
 
     @Test
     @Override

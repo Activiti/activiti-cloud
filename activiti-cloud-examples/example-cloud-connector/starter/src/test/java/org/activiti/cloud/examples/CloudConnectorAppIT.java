@@ -33,15 +33,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
 @AutoConfigureMockMvc
+@Testcontainers
 @TestPropertySource(locations = "classpath:test.properties")
 public class CloudConnectorAppIT {
+
+    @ServiceConnection
+    @Container
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     private static final String CONNECTOR_SUFFIX = "Connector";
 
@@ -58,10 +67,10 @@ public class CloudConnectorAppIT {
     private FunctionCatalog functionCatalog;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     public void contextShouldLoad() throws Exception {
@@ -105,6 +114,20 @@ public class CloudConnectorAppIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
     }
 
     private static String getRegisteredConnectorName(String functionName) {

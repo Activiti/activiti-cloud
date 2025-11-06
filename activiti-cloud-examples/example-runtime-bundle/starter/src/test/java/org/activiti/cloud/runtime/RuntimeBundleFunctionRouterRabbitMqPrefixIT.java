@@ -24,11 +24,13 @@ import org.springframework.test.context.TestPropertySource;
 public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFunctionRouterEnabledIT {
 
     @Test
+    @Override
     void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("myapp.");
     }
 
     @Test
+    @Override
     void rabbitBinderDefaultPrefix() {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
             .isEqualTo("myapp.");

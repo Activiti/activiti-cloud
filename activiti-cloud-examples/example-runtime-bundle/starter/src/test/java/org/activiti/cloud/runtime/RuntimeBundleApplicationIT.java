@@ -76,4 +76,18 @@ public class RuntimeBundleApplicationIT {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
     }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
+    }
 }
