@@ -41,6 +41,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         logger.error("AAE-39413: Handling integration requested event");
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
+        logger.error("AAE-39413: Integration context id: " + integrationContext.getId());
         String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
         logger.error("AAE-39413: entityId: " + entityId);
 
@@ -73,11 +74,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entityId);
-        serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
-        serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
-        serviceTaskEntity.setCompletedDate(null);
-
+        ServiceTaskEntity serviceTaskEntity = createServiceTaskEntity(integrationEvent, event);
         entity.setServiceTask(serviceTaskEntity);
 
         entityManager.persist(entity);
@@ -86,5 +83,67 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     @Override
     public String getHandledEvent() {
         return IntegrationEvents.INTEGRATION_REQUESTED.name();
+    }
+
+    public ServiceTaskEntity createServiceTaskEntity(
+        CloudIntegrationRequestedEvent integrationEvent,
+        CloudRuntimeEvent<?, ?> event
+    ) {
+        IntegrationContext integrationContext = integrationEvent.getEntity();
+        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+
+        ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
+            event.getServiceName(),
+            event.getServiceFullName(),
+            event.getServiceVersion(),
+            event.getAppName(),
+            event.getAppVersion()
+        );
+        serviceTaskEntity.setId(entityId);
+        serviceTaskEntity.setElementId(integrationContext.getClientId());
+        serviceTaskEntity.setActivityName(integrationContext.getClientName());
+        serviceTaskEntity.setActivityType("serviceTask");
+        serviceTaskEntity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+        serviceTaskEntity.setProcessInstanceId(integrationContext.getProcessInstanceId());
+        serviceTaskEntity.setExecutionId(integrationContext.getExecutionId());
+        serviceTaskEntity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
+        serviceTaskEntity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+        serviceTaskEntity.setBusinessKey(integrationContext.getBusinessKey());
+        serviceTaskEntity.setId(integrationContext.getId());
+        serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
+        serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
+        serviceTaskEntity.setCompletedDate(null);
+
+        String serviceTaskInfo =
+            "ServiceName: " +
+            event.getServiceName() +
+            ", ServiceFullName: " +
+            event.getServiceFullName() +
+            ", ServiceVersion: " +
+            event.getServiceVersion() +
+            ", AppName: " +
+            event.getAppName() +
+            ", AppVersion: " +
+            event.getAppVersion() +
+            ", ElementId: " +
+            integrationContext.getClientId() +
+            ", ActivityName: " +
+            integrationContext.getClientName() +
+            ", ProcessDefinitionId: " +
+            integrationContext.getProcessDefinitionId() +
+            ", ProcessInstanceId: " +
+            integrationContext.getProcessInstanceId() +
+            ", ExecutionId: " +
+            integrationContext.getExecutionId() +
+            ", ProcessDefinitionKey: " +
+            integrationContext.getProcessDefinitionKey() +
+            ", ProcessDefinitionVersion: " +
+            integrationContext.getProcessDefinitionVersion() +
+            ", BusinessKey: " +
+            integrationContext.getBusinessKey();
+
+        logger.error("AAE-39416: Created new ServiceTask: " + serviceTaskInfo);
+
+        return serviceTaskEntity;
     }
 }

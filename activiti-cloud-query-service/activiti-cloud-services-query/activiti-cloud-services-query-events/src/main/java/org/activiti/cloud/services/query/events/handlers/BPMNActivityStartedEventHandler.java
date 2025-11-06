@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -33,14 +34,17 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityStartedEvent activityEvent = CloudBPMNActivityStartedEvent.class.cast(event);
 
-        BaseBPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
+        Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         // Activity can be cyclical, so we just update the status and started date anyways
-        bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
-        bpmnActivityEntity.setCompletedDate(null);
-        bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
+        if (optionalBaseBPMNActivityEntity.isPresent()) {
+            BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
+            bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
+            bpmnActivityEntity.setCompletedDate(null);
+            bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
 
-        entityManager.persist(bpmnActivityEntity);
+            entityManager.persist(bpmnActivityEntity);
+        }
     }
 
     @Override

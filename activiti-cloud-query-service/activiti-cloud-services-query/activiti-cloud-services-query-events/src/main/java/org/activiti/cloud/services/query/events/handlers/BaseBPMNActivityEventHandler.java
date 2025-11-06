@@ -16,12 +16,12 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public abstract class BaseBPMNActivityEventHandler {
         this.entityManager = entityManager;
     }
 
-    protected BaseBPMNActivityEntity findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    protected Optional<BaseBPMNActivityEntity> findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         logger.error("AAE-39414: Handling CloudBPMNActivityEvent");
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
@@ -46,21 +46,18 @@ public abstract class BaseBPMNActivityEventHandler {
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
-        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            logger.error("AAE-39416: BPMNActivityEntity type is serviceTask");
-            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
-        } else {
+        if (!"serviceTask".equals(bpmnActivity.getActivityType())) {
             bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
         }
 
         if (bpmnActivityEntity == null) {
-            bpmnActivityEntity = createBpmnActivityEntity(event);
+            return createBpmnActivityEntity(event);
+        } else {
+            return Optional.of(bpmnActivityEntity);
         }
-
-        return bpmnActivityEntity;
     }
 
-    public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
+    public Optional<BaseBPMNActivityEntity> createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
 
         BPMNActivity bpmnActivity = activityEvent.getEntity();
@@ -68,18 +65,9 @@ public abstract class BaseBPMNActivityEventHandler {
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(bpmnActivity);
         logger.error("AAE-39417: Creating new BaseBPMNActivityEntity with pkId: " + pkId);
 
-        BaseBPMNActivityEntity bpmnActivityEntity;
+        BaseBPMNActivityEntity bpmnActivityEntity = null;
 
-        if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity =
-                new ServiceTaskEntity(
-                    event.getServiceName(),
-                    event.getServiceFullName(),
-                    event.getServiceVersion(),
-                    event.getAppName(),
-                    event.getAppVersion()
-                );
-        } else {
+        if (!"serviceTask".equals(bpmnActivity.getActivityType())) {
             bpmnActivityEntity =
                 new BPMNActivityEntity(
                     event.getServiceName(),
@@ -88,19 +76,48 @@ public abstract class BaseBPMNActivityEventHandler {
                     event.getAppName(),
                     event.getAppVersion()
                 );
+            bpmnActivityEntity.setId(pkId);
+            bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
+            bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
+            bpmnActivityEntity.setActivityType(bpmnActivity.getActivityType());
+            bpmnActivityEntity.setProcessDefinitionId(bpmnActivity.getProcessDefinitionId());
+            bpmnActivityEntity.setProcessInstanceId(bpmnActivity.getProcessInstanceId());
+            bpmnActivityEntity.setExecutionId(bpmnActivity.getExecutionId());
+            bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
+            bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
+            bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
+        } else {
+            String serviceTaskInfo =
+                "ServiceName: " +
+                event.getServiceName() +
+                ", ServiceFullName: " +
+                event.getServiceFullName() +
+                ", ServiceVersion: " +
+                event.getServiceVersion() +
+                ", AppName: " +
+                event.getAppName() +
+                ", AppVersion: " +
+                event.getAppVersion() +
+                ", ElementId: " +
+                bpmnActivity.getElementId() +
+                ", ActivityName: " +
+                bpmnActivity.getActivityName() +
+                ", ProcessDefinitionId: " +
+                bpmnActivity.getProcessDefinitionId() +
+                ", ProcessInstanceId: " +
+                bpmnActivity.getProcessInstanceId() +
+                ", ExecutionId: " +
+                bpmnActivity.getExecutionId() +
+                ", ProcessDefinitionKey: " +
+                activityEvent.getProcessDefinitionKey() +
+                ", ProcessDefinitionVersion: " +
+                activityEvent.getProcessDefinitionVersion() +
+                ", BusinessKey: " +
+                activityEvent.getBusinessKey();
+
+            logger.error("AAE-39416: Should create new ServiceTask: " + serviceTaskInfo);
         }
 
-        bpmnActivityEntity.setId(pkId);
-        bpmnActivityEntity.setElementId(bpmnActivity.getElementId());
-        bpmnActivityEntity.setActivityName(bpmnActivity.getActivityName());
-        bpmnActivityEntity.setActivityType(bpmnActivity.getActivityType());
-        bpmnActivityEntity.setProcessDefinitionId(bpmnActivity.getProcessDefinitionId());
-        bpmnActivityEntity.setProcessInstanceId(bpmnActivity.getProcessInstanceId());
-        bpmnActivityEntity.setExecutionId(bpmnActivity.getExecutionId());
-        bpmnActivityEntity.setProcessDefinitionKey(activityEvent.getProcessDefinitionKey());
-        bpmnActivityEntity.setProcessDefinitionVersion(activityEvent.getProcessDefinitionVersion());
-        bpmnActivityEntity.setBusinessKey(activityEvent.getBusinessKey());
-
-        return bpmnActivityEntity;
+        return Optional.ofNullable(bpmnActivityEntity);
     }
 }

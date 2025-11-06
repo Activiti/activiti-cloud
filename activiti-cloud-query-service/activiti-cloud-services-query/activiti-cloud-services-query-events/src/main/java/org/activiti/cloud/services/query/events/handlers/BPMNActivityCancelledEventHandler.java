@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -33,12 +34,15 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCancelledEvent activityEvent = CloudBPMNActivityCancelledEvent.class.cast(event);
 
-        BaseBPMNActivityEntity bpmnActivityEntity = findOrCreateBPMNActivityEntity(event);
+        Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
-        bpmnActivityEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
-        bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
+        if (optionalBaseBPMNActivityEntity.isPresent()) {
+            BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
+            bpmnActivityEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
+            bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
 
-        entityManager.persist(bpmnActivityEntity);
+            entityManager.persist(bpmnActivityEntity);
+        }
     }
 
     @Override
