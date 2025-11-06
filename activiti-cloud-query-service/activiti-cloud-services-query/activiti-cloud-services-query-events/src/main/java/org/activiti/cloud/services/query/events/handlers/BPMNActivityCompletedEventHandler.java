@@ -23,6 +23,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
@@ -35,6 +36,7 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
         CloudBPMNActivityCompletedEvent activityEvent = CloudBPMNActivityCompletedEvent.class.cast(event);
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
+        Optional<ServiceTaskEntity> optionalServiceTaskEntity = findServiceTaskEntity(activityEvent);
 
         if (optionalBaseBPMNActivityEntity.isPresent()) {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
@@ -42,6 +44,14 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
 
             entityManager.persist(bpmnActivityEntity);
+        }
+
+        if (optionalServiceTaskEntity.isPresent()) {
+            ServiceTaskEntity serviceTaskEntity = optionalServiceTaskEntity.get();
+            serviceTaskEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
+            serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
+            entityManager.persist(serviceTaskEntity);
         }
     }
 

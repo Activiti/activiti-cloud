@@ -23,6 +23,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
@@ -35,6 +37,7 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
         CloudBPMNActivityCancelledEvent activityEvent = CloudBPMNActivityCancelledEvent.class.cast(event);
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
+        Optional<ServiceTaskEntity> optionalServiceTaskEntity = findServiceTaskEntity(activityEvent);
 
         if (optionalBaseBPMNActivityEntity.isPresent()) {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
@@ -42,6 +45,14 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
 
             entityManager.persist(bpmnActivityEntity);
+        }
+
+        if (optionalServiceTaskEntity.isPresent()) {
+            ServiceTaskEntity serviceTaskEntity = optionalServiceTaskEntity.get();
+            serviceTaskEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
+            serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
+
+            entityManager.persist(serviceTaskEntity);
         }
     }
 

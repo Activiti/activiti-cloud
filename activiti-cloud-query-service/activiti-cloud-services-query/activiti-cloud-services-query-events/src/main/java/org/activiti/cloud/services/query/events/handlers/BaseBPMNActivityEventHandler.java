@@ -18,10 +18,14 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.activiti.api.process.model.BPMNActivity;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,5 +123,27 @@ public abstract class BaseBPMNActivityEventHandler {
         }
 
         return Optional.ofNullable(bpmnActivityEntity);
+    }
+
+    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudRuntimeEvent<?, ?> event) {
+        CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
+        BPMNActivity activitiEntity = activityEvent.getEntity();
+        String pkId = BPMNActivityEntity.IdBuilderHelper.from(activitiEntity);
+
+        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
+
+        return Optional.ofNullable(entity);
+    }
+
+    protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudRuntimeEvent<?, ?> event) {
+        Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(event);
+
+        if (integrationContextEntity.isPresent()) {
+            IntegrationContext integrationContext = integrationContextEntity.get();
+            ServiceTaskEntity entity = entityManager.find(ServiceTaskEntity.class, integrationContext.getId());
+            return Optional.ofNullable(entity);
+        } else {
+            return Optional.empty();
+        }
     }
 }
