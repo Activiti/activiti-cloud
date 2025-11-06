@@ -33,6 +33,11 @@ public class CloudProcessCompletedEventImpl
         super(id, timestamp, processInstance);
     }
 
+    public CloudProcessCompletedEventImpl(ProcessInstance processInstance, String actor) {
+        super(processInstance);
+        setActor(actor);
+    }
+
     @Override
     public ProcessRuntimeEvent.ProcessEvents getEventType() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;

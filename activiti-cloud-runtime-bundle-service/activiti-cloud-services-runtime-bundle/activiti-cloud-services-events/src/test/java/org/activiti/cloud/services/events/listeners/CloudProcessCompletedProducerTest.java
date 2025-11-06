@@ -89,7 +89,7 @@ class CloudProcessCompletedProducerTest {
     private ProcessCompletedEvent buildProcessCompletedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setInitiator(USERNAME);
-        ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);
-        return processCompletedEvent;
+        String actor = "service_user";
+        return new ProcessCompletedImpl(processInstance, actor);
     }
 }
