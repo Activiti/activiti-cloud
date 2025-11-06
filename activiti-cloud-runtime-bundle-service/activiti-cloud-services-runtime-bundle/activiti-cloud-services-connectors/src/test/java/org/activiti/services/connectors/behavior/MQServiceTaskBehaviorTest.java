@@ -16,7 +16,7 @@
 package org.activiti.services.connectors.behavior;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -45,7 +45,6 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -161,10 +160,9 @@ class MQServiceTaskBehaviorTest {
         //then
         ((ExecutionEntity) execution).getProcessInstance();
 
-        assertThat(entity)
-            .hasExecutionId(EXECUTION_ID)
-            .hasProcessDefinitionId(PROC_DEF_ID)
-            .hasProcessInstanceId(PROC_INST_ID);
+        assertThat(entity.getExecutionId()).isEqualTo(EXECUTION_ID);
+        assertThat(entity.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        assertThat(entity.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
 
         verify(integrationRequestSender).sendIntegrationRequest(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
@@ -253,7 +251,7 @@ class MQServiceTaskBehaviorTest {
         //then
         verify(processEngineEventsAggregator).add(eventCaptor.capture());
         CloudIntegrationRequestedEvent event = eventCaptor.getValue();
-        Assertions.assertThat(event.getEntity().getInBoundVariables()).isEmpty();
+        assertThat(event.getEntity().getInBoundVariables()).isEmpty();
     }
 
     @Test
@@ -290,6 +288,6 @@ class MQServiceTaskBehaviorTest {
         //then
         verify(processEngineEventsAggregator).add(eventCaptor.capture());
         CloudIntegrationRequestedEvent event = eventCaptor.getValue();
-        Assertions.assertThat(event.getEntity().getInBoundVariables()).containsExactlyEntriesOf(Map.of("key", "value"));
+        assertThat(event.getEntity().getInBoundVariables()).containsExactlyEntriesOf(Map.of("key", "value"));
     }
 }
