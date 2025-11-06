@@ -16,7 +16,7 @@
 package org.activiti.services.connectors.behavior;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-//import static org.activiti.test.Assertions.assertThat;
+import static org.activiti.test.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -161,14 +161,15 @@ class MQServiceTaskBehaviorTest {
         //then
         ((ExecutionEntity) execution).getProcessInstance();
 
-        /* assertThat(entity)
+        assertThat(entity)
             .hasExecutionId(EXECUTION_ID)
             .hasProcessDefinitionId(PROC_DEF_ID)
-            .hasProcessInstanceId(PROC_INST_ID);*/
+            .hasProcessInstanceId(PROC_INST_ID);
 
         verify(integrationRequestSender).sendIntegrationRequest(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
-        // assertThat(integrationRequest.getIntegrationContext()).isEqualTo(integrationContext);
+        assertThat(integrationRequest.getIntegrationContext()).isEqualTo(integrationContext);
+
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
 
         verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
