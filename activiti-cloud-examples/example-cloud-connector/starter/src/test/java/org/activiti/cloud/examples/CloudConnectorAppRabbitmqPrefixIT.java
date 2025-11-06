@@ -26,6 +26,29 @@ public class CloudConnectorAppRabbitmqPrefixIT extends CloudConnectorAppIT {
 
     @Test
     @Override
+    void rabbitQueues() {
+        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.processing-connector");
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "default-app.restconnector.POST",
+                "default-app.restConnector.GET",
+                "default-app.test-bpmn-error-connector.throwError",
+                "default-app.test-error-connector.throwError",
+                "default-app.miCloudConnector",
+                "default-app.headers.GET",
+                "default-app.Movies.getMovieDesc",
+                "default-app.ExampleConnector"
+            );
+    }
+
+    @Test
+    @Override
     void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("default-app.");
     }

@@ -26,16 +26,25 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.examples.connectors.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -46,6 +55,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource(locations = "classpath:test.properties")
+@Import(CloudConnectorAppIT.BinderFactoryListenerConfiguration.class)
 public class CloudConnectorAppIT {
 
     @ServiceConnection
@@ -53,6 +63,26 @@ public class CloudConnectorAppIT {
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     private static final String CONNECTOR_SUFFIX = "Connector";
+
+    static final Map<String, Queue> queues = new LinkedHashMap<>();
+    static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
+
+    @TestConfiguration
+    static class BinderFactoryListenerConfiguration {
+
+        @Bean
+        DeclarableCustomizer declarableCustomizer() {
+            return declarable -> {
+                if (declarable instanceof Queue queue) {
+                    queues.computeIfAbsent(queue.getName(), key -> queue);
+                } else if (declarable instanceof Exchange exchange) {
+                    exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
+                }
+
+                return declarable;
+            };
+        }
+    }
 
     @Autowired
     private ApplicationContext context;
@@ -72,13 +102,40 @@ public class CloudConnectorAppIT {
     @Autowired
     protected ActivitiCloudMessagingProperties messagingProperties;
 
+    @AfterAll
+    static void cleanUp() {
+        queues.clear();
+        exchanges.clear();
+    }
+
     @Test
-    public void contextShouldLoad() throws Exception {
+    void contextLoads() {
         //then
         assertThat(context).isNotNull();
         assertThat(appName).isNotEmpty();
 
         assertThat(functionCatalog).isNotNull();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(queues).isNotEmpty().containsOnlyKeys("processing-connector");
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "restconnector.POST",
+                "restConnector.GET",
+                "test-bpmn-error-connector.throwError",
+                "test-error-connector.throwError",
+                "miCloudConnector",
+                "headers.GET",
+                "Movies.getMovieDesc",
+                "ExampleConnector"
+            );
     }
 
     @Test

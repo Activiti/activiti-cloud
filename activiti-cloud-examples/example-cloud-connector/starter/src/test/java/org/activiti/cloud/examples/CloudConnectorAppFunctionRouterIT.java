@@ -29,9 +29,6 @@ public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
     private BindingServiceProperties bindingServiceProperties;
 
     @Test
-    void contextLoads() {}
-
-    @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings()).doesNotContainKeys("functionRouterInput").isNotEmpty();
     }
