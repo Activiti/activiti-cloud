@@ -17,13 +17,22 @@ package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -34,11 +43,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     classes = RuntimeBundleApplication.class,
     properties = {
-        "activiti.cloud.messaging.rabbitmq.compress=true", "activiti.cloud.messaging.rabbitmq.compression-level=9",
+        "activiti.cloud.application.name=default-app",
+        "activiti.cloud.messaging.rabbitmq.compress=true",
+        "activiti.cloud.messaging.rabbitmq.compression-level=9",
     }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
+@Import(RuntimeBundleApplicationIT.BinderFactoryListenerConfiguration.class)
 public class RuntimeBundleApplicationIT {
 
     @ServiceConnection
@@ -48,6 +60,32 @@ public class RuntimeBundleApplicationIT {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+
+    static final Map<String, Queue> queues = new LinkedHashMap<>();
+    static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
+
+    @TestConfiguration
+    static class BinderFactoryListenerConfiguration {
+
+        @Bean
+        DeclarableCustomizer declarableCustomizer() {
+            return declarable -> {
+                if (declarable instanceof Queue queue) {
+                    queues.computeIfAbsent(queue.getName(), key -> queue);
+                } else if (declarable instanceof Exchange exchange) {
+                    exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
+                }
+
+                return declarable;
+            };
+        }
+    }
+
+    @AfterAll
+    static void cleanUp() {
+        queues.clear();
+        exchanges.clear();
+    }
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -61,6 +99,38 @@ public class RuntimeBundleApplicationIT {
     @Test
     public void contextLoads() {
         assertThat(applicationContext).isNotNull();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(queues)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "engineEvents.query",
+                "engineEvents.audit",
+                "messageEvents_default-app.messages",
+                "signalEvent.my-runtime-bundle",
+                "commandConsumer_default-app.my-runtime-bundle",
+                "asyncExecutorJobs_default-app.my-runtime-bundle",
+                "integrationResult_my-runtime-bundle.my-runtime-bundle",
+                "integrationError_my-runtime-bundle.my-runtime-bundle"
+            );
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "commandResults_default-app",
+                "engineEvents",
+                "asyncExecutorJobs_default-app",
+                "commandConsumer_default-app",
+                "messageEvents_default-app",
+                "signalEvent",
+                "integrationResult_my-runtime-bundle",
+                "integrationError_my-runtime-bundle"
+            );
     }
 
     @Test

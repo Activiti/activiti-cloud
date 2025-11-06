@@ -25,9 +25,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(
-    properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
-)
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicationIT {
 
     @Autowired
@@ -38,6 +36,29 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
 
     @Autowired
     protected Environment environment;
+
+    @Test
+    @Override
+    void rabbitQueues() {
+        assertThat(queues).isNotEmpty().containsOnlyKeys("consumer", "my-runtime-bundle");
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "commandResults_default-app",
+                "engineEvents",
+                "asyncExecutorJobs_default-app",
+                "commandConsumer_default-app",
+                "messageEvents_default-app",
+                "signalEvent",
+                "integrationResult_my-runtime-bundle",
+                "integrationError_my-runtime-bundle"
+            );
+    }
 
     @Test
     void bindingServiceProperties() {
@@ -107,9 +128,9 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
 
         assertThat(functionRouter.registrations())
             .containsOnlyKeys(
-                "commandConsumer_myapp",
-                "asyncExecutorJobs_myapp",
-                "messageEvents_myapp",
+                "commandConsumer_default-app",
+                "asyncExecutorJobs_default-app",
+                "messageEvents_default-app",
                 "integrationResult_my-runtime-bundle",
                 "integrationError_my-runtime-bundle",
                 "signalEvent"

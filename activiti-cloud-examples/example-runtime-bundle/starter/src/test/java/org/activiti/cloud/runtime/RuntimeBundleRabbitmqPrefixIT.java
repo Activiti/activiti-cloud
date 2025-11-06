@@ -46,6 +46,40 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
 
     @Test
     @Override
+    void rabbitQueues() {
+        assertThat(queues)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "default-app.engineEvents.query",
+                "default-app.engineEvents.audit",
+                "default-app.messageEvents_default-app.messages",
+                "default-app.signalEvent.my-runtime-bundle",
+                "default-app.commandConsumer_default-app.my-runtime-bundle",
+                "default-app.asyncExecutorJobs_default-app.my-runtime-bundle",
+                "default-app.integrationResult_my-runtime-bundle.my-runtime-bundle",
+                "default-app.integrationError_my-runtime-bundle.my-runtime-bundle"
+            );
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "default-app.commandResults_default-app",
+                "default-app.engineEvents",
+                "default-app.asyncExecutorJobs_default-app",
+                "default-app.commandConsumer_default-app",
+                "default-app.messageEvents_default-app",
+                "default-app.signalEvent",
+                "default-app.integrationResult_my-runtime-bundle",
+                "default-app.integrationError_my-runtime-bundle"
+            );
+    }
+
+    @Test
+    @Override
     void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("default-app.");
     }

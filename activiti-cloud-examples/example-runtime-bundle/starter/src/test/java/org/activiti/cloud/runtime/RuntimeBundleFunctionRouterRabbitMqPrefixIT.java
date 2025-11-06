@@ -25,18 +25,41 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
 
     @Test
     @Override
+    void rabbitQueues() {
+        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.consumer", "default-app.my-runtime-bundle");
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges)
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "default-app.commandResults_default-app",
+                "default-app.engineEvents",
+                "default-app.asyncExecutorJobs_default-app",
+                "default-app.commandConsumer_default-app",
+                "default-app.messageEvents_default-app",
+                "default-app.signalEvent",
+                "default-app.integrationResult_my-runtime-bundle",
+                "default-app.integrationError_my-runtime-bundle"
+            );
+    }
+
+    @Test
+    @Override
     void messagingRabbitMqPrefixProperties() {
-        assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("myapp.");
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("default-app.");
     }
 
     @Test
     @Override
     void rabbitBinderDefaultPrefix() {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("myapp.");
+            .isEqualTo("default-app.");
 
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("myapp.");
+            .isEqualTo("default-app.");
     }
 
     @Test
@@ -45,6 +68,6 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
         assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
-            .containsOnly("myapp.consumer");
+            .containsOnly("default-app.consumer");
     }
 }
