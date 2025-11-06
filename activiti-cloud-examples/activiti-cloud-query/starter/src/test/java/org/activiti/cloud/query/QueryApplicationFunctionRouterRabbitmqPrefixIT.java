@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}." })
-public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
+public class QueryApplicationFunctionRouterRabbitmqPrefixIT extends QueryApplicationFunctionRouterIT {
 
     @Test
     void messagingRabbitMqPrefixProperties() {

@@ -24,7 +24,7 @@ import org.springframework.test.context.TestPropertySource;
 public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFunctionRouterEnabledIT {
 
     @Test
-    void messagingProperties() {
+    void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("myapp.");
     }
 

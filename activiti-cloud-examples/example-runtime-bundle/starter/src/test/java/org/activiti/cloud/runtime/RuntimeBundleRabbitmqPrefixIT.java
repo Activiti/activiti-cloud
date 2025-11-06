@@ -25,7 +25,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(
     properties = {
@@ -33,7 +32,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "activiti.cloud.messaging.rabbitmq.prefix=${activiti.cloud.application.name}.",
     }
 )
-@Testcontainers
 public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
 
     @ServiceConnection
@@ -47,7 +45,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
     private Environment environment;
 
     @Test
-    void messagingProperties() {
+    void messagingRabbitMqPrefixProperties() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("default-app.");
     }
 

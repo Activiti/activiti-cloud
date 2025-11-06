@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -39,6 +40,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Testcontainers
 public class RuntimeBundleApplicationIT {
+
+    @ServiceConnection
+    @Container
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     @Container
     @ServiceConnection

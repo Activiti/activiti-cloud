@@ -20,24 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(
     properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
 )
-@Testcontainers
 public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicationIT {
-
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
 
     @Autowired
     protected BindingServiceProperties bindingServiceProperties;

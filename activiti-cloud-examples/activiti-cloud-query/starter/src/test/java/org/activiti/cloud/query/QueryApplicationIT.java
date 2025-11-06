@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -46,14 +48,27 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = { QueryApplication.class },
     properties = "identity.test.token-interceptor.enabled=false",
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
+@Testcontainers
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryApplicationIT {
+
+    @ServiceConnection
+    @Container
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Autowired
     private WebApplicationContext context;
@@ -68,10 +83,13 @@ public class QueryApplicationIT {
     private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -142,5 +160,19 @@ public class QueryApplicationIT {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return new HttpEntity(headers);
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
     }
 }
