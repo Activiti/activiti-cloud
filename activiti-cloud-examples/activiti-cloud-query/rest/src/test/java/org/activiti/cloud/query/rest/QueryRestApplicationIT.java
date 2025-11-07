@@ -28,6 +28,7 @@ import com.introproventures.graphql.jpa.query.web.GraphQLController;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -35,11 +36,21 @@ import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryRes
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AnonymousQueue;
+import org.springframework.amqp.core.DeclarableCustomizer;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -53,14 +64,58 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = { QueryRestApplication.class },
-    properties = "identity.test.token-interceptor.enabled=false",
+    properties = { "identity.test.token-interceptor.enabled=false", "spring.sql.init.mode=always" },
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Testcontainers
+@Import(QueryRestApplicationIT.BinderFactoryListenerConfiguration.class)
 public class QueryRestApplicationIT {
+
+    @Container
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+
+    static final Map<String, Queue> queues = new LinkedHashMap<>();
+    static final Map<String, AnonymousQueue> anonQueues = new LinkedHashMap<>();
+    static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
+
+    @TestConfiguration
+    static class BinderFactoryListenerConfiguration {
+
+        @Bean
+        DeclarableCustomizer declarableCustomizer() {
+            return declarable -> {
+                if (declarable instanceof AnonymousQueue queue) {
+                    anonQueues.computeIfAbsent(queue.getName(), key -> queue);
+                } else if (declarable instanceof Queue queue) {
+                    queues.computeIfAbsent(queue.getName(), key -> queue);
+                } else if (declarable instanceof Exchange exchange) {
+                    exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
+                }
+
+                return declarable;
+            };
+        }
+    }
+
+    @AfterAll
+    static void cleanUp() {
+        queues.clear();
+        exchanges.clear();
+        anonQueues.clear();
+    }
 
     @Autowired
     private WebApplicationContext context;
@@ -81,10 +136,13 @@ public class QueryRestApplicationIT {
     private GraphQLSchema graphQLSchema;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -245,6 +303,35 @@ public class QueryRestApplicationIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(queues).isEmpty();
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(anonQueues)
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous.")));
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(exchanges).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {
