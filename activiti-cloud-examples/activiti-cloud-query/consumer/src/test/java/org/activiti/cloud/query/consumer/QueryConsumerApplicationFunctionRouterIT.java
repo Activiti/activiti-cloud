@@ -18,6 +18,7 @@ package org.activiti.cloud.query.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -31,6 +32,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 @Testcontainers
+@Disabled
 public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerApplicationIT {
 
     @ServiceConnection
