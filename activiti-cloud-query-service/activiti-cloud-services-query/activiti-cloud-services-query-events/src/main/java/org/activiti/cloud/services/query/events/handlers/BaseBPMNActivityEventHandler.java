@@ -21,7 +21,6 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
@@ -129,6 +128,8 @@ public abstract class BaseBPMNActivityEventHandler {
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
         BPMNActivity activitiEntity = activityEvent.getEntity();
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(activitiEntity);
+
+        logger.error("AAE-39417: pkId from activity " + pkId);
 
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
 

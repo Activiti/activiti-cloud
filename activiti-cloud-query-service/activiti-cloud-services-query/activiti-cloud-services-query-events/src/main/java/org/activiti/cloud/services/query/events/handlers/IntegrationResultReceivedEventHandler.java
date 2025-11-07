@@ -22,9 +22,14 @@ import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(IntegrationResultReceivedEventHandler.class);
 
     public IntegrationResultReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -35,6 +40,10 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+
+        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+
+        logger.error("AAE-39417: pkId from integration result " + pkId);
 
         result.ifPresent(entity -> {
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));
