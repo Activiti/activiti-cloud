@@ -28,6 +28,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private Date startDate;
     private String initiator;
     private String linkedProcessInstanceId;
+    private String linkedProcessInstanceType;
 
     @Schema(
         description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
@@ -68,6 +69,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         processDefinitionName = processInstance.getProcessDefinitionName();
         rootProcessInstanceId = processInstance.getRootProcessInstanceId();
         linkedProcessInstanceId = processInstance.getLinkedProcessInstanceId();
+        linkedProcessInstanceType = processInstance.getLinkedProcessInstanceType();
     }
 
     @Override
@@ -190,6 +192,11 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
         return linkedProcessInstanceId;
     }
 
+    @Override
+    public String getLinkedProcessInstanceType() {
+        return linkedProcessInstanceType;
+    }
+
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
         this.rootProcessInstanceId = rootProcessInstanceId;
     }
@@ -200,5 +207,9 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
 
     public void setLinkedProcessInstanceId(String linkedProcessInstanceId) {
         this.linkedProcessInstanceId = linkedProcessInstanceId;
+    }
+
+    public void setLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        this.linkedProcessInstanceType = linkedProcessInstanceType;
     }
 }

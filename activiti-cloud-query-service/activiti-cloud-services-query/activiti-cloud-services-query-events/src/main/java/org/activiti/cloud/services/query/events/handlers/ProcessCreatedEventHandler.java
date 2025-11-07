@@ -80,6 +80,9 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         createdProcessInstanceEntity.setProcessDefinitionName(createdEvent.getEntity().getProcessDefinitionName());
         createdProcessInstanceEntity.setRootProcessInstanceId(createdEvent.getEntity().getRootProcessInstanceId());
         createdProcessInstanceEntity.setLinkedProcessInstanceId(createdEvent.getEntity().getLinkedProcessInstanceId());
+        createdProcessInstanceEntity.setLinkedProcessInstanceType(
+            createdEvent.getEntity().getLinkedProcessInstanceType()
+        );
 
         return createdProcessInstanceEntity;
     }

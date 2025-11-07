@@ -154,6 +154,10 @@ class ProcessInstanceControllerIT {
             .andExpect(
                 jsonPath("$.list.entries[0].entry.linkedProcessInstanceId")
                     .value(processInstanceEntity.getLinkedProcessInstanceId())
+            )
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceType")
+                    .value(processInstanceEntity.getLinkedProcessInstanceType())
             );
     }
 

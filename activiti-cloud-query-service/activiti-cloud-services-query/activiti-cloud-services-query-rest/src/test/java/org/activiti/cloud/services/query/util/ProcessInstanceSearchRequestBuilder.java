@@ -52,6 +52,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private String excludeByProcessCategoryName;
     private Boolean includeSubprocesses;
     private Set<String> linkedProcessInstanceId;
+    private Set<String> linkedProcessInstanceType;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -169,6 +170,11 @@ public class ProcessInstanceSearchRequestBuilder {
 
     public ProcessInstanceSearchRequestBuilder withLinkedProcessInstanceId(String... linkedProcessInstanceIds) {
         this.linkedProcessInstanceId = Set.of(linkedProcessInstanceIds);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withLinkedProcessInstanceType(String... linkedProcessInstanceTypes) {
+        this.linkedProcessInstanceType = Set.of(linkedProcessInstanceTypes);
         return this;
     }
 

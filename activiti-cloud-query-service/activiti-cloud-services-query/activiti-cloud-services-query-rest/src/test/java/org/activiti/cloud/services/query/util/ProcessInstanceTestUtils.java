@@ -40,6 +40,7 @@ public class ProcessInstanceTestUtils {
             new Date()
         );
         processInstanceEntity.setLinkedProcessInstanceId("123-456-789-1111");
+        processInstanceEntity.setLinkedProcessInstanceType("my-type");
         return processInstanceEntity;
     }
 
