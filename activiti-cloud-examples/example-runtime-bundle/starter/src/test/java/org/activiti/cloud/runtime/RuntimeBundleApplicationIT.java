@@ -23,6 +23,7 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
@@ -63,6 +64,7 @@ public class RuntimeBundleApplicationIT {
 
     static final Map<String, Queue> queues = new LinkedHashMap<>();
     static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
+    static final Map<String, Queue> anonQueues = new LinkedHashMap<>();
 
     @TestConfiguration
     static class BinderFactoryListenerConfiguration {
@@ -70,7 +72,9 @@ public class RuntimeBundleApplicationIT {
         @Bean
         DeclarableCustomizer declarableCustomizer() {
             return declarable -> {
-                if (declarable instanceof Queue queue) {
+                if (declarable instanceof AnonymousQueue anonymousQueue) {
+                    anonQueues.computeIfAbsent(anonymousQueue.getName(), key -> anonymousQueue);
+                } else if (declarable instanceof Queue queue) {
                     queues.computeIfAbsent(queue.getName(), key -> queue);
                 } else if (declarable instanceof Exchange exchange) {
                     exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
@@ -84,6 +88,7 @@ public class RuntimeBundleApplicationIT {
     @AfterAll
     static void cleanUp() {
         queues.clear();
+        anonQueues.clear();
         exchanges.clear();
     }
 
@@ -115,6 +120,11 @@ public class RuntimeBundleApplicationIT {
                 "integrationResult_my-runtime-bundle.my-runtime-bundle",
                 "integrationError_my-runtime-bundle.my-runtime-bundle"
             );
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(anonQueues).isEmpty();
     }
 
     @Test

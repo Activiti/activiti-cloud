@@ -32,6 +32,7 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.examples.connectors.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
@@ -65,6 +66,7 @@ public class CloudConnectorAppIT {
     private static final String CONNECTOR_SUFFIX = "Connector";
 
     static final Map<String, Queue> queues = new LinkedHashMap<>();
+    static final Map<String, Queue> anonQueues = new LinkedHashMap<>();
     static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
 
     @TestConfiguration
@@ -73,7 +75,9 @@ public class CloudConnectorAppIT {
         @Bean
         DeclarableCustomizer declarableCustomizer() {
             return declarable -> {
-                if (declarable instanceof Queue queue) {
+                if (declarable instanceof AnonymousQueue anonymousQueue) {
+                    anonQueues.computeIfAbsent(anonymousQueue.getName(), key -> anonymousQueue);
+                } else if (declarable instanceof Queue queue) {
                     queues.computeIfAbsent(queue.getName(), key -> queue);
                 } else if (declarable instanceof Exchange exchange) {
                     exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
@@ -82,6 +86,13 @@ public class CloudConnectorAppIT {
                 return declarable;
             };
         }
+    }
+
+    @AfterAll
+    static void cleanUp() {
+        queues.clear();
+        exchanges.clear();
+        anonQueues.clear();
     }
 
     @Autowired
@@ -102,12 +113,6 @@ public class CloudConnectorAppIT {
     @Autowired
     protected ActivitiCloudMessagingProperties messagingProperties;
 
-    @AfterAll
-    static void cleanUp() {
-        queues.clear();
-        exchanges.clear();
-    }
-
     @Test
     void contextLoads() {
         //then
@@ -120,6 +125,11 @@ public class CloudConnectorAppIT {
     @Test
     void rabbitQueues() {
         assertThat(queues).isNotEmpty().containsOnlyKeys("processing-connector");
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(anonQueues).isEmpty();
     }
 
     @Test
