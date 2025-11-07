@@ -36,4 +36,19 @@ public class QueryApplicationFunctionRouterRabbitmqPrefixIT extends QueryApplica
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
             .isEqualTo("default-app.");
     }
+
+    @Test
+    @Override
+    void rabbitQueues() {
+        assertThat(queues)
+            .isNotEmpty()
+            .hasSize(2)
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.consumer")));
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+    }
 }

@@ -83,4 +83,25 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
                     .isNotEmpty()
             );
     }
+
+    @Test
+    @Override
+    void rabbitQueues() {
+        assertThat(queues)
+            .isNotEmpty()
+            .hasSize(2)
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer")));
+    }
+
+    @Test
+    @Override
+    void anonymousRabbitQueues() {
+        assertThat(anonQueues).isEmpty();
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(exchanges).isNotEmpty().containsOnlyKeys("engineEvents");
+    }
 }
