@@ -20,10 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
-@Testcontainers
 public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT {
 
     @Test

@@ -20,8 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -36,21 +39,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest(classes = { QueryConsumerApplication.class })
+@CleanupLiquibaseAfterTest
 @Import(QueryConsumerApplicationIT.BinderFactoryListenerConfiguration.class)
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryConsumerApplicationIT {
 
-    @Container
     @ServiceConnection
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
     static final Map<String, Queue> queues = new LinkedHashMap<>();
     static final Map<String, AnonymousQueue> anonQueues = new LinkedHashMap<>();

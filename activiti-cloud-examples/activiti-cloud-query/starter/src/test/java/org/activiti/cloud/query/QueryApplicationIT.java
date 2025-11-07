@@ -29,9 +29,12 @@ import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -59,26 +62,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = { QueryApplication.class },
     properties = "identity.test.token-interceptor.enabled=false",
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@Testcontainers
+@CleanupLiquibaseAfterTest
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(QueryApplicationIT.BinderFactoryListenerConfiguration.class)
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryApplicationIT {
 
     @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
     static final Map<String, Queue> queues = new LinkedHashMap<>();
     static final Map<String, AnonymousQueue> anonQueues = new LinkedHashMap<>();
