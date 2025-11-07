@@ -36,8 +36,6 @@ import org.springframework.messaging.Message;
 @AutoConfiguration
 public class AuditJPAStreamsAutoConfiguration {
 
-
-
     @Value("${microsoft.app.id}")
     private String appId;
 
@@ -46,7 +44,6 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @Value("${teams.connector.tenant}")
     private String appTenant;
-
 
     @Bean
     public TeamsChatService teamsChatService() {

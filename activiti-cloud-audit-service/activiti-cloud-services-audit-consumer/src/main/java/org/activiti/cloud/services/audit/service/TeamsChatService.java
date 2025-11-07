@@ -67,35 +67,51 @@ public class TeamsChatService {
 
         conversationParams.setTenantId(appTenant);
 
-        return adapter.createConversation(Channels.MSTEAMS, "https://smba.trafficmanager.net/amer/", appCredentials, conversationParams, turnContext -> {
-            System.out.println("Conversation Created!");
-            System.out.println("Conversation ID: " + turnContext.getActivity().getConversation().getId());
+        return adapter
+            .createConversation(
+                Channels.MSTEAMS,
+                "https://smba.trafficmanager.net/amer/",
+                appCredentials,
+                conversationParams,
+                turnContext -> {
+                    System.out.println("Conversation Created!");
+                    System.out.println("Conversation ID: " + turnContext.getActivity().getConversation().getId());
 
-            return turnContext.sendActivity(message).thenApply(result -> {
-                System.out.println("Message sent!");
-                System.out.println("Activity ID: " + result.getId());
+                    return turnContext
+                        .sendActivity(message)
+                        .thenApply(result -> {
+                            System.out.println("Message sent!");
+                            System.out.println("Activity ID: " + result.getId());
+                            return null;
+                        });
+                }
+            )
+            .exceptionally(throwable -> {
+                System.err.println("========== ERROR ==========");
+                System.err.println("Type: " + throwable.getClass().getName());
+                System.err.println("Message: " + throwable.getMessage());
+
+                Throwable cause = throwable.getCause();
+                if (cause != null) {
+                    System.err.println("Cause: " + cause.getClass().getName());
+                    System.err.println("Error Message: " + cause.getMessage());
+                }
+
+                System.err.println("Error:");
+                throwable.printStackTrace();
+                System.err.println("================================");
+
                 return null;
             });
-        }).exceptionally(throwable -> {
-            System.err.println("========== ERROR ==========");
-            System.err.println("Type: " + throwable.getClass().getName());
-            System.err.println("Message: " + throwable.getMessage());
-
-            Throwable cause = throwable.getCause();
-            if (cause != null) {
-                System.err.println("Cause: " + cause.getClass().getName());
-                System.err.println("Error Message: " + cause.getMessage());
-            }
-
-            System.err.println("Error:");
-            throwable.printStackTrace();
-            System.err.println("================================");
-
-            return null;
-        });
     }
 
-    public CompletableFuture<Void> sendAdaptiveCard(String teamsUserId, String title, String description, Map<String, String> data, String jsonDetail) {
+    public CompletableFuture<Void> sendAdaptiveCard(
+        String teamsUserId,
+        String title,
+        String description,
+        Map<String, String> data,
+        String jsonDetail
+    ) {
         System.out.println("========== SENDING ADAPTIVE CARD ==========");
         System.out.println("Teams User ID: " + teamsUserId);
         System.out.println("Card Title: " + title);
@@ -115,46 +131,59 @@ public class TeamsChatService {
 
         conversationParams.setTenantId(appTenant);
 
-        return adapter.createConversation(Channels.MSTEAMS, "https://smba.trafficmanager.net/amer/", appCredentials, conversationParams, turnContext -> {
-            System.out.println("Conversation Created!");
-            System.out.println("Conversation ID: " + turnContext.getActivity().getConversation().getId());
+        return adapter
+            .createConversation(
+                Channels.MSTEAMS,
+                "https://smba.trafficmanager.net/amer/",
+                appCredentials,
+                conversationParams,
+                turnContext -> {
+                    System.out.println("Conversation Created!");
+                    System.out.println("Conversation ID: " + turnContext.getActivity().getConversation().getId());
 
-            // Crea l'Adaptive Card
-//                    Attachment cardAttachment = createAdaptiveCard(title, description, data);
+                    // Crea l'Adaptive Card
+                    //                    Attachment cardAttachment = createAdaptiveCard(title, description, data);
 
+                    Attachment cardAttachment = createComplexAdaptiveCard(title, description, data, jsonDetail);
 
-            Attachment cardAttachment = createComplexAdaptiveCard(title, description, data, jsonDetail);
+                    // Crea l'Activity con la card
+                    Activity reply = Activity.createMessageActivity();
+                    reply.setAttachments(Collections.singletonList(cardAttachment));
 
-            // Crea l'Activity con la card
-            Activity reply = Activity.createMessageActivity();
-            reply.setAttachments(Collections.singletonList(cardAttachment));
+                    return turnContext
+                        .sendActivity(reply)
+                        .thenApply(result -> {
+                            System.out.println("Adaptive Card sent!");
+                            System.out.println("Activity ID: " + result.getId());
+                            return null;
+                        });
+                }
+            )
+            .exceptionally(throwable -> {
+                System.err.println("========== ERROR ==========");
+                System.err.println("Type: " + throwable.getClass().getName());
+                System.err.println("Message: " + throwable.getMessage());
 
-            return turnContext.sendActivity(reply).thenApply(result -> {
-                System.out.println("Adaptive Card sent!");
-                System.out.println("Activity ID: " + result.getId());
+                Throwable cause = throwable.getCause();
+                if (cause != null) {
+                    System.err.println("Cause: " + cause.getClass().getName());
+                    System.err.println("Error Message: " + cause.getMessage());
+                }
+
+                System.err.println("Error:");
+                throwable.printStackTrace();
+                System.err.println("================================");
+
                 return null;
             });
-        }).exceptionally(throwable -> {
-            System.err.println("========== ERROR ==========");
-            System.err.println("Type: " + throwable.getClass().getName());
-            System.err.println("Message: " + throwable.getMessage());
-
-            Throwable cause = throwable.getCause();
-            if (cause != null) {
-                System.err.println("Cause: " + cause.getClass().getName());
-                System.err.println("Error Message: " + cause.getMessage());
-            }
-
-            System.err.println("Error:");
-            throwable.printStackTrace();
-            System.err.println("================================");
-
-            return null;
-        });
     }
 
-    private Attachment createComplexAdaptiveCard(String title, String description, Map<String, String> data, String jsonDetails) {
-
+    private Attachment createComplexAdaptiveCard(
+        String title,
+        String description,
+        Map<String, String> data,
+        String jsonDetails
+    ) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode cardContent = mapper.createObjectNode();
 
@@ -310,7 +339,4 @@ public class TeamsChatService {
             return jsonString;
         }
     }
-
 }
-
-

@@ -52,7 +52,7 @@ public class AuditConsumerChannelHandlerImplTest {
     @Captor
     private ArgumentCaptor<Iterable<AuditEventEntity>> argumentCaptor;
 
-//    @Test
+    //    @Test
     public void receiveEventShouldStoreEntity() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = Mockito.mock(CloudRuntimeEventImpl.class);
@@ -70,7 +70,7 @@ public class AuditConsumerChannelHandlerImplTest {
         ProcessCreatedAuditEventEntity entity = Mockito.mock(ProcessCreatedAuditEventEntity.class);
         Mockito.when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
-        CloudRuntimeEvent[] events = {cloudRuntimeEvent};
+        CloudRuntimeEvent[] events = { cloudRuntimeEvent };
 
         //when
         handler.receiveCloudRuntimeEvent(
@@ -87,7 +87,7 @@ public class AuditConsumerChannelHandlerImplTest {
         Assertions.assertThat(argumentCaptor.getValue()).containsOnly(entity);
     }
 
-//    @Test
+    //    @Test
     public void messageIdShouldBeSet() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = Mockito.mock(CloudRuntimeEventImpl.class);
@@ -100,7 +100,7 @@ public class AuditConsumerChannelHandlerImplTest {
         AuditEventEntity entity = Mockito.mock(AuditEventEntity.class);
         Mockito.when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
-        CloudRuntimeEvent[] events = {cloudRuntimeEvent};
+        CloudRuntimeEvent[] events = { cloudRuntimeEvent };
 
         HashMap<String, Object> headers = new HashMap<>();
         headers.put("id", UUID.randomUUID());

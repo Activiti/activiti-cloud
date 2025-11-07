@@ -76,11 +76,9 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
                     entities.add((AuditEventEntity) converter.convertToEntity(event));
 
                     sendTeamsNotifcationCardToDevops((CloudRuntimeEventImpl) event);
-
                 } else {
                     LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType().name());
                 }
-
             }
             eventsRepository.saveAll(entities);
         }
@@ -90,7 +88,10 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
         StringBuilder sb = new StringBuilder();
         sb.append("New Audit Event from " + event.getAppName() + " app * ");
         sb.append("Event Type: " + event.getEventType() + " -- ");
-        CompletableFuture<Void> future = teamsChatService.sendSimpleMessage("9d1a5f8a-9abc-4ed1-8dda-522ba3d2ef45", sb.toString());
+        CompletableFuture<Void> future = teamsChatService.sendSimpleMessage(
+            "9d1a5f8a-9abc-4ed1-8dda-522ba3d2ef45",
+            sb.toString()
+        );
         future.join();
     }
 
@@ -104,7 +105,7 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
         processData.put("Process Instance ID", event.getProcessInstanceId());
         CompletableFuture<Void> future = teamsChatService.sendAdaptiveCard(
             "9d1a5f8a-9abc-4ed1-8dda-522ba3d2ef45",
-//            "f924e7e2-7656-4085-a05c-612076ca2d7f",
+            //            "f924e7e2-7656-4085-a05c-612076ca2d7f",
             "HXP Audit Event",
             "A new HXP Audit event for app: " + event.getAppName(),
             processData,
