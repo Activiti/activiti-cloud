@@ -37,5 +37,27 @@
       <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
       <scope>test</scope>
     </dependency>
+
+
+    <!-- Bot Framework SDK - Core -->
+    <dependency>
+      <groupId>com.microsoft.bot</groupId>
+      <artifactId>bot-builder</artifactId>
+      <version>4.14.3</version>
+    </dependency>
+
+    <!-- Bot Framework - Schema -->
+    <dependency>
+      <groupId>com.microsoft.bot</groupId>
+      <artifactId>bot-schema</artifactId>
+      <version>4.14.3</version>
+    </dependency>
+
+    <!-- Bot Framework - Connector -->
+    <dependency>
+      <groupId>com.microsoft.bot</groupId>
+      <artifactId>bot-connector</artifactId>
+      <version>4.14.3</version>
+    </dependency>
   </dependencies>
 </project>

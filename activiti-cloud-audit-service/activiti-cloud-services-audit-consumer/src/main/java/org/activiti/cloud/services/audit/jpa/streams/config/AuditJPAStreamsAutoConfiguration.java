@@ -26,6 +26,8 @@ import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
+import org.activiti.cloud.services.audit.service.TeamsChatService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -34,13 +36,31 @@ import org.springframework.messaging.Message;
 @AutoConfiguration
 public class AuditJPAStreamsAutoConfiguration {
 
+
+
+    @Value("${microsoft.app.id}")
+    private String appId;
+
+    @Value("${microsoft.app.password}")
+    private String appPassword;
+
+    @Value("${teams.connector.tenant}")
+    private String appTenant;
+
+
+    @Bean
+    public TeamsChatService teamsChatService() {
+        return new TeamsChatService(appId, appPassword, appTenant);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public AuditConsumerChannelHandler auditConsumerChannelHandler(
         EventsRepository eventsRepository,
-        APIEventToEntityConverters eventConverters
+        APIEventToEntityConverters eventConverters,
+        TeamsChatService teamsChatService
     ) {
-        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters);
+        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters, teamsChatService);
     }
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)
