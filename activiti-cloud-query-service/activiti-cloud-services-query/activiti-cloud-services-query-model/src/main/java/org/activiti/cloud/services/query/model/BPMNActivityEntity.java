@@ -33,7 +33,7 @@ import org.hibernate.annotations.DynamicUpdate;
         @Index(
             name = "bpmn_activity_processInstance_elementId_idx",
             columnList = "processInstanceId,elementId,executionId",
-            unique = true
+            unique = false
         ),
     }
 )
