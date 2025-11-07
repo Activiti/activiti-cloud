@@ -29,9 +29,10 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.examples.connectors.*;
+import org.activiti.cloud.examples.connectors.CustomPojo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -49,19 +50,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
 @AutoConfigureMockMvc
-@Testcontainers
 @TestPropertySource(locations = "classpath:test.properties")
 @Import(CloudConnectorAppIT.BinderFactoryListenerConfiguration.class)
+@ResourceLock("rabbitmq")
 public class CloudConnectorAppIT {
 
     @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     private static final String CONNECTOR_SUFFIX = "Connector";
 

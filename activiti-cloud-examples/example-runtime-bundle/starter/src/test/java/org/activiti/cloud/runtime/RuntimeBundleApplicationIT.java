@@ -21,8 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -38,8 +41,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = RuntimeBundleApplication.class,
@@ -49,18 +50,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "activiti.cloud.messaging.rabbitmq.compression-level=9",
     }
 )
+@CleanupLiquibaseAfterTest
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@Testcontainers
 @Import(RuntimeBundleApplicationIT.BinderFactoryListenerConfiguration.class)
+@ResourceLocks(value = { @ResourceLock("rabbitmq"), @ResourceLock("postgres") })
 public class RuntimeBundleApplicationIT {
 
     @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
     static final Map<String, Queue> queues = new LinkedHashMap<>();
     static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
