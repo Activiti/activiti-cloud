@@ -149,6 +149,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        process.setLinkedProcessInstanceType(linkedProcessInstanceType);
+        return this;
+    }
+
     public ProcessInstanceEntity buildAndSave() {
         variableRepository.saveAll(process.getVariables());
         Instant instant = Instant.now();

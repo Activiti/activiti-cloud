@@ -98,6 +98,7 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .buildProcessInstance()
             .withInitiator("user1")
             .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type")
             .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
             .buildAndSave();
 
@@ -105,11 +106,13 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .buildProcessInstance()
             .withInitiator("user1")
             .withLinkedProcessInstanceId("123-lin-ked-222")
+            .withLinkedProcessInstanceType("my-type")
             .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withLinkedProcessInstanceId("123-lin-ked-111");
+            .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type");
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -122,6 +125,10 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .body(
                 "_embedded.processInstances[0].linkedProcessInstanceId",
                 equalTo(processInstance1.getLinkedProcessInstanceId())
+            )
+            .body(
+                "_embedded.processInstances[0].linkedProcessInstanceType",
+                equalTo(processInstance1.getLinkedProcessInstanceType())
             );
     }
 

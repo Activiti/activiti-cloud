@@ -16,3 +16,6 @@
 
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_id VARCHAR(255);
+
+ALTER TABLE process_instance
+  ADD COLUMN linked_process_instance_type VARCHAR(255);

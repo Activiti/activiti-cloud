@@ -65,6 +65,8 @@ public class ProcessCreatedEventHandlerTest {
             .isEqualTo(expectedEventEntity.getRootProcessInstanceId());
         assertThat(processInstanceEntity.getLinkedProcessInstanceId())
             .isEqualTo(expectedEventEntity.getLinkedProcessInstanceId());
+        assertThat(processInstanceEntity.getLinkedProcessInstanceType())
+            .isEqualTo(expectedEventEntity.getLinkedProcessInstanceType());
     }
 
     private static ProcessInstanceImpl buildProcess() {
@@ -74,6 +76,7 @@ public class ProcessCreatedEventHandlerTest {
         processInstance.setProcessDefinitionId("processDefinitionId");
         processInstance.setRootProcessInstanceId("rootProcessInstanceId");
         processInstance.setLinkedProcessInstanceId("linkedProcessInstanceId");
+        processInstance.setLinkedProcessInstanceType("linkedProcessInstanceType");
 
         return processInstance;
     }
