@@ -1,0 +1,2 @@
+alter table bpmn_activity
+drop constraint bpmn_activity_processInstance_elementId_idx;
