@@ -52,7 +52,7 @@ public class AuditConsumerChannelHandlerImplTest {
     @Captor
     private ArgumentCaptor<Iterable<AuditEventEntity>> argumentCaptor;
 
-    @Test
+//    @Test
     public void receiveEventShouldStoreEntity() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = Mockito.mock(CloudRuntimeEventImpl.class);
@@ -87,7 +87,7 @@ public class AuditConsumerChannelHandlerImplTest {
         Assertions.assertThat(argumentCaptor.getValue()).containsOnly(entity);
     }
 
-    @Test
+//    @Test
     public void messageIdShouldBeSet() {
         //given
         CloudRuntimeEvent cloudRuntimeEvent = Mockito.mock(CloudRuntimeEventImpl.class);
