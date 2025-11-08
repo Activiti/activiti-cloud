@@ -33,6 +33,8 @@ import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -69,6 +71,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 @CleanupLiquibaseAfterTest
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(QueryApplicationIT.BinderFactoryListenerConfiguration.class)
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryApplicationIT {
 
     @ServiceConnection

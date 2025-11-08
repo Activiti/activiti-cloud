@@ -32,6 +32,7 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.examples.connectors.CustomPojo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -54,6 +55,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:test.properties")
 @Import(CloudConnectorAppIT.BinderFactoryListenerConfiguration.class)
+@ResourceLock("rabbitmq")
 public class CloudConnectorAppIT {
 
     @ServiceConnection

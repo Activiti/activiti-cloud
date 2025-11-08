@@ -23,6 +23,8 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Exchange;
@@ -41,6 +43,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 @SpringBootTest(classes = { QueryConsumerApplication.class })
 @CleanupLiquibaseAfterTest
 @Import(QueryConsumerApplicationIT.BinderFactoryListenerConfiguration.class)
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryConsumerApplicationIT {
 
     @ServiceConnection
