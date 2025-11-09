@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -43,8 +44,10 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -54,9 +57,12 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
     before = InputBindingConfiguration.class,
@@ -127,13 +133,15 @@ public class FunctionRouterConfiguration {
     @Bean
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        FunctionCatalog functionCatalog
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
         return (message, routingContext) -> {
             Optional
                 .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
+                .or(() -> Optional.ofNullable(message.getHeaders().get("connectorType", String.class)))
                 .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
@@ -199,6 +207,31 @@ public class FunctionRouterConfiguration {
 
                             if (!errors.isEmpty()) {
                                 log.debug("Errors handling function route message request {}", errors);
+
+                                Optional
+                                    .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
+                                    .filter(StringUtils::hasText)
+                                    .map(functionCatalog::lookup)
+                                    .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
+                                    .ifPresent(errorHandlerDefinition -> {
+                                        errors
+                                            .stream()
+                                            .map(CompletionException.class::cast)
+                                            .map(CompletionException::getCause)
+                                            .map(exception -> {
+                                                if (exception instanceof MessagingException messagingException) {
+                                                    return new ErrorMessage(messagingException, message);
+                                                } else {
+                                                    return new ErrorMessage(
+                                                        new MessagingException(message, exception),
+                                                        message
+                                                    );
+                                                }
+                                            })
+                                            .forEach(errorMessage -> {
+                                                errorHandlerDefinition.accept(errorMessage);
+                                            });
+                                    });
                             } else {
                                 log.debug("Successfully completed function route message request {}", message);
                             }

@@ -92,31 +92,19 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             final Type functionType = discoverFunctionType(bean, beanName);
                             final var functionRouter = messagingProperties.getFunctionRouter();
 
-                            FunctionRegistration functionRegistration = new FunctionRegistration(bean)
+                            FunctionRegistration<Object> functionRegistration = new FunctionRegistration<>(bean)
                                 .type(functionType);
 
-                            final var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+                            final var functionDefinition = functionRouter.isEnabled()
+                                ? beanName.concat("Target")
+                                : beanName;
 
-                            if (functionRouter.isEnabled()) {
-                                Optional
-                                    .ofNullable(connectorBinding.connectorType())
-                                    .filter(StringUtils::hasText)
-                                    .map(resolveExpression)
-                                    .ifPresentOrElse(
-                                        connectorType ->
-                                            functionRouter.register(
-                                                connectorBinding.input(),
-                                                functionBeanName,
-                                                connectorType
-                                            ),
-                                        () -> functionRouter.register(connectorBinding.input(), functionBeanName)
-                                    );
-                            }
+                            registerFunctionRegistration(functionDefinition, functionRegistration);
 
                             responseDestination.set(connectorBinding.outputHeader());
 
                             GenericHandler<Message> handler = (message, headers) -> {
-                                FunctionInvocationWrapper function = functionFromDefinition(beanName);
+                                FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                 Object result = function.apply(message);
 
                                 Message<?> response = null;
@@ -205,6 +193,24 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .get();
 
                             integrationFlowContext.registration(inputChannelFlow).register();
+
+                            if (functionRouter.isEnabled()) {
+                                final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
+
+                                Optional
+                                    .ofNullable(connectorBinding.connectorType())
+                                    .filter(StringUtils::hasText)
+                                    .map(resolveExpression)
+                                    .ifPresentOrElse(
+                                        connectorTypeName ->
+                                            functionRouter.register(
+                                                connectorBinding.input(),
+                                                functionBeanName,
+                                                connectorTypeName
+                                            ),
+                                        () -> functionRouter.register(connectorBinding.input(), functionBeanName)
+                                    );
+                            }
                         });
                 }
                 return bean;
@@ -216,12 +222,12 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         flow.handle((payload, headers) -> {
             Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers)
                 .orElse(buildNewMessage(headers, payload));
-            Object destination = headers.get("spring.cloud.function.destination");
+            final var destination = headers.get("spring.cloud.function.destination", String.class);
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
                 if (retryCount < maxRetry - 1) {
                     safeSleep(retryDelay);
-                    getStreamBridge().send((String) destination, newMessage);
+                    getStreamBridge().send(destination, newMessage);
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
