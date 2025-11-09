@@ -40,7 +40,7 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
             .containsOnlyKeys("default-app.engineEvents.query", "default-app.engineEvents.audit");
     }
@@ -48,6 +48,8 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.engineEvents");
     }
 }

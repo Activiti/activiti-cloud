@@ -58,11 +58,12 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
 
     @Test
     void rabbitQueues() {
-        assertThat(queues).satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer.")));
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer.")));
     }
 
     @Test
     void anonymousRabbitQueues() {
-        assertThat(anonQueues).isEmpty();
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
     }
 }

@@ -40,13 +40,15 @@ public class QueryRestApplicationFunctionRouterRabbitmqPrefixIT extends QueryRes
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.consumer.")));
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.engineEvents");
     }
 }

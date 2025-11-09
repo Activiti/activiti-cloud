@@ -27,13 +27,15 @@ public class CloudConnectorAppRabbitmqPrefixIT extends CloudConnectorAppIT {
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.processing-connector");
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.processing-connector");
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "default-app.restconnector.POST",

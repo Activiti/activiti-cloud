@@ -40,12 +40,14 @@ public class QueryConsumerApplicationFunctionRouterRabbitmqPrefixIT extends Quer
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.consumer");
+        assertThat(binderFactoryListenerTestContext.getQueues()).isNotEmpty().containsOnlyKeys("default-app.consumer");
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.engineEvents");
     }
 }

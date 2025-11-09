@@ -40,7 +40,7 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
             .hasSize(2)
             .containsOnlyKeys("default-app.engineEvents.query", "default-app.engineEvents.audit");
@@ -49,7 +49,7 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(anonQueues)
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
             .hasSize(1)
             .satisfies(map ->
@@ -60,6 +60,8 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.engineEvents");
     }
 }

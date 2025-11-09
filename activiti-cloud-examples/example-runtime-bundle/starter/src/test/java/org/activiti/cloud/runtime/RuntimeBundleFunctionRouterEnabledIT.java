@@ -40,13 +40,15 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("consumer", "my-runtime-bundle");
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys("consumer", "my-runtime-bundle");
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "commandResults_default-app",

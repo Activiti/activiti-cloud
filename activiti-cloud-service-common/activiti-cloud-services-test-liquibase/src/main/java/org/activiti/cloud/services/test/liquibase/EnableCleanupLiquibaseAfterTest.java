@@ -21,14 +21,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.springframework.test.context.TestExecutionListeners;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@TestExecutionListeners(
-    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS,
-    listeners = { CleanupLiquibaseAfterTestExecutionListener.class }
-)
-public @interface CleanupLiquibaseAfterTest {
+public @interface EnableCleanupLiquibaseAfterTest {
 }

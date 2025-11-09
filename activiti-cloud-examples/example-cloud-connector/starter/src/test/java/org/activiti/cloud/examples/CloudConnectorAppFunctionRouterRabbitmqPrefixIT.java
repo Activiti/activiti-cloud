@@ -27,12 +27,14 @@ public class CloudConnectorAppFunctionRouterRabbitmqPrefixIT extends CloudConnec
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.processing-connector");
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.processing-connector");
     }
 
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "default-app.restconnector.POST",

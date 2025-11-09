@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.test.liquibase;
+package org.activiti.cloud.starters.test.binder;
 
 import java.util.Map;
 import java.util.Optional;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
-public class CleanupLiquibaseAfterTestExecutionListener extends AbstractTestExecutionListener {
+public class BinderFactoryListenerTestExecutionListener extends AbstractTestExecutionListener {
 
     @Override
     public int getOrder() {
@@ -38,20 +36,14 @@ public class CleanupLiquibaseAfterTestExecutionListener extends AbstractTestExec
             .of(testContext.getTestClass())
             .filter(testClass ->
                 Optional
-                    .ofNullable(AnnotationUtils.findAnnotation(testClass, EnableCleanupLiquibaseAfterTest.class))
+                    .ofNullable(AnnotationUtils.findAnnotation(testClass, EnableBinderFactoryListenerTestContext.class))
                     .isPresent()
             )
-            .map(testClass -> testContext.getApplicationContext().getBeansOfType(SpringLiquibase.class))
+            .map(testClass -> testContext.getApplicationContext().getBeansOfType(BinderFactoryListenerTestContext.class)
+            )
             .map(Map::values)
-            .ifPresent(values -> {
-                values.forEach(springLiquibase -> {
-                    try {
-                        springLiquibase.setDropFirst(true);
-                        springLiquibase.afterPropertiesSet();
-                    } catch (Exception e) {
-                        throw new UnexpectedLiquibaseException(e);
-                    }
-                });
-            });
+            .ifPresent(binderFactoryListenerTestConfigurations ->
+                binderFactoryListenerTestConfigurations.forEach(BinderFactoryListenerTestContext::afterTestClass)
+            );
     }
 }

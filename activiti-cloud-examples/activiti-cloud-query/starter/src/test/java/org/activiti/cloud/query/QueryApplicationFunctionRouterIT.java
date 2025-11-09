@@ -87,7 +87,7 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
             .hasSize(2)
             .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer")));
@@ -96,12 +96,12 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(anonQueues).isEmpty();
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 }

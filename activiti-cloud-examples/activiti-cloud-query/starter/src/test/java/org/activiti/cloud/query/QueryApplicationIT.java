@@ -23,31 +23,24 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
-import org.activiti.cloud.services.test.liquibase.CleanupLiquibaseAfterTest;
+import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
-import org.springframework.amqp.core.AnonymousQueue;
-import org.springframework.amqp.core.DeclarableCustomizer;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -68,10 +61,10 @@ import org.testcontainers.containers.RabbitMQContainer;
     properties = "identity.test.token-interceptor.enabled=false",
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@CleanupLiquibaseAfterTest
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@Import(QueryApplicationIT.BinderFactoryListenerConfiguration.class)
 @ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
+@EnableCleanupLiquibaseAfterTest
+@EnableBinderFactoryListenerTestContext
 public class QueryApplicationIT {
 
     @ServiceConnection
@@ -80,35 +73,8 @@ public class QueryApplicationIT {
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
-    static final Map<String, Queue> queues = new LinkedHashMap<>();
-    static final Map<String, AnonymousQueue> anonQueues = new LinkedHashMap<>();
-    static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
-
-    @TestConfiguration
-    static class BinderFactoryListenerConfiguration {
-
-        @Bean
-        DeclarableCustomizer declarableCustomizer() {
-            return declarable -> {
-                if (declarable instanceof AnonymousQueue queue) {
-                    anonQueues.computeIfAbsent(queue.getName(), key -> queue);
-                } else if (declarable instanceof Queue queue) {
-                    queues.computeIfAbsent(queue.getName(), key -> queue);
-                } else if (declarable instanceof Exchange exchange) {
-                    exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
-                }
-
-                return declarable;
-            };
-        }
-    }
-
-    @AfterAll
-    static void cleanUp() {
-        queues.clear();
-        exchanges.clear();
-        anonQueues.clear();
-    }
+    @Autowired
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
 
     @Autowired
     private WebApplicationContext context;
@@ -218,12 +184,15 @@ public class QueryApplicationIT {
 
     @Test
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().hasSize(2).containsOnlyKeys("engineEvents.query", "engineEvents.audit");
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .hasSize(2)
+            .containsOnlyKeys("engineEvents.query", "engineEvents.audit");
     }
 
     @Test
     void anonymousRabbitQueues() {
-        assertThat(anonQueues)
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
             .hasSize(1)
             .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("engineEvents.anonymous.")));
@@ -231,6 +200,6 @@ public class QueryApplicationIT {
 
     @Test
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 }

@@ -61,6 +61,6 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().hasSize(1).containsOnlyKeys("consumer");
+        assertThat(binderFactoryListenerTestContext.getQueues()).isNotEmpty().hasSize(1).containsOnlyKeys("consumer");
     }
 }

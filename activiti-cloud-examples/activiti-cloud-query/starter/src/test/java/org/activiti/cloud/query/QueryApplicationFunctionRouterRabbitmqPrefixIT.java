@@ -40,7 +40,7 @@ public class QueryApplicationFunctionRouterRabbitmqPrefixIT extends QueryApplica
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
             .hasSize(2)
             .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.consumer")));
@@ -49,6 +49,8 @@ public class QueryApplicationFunctionRouterRabbitmqPrefixIT extends QueryApplica
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges).isNotEmpty().containsOnlyKeys("default-app.engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.engineEvents");
     }
 }

@@ -26,13 +26,15 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("default-app.consumer", "default-app.my-runtime-bundle");
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys("default-app.consumer", "default-app.my-runtime-bundle");
     }
 
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "default-app.commandResults_default-app",

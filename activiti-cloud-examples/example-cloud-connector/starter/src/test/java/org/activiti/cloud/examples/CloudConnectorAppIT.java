@@ -26,27 +26,19 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.examples.connectors.CustomPojo;
-import org.junit.jupiter.api.AfterAll;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.springframework.amqp.core.AnonymousQueue;
-import org.springframework.amqp.core.DeclarableCustomizer;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -54,44 +46,14 @@ import org.testcontainers.containers.RabbitMQContainer;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:test.properties")
-@Import(CloudConnectorAppIT.BinderFactoryListenerConfiguration.class)
 @ResourceLock("rabbitmq")
+@EnableBinderFactoryListenerTestContext
 public class CloudConnectorAppIT {
 
     @ServiceConnection
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     private static final String CONNECTOR_SUFFIX = "Connector";
-
-    static final Map<String, Queue> queues = new LinkedHashMap<>();
-    static final Map<String, Queue> anonQueues = new LinkedHashMap<>();
-    static final Map<String, Exchange> exchanges = new LinkedHashMap<>();
-
-    @TestConfiguration
-    static class BinderFactoryListenerConfiguration {
-
-        @Bean
-        DeclarableCustomizer declarableCustomizer() {
-            return declarable -> {
-                if (declarable instanceof AnonymousQueue anonymousQueue) {
-                    anonQueues.computeIfAbsent(anonymousQueue.getName(), key -> anonymousQueue);
-                } else if (declarable instanceof Queue queue) {
-                    queues.computeIfAbsent(queue.getName(), key -> queue);
-                } else if (declarable instanceof Exchange exchange) {
-                    exchanges.computeIfAbsent(exchange.getName(), key -> exchange);
-                }
-
-                return declarable;
-            };
-        }
-    }
-
-    @AfterAll
-    static void cleanUp() {
-        queues.clear();
-        exchanges.clear();
-        anonQueues.clear();
-    }
 
     @Autowired
     private ApplicationContext context;
@@ -111,6 +73,9 @@ public class CloudConnectorAppIT {
     @Autowired
     protected ActivitiCloudMessagingProperties messagingProperties;
 
+    @Autowired
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
+
     @Test
     void contextLoads() {
         //then
@@ -122,17 +87,17 @@ public class CloudConnectorAppIT {
 
     @Test
     void rabbitQueues() {
-        assertThat(queues).isNotEmpty().containsOnlyKeys("processing-connector");
+        assertThat(binderFactoryListenerTestContext.getQueues()).isNotEmpty().containsOnlyKeys("processing-connector");
     }
 
     @Test
     void anonymousRabbitQueues() {
-        assertThat(anonQueues).isEmpty();
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
     }
 
     @Test
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "restconnector.POST",

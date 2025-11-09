@@ -47,7 +47,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(queues)
+        assertThat(binderFactoryListenerTestContext.getQueues())
             .isNotEmpty()
             .containsOnlyKeys(
                 "default-app.engineEvents.query",
@@ -64,7 +64,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
     @Test
     @Override
     void rabbitExchanges() {
-        assertThat(exchanges)
+        assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
             .containsOnlyKeys(
                 "default-app.commandResults_default-app",
