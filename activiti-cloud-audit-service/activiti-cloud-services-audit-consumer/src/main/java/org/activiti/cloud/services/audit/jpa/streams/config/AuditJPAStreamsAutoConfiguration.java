@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 @AutoConfiguration
@@ -57,7 +58,7 @@ public class AuditJPAStreamsAutoConfiguration {
     public AuditConsumerChannelHandler auditConsumerChannelHandler(
         EventsRepository eventsRepository,
         APIEventToEntityConverters eventConverters,
-        TeamsChatService teamsChatService
+        @Nullable TeamsChatService teamsChatService
     ) {
         return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters, teamsChatService);
     }
