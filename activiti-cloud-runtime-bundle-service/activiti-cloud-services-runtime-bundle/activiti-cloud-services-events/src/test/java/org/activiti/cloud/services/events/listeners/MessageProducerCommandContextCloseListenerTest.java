@@ -34,6 +34,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -128,6 +129,9 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @Captor
     private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Message<List<CloudRuntimeEvent<?, ?>>>> incidentMessageArgumentCaptor;
 
     private CloudRuntimeEventImpl<?, ?> event;
 
@@ -325,6 +329,37 @@ class MessageProducerCommandContextCloseListenerTest {
         var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
 
         assertMessageNotSent(exception);
+    }
+
+    @Test
+    void closedShouldSendIncidentMessageWithCorrectContentWhenChunkSizeLimitExceeded() {
+        List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
+
+        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(events);
+
+        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
+        assertThat(exception).hasMessage("Chunk size limit exceeded");
+
+        verify(auditChannel, never()).send(any());
+        verify(auditIncidentsChannel).send(incidentMessageArgumentCaptor.capture());
+
+        List<CloudRuntimeEvent<?, ?>> incidentPayload = incidentMessageArgumentCaptor.getValue().getPayload();
+        assertThat(incidentPayload).hasSize(1);
+
+        CloudIncidentCreatedEventImpl incident = (CloudIncidentCreatedEventImpl) incidentPayload.get(0);
+        assertThat(incident.getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
+        assertThat(incident.getProcessDefinitionKey()).isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
+        assertThat(incident.getAppName()).isEqualTo(APP_NAME);
+        assertThat(incident.getServiceName()).isEqualTo(SPRING_APP_NAME);
+        assertThat(incident.getServiceType()).isEqualTo(SERVICE_TYPE);
+        assertThat(incident.getServiceVersion()).isEqualTo(SERVICE_VERSION);
+        assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(incident.getErrorMessage()).contains("Test incident for chunking");
+        assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
+        assertThat(incident.getEntity().getExecutionId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {

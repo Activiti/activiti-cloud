@@ -50,6 +50,7 @@ public class CloudIncidentCreatedEventImpl
         Throwable cause = findRootCause(error);
         this.errorMessage = cause.getMessage();
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
+        setEntityId(incidentContext.getExecutionId());
     }
 
     public CloudIncidentCreatedEventImpl(

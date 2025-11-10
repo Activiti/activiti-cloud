@@ -24,6 +24,7 @@ import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
@@ -117,18 +118,14 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
             new IllegalArgumentException("Test incident for chunking"),
             incidentContext
         );
-        incident.setAppName(runtimeBundleProperties.getAppName());
-        incident.setServiceName(runtimeBundleProperties.getServiceName());
-        incident.setServiceFullName(runtimeBundleProperties.getServiceFullName());
-        incident.setServiceType(runtimeBundleProperties.getServiceType());
-        incident.setServiceVersion(runtimeBundleProperties.getServiceVersion());
-        incident.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
-        incident.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
-        incident.setProcessDefinitionKey(rootExecutionContext.getProcessDefinition().getKey());
-        incident.setProcessDefinitionVersion(rootExecutionContext.getProcessDefinition().getVersion());
-        incident.setBusinessKey(rootExecutionContext.getProcessInstance().getBusinessKey());
+        getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
+        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
 
         return incident;
+    }
+
+    private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
+        return new ExecutionContextInfoAppender(rootExecutionContext);
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {
