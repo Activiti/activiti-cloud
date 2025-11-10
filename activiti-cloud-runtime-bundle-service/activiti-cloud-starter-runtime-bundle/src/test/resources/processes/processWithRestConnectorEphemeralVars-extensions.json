@@ -1,0 +1,43 @@
+{
+  "id": "process-227d0e18-af9f-42a0-a6fa-ae18ba3f2b81",
+  "type": "PROCESS",
+  "name": "ProcessWithRestConnectorEphemeralVars",
+  "key": "ProcessWithRestConnectorEphemeralVars",
+  "extensions": {
+    "ProcessWithRestConnectorEphemeralVars": {
+      "constants": {},
+      "mappings": {
+        "restConnector_07n2z3e": {
+          "ephemeral": true,
+          "inputs": {
+            "restUrl": {
+              "type": "value",
+              "value": "https://jsonplaceholder.typicode.com/posts/1"
+            }
+          },
+          "outputs": {
+            "result": {
+              "type": "variable",
+              "value": "restResult"
+            }
+          }
+        }
+      },
+      "properties": {
+        "01df9754-db09-4d94-913f-8a50f5ea74c7": {
+          "id": "01df9754-db09-4d94-913f-8a50f5ea74c7",
+          "name": "result",
+          "type": "json",
+          "model": {
+            "$ref": "#/$defs/primitive/json"
+          },
+          "required": false,
+          "ephemeral": false,
+          "description": "",
+          "category": "local"
+        }
+      },
+      "assignments": {}
+    }
+  }
+}
