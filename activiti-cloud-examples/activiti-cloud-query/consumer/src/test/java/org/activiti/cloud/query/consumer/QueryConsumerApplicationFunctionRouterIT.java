@@ -32,7 +32,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 @Testcontainers
-@Disabled
 public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerApplicationIT {
 
     @ServiceConnection

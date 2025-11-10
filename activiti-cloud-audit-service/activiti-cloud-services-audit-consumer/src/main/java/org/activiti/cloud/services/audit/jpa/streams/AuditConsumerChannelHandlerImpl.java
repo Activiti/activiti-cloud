@@ -75,7 +75,9 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
                     ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
                     entities.add((AuditEventEntity) converter.convertToEntity(event));
 
-                    sendTeamsNotifcationCardToDevops((CloudRuntimeEventImpl) event);
+                    if (teamsChatService != null) {
+                        sendTeamsNotifcationCardToDevops((CloudRuntimeEventImpl) event);
+                    }
                 } else {
                     LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType().name());
                 }

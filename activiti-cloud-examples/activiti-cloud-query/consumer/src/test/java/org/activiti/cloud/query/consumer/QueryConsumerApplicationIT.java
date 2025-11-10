@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 
-@Disabled
 @SpringBootTest(classes = { QueryConsumerApplication.class })
 public class QueryConsumerApplicationIT {
 

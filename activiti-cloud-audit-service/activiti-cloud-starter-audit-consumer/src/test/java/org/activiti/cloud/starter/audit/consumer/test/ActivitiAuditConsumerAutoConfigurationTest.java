@@ -24,7 +24,6 @@ import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 @SpringBootTest
 @SpringBootApplication
 @EnableTestBinder
-@Disabled
 public class ActivitiAuditConsumerAutoConfigurationTest {
 
     @Test
