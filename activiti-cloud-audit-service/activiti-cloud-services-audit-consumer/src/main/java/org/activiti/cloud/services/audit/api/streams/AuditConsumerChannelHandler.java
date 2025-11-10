@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.audit.api.streams;
 
 import java.util.Map;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.messaging.handler.annotation.Headers;
 

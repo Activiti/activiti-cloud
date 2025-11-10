@@ -26,11 +26,15 @@ public interface TestBindingsChannels {
 
     String AUDIT_CONSUMER = "auditConsumer";
 
+    String AUDIT_CONSUMER_INCIDENTS = "auditConsumerIncidents";
+
     String QUERY_CONSUMER = "queryConsumer";
 
     String COMMAND_RESULTS = "commandResults";
 
     String AUDIT_PRODUCER = "auditProducer";
+
+    String AUDIT_PRODUCER_INCIDENTS = "auditProducerIncidents";
 
     String INTEGRATION_REQUESTS = "integrationRequests";
 
@@ -57,6 +61,11 @@ public interface TestBindingsChannels {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
     }
 
+    @InputBinding(value = AUDIT_CONSUMER_INCIDENTS)
+    default SubscribableChannel auditConsumerIncidents() {
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER_INCIDENTS).getObject();
+    }
+
     @OutputBinding(COMMAND_RESULTS)
     default MessageChannel commandResults() {
         return MessageChannels.direct(COMMAND_RESULTS).getObject();
@@ -65,6 +74,11 @@ public interface TestBindingsChannels {
     @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).getObject();
+    }
+
+    @OutputBinding(AUDIT_PRODUCER_INCIDENTS)
+    default MessageChannel auditProducerIncidents() {
+        return MessageChannels.direct(AUDIT_PRODUCER_INCIDENTS).getObject();
     }
 
     @InputBinding(value = INTEGRATION_REQUESTS)
