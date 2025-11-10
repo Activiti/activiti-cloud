@@ -15,11 +15,16 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.activiti.cloud.services.events.TestUtils.MOCK_BUSINESS_KEY;
+import static org.activiti.cloud.services.events.TestUtils.MOCK_PARENT_PROCESS_INSTANCE_ID;
+import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_ID;
+import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_KEY;
+import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_VERSION;
+import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_INSTANCE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -37,16 +42,15 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
+import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
-import org.activiti.engine.repository.ProcessDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,29 +69,26 @@ import org.springframework.messaging.MessageChannel;
 class MessageProducerCommandContextCloseListenerTest {
 
     private static final String MOCK_ROUTING_KEY = "engineEvents.springAppName.appName";
-    private static final String MOCK_PARENT_PROCESS_NAME = "mockParentProcessName";
     private static final String LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT =
         "[Lorg.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;";
-    private static final String MOCK_PROCESS_NAME = "mockProcessName";
     private static final String SPRING_APP_NAME = "springAppName";
     private static final String SERVICE_VERSION = "serviceVersion";
     private static final String SERVICE_TYPE = "serviceType";
     private static final String APP_NAME = "appName";
-    private static final String MOCK_DEPLOYMENT_NAME = "mockDeploymentName";
-    private static final String MOCK_DEPLOYMENT_ID = "mockDeploymentId";
-    private static final int MOCK_PROCESS_DEFINITION_VERSION = 0;
-    private static final String MOCK_PROCESS_DEFINITION_KEY = "mockProcessDefinitionKey";
-    private static final String MOCK_PROCESS_DEFINITION_ID = "mockProcessDefinitionId";
-    private static final String MOCK_PARENT_PROCESS_INSTANCE_ID = "mockParentId";
-    private static final String MOCK_PROCESS_INSTANCE_ID = "mockProcessInstanceId";
-    private static final String MOCK_BUSINESS_KEY = "mockBusinessKey";
-    private static final String MOCK_SUPER_EXECTUION_ID = "mockSuperExectuionId";
-    private static final String MOCK_PROCESS_DEFINITION_NAME = "mockProcessDefinitionName";
 
     private MessageProducerCommandContextCloseListener closeListener;
 
     @Mock
     private ProcessEngineChannels producer;
+
+    @Mock
+    private MessageChannel auditChannel;
+
+    @Mock
+    private MessageChannel auditIncidentsChannel;
+
+    @Mock
+    private CommandContext commandContext;
 
     @Spy
     private RuntimeBundleProperties properties = new RuntimeBundleProperties() {
@@ -118,14 +119,7 @@ class MessageProducerCommandContextCloseListenerTest {
     @Spy
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
 
-    @Mock
-    private MessageChannel auditChannel;
-
-    @Mock
-    private MessageChannel auditIncidentsChannel;
-
-    @Mock
-    private CommandContext commandContext;
+    private IncidentService incidentService;
 
     @Captor
     private ArgumentCaptor<Message<CloudRuntimeEvent<?, ?>[]>> messageArgumentCaptor;
@@ -137,14 +131,16 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        incidentService = new IncidentService(producer, messageBuilderChainIncidentFactory, runtimeBundleInfoAppender);
+
         closeListener =
             new MessageProducerCommandContextCloseListener(
                 producer,
                 messageBuilderChainFactory,
-                messageBuilderChainIncidentFactory,
                 runtimeBundleInfoAppender,
                 properties,
-                eventChunker
+                eventChunker,
+                incidentService
             );
 
         ProcessInstance processInstance = new ProcessInstanceImpl();
@@ -157,7 +153,7 @@ class MessageProducerCommandContextCloseListenerTest {
 
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
 
-        ExecutionContext executionContext = mockExecutionContext();
+        ExecutionContext executionContext = TestUtils.mockExecutionContext();
         given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
             .willReturn(executionContext);
@@ -314,7 +310,10 @@ class MessageProducerCommandContextCloseListenerTest {
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
+        var exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> this.closeListener.closed(this.commandContext)
+        );
 
         assertMessageNotSent(exception);
     }
@@ -326,7 +325,10 @@ class MessageProducerCommandContextCloseListenerTest {
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
+        var exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> this.closeListener.closed(this.commandContext)
+        );
 
         assertMessageNotSent(exception);
     }
@@ -338,7 +340,10 @@ class MessageProducerCommandContextCloseListenerTest {
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(events);
 
-        var exception = assertThrows(RuntimeException.class, () -> this.closeListener.closed(this.commandContext));
+        var exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> this.closeListener.closed(this.commandContext)
+        );
         assertThat(exception).hasMessage("Chunk size limit exceeded");
 
         verify(auditChannel, never()).send(any());
@@ -356,7 +361,7 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incident.getServiceType()).isEqualTo(SERVICE_TYPE);
         assertThat(incident.getServiceVersion()).isEqualTo(SERVICE_VERSION);
         assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
-        assertThat(incident.getErrorMessage()).contains("Test incident for chunking");
+        assertThat(incident.getErrorMessage()).contains("Chunk size limit exceeded");
         assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
         assertThat(incident.getEntity().getExecutionId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
@@ -376,10 +381,10 @@ class MessageProducerCommandContextCloseListenerTest {
         return new MessageProducerCommandContextCloseListener(
             producer,
             messageBuilderChainFactory,
-            messageBuilderChainIncidentFactory,
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
-            eventChunker
+            eventChunker,
+            incidentService
         );
     }
 
@@ -387,7 +392,7 @@ class MessageProducerCommandContextCloseListenerTest {
         verify(this.auditChannel, never()).send(any());
         verify(auditIncidentsChannel).send(any());
         assertThat(exception).hasMessage("Chunk size limit exceeded");
-        assertThat(exception.getClass()).isEqualTo(RuntimeException.class);
+        assertThat(exception.getClass()).isEqualTo(IllegalArgumentException.class);
     }
 
     private List<CloudRuntimeEventImpl<?, ?>> getCloudRuntimeEvents(int eventsCount) {
@@ -415,41 +420,5 @@ class MessageProducerCommandContextCloseListenerTest {
             events.add(event);
         }
         return events;
-    }
-
-    private ExecutionContext mockExecutionContext() {
-        ExecutionContext context = mock(ExecutionContext.class);
-        ExecutionEntity processInstance = mock(ExecutionEntity.class);
-        DeploymentEntity deploymentEntity = mock(DeploymentEntity.class);
-        ProcessDefinition processDefinition = mock(ProcessDefinition.class);
-
-        when(context.getProcessInstance()).thenReturn(processInstance);
-        when(context.getDeployment()).thenReturn(deploymentEntity);
-        when(context.getProcessDefinition()).thenReturn(processDefinition);
-        when(context.getExecution()).thenReturn(processInstance);
-
-        when(processInstance.getId()).thenReturn(MOCK_PROCESS_INSTANCE_ID);
-        when(processInstance.getBusinessKey()).thenReturn(MOCK_BUSINESS_KEY);
-        when(processInstance.getName()).thenReturn(MOCK_PROCESS_NAME);
-
-        ExecutionEntity superExecution = mock(ExecutionEntity.class);
-        when(processInstance.getSuperExecutionId()).thenReturn(MOCK_SUPER_EXECTUION_ID);
-        when(processInstance.getSuperExecution()).thenReturn(superExecution);
-
-        ExecutionEntity parentProcessInstance = mock(ExecutionEntity.class);
-        when(superExecution.getProcessInstanceId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        when(superExecution.getProcessInstance()).thenReturn(parentProcessInstance);
-        when(parentProcessInstance.getId()).thenReturn(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        when(parentProcessInstance.getName()).thenReturn(MOCK_PARENT_PROCESS_NAME);
-
-        when(processDefinition.getId()).thenReturn(MOCK_PROCESS_DEFINITION_ID);
-        when(processDefinition.getKey()).thenReturn(MOCK_PROCESS_DEFINITION_KEY);
-        when(processDefinition.getVersion()).thenReturn(MOCK_PROCESS_DEFINITION_VERSION);
-        when(processDefinition.getName()).thenReturn(MOCK_PROCESS_DEFINITION_NAME);
-
-        when(deploymentEntity.getId()).thenReturn(MOCK_DEPLOYMENT_ID);
-        when(deploymentEntity.getName()).thenReturn(MOCK_DEPLOYMENT_NAME);
-
-        return context;
     }
 }

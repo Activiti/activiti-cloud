@@ -15,19 +15,16 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
+import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
@@ -43,31 +40,31 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory;
-    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private RuntimeBundleProperties runtimeBundleProperties;
     private final EventChunker eventChunker;
+    private final IncidentService incidentService;
 
     public MessageProducerCommandContextCloseListener(
         ProcessEngineChannels producer,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderChainFactory,
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
-        EventChunker eventChunker
+        EventChunker eventChunker,
+        IncidentService incidentService
     ) {
         Assert.notNull(producer, "producer must not be null");
         Assert.notNull(messageBuilderChainFactory, "messageBuilderChainFactory must not be null");
-        Assert.notNull(messageBuilderIncidentsChainFactory, "messageBuilderIncidentsChainFactory must not be null");
         Assert.notNull(runtimeBundleInfoAppender, "runtimeBundleInfoAppender must not be null");
         Assert.notNull(eventChunker, "eventChunker must not be null");
+        Assert.notNull(incidentService, "incidentService must not be null");
 
         this.producer = producer;
         this.messageBuilderChainFactory = messageBuilderChainFactory;
-        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.runtimeBundleProperties = runtimeBundleProperties;
         this.eventChunker = eventChunker;
+        this.incidentService = incidentService;
     }
 
     @Override
@@ -87,45 +84,10 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
             eventChunks.forEach(chunk -> sendChunk(rootExecutionContext, chunk));
         } catch (IllegalArgumentException e) {
-            createAndSendIncidentEvent(rootExecutionContext);
+            this.incidentService.createAndSendIncidentEvent(rootExecutionContext, e);
 
-            throw new RuntimeException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
-    }
-
-    private void createAndSendIncidentEvent(ExecutionContext rootExecutionContext) {
-        System.out.println("Sending error via incident channel test");
-
-        var errorEvents = new ArrayList<>();
-        var incident = getCloudIncidentCreatedEvent(rootExecutionContext);
-        errorEvents.add(incident);
-        var errorMessage =
-            this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
-
-        this.producer.auditProducerIncidents().send(errorMessage);
-
-        System.out.println("Sent error incident for chunking issues");
-    }
-
-    public CloudIncidentCreatedEventImpl getCloudIncidentCreatedEvent(ExecutionContext rootExecutionContext) {
-        var incidentContext = new IncidentContextImpl();
-        incidentContext.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
-        incidentContext.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
-        incidentContext.setActivityId(rootExecutionContext.getProcessInstance().getActivityId());
-        incidentContext.setExecutionId(rootExecutionContext.getExecution().getId());
-
-        var incident = new CloudIncidentCreatedEventImpl(
-            new IllegalArgumentException("Test incident for chunking"),
-            incidentContext
-        );
-        getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
-        runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
-
-        return incident;
-    }
-
-    private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
-        return new ExecutionContextInfoAppender(rootExecutionContext);
     }
 
     private Collection<List<CloudRuntimeEventImpl<?, ?>>> createEventChunks(List<CloudRuntimeEvent<?, ?>> events) {

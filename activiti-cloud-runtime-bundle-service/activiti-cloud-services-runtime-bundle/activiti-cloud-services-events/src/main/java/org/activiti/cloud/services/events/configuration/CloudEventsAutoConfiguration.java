@@ -77,6 +77,7 @@ import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventM
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
+import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
@@ -181,21 +182,31 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public IncidentService incidentService(
+        ProcessEngineChannels processEngineChannels,
+        ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
+        return new IncidentService(processEngineChannels, messageBuilderChainFactory, runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
-        ExecutionContextIncidentEventMessageBuilderFactory executionContextIncidentEventMessageBuilderFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         RuntimeBundleProperties runtimeBundleProperties,
-        EventChunker eventChunker
+        EventChunker eventChunker,
+        IncidentService incidentService
     ) {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
             executionContextMessageBuilderFactory,
-            executionContextIncidentEventMessageBuilderFactory,
             runtimeBundleInfoAppender,
             runtimeBundleProperties,
-            eventChunker
+            eventChunker,
+            incidentService
         );
     }
 

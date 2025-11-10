@@ -41,45 +41,31 @@ public class EventChunker {
         for (CloudRuntimeEventImpl<?, ?> event : events) {
             var eventSizeInBytes = getEventSizeInBytes(event);
 
-            if (
-                eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener()
-            ) {
-                System.out.printf("Dropping event of size %d bytes (exceeds max chunk size bytes)%n", eventSizeInBytes);
-
+            if (isSingleEventExceedingMaxLimit(eventSizeInBytes)) {
                 throw new IllegalArgumentException("Chunk size limit exceeded");
-            } else {
-                if (isExceedingMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
-                    chunks.add(new ArrayList<>(currentChunk));
-                    currentChunk.clear();
-                    currentChunkSize = 0;
-
-                    System.out.printf(
-                        "Created chunk with %d events, starting new chunk due to size limit%n",
-                        chunks.get(chunks.size() - 1).size()
-                    );
-                }
-
-                currentChunk.add(event);
-                currentChunkSize += eventSizeInBytes;
-
-                System.out.printf(
-                    "Added event of size %d bytes to chunk, current chunk size: %d bytes%n",
-                    eventSizeInBytes,
-                    currentChunkSize
-                );
             }
-        }
 
+            if (wouldChunkExceedMaxLimit(currentChunkSize, eventSizeInBytes, currentChunk)) {
+                chunks.add(new ArrayList<>(currentChunk));
+                currentChunk.clear();
+                currentChunkSize = 0;
+            }
+
+            currentChunk.add(event);
+            currentChunkSize += eventSizeInBytes;
+        }
         if (!currentChunk.isEmpty()) {
             chunks.add(currentChunk);
         }
 
-        System.out.printf("Created %d chunks from %d events", chunks.size(), events.size());
-
         return chunks;
     }
 
-    private boolean isExceedingMaxLimit(
+    private boolean isSingleEventExceedingMaxLimit(int eventSizeInBytes) {
+        return eventSizeInBytes > this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener();
+    }
+
+    private boolean wouldChunkExceedMaxLimit(
         int currentChunkSize,
         int eventSizeInBytes,
         List<CloudRuntimeEventImpl<?, ?>> currentChunk
