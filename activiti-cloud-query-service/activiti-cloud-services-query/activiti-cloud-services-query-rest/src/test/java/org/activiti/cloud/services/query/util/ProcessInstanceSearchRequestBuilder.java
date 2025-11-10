@@ -206,7 +206,8 @@ public class ProcessInstanceSearchRequestBuilder {
             processVariableKeys,
             sort,
             includeSubprocesses,
-            linkedProcessInstanceId
+            linkedProcessInstanceId,
+            linkedProcessInstanceType
         );
     }
 
