@@ -213,7 +213,8 @@ public class ProcessInstanceSearchRequestBuilder {
             sort,
             excludeByProcessCategoryName,
             includeSubprocesses,
-            linkedProcessInstanceId
+            linkedProcessInstanceId,
+            linkedProcessInstanceType
         );
     }
 
