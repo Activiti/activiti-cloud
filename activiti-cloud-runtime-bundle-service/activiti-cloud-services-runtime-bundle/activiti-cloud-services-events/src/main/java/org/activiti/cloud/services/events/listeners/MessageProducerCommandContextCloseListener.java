@@ -78,6 +78,21 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         sendEvents(events, rootExecutionContext);
     }
 
+    @Override
+    public void closing(CommandContext commandContext) {
+        // No need to implement this method in this class
+    }
+
+    @Override
+    public void afterSessionsFlush(CommandContext commandContext) {
+        // No need to implement this method in this class
+    }
+
+    @Override
+    public void closeFailure(CommandContext commandContext) {
+        // No need to implement this method in this class
+    }
+
     private void sendEvents(List<CloudRuntimeEvent<?, ?>> events, ExecutionContext rootExecutionContext) {
         try {
             var eventChunks = createEventChunks(events);
@@ -118,20 +133,5 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
 
     private boolean isChunkingDisabled() {
         return this.runtimeBundleProperties.getEventsProperties().isChunkingCloseListenerDisabled();
-    }
-
-    @Override
-    public void closing(CommandContext commandContext) {
-        // No need to implement this method in this class
-    }
-
-    @Override
-    public void afterSessionsFlush(CommandContext commandContext) {
-        // No need to implement this method in this class
-    }
-
-    @Override
-    public void closeFailure(CommandContext commandContext) {
-        // No need to implement this method in this class
     }
 }
