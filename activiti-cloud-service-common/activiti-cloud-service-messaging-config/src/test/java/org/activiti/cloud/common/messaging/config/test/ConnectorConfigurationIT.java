@@ -329,10 +329,7 @@ public class ConnectorConfigurationIT {
             .replace("${application.min.version}", minVersion)
             .replace("${application.max.version}", "-1");
 
-        Message<?> highVersionMessage = MessageBuilder
-            .withPayload(Map.of())
-            .setHeader("appVersion", "9999")
-            .build();
+        Message<?> highVersionMessage = MessageBuilder.withPayload(Map.of()).setHeader("appVersion", "9999").build();
 
         evaluationContext.setRootObject(highVersionMessage);
 
