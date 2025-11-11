@@ -49,32 +49,43 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
         assertThat(functionRouter.getFunctionRoutes())
             .containsOnly("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
         assertThat(functionRouter.destinations())
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+            .containsOnlyKeys(
+                "auditConsumer",
+                "queryConsumer",
+                "graphQLEngineEventsConsumerSource",
+                "auditConsumerIncidents"
+            );
         assertThat(functionRouter.destinations("functionRouterInput"))
-            .containsOnlyKeys("auditConsumer", "queryConsumer");
+            .containsOnlyKeys("auditConsumer", "queryConsumer", "auditConsumerIncidents");
         assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
             .containsOnlyKeys("graphQLEngineEventsConsumerSource");
         assertThat(functionRouter.registrations())
-            .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
+            .containsOnlyKeys("engineEvents", "engineEventsIncidents")
+            .satisfies(registrations -> {
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
                         "queryConsumerFunction_registration",
                         "auditConsumerChannelHandlerConsumer_registration",
                         "engineEventsGraphQlSourceConsumer_registration"
                     )
-                    .isNotEmpty()
-            );
+                    .isNotEmpty();
+                assertThat(registrations.get("engineEventsIncidents"))
+                    .containsOnly("auditConsumerIncidentsChannelHandlerConsumer_registration")
+                    .isNotEmpty();
+            });
         assertThat(functionRouter.registrations("functionRouterInput"))
-            .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
+            .containsOnlyKeys("engineEvents", "engineEventsIncidents")
+            .satisfies(registrations -> {
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
                         "queryConsumerFunction_registration",
                         "auditConsumerChannelHandlerConsumer_registration"
                     )
-                    .isNotEmpty()
-            );
+                    .isNotEmpty();
+                assertThat(registrations.get("engineEventsIncidents"))
+                    .containsOnly("auditConsumerIncidentsChannelHandlerConsumer_registration")
+                    .isNotEmpty();
+            });
         assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
             .containsOnlyKeys("engineEvents")
             .satisfies(registrations ->
