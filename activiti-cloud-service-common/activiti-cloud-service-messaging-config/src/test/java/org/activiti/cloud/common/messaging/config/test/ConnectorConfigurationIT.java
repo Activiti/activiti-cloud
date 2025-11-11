@@ -290,7 +290,7 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(condition)
             .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)"
             );
     }
 
@@ -303,8 +303,44 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(expression)
             .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= 17 or 17 == -1)"
             );
+    }
+
+    @Test
+    public void testShouldResolveConditionExpressionWithMaxVersionDisabled() {
+        // given
+        String expressionWithDisabledMax = condition
+            .replace("${application.min.version}", minVersion)
+            .replace("${application.max.version}", "-1");
+
+        // then
+        Assertions
+            .assertThat(expressionWithDisabledMax)
+            .isEqualTo(
+                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= -1 or -1 == -1)"
+            );
+    }
+
+    @Test
+    public void testShouldPassMessageWhenMaxVersionIsDisabled() {
+        // given
+        String expressionWithDisabledMax = condition
+            .replace("${application.min.version}", minVersion)
+            .replace("${application.max.version}", "-1");
+
+        Message<?> highVersionMessage = MessageBuilder
+            .withPayload(Map.of())
+            .setHeader("appVersion", "9999")
+            .build();
+
+        evaluationContext.setRootObject(highVersionMessage);
+
+        // when
+        Boolean result = parser.parseExpression(expressionWithDisabledMax).getValue(evaluationContext, Boolean.class);
+
+        // then
+        Assertions.assertThat(result).isTrue();
     }
 
     @Test
