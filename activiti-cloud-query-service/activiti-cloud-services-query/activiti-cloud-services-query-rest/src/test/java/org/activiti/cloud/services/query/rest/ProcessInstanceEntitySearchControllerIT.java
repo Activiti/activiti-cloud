@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
+import java.util.List;
+import java.util.Map;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -130,5 +132,29 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .then()
             .statusCode(200)
             .body(IsEqual.equalTo("2"));
+    }
+
+    @Test
+    void should_return_OnlyMainProcesses_WhenIncludeSubProcessIsFalse() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .subprocessOf(processInstance1)
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{\"includeSubprocesses\": false}")
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
+            .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
     }
 }
