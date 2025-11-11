@@ -50,6 +50,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
     private String excludeByProcessCategoryName;
+    private Boolean includeSubprocesses;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -136,6 +137,11 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder withIncludeSubprocesses(Boolean includeSubprocesses) {
+        this.includeSubprocesses = includeSubprocesses;
+        return this;
+    }
+
     public ProcessInstanceSearchRequestBuilder withSort(CloudRuntimeEntitySort sort) {
         this.sort = sort;
         return this;
@@ -193,7 +199,8 @@ public class ProcessInstanceSearchRequestBuilder {
             processVariableFilters,
             processVariableKeys,
             sort,
-            excludeByProcessCategoryName
+            excludeByProcessCategoryName,
+            includeSubprocesses
         );
     }
 

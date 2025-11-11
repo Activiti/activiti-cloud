@@ -41,5 +41,10 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort,
-    String excludeByProcessCategoryName
-) implements CloudRuntimeEntityFilterRequest {}
+    String excludeByProcessCategoryName,
+    Boolean includeSubprocesses
+) implements CloudRuntimeEntityFilterRequest {
+    public ProcessInstanceSearchRequest {
+        if(includeSubprocesses == null) includeSubprocesses = true;
+    }
+}

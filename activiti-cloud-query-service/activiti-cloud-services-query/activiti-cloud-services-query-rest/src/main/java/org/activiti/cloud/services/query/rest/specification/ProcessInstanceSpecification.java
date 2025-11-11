@@ -75,7 +75,14 @@ public class ProcessInstanceSpecification
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessCategoryNameFilter(root, criteriaBuilder);
+        applyIncludeSubprocesses(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
+    }
+
+    private void applyIncludeSubprocesses(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (!searchRequest.includeSubprocesses()) {
+            predicates.add(root.get(ProcessInstanceEntity_.parentId).isNull());
+        }
     }
 
     private void applyProcessCategoryNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
