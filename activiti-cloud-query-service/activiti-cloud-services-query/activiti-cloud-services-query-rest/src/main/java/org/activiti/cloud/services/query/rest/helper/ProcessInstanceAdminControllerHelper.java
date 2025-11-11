@@ -70,4 +70,12 @@ public class ProcessInstanceAdminControllerHelper {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
         return processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
     }
+
+    public Page<ProcessInstanceEntity> searchSubprocesses(
+        String processInstanceId,
+        Predicate predicate,
+        Pageable pageable
+    ) {
+        return processInstanceControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable);
+    }
 }

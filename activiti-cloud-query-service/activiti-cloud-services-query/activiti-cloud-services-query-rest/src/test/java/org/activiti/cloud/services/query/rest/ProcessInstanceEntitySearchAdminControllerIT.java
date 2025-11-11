@@ -132,6 +132,27 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
     }
 
     @Test
+    void should_return_SubProcesses() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .subprocessOf(processInstance1)
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .when()
+            .get("/admin/v1/process-instances/" + processInstance1.getId() + "/subprocesses")
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+    }
+
+    @Test
     void should_return_AllProcessInstancesWithSubProcess() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
