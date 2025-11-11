@@ -6612,6 +6612,9 @@
           },
           "excludeByProcessCategoryName" : {
             "type" : "string"
+          },
+          "includeSubprocesses": {
+            "type": "boolean"
           }
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
