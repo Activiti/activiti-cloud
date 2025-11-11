@@ -20,6 +20,7 @@ import java.util.List;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -60,5 +61,13 @@ public class ProcessInstanceAdminControllerHelper {
     public ProcessInstanceEntity findByIdProcessAdmin(String processInstanceId) {
         ProcessInstanceEntity processInstance = processInstanceAdminService.findById(processInstanceId);
         return processInstanceRepository.mapSubprocesses(processInstance);
+    }
+
+    public Page<ProcessInstanceEntity> searchProcessInstances(
+        ProcessInstanceSearchRequest searchRequest,
+        Pageable pageable
+    ) {
+        Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
+        return processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
     }
 }

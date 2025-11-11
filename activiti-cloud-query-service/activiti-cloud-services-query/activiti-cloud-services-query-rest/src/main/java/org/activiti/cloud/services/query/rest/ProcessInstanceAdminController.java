@@ -161,7 +161,7 @@ public class ProcessInstanceAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminService.search(searchRequest, pageable),
+            processInstanceAdminControllerHelper.searchProcessInstances(searchRequest, pageable),
             processInstanceRepresentationModelAssembler
         );
     }

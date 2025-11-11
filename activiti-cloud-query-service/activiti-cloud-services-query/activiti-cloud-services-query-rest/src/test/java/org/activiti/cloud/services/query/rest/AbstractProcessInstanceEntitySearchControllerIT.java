@@ -74,6 +74,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     protected static final String PROCESS_INSTANCES_JSON_PATH = "_embedded.processInstances";
     protected static final String PROCESS_INSTANCE_IDS_JSON_PATH = "_embedded.processInstances.id";
+    protected static final String PROCESS_INSTANCE_SUBPROCESS_JSON_PATH = "_embedded.processInstances.subprocesses";
 
     @BeforeEach
     void setUp() {
