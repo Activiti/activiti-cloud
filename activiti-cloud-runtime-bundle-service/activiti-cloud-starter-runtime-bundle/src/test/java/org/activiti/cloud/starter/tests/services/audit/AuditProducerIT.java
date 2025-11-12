@@ -716,10 +716,12 @@ public class AuditProducerIT {
 
                 assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
                 assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(Task.class);
-                assertThat(((Task) receivedEvents.getFirst().getEntity()).getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
+                assertThat(((Task) receivedEvents.getFirst().getEntity()).getStatus())
+                    .isEqualTo(Task.TaskStatus.ASSIGNED);
                 assertThat(((Task) receivedEvents.getFirst().getEntity()).getId()).isEqualTo(task.getId());
                 assertThat(receivedEvents.getFirst().getEntityId()).isEqualTo(task.getId());
-                assertThat(((Task) receivedEvents.getFirst().getEntity()).getDescription()).isEqualTo("short description");
+                assertThat(((Task) receivedEvents.getFirst().getEntity()).getDescription())
+                    .isEqualTo("short description");
             });
     }
 
@@ -755,8 +757,10 @@ public class AuditProducerIT {
 
                 assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
                 assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateUser.class);
-                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId()).isEqualTo(task.getId());
-                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId()).isEqualTo("testuser");
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId())
+                    .isEqualTo(task.getId());
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId())
+                    .isEqualTo("testuser");
             });
 
         ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(
@@ -788,8 +792,10 @@ public class AuditProducerIT {
 
                 assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
                 assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateUser.class);
-                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId()).isEqualTo(task.getId());
-                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId()).isEqualTo("testuser");
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId())
+                    .isEqualTo(task.getId());
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId())
+                    .isEqualTo("testuser");
             });
 
         userCandidates = taskRestTemplate.getUserCandidates(task.getId());
