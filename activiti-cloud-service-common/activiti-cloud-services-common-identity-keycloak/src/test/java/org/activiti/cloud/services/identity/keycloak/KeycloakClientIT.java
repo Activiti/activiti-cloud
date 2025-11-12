@@ -107,7 +107,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getUserGroups() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
-        List<KeycloakGroup> groups = keycloakClient.getUserGroups(users.get(0).getId());
+        List<KeycloakGroup> groups = keycloakClient.getUserGroups(users.getFirst().getId());
 
         assertThat(users).hasSize(1);
         assertThat(groups).extracting("name").contains("hr");
@@ -137,7 +137,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getUserRoles() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
-        List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.get(0).getId());
+        List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.getFirst().getId());
 
         assertThat(roles).hasSize(3);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
@@ -148,7 +148,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getGroupRoles() {
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
-        List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(users.get(0).getId());
+        List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(users.getFirst().getId());
 
         assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
@@ -159,7 +159,7 @@ public class KeycloakClientIT {
         Cache cache = cacheManager.getCache("groupRoleMapping");
         cache.clear();
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
-        String key = users.get(0).getId();
+        String key = users.getFirst().getId();
         assertThat(cache.get(key)).isNull();
 
         List<KeycloakRoleMapping> roles = keycloakClient.getGroupRoleMapping(key);
@@ -177,7 +177,7 @@ public class KeycloakClientIT {
         Cache cache = cacheManager.getCache("userGroups");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
-        String key = users.get(0).getId();
+        String key = users.getFirst().getId();
 
         assertThat(cache.get(key)).isNull();
 
@@ -196,7 +196,7 @@ public class KeycloakClientIT {
         Cache cache = cacheManager.getCache("userRoleMapping");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
-        String key = users.get(0).getId();
+        String key = users.getFirst().getId();
         assertThat(cache.get(key)).isNull();
 
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(key);
@@ -245,8 +245,8 @@ public class KeycloakClientIT {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
 
         List<KeycloakRoleMapping> roles = keycloakClient.getUserClientRoleMapping(
-            users.get(0).getId(),
-            clients.get(0).getId()
+            users.getFirst().getId(),
+            clients.getFirst().getId()
         );
 
         assertThat(roles).hasSize(3);
@@ -261,8 +261,8 @@ public class KeycloakClientIT {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
 
         List<KeycloakRoleMapping> roles = keycloakClient.getGroupClientRoleMapping(
-            groups.get(0).getId(),
-            clients.get(0).getId()
+            groups.getFirst().getId(),
+            clients.getFirst().getId()
         );
 
         assertThat(roles).hasSize(1);
@@ -272,15 +272,15 @@ public class KeycloakClientIT {
     @Test
     public void should_getClientRoles() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
-        List<KeycloakRoleMapping> roles = keycloakClient.getClientRoles(clients.get(0).getId());
+        List<KeycloakRoleMapping> roles = keycloakClient.getClientRoles(clients.getFirst().getId());
         assertThat(roles).isNotEmpty();
     }
 
     @Test
     public void should_addAndRemoveUserClientRoleMapping() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
-        String clientId = clients.get(0).getId();
-        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
+        String clientId = clients.getFirst().getId();
+        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.getFirst().getId());
         KeycloakRoleMapping kRoleToAdd = kRoles
             .stream()
             .filter(kRole -> kRole.getName().equals(ACTIVITI_ADMIN_ROLE))
@@ -300,8 +300,8 @@ public class KeycloakClientIT {
     @Test
     public void should_addAndRemoveGroupClientRoleMapping() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
-        String clientId = clients.get(0).getId();
-        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
+        String clientId = clients.getFirst().getId();
+        List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.getFirst().getId());
         KeycloakRoleMapping kRoleToAdd = kRoles
             .stream()
             .filter(kRole -> kRole.getName().equals(ACTIVITI_USER_ROLE))
@@ -335,7 +335,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getUsersClientRoleMapping() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
-        String clientId = clients.get(0).getId();
+        String clientId = clients.getFirst().getId();
         List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(clientId, ACTIVITI_ADMIN_ROLE);
 
         assertThat(users).hasSize(1);
@@ -345,7 +345,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getGroupsClientRoleMapping() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
-        String clientId = clients.get(0).getId();
+        String clientId = clients.getFirst().getId();
         List<KeycloakGroup> groups = keycloakClient.getGroupsClientRoleMapping(clientId, ACTIVITI_USER_ROLE);
 
         assertThat(groups).hasSize(1);
@@ -373,7 +373,7 @@ public class KeycloakClientIT {
     @Test
     public void should_get101Users_by_Role() {
         addUsers(101);
-        String clientId = testKeycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 1).get(0).getId();
+        String clientId = testKeycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 1).getFirst().getId();
         KeycloakRoleMapping kRoleToAdd = assignRole(clientId);
 
         List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(
@@ -462,7 +462,7 @@ public class KeycloakClientIT {
         List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(ACTIVITI_CLIENT_ID);
         assertThat(clients).hasSize(1);
 
-        String idOfClient = clients.get(0).getId();
+        String idOfClient = clients.getFirst().getId();
         KeycloakClientRepresentation clientById = keycloakClient.getClientById(idOfClient);
 
         assertThat(clientById).isNotNull();
@@ -475,7 +475,7 @@ public class KeycloakClientIT {
 
         assertThat(allGroups).hasSizeGreaterThan(0);
 
-        KeycloakGroup groupById = keycloakClient.getGroupById(allGroups.get(0).getId());
+        KeycloakGroup groupById = keycloakClient.getGroupById(allGroups.getFirst().getId());
         assertThat(groupById).isNotNull();
     }
 
@@ -495,14 +495,14 @@ public class KeycloakClientIT {
 
         assertThat(allUsers).hasSizeGreaterThan(0);
 
-        KeycloakUser userById = keycloakClient.getUserById(allUsers.get(0).getId());
+        KeycloakUser userById = keycloakClient.getUserById(allUsers.getFirst().getId());
         assertThat(userById).isNotNull();
         assertThat(countAllUsers).isEqualTo(allUsers.size());
     }
 
     private String getIdOfClient(String clientId) {
         List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(clientId);
-        return clients.get(0).getId();
+        return clients.getFirst().getId();
     }
 
     @Test

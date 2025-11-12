@@ -867,7 +867,7 @@ class QueryTasksIT {
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
                 assertThat(responseEntity.getBody()).isNotNull();
                 assertThat(responseEntity.getBody()).hasSize(1);
-                assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+                assertThat(responseEntity.getBody().getFirst()).isEqualTo("testuser");
             });
 
         //Check adding user candidate
@@ -884,7 +884,7 @@ class QueryTasksIT {
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
                 assertThat(responseEntity.getBody()).isNotNull();
                 assertThat(responseEntity.getBody()).hasSize(2);
-                assertThat(responseEntity.getBody().get(0)).isIn("hruser", "testuser");
+                assertThat(responseEntity.getBody().getFirst()).isIn("hruser", "testuser");
                 assertThat(responseEntity.getBody().get(1)).isIn("hruser", "testuser");
             });
 
@@ -902,7 +902,7 @@ class QueryTasksIT {
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
                 assertThat(responseEntity.getBody()).isNotNull();
                 assertThat(responseEntity.getBody()).hasSize(1);
-                assertThat(responseEntity.getBody().get(0)).isEqualTo("testuser");
+                assertThat(responseEntity.getBody().getFirst()).isEqualTo("testuser");
             });
     }
 

@@ -41,7 +41,7 @@ public class ToCandidateGroupConverterTest {
         //when
         List<CandidateGroup> convertedGroupList = toCandidateGroupConverter.from(groupList);
         //then
-        assertThat(convertedGroupList.get(0)).isInstanceOf(CandidateGroup.class);
-        assertThat(convertedGroupList.get(0).getGroup()).isEqualTo(group);
+        assertThat(convertedGroupList.getFirst()).isInstanceOf(CandidateGroup.class);
+        assertThat(convertedGroupList.getFirst().getGroup()).isEqualTo(group);
     }
 }

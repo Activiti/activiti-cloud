@@ -167,7 +167,7 @@ public class AuthorizationConfigurer {
             if (hasRoleOrPermissionConstraint(securityConstraint)) {
                 result.add(securityConstraint);
             } else {
-                result.add(0, securityConstraint);
+                result.addFirst(securityConstraint);
             }
         });
         return result;

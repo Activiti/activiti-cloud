@@ -72,7 +72,7 @@ class ProcessDefinitionVariablesDecoratorTest {
         assertThat(decoratedProcessDefinition.getVariableDefinitions()).hasSize(1);
         org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition
             .getVariableDefinitions()
-            .get(0);
+            .getFirst();
         assertThat(variableDefinition.getId()).isEqualTo("VAR_ID");
         assertThat(variableDefinition.getName()).isEqualTo("var1");
         assertThat(variableDefinition.getDescription()).isEqualTo("Variable no 1");
@@ -104,7 +104,7 @@ class ProcessDefinitionVariablesDecoratorTest {
         assertThat(decoratedProcessDefinition.getVariableDefinitions()).hasSize(1);
         org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition
             .getVariableDefinitions()
-            .get(0);
+            .getFirst();
         assertThat(variableDefinition.getDisplay()).isEqualTo(true);
         assertThat(variableDefinition.getDisplayName()).isEqualTo("Variable 2");
     }

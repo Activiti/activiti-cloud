@@ -58,7 +58,7 @@ public class AlfrescoWebAutoConfigurationTest {
         configurer.addArgumentResolvers(resolvers);
 
         //then
-        assertThat(resolvers.get(0)).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
+        assertThat(resolvers.getFirst()).isInstanceOf(AlfrescoPageArgumentMethodResolver.class);
     }
 
     @Test

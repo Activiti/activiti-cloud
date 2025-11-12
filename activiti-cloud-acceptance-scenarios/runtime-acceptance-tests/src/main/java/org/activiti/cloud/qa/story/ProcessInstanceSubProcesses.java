@@ -90,7 +90,7 @@ public class ProcessInstanceSubProcesses {
             processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
         );
         assertThat(tasks).isNotEmpty();
-        currentTask = tasks.get(0);
+        currentTask = tasks.getFirst();
         assertThat(currentTask).isNotNull();
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());

@@ -197,7 +197,7 @@ public class Tasks {
             processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstanceId)
         );
         assertThat(tasksFromRB).isNotEmpty();
-        newTask = tasksFromRB.get(0);
+        newTask = tasksFromRB.getFirst();
         assertThat(newTask).isNotNull();
         return newTask;
     }
@@ -240,7 +240,7 @@ public class Tasks {
             .getTasksByProcessInstance(processInstanceId)
             .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
-        newTask = tasksList.get(0);
+        newTask = tasksList.getFirst();
         taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
     }
 
@@ -264,7 +264,7 @@ public class Tasks {
             .getTasksByProcessInstance(processInstanceId)
             .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
-        newTask = tasksList.get(0);
+        newTask = tasksList.getFirst();
     }
 
     private void adminGetTaskToUpdateForCurrentProcessInstance() {
@@ -274,7 +274,7 @@ public class Tasks {
             .getTasksByProcessInstance(processInstanceId)
             .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
-        newTask = tasksList.get(0);
+        newTask = tasksList.getFirst();
     }
 
     private void waitForTasks(String processInstanceId) {

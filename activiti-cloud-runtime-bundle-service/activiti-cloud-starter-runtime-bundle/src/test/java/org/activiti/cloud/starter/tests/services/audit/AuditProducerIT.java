@@ -367,8 +367,8 @@ public class AuditProducerIT {
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_SUSPENDED.name(), TASK_SUSPENDED.name());
 
-                assertThat(receivedEvents1.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
-                assertThat(receivedEvents1.get(0).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
+                assertThat(receivedEvents1.getFirst().getEntity()).isInstanceOf(ProcessInstance.class);
+                assertThat(receivedEvents1.getFirst().getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
             });
 
         //when
@@ -384,8 +384,8 @@ public class AuditProducerIT {
                     .extracting(event -> event.getEventType().name())
                     .containsExactly(PROCESS_RESUMED.name(), TASK_ACTIVATED.name());
 
-                assertThat(receivedEvents2.get(0).getEntity()).isInstanceOf(ProcessInstance.class);
-                assertThat(receivedEvents2.get(0).getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
+                assertThat(receivedEvents2.getFirst().getEntity()).isInstanceOf(ProcessInstance.class);
+                assertThat(receivedEvents2.getFirst().getProcessDefinitionKey()).isEqualTo(SIMPLE_PROCESS);
             });
 
         //when
@@ -714,12 +714,12 @@ public class AuditProducerIT {
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_UPDATED, task.getId()));
 
-                assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-                assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(Task.class);
-                assertThat(((Task) receivedEvents.get(0).getEntity()).getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
-                assertThat(((Task) receivedEvents.get(0).getEntity()).getId()).isEqualTo(task.getId());
-                assertThat(receivedEvents.get(0).getEntityId()).isEqualTo(task.getId());
-                assertThat(((Task) receivedEvents.get(0).getEntity()).getDescription()).isEqualTo("short description");
+                assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
+                assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(Task.class);
+                assertThat(((Task) receivedEvents.getFirst().getEntity()).getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
+                assertThat(((Task) receivedEvents.getFirst().getEntity()).getId()).isEqualTo(task.getId());
+                assertThat(receivedEvents.getFirst().getEntityId()).isEqualTo(task.getId());
+                assertThat(((Task) receivedEvents.getFirst().getEntity()).getDescription()).isEqualTo("short description");
             });
     }
 
@@ -753,10 +753,10 @@ public class AuditProducerIT {
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_USER_ADDED, "testuser"));
 
-                assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-                assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateUser.class);
-                assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
-                assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("testuser");
+                assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
+                assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateUser.class);
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId()).isEqualTo(task.getId());
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId()).isEqualTo("testuser");
             });
 
         ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> userCandidates = taskRestTemplate.getUserCandidates(
@@ -786,10 +786,10 @@ public class AuditProducerIT {
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_USER_REMOVED, "testuser"));
 
-                assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-                assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateUser.class);
-                assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getTaskId()).isEqualTo(task.getId());
-                assertThat(((TaskCandidateUser) receivedEvents.get(0).getEntity()).getUserId()).isEqualTo("testuser");
+                assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
+                assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateUser.class);
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getTaskId()).isEqualTo(task.getId());
+                assertThat(((TaskCandidateUser) receivedEvents.getFirst().getEntity()).getUserId()).isEqualTo("testuser");
             });
 
         userCandidates = taskRestTemplate.getUserCandidates(task.getId());
@@ -845,11 +845,11 @@ public class AuditProducerIT {
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_GROUP_ADDED, "hr"));
 
-                assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-                assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateGroup.class);
-                assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getTaskId())
+                assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
+                assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateGroup.class);
+                assertThat(((TaskCandidateGroup) receivedEvents.getFirst().getEntity()).getTaskId())
                     .isEqualTo(task.getId());
-                assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getGroupId()).isEqualTo("hr");
+                assertThat(((TaskCandidateGroup) receivedEvents.getFirst().getEntity()).getGroupId()).isEqualTo("hr");
             });
 
         groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
@@ -878,11 +878,11 @@ public class AuditProducerIT {
                     .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getEntityId)
                     .containsExactly(tuple(TASK_CANDIDATE_GROUP_REMOVED, "hr"));
 
-                assertThat(receivedEvents.get(0).getEntity()).isNotNull();
-                assertThat(receivedEvents.get(0).getEntity()).isInstanceOf(TaskCandidateGroup.class);
-                assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getTaskId())
+                assertThat(receivedEvents.getFirst().getEntity()).isNotNull();
+                assertThat(receivedEvents.getFirst().getEntity()).isInstanceOf(TaskCandidateGroup.class);
+                assertThat(((TaskCandidateGroup) receivedEvents.getFirst().getEntity()).getTaskId())
                     .isEqualTo(task.getId());
-                assertThat(((TaskCandidateGroup) receivedEvents.get(0).getEntity()).getGroupId()).isEqualTo("hr");
+                assertThat(((TaskCandidateGroup) receivedEvents.getFirst().getEntity()).getGroupId()).isEqualTo("hr");
             });
 
         groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
@@ -921,7 +921,7 @@ public class AuditProducerIT {
             .superProcessInstanceId(processInstanceId)
             .list();
 
-        String subProcessId1 = childInstances.get(0).getProcessInstanceId();
+        String subProcessId1 = childInstances.getFirst().getProcessInstanceId();
         String subProcessId2 = childInstances.get(1).getProcessInstanceId();
 
         assertThat(childInstances).extracting(Execution::getRootProcessInstanceId).containsOnly(processInstanceId);
@@ -1009,7 +1009,7 @@ public class AuditProducerIT {
         );
         assertThat(tasks).hasSize(5);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
         taskRestTemplate.complete(tasks.get(1));
 
         //then
@@ -1109,7 +1109,7 @@ public class AuditProducerIT {
         );
         assertThat(tasks).hasSize(5);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
         taskRestTemplate.complete(tasks.get(1));
 
         //then
@@ -1256,7 +1256,7 @@ public class AuditProducerIT {
                     processInstanceRestTemplate.getTasks(childProcesses.get(i).getId()).getBody().getContent()
                 );
             assertThat(tasks).hasSize(1);
-            taskRestTemplate.complete(tasks.get(0));
+            taskRestTemplate.complete(tasks.getFirst());
         }
 
         //then
@@ -1297,7 +1297,7 @@ public class AuditProducerIT {
         tasks =
             new ArrayList<>(processInstanceRestTemplate.getTasks(childProcesses.get(2).getId()).getBody().getContent());
         assertThat(tasks).hasSize(1);
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
 
         assertThat(processInstanceRestTemplate.getSubprocesses(startProcessEntity.getId()).getBody().getContent())
             .isEmpty();
@@ -1322,7 +1322,7 @@ public class AuditProducerIT {
                     )
                     .extracting(CloudRuntimeEvent::getEventType, event -> ((ProcessInstance) event.getEntity()).getId())
                     .containsExactlyInAnyOrder(
-                        tuple(PROCESS_COMPLETED, childProcesses.get(0).getId()),
+                        tuple(PROCESS_COMPLETED, childProcesses.getFirst().getId()),
                         tuple(PROCESS_COMPLETED, childProcesses.get(1).getId()),
                         tuple(PROCESS_COMPLETED, childProcesses.get(2).getId()),
                         tuple(PROCESS_CANCELLED, childProcesses.get(3).getId()),
@@ -1364,7 +1364,7 @@ public class AuditProducerIT {
         assertThat(childProcesses).isNotEmpty();
         assertThat(childProcesses.getFirst().getRootProcessInstanceId()).isEqualTo(processInstance.getId());
 
-        String childProcessInstanceId = childProcesses.iterator().next().getId();
+        String childProcessInstanceId = childProcesses.getFirst().getId();
 
         Collection<CloudTask> tasksInSubProcess = processInstanceRestTemplate
             .getTasks(childProcessInstanceId)

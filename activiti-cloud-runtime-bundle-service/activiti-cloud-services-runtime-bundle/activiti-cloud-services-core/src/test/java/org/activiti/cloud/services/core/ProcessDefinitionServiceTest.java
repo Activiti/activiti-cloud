@@ -95,9 +95,9 @@ class ProcessDefinitionServiceTest {
 
         assertThat(result).hasSize(1);
         List<VariableDefinition> variableDefinitions =
-            ((ExtendedCloudProcessDefinition) result.get(0)).getVariableDefinitions();
+            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
         assertThat(variableDefinitions).hasSize(1);
-        assertThat(variableDefinitions.get(0)).isEqualTo(variableDefinition);
+        assertThat(variableDefinitions.getFirst()).isEqualTo(variableDefinition);
         verify(processDefinitionDecorator)
             .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
     }

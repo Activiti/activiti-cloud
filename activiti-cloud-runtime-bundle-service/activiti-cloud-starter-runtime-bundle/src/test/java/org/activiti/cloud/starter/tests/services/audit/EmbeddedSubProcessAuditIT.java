@@ -222,7 +222,7 @@ public class EmbeddedSubProcessAuditIT {
                     );
 
                 String entityProcessInstanceId =
-                    ((CloudTaskAssignedEvent) receivedEvents.get(0)).getEntity().getProcessInstanceId();
+                    ((CloudTaskAssignedEvent) receivedEvents.getFirst()).getEntity().getProcessInstanceId();
                 assertThat(entityProcessInstanceId).isNotNull();
                 assertThat(entityProcessInstanceId).isEqualTo(processInstanceId);
             });
@@ -263,7 +263,7 @@ public class EmbeddedSubProcessAuditIT {
                         "subProcess".equals(((CloudBPMNActivityCompletedEvent) event).getEntity().getActivityType())
                     )
                     .collect(Collectors.toList())
-                    .get(0);
+                    .getFirst();
 
                 assertThat(subprocessCompletedEvent).isNotNull();
                 assertThat(subprocessCompletedEvent.getProcessInstanceId()).isEqualTo(processInstanceId);

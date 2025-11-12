@@ -79,7 +79,7 @@ public class ProcessInstanceSignalEvents {
         );
         assertThat(tasks).isNotEmpty();
 
-        Task currentTask = tasks.get(0);
+        Task currentTask = tasks.getFirst();
         assertThat(currentTask).isNotNull();
         assertThat(currentTask.getName()).isEqualTo(taskName);
     }

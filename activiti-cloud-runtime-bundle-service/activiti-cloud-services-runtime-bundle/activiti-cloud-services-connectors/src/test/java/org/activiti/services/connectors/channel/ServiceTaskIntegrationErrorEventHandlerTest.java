@@ -106,7 +106,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
         final CompositeCommand compositeCommand = commandArgumentCaptor.getValue();
         assertThat(compositeCommand.getCommands()).hasSize(3);
-        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
         assertThat(compositeCommand.getCommands().get(2))
             .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
@@ -138,7 +138,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
         final CompositeCommand compositeCommand = commandArgumentCaptor.getValue();
         assertThat(compositeCommand.getCommands()).hasSize(2);
-        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
@@ -168,7 +168,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         verify(executionEntity, never()).getActivityId();
         final CompositeCommand compositeCommand = commandArgumentCaptor.getValue();
         assertThat(compositeCommand.getCommands()).hasSize(2);
-        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
@@ -208,14 +208,14 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         final List<CompositeCommand> compositeCommands = commandArgumentCaptor.getAllValues();
         var propagateCloudBpmnErrorCmd = compositeCommands.getFirst();
         assertThat(propagateCloudBpmnErrorCmd.getCommands()).hasSize(3);
-        assertThat(propagateCloudBpmnErrorCmd.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(propagateCloudBpmnErrorCmd.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().get(2))
             .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
 
         var compositeCommand = compositeCommands.get(1);
         assertThat(compositeCommand.getCommands()).hasSize(2);
-        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 

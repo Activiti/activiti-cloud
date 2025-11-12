@@ -206,7 +206,7 @@ public class ProcessInstanceNotifications {
                 processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
             );
             assertThat(tasks).isNotEmpty();
-            currentTask = tasks.get(0);
+            currentTask = tasks.getFirst();
             assertThat(currentTask).isNotNull();
             Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
         }

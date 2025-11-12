@@ -191,7 +191,7 @@ public abstract class AbstractMQServiceTaskIT {
 
         //should be able to complete the process
         //when
-        taskService.complete(tasks.get(0).getId());
+        taskService.complete(tasks.getFirst().getId());
 
         //then
         List<ProcessInstance> processInstances = runtimeService
@@ -216,7 +216,7 @@ public abstract class AbstractMQServiceTaskIT {
         assertThat(tasks).extracting(Task::getName).containsExactly("Execute plan B");
 
         //when the task related to the exception path is executed
-        taskService.complete(tasks.get(0).getId());
+        taskService.complete(tasks.getFirst().getId());
 
         //the process should finish
         List<ProcessInstance> processInstances = runtimeService

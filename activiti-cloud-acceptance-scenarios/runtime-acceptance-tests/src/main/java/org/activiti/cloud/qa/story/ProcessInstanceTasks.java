@@ -154,7 +154,7 @@ public class ProcessInstanceTasks {
                 processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
             );
             assertThat(tasks).isNotEmpty();
-            currentTask = tasks.get(0);
+            currentTask = tasks.getFirst();
             assertThat(currentTask).isNotNull();
             Serenity.setSessionVariable("currentTaskId").to(currentTask.getId());
         }
@@ -563,11 +563,11 @@ public class ProcessInstanceTasks {
         assertThat(processInstancesList.size()).isEqualTo(1);
 
         List<Task> tasksList = new ArrayList<>(
-            processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstancesList.get(0).getId())
+            processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstancesList.getFirst().getId())
         );
 
         assertThat(tasksList).isNotEmpty();
-        currentTask = tasksList.get(0);
+        currentTask = tasksList.getFirst();
         assertThat(currentTask.getStatus()).isEqualTo(status);
         assertThat(currentTask.getName()).isEqualTo(taskName);
     }
@@ -665,12 +665,12 @@ public class ProcessInstanceTasks {
                     )
                     .collect(Collectors.toList());
 
-                assertThat(taskCompletedEvents.get(0).getEventType())
+                assertThat(taskCompletedEvents.getFirst().getEventType())
                     .isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
                 assertThat(queriedTask.getCompletedDate().getTime())
-                    .isEqualTo(taskCompletedEvents.get(0).getTimestamp());
+                    .isEqualTo(taskCompletedEvents.getFirst().getTimestamp());
                 assertThat(queriedTask.getDuration())
-                    .isEqualTo(taskCompletedEvents.get(0).getTimestamp() - queriedTask.getCreatedDate().getTime());
+                    .isEqualTo(taskCompletedEvents.getFirst().getTimestamp() - queriedTask.getCreatedDate().getTime());
             });
     }
 

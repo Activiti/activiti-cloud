@@ -117,7 +117,7 @@ public class CloudProcessDeployedProducerTest {
 
         List<CloudRuntimeEvent<?, ?>[]> values = messagePayloadCaptor.getAllValues();
         List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays
-            .stream(values.get(0))
+            .stream(values.getFirst())
             .map(CloudProcessDeployedEvent.class::cast)
             .collect(Collectors.toList());
         assertThat(cloudProcessDeployedEvents)

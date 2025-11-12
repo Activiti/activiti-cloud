@@ -679,7 +679,7 @@ public class AuditServiceIT {
                 List<CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
 
                 assertThat(retrievedEvents).hasSameSizeAs(testEvents);
-                String commonMessageId = retrievedEventsList.get(0).getMessageId();
+                String commonMessageId = retrievedEventsList.getFirst().getMessageId();
 
                 for (int i = 0; i < testEvents.size(); i++) {
                     assertThat(retrievedEventsList.get(i).getMessageId()).isNotNull().isEqualTo(commonMessageId);

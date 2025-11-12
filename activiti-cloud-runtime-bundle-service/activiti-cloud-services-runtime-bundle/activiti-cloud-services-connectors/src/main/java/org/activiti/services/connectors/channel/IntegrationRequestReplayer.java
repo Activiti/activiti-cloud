@@ -47,7 +47,7 @@ public class IntegrationRequestReplayer {
             .activityId(flowNodeId)
             .list();
         if (!executions.isEmpty()) {
-            ExecutionEntity execution = (ExecutionEntity) executions.get(0);
+            ExecutionEntity execution = (ExecutionEntity) executions.getFirst();
             managementService.executeCommand(
                 (Command<Void>) commandContext -> {
                     mqServiceTaskBehavior.apply(execution);
