@@ -50,8 +50,8 @@ class KeycloakRoleMappingToRoleTest {
 
         List<Role> role = keycloakRoleMappingToRole.toRoles(List.of(kRole1, kRole2));
 
-        assertThat(role.get(0).getId()).isEqualTo(kRole1.getId());
-        assertThat(role.get(0).getName()).isEqualTo(kRole1.getName());
+        assertThat(role.getFirst().getId()).isEqualTo(kRole1.getId());
+        assertThat(role.getFirst().getName()).isEqualTo(kRole1.getName());
         assertThat(role.get(1).getId()).isEqualTo(kRole2.getId());
         assertThat(role.get(1).getName()).isEqualTo(kRole2.getName());
     }

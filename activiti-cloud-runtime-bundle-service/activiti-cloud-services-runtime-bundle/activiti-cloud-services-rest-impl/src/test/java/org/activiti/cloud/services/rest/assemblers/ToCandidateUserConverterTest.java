@@ -41,7 +41,7 @@ public class ToCandidateUserConverterTest {
         //when
         List<CandidateUser> convertedUserList = toCandidateUserConverter.from(userList);
         //then
-        assertThat(convertedUserList.get(0)).isInstanceOf(CandidateUser.class);
-        assertThat(convertedUserList.get(0).getUser()).isEqualTo(user);
+        assertThat(convertedUserList.getFirst()).isInstanceOf(CandidateUser.class);
+        assertThat(convertedUserList.getFirst().getUser()).isEqualTo(user);
     }
 }

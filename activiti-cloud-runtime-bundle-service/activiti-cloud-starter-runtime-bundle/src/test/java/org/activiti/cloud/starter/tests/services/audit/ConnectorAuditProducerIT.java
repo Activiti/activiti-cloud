@@ -424,7 +424,7 @@ public class ConnectorAuditProducerIT {
         );
         assertThat(tasks).hasSize(1);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
 
         // then
         await()
@@ -545,7 +545,7 @@ public class ConnectorAuditProducerIT {
         );
         assertThat(tasks).hasSize(1);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
 
         //then
         await()
@@ -632,7 +632,7 @@ public class ConnectorAuditProducerIT {
         );
         assertThat(tasks).hasSize(1);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
 
         // then
         await()
@@ -766,7 +766,7 @@ public class ConnectorAuditProducerIT {
         );
         assertThat(tasks).hasSize(1);
 
-        taskRestTemplate.complete(tasks.get(0));
+        taskRestTemplate.complete(tasks.getFirst());
 
         //then
         await()

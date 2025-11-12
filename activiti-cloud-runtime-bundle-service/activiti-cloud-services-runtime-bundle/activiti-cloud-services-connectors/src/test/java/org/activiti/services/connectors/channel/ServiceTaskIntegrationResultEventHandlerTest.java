@@ -96,7 +96,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
         // Expect only aggregate + delete
         assertThat(composite.getCommands()).hasSize(2);
-        assertThat(composite.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(composite.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
@@ -158,7 +158,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(3);
-        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
         assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }

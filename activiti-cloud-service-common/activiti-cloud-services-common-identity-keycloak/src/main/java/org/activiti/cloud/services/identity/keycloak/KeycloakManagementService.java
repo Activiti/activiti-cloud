@@ -464,6 +464,6 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     private String getKeycloakClientId(String application) {
         List<KeycloakClientRepresentation> kClients = keycloakClient.searchClients(application, 0, 1);
-        return !kClients.isEmpty() ? kClients.get(0).getId() : null;
+        return !kClients.isEmpty() ? kClients.getFirst().getId() : null;
     }
 }

@@ -100,12 +100,12 @@ public class ProcessInstanceVariablesMappingOnStartEvent {
 
         assertThat(tasks).isNotNull().hasSize(1);
 
-        Serenity.setSessionVariable("taskId").to(tasks.get(0).getId());
+        Serenity.setSessionVariable("taskId").to(tasks.getFirst().getId());
 
         await()
             .untilAsserted(() -> {
                 final Collection<CloudVariableInstance> variables = taskVariableRuntimeBundleSteps.getVariables(
-                    tasks.get(0).getId()
+                    tasks.getFirst().getId()
                 );
 
                 assertThat(variables)

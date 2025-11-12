@@ -233,7 +233,7 @@ public class TestMvcClient {
     public Link discoverUnique(String rel) throws Exception {
         List<Link> discover = discover(rel);
         assertThat(discover).hasSize(1);
-        return discover.get(0);
+        return discover.getFirst();
     }
 
     /**

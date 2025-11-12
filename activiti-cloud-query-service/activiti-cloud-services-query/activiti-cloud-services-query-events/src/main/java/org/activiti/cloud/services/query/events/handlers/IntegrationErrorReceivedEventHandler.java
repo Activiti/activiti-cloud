@@ -86,7 +86,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
     private StackTraceElement getNewTopStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
         if (ObjectUtils.isNotEmpty(integrationEvent.getStackTraceElements())) {
-            StackTraceElement firstElement = integrationEvent.getStackTraceElements().get(0);
+            StackTraceElement firstElement = integrationEvent.getStackTraceElements().getFirst();
             return new StackTraceElement(
                 integrationEvent.getErrorMessage(),
                 "",

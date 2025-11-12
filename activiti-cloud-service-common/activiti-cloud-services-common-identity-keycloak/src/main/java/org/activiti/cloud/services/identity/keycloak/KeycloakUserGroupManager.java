@@ -89,6 +89,6 @@ public class KeycloakUserGroupManager implements UserGroupManager {
         if (users.size() == 0) {
             throw new UnsupportedOperationException("User id " + username + " not found");
         }
-        return users.get(0);
+        return users.getFirst();
     }
 }

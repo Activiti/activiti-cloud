@@ -127,7 +127,7 @@ public class AuditSteps {
                     )
                     .collect(Collectors.toList());
                 assertThat(processInstanceTasks).hasSize(1);
-                CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
+                CloudRuntimeEvent resultingEvent = processInstanceTasks.getFirst();
                 assertThat(resultingEvent).isNotNull();
                 assertThat(resultingEvent).isInstanceOf(CloudTaskRuntimeEvent.class);
                 assertThat(((CloudTaskRuntimeEvent) resultingEvent).getEntity().getId()).isEqualTo(taskId);
@@ -160,7 +160,7 @@ public class AuditSteps {
                     )
                     .collect(Collectors.toList());
                 assertThat(processInstanceTasks).hasSize(1); //could be more than one if there are multiple vars
-                CloudRuntimeEvent resultingEvent = processInstanceTasks.get(0);
+                CloudRuntimeEvent resultingEvent = processInstanceTasks.getFirst();
                 assertThat(resultingEvent).isNotNull();
                 assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
                 assertThat(((CloudVariableEvent) resultingEvent).getEntity().getName()).isEqualTo(variableName);
@@ -194,7 +194,7 @@ public class AuditSteps {
                     .collect(Collectors.toList());
 
                 assertThat(varEvents.size()).isGreaterThanOrEqualTo(1); //could be more than one if there are multiple vars with same name
-                CloudRuntimeEvent resultingEvent = varEvents.get(0);
+                CloudRuntimeEvent resultingEvent = varEvents.getFirst();
                 assertThat(resultingEvent).isNotNull();
                 assertThat(resultingEvent).isInstanceOf(CloudVariableEvent.class);
                 assertThat(((CloudVariableEvent) resultingEvent).getEntity().getName()).isEqualTo(variableName);

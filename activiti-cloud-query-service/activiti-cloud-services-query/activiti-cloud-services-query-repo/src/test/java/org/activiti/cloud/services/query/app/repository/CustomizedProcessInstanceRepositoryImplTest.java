@@ -118,7 +118,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isNotNull();
+        assertThat(result.getFirst().getId()).isNotNull();
         assertThat(result.get(1).getId()).isNotNull();
 
         verify(queryFactory).selectFrom(processInstanceEntity);
@@ -145,7 +145,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(5);
-        assertThat(result.getContent().get(0).getId()).isNotNull();
+        assertThat(result.getContent().getFirst().getId()).isNotNull();
         assertThat(result.getContent().get(1).getId()).isNotNull();
 
         verify(queryFactory).selectFrom(processInstanceEntity);
@@ -165,7 +165,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
         List<ProcessInstanceEntity> subprocessesList = createSubprocessInstances(
             2,
-            processInstancesList.get(0).getId()
+            processInstancesList.getFirst().getId()
         );
         subprocessesList.addAll(createSubprocessInstances(3, processInstancesList.get(1).getId()));
 
@@ -180,7 +180,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getContent().get(0).getSubprocesses()).isNotNull();
+        assertThat(result.getContent().getFirst().getSubprocesses()).isNotNull();
         assertThat(result.getContent().get(1).getSubprocesses()).isNotNull();
     }
 

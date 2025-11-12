@@ -110,7 +110,7 @@ public class KeycloakClientCrudIT {
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
 
         List<KeycloakRoleMapping> roleMappings = keycloakClient.getUserRoleMappingAvailable(ADMIN_USER_ID);
-        KeycloakRoleMapping keycloakRoleMapping = roleMappings.get(0);
+        KeycloakRoleMapping keycloakRoleMapping = roleMappings.getFirst();
         keycloakClient.createRoleRepresentationForClient(idOfClient, keycloakRoleMapping);
 
         KeycloakRoleMapping roleRepresentationForClient = keycloakClient.getRoleRepresentationForClient(
@@ -182,6 +182,6 @@ public class KeycloakClientCrudIT {
 
     private String getIdOfClient(String clientId) {
         List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(clientId);
-        return clients.get(0).getId();
+        return clients.getFirst().getId();
     }
 }
