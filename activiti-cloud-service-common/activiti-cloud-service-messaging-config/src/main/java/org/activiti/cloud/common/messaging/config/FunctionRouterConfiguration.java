@@ -76,6 +76,7 @@ public class FunctionRouterConfiguration {
     public static final String FUNCTION_DESTINATION = "spring.cloud.function.destination";
     public static final String FUNCTION_ROUTER_INPUT = "functionRouterInput";
     public static final String FUNCTION_ROUTER_ANONYMOUS_INPUT = "functionRouterAnonymousInput";
+    public static final String CONNECTOR_TYPE = "connectorType";
 
     @Bean
     ApplicationRunner functionRouterConfigurationApplicationRunner(
@@ -140,8 +141,8 @@ public class FunctionRouterConfiguration {
         return (message, routingContext) -> {
             Optional
                 .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
+                .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
-                .or(() -> Optional.ofNullable(message.getHeaders().get("connectorType", String.class)))
                 .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))
                 .ifPresentOrElse(
