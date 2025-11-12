@@ -129,6 +129,7 @@ public abstract class BaseBPMNActivityEventHandler {
         BPMNActivity activitiEntity = activityEvent.getEntity();
         String pkId = BPMNActivityEntity.IdBuilderHelper.from(activitiEntity);
 
+        logger.error("AAE-39417: CHECKING VERSION ");
         logger.error("AAE-39417: pkId from activity " + pkId);
 
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
