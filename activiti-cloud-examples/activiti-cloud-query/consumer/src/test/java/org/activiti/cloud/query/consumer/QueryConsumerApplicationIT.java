@@ -18,19 +18,43 @@ package org.activiti.cloud.query.consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 
 @SpringBootTest(classes = { QueryConsumerApplication.class })
+@EnableCleanupLiquibaseAfterTest
+@EnableBinderFactoryListenerTestContext
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryConsumerApplicationIT {
 
-    @Autowired
-    private Environment environment;
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
+
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
+
+    @Autowired
+    protected Environment environment;
+
+    @Autowired
+    protected ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {}
@@ -47,5 +71,36 @@ public class QueryConsumerApplicationIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .hasSize(2)
+            .containsOnlyKeys("engineEvents.query", "engineEvents.audit");
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 }
