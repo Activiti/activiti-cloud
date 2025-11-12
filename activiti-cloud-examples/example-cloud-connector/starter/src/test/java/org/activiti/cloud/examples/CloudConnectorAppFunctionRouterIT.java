@@ -17,11 +17,9 @@ package org.activiti.cloud.examples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
@@ -29,15 +27,6 @@ public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
-
-    @Autowired
-    private Environment environment;
-
-    @Test
-    void contextLoads() {}
 
     @Test
     void bindingServiceProperties() {

@@ -19,7 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -27,22 +32,30 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.containers.RabbitMQContainer;
 
 @SpringBootTest(
     classes = RuntimeBundleApplication.class,
     properties = {
-        "activiti.cloud.messaging.rabbitmq.compress=true", "activiti.cloud.messaging.rabbitmq.compression-level=9",
+        "activiti.cloud.application.name=default-app",
+        "activiti.cloud.messaging.rabbitmq.compress=true",
+        "activiti.cloud.messaging.rabbitmq.compression-level=9",
     }
 )
+@EnableCleanupLiquibaseAfterTest
+@EnableBinderFactoryListenerTestContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@Testcontainers
+@ResourceLocks(value = { @ResourceLock("rabbitmq"), @ResourceLock("postgres") })
 public class RuntimeBundleApplicationIT {
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
+
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
+
+    @Autowired
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -59,6 +72,43 @@ public class RuntimeBundleApplicationIT {
     }
 
     @Test
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "engineEvents.query",
+                "engineEvents.audit",
+                "messageEvents_default-app.messages",
+                "signalEvent.my-runtime-bundle",
+                "commandConsumer_default-app.my-runtime-bundle",
+                "asyncExecutorJobs_default-app.my-runtime-bundle",
+                "integrationResult_my-runtime-bundle.my-runtime-bundle",
+                "integrationError_my-runtime-bundle.my-runtime-bundle"
+            );
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "commandResults_default-app",
+                "engineEvents",
+                "asyncExecutorJobs_default-app",
+                "commandConsumer_default-app",
+                "messageEvents_default-app",
+                "signalEvent",
+                "integrationResult_my-runtime-bundle",
+                "integrationError_my-runtime-bundle"
+            );
+    }
+
+    @Test
     void rabbitBinderCompression() {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
             .isEqualTo(9);
@@ -70,5 +120,19 @@ public class RuntimeBundleApplicationIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
     }
 }
