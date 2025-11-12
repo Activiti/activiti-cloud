@@ -184,8 +184,6 @@ create table task_variable
 );
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
-alter table bpmn_activity
-    add constraint bpmn_activity_processInstance_elementId_idx unique (process_instance_id, element_id);
 create index bpmn_sequence_flow_processInstance_idx on bpmn_sequence_flow (process_instance_id);
 create index bpmn_sequence_flow_elementId_idx on bpmn_sequence_flow (element_id);
 create index bpmn_sequence_flow_processInstance_elementId_idx on bpmn_sequence_flow (process_instance_id, element_id);
