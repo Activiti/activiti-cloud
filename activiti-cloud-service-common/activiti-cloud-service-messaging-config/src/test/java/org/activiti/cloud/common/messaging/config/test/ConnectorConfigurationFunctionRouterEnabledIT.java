@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -29,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Import;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
@@ -41,32 +37,24 @@ import org.springframework.test.context.TestPropertySource;
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
     }
 )
-@Import(FunctionBindingConfigurationFunctionRouterEnabledIT.ApplicationConfig.class)
-public class FunctionBindingConfigurationFunctionRouterEnabledIT extends FunctionBindingConfigurationIT {
+@Import(ConnectorConfigurationFunctionRouterEnabledIT.ApplicationConfig.class)
+public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConfigurationIT {
 
     @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
     @Test
     @Override
-    void testInputBindingsDefinitions() {
-        Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions
-            .assertThat(bindingServiceProperties.getInputBindings())
-            .doesNotContain(FUNCTION_COMMAND_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
-            .isNull();
-        Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_AUDIT_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
-            .isNull();
-        Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_QUERY_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
-            .isNull();
+    void defaultErrorHandlerDefinition() {
+        AssertionsForClassTypes
+            .assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_INPUT))
+            .extracting(BindingProperties::getErrorHandlerDefinition)
+            .isEqualTo(MY_ERROR_HANDLER);
+
+        AssertionsForClassTypes
+            .assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_ANONYMOUS_INPUT))
+            .extracting(BindingProperties::getErrorHandlerDefinition)
+            .isEqualTo(MY_ERROR_HANDLER);
     }
 
     @Test
@@ -81,11 +69,12 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
             .assertThat(bindings)
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys(
-                "auditProducer",
+                "functionRouterInput",
+                "functionRouterAnonymousInput",
                 "commandResults",
                 "integrationResults",
-                "functionRouterInput",
-                "functionRouterAnonymousInput"
+                "auditProducer",
+                "script.EXECUTE"
             );
     }
 }

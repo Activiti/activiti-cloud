@@ -42,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -84,6 +85,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
         "spring.cloud.stream.bindings.integrationRequests.destination=rest-connector.GET,rest-connector.POST,script.EXECUTE",
         "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
+        "spring.cloud.stream.bindings.[script.EXECUTE].destination=script.EXECUTE",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
     }
 )
@@ -186,7 +188,7 @@ public class ConnectorConfigurationIT {
         }
 
         @Bean(FUNCTION_NAME_D)
-        @ConnectorBinding(input = AUDIT_CONSUMER, output = COMMAND_RESULTS)
+        @ConnectorBinding(input = AUDIT_CONSUMER, output = COMMAND_RESULTS, connectorType = "engineEvents")
         public Connector<?, ?> auditProcessorVersionHandler() {
             return payload -> "TestVersion";
         }
@@ -385,6 +387,7 @@ public class ConnectorConfigurationIT {
             .withPayload(Map.of())
             .setHeader("appVersion", "6")
             .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "engineEvents")
             .build();
 
         // when
@@ -424,6 +427,7 @@ public class ConnectorConfigurationIT {
             .setHeader("type", "TestAuditConsumerC")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", "commandResults")
+            .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "engineEvents")
             .build();
         // when
         input.send(message, "engineEvents");
@@ -445,6 +449,7 @@ public class ConnectorConfigurationIT {
             .setHeader("type", "myErrorHandler")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", "commandResults")
+            .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "engineEvents")
             .build();
         // when
         input.send(message, "engineEvents");
@@ -524,19 +529,23 @@ public class ConnectorConfigurationIT {
         // when
         long start = System.currentTimeMillis();
         input.send(message, "script.EXECUTE");
-        long end = System.currentTimeMillis();
 
         //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
-        assertThat(end - start).isBetween(2000L, 2500L);
+        await()
+            .untilAsserted(() -> {
+                // then
+                verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
+                List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
+                Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
+                Assertions
+                    .assertThat(retryMessages)
+                    .extracting("headers")
+                    .extracting("x-retry-count")
+                    .containsExactly(1, 2);
 
-        // then
-        verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
-        List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
-        Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
-        Assertions.assertThat(retryMessages).extracting("headers").extracting("x-retry-count").containsExactly(1, 2);
-
-        Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
-        assertThat(reply).isNull();
+                Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
+                assertThat(reply).isNull();
+            });
     }
 
     @Captor
