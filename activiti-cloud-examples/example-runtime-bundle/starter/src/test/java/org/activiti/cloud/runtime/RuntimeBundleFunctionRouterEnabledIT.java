@@ -20,33 +20,47 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@TestPropertySource(
-    properties = { "activiti.cloud.messaging.function-router.enabled=true", "activiti.cloud.application.name=myapp" }
-)
-@Testcontainers
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicationIT {
 
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
+    @Autowired
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Autowired
-    private BindingServiceProperties bindingServiceProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected Environment environment;
 
-    @Autowired
-    private Environment environment;
+    @Test
+    @Override
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .isNotEmpty()
+            .containsOnlyKeys("consumer", "my-runtime-bundle");
+    }
+
+    @Test
+    @Override
+    void rabbitExchanges() {
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "commandResults_default-app",
+                "engineEvents",
+                "asyncExecutorJobs_default-app",
+                "commandConsumer_default-app",
+                "messageEvents_default-app",
+                "signalEvent",
+                "integrationResult_my-runtime-bundle",
+                "integrationError_my-runtime-bundle"
+            );
+    }
 
     @Test
     void bindingServiceProperties() {
@@ -116,9 +130,9 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
 
         assertThat(functionRouter.registrations())
             .containsOnlyKeys(
-                "commandConsumer_myapp",
-                "asyncExecutorJobs_myapp",
-                "messageEvents_myapp",
+                "commandConsumer_default-app",
+                "asyncExecutorJobs_default-app",
+                "messageEvents_default-app",
                 "integrationResult_my-runtime-bundle",
                 "integrationError_my-runtime-bundle",
                 "signalEvent"

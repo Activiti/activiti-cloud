@@ -32,10 +32,12 @@
     <module>activiti-cloud-service-common-liquibase</module>
     <module>activiti-cloud-service-messaging-config</module>
     <module>activiti-cloud-service-messaging-starter</module>
+    <module>activiti-cloud-services-test-liquibase</module>
+    <module>activiti-cloud-services-test-binder</module>
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>8.8.0-alpha.111</activiti.version>
+    <activiti.version>8.8.0-alpha.113</activiti.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-lang3.version>3.18.0</commons-lang3.version>

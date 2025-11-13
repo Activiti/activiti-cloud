@@ -18,36 +18,11 @@ package org.activiti.cloud.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@TestPropertySource(
-    properties = { "activiti.cloud.messaging.function-router.enabled=true", "spring.sql.init.mode=always" }
-)
-@Testcontainers
+@TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
 public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT {
-
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Autowired
-    private BindingServiceProperties bindingServiceProperties;
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     void bindingServiceProperties() {
@@ -79,5 +54,16 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
                     .containsOnly("engineEventsGraphQlSourceConsumer_registration")
                     .isNotEmpty()
             );
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues())
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer.")));
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
     }
 }

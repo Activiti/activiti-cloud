@@ -27,21 +27,31 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.examples.connectors.*;
+import org.activiti.cloud.examples.connectors.CustomPojo;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.RabbitMQContainer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { CloudConnectorApp.class })
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:test.properties")
+@ResourceLock("rabbitmq")
+@EnableBinderFactoryListenerTestContext
 public class CloudConnectorAppIT {
+
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     private static final String CONNECTOR_SUFFIX = "Connector";
 
@@ -58,18 +68,47 @@ public class CloudConnectorAppIT {
     private FunctionCatalog functionCatalog;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
 
     @Test
-    public void contextShouldLoad() throws Exception {
+    void contextLoads() {
         //then
         assertThat(context).isNotNull();
         assertThat(appName).isNotEmpty();
 
         assertThat(functionCatalog).isNotNull();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues()).isNotEmpty().containsOnlyKeys("processing-connector");
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).isEmpty();
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys(
+                "restconnector.POST",
+                "restConnector.GET",
+                "test-bpmn-error-connector.throwError",
+                "test-error-connector.throwError",
+                "miCloudConnector",
+                "headers.GET",
+                "Movies.getMovieDesc",
+                "ExampleConnector"
+            );
     }
 
     @Test
@@ -105,6 +144,20 @@ public class CloudConnectorAppIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
     }
 
     private static String getRegisteredConnectorName(String functionName) {
