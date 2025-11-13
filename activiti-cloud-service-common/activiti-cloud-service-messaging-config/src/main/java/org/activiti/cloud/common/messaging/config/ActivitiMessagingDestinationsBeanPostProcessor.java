@@ -18,9 +18,11 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_ANONYMOUS_INPUT;
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -33,6 +35,7 @@ import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionConfigurationProperties;
 import org.springframework.core.Ordered;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
@@ -60,6 +63,22 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
         if (bean instanceof BindingServiceProperties bindingServiceProperties) {
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
             final var functionRouter = messagingProperties.getFunctionRouter();
+
+            // See https://github.com/spring-cloud/spring-cloud-stream/commit/afc8fa29da421f41fa70cedc4acc3b6c07addcf0
+            Optional
+                .ofNullable(ReflectionUtils.findField(BindingServiceProperties.class, "bindings", Map.class))
+                .stream()
+                .peek(ReflectionUtils::makeAccessible)
+                .findFirst()
+                .ifPresent(field -> {
+                    final var bindings = new ConcurrentSkipListMap<String, BindingProperties>(
+                        String.CASE_INSENSITIVE_ORDER
+                    );
+
+                    bindings.putAll(bindingServiceProperties.getBindings());
+
+                    ReflectionUtils.setField(field, bindingServiceProperties, bindings);
+                });
 
             bindingServiceProperties
                 .getBindings()
