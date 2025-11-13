@@ -135,6 +135,8 @@ public class ActivitiCloudMessagingProperties {
 
         private Integer compressionLevel = 1;
 
+        private String prefix;
+
         public Boolean getMissingAnonymousQueuesFatal() {
             return missingAnonymousQueuesFatal;
         }
@@ -165,6 +167,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setCompressionLevel(Integer compressionLevel) {
             this.compressionLevel = compressionLevel;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(String prefix) {
+            this.prefix = prefix;
         }
     }
 
