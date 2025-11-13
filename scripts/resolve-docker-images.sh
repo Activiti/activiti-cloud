@@ -113,22 +113,22 @@ cat > "$SCRIPT_DIR/../local-values.yaml" << EOF
 runtime-bundle:
   image:
     tag: "${RUNTIME_BUNDLE_TAG:-latest}"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 activiti-cloud-query:
   image:
     tag: "${QUERY_TAG:-latest}"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 activiti-cloud-connector:
   image:
     tag: "${CONNECTOR_TAG:-latest}"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 activiti-cloud-identity-adapter:
   image:
     tag: "${IDENTITY_ADAPTER_TAG:-latest}"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 EOF
 
 echo -e "${GREEN}✓ Created local-values.yaml with working image tags${NC}"
