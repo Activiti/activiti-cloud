@@ -139,6 +139,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder subprocessOf(ProcessInstanceEntity processInstance) {
+        process.setParentId(processInstance.getId());
+        return this;
+    }
+
     public ProcessInstanceEntity buildAndSave() {
         variableRepository.saveAll(process.getVariables());
         Instant instant = Instant.now();

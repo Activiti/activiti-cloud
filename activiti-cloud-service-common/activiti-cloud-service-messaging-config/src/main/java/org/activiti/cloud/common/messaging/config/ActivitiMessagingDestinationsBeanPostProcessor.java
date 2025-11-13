@@ -149,7 +149,16 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                 var overrideGroups = functionRouter
                                     .getRoutes()
                                     .get(bindingName)
-                                    .getOverrideRequiredProducerGroups();
+                                    .getOverrideRequiredProducerGroups()
+                                    .stream()
+                                    .map(it ->
+                                        Optional
+                                            .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                                            .map(prefix -> prefix.concat(it))
+                                            .orElse(it)
+                                    )
+                                    .toList();
+
                                 producer.setRequiredGroups(overrideGroups.toArray(new String[] {}));
 
                                 log.warn(
