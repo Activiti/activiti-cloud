@@ -17,35 +17,12 @@ package org.activiti.cloud.query.consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingProperties;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestPropertySource(properties = { "activiti.cloud.messaging.function-router.enabled=true" })
-@Testcontainers
 public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerApplicationIT {
-
-    @ServiceConnection
-    @Container
-    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine");
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @Autowired
-    private BindingServiceProperties bindingServiceProperties;
-
-    @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
 
     @Test
     void bindingServiceProperties() {
@@ -79,5 +56,11 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
                     .isNotEmpty()
             );
         assertThat(functionRouter.registrations("functionRouterAnonymousInput")).isEmpty();
+    }
+
+    @Test
+    @Override
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues()).isNotEmpty().hasSize(1).containsOnlyKeys("consumer");
     }
 }

@@ -95,12 +95,16 @@ public class FunctionRouterConfiguration {
     @Bean
     DeclarableCustomizer functionRouterAnonymousQueueCustomizer(ActivitiCloudMessagingProperties messagingProperties) {
         final var groupPrefix = messagingProperties.getFunctionRouter().groupPrefix();
+        final var queuePrefix = Optional
+            .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+            .map(prefix -> prefix.concat(groupPrefix))
+            .orElse(groupPrefix);
 
         return declarable -> {
             if (declarable instanceof Queue queue) {
                 Optional
                     .ofNullable(queue.getName())
-                    .filter(it -> it.startsWith(groupPrefix))
+                    .filter(it -> it.startsWith(queuePrefix))
                     .ifPresent(name -> queue.setLeaderLocator("client-local"));
             }
 
