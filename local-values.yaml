@@ -10,7 +10,7 @@ runtime-bundle:
 activiti-cloud-query:
   image:
     tag: "8.8.0-alpha.108"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 activiti-cloud-connector:
   image:
