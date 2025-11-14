@@ -83,7 +83,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
-        "spring.cloud.stream.bindings.integrationRequests.destination=rest-connector.GET,rest-connector.POST,script.EXECUTE",
+        "spring.cloud.stream.bindings.integrationrequests.destination=rest-connector.GET,rest-connector.POST,script.EXECUTE",
         "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.bindings.[script.EXECUTE].destination=script.EXECUTE",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
@@ -546,6 +546,12 @@ public class ConnectorConfigurationIT {
                 Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
                 assertThat(reply).isNull();
             });
+    }
+
+    @Test
+    void shouldUseCaseInsensitiveMatchForBindingsProperties() {
+        assertThat(bindingServiceProperties.getBindings().get("integrationRequests"))
+            .isEqualTo(bindingServiceProperties.getBindings().get("integrationrequests"));
     }
 
     @Captor
