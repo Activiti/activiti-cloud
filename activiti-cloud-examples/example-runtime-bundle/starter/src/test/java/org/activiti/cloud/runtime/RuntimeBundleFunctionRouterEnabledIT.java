@@ -100,7 +100,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
         assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
             .containsOnly("consumer");
         assertThat(bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups())
-            .containsOnly("auditIncidents");
+            .containsOnly("audit");
     }
 
     @Test
