@@ -34,11 +34,18 @@ import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
+import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
+import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -53,14 +60,28 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 
 @SpringBootTest(
     classes = { QueryRestApplication.class },
-    properties = "identity.test.token-interceptor.enabled=false",
+    properties = { "identity.test.token-interceptor.enabled=false", "spring.sql.init.mode=always" },
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@EnableCleanupLiquibaseAfterTest
+@EnableBinderFactoryListenerTestContext
+@ResourceLocks(value = { @ResourceLock("postgres"), @ResourceLock("rabbitmq") })
 public class QueryRestApplicationIT {
+
+    @ServiceConnection
+    static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
+
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
+
+    @Autowired
+    protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;
 
     @Autowired
     private WebApplicationContext context;
@@ -81,10 +102,13 @@ public class QueryRestApplicationIT {
     private GraphQLSchema graphQLSchema;
 
     @Autowired
-    private Environment environment;
+    protected Environment environment;
 
     @Autowired
-    private ActivitiCloudMessagingProperties messagingProperties;
+    protected ActivitiCloudMessagingProperties messagingProperties;
+
+    @Autowired
+    protected BindingServiceProperties bindingServiceProperties;
 
     @Test
     public void contextLoads() {
@@ -245,6 +269,35 @@ public class QueryRestApplicationIT {
     void messagingPropertiesRabbitMqCompression() {
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
+    }
+
+    @Test
+    void messagingRabbitMqPrefixProperties() {
+        assertThat(messagingProperties.getRabbitmq().getPrefix()).isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitBinderDefaultPrefix() {
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
+            .isNullOrEmpty();
+        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
+            .isNullOrEmpty();
+    }
+
+    @Test
+    void rabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getQueues()).isEmpty();
+    }
+
+    @Test
+    void anonymousRabbitQueues() {
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
+            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous.")));
+    }
+
+    @Test
+    void rabbitExchanges() {
+        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {

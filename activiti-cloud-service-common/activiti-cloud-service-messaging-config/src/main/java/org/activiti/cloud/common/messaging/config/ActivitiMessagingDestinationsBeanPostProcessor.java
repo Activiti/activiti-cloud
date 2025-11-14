@@ -149,7 +149,16 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                 var overrideGroups = functionRouter
                                     .getRoutes()
                                     .get(bindingName)
-                                    .getOverrideRequiredProducerGroups();
+                                    .getOverrideRequiredProducerGroups()
+                                    .stream()
+                                    .map(it ->
+                                        Optional
+                                            .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                                            .map(prefix -> prefix.concat(it))
+                                            .orElse(it)
+                                    )
+                                    .toList();
+
                                 producer.setRequiredGroups(overrideGroups.toArray(new String[] {}));
 
                                 log.warn(
@@ -172,6 +181,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingProperties.setDestination(destination);
                     bindingProperties.setGroup(new Base64UrlNamingStrategy(groupPrefix).generateName());
                     bindingProperties.setConsumer(functionRouter.getAnonymous().getConsumer());
+                    bindingProperties.setErrorHandlerDefinition(functionRouter.getErrorHandlerDefinition());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_ANONYMOUS_INPUT, bindingProperties);
 
@@ -191,6 +201,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     bindingProperties.setDestination(destination);
                     bindingProperties.setGroup(group);
                     bindingProperties.setConsumer(functionRouter.getConsumer());
+                    bindingProperties.setErrorHandlerDefinition(functionRouter.getErrorHandlerDefinition());
 
                     bindingServiceProperties.getBindings().put(FUNCTION_ROUTER_INPUT, bindingProperties);
 

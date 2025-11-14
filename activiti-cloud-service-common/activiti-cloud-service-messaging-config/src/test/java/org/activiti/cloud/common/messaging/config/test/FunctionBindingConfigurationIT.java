@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
@@ -26,8 +27,10 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -66,13 +69,13 @@ import org.springframework.messaging.support.MessageBuilder;
 @Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
 public class FunctionBindingConfigurationIT {
 
-    private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
-    private static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
-    private static final String FUNCTION_AUDIT_SUPPLIER_NAME = "auditProducer" + OUTPUT_BINDING;
-    private static final String FUNCTION_COMMAND_SUPPLIER_NAME = "commandResults" + OUTPUT_BINDING;
-    private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
-    private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
-    private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
+    static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
+    static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
+    static final String FUNCTION_AUDIT_SUPPLIER_NAME = "auditProducer" + OUTPUT_BINDING;
+    static final String FUNCTION_COMMAND_SUPPLIER_NAME = "commandResults" + OUTPUT_BINDING;
+    static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
+    static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
+    static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
 
     private static Message<?> consumerMessage = null;
 
@@ -86,7 +89,7 @@ public class FunctionBindingConfigurationIT {
     private FunctionRegistry functionRegistry;
 
     @Autowired
-    private StreamFunctionProperties streamFunctionProperties;
+    protected StreamFunctionProperties streamFunctionProperties;
 
     @Autowired
     private BindingResolver bindingResolver;
@@ -95,13 +98,16 @@ public class FunctionBindingConfigurationIT {
     private BindingServiceProperties bindingServiceProperties;
 
     @Autowired
-    private ConfigurableApplicationContext context;
+    protected ConfigurableApplicationContext context;
 
     @Autowired
     private InputDestination input;
 
     @Autowired
     private OutputDestination output;
+
+    @Autowired
+    protected ActivitiCloudMessagingProperties messagingProperties;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -228,15 +234,18 @@ public class FunctionBindingConfigurationIT {
         Message<String> message = MessageBuilder.withPayload("Test").setHeader("type", "Test Consumer").build();
 
         // when
-        input.send(message, "engineEvents");
+        send(message, "engineEvents");
 
         // then
-        assertThat(consumerMessage).isNotNull();
-        assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Consumer");
+        await()
+            .untilAsserted(() -> {
+                assertThat(consumerMessage).isNotNull();
+                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Consumer");
+            });
     }
 
     @Test
-    public void testFunctionBindings() throws InterruptedException {
+    public void testFunctionBindings() {
         // given
         Message<String> message = MessageBuilder.withPayload("Test").setHeader("type", "Test Consumer").build();
 
@@ -244,11 +253,11 @@ public class FunctionBindingConfigurationIT {
         channels.commandConsumer().send(message);
 
         // then
-        assertThat(consumerMessage).isNotNull();
-        assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
-
         await()
             .untilAsserted(() -> {
+                assertThat(consumerMessage).isNotNull();
+                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+
                 Message<?> outputMessage = output.receive(
                     1000,
                     bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
@@ -256,5 +265,15 @@ public class FunctionBindingConfigurationIT {
                 assertThat(outputMessage).isNotNull();
                 assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
             });
+    }
+
+    protected void send(Message<String> message, String destination) {
+        final var messageToSend = Optional
+            .of(message)
+            .filter(it -> messagingProperties.getFunctionRouter().isEnabled())
+            .map(it -> MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build())
+            .orElse(message);
+
+        input.send(messageToSend, destination);
     }
 }

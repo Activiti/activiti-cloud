@@ -17,9 +17,11 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
@@ -38,6 +40,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
@@ -135,5 +139,32 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     protected MessageConverterConfigurer getMessageConverterConfigurer() {
         return applicationContext.getBean("messageConverterConfigurer", MessageConverterConfigurer.class);
+    }
+
+    protected String registerConnectorFlowFunction(IntegrationFlow connectorFlow, String beanName) {
+        final Consumer<Message<?>> connectorFlowFunction = connectorFlow.getInputChannel()::send;
+
+        final var connectorFlowFunctionRegistration = new FunctionRegistration<>(connectorFlowFunction)
+            .type(new MessageConsumerParametrizedType());
+
+        return registerFunctionRegistration(beanName, connectorFlowFunctionRegistration);
+    }
+
+    static class MessageConsumerParametrizedType implements ParameterizedType {
+
+        @Override
+        public Type[] getActualTypeArguments() {
+            return new Type[] { Message.class };
+        }
+
+        @Override
+        public Type getRawType() {
+            return Consumer.class;
+        }
+
+        @Override
+        public Type getOwnerType() {
+            return null;
+        }
     }
 }

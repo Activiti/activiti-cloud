@@ -161,7 +161,7 @@ public class ProcessInstanceAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminService.search(searchRequest, pageable),
+            processInstanceAdminControllerHelper.searchProcessInstances(searchRequest, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -189,5 +189,21 @@ public class ProcessInstanceAdminController {
     @PostMapping("/count")
     public Long searchProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {
         return processInstanceAdminService.count(searchRequest);
+    }
+
+    @JsonView(JsonViews.General.class)
+    @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> subprocesses(
+        @PathVariable String processInstanceId,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceAdminControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable),
+            processInstanceRepresentationModelAssembler
+        );
     }
 }

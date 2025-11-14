@@ -135,6 +135,8 @@ public class ActivitiCloudMessagingProperties {
 
         private Integer compressionLevel = 1;
 
+        private String prefix;
+
         public Boolean getMissingAnonymousQueuesFatal() {
             return missingAnonymousQueuesFatal;
         }
@@ -165,6 +167,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setCompressionLevel(Integer compressionLevel) {
             this.compressionLevel = compressionLevel;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+
+        public void setPrefix(String prefix) {
+            this.prefix = prefix;
         }
     }
 
@@ -424,6 +434,8 @@ public class ActivitiCloudMessagingProperties {
         @NotEmpty
         private String group = "function-router";
 
+        private String errorHandlerDefinition;
+
         private int maxRetries = 3;
 
         private Duration retryInterval = Duration.ofMillis(10);
@@ -603,7 +615,8 @@ public class ActivitiCloudMessagingProperties {
                 maxRetries,
                 retryInterval,
                 consumer,
-                anonymous
+                anonymous,
+                errorHandlerDefinition
             );
         }
 
@@ -619,11 +632,20 @@ public class ActivitiCloudMessagingProperties {
                 .add("retryInterval=" + retryInterval)
                 .add("consumer=" + consumer)
                 .add("anonymous=" + anonymous)
+                .add("errorHandlerDefinition=" + errorHandlerDefinition)
                 .toString();
         }
 
         public FunctionRouterAnonymousProperties getAnonymous() {
             return anonymous;
+        }
+
+        public String getErrorHandlerDefinition() {
+            return errorHandlerDefinition;
+        }
+
+        public void setErrorHandlerDefinition(String errorHandlerDefinition) {
+            this.errorHandlerDefinition = errorHandlerDefinition;
         }
     }
 

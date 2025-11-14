@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,15 +138,7 @@ class ToCloudProcessRuntimeEventConverterTest {
         processInstance.setProcessDefinitionId("myProcessDef");
         processInstance.setInitiator(USERNAME);
 
-        IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
-        identityLink.setDetails(USERNAME_GUID.getBytes());
-        identityLink.setType(ActorConstants.ACTOR_TYPE);
-
-        when(this.commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
-        when(executionEntityManager.findById(any())).thenReturn(executionEntity);
-        when(executionEntity.getIdentityLinks()).thenReturn(List.of(identityLink));
-
-        ProcessCompletedImpl event = new ProcessCompletedImpl(processInstance);
+        ProcessCompletedImpl event = new ProcessCompletedImpl(processInstance, USERNAME_GUID);
 
         //when
         CloudProcessCompletedEvent processCompleted = converter.from(event);
@@ -160,7 +153,7 @@ class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processCompleted.getActor()).isEqualTo(USERNAME_GUID);
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(this.processAuditServiceInfoAppender)
+        verify(this.processAuditServiceInfoAppender, never())
             .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
     }
 }
