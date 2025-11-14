@@ -45,11 +45,11 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived;
             if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
-                IntegrationContext sanitizedContext = new IntegrationContextImpl(
+                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
                     (IntegrationContextImpl) integrationError.getIntegrationContext()
                 );
-                sanitizedContext.getOutBoundVariables().clear();
-                sanitizedContext.getInBoundVariables().clear();
+                sanitizedContext.clearOutBoundVariables();
+                sanitizedContext.clearInBoundVariables();
                 integrationErrorReceived = createIntegrationErrorReceivedEvent(sanitizedContext);
             } else {
                 integrationErrorReceived =
@@ -61,10 +61,10 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
     }
 
     private CloudIntegrationErrorReceivedEventImpl createIntegrationErrorReceivedEvent(
-        IntegrationContext sanitizedContext
+        IntegrationContext integrationContext
     ) {
         return new CloudIntegrationErrorReceivedEventImpl(
-            sanitizedContext,
+            integrationContext,
             integrationError.getErrorCode(),
             integrationError.getErrorMessage(),
             integrationError.getErrorClassName(),

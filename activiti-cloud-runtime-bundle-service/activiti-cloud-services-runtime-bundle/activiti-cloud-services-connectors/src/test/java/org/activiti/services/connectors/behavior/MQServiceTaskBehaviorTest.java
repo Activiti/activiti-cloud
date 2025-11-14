@@ -224,12 +224,7 @@ class MQServiceTaskBehaviorTest {
         );
 
         //given
-        DelegateExecution execution = anExecution()
-            .withId(EXECUTION_ID)
-            .withProcessInstanceId(PROC_INST_ID)
-            .withProcessDefinitionId(PROC_DEF_ID)
-            .withFlowNodeId(FLOW_NODE_ID)
-            .build();
+        DelegateExecution execution = anExecution().build();
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
@@ -261,12 +256,7 @@ class MQServiceTaskBehaviorTest {
         );
 
         //given
-        DelegateExecution execution = anExecution()
-            .withId(EXECUTION_ID)
-            .withProcessInstanceId(PROC_INST_ID)
-            .withProcessDefinitionId(PROC_DEF_ID)
-            .withFlowNodeId(FLOW_NODE_ID)
-            .build();
+        DelegateExecution execution = anExecution().build();
 
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
