@@ -37,25 +37,31 @@ public abstract class BaseIntegrationEventHandler {
 
     protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+        String pkId = integrationContext.getId();
 
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
+
+        if (entity != null) {
+            logger.error("AAE-39414: Great, Found IntegrationContextEntity with id " + pkId);
+        } else {
+            logger.error("AAE-39414: NOT Found IntegrationContextEntity with id " + pkId);
+        }
 
         return Optional.ofNullable(entity);
     }
 
     protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-        String id = integrationContext.getId() + ":" + integrationContext.getClientId();
+        String pkId = integrationContext.getId();
 
-        logger.error("AAE-39413: Looking for ServiceTaskEntity with id " + id);
+        logger.error("AAE-39413: Looking for ServiceTaskEntity with id " + pkId);
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, id);
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, pkId);
 
         if (serviceTaskEntity != null) {
-            logger.error("AAE-39414: Great, Found ServiceTaskEntity with id " + id);
+            logger.error("AAE-39414: Great, Found ServiceTaskEntity with id " + pkId);
         } else {
-            logger.error("AAE-39414: NOT Found ServiceTaskEntity with id " + id);
+            logger.error("AAE-39414: NOT Found ServiceTaskEntity with id " + pkId);
         }
 
         return Optional.ofNullable(serviceTaskEntity);

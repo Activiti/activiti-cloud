@@ -78,6 +78,8 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setServiceTask(serviceTaskEntity);
 
         entityManager.persist(entity);
+
+        logger.error("AAE-39413: Created IntegrationContextEntity with id: " + entity.getId());
     }
 
     @Override
@@ -98,7 +100,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
             event.getAppName(),
             event.getAppVersion()
         );
-        serviceTaskEntity.setId(integrationContext.getId() + ":" + integrationContext.getClientId());
+        serviceTaskEntity.setId(integrationContext.getId());
         serviceTaskEntity.setElementId(integrationContext.getClientId());
         serviceTaskEntity.setActivityName(integrationContext.getClientName());
         serviceTaskEntity.setActivityType("serviceTask");
@@ -143,7 +145,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
             ", BusinessKey: " +
             integrationContext.getBusinessKey();
 
-        logger.error("AAE-39416: Created new ServiceTask: " + serviceTaskInfo);
+        logger.error("AAE-39416: Created new ServiceTask with ID: " + integrationContext.getId());
 
         return serviceTaskEntity;
     }
