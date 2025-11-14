@@ -145,11 +145,11 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             FunctionRegistration functionRegistration = new FunctionRegistration(bean)
                                 .type(functionType);
 
-                            var functionBeanName = registerFunctionRegistration(beanName, functionRegistration);
+                            final var functionDefinition = functionRouter.isEnabled()
+                                ? beanName.concat("Target")
+                                : beanName;
 
-                            if (functionRouter.isEnabled()) {
-                                functionRouter.register(functionBinding.input(), functionBeanName);
-                            }
+                            registerFunctionRegistration(functionDefinition, functionRegistration);
 
                             GenericSelector<Message<?>> selector = Optional
                                 .ofNullable(functionBinding)
@@ -160,7 +160,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
                             if (Supplier.class.isInstance(bean)) {
-                                FunctionInvocationWrapper supplier = functionFromDefinition(beanName);
+                                FunctionInvocationWrapper supplier = functionFromDefinition(functionDefinition);
 
                                 IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow
                                     .fromSupplier(supplier)
@@ -176,7 +176,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 integrationFlowContext.registration(supplierFlowBuilder.get()).register();
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
-                                    FunctionInvocationWrapper function = functionFromDefinition(beanName);
+                                    FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                     return function.apply(message);
                                 };
 
@@ -201,12 +201,20 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                         .channel(functionBinding.output());
                                 }
 
+                                final var connectorFlow = functionFlowBuilder.get();
+
                                 IntegrationFlow inputChannelFlow = IntegrationFlow
                                     .from(functionBinding.input())
-                                    .gateway(functionFlowBuilder.get(), spec -> spec.replyTimeout(0L))
+                                    .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                                     .get();
 
                                 integrationFlowContext.registration(inputChannelFlow).register();
+
+                                if (functionRouter.isEnabled()) {
+                                    final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
+
+                                    functionRouter.register(functionBinding.input(), functionBeanName);
+                                }
                             }
                         });
                 }
