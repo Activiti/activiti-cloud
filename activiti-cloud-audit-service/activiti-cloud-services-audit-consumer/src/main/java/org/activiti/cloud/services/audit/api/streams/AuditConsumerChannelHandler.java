@@ -21,6 +21,4 @@ import org.springframework.messaging.handler.annotation.Headers;
 
 public interface AuditConsumerChannelHandler {
     void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
-
-    void receiveCloudRuntimeEventIncidents(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
 }

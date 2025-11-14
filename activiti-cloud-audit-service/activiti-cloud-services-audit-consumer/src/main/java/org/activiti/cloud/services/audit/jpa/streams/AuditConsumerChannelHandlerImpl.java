@@ -59,18 +59,6 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
         }
     }
 
-    @Override
-    public void receiveCloudRuntimeEventIncidents(
-        @Headers Map<String, Object> headers,
-        CloudRuntimeEvent<?, ?>... events
-    ) {
-        if (events == null) {
-            return;
-        }
-        List<AuditEventEntity> entities = convertAndSaveEvents(headers, events);
-        LOGGER.error("Incidents received: {}", entities);
-    }
-
     private List<AuditEventEntity> convertAndSaveEvents(Map<String, Object> headers, CloudRuntimeEvent<?, ?>[] events) {
         var counter = new AtomicInteger(0);
         List<AuditEventEntity> entities = new ArrayList<>();

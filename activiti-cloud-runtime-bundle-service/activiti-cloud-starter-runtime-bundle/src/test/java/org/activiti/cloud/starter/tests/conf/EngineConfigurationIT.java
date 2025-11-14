@@ -126,11 +126,11 @@ class EngineConfigurationIT {
         //then
         assertThat(auditProducerIncidents.getDestination())
             .as("should have required groups set for audit producer incidents")
-            .isEqualTo("namespace.engineeventsincidents");
+            .isEqualTo("namespace.engine-events");
 
         assertThat(auditProducerIncidents.getProducer().getRequiredGroups())
             .as("should have required groups set for audit producer")
-            .containsExactly("auditIncidents");
+            .containsExactly("audit");
     }
 
     @Test

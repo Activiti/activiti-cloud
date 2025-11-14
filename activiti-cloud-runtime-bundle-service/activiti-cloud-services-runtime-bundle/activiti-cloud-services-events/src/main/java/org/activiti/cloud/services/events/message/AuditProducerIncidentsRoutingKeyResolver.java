@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class AuditProducerIncidentsRoutingKeyResolver extends AbstractMessageHeadersRoutingKeyResolver {
 
-    public final String ROUTING_KEY_PREFIX = "engineEventsIncidents";
+    public final String ROUTING_KEY_PREFIX = "engineEvents";
 
     public final String[] HEADER_KEYS = {
         RuntimeBundleInfoMessageHeaders.SERVICE_NAME,

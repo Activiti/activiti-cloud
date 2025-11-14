@@ -27,7 +27,7 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
     @Test
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys("auditConsumer", "queryConsumer", "auditConsumerIncidents")
+            .doesNotContainKeys("auditConsumer", "queryConsumer")
             .containsOnlyKeys("functionRouterInput", "producer");
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
@@ -41,22 +41,18 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getFunctionRoutes())
-            .containsOnly("auditConsumer", "queryConsumer", "auditConsumerIncidents");
+        assertThat(functionRouter.getFunctionRoutes()).containsOnly("auditConsumer", "queryConsumer");
         assertThat(functionRouter.destinations("functionRouterInput"))
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "auditConsumerIncidents");
+            .containsOnlyKeys("auditConsumer", "queryConsumer");
         assertThat(functionRouter.destinations("functionRouterAnonymousInput")).isEmpty();
         assertThat(functionRouter.registrations("functionRouterInput"))
-            .containsOnlyKeys("engineEvents", "engineEventsIncidents")
+            .containsOnlyKeys("engineEvents")
             .satisfies(registrations -> {
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
                         "queryConsumerFunction_registration",
                         "auditConsumerChannelHandlerConsumer_registration"
                     )
-                    .isNotEmpty();
-                assertThat(registrations.get("engineEventsIncidents"))
-                    .containsOnly("auditConsumerIncidentsChannelHandlerConsumer_registration")
                     .isNotEmpty();
             });
         assertThat(functionRouter.registrations("functionRouterAnonymousInput")).isEmpty();

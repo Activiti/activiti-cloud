@@ -26,8 +26,6 @@ public interface TestBindingsChannels {
 
     String AUDIT_CONSUMER = "auditConsumer";
 
-    String AUDIT_CONSUMER_INCIDENTS = "auditConsumerIncidents";
-
     String QUERY_CONSUMER = "queryConsumer";
 
     String COMMAND_RESULTS = "commandResults";
@@ -59,11 +57,6 @@ public interface TestBindingsChannels {
     @InputBinding(value = AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
-    }
-
-    @InputBinding(value = AUDIT_CONSUMER_INCIDENTS)
-    default SubscribableChannel auditConsumerIncidents() {
-        return MessageChannels.publishSubscribe(AUDIT_CONSUMER_INCIDENTS).getObject();
     }
 
     @OutputBinding(COMMAND_RESULTS)

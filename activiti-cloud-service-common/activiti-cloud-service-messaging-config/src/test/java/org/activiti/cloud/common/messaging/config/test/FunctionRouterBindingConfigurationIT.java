@@ -22,7 +22,6 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER_INCIDENTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_PRODUCER_INCIDENTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.ENGINE_EVENTS_CONSUMER;
@@ -79,8 +78,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.application.name=bar",
         "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
         "spring.cloud.stream.bindings.auditProducer.producer.required-groups=query,audit",
-        "spring.cloud.stream.bindings.auditProducerIncidents.destination=engineEventsIncidents",
-        "spring.cloud.stream.bindings.auditProducerIncidents.producer.required-groups=auditIncidents",
+        "spring.cloud.stream.bindings.auditProducerIncidents.destination=engineEvents",
+        "spring.cloud.stream.bindings.auditProducerIncidents.producer.required-groups=audit",
         "spring.cloud.stream.bindings.commandConsumer.destination=command-consumer",
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
@@ -95,8 +94,6 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.restConsumer.destination=rest.GET,rest.POST",
         "spring.cloud.stream.bindings.restConsumer.group=${spring.application.name}",
-        "spring.cloud.stream.bindings.auditConsumerIncidents.destination=engineEventsIncidents",
-        "spring.cloud.stream.bindings.auditConsumerIncidents.group=auditIncidents",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.max-retries=4",
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
@@ -105,7 +102,6 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.commandConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.queryConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditConsumer.enabled=true",
-        "activiti.cloud.messaging.function-router.routes.auditConsumerIncidents.enabled=true",
         "activiti.cloud.messaging.function-router.routes.integrationRequests.enabled=true",
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
@@ -130,7 +126,6 @@ public class FunctionRouterBindingConfigurationIT {
 
     private static final AtomicReference<Message<?>> queryMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> auditMessage = new AtomicReference<>();
-    private static final AtomicReference<Message<?>> auditIncidentsMessage = new AtomicReference<>();
     private static final AtomicReference<Message<?>> engineEventsMessage = new AtomicReference<>();
     private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
     private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
@@ -192,14 +187,6 @@ public class FunctionRouterBindingConfigurationIT {
             };
         }
 
-        @Bean
-        @FunctionBinding(input = AUDIT_CONSUMER_INCIDENTS)
-        public Consumer<Message<?>> auditConsumerIncidentsHandler() {
-            return message -> {
-                auditIncidentsMessage.set(message);
-            };
-        }
-
         @Bean(FUNCTION_PROCESSOR_NAME)
         @FunctionBinding(input = COMMAND_CONSUMER, output = TestBindingsChannels.COMMAND_RESULTS)
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
@@ -255,7 +242,6 @@ public class FunctionRouterBindingConfigurationIT {
     public void setUp() {
         queryMessage.set(null);
         auditMessage.set(null);
-        auditIncidentsMessage.set(null);
         connectorPayload.set(null);
         getPayload.set(null);
         postPayload.set(null);
@@ -305,7 +291,6 @@ public class FunctionRouterBindingConfigurationIT {
                     .asInstanceOf(InstanceOfAssertFactories.list(String.class))
                     .containsOnly(
                         "engine-events",
-                        "engineEventsIncidents",
                         "command-consumer",
                         "integration-requests",
                         "script.EXECUTE",
@@ -489,28 +474,6 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void testIncidentsConsumerBindings() {
-        // given
-        Message<String> message = MessageBuilder
-            .withPayload("Test")
-            .setHeader("type", "Test Consumer")
-            .setHeader(FUNCTION_DESTINATION, "engineEventsIncidents")
-            .build();
-
-        // when
-        input.send(message, "engineEventsIncidents");
-
-        // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(auditIncidentsMessage.get())
-                    .isNotNull()
-                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-                    .isEqualTo("auditConsumerIncidentsHandler_registration");
-            });
-    }
-
-    @Test
     void testFunctionBindings() {
         // given
         Message<String> message = MessageBuilder
@@ -636,7 +599,6 @@ public class FunctionRouterBindingConfigurationIT {
                 "commandConsumer",
                 "queryConsumer",
                 "auditConsumer",
-                "auditConsumerIncidents",
                 "integrationRequests",
                 "scriptRuntimeConsumer",
                 "engineEventsConsumer",
@@ -658,7 +620,6 @@ public class FunctionRouterBindingConfigurationIT {
                         "engineEventsConsumerHandler_registration"
                     )
                 ),
-                Map.entry("engineEventsIncidents", List.of("auditConsumerIncidentsHandler_registration")),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
                 Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
                 Map.entry("rest.GET", List.of("restConsumerGetHandler_registration"))
@@ -675,7 +636,6 @@ public class FunctionRouterBindingConfigurationIT {
                     "engine-events",
                     List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
                 ),
-                Map.entry("engineEventsIncidents", List.of("auditConsumerIncidentsHandler_registration")),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
                 Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
                 Map.entry("rest.POST", List.of("restConsumerPostHandler_registration"))
@@ -705,7 +665,6 @@ public class FunctionRouterBindingConfigurationIT {
             .assertThat(messagingProperties.getFunctionRouter().destinations())
             .containsOnly(
                 Map.entry("auditConsumer", "engine-events"),
-                Map.entry("auditConsumerIncidents", "engineEventsIncidents"),
                 Map.entry("commandConsumer", "command-consumer"),
                 Map.entry("integrationRequests", "integration-requests"),
                 Map.entry("queryConsumer", "engine-events"),
