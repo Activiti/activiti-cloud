@@ -46,7 +46,7 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
             CloudIntegrationErrorReceivedEventImpl integrationErrorReceived;
             if (integrationError.getIntegrationContext().hasEphemeralVariables()) {
                 IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
-                    (IntegrationContextImpl) integrationError.getIntegrationContext()
+                    integrationError.getIntegrationContext()
                 );
                 sanitizedContext.clearOutBoundVariables();
                 sanitizedContext.clearInBoundVariables();

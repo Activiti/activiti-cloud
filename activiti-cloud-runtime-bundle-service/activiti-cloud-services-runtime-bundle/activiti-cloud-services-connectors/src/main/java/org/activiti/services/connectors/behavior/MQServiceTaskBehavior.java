@@ -93,9 +93,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationRequestedEventImpl cloudEvent;
             if (integrationContext.hasEphemeralVariables()) {
-                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
-                    (IntegrationContextImpl) integrationContext
-                );
+                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(integrationContext);
                 sanitizedContext.clearInBoundVariables();
                 cloudEvent = new CloudIntegrationRequestedEventImpl(sanitizedContext);
             } else {

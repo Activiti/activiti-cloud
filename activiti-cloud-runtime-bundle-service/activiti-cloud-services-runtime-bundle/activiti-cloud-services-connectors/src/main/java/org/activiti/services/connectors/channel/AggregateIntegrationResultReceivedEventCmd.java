@@ -44,9 +44,7 @@ class AggregateIntegrationResultReceivedEventCmd implements Command<Void> {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
             CloudIntegrationResultReceivedEventImpl integrationResultReceived;
             if (integrationContext.hasEphemeralVariables()) {
-                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
-                    (IntegrationContextImpl) integrationContext
-                );
+                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(integrationContext);
                 sanitizedContext.clearInBoundVariables();
                 sanitizedContext.clearOutBoundVariables();
                 integrationResultReceived = new CloudIntegrationResultReceivedEventImpl(sanitizedContext);
