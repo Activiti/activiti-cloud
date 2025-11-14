@@ -42,7 +42,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -112,13 +111,6 @@ class AuditConsumerChannelHandlerImplTest {
     }
 
     @Test
-    void receiveCloudRuntimeEventIncidents_shouldHandleNullEvents() {
-        handler.receiveCloudRuntimeEventIncidents(new HashMap<>(), null);
-
-        verify(eventsRepository, Mockito.never()).saveAll(Mockito.any());
-    }
-
-    @Test
     void receiveCloudRuntimeEventIncidentsAndSetMessageIdAndSequenceNumber() {
         var eventContextInfoAppender = mock(EventContextInfoAppender.class);
         var converter = new IncidentCreatedEventConverter(eventContextInfoAppender);
@@ -141,7 +133,7 @@ class AuditConsumerChannelHandlerImplTest {
         var messageId = UUID.randomUUID();
         headers.put("id", messageId);
 
-        handler.receiveCloudRuntimeEventIncidents(headers, events);
+        handler.receiveCloudRuntimeEvent(headers, events);
 
         verify(eventsRepository).saveAll(argumentCaptor.capture());
         IncidentCreatedEventEntity savedEntity = (IncidentCreatedEventEntity) argumentCaptor
