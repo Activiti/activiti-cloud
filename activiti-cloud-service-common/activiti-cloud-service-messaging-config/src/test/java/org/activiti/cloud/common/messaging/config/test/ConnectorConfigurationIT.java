@@ -548,6 +548,12 @@ public class ConnectorConfigurationIT {
             });
     }
 
+    @Test
+    void shouldUseCaseInsensitiveMatchForBindingsProperties() {
+        assertThat(bindingServiceProperties.getBindings().get("integrationRequests"))
+            .isEqualTo(bindingServiceProperties.getBindings().get("integrationrequests"));
+    }
+
     @Captor
     private ArgumentCaptor<GenericMessage> retryMessageCaptor;
 
