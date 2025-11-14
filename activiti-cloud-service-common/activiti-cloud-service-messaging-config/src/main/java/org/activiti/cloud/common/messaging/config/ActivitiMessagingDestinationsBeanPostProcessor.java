@@ -67,16 +67,13 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             // See https://github.com/spring-cloud/spring-cloud-stream/commit/afc8fa29da421f41fa70cedc4acc3b6c07addcf0
             Optional
                 .ofNullable(ReflectionUtils.findField(BindingServiceProperties.class, "bindings", Map.class))
-                .stream()
-                .peek(ReflectionUtils::makeAccessible)
-                .findFirst()
                 .ifPresent(field -> {
                     final var bindings = new ConcurrentSkipListMap<String, BindingProperties>(
                         String.CASE_INSENSITIVE_ORDER
                     );
 
                     bindings.putAll(bindingServiceProperties.getBindings());
-
+                    ReflectionUtils.makeAccessible(field);
                     ReflectionUtils.setField(field, bindingServiceProperties, bindings);
                 });
 
