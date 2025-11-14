@@ -17,6 +17,8 @@ package org.activiti.cloud.examples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -30,18 +32,55 @@ public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
 
     @Test
     void bindingServiceProperties() {
-        assertThat(bindingServiceProperties.getBindings()).doesNotContainKeys("functionRouterInput").isNotEmpty();
+        assertThat(bindingServiceProperties.getBindings()).isNotEmpty().containsOnlyKeys("functionRouterInput");
     }
 
     @Test
-    void functionRouter() {
+    void functionRouterEnabled() {
         var functionRouter = messagingProperties.getFunctionRouter();
 
         assertThat(functionRouter.isEnabled()).isTrue();
+    }
 
-        assertThat(functionRouter.getFunctionRoutes()).isEmpty();
-        assertThat(functionRouter.destinations()).isEmpty();
-        assertThat(functionRouter.registrations()).isEmpty();
+    @Test
+    void functionRouterRoutes() {
+        var functionRouter = messagingProperties.getFunctionRouter();
+
+        assertThat(functionRouter.getFunctionRoutes()).isNotEmpty().containsOnly("example-connector");
+    }
+
+    @Test
+    void functionRouterDestinations() {
+        var functionRouter = messagingProperties.getFunctionRouter();
+
+        assertThat(functionRouter.destinations())
+            .isNotEmpty()
+            .containsOnly(
+                Map.entry(
+                    "example-connector",
+                    "restconnector.POST,restConnector.GET,test-bpmn-error-connector.throwError,test-error-connector.throwError,miCloudConnector,headers.GET,Movies.getMovieDesc,ExampleConnector"
+                )
+            );
+    }
+
+    @Test
+    void functionRouterRegistrations() {
+        var functionRouter = messagingProperties.getFunctionRouter();
+
+        assertThat(functionRouter.registrations())
+            .isNotEmpty()
+            .containsOnly(
+                Map.entry("ExampleConnector", List.of("exampleConnectorConsumerConnector_registration")),
+                Map.entry("Movies.getMovieDesc", List.of("moviesDescriptionConsumerConnector_registration")),
+                Map.entry("headers.GET", List.of("headersConnectorConsumerConnector_registration")),
+                Map.entry("miCloudConnector", List.of("miCloudConnectorInputConnector_registration")),
+                Map.entry("restconnector.POST", List.of("restConnectorPOST_registration")),
+                Map.entry(
+                    "test-bpmn-error-connector.throwError",
+                    List.of("testBpmnErrorConnectorInputConnector_registration")
+                ),
+                Map.entry("test-error-connector.throwError", List.of("testErrorConnectorInputConnector_registration"))
+            );
     }
 
     @Test
@@ -54,6 +93,7 @@ public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
         )
             .isTrue();
 
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class)).isNull();
+        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
+            .isEqualTo("processing-connector");
     }
 }

@@ -519,6 +519,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("GET http://localhost:8080")
             .setHeader(FUNCTION_DESTINATION, "rest.GET")
+            .setHeader("connectorType", "rest.GET")
             .build();
 
         // when
@@ -538,6 +539,7 @@ public class FunctionRouterBindingConfigurationIT {
         Message<String> message = MessageBuilder
             .withPayload("POST http://localhost:8080")
             .setHeader(FUNCTION_DESTINATION, "rest.POST")
+            .setHeader("connectorType", "rest.POST")
             .build();
 
         // when
