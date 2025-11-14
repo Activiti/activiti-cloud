@@ -18,8 +18,10 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,5 +42,14 @@ public abstract class BaseIntegrationEventHandler {
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
 
         return Optional.ofNullable(entity);
+    }
+
+    protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudIntegrationEvent event) {
+        IntegrationContext integrationContext = event.getEntity();
+        String id = integrationContext.getId();
+
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, id);
+
+        return Optional.ofNullable(serviceTaskEntity);
     }
 }

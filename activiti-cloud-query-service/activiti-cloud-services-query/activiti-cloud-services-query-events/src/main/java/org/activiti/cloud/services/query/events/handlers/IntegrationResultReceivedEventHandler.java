@@ -20,10 +20,13 @@ import java.util.Date;
 import java.util.Optional;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +42,24 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
-        Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(integrationEvent);
+        Optional<ServiceTaskEntity> serviceTaskEntity = findServiceTaskEntity(integrationEvent);
 
-        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+        logger.error("AAE-39417: Id from integration integrationContextEntity " + integrationEvent.getEntity().getId());
 
-        logger.error("AAE-39417: pkId from integration result " + pkId);
-
-        result.ifPresent(entity -> {
+        integrationContextEntity.ifPresent(entity -> {
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));
             entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
             entityManager.persist(entity);
+
+            serviceTaskEntity.ifPresent(serviceTask -> {
+                serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
+                serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+
+                entityManager.persist(serviceTask);
+            });
         });
     }
 

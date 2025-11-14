@@ -37,7 +37,6 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
         CloudBPMNActivityCancelledEvent activityEvent = CloudBPMNActivityCancelledEvent.class.cast(event);
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
-        Optional<ServiceTaskEntity> optionalServiceTaskEntity = findServiceTaskEntity(activityEvent);
 
         if (activityEvent.getEntity().getActivityType().equals("serviceTask")) {
             logger.error(
@@ -51,15 +50,6 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
 
             entityManager.persist(bpmnActivityEntity);
-        }
-
-        if (optionalServiceTaskEntity.isPresent()) {
-            logger.error("AAE-39417: Persisting ServiceTaskEntity as cancelled");
-            ServiceTaskEntity serviceTaskEntity = optionalServiceTaskEntity.get();
-            serviceTaskEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
-            serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
-
-            entityManager.persist(serviceTaskEntity);
         }
     }
 

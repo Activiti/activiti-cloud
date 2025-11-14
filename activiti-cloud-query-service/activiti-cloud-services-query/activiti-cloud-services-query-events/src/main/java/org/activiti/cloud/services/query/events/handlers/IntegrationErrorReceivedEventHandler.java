@@ -39,9 +39,10 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationErrorReceivedEvent integrationEvent = CloudIntegrationErrorReceivedEvent.class.cast(event);
 
-        Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+        Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(integrationEvent);
+        Optional<ServiceTaskEntity> serviceTaskEntity = findServiceTaskEntity(integrationEvent);
 
-        result.ifPresent(entity -> {
+        integrationContextEntity.ifPresent(entity -> {
             entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
             entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
             entity.setErrorCode(integrationEvent.getErrorCode());
@@ -53,10 +54,12 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
             entityManager.persist(entity);
 
-            ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entity.getId());
-            serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
+            serviceTaskEntity.ifPresent(serviceTask -> {
+                serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
+                serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
 
-            entityManager.persist(serviceTaskEntity);
+                entityManager.persist(serviceTask);
+            });
         });
     }
 

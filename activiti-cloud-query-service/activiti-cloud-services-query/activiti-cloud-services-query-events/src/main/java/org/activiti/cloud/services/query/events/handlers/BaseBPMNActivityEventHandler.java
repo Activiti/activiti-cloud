@@ -123,29 +123,4 @@ public abstract class BaseBPMNActivityEventHandler {
 
         return Optional.ofNullable(bpmnActivityEntity);
     }
-
-    protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudRuntimeEvent<?, ?> event) {
-        CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);
-        BPMNActivity activitiEntity = activityEvent.getEntity();
-        String pkId = BPMNActivityEntity.IdBuilderHelper.from(activitiEntity);
-
-        logger.error("AAE-39417: CHECKING VERSION ");
-        logger.error("AAE-39417: pkId from activity " + pkId);
-
-        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
-
-        return Optional.ofNullable(entity);
-    }
-
-    protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudRuntimeEvent<?, ?> event) {
-        Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(event);
-
-        if (integrationContextEntity.isPresent()) {
-            IntegrationContext integrationContext = integrationContextEntity.get();
-            ServiceTaskEntity entity = entityManager.find(ServiceTaskEntity.class, integrationContext.getId());
-            return Optional.ofNullable(entity);
-        } else {
-            return Optional.empty();
-        }
-    }
 }
