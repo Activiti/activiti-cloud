@@ -23,8 +23,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
-import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
@@ -38,19 +36,13 @@ public class BPMNActivityCancelledEventHandler extends BaseBPMNActivityEventHand
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
-        if (activityEvent.getEntity().getActivityType().equals("serviceTask")) {
-            logger.error(
-                "AAE-39416: Activiti cancelled for ActivitiName: " + activityEvent.getEntity().getActivityName()
-            );
-        }
-
-        if (optionalBaseBPMNActivityEntity.isPresent()) {
+        optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
             bpmnActivityEntity.setCancelledDate(new Date(activityEvent.getTimestamp()));
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.CANCELLED);
 
             entityManager.persist(bpmnActivityEntity);
-        }
+        });
     }
 
     @Override

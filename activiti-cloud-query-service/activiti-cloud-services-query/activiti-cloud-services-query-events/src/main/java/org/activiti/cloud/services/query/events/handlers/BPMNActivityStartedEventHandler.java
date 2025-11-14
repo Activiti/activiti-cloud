@@ -37,14 +37,14 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         // Activity can be cyclical, so we just update the status and started date anyways
-        if (optionalBaseBPMNActivityEntity.isPresent()) {
+        optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
             bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
             bpmnActivityEntity.setCompletedDate(null);
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
 
             entityManager.persist(bpmnActivityEntity);
-        }
+        });
     }
 
     @Override

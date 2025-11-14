@@ -56,7 +56,7 @@ import org.springframework.format.annotation.DateTimeFormat;
         @Index(
             name = "integration_context_processInstance_elementId_idx",
             columnList = "processInstanceId,clientId,executionId",
-            unique = true
+            unique = false
         ),
     }
 )

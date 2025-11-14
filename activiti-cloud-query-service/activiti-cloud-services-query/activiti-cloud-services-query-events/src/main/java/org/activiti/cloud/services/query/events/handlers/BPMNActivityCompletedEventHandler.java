@@ -23,9 +23,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHandler implements QueryEventHandler {
 
@@ -39,13 +36,13 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
-        if (optionalBaseBPMNActivityEntity.isPresent()) {
+        optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
             bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
 
             entityManager.persist(bpmnActivityEntity);
-        }
+        });
     }
 
     @Override
