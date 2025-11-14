@@ -98,7 +98,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
             event.getAppName(),
             event.getAppVersion()
         );
-        serviceTaskEntity.setId(integrationContext.getId());
+        serviceTaskEntity.setId(integrationContext.getId() + ":" + integrationContext.getClientId());
         serviceTaskEntity.setElementId(integrationContext.getClientId());
         serviceTaskEntity.setActivityName(integrationContext.getClientName());
         serviceTaskEntity.setActivityType("serviceTask");

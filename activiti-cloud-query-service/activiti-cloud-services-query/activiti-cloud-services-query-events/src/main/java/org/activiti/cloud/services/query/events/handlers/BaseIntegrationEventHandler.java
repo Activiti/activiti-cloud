@@ -46,9 +46,17 @@ public abstract class BaseIntegrationEventHandler {
 
     protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-        String id = integrationContext.getId();
+        String id = integrationContext.getId() + ":" + integrationContext.getClientId();
+
+        logger.error("AAE-39413: Looking for ServiceTaskEntity with id " + id);
 
         ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, id);
+
+        if (serviceTaskEntity != null) {
+            logger.error("AAE-39414: Great, Found ServiceTaskEntity with id " + id);
+        } else {
+            logger.error("AAE-39414: NOT Found ServiceTaskEntity with id " + id);
+        }
 
         return Optional.ofNullable(serviceTaskEntity);
     }
