@@ -74,6 +74,7 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
                 "commandResults",
                 "integrationResults",
                 "auditProducer",
+                "auditProducerIncidents",
                 "script.EXECUTE"
             );
     }
