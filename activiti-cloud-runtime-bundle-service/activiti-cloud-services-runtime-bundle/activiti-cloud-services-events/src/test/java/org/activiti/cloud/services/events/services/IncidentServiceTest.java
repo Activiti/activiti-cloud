@@ -115,7 +115,7 @@ class IncidentServiceTest {
 
         assertThat(capturedMessage.getHeaders())
             .contains(
-                entry("routingKey", "engineEventsIncidents.springAppName.appName"),
+                entry("routingKey", "engineEvents.springAppName.appName"),
                 entry("messagePayloadType", "java.util.ArrayList")
             );
     }
