@@ -38,17 +38,13 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        logger.error("AAE-39413: Handling integration requested event");
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        logger.error("AAE-39413: Integration context id: " + integrationContext.getId());
         String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
-        logger.error("AAE-39413: entityId: " + entityId);
 
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
         if (entity == null) {
-            logger.error("AAE-39413: Creating new IntegrationContextEntity");
             entity =
                 new IntegrationContextEntity(
                     event.getServiceName(),
@@ -78,8 +74,6 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setServiceTask(serviceTaskEntity);
 
         entityManager.persist(entity);
-
-        logger.error("AAE-39413: Created IntegrationContextEntity with id: " + entity.getId());
     }
 
     @Override

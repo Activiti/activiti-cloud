@@ -38,6 +38,11 @@ public abstract class BaseBPMNActivityEventHandler {
         this.entityManager = entityManager;
     }
 
+    protected boolean isServiceTaskActivity(CloudBPMNActivityEvent event) {
+        BPMNActivity bpmnActivity = event.getEntity();
+        return "serviceTask".equals(bpmnActivity.getActivityType());
+    }
+
     protected Optional<BaseBPMNActivityEntity> findOrCreateBPMNActivityEntity(CloudRuntimeEvent<?, ?> event) {
         logger.error("AAE-39414: Handling CloudBPMNActivityEvent");
         CloudBPMNActivityEvent activityEvent = CloudBPMNActivityEvent.class.cast(event);

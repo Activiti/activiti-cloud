@@ -28,8 +28,12 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceived
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(IntegrationErrorReceivedEventHandler.class);
 
     public IntegrationErrorReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -40,7 +44,6 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         CloudIntegrationErrorReceivedEvent integrationEvent = CloudIntegrationErrorReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(integrationEvent);
-        Optional<ServiceTaskEntity> serviceTaskEntity = findServiceTaskEntity(integrationEvent);
 
         integrationContextEntity.ifPresent(entity -> {
             entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
@@ -54,12 +57,20 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
             entityManager.persist(entity);
 
-            serviceTaskEntity.ifPresent(serviceTask -> {
+            ServiceTaskEntity serviceTask = entity.getServiceTask();
+
+            if (serviceTask != null) {
+                logger.error("AAE-39417: ERROR Found ServiceTaskEntity with id " + serviceTask.getId());
                 serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
                 serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
 
                 entityManager.persist(serviceTask);
-            });
+            } else {
+                logger.error(
+                    "AAE-39417: ERROR NOT Found ServiceTaskEntity for IntegrationContextEntity with id " +
+                    entity.getId()
+                );
+            }
         });
     }
 

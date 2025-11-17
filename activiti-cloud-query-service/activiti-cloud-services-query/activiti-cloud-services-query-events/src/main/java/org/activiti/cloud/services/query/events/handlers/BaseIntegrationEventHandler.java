@@ -49,21 +49,4 @@ public abstract class BaseIntegrationEventHandler {
 
         return Optional.ofNullable(entity);
     }
-
-    protected Optional<ServiceTaskEntity> findServiceTaskEntity(CloudIntegrationEvent event) {
-        IntegrationContext integrationContext = event.getEntity();
-        String pkId = integrationContext.getId();
-
-        logger.error("AAE-39413: Looking for ServiceTaskEntity with id " + pkId);
-
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, pkId);
-
-        if (serviceTaskEntity != null) {
-            logger.error("AAE-39414: Great, Found ServiceTaskEntity with id " + pkId);
-        } else {
-            logger.error("AAE-39414: NOT Found ServiceTaskEntity with id " + pkId);
-        }
-
-        return Optional.ofNullable(serviceTaskEntity);
-    }
 }

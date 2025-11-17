@@ -43,9 +43,6 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> integrationContextEntity = findIntegrationContextEntity(integrationEvent);
-        Optional<ServiceTaskEntity> serviceTaskEntity = findServiceTaskEntity(integrationEvent);
-
-        logger.error("AAE-39417: Id from integration integrationContextEntity " + integrationEvent.getEntity().getId());
 
         integrationContextEntity.ifPresent(entity -> {
             entity.setResultDate(new Date(integrationEvent.getTimestamp()));
@@ -54,12 +51,18 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
             entityManager.persist(entity);
 
-            serviceTaskEntity.ifPresent(serviceTask -> {
+            ServiceTaskEntity serviceTask = entity.getServiceTask();
+            if (serviceTask != null) {
+                logger.error("AAE-39417: COMPLETED Found ServiceTaskEntity with id " + serviceTask.getId());
                 serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
                 serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
-
                 entityManager.persist(serviceTask);
-            });
+            } else {
+                logger.error(
+                    "AAE-39417: COMPLETED NOT Found ServiceTaskEntity for IntegrationContextEntity with id " +
+                    entity.getId()
+                );
+            }
         });
     }
 
