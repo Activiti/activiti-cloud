@@ -34,6 +34,7 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
+import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +126,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @MapsId
     @JoinColumn(name = "id")
     private ServiceTaskEntity serviceTask;
+
+    @Transient
+    private Boolean ephemeralVariables;
 
     public IntegrationContextEntity() {
         this.id = UUID.randomUUID().toString();
@@ -428,6 +432,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @Override
     public <T> T getOutBoundVariable(String name, Class<T> type) {
         return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
+    }
+
+    @Override
+    public boolean hasEphemeralVariables() {
+        return Boolean.TRUE.equals(this.ephemeralVariables);
     }
 
     public static class IdBuilderHelper {

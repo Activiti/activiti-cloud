@@ -18,6 +18,7 @@ package org.activiti.services.connectors.behavior;
 import java.util.Collection;
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -90,8 +91,14 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationRequestedEventImpl cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
-
+            CloudIntegrationRequestedEventImpl cloudEvent;
+            if (integrationContext.hasEphemeralVariables()) {
+                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(integrationContext);
+                sanitizedContext.clearInBoundVariables();
+                cloudEvent = new CloudIntegrationRequestedEventImpl(sanitizedContext);
+            } else {
+                cloudEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+            }
             processEngineEventsAggregator.add(cloudEvent);
         }
     }

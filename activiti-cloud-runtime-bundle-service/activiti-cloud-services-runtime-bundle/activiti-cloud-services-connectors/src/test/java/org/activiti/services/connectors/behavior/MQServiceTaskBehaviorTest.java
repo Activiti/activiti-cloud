@@ -16,7 +16,7 @@
 package org.activiti.services.connectors.behavior;
 
 import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
@@ -25,8 +25,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -158,10 +160,9 @@ class MQServiceTaskBehaviorTest {
         //then
         ((ExecutionEntity) execution).getProcessInstance();
 
-        assertThat(entity)
-            .hasExecutionId(EXECUTION_ID)
-            .hasProcessDefinitionId(PROC_DEF_ID)
-            .hasProcessInstanceId(PROC_INST_ID);
+        assertThat(entity.getExecutionId()).isEqualTo(EXECUTION_ID);
+        assertThat(entity.getProcessDefinitionId()).isEqualTo(PROC_DEF_ID);
+        assertThat(entity.getProcessInstanceId()).isEqualTo(PROC_INST_ID);
 
         verify(integrationRequestSender).sendIntegrationRequest(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
@@ -214,5 +215,69 @@ class MQServiceTaskBehaviorTest {
 
         //then
         assertDoesNotThrow(() -> behavior.apply(execution));
+    }
+
+    @Test
+    void should_notPreserveInboundVariablesInIntegrationRequestedEvent_whenEphemeralVariablesArePresent() {
+        ArgumentCaptor<CloudIntegrationRequestedEvent> eventCaptor = ArgumentCaptor.forClass(
+            CloudIntegrationRequestedEvent.class
+        );
+
+        //given
+        DelegateExecution execution = anExecution().build();
+
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId(INTEGRATION_CONTEXT_ID);
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(INTEGRATION_CONTEXT_ID);
+        integrationContext.addInBoundVariable("key", "value");
+        integrationContext.setEphemeralVariables(true);
+        integrationContext.setAppVersion("1");
+
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
+
+        //when
+        behavior.apply(execution);
+
+        //then
+        verify(processEngineEventsAggregator).add(eventCaptor.capture());
+        CloudIntegrationRequestedEvent event = eventCaptor.getValue();
+        assertThat(event.getEntity().getInBoundVariables()).isEmpty();
+    }
+
+    @Test
+    void should_preserveInboundVariablesInIntegrationRequestedEvent_whenEphemeralVariablesArePresent() {
+        ArgumentCaptor<CloudIntegrationRequestedEvent> eventCaptor = ArgumentCaptor.forClass(
+            CloudIntegrationRequestedEvent.class
+        );
+
+        //given
+        DelegateExecution execution = anExecution().build();
+
+        IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
+        entity.setId(INTEGRATION_CONTEXT_ID);
+        given(integrationContextManager.create()).willReturn(entity);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(INTEGRATION_CONTEXT_ID);
+        integrationContext.addInBoundVariable("key", "value");
+        integrationContext.setEphemeralVariables(false);
+        integrationContext.setAppVersion("1");
+
+        given(integrationContextBuilder.from(entity, execution)).willReturn(integrationContext);
+
+        when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
+
+        //when
+        behavior.apply(execution);
+
+        //then
+        verify(processEngineEventsAggregator).add(eventCaptor.capture());
+        CloudIntegrationRequestedEvent event = eventCaptor.getValue();
+        assertThat(event.getEntity().getInBoundVariables()).containsExactlyEntriesOf(Map.of("key", "value"));
     }
 }

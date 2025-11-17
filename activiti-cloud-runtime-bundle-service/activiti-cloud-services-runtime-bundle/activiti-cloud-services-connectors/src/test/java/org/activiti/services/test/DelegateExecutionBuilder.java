@@ -15,6 +15,7 @@
  */
 package org.activiti.services.test;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +32,7 @@ public class DelegateExecutionBuilder {
         execution = mock(ExecutionEntity.class);
         processInstance = mock(ExecutionEntity.class);
 
-        when(execution.getProcessInstance()).thenReturn(processInstance);
+        lenient().when(execution.getProcessInstance()).thenReturn(processInstance);
     }
 
     public static DelegateExecutionBuilder anExecution() {
