@@ -44,7 +44,13 @@ public abstract class BaseIntegrationEventHandler {
         if (entity != null) {
             logger.error("AAE-39414: Great, Found IntegrationContextEntity with id " + pkId);
         } else {
-            logger.error("AAE-39414: NOT Found IntegrationContextEntity with id " + pkId);
+            pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+            entity = entityManager.find(IntegrationContextEntity.class, pkId);
+            if (entity != null) {
+                logger.error("AAE-39414: OLD ID Great, Found IntegrationContextEntity with id " + pkId);
+            } else {
+                logger.error("AAE-39414: NOT Found IntegrationContextEntity with id " + pkId);
+            }
         }
 
         return Optional.ofNullable(entity);
