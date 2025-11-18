@@ -22,7 +22,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 public class PostgresApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer("postgres:10")
+    private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer("postgres:16-alpine")
         .withReuse(false);
 
     @Override

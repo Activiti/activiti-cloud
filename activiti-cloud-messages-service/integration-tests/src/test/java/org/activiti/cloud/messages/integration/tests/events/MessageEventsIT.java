@@ -83,7 +83,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class MessageEventsIT {
 
     @Container
-    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
+    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:16-alpine");
 
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 =
         "BoundarySubprocessThrowCatchMessageIT_Process1";
