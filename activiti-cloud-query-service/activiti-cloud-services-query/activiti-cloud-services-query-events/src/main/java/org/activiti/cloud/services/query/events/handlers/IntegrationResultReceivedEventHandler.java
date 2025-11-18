@@ -23,16 +23,10 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(IntegrationResultReceivedEventHandler.class);
 
     public IntegrationResultReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -53,15 +47,9 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
             ServiceTaskEntity serviceTask = entity.getServiceTask();
             if (serviceTask != null) {
-                logger.error("AAE-39417: COMPLETED Found ServiceTaskEntity with id " + serviceTask.getId());
                 serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
                 serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
                 entityManager.persist(serviceTask);
-            } else {
-                logger.error(
-                    "AAE-39417: COMPLETED NOT Found ServiceTaskEntity for IntegrationContextEntity with id " +
-                    entity.getId()
-                );
             }
         });
     }

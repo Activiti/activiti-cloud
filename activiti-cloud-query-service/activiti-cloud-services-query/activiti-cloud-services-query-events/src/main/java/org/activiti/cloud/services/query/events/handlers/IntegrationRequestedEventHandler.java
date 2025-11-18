@@ -25,12 +25,8 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationC
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
 
     public IntegrationRequestedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -42,7 +38,8 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         IntegrationContext integrationContext = integrationEvent.getEntity();
         String entityId = integrationContext.getId();
 
-        // Activity can be cyclical, so try to find existing before creating a new one
+        // Activity can be cyclical, so instead of using aggregation of process instance id, client id and execution id (like we did before),
+        // we use the integration context id as primary key
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
         if (entity == null) {
             entity =
@@ -108,38 +105,6 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);
-
-        String serviceTaskInfo =
-            "ServiceName: " +
-            event.getServiceName() +
-            "Id: " +
-            integrationContext.getId() +
-            ", ServiceFullName: " +
-            event.getServiceFullName() +
-            ", ServiceVersion: " +
-            event.getServiceVersion() +
-            ", AppName: " +
-            event.getAppName() +
-            ", AppVersion: " +
-            event.getAppVersion() +
-            ", ElementId: " +
-            integrationContext.getClientId() +
-            ", ActivityName: " +
-            integrationContext.getClientName() +
-            ", ProcessDefinitionId: " +
-            integrationContext.getProcessDefinitionId() +
-            ", ProcessInstanceId: " +
-            integrationContext.getProcessInstanceId() +
-            ", ExecutionId: " +
-            integrationContext.getExecutionId() +
-            ", ProcessDefinitionKey: " +
-            integrationContext.getProcessDefinitionKey() +
-            ", ProcessDefinitionVersion: " +
-            integrationContext.getProcessDefinitionVersion() +
-            ", BusinessKey: " +
-            integrationContext.getBusinessKey();
-
-        logger.error("AAE-39416: Created new ServiceTask with ID: " + integrationContext.getId());
 
         return serviceTaskEntity;
     }

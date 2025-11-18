@@ -18,16 +18,10 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class BaseIntegrationEventHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final EntityManager entityManager;
 
@@ -41,16 +35,9 @@ public abstract class BaseIntegrationEventHandler {
 
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
 
-        if (entity != null) {
-            logger.error("AAE-39414: Great, Found IntegrationContextEntity with id " + pkId);
-        } else {
+        if (entity == null) {
             pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
             entity = entityManager.find(IntegrationContextEntity.class, pkId);
-            if (entity != null) {
-                logger.error("AAE-39414: OLD ID Great, Found IntegrationContextEntity with id " + pkId);
-            } else {
-                logger.error("AAE-39414: NOT Found IntegrationContextEntity with id " + pkId);
-            }
         }
 
         return Optional.ofNullable(entity);

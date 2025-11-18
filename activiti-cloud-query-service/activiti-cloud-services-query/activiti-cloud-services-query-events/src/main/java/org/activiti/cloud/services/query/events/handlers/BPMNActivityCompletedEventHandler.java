@@ -34,13 +34,6 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudBPMNActivityCompletedEvent activityEvent = CloudBPMNActivityCompletedEvent.class.cast(event);
 
-        if (isServiceTaskActivity(activityEvent)) {
-            logger.error(
-                "AAE-39416: Skipping handling of CloudBPMNActivityCompletedEvent for Service Task Activity with id:" +
-                activityEvent.getEntityId()
-            );
-        }
-
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
         optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {

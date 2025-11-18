@@ -36,7 +36,8 @@ public class BPMNActivityStartedEventHandler extends BaseBPMNActivityEventHandle
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
-        // Activity can be cyclical, so we just update the status and started date anyways
+        // Activity can be cyclical, so we just update the status and started date anyways.
+        // For ServiceTasks, a new entity will be created each time in IntegrationRequestEventHandler
         optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {
             BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
             bpmnActivityEntity.setStartedDate(new Date(activityEvent.getTimestamp()));
