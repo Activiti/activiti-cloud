@@ -21,7 +21,7 @@ jobs:
         messaging-destinations: [default-destinations, override-destinations]
     steps:
       - name: Set up kubectl
-        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v3
+        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
         with:
           version: v1.19.6
 
