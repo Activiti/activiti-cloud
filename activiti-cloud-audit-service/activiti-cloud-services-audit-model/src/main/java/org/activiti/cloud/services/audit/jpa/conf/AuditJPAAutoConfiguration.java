@@ -25,6 +25,7 @@ import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEvent
 import org.activiti.cloud.services.audit.jpa.converters.ApplicationRollbackEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
+import org.activiti.cloud.services.audit.jpa.converters.IncidentCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
@@ -423,6 +424,14 @@ public class AuditJPAAutoConfiguration {
         EventContextInfoAppender eventContextInfoAppender
     ) {
         return new IntegrationErrorReceivedEventConverter(eventContextInfoAppender);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public IncidentCreatedEventConverter incidentCreatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
+        return new IncidentCreatedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean

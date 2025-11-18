@@ -55,21 +55,25 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     @Override
     public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
-            AtomicInteger counter = new AtomicInteger(0);
-            List<AuditEventEntity> entities = new ArrayList<>();
-            for (CloudRuntimeEvent event : events) {
-                EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(
-                    event.getEventType().name()
-                );
-                if (converter != null) {
-                    ((CloudRuntimeEventImpl) event).setMessageId((headers.get(MessageHeaders.ID).toString()));
-                    ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
-                    entities.add((AuditEventEntity) converter.convertToEntity(event));
-                } else {
-                    LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: " + event.getEventType().name());
-                }
-            }
-            eventsRepository.saveAll(entities);
+            convertAndSaveEvents(headers, events);
         }
+    }
+
+    private List<AuditEventEntity> convertAndSaveEvents(Map<String, Object> headers, CloudRuntimeEvent<?, ?>[] events) {
+        var counter = new AtomicInteger(0);
+        List<AuditEventEntity> entities = new ArrayList<>();
+        for (CloudRuntimeEvent event : events) {
+            EventToEntityConverter converter = eventConverters.getConverterByEventTypeName(event.getEventType().name());
+            if (converter != null) {
+                ((CloudRuntimeEventImpl) event).setMessageId((headers.get(MessageHeaders.ID).toString()));
+                ((CloudRuntimeEventImpl) event).setSequenceNumber(counter.getAndIncrement());
+                entities.add((AuditEventEntity) converter.convertToEntity(event));
+            } else {
+                LOGGER.warn(">>> Ignoring CloudRuntimeEvents type: {}", event.getEventType().name());
+            }
+        }
+        eventsRepository.saveAll(entities);
+
+        return entities;
     }
 }

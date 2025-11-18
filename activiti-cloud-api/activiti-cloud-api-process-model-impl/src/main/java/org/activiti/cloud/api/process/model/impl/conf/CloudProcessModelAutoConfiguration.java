@@ -47,6 +47,8 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
+import org.activiti.cloud.api.process.model.IncidentContext;
+import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -58,6 +60,7 @@ import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudServiceTaskImpl;
 import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefinitionImpl;
+import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
@@ -79,6 +82,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFailedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerFiredEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerRetriesDecrementedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
@@ -298,6 +302,10 @@ public class CloudProcessModelAutoConfiguration {
             )
         );
 
+        module.registerSubtypes(
+            new NamedType(CloudIncidentCreatedEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
+        );
+
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
@@ -323,6 +331,7 @@ public class CloudProcessModelAutoConfiguration {
         resolver.addMapping(Deployment.class, DeploymentImpl.class);
         resolver.addMapping(CloudApplication.class, CloudApplicationImpl.class);
         resolver.addMapping(QueryCloudProcessInstance.class, QueryCloudProcessInstanceImpl.class);
+        resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
 
         module.setAbstractTypes(resolver);
 

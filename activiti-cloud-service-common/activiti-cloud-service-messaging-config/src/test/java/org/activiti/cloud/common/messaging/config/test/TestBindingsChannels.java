@@ -32,6 +32,8 @@ public interface TestBindingsChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
+    String AUDIT_PRODUCER_INCIDENTS = "auditProducerIncidents";
+
     String INTEGRATION_REQUESTS = "integrationRequests";
 
     String INTEGRATION_RESULTS = "integrationResults";
@@ -65,6 +67,11 @@ public interface TestBindingsChannels {
     @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).getObject();
+    }
+
+    @OutputBinding(AUDIT_PRODUCER_INCIDENTS)
+    default MessageChannel auditProducerIncidents() {
+        return MessageChannels.direct(AUDIT_PRODUCER_INCIDENTS).getObject();
     }
 
     @InputBinding(value = INTEGRATION_REQUESTS)

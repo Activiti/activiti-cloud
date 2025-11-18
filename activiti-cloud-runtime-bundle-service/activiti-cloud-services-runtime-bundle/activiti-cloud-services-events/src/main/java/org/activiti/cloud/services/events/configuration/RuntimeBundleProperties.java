@@ -109,6 +109,8 @@ public class RuntimeBundleProperties {
         @Positive
         private int chunkSize = 100;
 
+        private int chunkSizeInBytesCloseListener = 0;
+
         public boolean isIntegrationAuditEventsEnabled() {
             return integrationAuditEventsEnabled;
         }
@@ -123,6 +125,18 @@ public class RuntimeBundleProperties {
 
         public void setChunkSize(Integer chunkSize) {
             this.chunkSize = chunkSize;
+        }
+
+        public int getChunkSizeInBytesCloseListener() {
+            return chunkSizeInBytesCloseListener;
+        }
+
+        public void setChunkSizeInBytesCloseListener(int chunkSizeCloseListener) {
+            this.chunkSizeInBytesCloseListener = chunkSizeCloseListener;
+        }
+
+        public boolean isChunkingCloseListenerDisabled() {
+            return this.chunkSizeInBytesCloseListener <= 0;
         }
     }
 

@@ -82,6 +82,7 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys(
                 "auditProducer",
+                "auditProducerIncidents",
                 "commandResults",
                 "integrationResults",
                 "functionRouterInput",
