@@ -214,8 +214,8 @@ public abstract class AuditEventEntity {
         return sequenceNumber;
     }
 
-    public void setSequenceNumber(int sequeceNumber) {
-        this.sequenceNumber = sequeceNumber;
+    public void setSequenceNumber(int sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
     }
 
     public String getMessageId() {

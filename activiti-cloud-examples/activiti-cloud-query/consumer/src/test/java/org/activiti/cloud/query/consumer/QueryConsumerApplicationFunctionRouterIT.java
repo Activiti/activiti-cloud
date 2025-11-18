@@ -47,14 +47,14 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
         assertThat(functionRouter.destinations("functionRouterAnonymousInput")).isEmpty();
         assertThat(functionRouter.registrations("functionRouterInput"))
             .containsOnlyKeys("engineEvents")
-            .satisfies(registrations ->
+            .satisfies(registrations -> {
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
                         "queryConsumerFunction_registration",
                         "auditConsumerChannelHandlerConsumer_registration"
                     )
-                    .isNotEmpty()
-            );
+                    .isNotEmpty();
+            });
         assertThat(functionRouter.registrations("functionRouterAnonymousInput")).isEmpty();
     }
 

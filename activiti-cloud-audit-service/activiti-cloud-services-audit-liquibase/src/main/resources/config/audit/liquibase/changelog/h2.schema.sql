@@ -45,6 +45,7 @@ create table audit_event
     error_message			   varchar(255),
     error_class_name		   varchar(255),
     integration_context		   text,
+    incident_context		   text,
     stack_trace_elements	   text,
     deployment                 text,
     candidate_starter_user     text,

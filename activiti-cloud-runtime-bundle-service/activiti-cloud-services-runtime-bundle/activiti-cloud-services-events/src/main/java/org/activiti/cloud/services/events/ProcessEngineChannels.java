@@ -28,6 +28,8 @@ public interface ProcessEngineChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
+    String AUDIT_PRODUCER_INCIDENTS = "auditProducerIncidents";
+
     @InputBinding(COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
@@ -41,5 +43,10 @@ public interface ProcessEngineChannels {
     @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).getObject();
+    }
+
+    @OutputBinding(AUDIT_PRODUCER_INCIDENTS)
+    default MessageChannel auditProducerIncidents() {
+        return MessageChannels.direct(AUDIT_PRODUCER_INCIDENTS).getObject();
     }
 }

@@ -294,4 +294,22 @@
              splitStatements="false"
              stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter17-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/17-alter.pg.schema.8.8.1.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter17-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+      encoding="utf8"
+      path="changelog/17-alter.oracle.schema.8.8.1.sql"
+      relativeToChangelogFile="true"
+      splitStatements="false"
+      stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
