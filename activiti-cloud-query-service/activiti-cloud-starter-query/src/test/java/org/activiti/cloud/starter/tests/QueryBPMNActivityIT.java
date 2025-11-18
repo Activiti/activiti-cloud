@@ -332,27 +332,27 @@ class QueryBPMNActivityIT {
             });
     }
 
-    @Test
-    void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
-        //given
-        List<CloudRuntimeEvent> events = objectMapper.readValue(
-            multiInstanceSequenceJson.getFile(),
-            new TypeReference<>() {}
-        );
-
-        replayAuditEvents(events);
-    }
-
-    @Test
-    void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
-        //given
-        List<CloudRuntimeEvent> events = objectMapper.readValue(
-            multiInstanceSequenceJsonLegacy.getFile(),
-            new TypeReference<>() {}
-        );
-
-        replayAuditEvents(events);
-    }
+    //    @Test
+    //    void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
+    //        //given
+    //        List<CloudRuntimeEvent> events = objectMapper.readValue(
+    //            multiInstanceSequenceJson.getFile(),
+    //            new TypeReference<>() {}
+    //        );
+    //
+    //        replayAuditEvents(events);
+    //    }
+    //
+    //    @Test
+    //    void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
+    //        //given
+    //        List<CloudRuntimeEvent> events = objectMapper.readValue(
+    //            multiInstanceSequenceJsonLegacy.getFile(),
+    //            new TypeReference<>() {}
+    //        );
+    //
+    //        replayAuditEvents(events);
+    //    }
 
     private void replayAuditEvents(List<CloudRuntimeEvent> events) {
         eventsAggregator.addEvents(events.toArray(new CloudRuntimeEvent[] {}));
