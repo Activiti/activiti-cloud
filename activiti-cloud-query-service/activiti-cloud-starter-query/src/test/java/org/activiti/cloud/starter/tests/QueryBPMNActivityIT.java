@@ -332,29 +332,29 @@ class QueryBPMNActivityIT {
             });
     }
 
-    //    @Test
-    //    void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
-    //        //given
-    //        List<CloudRuntimeEvent> events = objectMapper.readValue(
-    //            multiInstanceSequenceJson.getFile(),
-    //            new TypeReference<>() {}
-    //        );
-    //
-    //        replayAuditEvents(events);
-    //    }
-    //
-    //    @Test
-    //    void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
-    //        //given
-    //        List<CloudRuntimeEvent> events = objectMapper.readValue(
-    //            multiInstanceSequenceJsonLegacy.getFile(),
-    //            new TypeReference<>() {}
-    //        );
-    //
-    //        replayAuditEvents(events);
-    //    }
+    @Test
+    void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
+        //given
+        List<CloudRuntimeEvent> events = objectMapper.readValue(
+            multiInstanceSequenceJson.getFile(),
+            new TypeReference<>() {}
+        );
 
-    private void replayAuditEvents(List<CloudRuntimeEvent> events) {
+        replayAuditEvents(events, 4);
+    }
+
+    @Test
+    void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
+        //given
+        List<CloudRuntimeEvent> events = objectMapper.readValue(
+            multiInstanceSequenceJsonLegacy.getFile(),
+            new TypeReference<>() {}
+        );
+
+        replayAuditEvents(events, 3);
+    }
+
+    private void replayAuditEvents(List<CloudRuntimeEvent> events, int integrationRequestedSize) {
         eventsAggregator.addEvents(events.toArray(new CloudRuntimeEvent[] {}));
 
         //when
@@ -372,17 +372,17 @@ class QueryBPMNActivityIT {
                     .extracting(ProcessInstanceEntity::getStatus)
                     .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
 
-                //                List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
-                //
-                //                assertThat(serviceTasks)
-                //                    .hasSize(1)
-                //                    .extracting(ServiceTaskEntity::getActivityName, ServiceTaskEntity::getStatus)
-                //                    .containsOnly(tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
+                List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
+
+                assertThat(serviceTasks)
+                    .hasSize(integrationRequestedSize) // Each IntegrationRequest creates a Service Task
+                    .extracting(ServiceTaskEntity::getActivityName, ServiceTaskEntity::getStatus)
+                    .containsOnly(tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
 
                 List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
 
                 assertThat(activities)
-                    .hasSize(4)
+                    .hasSize(3 + integrationRequestedSize) // 3 User Tasks + Service Tasks
                     .extracting(BPMNActivityEntity::getActivityName, BPMNActivityEntity::getStatus)
                     .containsOnly(
                         tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
