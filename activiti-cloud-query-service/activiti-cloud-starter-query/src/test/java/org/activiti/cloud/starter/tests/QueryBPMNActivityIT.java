@@ -56,6 +56,7 @@ import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -333,6 +334,7 @@ class QueryBPMNActivityIT {
     }
 
     @Test
+    @DirtiesContext
     void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
         //given
         List<CloudRuntimeEvent> events = objectMapper.readValue(
@@ -344,6 +346,7 @@ class QueryBPMNActivityIT {
     }
 
     @Test
+    @DirtiesContext
     void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
         //given
         List<CloudRuntimeEvent> events = objectMapper.readValue(
