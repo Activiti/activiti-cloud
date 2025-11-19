@@ -72,7 +72,6 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
-@DirtiesContext
 class QueryBPMNActivityIT {
 
     @Autowired
