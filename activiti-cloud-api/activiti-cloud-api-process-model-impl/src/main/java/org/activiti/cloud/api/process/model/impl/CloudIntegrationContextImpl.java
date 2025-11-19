@@ -297,6 +297,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
         return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
+    @Override
     @JsonProperty("ephemeralVariables")
     public boolean hasEphemeralVariables() {
         return Boolean.TRUE.equals(this.ephemeralVariables);
