@@ -145,16 +145,21 @@ public class ProcessInstanceBuilder {
     }
 
     public ProcessInstanceEntity buildAndSave() {
-        variableRepository.saveAll(process.getVariables());
+        ProcessInstanceEntity savedProcess = processInstanceRepository.save(process);
+
+        if (!process.getVariables().isEmpty()) {
+            variableRepository.saveAll(savedProcess.getVariables());
+        }
+
         Instant instant = Instant.now();
 
         Set<TaskEntity> tasks = new HashSet<>();
         for (TaskBuilder builder : taskBuffer) {
-            builder.withParentProcess(process);
+            builder.withParentProcess(savedProcess);
             builder.withCreatedDate(Date.from(instant.plusSeconds(taskBuffer.indexOf(builder))));
             tasks.add(builder.buildAndSave());
         }
-        process.setTasks(tasks);
-        return processInstanceRepository.save(process);
+        savedProcess.setTasks(tasks);
+        return savedProcess;
     }
 }
