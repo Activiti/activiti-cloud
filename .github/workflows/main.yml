@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 25
-          distribution: 'temurin'
+          distribution: 'cornetto'
 
       - name: Resolve override VERSION
         id: resolve-override-version
@@ -194,7 +194,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # 5.0.0
         with:
           java-version: 25
-          distribution: 'temurin'
+          distribution: 'cornetto'
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
@@ -377,7 +377,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: 25
-          distribution: 'temurin'
+          distribution: 'cornetto'
 
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
