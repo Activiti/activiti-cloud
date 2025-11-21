@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.BaseBPMNActivityEventHandler.SERVICE_TASK;
+
 import jakarta.persistence.EntityManager;
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
@@ -94,7 +96,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         serviceTaskEntity.setId(integrationContext.getId());
         serviceTaskEntity.setElementId(integrationContext.getClientId());
         serviceTaskEntity.setActivityName(integrationContext.getClientName());
-        serviceTaskEntity.setActivityType("serviceTask");
+        serviceTaskEntity.setActivityType(SERVICE_TASK);
         serviceTaskEntity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
         serviceTaskEntity.setProcessInstanceId(integrationContext.getProcessInstanceId());
         serviceTaskEntity.setExecutionId(integrationContext.getExecutionId());
