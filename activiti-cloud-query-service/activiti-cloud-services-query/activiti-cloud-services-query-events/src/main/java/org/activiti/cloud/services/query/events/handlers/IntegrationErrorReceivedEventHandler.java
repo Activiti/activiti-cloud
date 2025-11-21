@@ -56,7 +56,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             ServiceTaskEntity serviceTask = entity.getServiceTask();
 
             if (serviceTask != null) {
-                serviceTask.setCompletedDate(new Date(integrationEvent.getTimestamp()));
+                serviceTask.setCancelledDate(new Date(integrationEvent.getTimestamp()));
                 serviceTask.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
 
                 entityManager.persist(serviceTask);
