@@ -129,12 +129,6 @@ public class IntegrationResultReceivedEventHandlerTest {
     }
 
     private CloudIntegrationResultReceivedEvent buildIntegrationResultReceivedEvent(String integrationContextId) {
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setId(integrationContextId);
-        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        integrationContext.setClientId(CLIENT_ID);
-        integrationContext.setExecutionId(EXECUTION_ID);
-
         CloudIntegrationResultReceivedEventImpl event = new CloudIntegrationResultReceivedEventImpl(
             "event-id",
             new Date().getTime(),
