@@ -78,7 +78,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         return IntegrationEvents.INTEGRATION_REQUESTED.name();
     }
 
-    public ServiceTaskEntity createServiceTaskEntity(
+    private ServiceTaskEntity createServiceTaskEntity(
         CloudIntegrationRequestedEvent integrationEvent,
         CloudRuntimeEvent<?, ?> event
     ) {
