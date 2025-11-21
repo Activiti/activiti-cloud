@@ -55,6 +55,7 @@ public class ProcessAssertions {
             .hasMessageContaining("Unable to find process instance for the given id");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 ProcessInstance queryProcessInstance = processQuerySteps.getProcessInstance(processInstanceId);
                 assertThat(queryProcessInstance).isNotNull();
@@ -67,6 +68,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 ProcessInstance queryProcessInstance = processQuerySteps.getProcessInstance(processInstanceId);
                 assertThat(queryProcessInstance.getBusinessKey()).isEqualTo("businessKey");
@@ -79,6 +81,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
@@ -102,6 +105,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
@@ -126,6 +130,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
@@ -152,6 +157,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
@@ -173,6 +179,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
@@ -207,6 +214,7 @@ public class ProcessAssertions {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId(processInstanceId);
                 assertThat(events).isNotEmpty();
