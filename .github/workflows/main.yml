@@ -84,7 +84,7 @@ jobs:
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
         with:
           java-version: 25
-          distribution: 'cornetto'
+          distribution: 'corretto'
 
       - name: Resolve override VERSION
         id: resolve-override-version
@@ -208,7 +208,7 @@ jobs:
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
         with:
           java-version: 25
-          distribution: 'cornetto'
+          distribution: 'corretto'
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
@@ -422,7 +422,7 @@ jobs:
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: 25
-          distribution: 'cornetto'
+          distribution: 'corretto'
 
       - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
