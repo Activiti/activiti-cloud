@@ -72,6 +72,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         ServiceTaskEntity serviceTaskEntity = createServiceTaskEntity(integrationEvent, event);
         entity.setServiceTask(serviceTaskEntity);
 
+        entityManager.persist(serviceTaskEntity);
         entityManager.persist(entity);
     }
 
