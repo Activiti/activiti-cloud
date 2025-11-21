@@ -36,8 +36,7 @@ public class BPMNActivityCompletedEventHandler extends BaseBPMNActivityEventHand
 
         Optional<BaseBPMNActivityEntity> optionalBaseBPMNActivityEntity = findOrCreateBPMNActivityEntity(event);
 
-        optionalBaseBPMNActivityEntity.ifPresent(baseBPMNActivityEntity -> {
-            BaseBPMNActivityEntity bpmnActivityEntity = optionalBaseBPMNActivityEntity.get();
+        optionalBaseBPMNActivityEntity.ifPresent(bpmnActivityEntity -> {
             bpmnActivityEntity.setCompletedDate(new Date(activityEvent.getTimestamp()));
             bpmnActivityEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
 

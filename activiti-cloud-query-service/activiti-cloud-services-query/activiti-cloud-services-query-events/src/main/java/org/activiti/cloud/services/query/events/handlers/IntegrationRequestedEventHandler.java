@@ -101,7 +101,6 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         serviceTaskEntity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
         serviceTaskEntity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
         serviceTaskEntity.setBusinessKey(integrationContext.getBusinessKey());
-        serviceTaskEntity.setId(integrationContext.getId());
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);

@@ -35,6 +35,7 @@ public abstract class BaseIntegrationEventHandler {
 
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
 
+        // Fallback to previous primary key strategy for backward compatibility
         if (entity == null) {
             pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
             entity = entityManager.find(IntegrationContextEntity.class, pkId);
