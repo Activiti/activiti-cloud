@@ -25,7 +25,7 @@ import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 
 public abstract class BaseBPMNActivityEventHandler {
 
-    public static final String SERVICE_TASK = "serviceTask";
+    public static final String SERVICE_TASK_TYPE = "serviceTask";
 
     protected final EntityManager entityManager;
 
@@ -42,7 +42,7 @@ public abstract class BaseBPMNActivityEventHandler {
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
-        if (!SERVICE_TASK.equals(bpmnActivity.getActivityType())) {
+        if (!SERVICE_TASK_TYPE.equals(bpmnActivity.getActivityType())) {
             bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
         }
 
@@ -62,7 +62,7 @@ public abstract class BaseBPMNActivityEventHandler {
 
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
-        if (!SERVICE_TASK.equals(bpmnActivity.getActivityType())) {
+        if (!SERVICE_TASK_TYPE.equals(bpmnActivity.getActivityType())) {
             bpmnActivityEntity =
                 new BPMNActivityEntity(
                     event.getServiceName(),

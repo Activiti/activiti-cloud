@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.activiti.cloud.services.query.events.handlers.BaseBPMNActivityEventHandler.SERVICE_TASK;
+import static org.activiti.cloud.services.query.events.handlers.BaseBPMNActivityEventHandler.SERVICE_TASK_TYPE;
 import static org.activiti.cloud.services.query.model.IntegrationContextEntity.ERROR_MESSAGE_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -208,7 +208,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getActivityType)
-                    .contains(SERVICE_TASK);
+                    .contains(SERVICE_TASK_TYPE);
             });
     }
 
@@ -238,7 +238,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK));
+                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
             });
 
         // and given
@@ -260,7 +260,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK));
+                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
             });
     }
 
@@ -289,7 +289,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getActivityType)
-                    .contains(SERVICE_TASK);
+                    .contains(SERVICE_TASK_TYPE);
             });
     }
 
@@ -331,7 +331,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK));
+                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
             });
 
         // and given
@@ -353,7 +353,7 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getBody().getContent())
                     .hasSize(1)
                     .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK));
+                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
             });
     }
 
@@ -396,7 +396,7 @@ public class QueryAdminProcessServiceTasksIT {
                         CloudServiceTask::getElementId,
                         CloudServiceTask::getActivityType
                     )
-                    .containsExactly(serviceTaskId, integrationContext.getId(), SERVICE_TASK);
+                    .containsExactly(serviceTaskId, integrationContext.getId(), SERVICE_TASK_TYPE);
             });
     }
 
@@ -434,7 +434,7 @@ public class QueryAdminProcessServiceTasksIT {
                     )
                     .containsExactly(
                         integrationContext.getId(),
-                        SERVICE_TASK,
+                        SERVICE_TASK_TYPE,
                         ROOT_PROCESS_INSTANCE_ID,
                         IntegrationContextStatus.INTEGRATION_REQUESTED
                     );
@@ -469,7 +469,7 @@ public class QueryAdminProcessServiceTasksIT {
                     )
                     .containsExactly(
                         integrationContext.getId(),
-                        SERVICE_TASK,
+                        SERVICE_TASK_TYPE,
                         IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
                         error.getErrorCode(),
                         StringUtils.truncate(error.getMessage(), ERROR_MESSAGE_LENGTH),
@@ -503,7 +503,7 @@ public class QueryAdminProcessServiceTasksIT {
                     )
                     .containsExactly(
                         integrationContext.getId(),
-                        SERVICE_TASK,
+                        SERVICE_TASK_TYPE,
                         ROOT_PROCESS_INSTANCE_ID,
                         IntegrationContextStatus.INTEGRATION_REQUESTED
                     );
@@ -523,7 +523,7 @@ public class QueryAdminProcessServiceTasksIT {
                     )
                     .containsExactly(
                         integrationContext.getId(),
-                        SERVICE_TASK,
+                        SERVICE_TASK_TYPE,
                         IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
                     );
             });
@@ -598,7 +598,7 @@ public class QueryAdminProcessServiceTasksIT {
             serviceTaskEntity.setId(oldCompositeKey);
             serviceTaskEntity.setElementId(clientId);
             serviceTaskEntity.setActivityName("Service Task");
-            serviceTaskEntity.setActivityType(SERVICE_TASK);
+            serviceTaskEntity.setActivityType(SERVICE_TASK_TYPE);
             serviceTaskEntity.setProcessInstanceId(processInstanceId);
             serviceTaskEntity.setProcessDefinitionId(processDefinitionId);
             serviceTaskEntity.setExecutionId(executionId);
@@ -620,7 +620,7 @@ public class QueryAdminProcessServiceTasksIT {
             integrationContextEntity.setRootProcessInstanceId(UUID.randomUUID().toString());
             integrationContextEntity.setExecutionId(executionId);
             integrationContextEntity.setClientId(clientId);
-            integrationContextEntity.setClientType(SERVICE_TASK);
+            integrationContextEntity.setClientType(SERVICE_TASK_TYPE);
             integrationContextEntity.setClientName("Service Task");
             integrationContextEntity.setProcessDefinitionId(processDefinitionId);
             integrationContextEntity.setProcessDefinitionKey("testProcess");
@@ -786,7 +786,7 @@ public class QueryAdminProcessServiceTasksIT {
         integrationContext.setRootProcessInstanceId(ROOT_PROCESS_INSTANCE_ID);
         integrationContext.setExecutionId(EXECUTION_ID);
         integrationContext.setClientId(id);
-        integrationContext.setClientType(SERVICE_TASK);
+        integrationContext.setClientType(SERVICE_TASK_TYPE);
         integrationContext.setClientName(SERVICE_TASK_NAME);
         integrationContext.setProcessDefinitionId(process.getProcessDefinitionId());
         integrationContext.setProcessDefinitionVersion(process.getProcessDefinitionVersion());
@@ -889,7 +889,7 @@ public class QueryAdminProcessServiceTasksIT {
         BPMNActivityImpl activity = new BPMNActivityImpl(
             "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94",
             SERVICE_TASK_NAME,
-            SERVICE_TASK
+            SERVICE_TASK_TYPE
         );
         activity.setProcessDefinitionId(process.getProcessDefinitionId());
         activity.setProcessInstanceId(process.getId());
