@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.UUID;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
@@ -46,22 +47,64 @@ public class IntegrationResultReceivedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
-    private static final String uuid = "f89b5dc9-ab00-4c89-bbf1-65fc013371fd";
+    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
+    private static final String CLIENT_ID = UUID.randomUUID().toString();
+    private static final String EXECUTION_ID = UUID.randomUUID().toString();
 
     @Test
-    public void handleShouldUpdateStatusFromRequestedToResultReceived() {
+    public void handleShouldUpdateStatusesWhenIntegrationResultReceived() {
         // given
+        String id = UUID.randomUUID().toString();
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
-            uuid,
-            IntegrationContextStatus.INTEGRATION_REQUESTED
-        );
+            id);
 
-        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(uuid, BPMNActivityStatus.STARTED));
+        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(id));
 
-        when(entityManager.find(IntegrationContextEntity.class, uuid)).thenReturn(existingIntegrationContextEntity);
+        when(entityManager.find(IntegrationContextEntity.class, id)).thenReturn(existingIntegrationContextEntity);
 
         // when
-        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(uuid);
+        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(id);
+        resultHandler.handle(resultEvent);
+
+        // then
+        ArgumentCaptor<IntegrationContextEntity> integrationContextCaptor = ArgumentCaptor.forClass(
+            IntegrationContextEntity.class
+        );
+        ArgumentCaptor<ServiceTaskEntity> serviceTaskCaptor = ArgumentCaptor.forClass(ServiceTaskEntity.class);
+
+        verify(entityManager, times(2)).persist(any());
+        verify(entityManager).persist(integrationContextCaptor.capture());
+        verify(entityManager).persist(serviceTaskCaptor.capture());
+
+        IntegrationContextEntity updatedIntegrationContext = integrationContextCaptor.getValue();
+        ServiceTaskEntity updatedServiceTask = serviceTaskCaptor.getValue();
+
+        assertThat(updatedIntegrationContext.getStatus())
+            .isEqualTo(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+        assertThat(updatedIntegrationContext.getResultDate()).isNotNull();
+
+        assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
+        assertThat(updatedServiceTask.getCompletedDate()).isNotNull();
+    }
+
+    @Test
+    public void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
+        // given
+        String new_uuid_id = UUID.randomUUID().toString();
+        String legacy_composite_key_id = PROCESS_INSTANCE_ID + ":" + CLIENT_ID + ":" + EXECUTION_ID;
+
+        IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
+            legacy_composite_key_id
+        );
+
+        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(legacy_composite_key_id));
+
+        // First attempt with UUID returns null, second attempt with legacy composite key returns the entity
+        when(entityManager.find(IntegrationContextEntity.class, new_uuid_id)).thenReturn(null);
+        when(entityManager.find(IntegrationContextEntity.class, legacy_composite_key_id)).thenReturn(existingIntegrationContextEntity);
+
+        // when
+        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(new_uuid_id);
         resultHandler.handle(resultEvent);
 
         // then
@@ -88,9 +131,9 @@ public class IntegrationResultReceivedEventHandlerTest {
     private CloudIntegrationResultReceivedEvent buildIntegrationResultReceivedEvent(String integrationContextId) {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(integrationContextId);
-        integrationContext.setProcessInstanceId("processInstanceId");
-        integrationContext.setClientId("clientId");
-        integrationContext.setExecutionId("executionId");
+        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        integrationContext.setClientId(CLIENT_ID);
+        integrationContext.setExecutionId(EXECUTION_ID);
 
         CloudIntegrationResultReceivedEventImpl event = new CloudIntegrationResultReceivedEventImpl(
             "event-id",
@@ -109,15 +152,14 @@ public class IntegrationResultReceivedEventHandlerTest {
     private IntegrationContextImpl createIntegrationContext(String integrationContextId) {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
         integrationContext.setId(integrationContextId);
-        integrationContext.setProcessInstanceId("processInstanceId");
-        integrationContext.setClientId("clientId");
-        integrationContext.setExecutionId("executionId");
+        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        integrationContext.setClientId(CLIENT_ID);
+        integrationContext.setExecutionId(EXECUTION_ID);
         return integrationContext;
     }
 
     private IntegrationContextEntity createIntegrationContextEntity(
-        String id,
-        IntegrationContextStatus integrationContextStatus
+        String id
     ) {
         IntegrationContextEntity existingEntity = new IntegrationContextEntity(
             "serviceName",
@@ -127,16 +169,16 @@ public class IntegrationResultReceivedEventHandlerTest {
             "appVersion"
         );
         existingEntity.setId(id);
-        existingEntity.setProcessInstanceId("processInstanceId");
-        existingEntity.setClientId("clientId");
-        existingEntity.setExecutionId("executionId");
-        existingEntity.setStatus(integrationContextStatus);
+        existingEntity.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        existingEntity.setClientId(CLIENT_ID);
+        existingEntity.setExecutionId(EXECUTION_ID);
+        existingEntity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         existingEntity.setRequestDate(new Date());
 
         return existingEntity;
     }
 
-    private ServiceTaskEntity createServiceTaskEntity(String id, BPMNActivityStatus bpmnActivityStatus) {
+    private ServiceTaskEntity createServiceTaskEntity(String id) {
         ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
             "serviceName",
             "serviceFullName",
@@ -145,7 +187,10 @@ public class IntegrationResultReceivedEventHandlerTest {
             "appVersion"
         );
         serviceTaskEntity.setId(id);
-        serviceTaskEntity.setStatus(bpmnActivityStatus);
+        serviceTaskEntity.setProcessInstanceId(PROCESS_INSTANCE_ID);
+        serviceTaskEntity.setExecutionId(EXECUTION_ID);
+        serviceTaskEntity.setElementId(CLIENT_ID);
+        serviceTaskEntity.setStatus(BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date());
 
         return serviceTaskEntity;
