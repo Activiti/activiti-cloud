@@ -22,6 +22,7 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_PRODUCER_INCIDENTS;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.ENGINE_EVENTS_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
@@ -77,6 +78,8 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.application.name=bar",
         "spring.cloud.stream.bindings.auditProducer.destination=engine-events",
         "spring.cloud.stream.bindings.auditProducer.producer.required-groups=query,audit",
+        "spring.cloud.stream.bindings.auditProducerIncidents.destination=engineEvents",
+        "spring.cloud.stream.bindings.auditProducerIncidents.producer.required-groups=audit",
         "spring.cloud.stream.bindings.commandConsumer.destination=command-consumer",
         "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.commandResults.destination=command-results",
@@ -104,6 +107,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.restConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
+        "activiti.cloud.messaging.function-router.routes.auditProducerIncidents.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
     }
 )
@@ -114,6 +118,7 @@ public class FunctionRouterBindingConfigurationIT {
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
     private static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
     private static final String FUNCTION_AUDIT_SUPPLIER_NAME = "auditProducer" + OUTPUT_BINDING;
+    private static final String FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME = "auditProducerIncidents" + OUTPUT_BINDING;
     private static final String FUNCTION_COMMAND_SUPPLIER_NAME = "commandResults" + OUTPUT_BINDING;
     private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
     private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
@@ -344,6 +349,7 @@ public class FunctionRouterBindingConfigurationIT {
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys(
                 "auditProducer",
+                "auditProducerIncidents",
                 "commandResults",
                 "functionRouterInput",
                 "integrationResults",
@@ -363,6 +369,10 @@ public class FunctionRouterBindingConfigurationIT {
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_COMMAND_SUPPLIER_NAME);
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
             .isEqualTo(Arrays.asList(TestBindingsChannels.COMMAND_RESULTS));
+
+        assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME);
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
+            .isEqualTo(Arrays.asList(AUDIT_PRODUCER_INCIDENTS));
     }
 
     @Test
@@ -425,6 +435,11 @@ public class FunctionRouterBindingConfigurationIT {
             .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
             .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
+
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
+            .matches(bindings -> bindings == null || bindings.isEmpty());
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(AUDIT_PRODUCER_INCIDENTS));
     }
 
     @Test

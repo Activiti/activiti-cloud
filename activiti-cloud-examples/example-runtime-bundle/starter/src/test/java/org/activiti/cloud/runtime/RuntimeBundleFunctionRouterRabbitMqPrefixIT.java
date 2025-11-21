@@ -71,5 +71,7 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
             .containsOnly("default-app.consumer");
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups())
+            .containsOnly("default-app.consumer");
     }
 }

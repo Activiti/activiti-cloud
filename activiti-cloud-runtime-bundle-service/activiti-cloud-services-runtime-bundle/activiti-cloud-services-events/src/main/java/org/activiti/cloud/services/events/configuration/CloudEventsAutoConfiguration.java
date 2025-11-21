@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.configuration;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -71,9 +72,12 @@ import org.activiti.cloud.services.events.listeners.MessageProducerCommandContex
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
+import org.activiti.cloud.services.events.message.EventChunker;
+import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
+import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
@@ -138,6 +142,14 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ExecutionContextIncidentEventMessageBuilderFactory executionContextIncidentEventMessageBuilderFactory(
+        RuntimeBundleProperties properties
+    ) {
+        return new ExecutionContextIncidentEventMessageBuilderFactory(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory(
         RuntimeBundleProperties properties
     ) {
@@ -164,15 +176,37 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public EventChunker eventChunker(ObjectMapper objectMapper, RuntimeBundleProperties properties) {
+        return new EventChunker(objectMapper, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IncidentService incidentService(
+        ProcessEngineChannels processEngineChannels,
+        ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
+        return new IncidentService(processEngineChannels, messageBuilderChainFactory, runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        RuntimeBundleProperties runtimeBundleProperties,
+        EventChunker eventChunker,
+        IncidentService incidentService
     ) {
         return new MessageProducerCommandContextCloseListener(
             processEngineChannels,
             executionContextMessageBuilderFactory,
-            runtimeBundleInfoAppender
+            runtimeBundleInfoAppender,
+            runtimeBundleProperties,
+            eventChunker,
+            incidentService
         );
     }
 
