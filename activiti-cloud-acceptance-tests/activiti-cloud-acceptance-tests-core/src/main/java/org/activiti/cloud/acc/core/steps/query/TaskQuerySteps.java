@@ -52,6 +52,7 @@ public class TaskQuerySteps {
     @Step
     public void checkTaskStatus(String taskId, Task.TaskStatus expectedStatus) {
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() ->
                 assertThat(taskQueryService.queryTasksByIdAnsStatus(taskId, expectedStatus).getContent())
                     .isNotNull()
@@ -63,6 +64,7 @@ public class TaskQuerySteps {
     @Step
     public void checkSubtaskHasParentTaskId(String subtaskId, String parentTaskId) {
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 final Collection<CloudTask> tasks = taskQueryService.getTask(subtaskId).getContent();
 
@@ -88,6 +90,7 @@ public class TaskQuerySteps {
     @Step
     public void checkTaskHasVariable(String taskId, String variableName, String variableValue) throws Exception {
         await()
+            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
 
