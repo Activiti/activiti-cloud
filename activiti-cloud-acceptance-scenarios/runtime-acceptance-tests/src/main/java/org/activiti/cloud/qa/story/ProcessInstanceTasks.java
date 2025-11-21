@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
@@ -219,7 +220,7 @@ public class ProcessInstanceTasks {
     @Then("the process instance reaches a task named $taskName")
     public void checkProcessIsOnTask(String taskName) {
         await()
-            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudTask> tasks = processRuntimeBundleSteps.getTaskByProcessInstanceId(
                     processInstance.getId()
@@ -516,7 +517,7 @@ public class ProcessInstanceTasks {
     public void checkIfEventsFromProcessesWithVariablesArePresentAdmin() {
         assertThat(processInstance).isNotNull();
         await()
-            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> cloudRuntimeEvents = auditAdminSteps.getEventsAdmin().getContent();
                 assertThat(cloudRuntimeEvents)
@@ -629,7 +630,7 @@ public class ProcessInstanceTasks {
 
         // propagation my take some time to reach query
         await()
-            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() ->
                 assertThat(processQuerySteps.getProcessInstance(processInstance.getId()).getName())
                     .isEqualTo(newProcessName)
@@ -654,7 +655,7 @@ public class ProcessInstanceTasks {
     @Then("the task has the completion fields set")
     public void verifyTheCorrectCompletionFieldsAreSet() {
         await()
-            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Task queriedTask = taskQuerySteps.getTaskById(currentTask.getId());
 
@@ -695,7 +696,7 @@ public class ProcessInstanceTasks {
     public void verifyEventMessageIdIsSet() {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         await()
-            .atMost(30, java.util.concurrent.TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudRuntimeEvent> generatedEvents = auditSteps.getEventsByProcessInstanceId(processId);
 
