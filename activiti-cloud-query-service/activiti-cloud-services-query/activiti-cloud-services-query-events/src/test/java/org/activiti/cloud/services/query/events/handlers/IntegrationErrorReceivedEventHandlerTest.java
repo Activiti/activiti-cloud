@@ -23,9 +23,7 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
-import java.util.Date;
 import java.util.UUID;
-import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
@@ -40,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationErrorReceivedEventHandlerTest {
+public class IntegrationErrorReceivedEventHandlerTest extends IntegrationEventsHelper {
 
     @InjectMocks
     private IntegrationErrorReceivedEventHandler errorHandler;
@@ -48,16 +46,11 @@ public class IntegrationErrorReceivedEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
-    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
-    private static final String CLIENT_ID = UUID.randomUUID().toString();
-    private static final String EXECUTION_ID = UUID.randomUUID().toString();
-
     @Test
     public void handleShouldUpdateStatusesWhenIntegrationErrorReceived() {
         // given
         String id = UUID.randomUUID().toString();
-        IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
-            id);
+        IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(id);
 
         existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(id));
 
@@ -92,7 +85,7 @@ public class IntegrationErrorReceivedEventHandlerTest {
     public void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
         // given
         String new_uuid_id = UUID.randomUUID().toString();
-        String legacy_composite_key_id = PROCESS_INSTANCE_ID + ":" + CLIENT_ID + ":" + EXECUTION_ID;
+        String legacy_composite_key_id = getLegacyId();
 
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
             legacy_composite_key_id
@@ -102,7 +95,8 @@ public class IntegrationErrorReceivedEventHandlerTest {
 
         // First attempt with UUID returns null, second attempt with legacy composite key returns the entity
         when(entityManager.find(IntegrationContextEntity.class, new_uuid_id)).thenReturn(null);
-        when(entityManager.find(IntegrationContextEntity.class, legacy_composite_key_id)).thenReturn(existingIntegrationContextEntity);
+        when(entityManager.find(IntegrationContextEntity.class, legacy_composite_key_id))
+            .thenReturn(existingIntegrationContextEntity);
 
         // when
         CloudIntegrationErrorReceivedEvent resultEvent = buildIntegrationErrorReceivedEvent(new_uuid_id);
@@ -144,52 +138,5 @@ public class IntegrationErrorReceivedEventHandlerTest {
         event.setAppVersion("appVersion");
 
         return event;
-    }
-
-    private IntegrationContextImpl createIntegrationContext(String integrationContextId) {
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setId(integrationContextId);
-        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        integrationContext.setClientId(CLIENT_ID);
-        integrationContext.setExecutionId(EXECUTION_ID);
-        return integrationContext;
-    }
-
-    private IntegrationContextEntity createIntegrationContextEntity(
-        String id
-    ) {
-        IntegrationContextEntity existingEntity = new IntegrationContextEntity(
-            "serviceName",
-            "serviceFullName",
-            "serviceVersion",
-            "appName",
-            "appVersion"
-        );
-        existingEntity.setId(id);
-        existingEntity.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        existingEntity.setClientId(CLIENT_ID);
-        existingEntity.setExecutionId(EXECUTION_ID);
-        existingEntity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
-        existingEntity.setRequestDate(new Date());
-
-        return existingEntity;
-    }
-
-    private ServiceTaskEntity createServiceTaskEntity(String id) {
-        ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
-            "serviceName",
-            "serviceFullName",
-            "serviceVersion",
-            "appName",
-            "appVersion"
-        );
-        serviceTaskEntity.setId(id);
-        serviceTaskEntity.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        serviceTaskEntity.setExecutionId(EXECUTION_ID);
-        serviceTaskEntity.setElementId(CLIENT_ID);
-        serviceTaskEntity.setStatus(BPMNActivityStatus.STARTED);
-        serviceTaskEntity.setStartedDate(new Date());
-
-        return serviceTaskEntity;
     }
 }

@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
-import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -39,17 +38,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationRequestedEventHandlerTest {
+public class IntegrationRequestedEventHandlerTest extends IntegrationEventsHelper {
 
     @InjectMocks
     private IntegrationRequestedEventHandler requestedHandler;
 
     @Mock
     private EntityManager entityManager;
-
-    private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
-    private static final String CLIENT_ID = UUID.randomUUID().toString();
-    private static final String EXECUTION_ID = UUID.randomUUID().toString();
 
     @Test
     public void handleShouldCreateNewIntegrationContextAndServiceTaskWhenIntegrationRequested() {
@@ -86,12 +81,9 @@ public class IntegrationRequestedEventHandlerTest {
         assertThat(savedServiceTask.getProcessInstanceId()).isEqualTo(PROCESS_INSTANCE_ID);
         assertThat(savedServiceTask.getExecutionId()).isEqualTo(EXECUTION_ID);
         assertThat(savedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.STARTED);
-
     }
 
-    private CloudIntegrationRequestedEvent buildIntegrationRequestedEvent(
-        String integrationContextId
-    ) {
+    private CloudIntegrationRequestedEvent buildIntegrationRequestedEvent(String integrationContextId) {
         CloudIntegrationRequestedEventImpl event = new CloudIntegrationRequestedEventImpl(
             "event-id",
             new Date().getTime(),
@@ -105,14 +97,4 @@ public class IntegrationRequestedEventHandlerTest {
 
         return event;
     }
-
-    private IntegrationContextImpl createIntegrationContext(String integrationContextId) {
-        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-        integrationContext.setId(integrationContextId);
-        integrationContext.setProcessInstanceId(PROCESS_INSTANCE_ID);
-        integrationContext.setClientId(CLIENT_ID);
-        integrationContext.setExecutionId(EXECUTION_ID);
-        return integrationContext;
-    }
-
 }
