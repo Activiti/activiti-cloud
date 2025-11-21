@@ -145,10 +145,7 @@ public class ProcessInstanceBuilder {
     }
 
     public ProcessInstanceEntity buildAndSave() {
-        if (!process.getVariables().isEmpty()) {
-            variableRepository.saveAll(process.getVariables());
-        }
-
+        variableRepository.saveAll(process.getVariables());
         Instant instant = Instant.now();
 
         Set<TaskEntity> tasks = new HashSet<>();
