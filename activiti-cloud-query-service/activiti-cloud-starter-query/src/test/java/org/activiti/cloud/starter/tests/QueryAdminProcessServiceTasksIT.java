@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.UUID;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.ProcessInstance;
@@ -54,6 +56,8 @@ import org.activiti.cloud.services.query.app.repository.IntegrationContextReposi
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.model.StringUtils;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -76,6 +80,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-admin.properties")
@@ -128,6 +133,12 @@ public class QueryAdminProcessServiceTasksIT {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private String processDefinitionId = UUID.randomUUID().toString();
 
@@ -563,6 +574,90 @@ public class QueryAdminProcessServiceTasksIT {
         assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
 
         waitForIntegrationContext(serviceTaskIt2, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+    }
+
+    @Test
+    public void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
+        String processInstanceId = UUID.randomUUID().toString();
+        String clientId = UUID.randomUUID().toString();
+        String executionId = UUID.randomUUID().toString();
+        String processDefinitionId = UUID.randomUUID().toString();
+
+        // Create the old composite key using the format: processInstanceId:clientId:executionId
+        String oldCompositeKey = processInstanceId + ":" + clientId + ":" + executionId;
+
+        // Persist entities with old composite key in a transaction
+        transactionTemplate.execute(status -> {
+            // Create and persist ServiceTaskEntity with old composite key
+            ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
+                "test-service", "test-service-full", "1.0", "test-app", "1.0"
+            );
+            serviceTaskEntity.setId(oldCompositeKey);
+            serviceTaskEntity.setElementId(clientId);
+            serviceTaskEntity.setActivityName("Service Task");
+            serviceTaskEntity.setActivityType("serviceTask");
+            serviceTaskEntity.setProcessInstanceId(processInstanceId);
+            serviceTaskEntity.setProcessDefinitionId(processDefinitionId);
+            serviceTaskEntity.setExecutionId(executionId);
+            serviceTaskEntity.setStatus(BPMNActivityStatus.STARTED);
+            serviceTaskEntity.setStartedDate(new java.util.Date());
+
+            entityManager.persist(serviceTaskEntity);
+
+            // Create and persist IntegrationContextEntity with old composite key
+            IntegrationContextEntity integrationContextEntity = new IntegrationContextEntity(
+                "test-service", "test-service-full", "1.0", "test-app", "1.0"
+            );
+            integrationContextEntity.setId(oldCompositeKey);
+            integrationContextEntity.setProcessInstanceId(processInstanceId);
+            integrationContextEntity.setRootProcessInstanceId(UUID.randomUUID().toString());
+            integrationContextEntity.setExecutionId(executionId);
+            integrationContextEntity.setClientId(clientId);
+            integrationContextEntity.setClientType("serviceTask");
+            integrationContextEntity.setClientName("Service Task");
+            integrationContextEntity.setProcessDefinitionId(processDefinitionId);
+            integrationContextEntity.setProcessDefinitionKey("testProcess");
+            integrationContextEntity.setProcessDefinitionVersion(1);
+            integrationContextEntity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
+            integrationContextEntity.setRequestDate(new java.util.Date());
+            integrationContextEntity.setServiceTask(serviceTaskEntity);
+
+            entityManager.persist(integrationContextEntity);
+            entityManager.flush();
+
+            return null;
+        });
+
+        // Verify entities are persisted with old composite key
+        assertThat(integrationContextRepository.findById(oldCompositeKey)).isPresent();
+        assertThat(bpmnActivityRepository.findById(oldCompositeKey)).isPresent();
+
+        // When: We send an integration result received event with the new ID format (just clientId)
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(clientId);  // New format uses just the clientId
+        integrationContext.setProcessInstanceId(processInstanceId);
+        integrationContext.setExecutionId(executionId);
+        integrationContext.setClientId(clientId);
+
+        CloudIntegrationResultReceivedEventImpl event = new CloudIntegrationResultReceivedEventImpl(integrationContext);
+        producer.send(event);
+
+        // Then: The backward compatibility mechanism finds and updates the entity with the old key
+        await().untilAsserted(() -> {
+            // Verify the integration context was found and updated using the fallback mechanism
+            IntegrationContextEntity updatedEntity = integrationContextRepository.findById(oldCompositeKey).orElseThrow();
+
+            assertThat(updatedEntity.getStatus())
+                .isEqualTo(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+            assertThat(updatedEntity.getResultDate()).isNotNull();
+
+            // Verify the associated service task was also updated
+            org.activiti.cloud.services.query.model.BPMNActivityEntity updatedServiceTask =
+                bpmnActivityRepository.findById(oldCompositeKey).orElseThrow();
+
+            assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
+            assertThat(updatedServiceTask.getCompletedDate()).isNotNull();
+        });
     }
 
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
