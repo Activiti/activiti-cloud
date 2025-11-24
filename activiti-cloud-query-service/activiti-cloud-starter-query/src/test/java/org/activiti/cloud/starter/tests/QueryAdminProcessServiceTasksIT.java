@@ -528,48 +528,47 @@ public class QueryAdminProcessServiceTasksIT {
 
     @Test
     public void should_supportLoopInvolvingServiceTasks() {
-        //given
+        //given - first iteration, service task started and completed
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
-        String integrationContextId1 = UUID.randomUUID().toString();
-        IntegrationContext integrationContext1 = createIntegrationContext(process, integrationContextId1);
-        sendIntegrationRequestedEvent(integrationContext1);
+        String id_iteration1 = UUID.randomUUID().toString();
+        String id_iteration2 = UUID.randomUUID().toString();
 
-        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContextId1);
+        IntegrationContext integrationContextIt1 = createIntegrationContext(process, id_iteration1);
+        CloudServiceTask serviceTaskIt1 = startServiceTask(integrationContextIt1);
+
+        completeServiceTask(integrationContextIt1, serviceTaskIt1, process);
+
+        //when - the process loop back and reaches the task a second time
+        IntegrationContext integrationContextIt2 = createIntegrationContext(process, id_iteration2);
+        CloudServiceTask serviceTaskIt2 = startServiceTask(integrationContextIt2);
+
+        //then - first iteration service task remains completed
+        checkServiceTaskStatus(serviceTaskIt1, BPMNActivityStatus.COMPLETED);
+
+        completeServiceTask(integrationContextIt2, serviceTaskIt2, process);
+        checkServiceTaskStatus(serviceTaskIt1, BPMNActivityStatus.COMPLETED);
+    }
+
+    private CloudServiceTask startServiceTask(IntegrationContext integrationContext) {
+        sendIntegrationRequestedEvent(integrationContext);
+        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
+
         assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.STARTED);
+        return serviceTaskIt1;
+    }
 
-        sendIntegrationResultReceivedEvent(integrationContext1);
-        sendActivityCompletedEvent(serviceTaskIt1, process);
+    private void completeServiceTask(IntegrationContext integrationContext, CloudServiceTask serviceTask, ProcessInstance process) {
+        sendIntegrationResultReceivedEvent(integrationContext);
+        sendActivityCompletedEvent(serviceTask, process);
 
-        serviceTaskIt1 = waitForServiceTask(integrationContextId1);
+        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
         assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
         waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+    }
 
-        //when the process loop back and reaches the task a second time
-        String integrationContextId2 = UUID.randomUUID().toString();
-        IntegrationContext integrationContext2 = createIntegrationContext(process, integrationContextId2);
-
-        // Send BPMNActivityStartedEvent first (this creates the BPMN activity)
-        final BPMNActivityImpl bpmnActivity = buildServiceTask(serviceTaskIt1.getExecutionId(), process);
-        sendActivitiStartedEvent(process, bpmnActivity);
-
-        // Then send IntegrationRequestedEvent (this creates the service task entity with the integration context ID)
-        sendIntegrationRequestedEvent(integrationContext2);
-
-        CloudServiceTask serviceTaskIt2 = waitForServiceTask(integrationContextId2);
-        assertThat(serviceTaskIt2.getStatus()).isEqualTo(BPMNActivityStatus.STARTED);
-        serviceTaskIt1 = waitForServiceTask(integrationContextId1);
-        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
-
-        sendIntegrationResultReceivedEvent(integrationContext2);
-        sendActivityCompletedEvent(serviceTaskIt2, process);
-
-        // Refresh serviceTasks to get updated status
-        serviceTaskIt2 = waitForServiceTask(integrationContextId2);
-        assertThat(serviceTaskIt2.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
-        serviceTaskIt1 = waitForServiceTask(integrationContextId1);
-        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
-
-        waitForIntegrationContext(serviceTaskIt2, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+    private void checkServiceTaskStatus(CloudServiceTask serviceTask, BPMNActivityStatus expectedStatus) {
+        CloudServiceTask retrievedServiceTask = waitForServiceTask(serviceTask.getId());
+        assertThat(retrievedServiceTask.getStatus()).isEqualTo(expectedStatus);
     }
 
     @Test
@@ -579,7 +578,7 @@ public class QueryAdminProcessServiceTasksIT {
         String clientId = UUID.randomUUID().toString();
         String executionId = UUID.randomUUID().toString();
         String processDefinitionId = UUID.randomUUID().toString();
-        String oldCompositeKey = buildOldCompositeKey(processInstanceId, clientId, executionId);
+        String oldCompositeKey = processInstanceId + ":" + clientId + ":" + executionId;
 
         persistEntitiesWithOldCompositeKey(oldCompositeKey, processInstanceId, clientId, executionId, processDefinitionId);
         verifyEntitiesPersistedWithOldKey(oldCompositeKey);
@@ -590,10 +589,6 @@ public class QueryAdminProcessServiceTasksIT {
 
         // then: backward compatibility mechanism updates entities with old key
         verifyEntitiesUpdatedWithOldKey(oldCompositeKey);
-    }
-
-    private String buildOldCompositeKey(String processInstanceId, String clientId, String executionId) {
-        return processInstanceId + ":" + clientId + ":" + executionId;
     }
 
     private void persistEntitiesWithOldCompositeKey(
@@ -853,14 +848,6 @@ public class QueryAdminProcessServiceTasksIT {
             .filter(task -> serviceTaskId.equals(task.getId()))
             .findFirst()
             .orElseThrow(() -> new AssertionError("Service task with ID " + serviceTaskId + " not found"));
-    }
-
-    private void sendActivitiStartedEvent(ProcessInstanceImpl process, BPMNActivityImpl bpmnActivity) {
-        eventsAggregator.addEvents(
-            new CloudBPMNActivityStartedEventImpl(bpmnActivity, process.getProcessDefinitionId(), process.getId())
-        );
-
-        eventsAggregator.sendAll();
     }
 
     private IntegrationContext createIntegrationContext(ProcessInstanceImpl process, String id) {
