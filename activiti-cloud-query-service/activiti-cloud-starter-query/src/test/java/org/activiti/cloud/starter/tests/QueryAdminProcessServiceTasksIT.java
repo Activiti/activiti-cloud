@@ -64,7 +64,6 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starters.test.EventsAggregator;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,15 +92,15 @@ public class QueryAdminProcessServiceTasksIT {
     private static final String ERROR_MESSAGE =
         "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
 
-    private static final String PROC_URL = "/admin/v1/process-instances";
-
     private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudServiceTask>>() {};
-
     private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudServiceTask>() {};
-
     private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<CloudIntegrationContext>() {};
-    public static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
 
+    private static final String PROC_URL = "/admin/v1/process-instances/{processInstanceId}/service-tasks";
+    private static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
+    private static final String WITH_STATUS = "?status={status}";
+
+    private static final String ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
     private static final String ROOT_PROCESS_INSTANCE_ID = "56824d90-cd3e-45fc-bbfc-32f91dab775f";
     private static final String EXECUTION_ID = "95d8752a-d2b7-4acb-8eda-5fad2d952bed";
     private static final String SERVICE_TASK_NAME = "Service Task";
@@ -141,8 +140,6 @@ public class QueryAdminProcessServiceTasksIT {
 
     private String processDefinitionId = UUID.randomUUID().toString();
 
-    private ProcessInstanceEventContainedBuilder processInstanceBuilder;
-
     private EventsAggregator eventsAggregator;
 
     @BeforeEach
@@ -151,13 +148,11 @@ public class QueryAdminProcessServiceTasksIT {
 
         eventsAggregator = new EventsAggregator(producer);
 
-        processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
-
         //given
-        deployProcessDefinition();
+        deployFirstProcessDefinition();
     }
 
-    private void deployProcessDefinition() throws IOException {
+    private void deployFirstProcessDefinition() throws IOException {
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(processDefinitionId);
         firstProcessDefinition.setKey("mySimpleProcess");
@@ -197,10 +192,11 @@ public class QueryAdminProcessServiceTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks",
+                    PROC_URL,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    process.getId()
                 );
                 //then
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -226,10 +222,11 @@ public class QueryAdminProcessServiceTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                    PROC_URL + WITH_STATUS,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
+                    process.getId(),
                     CloudBPMNActivity.BPMNActivityStatus.STARTED
                 );
                 //then
@@ -248,10 +245,11 @@ public class QueryAdminProcessServiceTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                    PROC_URL + WITH_STATUS,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
+                    process.getId(),
                     CloudBPMNActivity.BPMNActivityStatus.COMPLETED
                 );
                 //then
@@ -296,7 +294,7 @@ public class QueryAdminProcessServiceTasksIT {
     @Test
     void shouldReturn400WhenGetServiceTasksByStatusWithInvalidStatus() {
         ResponseEntity<PagedModel<CloudServiceTask>> running = testRestTemplate.exchange(
-            "/admin/v1/service-tasks?status={status}",
+            SERVICE_TASKS_URL + WITH_STATUS,
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_TASKS_RESPONSE_TYPE,
@@ -319,7 +317,7 @@ public class QueryAdminProcessServiceTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks?status={status}",
+                    SERVICE_TASKS_URL + WITH_STATUS,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
@@ -341,7 +339,7 @@ public class QueryAdminProcessServiceTasksIT {
             .untilAsserted(() -> {
                 //when
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks?status={status}",
+                    SERVICE_TASKS_URL + WITH_STATUS,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_TASKS_RESPONSE_TYPE,
@@ -377,12 +375,11 @@ public class QueryAdminProcessServiceTasksIT {
                 );
 
                 assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
-
                 String serviceTaskId = serviceTasksResponse.getBody().getContent().iterator().next().getId();
 
                 //when
                 ResponseEntity<CloudServiceTask> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks/" + serviceTaskId,
+                    SERVICE_TASKS_URL + "/" + serviceTaskId,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     SINGLE_TASK_RESPONSE_TYPE
@@ -670,9 +667,40 @@ public class QueryAdminProcessServiceTasksIT {
             });
     }
 
+    @Test
+    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
+        //given
+        identityTokenProducer.withTestUser("hruser");
+
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        IntegrationContext integrationContext = createIntegrationContext(process, UUID.randomUUID().toString());
+        sendIntegrationRequestedEvent(integrationContext);
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+            });
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                    PROC_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    process.getId()
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            });
+    }
+
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
         ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
-            "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+            SERVICE_TASKS_URL + "/{serviceTaskId}/integration-context",
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             SINGLE_INT_CONTEXT_RESPONSE_TYPE,
@@ -819,36 +847,6 @@ public class QueryAdminProcessServiceTasksIT {
         return process;
     }
 
-    @Test
-    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
-        //given
-        identityTokenProducer.withTestUser("hruser");
-
-        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
-        IntegrationContext integrationContext = createIntegrationContext(process, UUID.randomUUID().toString());
-        sendIntegrationRequestedEvent(integrationContext);
-
-        //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
-
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-            });
-    }
-
     private ProcessInstanceImpl startSimpleProcessInstance() {
         String executionId = UUID.randomUUID().toString();
         ProcessInstanceImpl process = new ProcessInstanceImpl();
@@ -866,7 +864,7 @@ public class QueryAdminProcessServiceTasksIT {
         BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl(
             "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
             "startEvent1",
-            "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
+            ELEMENT_ID
         );
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
@@ -887,7 +885,7 @@ public class QueryAdminProcessServiceTasksIT {
 
     private BPMNActivityImpl buildServiceTask(String executionId, ProcessInstanceImpl process) {
         BPMNActivityImpl activity = new BPMNActivityImpl(
-            "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94",
+            ELEMENT_ID,
             SERVICE_TASK_NAME,
             SERVICE_TASK_TYPE
         );
