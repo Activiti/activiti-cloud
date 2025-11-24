@@ -549,28 +549,6 @@ public class QueryAdminProcessServiceTasksIT {
         checkServiceTaskStatus(serviceTaskIt1, BPMNActivityStatus.COMPLETED);
     }
 
-    private CloudServiceTask startServiceTask(IntegrationContext integrationContext) {
-        sendIntegrationRequestedEvent(integrationContext);
-        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
-
-        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.STARTED);
-        return serviceTaskIt1;
-    }
-
-    private void completeServiceTask(IntegrationContext integrationContext, CloudServiceTask serviceTask, ProcessInstance process) {
-        sendIntegrationResultReceivedEvent(integrationContext);
-        sendActivityCompletedEvent(serviceTask, process);
-
-        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
-        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
-        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-    }
-
-    private void checkServiceTaskStatus(CloudServiceTask serviceTask, BPMNActivityStatus expectedStatus) {
-        CloudServiceTask retrievedServiceTask = waitForServiceTask(serviceTask.getId());
-        assertThat(retrievedServiceTask.getStatus()).isEqualTo(expectedStatus);
-    }
-
     @Test
     public void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
         //given
@@ -620,6 +598,28 @@ public class QueryAdminProcessServiceTasksIT {
                 //then
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
             });
+    }
+
+    private CloudServiceTask startServiceTask(IntegrationContext integrationContext) {
+        sendIntegrationRequestedEvent(integrationContext);
+        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
+
+        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.STARTED);
+        return serviceTaskIt1;
+    }
+
+    private void completeServiceTask(IntegrationContext integrationContext, CloudServiceTask serviceTask, ProcessInstance process) {
+        sendIntegrationResultReceivedEvent(integrationContext);
+        sendActivityCompletedEvent(serviceTask, process);
+
+        CloudServiceTask serviceTaskIt1 = waitForServiceTask(integrationContext.getId());
+        assertThat(serviceTaskIt1.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
+        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+    }
+
+    private void checkServiceTaskStatus(CloudServiceTask serviceTask, BPMNActivityStatus expectedStatus) {
+        CloudServiceTask retrievedServiceTask = waitForServiceTask(serviceTask.getId());
+        assertThat(retrievedServiceTask.getStatus()).isEqualTo(expectedStatus);
     }
 
     private void persistEntitiesWithOldCompositeKey(
