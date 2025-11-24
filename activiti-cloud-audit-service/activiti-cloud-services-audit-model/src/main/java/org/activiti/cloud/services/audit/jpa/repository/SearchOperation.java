@@ -43,19 +43,13 @@ public enum SearchOperation {
 
     public static SearchOperation getSimpleOperation(final String operation) {
         char input = operation.charAt(0);
-        switch (input) {
-            case ':':
-                return EQUALITY;
-            case '!':
-                return NEGATION;
-            case '>':
-                return operation.length() > 1 && operation.charAt(1) == '=' ? GREATER_THAN_EQUAL : GREATER_THAN;
-            case '<':
-                return operation.length() > 1 && operation.charAt(1) == '=' ? LESS_THAN_EQUAL : LESS_THAN;
-            case '~':
-                return LIKE;
-            default:
-                return null;
-        }
+        return switch (input) {
+            case ':' -> EQUALITY;
+            case '!' -> NEGATION;
+            case '>' -> operation.length() > 1 && operation.charAt(1) == '=' ? GREATER_THAN_EQUAL : GREATER_THAN;
+            case '<' -> operation.length() > 1 && operation.charAt(1) == '=' ? LESS_THAN_EQUAL : LESS_THAN;
+            case '~' -> LIKE;
+            default -> null;
+        };
     }
 }
