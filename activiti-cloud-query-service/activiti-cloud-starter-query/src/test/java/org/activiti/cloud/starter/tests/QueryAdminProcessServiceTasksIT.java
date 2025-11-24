@@ -591,6 +591,37 @@ public class QueryAdminProcessServiceTasksIT {
         verifyEntitiesUpdatedWithOldKey(oldCompositeKey);
     }
 
+    @Test
+    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
+        //given
+        identityTokenProducer.withTestUser("hruser");
+
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        IntegrationContext integrationContext = createIntegrationContext(process, UUID.randomUUID().toString());
+        sendIntegrationRequestedEvent(integrationContext);
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+            });
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                    PROC_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE,
+                    process.getId()
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+            });
+    }
+
     private void persistEntitiesWithOldCompositeKey(
         String oldCompositeKey,
         String processInstanceId,
@@ -715,37 +746,6 @@ public class QueryAdminProcessServiceTasksIT {
 
                 assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.COMPLETED);
                 assertThat(updatedServiceTask.getCompletedDate()).isNotNull();
-            });
-    }
-
-    @Test
-    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
-        //given
-        identityTokenProducer.withTestUser("hruser");
-
-        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
-        IntegrationContext integrationContext = createIntegrationContext(process, UUID.randomUUID().toString());
-        sendIntegrationRequestedEvent(integrationContext);
-
-        //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
-
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    process.getId()
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
             });
     }
 
