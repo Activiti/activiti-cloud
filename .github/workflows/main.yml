@@ -322,6 +322,15 @@ jobs:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
 
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+        env:
+          MAVEN_OPTS: >-
+            -XX:+UseG1GC
+            -XX:+DisableExplicitGC
+            -XX:+AlwaysPreTouch
+            -Djava.security.egd=file:/dev/./urandom
+            -Djdk.io.File.enableADS=true
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.util=ALL-UNNAMED
         run: |
           make test/runtime-acceptance-tests
 
