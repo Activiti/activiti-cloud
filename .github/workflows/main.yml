@@ -110,12 +110,6 @@ jobs:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          MAVEN_OPTS: >-
-            -XX:+UseG1GC
-            -XX:+DisableExplicitGC
-            -XX:+AlwaysPreTouch
-            -Djava.security.egd=file:/dev/./urandom
-            -Djdk.io.File.enableADS=true
 
       - name: Merge JaCoCo execution files
         shell: bash
@@ -320,13 +314,6 @@ jobs:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
 
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        env:
-          MAVEN_OPTS: >-
-            -XX:+UseG1GC
-            -XX:+DisableExplicitGC
-            -XX:+AlwaysPreTouch
-            -Djava.security.egd=file:/dev/./urandom
-            -Djdk.io.File.enableADS=true
         run: |
           make test/runtime-acceptance-tests
 

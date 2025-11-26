@@ -20,10 +20,10 @@
     <skipTests>${skipAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
-    <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
+    <serenity-maven-plugin.version>4.2.9</serenity-maven-plugin.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <com.squareup.okhttp3.version>4.12.0</com.squareup.okhttp3.version>
   </properties>
