@@ -20,6 +20,8 @@ import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -27,6 +29,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(QueryConsumerChannelHandler.class);
 
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
@@ -43,8 +47,10 @@ public class QueryConsumerChannelHandler {
     }
 
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+        logger.info("Query service received {} events", events != null ? events.size() : 0);
         afterCompletion(entityManager::clear);
         eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+        logger.info("Query service processed {} events successfully", events != null ? events.size() : 0);
     }
 
     private static void afterCompletion(Runnable action) {
