@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.qa.story;
 
+import java.util.concurrent.TimeUnit;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.core.steps.audit.AuditSteps;
 import org.activiti.cloud.acc.core.steps.audit.admin.AuditAdminSteps;
@@ -29,6 +30,7 @@ import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessVariablesRuntimeAd
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.steps.AuthenticationSteps;
+import org.awaitility.Awaitility;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +81,12 @@ public class RuntimeLifecycleActions {
 
     @BeforeStories
     public void checkServicesHealth() throws Exception {
+        // Configure Awaitility defaults for Java 25 - increase timeout to 60s for cross-service propagation
+        // This ensures await() calls without explicit timeouts have sufficient time for eventual consistency
+        // across runtime-bundle -> query/audit services via RabbitMQ
+        Awaitility.setDefaultTimeout(60, TimeUnit.SECONDS);
+        Awaitility.setDefaultPollInterval(500, TimeUnit.MILLISECONDS);
+
         authenticationSteps.authenticateUser("testuser");
         processRuntimeBundleSteps.checkServicesHealth();
         taskRuntimeBundleSteps.checkServicesHealth();

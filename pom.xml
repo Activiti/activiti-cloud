@@ -184,12 +184,12 @@
   </ciManagement>
   <properties>
     <java.release>${java.version}</java.release>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <skipAcceptanceTests>false</skipAcceptanceTests>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>ß
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
