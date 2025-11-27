@@ -47,10 +47,27 @@ public class QueryConsumerChannelHandler {
     }
 
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        logger.info("Query service received {} events", events != null ? events.size() : 0);
-        afterCompletion(entityManager::clear);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
-        logger.info("Query service processed {} events successfully", events != null ? events.size() : 0);
+        try {
+            logger.info("[QUERY-TRACE] receive() method called");
+            logger.info("[QUERY-TRACE] Received {} events", events != null ? events.size() : 0);
+
+            if (events != null && !events.isEmpty()) {
+                logger.info("[QUERY-TRACE] First event type: {}", events.get(0).getEventType());
+                logger.info("[QUERY-TRACE] First event processInstanceId: {}", events.get(0).getProcessInstanceId());
+            }
+
+            afterCompletion(entityManager::clear);
+            logger.info("[QUERY-TRACE] EntityManager clear callback registered");
+
+            CloudRuntimeEvent<?, ?>[] eventsArray = optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {});
+            logger.info("[QUERY-TRACE] Events optimized, processing {} events", eventsArray.length);
+
+            eventHandlerContext.handle(eventsArray);
+            logger.info("[QUERY-TRACE] Processed {} events successfully", events != null ? events.size() : 0);
+        } catch (Exception e) {
+            logger.error("[QUERY-TRACE] ERROR processing events", e);
+            throw e;
+        }
     }
 
     private static void afterCompletion(Runnable action) {

@@ -40,9 +40,13 @@ import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessEngineEventsAggregator
     extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?, ?>, MessageProducerCommandContextCloseListener> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProcessEngineEventsAggregator.class);
 
     private final MessageProducerCommandContextCloseListener closeListener;
 
@@ -67,16 +71,23 @@ public class ProcessEngineEventsAggregator
 
     @Override
     public void add(CloudRuntimeEvent<?, ?> element) {
+        logger.info(
+            "[RUNTIME-TRACE] ProcessEngineEventsAggregator.add() called with event type: {}",
+            element.getClass().getSimpleName()
+        );
+
         CommandContext commandContext = getCurrentCommandContext();
 
         // Let's try resolve underlying execution Id
         String executionId = resolveExecutionId(element);
+        logger.info("[RUNTIME-TRACE] Resolved executionId: {}", executionId);
 
         // Let's find and cache ExecutionContext for executionId
         ExecutionContext executionContext = resolveExecutionContext(commandContext, executionId);
 
         // Let's inject execution context info into event using event execution process context
         if (executionContext != null) {
+            logger.info("[RUNTIME-TRACE] ExecutionContext found, appending context info to event");
             ExecutionContextInfoAppender executionContextInfoAppender = createExecutionContextInfoAppender(
                 executionContext
             );
@@ -84,9 +95,12 @@ public class ProcessEngineEventsAggregator
             CloudRuntimeEventImpl<?, ?> event = CloudRuntimeEventImpl.class.cast(element);
 
             element = executionContextInfoAppender.appendExecutionContextInfoTo(event);
+        } else {
+            logger.info("[RUNTIME-TRACE] No ExecutionContext found for executionId: {}", executionId);
         }
 
         super.add(element);
+        logger.info("[RUNTIME-TRACE] Event added to aggregator successfully");
     }
 
     protected ExecutionContext resolveExecutionContext(CommandContext commandContext, String executionId) {

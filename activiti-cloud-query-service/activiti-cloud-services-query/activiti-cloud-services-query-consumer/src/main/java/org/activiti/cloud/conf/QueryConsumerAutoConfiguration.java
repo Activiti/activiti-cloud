@@ -21,6 +21,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -29,11 +31,17 @@ import org.springframework.context.annotation.Import;
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 
+    private static final Logger logger = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
+
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     @Bean
     public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        return queryConsumerChannelHandler::receive;
+        logger.info("[QUERY-TRACE] Consumer function bean created");
+        return events -> {
+            logger.info("[QUERY-TRACE] Consumer function invoked with {} events", events != null ? events.size() : 0);
+            queryConsumerChannelHandler.receive(events);
+        };
     }
 }
