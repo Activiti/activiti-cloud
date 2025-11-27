@@ -32,6 +32,7 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
