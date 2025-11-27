@@ -348,6 +348,7 @@ public class ProcessInstanceTasks {
         processRuntimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
     }
 
+    //1
     @Then("the status of the process is changed to completed")
     public void verifyProcessStatusCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
@@ -381,6 +382,7 @@ public class ProcessInstanceTasks {
         );
     }
 
+    //1
     @Then("a variable was created with name $variableName")
     @When("a variable was created with name $variableName")
     public void verifyVariableCreated(String variableName) throws Exception {

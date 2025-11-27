@@ -118,6 +118,7 @@ public class ProcessInstanceConnectors {
             });
     }
 
+    //1
     @Then("the query process instance has an integer variable named $variableName with value $variableValue")
     public void assertThatQueryHasVariable(String variableName, Integer variableValue) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
@@ -125,6 +126,7 @@ public class ProcessInstanceConnectors {
         processQuerySteps.checkProcessInstanceHasVariableValue(processInstanceId, variableName, variableValue);
     }
 
+    //1
     @Then(
         "the process instance has a resultCollection named $variableName with the following integer entries: $variableTable"
     )

@@ -123,6 +123,7 @@ public class ProcessInstanceServiceTasks {
             });
     }
 
+    //1
     @Then("the user can get service task integration context by service task id")
     public void verifyServiceTaskIntegrationContextById() {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
@@ -163,6 +164,7 @@ public class ProcessInstanceServiceTasks {
         assertThat(thrown).isNull();
     }
 
+    //1
     @When("the user can get list of service tasks with status of $status")
     @Then("the user can get list of service tasks with status of $status")
     public void verifyGetServiceTaskByStatus(String status) {
@@ -214,12 +216,14 @@ public class ProcessInstanceServiceTasks {
             });
     }
 
+    //1
     @Then("the process with service tasks is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
         processQuerySteps.checkProcessInstanceStatus(processId, ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 
+    //1
     @Then("integration context events are emitted for the process")
     public void verifyIntegrationContextEventsForProcess() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
@@ -361,6 +365,7 @@ public class ProcessInstanceServiceTasks {
         );
     }
 
+    //1
     @Then("the generated ACTIVITY_COMPLETED events for activity $elementId have the expected count of $count")
     public void verifyEventActivityCompleted(String elementId, Integer count) {
         String processId = Serenity.sessionVariableCalled("processInstanceId");

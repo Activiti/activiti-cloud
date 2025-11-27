@@ -250,6 +250,7 @@ public class ProcessInstanceNotifications {
         processRuntimeBundleSteps.message(payload);
     }
 
+    //1
     @Then("notifications: verify the status of the process is completed")
     public void verifyProcessCompleted() throws Exception {
         assertThat(processInstanceRef.get()).isNotNull();

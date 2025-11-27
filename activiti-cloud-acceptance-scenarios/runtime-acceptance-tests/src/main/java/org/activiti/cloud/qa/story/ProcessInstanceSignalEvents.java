@@ -104,6 +104,7 @@ public class ProcessInstanceSignalEvents {
         );
     }
 
+    //1
     @Then("the process catching a signal is completed")
     public void sheckSignalCatchProcessInstance() throws Exception {
         processQuerySteps.checkProcessInstanceStatus(
