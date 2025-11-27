@@ -17,7 +17,6 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
@@ -32,7 +31,6 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
-    private final ReentrantLock lock = new ReentrantLock();
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
@@ -44,14 +42,9 @@ public class QueryConsumerChannelHandler {
         this.entityManager = entityManager;
     }
 
-    public void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        lock.lock();
-        try {
-            afterCompletion(entityManager::clear);
-            eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
-        } finally {
-            lock.unlock();
-        }
+    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+        afterCompletion(entityManager::clear);
+        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
     }
 
     private static void afterCompletion(Runnable action) {
