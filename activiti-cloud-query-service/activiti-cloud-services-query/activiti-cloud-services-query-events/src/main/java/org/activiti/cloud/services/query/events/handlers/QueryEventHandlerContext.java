@@ -36,18 +36,31 @@ public class QueryEventHandlerContext {
     }
 
     public void handle(CloudRuntimeEvent<?, ?>... events) {
+        LOGGER.warn("[QUERY-TRACE] handle() called with {} events", events != null ? events.length : 0);
         if (events != null) {
+            LOGGER.warn("[QUERY-TRACE] Starting to process {} events", events.length);
             Stream
                 .of(events)
                 .forEach(event -> {
+                    LOGGER.warn(
+                        "[QUERY-TRACE] Processing event: type={}, eventId={}, processInstanceId={}",
+                        event.getEventType().name(),
+                        event.getId(),
+                        event.getProcessInstanceId()
+                    );
                     QueryEventHandler handler = handlers.get(event.getEventType().name());
                     if (handler != null) {
-                        LOGGER.debug("Handling event: " + handler.getHandledEvent());
+                        LOGGER.warn("[QUERY-TRACE] Found handler for event type: {}", event.getEventType().name());
                         handler.handle(event);
+                        LOGGER.warn("[QUERY-TRACE] Successfully handled event type: {}", event.getEventType().name());
                     } else {
-                        LOGGER.debug("No handler found for event: " + event.getEventType().name() + ". Ignoring event");
+                        LOGGER.warn(
+                            "[QUERY-TRACE] No handler found for event: {} - ignoring",
+                            event.getEventType().name()
+                        );
                     }
                 });
+            LOGGER.warn("[QUERY-TRACE] Finished processing {} events", events.length);
         }
     }
 

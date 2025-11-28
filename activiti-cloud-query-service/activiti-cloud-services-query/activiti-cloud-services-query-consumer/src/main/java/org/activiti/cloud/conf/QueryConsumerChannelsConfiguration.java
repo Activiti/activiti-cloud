@@ -16,7 +16,16 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {}
+public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
+
+    private static final Logger logger = LoggerFactory.getLogger(QueryConsumerChannelsConfiguration.class);
+
+    public QueryConsumerChannelsConfiguration() {
+        logger.warn("[QUERY-TRACE] ===== QueryConsumerChannelsConfiguration initialized =====");
+    }
+}

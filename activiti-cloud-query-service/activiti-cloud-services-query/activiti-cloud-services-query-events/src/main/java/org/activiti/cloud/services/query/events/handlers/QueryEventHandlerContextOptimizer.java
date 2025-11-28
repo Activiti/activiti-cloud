@@ -130,9 +130,16 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
+        LOGGER.warn("[QUERY-TRACE] optimize() called with {} events", events != null ? events.size() : 0);
+        if (events != null && !events.isEmpty()) {
+            LOGGER.warn("[QUERY-TRACE] First event type: {}", events.get(0).getEventType());
+        }
         resolveProcessInstanceId(events)
             .ifPresent(processInstanceId -> {
-                LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
+                LOGGER.warn(
+                    "[QUERY-TRACE] Building entity fetch graph for root process instance: {}",
+                    processInstanceId
+                );
                 var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
                 var criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -144,6 +151,7 @@ public class QueryEventHandlerContextOptimizer {
 
                 findRuntimeEvents(events, CloudVariableEvent.class, entity -> true, VariableInstance::getName)
                     .ifPresent(variableNames -> {
+                        LOGGER.warn("[QUERY-TRACE] Fetching variables for optimization");
                         fetch(fromProcessInstance, entityGraph, VARIABLES, "name", variableNames);
                     });
 
@@ -193,7 +201,12 @@ public class QueryEventHandlerContextOptimizer {
                     });
             });
 
-        return events.stream().sorted(byEventClass.thenComparing(byTimestamp)).collect(Collectors.toList());
+        List<CloudRuntimeEvent<?, ?>> optimizedEvents = events
+            .stream()
+            .sorted(byEventClass.thenComparing(byTimestamp))
+            .collect(Collectors.toList());
+        LOGGER.warn("[QUERY-TRACE] optimize() returning {} optimized events", optimizedEvents.size());
+        return optimizedEvents;
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {

@@ -21,6 +21,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -29,11 +31,32 @@ import org.springframework.context.annotation.Import;
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 
+    private static final Logger logger = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
+
+    public QueryConsumerAutoConfiguration() {
+        logger.warn("[QUERY-TRACE] ===== QueryConsumerAutoConfiguration constructor called =====");
+    }
+
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     @Bean
     public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        return queryConsumerChannelHandler::receive;
+        logger.warn("[QUERY-TRACE] ===== Consumer function bean CREATED - queryConsumerFunction =====");
+        logger.warn("[QUERY-TRACE] Input binding: {}", QueryConsumerChannels.QUERY_CONSUMER);
+        return events -> {
+            logger.warn(
+                "[QUERY-TRACE] ===== Consumer function INVOKED with {} events =====",
+                events != null ? events.size() : 0
+            );
+            if (events != null && !events.isEmpty()) {
+                logger.warn(
+                    "[QUERY-TRACE] First event: eventType={}, processInstanceId={}",
+                    events.get(0).getEventType(),
+                    events.get(0).getProcessInstanceId()
+                );
+            }
+            queryConsumerChannelHandler.receive(events);
+        };
     }
 }
