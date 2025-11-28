@@ -21,6 +21,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
@@ -52,7 +53,9 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     private ApplicationContext applicationContext;
 
-    private SmartCompositeMessageConverter smartCompositeMessageConverter;
+    private volatile SmartCompositeMessageConverter smartCompositeMessageConverter;
+
+    private final ReentrantLock messageConverterLock = new ReentrantLock();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -118,19 +121,24 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     }
 
     protected CompositeMessageConverter getMessageConverter() {
-        synchronized (this) {
-            if (smartCompositeMessageConverter == null) {
-                BeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+        if (smartCompositeMessageConverter == null) {
+            messageConverterLock.lock();
+            try {
+                if (smartCompositeMessageConverter == null) {
+                    BeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
 
-                List<MessageConverter> messageConverters = new ArrayList<>();
-                JsonMapper jsonMapper = beanFactory.getBean(JsonMapper.class);
+                    List<MessageConverter> messageConverters = new ArrayList<>();
+                    JsonMapper jsonMapper = beanFactory.getBean(JsonMapper.class);
 
-                messageConverters.add(new JsonMessageConverter(jsonMapper));
-                messageConverters.add(new ByteArrayMessageConverter());
-                messageConverters.add(new StringMessageConverter());
-                messageConverters.add(new PrimitiveTypesFromStringMessageConverter(new DefaultConversionService()));
+                    messageConverters.add(new JsonMessageConverter(jsonMapper));
+                    messageConverters.add(new ByteArrayMessageConverter());
+                    messageConverters.add(new StringMessageConverter());
+                    messageConverters.add(new PrimitiveTypesFromStringMessageConverter(new DefaultConversionService()));
 
-                this.smartCompositeMessageConverter = new SmartCompositeMessageConverter(messageConverters);
+                    this.smartCompositeMessageConverter = new SmartCompositeMessageConverter(messageConverters);
+                }
+            } finally {
+                messageConverterLock.unlock();
             }
         }
 

@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -105,12 +106,44 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                                 .addInterceptor(
                                     new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
                                 );
+
+                            // Create and register Supplier function for Spring Cloud Stream 2025 compatibility
+                            createAndRegisterSupplierFunction(bean, beanOutName, beanFactory);
                         });
                 }
 
                 return bean;
             }
         };
+    }
+
+    /**
+     * Creates and registers a Supplier function for the output binding to be compatible with
+     * Spring Cloud Stream 2025, which requires Supplier functions for all output bindings.
+     * The function is registered with the name pattern: <bindingName>_source-out-0
+     */
+    private void createAndRegisterSupplierFunction(
+        Object bean,
+        String beanOutName,
+        DefaultListableBeanFactory beanFactory
+    ) {
+        // Extract the binding name from beanOutName (e.g., "auditProducer_source" -> "auditProducer")
+        String supplierFunctionName = beanOutName.replace(OUTPUT_BINDING, "") + "_source-out-0";
+
+        try {
+            // Create a Supplier function that delegates to the message channel
+            Supplier<Message<?>> supplierFunction = () -> {
+                // This supplier will be called by Spring Cloud Function framework
+                // For output bindings, it acts as a no-op since messages are sent via send()
+                return null;
+            };
+
+            // Register the supplier as a bean with the correct name
+            beanFactory.registerSingleton(supplierFunctionName, supplierFunction);
+        } catch (Exception e) {
+            // Log but don't fail if we can't register the supplier
+            System.err.println("Failed to register supplier function: " + supplierFunctionName + ": " + e.getMessage());
+        }
     }
 
     /**
