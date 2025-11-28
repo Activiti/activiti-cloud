@@ -33,14 +33,22 @@ public class QueryConsumerAutoConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
 
+    public QueryConsumerAutoConfiguration() {
+        logger.warn("[QUERY-TRACE] ===== QueryConsumerAutoConfiguration constructor called =====");
+    }
+
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     @Bean
     public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        logger.info("[QUERY-TRACE] Consumer function bean created");
+        logger.warn("[QUERY-TRACE] ===== Consumer function bean CREATED - queryConsumerFunction =====");
+        logger.warn("[QUERY-TRACE] Input binding: {}", QueryConsumerChannels.QUERY_CONSUMER);
         return events -> {
-            logger.info("[QUERY-TRACE] Consumer function invoked with {} events", events != null ? events.size() : 0);
+            logger.warn(
+                "[QUERY-TRACE] ===== Consumer function INVOKED with {} events =====",
+                events != null ? events.size() : 0
+            );
             queryConsumerChannelHandler.receive(events);
         };
     }
