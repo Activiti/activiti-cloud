@@ -130,6 +130,10 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
+        LOGGER.warn("[QUERY-TRACE] optimize() called with {} events", events != null ? events.size() : 0);
+        if (events != null && !events.isEmpty()) {
+            LOGGER.warn("[QUERY-TRACE] First event type: {}", events.get(0).getEventType().name());
+        }
         resolveProcessInstanceId(events)
             .ifPresent(processInstanceId -> {
                 LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
@@ -197,7 +201,9 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
-        return events.stream().map(CloudRuntimeEvent::getProcessInstanceId).filter(Objects::nonNull).findFirst();
+        var result = events.stream().map(CloudRuntimeEvent::getProcessInstanceId).filter(Objects::nonNull).findFirst();
+        LOGGER.warn("[QUERY-TRACE] optimize() returning {} optimized events", events != null ? events.size() : 0);
+        return result;
     }
 
     protected Optional<CloudRuntimeEvent<?, ?>> findRuntimeEvent(

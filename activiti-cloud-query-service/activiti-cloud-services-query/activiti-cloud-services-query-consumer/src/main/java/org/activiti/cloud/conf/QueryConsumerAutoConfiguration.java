@@ -49,6 +49,13 @@ public class QueryConsumerAutoConfiguration {
                 "[QUERY-TRACE] ===== Consumer function INVOKED with {} events =====",
                 events != null ? events.size() : 0
             );
+            if (events != null && !events.isEmpty()) {
+                logger.warn(
+                    "[QUERY-TRACE] First event: eventType={}, processInstanceId={}",
+                    events.get(0).getEventType(),
+                    events.get(0).getProcessInstanceId()
+                );
+            }
             queryConsumerChannelHandler.receive(events);
         };
     }
