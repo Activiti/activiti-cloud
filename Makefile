@@ -47,8 +47,12 @@ install: release
 			--timeout 8m
 
 delete:
-	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
-	$(or $(KUBECTL),kubectl) delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
+	@echo "Skipping cleanup - services will remain in namespace ${PREVIEW_NAME}"
+	@echo "To manually delete later, run:"
+	@echo "  helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME}"
+	@echo "  kubectl delete ns ${PREVIEW_NAME}"
+	# helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
+	# $(or $(KUBECTL),kubectl) delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"_NAME}"
 
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
