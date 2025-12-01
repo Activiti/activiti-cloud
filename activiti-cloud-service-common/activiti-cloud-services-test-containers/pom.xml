@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>rabbitmq</artifactId>
+      <artifactId>testcontainers-rabbitmq</artifactId>
     </dependency>
     <dependency>
       <groupId>com.github.dasniko</groupId>
