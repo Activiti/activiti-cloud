@@ -102,7 +102,7 @@ class BaseBPMNActivityEventHandlerTest {
 
         // then
         assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(existingEntity);
+        assertThat(result).contains(existingEntity);
         assertThat(result.get().getId()).isEqualTo("existing-id");
     }
 
