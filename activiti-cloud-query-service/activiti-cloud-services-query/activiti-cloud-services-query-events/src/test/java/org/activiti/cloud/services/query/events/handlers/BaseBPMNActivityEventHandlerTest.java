@@ -58,7 +58,7 @@ class BaseBPMNActivityEventHandlerTest {
     }
 
     @Test
-    public void findOrCreateBPMNActivityEntity_shouldCreateEntityForUserTask() {
+    void findOrCreateBPMNActivityEntity_shouldCreateEntityForUserTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
 
