@@ -100,7 +100,7 @@ public class QueryAdminProcessServiceTasksIT {
     private static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
     private static final String WITH_STATUS = "?status={status}";
 
-    private static final String ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
+    private static final String SERVICE_TASK_ELEMENT_ID = "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94";
     private static final String ROOT_PROCESS_INSTANCE_ID = "56824d90-cd3e-45fc-bbfc-32f91dab775f";
     private static final String EXECUTION_ID = "95d8752a-d2b7-4acb-8eda-5fad2d952bed";
     private static final String SERVICE_TASK_NAME = "Service Task";
@@ -149,10 +149,10 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator = new EventsAggregator(producer);
 
         //given
-        deployFirstProcessDefinition();
+        deployProcessDefinition();
     }
 
-    private void deployFirstProcessDefinition() throws IOException {
+    private void deployProcessDefinition() throws IOException {
         ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
         firstProcessDefinition.setId(processDefinitionId);
         firstProcessDefinition.setKey("mySimpleProcess");
@@ -531,13 +531,13 @@ public class QueryAdminProcessServiceTasksIT {
         String idIteration1 = UUID.randomUUID().toString();
         String idIteration2 = UUID.randomUUID().toString();
 
-        IntegrationContext integrationContextIt1 = createIntegrationContext(process, id_iteration1);
+        IntegrationContext integrationContextIt1 = createIntegrationContext(process, idIteration1);
         CloudServiceTask serviceTaskIt1 = startServiceTask(integrationContextIt1);
 
         completeServiceTask(integrationContextIt1, serviceTaskIt1, process);
 
         //when - the process loops back and reaches the task a second time
-        IntegrationContext integrationContextIt2 = createIntegrationContext(process, id_iteration2);
+        IntegrationContext integrationContextIt2 = createIntegrationContext(process, idIteration2);
         CloudServiceTask serviceTaskIt2 = startServiceTask(integrationContextIt2);
 
         //then - first iteration service task remains completed
@@ -879,7 +879,7 @@ public class QueryAdminProcessServiceTasksIT {
         BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl(
             "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
             "startEvent1",
-            ELEMENT_ID
+            SERVICE_TASK_ELEMENT_ID
         );
         sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
         sequenceFlow.setProcessInstanceId(process.getId());
@@ -899,7 +899,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     private BPMNActivityImpl buildServiceTask(String executionId, ProcessInstanceImpl process) {
-        BPMNActivityImpl activity = new BPMNActivityImpl(ELEMENT_ID, SERVICE_TASK_NAME, SERVICE_TASK_TYPE);
+        BPMNActivityImpl activity = new BPMNActivityImpl(SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_NAME, SERVICE_TASK_TYPE);
         activity.setProcessDefinitionId(process.getProcessDefinitionId());
         activity.setProcessInstanceId(process.getId());
         activity.setExecutionId(executionId);
