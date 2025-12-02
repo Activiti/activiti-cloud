@@ -18,7 +18,6 @@ package org.activiti.cloud.services.common.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,12 +30,11 @@ import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProvider
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.KeycloakPrincipal;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtPrincipalRolesProviderChainTest {
+class JwtPrincipalRolesProviderChainTest {
 
     private JwtPrincipalRolesProviderChain subject;
 
@@ -47,14 +45,14 @@ public class JwtPrincipalRolesProviderChainTest {
     PrincipalRolesProvider provider2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         subject = new JwtPrincipalRolesProviderChain(Arrays.asList(provider1, provider2));
     }
 
     @Test
-    public void testGetRoles() {
+    void testGetRoles() {
         // given
-        Principal principal = mock(KeycloakPrincipal.class);
+        Principal principal = mock(Principal.class);
         when(provider1.getRoles(any())).thenReturn(null);
         when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1", "role2"));
 
@@ -64,26 +62,24 @@ public class JwtPrincipalRolesProviderChainTest {
         // then
         assertThat(result).isNotEmpty().containsExactly("role1", "role2");
 
-        verify(provider1).getRoles(eq(principal));
-        verify(provider2).getRoles(eq(principal));
+        verify(provider1).getRoles(principal);
+        verify(provider2).getRoles(principal);
     }
 
     @Test
-    public void testGetRolesSecurityException() {
+    void testGetRolesSecurityException() {
         // given
-        Principal principal = mock(KeycloakPrincipal.class);
+        Principal principal = mock(Principal.class);
         when(provider1.getRoles(any())).thenReturn(null);
         when(provider2.getRoles(any())).thenReturn(null);
 
         // when
-        Throwable thrown = catchThrowable(() -> {
-            subject.getRoles(principal);
-        });
+        Throwable thrown = catchThrowable(() -> subject.getRoles(principal));
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
 
-        verify(provider1).getRoles(eq(principal));
-        verify(provider2).getRoles(eq(principal));
+        verify(provider1).getRoles(principal);
+        verify(provider2).getRoles(principal);
     }
 }
