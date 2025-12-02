@@ -578,7 +578,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
+    void shouldNotGetProcessInstanceServiceTasks() throws InterruptedException {
         //given
         identityTokenProducer.withTestUser("hruser");
 
