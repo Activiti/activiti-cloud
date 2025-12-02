@@ -1,5 +1,5 @@
-alter table bpmn_activity
-  drop constraint bpmn_activity_processInstance_elementId_idx;
+ALTER TABLE bpmn_activity
+  DROP CONSTRAINT bpmn_activity_processInstance_elementId_idx;
 
-alter table integration_context
-  drop constraint integration_context_bpmn_activity_idx;
+ALTER TABLE integration_context
+  DROP CONSTRAINT integration_context_bpmn_activity_idx;
