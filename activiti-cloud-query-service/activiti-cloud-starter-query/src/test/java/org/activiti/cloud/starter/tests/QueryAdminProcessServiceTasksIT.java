@@ -530,7 +530,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void should_supportLoopInvolvingServiceTasks() {
+    void should_supportLoopInvolvingServiceTasks() {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
         String integrationContextId1 = UUID.randomUUID().toString();
