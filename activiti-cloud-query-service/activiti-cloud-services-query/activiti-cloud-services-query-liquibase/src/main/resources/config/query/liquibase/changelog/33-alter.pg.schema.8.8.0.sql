@@ -3,4 +3,3 @@ ALTER TABLE bpmn_activity
 
 ALTER TABLE integration_context
   DROP CONSTRAINT integration_context_bpmn_activity_idx;
-
