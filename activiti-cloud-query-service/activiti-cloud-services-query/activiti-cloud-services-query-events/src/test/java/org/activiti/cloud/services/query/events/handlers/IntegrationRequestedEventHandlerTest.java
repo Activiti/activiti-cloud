@@ -47,7 +47,7 @@ public class IntegrationRequestedEventHandlerTest extends IntegrationEventsHelpe
     private EntityManager entityManager;
 
     @Test
-    public void handleShouldCreateNewIntegrationContextAndServiceTaskWhenIntegrationRequested() {
+    void handleShouldCreateNewIntegrationContextAndServiceTaskWhenIntegrationRequested() {
         // given
         String id = UUID.randomUUID().toString();
 
