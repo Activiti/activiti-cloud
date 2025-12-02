@@ -164,6 +164,7 @@ jobs:
       - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: enhancement/AAE-40522-igdianov-rabbitmq-prefix-acceptance-tests
     strategy:
       # avoid overloading test cluster
       max-parallel: 2
@@ -178,6 +179,9 @@ jobs:
             messaging-destinations: override-destinations
           - messaging-broker: rabbitmq
             messaging-partitioned: non-partitioned
+            messaging-destinations: pdb
+          - messaging-broker: rabbitmq
+            messaging-partitioned: prefix
             messaging-destinations: pdb
     steps:
       - name: Checkout repository
