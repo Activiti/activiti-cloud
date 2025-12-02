@@ -528,8 +528,8 @@ public class QueryAdminProcessServiceTasksIT {
     public void should_supportLoopInvolvingServiceTasks() {
         //given - first iteration, service task started and completed
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
-        String id_iteration1 = UUID.randomUUID().toString();
-        String id_iteration2 = UUID.randomUUID().toString();
+        String idIteration1 = UUID.randomUUID().toString();
+        String idIteration2 = UUID.randomUUID().toString();
 
         IntegrationContext integrationContextIt1 = createIntegrationContext(process, id_iteration1);
         CloudServiceTask serviceTaskIt1 = startServiceTask(integrationContextIt1);
