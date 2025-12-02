@@ -146,7 +146,7 @@ class BaseBPMNActivityEventHandlerTest {
     }
 
     @Test
-    public void createBpmnActivityEntity_shouldCreateEntityForScriptTask() {
+    void createBpmnActivityEntity_shouldCreateEntityForScriptTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
 
