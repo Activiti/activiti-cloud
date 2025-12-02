@@ -84,8 +84,8 @@ public class IntegrationResultReceivedEventHandlerTest extends IntegrationEvents
     @Test
     public void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
         // given
-        String new_uuid_id = UUID.randomUUID().toString();
-        String legacy_composite_key_id = getLegacyId();
+        String newUuid = UUID.randomUUID().toString();
+        String legacyCompositeKeyId = getLegacyId();
 
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
             legacy_composite_key_id
