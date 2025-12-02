@@ -576,7 +576,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
+    void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
         String processInstanceId = UUID.randomUUID().toString();
         String clientId = UUID.randomUUID().toString();
         String executionId = UUID.randomUUID().toString();
