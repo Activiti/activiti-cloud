@@ -47,7 +47,7 @@ public class IntegrationErrorReceivedEventHandlerTest extends IntegrationEventsH
     private EntityManager entityManager;
 
     @Test
-    public void handleShouldUpdateStatusesWhenIntegrationErrorReceived() {
+    void handleShouldUpdateStatusesWhenIntegrationErrorReceived() {
         // given
         String id = UUID.randomUUID().toString();
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(id);
