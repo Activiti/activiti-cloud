@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationResultReceivedEventHandlerTest extends IntegrationEventsHelper {
+class IntegrationResultReceivedEventHandlerTest extends IntegrationEventsHelper {
 
     @InjectMocks
     private IntegrationResultReceivedEventHandler resultHandler;
@@ -47,7 +47,7 @@ public class IntegrationResultReceivedEventHandlerTest extends IntegrationEvents
     private EntityManager entityManager;
 
     @Test
-    public void handleShouldUpdateStatusesWhenIntegrationResultReceived() {
+    void handleShouldUpdateStatusesWhenIntegrationResultReceived() {
         // given
         String id = UUID.randomUUID().toString();
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(id);
@@ -82,24 +82,24 @@ public class IntegrationResultReceivedEventHandlerTest extends IntegrationEvents
     }
 
     @Test
-    public void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
+    void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
         // given
-        String new_uuid_id = UUID.randomUUID().toString();
-        String legacy_composite_key_id = getLegacyId();
+        String newUuid = UUID.randomUUID().toString();
+        String legacyCompositeKeyId = getLegacyId();
 
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
-            legacy_composite_key_id
+            legacyCompositeKeyId
         );
 
-        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(legacy_composite_key_id));
+        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(legacyCompositeKeyId));
 
         // First attempt with UUID returns null, second attempt with legacy composite key returns the entity
-        when(entityManager.find(IntegrationContextEntity.class, new_uuid_id)).thenReturn(null);
-        when(entityManager.find(IntegrationContextEntity.class, legacy_composite_key_id))
+        when(entityManager.find(IntegrationContextEntity.class, newUuid)).thenReturn(null);
+        when(entityManager.find(IntegrationContextEntity.class, legacyCompositeKeyId))
             .thenReturn(existingIntegrationContextEntity);
 
         // when
-        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(new_uuid_id);
+        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(newUuid);
         resultHandler.handle(resultEvent);
 
         // then

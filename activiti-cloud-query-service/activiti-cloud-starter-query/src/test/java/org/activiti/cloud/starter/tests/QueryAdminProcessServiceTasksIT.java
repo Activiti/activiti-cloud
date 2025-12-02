@@ -525,7 +525,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void should_supportLoopInvolvingServiceTasks() {
+    void should_supportLoopInvolvingServiceTasks() {
         //given - first iteration, service task started and completed
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
         String idIteration1 = UUID.randomUUID().toString();
@@ -548,12 +548,11 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
+    void shouldSupportBackwardCompatibilityWithOldCompositeKeyForIntegrationResultReceived() {
         //given
         String processInstanceId = UUID.randomUUID().toString();
         String clientId = UUID.randomUUID().toString();
         String executionId = UUID.randomUUID().toString();
-        String processDefinitionId = UUID.randomUUID().toString();
         String oldCompositeKey = processInstanceId + ":" + clientId + ":" + executionId;
 
         persistEntitiesWithOldCompositeKey(

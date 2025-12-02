@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationRequestedEventHandlerTest extends IntegrationEventsHelper {
+class IntegrationRequestedEventHandlerTest extends IntegrationEventsHelper {
 
     @InjectMocks
     private IntegrationRequestedEventHandler requestedHandler;
@@ -47,7 +47,7 @@ public class IntegrationRequestedEventHandlerTest extends IntegrationEventsHelpe
     private EntityManager entityManager;
 
     @Test
-    public void handleShouldCreateNewIntegrationContextAndServiceTaskWhenIntegrationRequested() {
+    void handleShouldCreateNewIntegrationContextAndServiceTaskWhenIntegrationRequested() {
         // given
         String id = UUID.randomUUID().toString();
 

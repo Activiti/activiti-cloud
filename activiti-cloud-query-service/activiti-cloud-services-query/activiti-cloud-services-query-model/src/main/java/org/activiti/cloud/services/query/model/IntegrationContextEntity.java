@@ -439,7 +439,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return Boolean.TRUE.equals(this.ephemeralVariables);
     }
 
-    // Old way for creating an id for IntegrationContextEntity. It is used in the integration event handlers to find existing entities.
+    // Legacy ID creation strategy for backward compatibility with entities created before AAE-37102.
+    // Used as a fallback in integration event handlers to find pre-existing entities.
     public static class IdBuilderHelper {
 
         public static String from(IntegrationContext integrationContext) {
