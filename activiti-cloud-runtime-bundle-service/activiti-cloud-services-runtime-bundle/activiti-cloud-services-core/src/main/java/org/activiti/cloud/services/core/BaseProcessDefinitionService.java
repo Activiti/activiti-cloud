@@ -69,29 +69,26 @@ public abstract class BaseProcessDefinitionService {
             .orElse(processDefinition);
     }
 
-    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(String excludedCategory) {
-        var processDefinitionsPayloadBuilder = getGetProcessDefinitionsPayloadBuilder(excludedCategory);
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayload(String excludedConstant) {
+        var processDefinitionsPayloadBuilder = getGetProcessDefinitionsPayloadBuilder(excludedConstant);
         return processDefinitionsPayloadBuilder.build();
     }
 
-    private GetProcessDefinitionsPayloadBuilder getGetProcessDefinitionsPayloadBuilder(String excludedCategory) {
+    private GetProcessDefinitionsPayloadBuilder getGetProcessDefinitionsPayloadBuilder(String excludedConstant) {
         var processDefinitionsPayloadBuilder = ProcessPayloadBuilder.processDefinitions();
-        if (validateInput(excludedCategory)) {
-            LOGGER.debug("Excluding process definitions with category: {}", excludedCategory);
+        if (validateInput(excludedConstant)) {
+            LOGGER.debug("Excluding process definitions with constant: {}", excludedConstant);
 
-            processDefinitionsPayloadBuilder.withProcessCategoryToExclude(excludedCategory);
+            processDefinitionsPayloadBuilder.withProcessCategoryToExclude(excludedConstant);
         }
         return processDefinitionsPayloadBuilder;
     }
 
-    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayloadWithLatestVersion(
-        String excludedCategory,
-        boolean latestVersion
-    ) {
-        return getGetProcessDefinitionsPayloadBuilder(excludedCategory).withLatestVersionOnly(latestVersion).build();
+    protected GetProcessDefinitionsPayload buildGetProcessDefinitionsPayloadWithLatestVersion(boolean latestVersion) {
+        return ProcessPayloadBuilder.processDefinitions().withLatestVersionOnly(latestVersion).build();
     }
 
-    protected boolean validateInput(String excludedCategory) {
-        return StringUtils.isNotEmpty(excludedCategory) && excludedCategory.matches("[a-zA-Z0-9_\\-#.]+");
+    protected boolean validateInput(String excludedConstant) {
+        return StringUtils.isNotEmpty(excludedConstant) && excludedConstant.matches("[a-zA-Z0-9_\\-#.]+");
     }
 }

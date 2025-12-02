@@ -307,9 +307,14 @@ public class ServicesCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessDefinitionAdminService processDefinitionAdminService(
         ProcessAdminRuntime processAdminRuntime,
-        List<ProcessDefinitionDecorator> processDefinitionDecorators
+        List<ProcessDefinitionDecorator> processDefinitionDecorators,
+        ProcessDefinitionValuesService processDefinitionValuesService
     ) {
-        return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
+        return new ProcessDefinitionAdminService(
+            processAdminRuntime,
+            processDefinitionDecorators,
+            processDefinitionValuesService
+        );
     }
 
     @Bean
