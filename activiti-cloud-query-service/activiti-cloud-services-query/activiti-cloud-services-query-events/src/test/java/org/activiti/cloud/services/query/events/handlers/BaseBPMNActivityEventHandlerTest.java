@@ -107,7 +107,7 @@ class BaseBPMNActivityEventHandlerTest {
     }
 
     @Test
-    public void createBpmnActivityEntity_shouldNotCreateEntityForServiceTask() {
+    void createBpmnActivityEntity_shouldNotCreateEntityForServiceTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
 
