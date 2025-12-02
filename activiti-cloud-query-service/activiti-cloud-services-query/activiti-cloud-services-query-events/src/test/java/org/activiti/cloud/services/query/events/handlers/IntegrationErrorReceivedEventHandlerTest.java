@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class IntegrationErrorReceivedEventHandlerTest extends IntegrationEventsHelper {
+class IntegrationErrorReceivedEventHandlerTest extends IntegrationEventsHelper {
 
     @InjectMocks
     private IntegrationErrorReceivedEventHandler errorHandler;
