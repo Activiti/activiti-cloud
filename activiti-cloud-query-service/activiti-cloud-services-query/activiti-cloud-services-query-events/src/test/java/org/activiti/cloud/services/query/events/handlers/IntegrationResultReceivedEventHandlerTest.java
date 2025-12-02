@@ -82,7 +82,7 @@ public class IntegrationResultReceivedEventHandlerTest extends IntegrationEvents
     }
 
     @Test
-    public void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
+    void handleShouldUpdateStatusesForLegacyIdsWhenIntegrationResultReceived() {
         // given
         String newUuid = UUID.randomUUID().toString();
         String legacyCompositeKeyId = getLegacyId();
