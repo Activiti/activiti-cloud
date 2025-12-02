@@ -122,7 +122,7 @@ class BaseBPMNActivityEventHandlerTest {
     }
 
     @Test
-    public void createBpmnActivityEntity_shouldCreateEntityForCallActivity() {
+    void createBpmnActivityEntity_shouldCreateEntityForCallActivity() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
 
