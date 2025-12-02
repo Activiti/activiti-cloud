@@ -271,6 +271,8 @@ create table process_candidate_starter_user
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
 create index bpmn_sequence_flow_processInstance_idx on bpmn_sequence_flow (process_instance_id);
+alter table bpmn_activity
+  add constraint bpmn_activity_processInstance_elementId_idx unique (id, process_instance_id, element_id, execution_id);
 create index bpmn_sequence_flow_elementId_idx on bpmn_sequence_flow (element_id);
 create index bpmn_sequence_flow_processInstance_elementId_idx on bpmn_sequence_flow (process_instance_id, element_id);
 create index bpmn_sequence_flow_eventId_idx on bpmn_sequence_flow (event_id);
@@ -300,6 +302,8 @@ create index pcsg_groupId_idx on process_candidate_starter_group (group_id);
 create index pcsg_processDefinition_idx on process_candidate_starter_group (process_definition_id);
 create index pcsu_userId_idx on process_candidate_starter_user (user_id);
 create index pcsu_processDefinition_idx on process_candidate_starter_user (process_definition_id);
+alter table integration_context
+  add constraint integration_context_bpmn_activity_idx unique (id, process_instance_id, client_id, execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
 alter table task_process_variable
