@@ -580,7 +580,6 @@ public class QueryAdminProcessServiceTasksIT {
         String processInstanceId = UUID.randomUUID().toString();
         String clientId = UUID.randomUUID().toString();
         String executionId = UUID.randomUUID().toString();
-        String processDefinitionId = UUID.randomUUID().toString();
 
         // Create the old composite key using the format: processInstanceId:clientId:executionId
         String oldCompositeKey = processInstanceId + ":" + clientId + ":" + executionId;

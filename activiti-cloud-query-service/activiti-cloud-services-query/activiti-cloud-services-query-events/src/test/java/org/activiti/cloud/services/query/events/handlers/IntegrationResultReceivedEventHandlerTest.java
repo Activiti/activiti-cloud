@@ -88,18 +88,18 @@ class IntegrationResultReceivedEventHandlerTest extends IntegrationEventsHelper 
         String legacyCompositeKeyId = getLegacyId();
 
         IntegrationContextEntity existingIntegrationContextEntity = createIntegrationContextEntity(
-            legacy_composite_key_id
+            legacyCompositeKeyId
         );
 
-        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(legacy_composite_key_id));
+        existingIntegrationContextEntity.setServiceTask(createServiceTaskEntity(legacyCompositeKeyId));
 
         // First attempt with UUID returns null, second attempt with legacy composite key returns the entity
-        when(entityManager.find(IntegrationContextEntity.class, new_uuid_id)).thenReturn(null);
-        when(entityManager.find(IntegrationContextEntity.class, legacy_composite_key_id))
+        when(entityManager.find(IntegrationContextEntity.class, newUuid)).thenReturn(null);
+        when(entityManager.find(IntegrationContextEntity.class, legacyCompositeKeyId))
             .thenReturn(existingIntegrationContextEntity);
 
         // when
-        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(new_uuid_id);
+        CloudIntegrationResultReceivedEvent resultEvent = buildIntegrationResultReceivedEvent(newUuid);
         resultHandler.handle(resultEvent);
 
         // then

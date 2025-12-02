@@ -45,7 +45,6 @@ class BaseBPMNActivityEventHandlerTest {
     void findOrCreateBPMNActivityEntity_shouldNotCreateEntityForServiceTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
-
         CloudBPMNActivityImpl serviceTaskActivity = createBPMNActivity(SERVICE_TASK_TYPE);
         CloudBPMNActivityStartedEventImpl event = createEvent(serviceTaskActivity);
 
@@ -61,7 +60,6 @@ class BaseBPMNActivityEventHandlerTest {
     void findOrCreateBPMNActivityEntity_shouldCreateEntityForUserTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
-
         CloudBPMNActivityImpl userTaskActivity = createBPMNActivity("userTask");
         CloudBPMNActivityStartedEventImpl event = createEvent(userTaskActivity);
 
@@ -81,7 +79,6 @@ class BaseBPMNActivityEventHandlerTest {
     void findOrCreateBPMNActivityEntity_shouldFindExistingEntityForUserTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
-
         CloudBPMNActivityImpl userTaskActivity = createBPMNActivity("userTask");
         CloudBPMNActivityStartedEventImpl event = createEvent(userTaskActivity);
 
@@ -115,7 +112,7 @@ class BaseBPMNActivityEventHandlerTest {
         CloudBPMNActivityStartedEventImpl event = createEvent(serviceTaskActivity);
 
         // when
-        Optional<BaseBPMNActivityEntity> result = handler.createBpmnActivityEntity(event);
+        Optional<BaseBPMNActivityEntity> result = handler.findOrCreateBPMNActivityEntity(event);
 
         // then
         assertThat(result).isEmpty();
@@ -125,40 +122,38 @@ class BaseBPMNActivityEventHandlerTest {
     void createBpmnActivityEntity_shouldCreateEntityForCallActivity() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
-
         CloudBPMNActivityImpl callActivity = createBPMNActivity("callActivity");
         CloudBPMNActivityStartedEventImpl event = createEvent(callActivity);
 
         // when
-        Optional<BaseBPMNActivityEntity> result = handler.createBpmnActivityEntity(event);
+        BaseBPMNActivityEntity result = handler.createBpmnActivityEntity(event);
 
         // then
-        assertThat(result).isPresent();
-        assertThat(result.get().getActivityType()).isEqualTo("callActivity");
-        assertThat(result.get().getActivityName()).isEqualTo("Test Activity");
-        assertThat(result.get().getElementId()).isEqualTo("element-123");
-        assertThat(result.get().getProcessDefinitionId()).isEqualTo("process-def-123");
-        assertThat(result.get().getProcessInstanceId()).isEqualTo("process-instance-123");
-        assertThat(result.get().getExecutionId()).isEqualTo("execution-123");
-        assertThat(result.get().getProcessDefinitionKey()).isEqualTo("process-key");
-        assertThat(result.get().getProcessDefinitionVersion()).isEqualTo(1);
-        assertThat(result.get().getBusinessKey()).isEqualTo("business-key-123");
+        assertThat(result).isNotNull();
+        assertThat(result.getActivityType()).isEqualTo("callActivity");
+        assertThat(result.getActivityName()).isEqualTo("Test Activity");
+        assertThat(result.getElementId()).isEqualTo("element-123");
+        assertThat(result.getProcessDefinitionId()).isEqualTo("process-def-123");
+        assertThat(result.getProcessInstanceId()).isEqualTo("process-instance-123");
+        assertThat(result.getExecutionId()).isEqualTo("execution-123");
+        assertThat(result.getProcessDefinitionKey()).isEqualTo("process-key");
+        assertThat(result.getProcessDefinitionVersion()).isEqualTo(1);
+        assertThat(result.getBusinessKey()).isEqualTo("business-key-123");
     }
 
     @Test
     void createBpmnActivityEntity_shouldCreateEntityForScriptTask() {
         // given
         TestBaseBPMNActivityEventHandler handler = new TestBaseBPMNActivityEventHandler(entityManager);
-
         CloudBPMNActivityImpl scriptTask = createBPMNActivity("scriptTask");
         CloudBPMNActivityStartedEventImpl event = createEvent(scriptTask);
 
         // when
-        Optional<BaseBPMNActivityEntity> result = handler.createBpmnActivityEntity(event);
+        BaseBPMNActivityEntity result = handler.createBpmnActivityEntity(event);
 
         // then
-        assertThat(result).isPresent();
-        assertThat(result.get().getActivityType()).isEqualTo("scriptTask");
+        assertThat(result).isNotNull();
+        assertThat(result.getActivityType()).isEqualTo("scriptTask");
     }
 
     private CloudBPMNActivityImpl createBPMNActivity(String activityType) {
@@ -192,25 +187,11 @@ class BaseBPMNActivityEventHandlerTest {
         return event;
     }
 
-    // Test implementation to expose protected methods
+    // Concrete test implementation of the abstract class
     private static class TestBaseBPMNActivityEventHandler extends BaseBPMNActivityEventHandler {
 
         public TestBaseBPMNActivityEventHandler(EntityManager entityManager) {
             super(entityManager);
-        }
-
-        @Override
-        public Optional<BaseBPMNActivityEntity> findOrCreateBPMNActivityEntity(
-            org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent<?, ?> event
-        ) {
-            return super.findOrCreateBPMNActivityEntity(event);
-        }
-
-        @Override
-        public Optional<BaseBPMNActivityEntity> createBpmnActivityEntity(
-            org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent<?, ?> event
-        ) {
-            return super.createBpmnActivityEntity(event);
         }
     }
 }
