@@ -536,7 +536,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         completeServiceTask(integrationContextIt1, serviceTaskIt1, process);
 
-        //when - the process loop back and reaches the task a second time
+        //when - the process loops back and reaches the task a second time
         IntegrationContext integrationContextIt2 = createIntegrationContext(process, id_iteration2);
         CloudServiceTask serviceTaskIt2 = startServiceTask(integrationContextIt2);
 
