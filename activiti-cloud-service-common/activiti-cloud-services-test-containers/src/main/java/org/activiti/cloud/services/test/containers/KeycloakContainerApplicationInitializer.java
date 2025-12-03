@@ -36,9 +36,7 @@ public class KeycloakContainerApplicationInitializer
 
     // Remove once Keycloak is migrated to >= 25
     private static @NotNull WaitStrategy legacyHealthCheckStrategy() {
-        return Wait.forHttp("/health/started")
-            .forPort(8080)
-            .withStartupTimeout(Duration.ofMinutes(2));
+        return Wait.forHttp("/health/started").forPort(8080).withStartupTimeout(Duration.ofMinutes(2));
     }
 
     @Override
