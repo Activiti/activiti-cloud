@@ -27,7 +27,7 @@
   "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@playwright/test": "^1.47.2",
+    "@playwright/test": "^1.57.0",
     "@types/node": "^20.14.0",
     "typescript": "^5.5.4"
   },
