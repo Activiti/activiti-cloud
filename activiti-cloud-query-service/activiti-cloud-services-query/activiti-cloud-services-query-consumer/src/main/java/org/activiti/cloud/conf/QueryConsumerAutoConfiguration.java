@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.messaging.Message;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
@@ -39,16 +40,22 @@ public class QueryConsumerAutoConfiguration {
 
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     @Bean
-    public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
         logger.warn("[QUERY-TRACE] ===== Consumer function bean CREATED - queryConsumerFunction =====");
         logger.warn("[QUERY-TRACE] Input binding: {}", QueryConsumerChannels.QUERY_CONSUMER);
-        return events -> {
+        return message -> {
+            List<CloudRuntimeEvent<?, ?>> events = message.getPayload();
             logger.warn(
                 "[QUERY-TRACE] ===== Consumer function INVOKED with {} events =====",
                 events != null ? events.size() : 0
             );
+            logger.warn(
+                "[QUERY-TRACE] Message contentType header: {}",
+                message.getHeaders().get("contentType", String.class)
+            );
+            logger.warn("[QUERY-TRACE] Message all headers: {}", message.getHeaders().keySet());
             if (events != null && !events.isEmpty()) {
                 logger.warn(
                     "[QUERY-TRACE] First event: eventType={}, processInstanceId={}",
