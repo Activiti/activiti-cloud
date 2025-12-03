@@ -183,6 +183,9 @@ jobs:
           - messaging-broker: rabbitmq
             messaging-partitioned: prefix
             messaging-destinations: pdb
+          - messaging-broker: rabbitmq
+            messaging-partitioned: prefix
+            messaging-destinations: non-function-pdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
