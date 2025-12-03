@@ -16,19 +16,30 @@
 package org.activiti.cloud.services.test.containers;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import java.time.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:26.1.0")
+    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.3")
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
+        .waitingFor(legacyHealthCheckStrategy())
         .withReuse(true);
+
+    // Remove once Keycloak is migrated to >= 25
+    private static @NotNull WaitStrategy legacyHealthCheckStrategy() {
+        return Wait.forHttp("/health/started")
+            .forPort(8080)
+            .withStartupTimeout(Duration.ofMinutes(2));
+    }
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
