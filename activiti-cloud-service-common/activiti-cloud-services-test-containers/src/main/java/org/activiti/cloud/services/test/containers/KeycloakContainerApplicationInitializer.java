@@ -34,7 +34,7 @@ public class KeycloakContainerApplicationInitializer
         .waitingFor(legacyHealthCheckStrategy())
         .withReuse(true);
 
-    // Remove once Keycloak is migrated to >= 25
+    // Remove once Keycloak is migrated to >= 25. See: https://github.com/dasniko/testcontainers-keycloak/pull/142
     private static @NotNull WaitStrategy legacyHealthCheckStrategy() {
         return Wait.forHttp("/health/started").forPort(8080).withStartupTimeout(Duration.ofMinutes(2));
     }
