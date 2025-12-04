@@ -40,7 +40,8 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        String entityId = integrationContext.getId();
+        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
@@ -70,7 +71,7 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entityId);
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);
