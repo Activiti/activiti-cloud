@@ -47,6 +47,8 @@ public class ProcessInstanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceService.class);
 
+    private static final String ADMIN_ROLE = "ACTIVITI_ADMIN";
+
     private final ProcessInstanceRepository processInstanceRepository;
 
     private final TaskRepository taskRepository;
@@ -142,7 +144,7 @@ public class ProcessInstanceService {
             "Unable to find process for the given id:'" + processInstanceId + "'"
         );
 
-        if (!canRead(processInstanceEntity)) {
+        if (!canReadOrAdmin(processInstanceEntity)) {
             LOGGER.debug(
                 "User " +
                 securityManager.getAuthenticatedUserId() +
@@ -168,6 +170,10 @@ public class ProcessInstanceService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> search(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return processInstanceSearchService.searchRestricted(searchRequest, pageable);
+    }
+
+    private boolean canReadOrAdmin(ProcessInstanceEntity processInstanceEntity) {
+        return canRead(processInstanceEntity) || securityManager.getAuthenticatedUserRoles().contains(ADMIN_ROLE);
     }
 
     private boolean canRead(ProcessInstanceEntity processInstanceEntity) {
