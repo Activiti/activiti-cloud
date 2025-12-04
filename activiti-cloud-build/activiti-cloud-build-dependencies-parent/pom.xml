@@ -76,10 +76,10 @@
           </exclusion>
         </exclusions>
       </dependency>
-      <!-- Apache EL for Jakarta (provides org.apache.el.ExpressionFactoryImpl for Activiti) -->
+      <!-- Apache EL implementation (provides org.apache.el.ExpressionFactoryImpl for Activiti) -->
       <dependency>
         <groupId>org.apache.tomcat</groupId>
-        <artifactId>tomcat-el-core</artifactId>
+        <artifactId>tomcat-el</artifactId>
         <version>${tomcat.version}</version>
       </dependency>
       <!-- Jakarta EL API (required for expression evaluation) -->
