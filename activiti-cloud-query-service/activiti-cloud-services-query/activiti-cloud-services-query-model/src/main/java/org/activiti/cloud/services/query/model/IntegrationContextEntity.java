@@ -116,7 +116,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private IntegrationContextStatus status;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "id", insertable = false, updatable = false)
     private ServiceTaskEntity serviceTask;
 
