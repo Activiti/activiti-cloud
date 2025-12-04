@@ -22,6 +22,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.*;
@@ -35,8 +36,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
     @JsonIgnore
-    @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
-    private IntegrationContextEntity integrationContext;
+    @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
+    private List<IntegrationContextEntity> integrationContexts;
 
     @QueryType(PropertyType.DATE)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -71,12 +72,12 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
-    public IntegrationContextEntity getIntegrationContext() {
-        return integrationContext;
+    public List<IntegrationContextEntity> getIntegrationContexts() {
+        return integrationContexts;
     }
 
-    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
-        this.integrationContext = integrationContext;
+    public void setIntegrationContexts(List<IntegrationContextEntity> integrationContexts) {
+        this.integrationContexts = integrationContexts;
     }
 
     @Override

@@ -35,9 +35,11 @@ public abstract class BaseIntegrationEventHandler {
 
     protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
-        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
+        IntegrationContextEntity entity = entityManager.find(
+            IntegrationContextEntity.class,
+            integrationContext.getId()
+        );
 
         return Optional.ofNullable(entity);
     }
