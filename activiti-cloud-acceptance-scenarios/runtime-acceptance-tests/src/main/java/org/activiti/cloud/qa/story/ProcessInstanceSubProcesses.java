@@ -137,7 +137,6 @@ public class ProcessInstanceSubProcesses {
     public void checkSubProcessInstanceVariable(String variableName, String variableValue) {
         assertThat(subprocessInstance).isNotNull();
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     subprocessInstance.getId()
@@ -152,7 +151,6 @@ public class ProcessInstanceSubProcesses {
     @Then("the parent process instance has a variable named $variableName with value $variableValue")
     public void checkParentProcessInstanceVariable(String variableName, String variableValue) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 Collection<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
                     processInstance.getId()

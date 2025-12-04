@@ -64,7 +64,6 @@ public class ProcessQuerySteps {
     @Step
     public CloudProcessInstance getProcessInstance(String processInstanceId) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() ->
                 assertThat(catchThrowable(() -> processQueryService.getProcessInstance(processInstanceId))).isNull()
             );
@@ -84,7 +83,6 @@ public class ProcessQuerySteps {
         assertThat(expectedStatus).isNotNull();
 
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
                 assertThat(processInstance).isNotNull();
@@ -97,7 +95,6 @@ public class ProcessQuerySteps {
     @Step
     public void checkProcessInstanceHasVariable(String processInstanceId, String variableName) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
                 final Collection<CloudVariableInstance> variableInstances = processQueryService
@@ -117,7 +114,6 @@ public class ProcessQuerySteps {
         Object variableValue
     ) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
                 final Collection<CloudVariableInstance> variableInstances = processQueryService
@@ -149,7 +145,6 @@ public class ProcessQuerySteps {
     @Step
     public void checkProcessInstanceName(String processInstanceId, String processInstanceName) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() ->
                 assertThat(processQueryService.getProcessInstance(processInstanceId).getName())
                     .isNotNull()
@@ -180,7 +175,6 @@ public class ProcessQuerySteps {
     @Step
     public String getProcessInstanceDiagram(String id) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .untilAsserted(() ->
                 assertThat(catchThrowable(() -> processQueryDiagramService.getProcessInstanceDiagram(id))).isNull()
             );
@@ -201,7 +195,6 @@ public class ProcessQuerySteps {
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
         await()
-            .atMost(30, TimeUnit.SECONDS)
             .pollInSameThread()
             .untilAsserted(() ->
                 assertThatRestNotFoundErrorIsThrownBy(() -> processQueryService.getProcessInstance(processInstanceId))
