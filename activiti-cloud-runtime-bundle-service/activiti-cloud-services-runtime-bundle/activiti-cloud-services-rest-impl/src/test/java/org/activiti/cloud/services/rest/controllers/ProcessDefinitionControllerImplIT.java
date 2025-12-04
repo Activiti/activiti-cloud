@@ -184,34 +184,6 @@ class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    void getProcessDefinitionsExcludingProcessTriggerableByFormCategory() throws Exception {
-        String procId = "procId";
-        String my_process = "my process";
-        String this_is_my_process = "this is my process";
-        int version = 1;
-        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
-        processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
-            processDefinitionList,
-            processDefinitionList.size()
-        );
-
-        when(processRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture(), anyList()))
-            .thenReturn(processDefinitionPage);
-
-        var excludedCategory = "#triggerableByForm";
-        mockMvc
-            .perform(
-                get("/v1/process-definitions")
-                    .queryParam("excludedCategory", excludedCategory)
-                    .accept(MediaTypes.HAL_JSON_VALUE)
-            )
-            .andExpect(status().isOk());
-
-        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isEqualTo(excludedCategory);
-    }
-
-    @Test
     void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();

@@ -35,12 +35,8 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         this.processRuntime = processRuntime;
     }
 
-    public Page<ProcessDefinition> getProcessDefinitions(
-        Pageable pageable,
-        List<String> include,
-        String excludedCategory
-    ) {
-        GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayload(excludedCategory);
+    public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
+        GetProcessDefinitionsPayload processDefinitionsPayload = buildGetProcessDefinitionsPayload();
         Page<ProcessDefinition> processDefinitions = processRuntime.processDefinitions(
             pageable,
             processDefinitionsPayload,
