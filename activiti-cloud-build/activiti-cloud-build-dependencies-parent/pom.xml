@@ -76,6 +76,18 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <!-- Apache EL for Jakarta (provides org.apache.el.ExpressionFactoryImpl for Activiti) -->
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>tomcat-el-core</artifactId>
+        <version>${tomcat.version}</version>
+      </dependency>
+      <!-- Jakarta EL API (required for expression evaluation) -->
+      <dependency>
+        <groupId>jakarta.el</groupId>
+        <artifactId>jakarta.el-api</artifactId>
+        <version>6.0.0</version>
+      </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
