@@ -68,25 +68,12 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-        <exclusions>
-          <!-- Activiti uses its own EL implementation, not Tomcat's -->
-          <exclusion>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
-      <!-- Apache EL implementation (provides org.apache.el.ExpressionFactoryImpl for Activiti) -->
+      <!-- Explicitly include Tomcat EL implementation (provides org.apache.el.ExpressionFactoryImpl for Activiti expressions) -->
       <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>tomcat-el</artifactId>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-el</artifactId>
         <version>${tomcat.version}</version>
-      </dependency>
-      <!-- Jakarta EL API (required for expression evaluation) -->
-      <dependency>
-        <groupId>jakarta.el</groupId>
-        <artifactId>jakarta.el-api</artifactId>
-        <version>6.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>

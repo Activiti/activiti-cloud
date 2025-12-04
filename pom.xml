@@ -196,7 +196,7 @@
     <project.year>2025</project.year>
 
     <spring-boot.version>3.5.7</spring-boot.version>
-    <tomcat.version>10.1.31</tomcat.version>
+    <tomcat.version>10.1.48</tomcat.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
