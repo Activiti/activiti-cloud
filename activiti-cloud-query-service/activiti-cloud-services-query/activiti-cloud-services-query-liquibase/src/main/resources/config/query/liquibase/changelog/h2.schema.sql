@@ -302,8 +302,6 @@ create index pcsg_groupId_idx on process_candidate_starter_group (group_id);
 create index pcsg_processDefinition_idx on process_candidate_starter_group (process_definition_id);
 create index pcsu_userId_idx on process_candidate_starter_user (user_id);
 create index pcsu_processDefinition_idx on process_candidate_starter_user (process_definition_id);
-alter table integration_context
-    add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
 alter table task_process_variable
