@@ -36,7 +36,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
     @JsonIgnore
-    @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "serviceTask", fetch = FetchType.EAGER)
     private List<IntegrationContextEntity> integrationContexts;
 
     @QueryType(PropertyType.DATE)
