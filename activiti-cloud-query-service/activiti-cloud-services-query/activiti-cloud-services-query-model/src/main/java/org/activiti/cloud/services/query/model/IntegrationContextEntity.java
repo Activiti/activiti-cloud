@@ -117,7 +117,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "service_task_id")
+    @JoinColumn(name = "id")
     private ServiceTaskEntity serviceTask;
 
     @Transient
