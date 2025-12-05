@@ -41,7 +41,7 @@
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-lang3.version>3.18.0</commons-lang3.version>
-    <java-semver.version>0.9.0</java-semver.version>
+    <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
     <logstash.version>8.1</logstash.version>
     <springdoc.version>2.8.9</springdoc.version>
