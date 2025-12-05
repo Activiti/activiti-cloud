@@ -17,7 +17,7 @@
     <h2.version>2.3.232</h2.version>
     <graphql-java.version>24.1</graphql-java.version>
     <postgresql.version>42.7.7</postgresql.version>
-    <liquibase.version>4.31.1</liquibase.version>
+    <liquibase.version>5.0.1</liquibase.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
   </properties>
   <dependencyManagement>
