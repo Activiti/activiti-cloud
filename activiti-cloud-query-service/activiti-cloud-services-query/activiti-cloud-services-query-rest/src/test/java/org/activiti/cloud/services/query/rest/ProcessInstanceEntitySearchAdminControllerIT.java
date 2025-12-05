@@ -135,10 +135,11 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
     void should_return_SubProcesses() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
-            .withInitiator(USER)
+            .withInitiator("hruser")
             .buildAndSave();
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
+            .withInitiator("hruser")
             .subprocessOf(processInstance1)
             .buildAndSave();
 
