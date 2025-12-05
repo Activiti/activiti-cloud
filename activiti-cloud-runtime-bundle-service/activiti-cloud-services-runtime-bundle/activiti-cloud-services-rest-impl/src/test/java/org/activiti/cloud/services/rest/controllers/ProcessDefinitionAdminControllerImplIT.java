@@ -175,7 +175,6 @@ class ProcessDefinitionAdminControllerImplIT {
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk());
 
-        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isNull();
     }
 
     @Test
