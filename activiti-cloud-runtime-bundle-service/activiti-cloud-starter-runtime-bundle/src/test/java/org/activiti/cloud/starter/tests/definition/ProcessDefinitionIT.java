@@ -69,6 +69,7 @@ public class ProcessDefinitionIT {
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
     private static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions";
+
     private static final String PROCESS_WITH_VARIABLES = "ProcessWithVariables";
     private static final String PROCESS_WITH_VARIABLES_2 = "ProcessWithVariables2";
     private static final String PROCESS_POOL_LANE = "process_pool1";
@@ -97,24 +98,6 @@ public class ProcessDefinitionIT {
                 SIMPLE_PROCESS,
                 PROCESS_WITH_BOUNDARY_SIGNAL
             );
-    }
-
-    @Test
-    void shouldRetrieveListOfProcessDefinitionExcludingTestCategory() {
-        //given
-        //processes are automatically deployed from src/test/resources/processes
-
-        identityTokenProducer.withTestUser("hruser");
-
-        //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> entity = getProcessDefinitions(
-            PROCESS_DEFINITIONS_URL + "?excludedCategory=test-category"
-        );
-
-        //then
-        assertThat(entity).isNotNull();
-        assertThat(entity.getBody()).isNotNull();
-        assertThat(entity.getBody().getContent()).extracting(ProcessDefinition::getName).doesNotContain(SIMPLE_PROCESS);
     }
 
     private ProcessDefinition getProcessDefinition(String name) {

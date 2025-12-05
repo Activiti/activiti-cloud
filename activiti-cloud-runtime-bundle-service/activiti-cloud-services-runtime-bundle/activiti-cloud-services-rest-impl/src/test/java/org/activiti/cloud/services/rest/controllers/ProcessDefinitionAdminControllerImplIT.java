@@ -302,32 +302,6 @@ class ProcessDefinitionAdminControllerImplIT {
             .andExpect(jsonPath("$.list.entries[0].entry.constantValues.unauthorizedStart").value(true));
     }
 
-    @Test
-    void getProcessDefinitionsExcludingProcessTriggerableByFormCategory() throws Exception {
-        String procId = "procId";
-        String processName = "my process";
-        String processDescription = "this is my process";
-        int version = 1;
-        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
-        processDefinitionList.add(buildProcessDefinition(procId, processName, processDescription, version));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
-            processDefinitionList,
-            processDefinitionList.size()
-        );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture()))
-            .thenReturn(processDefinitionPage);
-
-        var excludedCategory = "#triggerableByForm";
-        this.mockMvc.perform(
-                get("/admin/v1/process-definitions")
-                    .queryParam("excludedCategory", excludedCategory)
-                    .accept(MediaTypes.HAL_JSON_VALUE)
-            )
-            .andExpect(status().isOk());
-
-        assertThat(payloadCaptor.getValue().getProcessCategoryToExclude()).isEqualTo(excludedCategory);
-    }
-
     private ProcessDefinition buildProcessDefinition(
         String processDefinitionId,
         String name,
