@@ -68,7 +68,7 @@ public class ProcessDefinitionIT {
 
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
-    public static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions";
+    private static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions";
 
     private static final String PROCESS_WITH_VARIABLES = "ProcessWithVariables";
     private static final String PROCESS_WITH_VARIABLES_2 = "ProcessWithVariables2";
@@ -77,7 +77,7 @@ public class ProcessDefinitionIT {
     private static final String PROCESS_WITH_BOUNDARY_SIGNAL = "ProcessWithBoundarySignal";
 
     @Test
-    public void shouldRetrieveListOfProcessDefinition() {
+    void shouldRetrieveListOfProcessDefinition() {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
@@ -119,7 +119,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionById() {
+    void shouldReturnProcessDefinitionById() {
         //given
         ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {};
 
@@ -146,7 +146,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionMetadata() {
+    void shouldReturnProcessDefinitionMetadata() {
         //given
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {};
 
@@ -170,7 +170,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnProcessDefinitionMetadataForPoolLane() {
+    void shouldReturnProcessDefinitionMetadataForPoolLane() {
         //given
         ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {};
 
@@ -194,7 +194,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldRetrieveProcessModel() throws Exception {
+    void shouldRetrieveProcessModel() throws Exception {
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
@@ -210,7 +210,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldRetriveBpmnModel() throws Exception {
+    void shouldRetriveBpmnModel() throws Exception {
         //given
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_WITH_VARIABLES_2);
 
@@ -237,7 +237,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldRetrieveDiagram() throws Exception {
+    void shouldRetrieveDiagram() throws Exception {
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 
         //when
@@ -282,7 +282,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void shouldRetrieveDifferentListOfProcessDefinitionAccordingToUserPolicies() {
+    void shouldRetrieveDifferentListOfProcessDefinitionAccordingToUserPolicies() {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
@@ -310,7 +310,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void adminShouldSeeLargerListAtAdminEndpoint() {
+    void adminShouldSeeLargerListAtAdminEndpoint() {
         //given
         //processes are automatically deployed from src/test/resources/processes
 
@@ -338,7 +338,7 @@ public class ProcessDefinitionIT {
     }
 
     @Test
-    public void processDefinitionShouldHaveFormKey() {
+    void processDefinitionShouldHaveFormKey() {
         ProcessDefinition aProcessDefinition = getProcessDefinition(SIMPLE_PROCESS);
         assertThat(aProcessDefinition.getFormKey()).isEqualTo("startFormKey");
     }
