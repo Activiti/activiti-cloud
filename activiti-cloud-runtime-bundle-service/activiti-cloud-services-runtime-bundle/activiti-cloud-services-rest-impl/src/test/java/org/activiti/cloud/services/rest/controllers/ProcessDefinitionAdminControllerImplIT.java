@@ -271,7 +271,9 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
+            .thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
