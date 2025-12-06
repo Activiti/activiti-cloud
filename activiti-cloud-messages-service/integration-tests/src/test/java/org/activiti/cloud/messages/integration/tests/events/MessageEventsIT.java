@@ -69,7 +69,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
-        "spring.datasource.platform=postgresql",
+        "spring.sql.init.platform=postgresql",
         "activiti.cloud.application.name=messages-app",
         "spring.application.name=rb",
         "spring.jmx.enabled=false",
@@ -83,7 +83,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class MessageEventsIT {
 
     @Container
-    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:10");
+    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:15");
 
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 =
         "BoundarySubprocessThrowCatchMessageIT_Process1";
