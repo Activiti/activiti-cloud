@@ -56,21 +56,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.apache.tomcat.embed</groupId>
-              <artifactId>tomcat-embed-el</artifactId>
-            </exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
