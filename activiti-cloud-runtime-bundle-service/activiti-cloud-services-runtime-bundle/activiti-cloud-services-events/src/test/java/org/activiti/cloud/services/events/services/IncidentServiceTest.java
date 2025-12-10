@@ -27,6 +27,8 @@ import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +59,12 @@ class IncidentServiceTest {
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
+    @Mock
+    private ManagementService managementService;
+
+    @Mock
+    private RuntimeService runtimeService;
+
     @Spy
     private RuntimeBundleProperties properties = new RuntimeBundleProperties() {
         {
@@ -81,7 +89,13 @@ class IncidentServiceTest {
         when(this.producer.auditProducerIncidents()).thenReturn(this.auditIncidentsChannel);
 
         this.incidentService =
-            new IncidentService(producer, messageBuilderChainIncidentFactory, runtimeBundleInfoAppender);
+            new IncidentService(
+                producer,
+                messageBuilderChainIncidentFactory,
+                runtimeBundleInfoAppender,
+                managementService,
+                runtimeService
+            );
     }
 
     @Test

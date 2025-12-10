@@ -49,6 +49,8 @@ import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.IncidentService;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,6 +121,12 @@ class MessageProducerCommandContextCloseListenerTest {
     @Spy
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
 
+    @Mock
+    private RuntimeService runtimeService;
+
+    @Mock
+    private ManagementService managementService;
+
     private IncidentService incidentService;
 
     @Captor
@@ -131,7 +139,14 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        incidentService = new IncidentService(producer, messageBuilderChainIncidentFactory, runtimeBundleInfoAppender);
+        incidentService =
+            new IncidentService(
+                producer,
+                messageBuilderChainIncidentFactory,
+                runtimeBundleInfoAppender,
+                managementService,
+                runtimeService
+            );
 
         closeListener =
             new MessageProducerCommandContextCloseListener(

@@ -16,28 +16,53 @@
 package org.activiti.cloud.services.events.services;
 
 import java.util.ArrayList;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
+import org.springframework.messaging.Message;
 
 public class IncidentService {
 
     private final ProcessEngineChannels producer;
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final ManagementService managementService;
+    private final RuntimeService runtimeService;
 
     public IncidentService(
         ProcessEngineChannels producer,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ManagementService managementService,
+        RuntimeService runtimeService
     ) {
         this.producer = producer;
         this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.managementService = managementService;
+        this.runtimeService = runtimeService;
+    }
+
+    public void sendIncidentViaCommand(IntegrationContext integrationContext, Exception exception) {
+        var message =
+            this.managementService.executeCommand(
+                    new SendIncidentEventCmd(
+                        integrationContext,
+                        exception,
+                        this.runtimeService,
+                        this.messageBuilderIncidentsChainFactory,
+                        this.runtimeBundleInfoAppender
+                    )
+                );
+
+        this.producer.auditProducer().send(message);
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
