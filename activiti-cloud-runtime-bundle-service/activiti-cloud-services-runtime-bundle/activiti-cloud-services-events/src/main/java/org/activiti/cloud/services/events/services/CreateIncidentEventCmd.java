@@ -16,63 +16,27 @@
 package org.activiti.cloud.services.events.services;
 
 import java.util.ArrayList;
-import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
-import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.Command;
-import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.springframework.messaging.Message;
 
-class CreateIncidentEventCmd implements Command<Message> {
-
-    private final IntegrationContext integrationContext;
-    private final Exception exception;
-    private final RuntimeService runtimeService;
-    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
-    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-
-    CreateIncidentEventCmd(
-        IntegrationContext integrationContext,
-        Exception exception,
-        RuntimeService runtimeService,
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
-    ) {
-        this.integrationContext = integrationContext;
-        this.exception = exception;
-        this.runtimeService = runtimeService;
-        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
-        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-    }
-
-    @Override
-    public Message execute(CommandContext commandContext) {
-        var executionId = this.integrationContext.getExecutionId();
-        var execution = (ExecutionEntity) this.runtimeService.createExecutionQuery()
-            .executionId(executionId)
-            .list()
-            .getFirst();
-
-        return createAndSendIncidentEvent(new ExecutionContext(execution), this.exception);
-    }
-
-    public Message<ArrayList<Object>> createAndSendIncidentEvent(
+interface CreateIncidentEventCmd extends Command<Message> {
+    default Message<ArrayList<Object>> createAndSendIncidentEvent(
         ExecutionContext rootExecutionContext,
         Exception exception
     ) {
         var errorEvents = new ArrayList<>();
         var incident = createCloudIncidentCreatedEvent(rootExecutionContext, exception);
         errorEvents.add(incident);
-        return this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
+        return getMessageBuilderIncidentsChainFactory().create(rootExecutionContext).withPayload(errorEvents).build();
     }
 
-    private CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
+    default CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
         ExecutionContext rootExecutionContext,
         Exception exception
     ) {
@@ -84,12 +48,16 @@ class CreateIncidentEventCmd implements Command<Message> {
 
         var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext);
         getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
-        this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
+        getRuntimeBundleInfoAppender().appendRuntimeBundleInfoTo(incident);
 
         return incident;
     }
 
-    private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
+    default ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
         return new ExecutionContextInfoAppender(rootExecutionContext);
     }
+
+    MessageBuilderChainFactory<ExecutionContext> getMessageBuilderIncidentsChainFactory();
+
+    RuntimeBundleInfoAppender getRuntimeBundleInfoAppender();
 }

@@ -15,12 +15,8 @@
  */
 package org.activiti.cloud.services.events.services;
 
-import java.util.ArrayList;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.ManagementService;
@@ -50,9 +46,9 @@ public class IncidentService {
     }
 
     public void sendIncidentViaCommand(IntegrationContext integrationContext, Exception exception) {
-        var message =
+        var incidentMessage =
             this.managementService.executeCommand(
-                    new CreateIncidentEventCmd(
+                    new CreateIncidentEventFromIntegrationCmd(
                         integrationContext,
                         exception,
                         this.runtimeService,
@@ -61,37 +57,20 @@ public class IncidentService {
                     )
                 );
 
-        this.producer.auditProducer().send(message);
+        this.producer.auditProducer().send(incidentMessage);
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
-        var errorEvents = new ArrayList<>();
-        var incident = createCloudIncidentCreatedEvent(rootExecutionContext, exception);
-        errorEvents.add(incident);
-        var errorMessage =
-            this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
+        var incidentMessage =
+            this.managementService.executeCommand(
+                    new CreateIncidentEventFromExecutionCmd(
+                        rootExecutionContext,
+                        exception,
+                        this.messageBuilderIncidentsChainFactory,
+                        this.runtimeBundleInfoAppender
+                    )
+                );
 
-        this.producer.auditProducerIncidents().send(errorMessage);
-    }
-
-    private CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
-        ExecutionContext rootExecutionContext,
-        Exception exception
-    ) {
-        var incidentContext = new IncidentContextImpl();
-        incidentContext.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
-        incidentContext.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
-        incidentContext.setActivityId(rootExecutionContext.getProcessInstance().getActivityId());
-        incidentContext.setExecutionId(rootExecutionContext.getExecution().getId());
-
-        var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext);
-        getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
-        this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
-
-        return incident;
-    }
-
-    private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
-        return new ExecutionContextInfoAppender(rootExecutionContext);
+        this.producer.auditProducerIncidents().send(incidentMessage);
     }
 }
