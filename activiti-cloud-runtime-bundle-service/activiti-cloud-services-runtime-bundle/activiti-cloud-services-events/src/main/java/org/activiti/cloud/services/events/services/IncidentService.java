@@ -26,7 +26,6 @@ import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
-import org.springframework.messaging.Message;
 
 public class IncidentService {
 
@@ -53,7 +52,7 @@ public class IncidentService {
     public void sendIncidentViaCommand(IntegrationContext integrationContext, Exception exception) {
         var message =
             this.managementService.executeCommand(
-                    new SendIncidentEventCmd(
+                    new CreateIncidentEventCmd(
                         integrationContext,
                         exception,
                         this.runtimeService,

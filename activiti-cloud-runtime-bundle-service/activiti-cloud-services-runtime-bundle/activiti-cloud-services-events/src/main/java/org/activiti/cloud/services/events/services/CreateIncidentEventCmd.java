@@ -29,7 +29,7 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.springframework.messaging.Message;
 
-class SendIncidentEventCmd implements Command<Message> {
+class CreateIncidentEventCmd implements Command<Message> {
 
     private final IntegrationContext integrationContext;
     private final Exception exception;
@@ -37,7 +37,7 @@ class SendIncidentEventCmd implements Command<Message> {
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    SendIncidentEventCmd(
+    CreateIncidentEventCmd(
         IntegrationContext integrationContext,
         Exception exception,
         RuntimeService runtimeService,
