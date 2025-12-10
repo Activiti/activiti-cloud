@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort,
-    String excludeByProcessCategoryName,
     Boolean includeSubprocesses
 ) implements CloudRuntimeEntityFilterRequest {
     public ProcessInstanceSearchRequest {
