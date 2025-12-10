@@ -23,7 +23,7 @@ import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 
-class SendIncidentEventCmd implements Command<Void> {
+public class SendIncidentEventCmd implements Command<Void> {
 
     private final IntegrationContext integrationContext;
     private final Exception exception;
