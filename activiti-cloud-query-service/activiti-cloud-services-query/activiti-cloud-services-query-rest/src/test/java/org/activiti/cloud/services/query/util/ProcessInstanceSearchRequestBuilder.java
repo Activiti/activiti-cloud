@@ -159,6 +159,7 @@ public class ProcessInstanceSearchRequestBuilder {
         }
         return this;
     }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
