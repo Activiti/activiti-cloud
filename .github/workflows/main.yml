@@ -164,8 +164,7 @@ jobs:
       - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-      # TODO remove before merge
-      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: enhancement/AAE-40522-igdianov-rabbitmq-prefix-acceptance-tests
+      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
     strategy:
       # avoid overloading test cluster
       max-parallel: 2
