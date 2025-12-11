@@ -57,7 +57,7 @@ public class IncidentService {
                     )
                 );
 
-        this.producer.auditProducer().send(incidentMessage);
+        this.producer.auditProducerIncidents().send(incidentMessage);
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
