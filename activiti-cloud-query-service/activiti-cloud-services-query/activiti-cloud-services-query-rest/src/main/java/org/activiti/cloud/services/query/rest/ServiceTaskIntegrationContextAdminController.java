@@ -15,13 +15,15 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,26 +41,28 @@ public class ServiceTaskIntegrationContextAdminController {
 
     private final IntegrationContextRepresentationModelAssembler representationModelAssembler;
 
-    private final EntityFinder entityFinder;
+    private final AlfrescoPagedModelAssembler<IntegrationContextEntity> pagedCollectionModelAssembler;
 
     public ServiceTaskIntegrationContextAdminController(
         IntegrationContextRepository repository,
         IntegrationContextRepresentationModelAssembler representationModelAssembler,
-        EntityFinder entityFinder
+        AlfrescoPagedModelAssembler<IntegrationContextEntity> pagedCollectionModelAssembler
     ) {
         this.repository = repository;
         this.representationModelAssembler = representationModelAssembler;
-        this.entityFinder = entityFinder;
+        this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
-    @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
-    public EntityModel<CloudIntegrationContext> findById(@PathVariable String serviceTaskId) {
-        IntegrationContextEntity entity = entityFinder.findById(
-            repository,
-            serviceTaskId,
-            "Unable to find integration context entity for the given id:'" + serviceTaskId + "'"
+    @RequestMapping(value = "/{serviceTaskId}/integration-contexts", method = RequestMethod.GET)
+    public PagedModel<EntityModel<CloudIntegrationContext>> findByServiceTaskId(
+        @PathVariable String serviceTaskId,
+        Pageable pageable
+    ) {
+        String[] split = serviceTaskId.trim().split(":");
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            repository.findByProcessInstanceIdAndClientIdAndExecutionId(split[0], split[1], split[2], pageable),
+            representationModelAssembler
         );
-
-        return representationModelAssembler.toModel(entity);
     }
 }

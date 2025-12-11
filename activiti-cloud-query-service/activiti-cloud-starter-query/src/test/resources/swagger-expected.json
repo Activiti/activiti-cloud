@@ -4954,15 +4954,42 @@
         } ]
       }
     },
-    "/admin/v1/service-tasks/{serviceTaskId}/integration-context" : {
+    "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts" : {
       "get" : {
         "tags" : [ "service-task-integration-context-admin-controller" ],
-        "summary" : "findById",
-        "operationId" : "findById",
+        "summary" : "findByServiceTaskId",
+        "operationId" : "findByServiceTaskId",
         "parameters" : [ {
           "name" : "serviceTaskId",
           "in" : "path",
           "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
           "schema" : {
             "type" : "string"
           }
@@ -5003,12 +5030,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                  "$ref" : "#/components/schemas/ListResponseContentCloudIntegrationContext"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                  "$ref" : "#/components/schemas/ListResponseContentCloudIntegrationContext"
                 }
               }
             }
@@ -7994,6 +8021,21 @@
         },
         "title" : "CloudIntegrationContext"
       },
+      "EntriesResponseContentCloudIntegrationContext" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentCloudIntegrationContext"
+      },
       "EntryResponseContentCloudIntegrationContext" : {
         "type" : "object",
         "properties" : {
@@ -8002,6 +8044,15 @@
           }
         },
         "title" : "EntryResponseContentCloudIntegrationContext"
+      },
+      "ListResponseContentCloudIntegrationContext" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentCloudIntegrationContext"
+          }
+        },
+        "title" : "ListResponseContentCloudIntegrationContext"
       }
     }
   },

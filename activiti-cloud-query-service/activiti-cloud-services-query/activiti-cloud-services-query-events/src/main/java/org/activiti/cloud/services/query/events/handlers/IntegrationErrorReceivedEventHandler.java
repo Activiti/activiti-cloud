@@ -53,7 +53,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
             entityManager.persist(entity);
 
-            ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entity.getId());
+            String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+            ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
             serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
 
             entityManager.persist(serviceTaskEntity);
