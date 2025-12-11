@@ -4797,6 +4797,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "integrationContexts",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
@@ -5651,6 +5657,12 @@
           "in" : "query",
           "required" : false,
           "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "integrationContexts",
+          "in" : "query",
           "schema" : {
             "type" : "string"
           }
