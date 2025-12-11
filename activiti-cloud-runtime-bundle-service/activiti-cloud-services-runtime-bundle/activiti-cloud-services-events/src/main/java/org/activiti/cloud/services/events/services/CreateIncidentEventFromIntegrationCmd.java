@@ -49,10 +49,7 @@ class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
     @Override
     public Message execute(CommandContext commandContext) {
         var executionId = this.integrationContext.getExecutionId();
-        var execution = (ExecutionEntity) this.runtimeService.createExecutionQuery()
-            .executionId(executionId)
-            .list()
-            .getFirst();
+        var execution = getExecutionEntity(executionId);
 
         return createAndSendIncidentEvent(new ExecutionContext(execution), this.exception);
     }
@@ -65,5 +62,9 @@ class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
     @Override
     public RuntimeBundleInfoAppender getRuntimeBundleInfoAppender() {
         return this.runtimeBundleInfoAppender;
+    }
+
+    private ExecutionEntity getExecutionEntity(String executionId) {
+        return (ExecutionEntity) this.runtimeService.createExecutionQuery().executionId(executionId).list().getFirst();
     }
 }
