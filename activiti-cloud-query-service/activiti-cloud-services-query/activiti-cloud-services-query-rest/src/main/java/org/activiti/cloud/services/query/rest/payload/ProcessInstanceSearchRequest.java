@@ -41,7 +41,6 @@ public record ProcessInstanceSearchRequest(
     Set<VariableFilter> processVariableFilters,
     Set<ProcessVariableKey> processVariableKeys,
     CloudRuntimeEntitySort sort,
-    String excludeByProcessCategoryName,
     Boolean includeSubprocesses
 ) implements CloudRuntimeEntityFilterRequest {
     public ProcessInstanceSearchRequest {

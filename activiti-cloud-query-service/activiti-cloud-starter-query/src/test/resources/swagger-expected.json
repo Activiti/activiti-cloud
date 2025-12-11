@@ -6929,9 +6929,6 @@
           "sort" : {
             "$ref" : "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
           },
-          "excludeByProcessCategoryName" : {
-            "type" : "string"
-          },
           "includeSubprocesses": {
             "type": "boolean"
           }
