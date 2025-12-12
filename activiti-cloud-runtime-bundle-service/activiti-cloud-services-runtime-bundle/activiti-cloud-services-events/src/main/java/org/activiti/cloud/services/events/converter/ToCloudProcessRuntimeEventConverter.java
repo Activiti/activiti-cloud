@@ -109,7 +109,9 @@ public class ToCloudProcessRuntimeEventConverter {
         CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(
             event.getEntity(),
             event.getNestedProcessDefinitionId(),
-            event.getNestedProcessInstanceId()
+            event.getNestedProcessInstanceId(),
+            event.getLinkedProcessInstanceId(),
+            event.getLinkedProcessInstanceType()
         );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessStartedEvent);
         this.processAuditServiceInfoAppender.appendAuditServiceInfoTo(cloudProcessStartedEvent);

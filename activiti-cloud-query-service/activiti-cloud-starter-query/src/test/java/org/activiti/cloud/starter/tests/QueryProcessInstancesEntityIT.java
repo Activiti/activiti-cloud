@@ -406,7 +406,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
-            new CloudProcessStartedEventImpl(process, null, null)
+            new CloudProcessStartedEventImpl(process)
         );
 
         eventsAggregator.sendAll();
@@ -432,7 +432,7 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
-            new CloudProcessStartedEventImpl(process, null, null)
+            new CloudProcessStartedEventImpl(process)
         );
 
         eventsAggregator.sendAll();
