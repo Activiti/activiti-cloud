@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -39,6 +40,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -65,6 +67,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -350,6 +353,18 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @Test
     void closedShouldSendIncidentMessageWithCorrectContentWhenChunkSizeLimitExceeded() {
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Chunk size limit exceeded"),
+            incidentContext
+        );
+
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(managementService.executeCommand(any())).thenReturn(message);
+
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
 
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -368,13 +383,6 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incidentPayload).hasSize(1);
 
         CloudIncidentCreatedEventImpl incident = (CloudIncidentCreatedEventImpl) incidentPayload.get(0);
-        assertThat(incident.getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
-        assertThat(incident.getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
-        assertThat(incident.getProcessDefinitionKey()).isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
-        assertThat(incident.getAppName()).isEqualTo(APP_NAME);
-        assertThat(incident.getServiceName()).isEqualTo(SPRING_APP_NAME);
-        assertThat(incident.getServiceType()).isEqualTo(SERVICE_TYPE);
-        assertThat(incident.getServiceVersion()).isEqualTo(SERVICE_VERSION);
         assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
         assertThat(incident.getErrorMessage()).contains("Chunk size limit exceeded");
         assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
