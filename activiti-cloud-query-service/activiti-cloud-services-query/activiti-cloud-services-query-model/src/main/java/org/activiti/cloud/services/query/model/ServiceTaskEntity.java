@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.*;
@@ -77,6 +76,11 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     public void setIntegrationContexts(List<IntegrationContextEntity> integrationContexts) {
         this.integrationContexts = integrationContexts;
+    }
+
+    @Override
+    public Integer getIntegrationContextCounter() {
+        return integrationContexts != null ? integrationContexts.size() : 0;
     }
 
     @Override

@@ -418,6 +418,48 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
+    public void shouldGetServiceTaskReturnIntegrationContextCounter() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+            });
+
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // Create and send multiple integration contexts
+        IntegrationContext integrationContext1 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        sendIntegrationRequestedEvent(integrationContext1);
+
+        IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        sendIntegrationRequestedEvent(integrationContext2);
+
+        //when
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                    SERVICE_TASKS_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getContent())
+                    .hasSize(1)
+                    .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
+                    .contains(tuple(SERVICE_TASK_TYPE, 2));
+            });
+    }
+
+    @Test
     public void shouldGetServiceTaskIntegrationContextErrorById() throws InterruptedException {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();

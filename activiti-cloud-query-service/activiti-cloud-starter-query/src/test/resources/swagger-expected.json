@@ -7787,6 +7787,10 @@
       "CloudServiceTask" : {
         "type" : "object",
         "properties" : {
+          "integrationContextCounter" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "id" : {
             "type" : "string"
           },
