@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
@@ -42,10 +41,6 @@ public interface ProcessDefinitionAdminController {
         @Parameter(
             description = "Specifies whether to include latest versions only (true) or all the versions (false) of each process definition"
         ) @RequestParam(value = "latestVersion", required = false, defaultValue = "false") boolean latestVersion,
-        @Parameter(description = "Process definition category to exclude from results") @RequestParam(
-            value = "excludedCategory",
-            required = false
-        ) String excludedCategory,
         Pageable pageable
     );
 }

@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -124,44 +123,6 @@ class ProcessDefinitionServiceTest {
     }
 
     @Test
-    void should_setFilterForProcessDefinitionsExcludedCategory() {
-        String excludedCategory = "#triggerableByForm";
-        Pageable pageable = Pageable.of(0, 10);
-
-        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), any()))
-            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
-
-        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
-
-        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
-            GetProcessDefinitionsPayload.class
-        );
-        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture(), any());
-
-        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload.getProcessCategoryToExclude()).isEqualTo(excludedCategory);
-    }
-
-    @Test
-    void should_setFilterForProcessDefinitionsWithoutExcludedCategory() {
-        String excludedCategory = "SELECT * FROM wrong_category";
-        Pageable pageable = Pageable.of(0, 10);
-
-        when(processRuntime.processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), any()))
-            .thenReturn(new PageImpl<>(Collections.emptyList(), 1));
-
-        processDefinitionService.getProcessDefinitions(pageable, Collections.emptyList(), excludedCategory);
-
-        ArgumentCaptor<GetProcessDefinitionsPayload> payloadCaptor = ArgumentCaptor.forClass(
-            GetProcessDefinitionsPayload.class
-        );
-        verify(processRuntime).processDefinitions(eq(pageable), payloadCaptor.capture(), any());
-
-        GetProcessDefinitionsPayload capturedPayload = payloadCaptor.getValue();
-        assertThat(capturedPayload.getProcessCategoryToExclude()).isNull();
-    }
-
-    @Test
     void should_getProcessDefinitionsWithVariablesAndNoUserStartableProcesses_whenIncludeVariablesAndNoUserStartableProcessesParametersPresent() {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("id");
@@ -190,7 +151,7 @@ class ProcessDefinitionServiceTest {
         var pageable = Pageable.of(0, 50);
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(pageable, List.of(VARIABLES, NO_USER_STARTABLE_PROCESSES), "")
+            .getProcessDefinitions(pageable, List.of(VARIABLES, NO_USER_STARTABLE_PROCESSES))
             .getContent();
 
         assertThat(result).hasSize(1);
@@ -226,7 +187,7 @@ class ProcessDefinitionServiceTest {
         var pageable = Pageable.of(0, 50);
 
         List<ProcessDefinition> result = processDefinitionService
-            .getProcessDefinitions(pageable, List.of(NO_USER_STARTABLE_PROCESSES), "")
+            .getProcessDefinitions(pageable, List.of(NO_USER_STARTABLE_PROCESSES))
             .getContent();
 
         assertThat(result).hasSize(1);

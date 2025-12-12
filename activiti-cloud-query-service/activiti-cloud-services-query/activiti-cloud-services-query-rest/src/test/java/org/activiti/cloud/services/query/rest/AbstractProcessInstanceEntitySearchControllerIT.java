@@ -34,8 +34,6 @@ import java.util.stream.IntStream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
@@ -69,9 +67,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Autowired
     protected QueryTestUtils queryTestUtils;
 
-    @Autowired
-    private ProcessDefinitionRepository processDefinitionRepository;
-
     protected static final String PROCESS_INSTANCES_JSON_PATH = "_embedded.processInstances";
     protected static final String PROCESS_INSTANCE_IDS_JSON_PATH = "_embedded.processInstances.id";
     protected static final String PROCESS_INSTANCE_SUBPROCESS_JSON_PATH = "_embedded.processInstances.subprocesses";
@@ -90,57 +85,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     protected abstract String getSearchEndpoint();
 
     protected abstract String getCountEndpoint();
-
-    @Test
-    public void should_excludeProcessInstances_by_processDefinitionCategoryName() throws Exception {
-        // given
-        ProcessDefinitionEntity processDefinitionToExclude = new ProcessDefinitionEntity();
-        processDefinitionToExclude.setId("proc-def-id-to-exclude");
-        processDefinitionToExclude.setKey("proc-def-key-to-exclude");
-        processDefinitionToExclude.setCategory("CategoryToExclude");
-        processDefinitionRepository.save(processDefinitionToExclude);
-
-        queryTestUtils
-            .buildProcessInstance()
-            .withProcessDefinitionKey(processDefinitionToExclude.getKey())
-            .withInitiator(USER)
-            .buildAndSave();
-
-        ProcessDefinitionEntity processDefinitionToKeep = new ProcessDefinitionEntity();
-        processDefinitionToKeep.setId("proc-def-id-to-keep");
-        processDefinitionToKeep.setKey("proc-def-key-to-keep");
-        processDefinitionToKeep.setCategory("CategoryToKeep");
-        processDefinitionRepository.save(processDefinitionToKeep);
-
-        ProcessInstanceEntity processInstanceToKeep = queryTestUtils
-            .buildProcessInstance()
-            .withProcessDefinitionKey(processDefinitionToKeep.getKey())
-            .withInitiator(USER)
-            .buildAndSave();
-
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withExcludeByProcessCategoryName("CategoryToExclude");
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            // then
-            .then()
-            .statusCode(200)
-            .body("_embedded.processInstances", hasSize(1))
-            .body("_embedded.processInstances[0].id", equalTo(processInstanceToKeep.getId()));
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getCountEndpoint())
-            .then()
-            .statusCode(200)
-            .body(equalTo("1"));
-    }
 
     @Test
     void should_returnProcessInstances_filteredById() {

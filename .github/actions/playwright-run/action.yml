@@ -21,7 +21,7 @@ runs:
   using: composite
   steps:
 
-    - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: '20.18.3'
 
@@ -38,7 +38,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@6893e3d493fc1e1e930123bbbd20c32805116860 # v10.0.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
 
     - name: Add GitHub Step Summary
       shell: bash

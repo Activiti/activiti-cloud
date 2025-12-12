@@ -74,13 +74,11 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
     public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
         @RequestParam(required = false, defaultValue = "") List<String> include,
         @RequestParam(required = false, defaultValue = "false") boolean latestVersion,
-        String excludedCategory,
         Pageable pageable
     ) {
         Page<ProcessDefinition> page = processDefinitionAdminService.getProcessDefinitions(
             pageConverter.toAPIPageable(pageable),
             include,
-            excludedCategory,
             latestVersion
         );
         return pagedCollectionModelAssembler.toModel(
