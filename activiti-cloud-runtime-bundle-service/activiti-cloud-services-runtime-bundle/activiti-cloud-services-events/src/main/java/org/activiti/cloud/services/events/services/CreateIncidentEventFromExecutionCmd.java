@@ -42,7 +42,7 @@ class CreateIncidentEventFromExecutionCmd implements CreateIncidentEventCmd {
 
     @Override
     public Message execute(CommandContext commandContext) {
-        return createAndSendIncidentEvent(this.executionContext, this.exception);
+        return createMessage(this.executionContext, this.exception);
     }
 
     @Override

@@ -111,12 +111,12 @@ class CreateIncidentEventFromIntegrationCmdTest {
         mockExecutionQuery(executionEntity);
         doReturn(null)
             .when(this.createIncidentEventFromIntegrationCmd)
-            .createAndSendIncidentEvent(any(ExecutionContext.class), any());
+            .createMessage(any(ExecutionContext.class), any());
 
         this.createIncidentEventFromIntegrationCmd.execute(null);
 
         verify(this.createIncidentEventFromIntegrationCmd)
-            .createAndSendIncidentEvent(this.executionContextArgumentCaptor.capture(), this.exceptionCaptor.capture());
+            .createMessage(this.executionContextArgumentCaptor.capture(), this.exceptionCaptor.capture());
 
         assertThat(this.exceptionCaptor.getValue()).isEqualTo(testException);
         var executionContext = this.executionContextArgumentCaptor.getValue();
@@ -131,7 +131,7 @@ class CreateIncidentEventFromIntegrationCmdTest {
         var executionContext = TestUtils.mockExecutionContext();
 
         Message<ArrayList<Object>> message =
-            this.createIncidentEventFromIntegrationCmd.createAndSendIncidentEvent(executionContext, this.testException);
+            this.createIncidentEventFromIntegrationCmd.createMessage(executionContext, this.testException);
 
         var payload = (List) message.getPayload();
         assertThat(payload).hasSize(1);

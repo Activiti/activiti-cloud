@@ -22,6 +22,7 @@ import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
+import org.springframework.messaging.Message;
 
 public class IncidentService {
 
@@ -45,32 +46,38 @@ public class IncidentService {
         this.runtimeService = runtimeService;
     }
 
-    public void sendIncidentViaCommand(IntegrationContext integrationContext, Exception exception) {
-        var incidentMessage =
-            this.managementService.executeCommand(
-                    new CreateIncidentEventFromIntegrationCmd(
-                        integrationContext,
-                        exception,
-                        this.runtimeService,
-                        this.messageBuilderIncidentsChainFactory,
-                        this.runtimeBundleInfoAppender
-                    )
-                );
+    public void createAndSendIncidentEvent(IntegrationContext integrationContext, Exception exception) {
+        var incidentMessage = createIncidentMessage(
+            new CreateIncidentEventFromIntegrationCmd(
+                integrationContext,
+                exception,
+                this.runtimeService,
+                this.messageBuilderIncidentsChainFactory,
+                this.runtimeBundleInfoAppender
+            )
+        );
 
-        this.producer.auditProducerIncidents().send(incidentMessage);
+        sendIncident(incidentMessage);
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
-        var incidentMessage =
-            this.managementService.executeCommand(
-                    new CreateIncidentEventFromExecutionCmd(
-                        rootExecutionContext,
-                        exception,
-                        this.messageBuilderIncidentsChainFactory,
-                        this.runtimeBundleInfoAppender
-                    )
-                );
+        var incidentMessage = createIncidentMessage(
+            new CreateIncidentEventFromExecutionCmd(
+                rootExecutionContext,
+                exception,
+                this.messageBuilderIncidentsChainFactory,
+                this.runtimeBundleInfoAppender
+            )
+        );
 
+        sendIncident(incidentMessage);
+    }
+
+    private Message createIncidentMessage(CreateIncidentEventCmd incidentEventCmd) {
+        return this.managementService.executeCommand(incidentEventCmd);
+    }
+
+    private void sendIncident(Message incidentMessage) {
         this.producer.auditProducerIncidents().send(incidentMessage);
     }
 }

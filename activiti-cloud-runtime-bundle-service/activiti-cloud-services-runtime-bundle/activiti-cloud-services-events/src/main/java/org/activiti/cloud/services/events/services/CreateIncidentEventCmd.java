@@ -26,25 +26,18 @@ import org.activiti.engine.impl.interceptor.Command;
 import org.springframework.messaging.Message;
 
 interface CreateIncidentEventCmd extends Command<Message> {
-    default Message<ArrayList<Object>> createAndSendIncidentEvent(
-        ExecutionContext rootExecutionContext,
-        Exception exception
-    ) {
+    default Message<ArrayList<Object>> createMessage(ExecutionContext rootExecutionContext, Exception exception) {
         var errorEvents = new ArrayList<>();
         var incident = createCloudIncidentCreatedEvent(rootExecutionContext, exception);
         errorEvents.add(incident);
         return getMessageBuilderIncidentsChainFactory().create(rootExecutionContext).withPayload(errorEvents).build();
     }
 
-    default CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
+    private CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
         ExecutionContext rootExecutionContext,
         Exception exception
     ) {
-        var incidentContext = new IncidentContextImpl();
-        incidentContext.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
-        incidentContext.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
-        incidentContext.setActivityId(rootExecutionContext.getProcessInstance().getActivityId());
-        incidentContext.setExecutionId(rootExecutionContext.getExecution().getId());
+        var incidentContext = getIncidentContext(rootExecutionContext);
 
         var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext);
         getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
@@ -53,7 +46,16 @@ interface CreateIncidentEventCmd extends Command<Message> {
         return incident;
     }
 
-    default ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
+    private IncidentContextImpl getIncidentContext(ExecutionContext rootExecutionContext) {
+        var incidentContext = new IncidentContextImpl();
+        incidentContext.setProcessInstanceId(rootExecutionContext.getProcessInstance().getId());
+        incidentContext.setProcessDefinitionId(rootExecutionContext.getProcessDefinition().getId());
+        incidentContext.setActivityId(rootExecutionContext.getProcessInstance().getActivityId());
+        incidentContext.setExecutionId(rootExecutionContext.getExecution().getId());
+        return incidentContext;
+    }
+
+    private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
         return new ExecutionContextInfoAppender(rootExecutionContext);
     }
 

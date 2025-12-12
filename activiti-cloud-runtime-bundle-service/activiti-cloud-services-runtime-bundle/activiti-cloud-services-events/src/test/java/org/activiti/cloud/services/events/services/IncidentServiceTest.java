@@ -104,7 +104,7 @@ class IncidentServiceTest {
     }
 
     @Test
-    void shouldCreateAndSendIncidentEvent() {
+    void shouldCreateAndSendExecutionContextIncidentEvent() {
         var executionContext = mock(ExecutionContext.class);
         var incidentContext = mock(IncidentContext.class);
         when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
@@ -141,7 +141,7 @@ class IncidentServiceTest {
     }
 
     @Test
-    void shouldSendIncidentViaCommand() {
+    void shouldCreateAndSendIntegrationContextIncidentEvent() {
         var integrationContext = mock(IntegrationContext.class);
         var incidentContext = mock(IncidentContext.class);
         when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
@@ -157,7 +157,7 @@ class IncidentServiceTest {
             .thenReturn(message);
         var exception = new IllegalArgumentException("Test exception");
 
-        this.incidentService.sendIncidentViaCommand(integrationContext, exception);
+        this.incidentService.createAndSendIncidentEvent(integrationContext, exception);
 
         verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
 

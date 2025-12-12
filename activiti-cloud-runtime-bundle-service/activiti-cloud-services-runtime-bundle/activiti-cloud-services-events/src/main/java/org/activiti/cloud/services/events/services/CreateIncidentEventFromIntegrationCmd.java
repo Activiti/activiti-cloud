@@ -51,7 +51,7 @@ class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
         var executionId = this.integrationContext.getExecutionId();
         var execution = getExecutionEntity(executionId);
 
-        return createAndSendIncidentEvent(new ExecutionContext(execution), this.exception);
+        return createMessage(new ExecutionContext(execution), this.exception);
     }
 
     @Override
