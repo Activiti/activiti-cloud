@@ -621,6 +621,85 @@ public class QueryAdminProcessServiceTasksIT {
             });
     }
 
+    @Test
+    public void shouldGetServiceTaskIntegrationContextsById() throws InterruptedException {
+        //given
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+
+        //then
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+        IntegrationContext integrationContext = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+
+        sendIntegrationRequestedEvent(integrationContext);
+        sendIntegrationRequestedEvent(integrationContext2);
+
+        //when
+        await()
+            .untilAsserted(() -> {
+                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
+                    serviceTask.getId()
+                );
+                assertThat(cloudIntegrationContext)
+                    .isNotEmpty()
+                    .hasSize(2)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .containsExactly(
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        ),
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        )
+                    );
+            });
+
+        // and given
+        sendIntegrationResultReceivedEvent(integrationContext);
+
+        await()
+            .untilAsserted(() -> {
+                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
+                    serviceTask.getId()
+                );
+                assertThat(cloudIntegrationContext)
+                    .isNotEmpty()
+                    .hasSize(2)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .contains(
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                        ),
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        )
+                    );
+            });
+    }
+
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
         ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
             "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
@@ -634,7 +713,7 @@ public class QueryAdminProcessServiceTasksIT {
         return responseEntity.getBody();
     }
 
-    private List<CloudIntegrationContext> retrieveIntegrationContexts(String serviceTaskId) {
+    private List<CloudIntegrationContext> retrieveAllIntegrationContexts(String serviceTaskId) {
         ResponseEntity<PagedModel<CloudIntegrationContext>> responseEntity = testRestTemplate.exchange(
             "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts",
             HttpMethod.GET,
@@ -749,6 +828,7 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
     }
 
+    // Get the newest Integration Context for given Service Task
     private void waitForIntegrationContext(CloudServiceTask serviceTask, IntegrationContextStatus status) {
         await()
             .untilAsserted(() -> {

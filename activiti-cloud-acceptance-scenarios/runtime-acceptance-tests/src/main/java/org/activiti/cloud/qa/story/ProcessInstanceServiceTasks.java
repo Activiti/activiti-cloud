@@ -136,14 +136,46 @@ public class ProcessInstanceServiceTasks {
                 String serviceTaskId = tasks.getContent().iterator().next().getId();
 
                 assertThatHasIntegrationContext(serviceTaskId);
-                CloudIntegrationContext serviceTask = processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId);
+                CloudIntegrationContext integrationContext = processQueryAdminSteps.getCloudIntegrationContext(
+                    serviceTaskId
+                );
 
-                assertThat(serviceTask)
+                assertThat(integrationContext)
                     .isNotNull()
                     .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                     .containsOnly(
                         "ServiceTask",
                         CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    );
+            });
+    }
+
+    @Then("the user can get service task all integration contexts by service task id")
+    public void verifyServiceTaskAllIntegrationContextsById() {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await()
+            .untilAsserted(() -> {
+                PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
+
+                assertThat(tasks.getContent()).hasSize(1);
+
+                String serviceTaskId = tasks.getContent().iterator().next().getId();
+
+                assertThatHasIntegrationContexts(serviceTaskId);
+                PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getAllCloudIntegrationContexts(
+                    serviceTaskId
+                );
+
+                assertThat(integrationContexts.getContent())
+                    .isNotNull()
+                    .hasSizeGreaterThan(1)
+                    .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
+                    .contains(
+                        tuple(
+                            "ServiceTask",
+                            CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                        )
                     );
             });
     }
@@ -158,6 +190,17 @@ public class ProcessInstanceServiceTasks {
             //the step will be marked to be skipped and any subsequent call to
             //processQueryAdminSteps will return mocks instead of calling the real endpoint.
             //Without clearing step failures the await block become useless.
+            StepEventBus.getEventBus().clearStepFailures();
+        }
+        assertThat(thrown).isNull();
+    }
+
+    private void assertThatHasIntegrationContexts(String serviceTaskId) {
+        FeignException thrown = catchThrowableOfType(
+            () -> processQueryAdminSteps.getAllCloudIntegrationContexts(serviceTaskId),
+            FeignException.class
+        );
+        if (thrown != null) {
             StepEventBus.getEventBus().clearStepFailures();
         }
         assertThat(thrown).isNull();
