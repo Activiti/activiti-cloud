@@ -15,12 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
@@ -53,8 +57,26 @@ public class ServiceTaskIntegrationContextAdminController {
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
+    @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
+    public EntityModel<CloudIntegrationContext> findByServiceTaskId(@PathVariable String serviceTaskId) {
+        String[] split = serviceTaskId.trim().split(":");
+        Page<IntegrationContextEntity> page = repository.findByProcessInstanceIdAndClientIdAndExecutionId(
+            split[0],
+            split[1],
+            split[2],
+            PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestDate"))
+        );
+        if (page.hasContent()) {
+            return representationModelAssembler.toModel(page.getContent().getFirst());
+        } else {
+            throw new EntityNotFoundException(
+                "Unable to find integration context entity for the given id:'" + serviceTaskId + "'"
+            );
+        }
+    }
+
     @RequestMapping(value = "/{serviceTaskId}/integration-contexts", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudIntegrationContext>> findByServiceTaskId(
+    public PagedModel<EntityModel<CloudIntegrationContext>> findAllByServiceTaskId(
         @PathVariable String serviceTaskId,
         Pageable pageable
     ) {

@@ -123,8 +123,13 @@ public class ProcessQueryAdminSteps {
     }
 
     @Step
-    public PagedModel<CloudIntegrationContext> getCloudIntegrationContexts(String serviceTaskId) {
-        return processQueryAdminService.getCloudIntegrationContexts(serviceTaskId);
+    public CloudIntegrationContext getCloudIntegrationContext(String serviceTaskId) {
+        return processQueryAdminService.getCloudIntegrationContext(serviceTaskId);
+    }
+
+    @Step
+    public PagedModel<CloudIntegrationContext> getAllCloudIntegrationContexts(String serviceTaskId) {
+        return processQueryAdminService.getAllCloudIntegrationContexts(serviceTaskId);
     }
 
     @Step

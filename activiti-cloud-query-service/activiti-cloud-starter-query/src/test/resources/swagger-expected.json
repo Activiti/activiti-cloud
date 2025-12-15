@@ -4954,7 +4954,7 @@
         } ]
       }
     },
-    "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts" : {
+    "/admin/v1/service-tasks/{serviceTaskId}/integration-context" : {
       "get" : {
         "tags" : [ "service-task-integration-context-admin-controller" ],
         "summary" : "findByServiceTaskId",
@@ -4966,34 +4966,102 @@
           "schema" : {
             "type" : "string"
           }
+        }],
+        "responses" : {
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
         },
-        {
-          "name" : "maxItems",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "skipCount",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "sort",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
+    "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts" : {
+      "get" : {
+        "tags" : [ "service-task-integration-context-admin-controller" ],
+        "summary" : "findAllByServiceTaskId",
+        "operationId" : "findAllByServiceTaskId",
+        "parameters" : [ {
+          "name" : "serviceTaskId",
+          "in" : "path",
+          "required" : true,
           "schema" : {
             "type" : "string"
           }
-        } ],
+        },
+          {
+            "name" : "maxItems",
+            "in" : "query",
+            "required" : false,
+            "style" : "form",
+            "schema" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }, {
+            "name" : "skipCount",
+            "in" : "query",
+            "required" : false,
+            "style" : "form",
+            "schema" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }, {
+            "name" : "sort",
+            "in" : "query",
+            "required" : false,
+            "style" : "form",
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",

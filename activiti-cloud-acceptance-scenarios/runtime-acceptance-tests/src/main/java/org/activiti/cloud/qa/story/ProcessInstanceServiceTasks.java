@@ -136,25 +136,21 @@ public class ProcessInstanceServiceTasks {
                 String serviceTaskId = tasks.getContent().iterator().next().getId();
 
                 assertThatHasIntegrationContext(serviceTaskId);
-                PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getCloudIntegrationContexts(
-                    serviceTaskId
-                );
+                CloudIntegrationContext serviceTask = processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId);
 
-                assertThat(integrationContexts.getContent())
-                    .isNotEmpty()
+                assertThat(serviceTask)
+                    .isNotNull()
                     .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                     .containsOnly(
-                        tuple(
-                            "ServiceTask",
-                            CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                        )
+                        "ServiceTask",
+                        CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
                     );
             });
     }
 
     private void assertThatHasIntegrationContext(String serviceTaskId) {
         FeignException thrown = catchThrowableOfType(
-            () -> processQueryAdminSteps.getCloudIntegrationContexts(serviceTaskId),
+            () -> processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId),
             FeignException.class
         );
         if (thrown != null) {

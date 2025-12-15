@@ -63,9 +63,13 @@ public interface ProcessQueryAdminService {
         @Param("status") String status
     );
 
+    @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
+    @Headers("Content-Type: application/json")
+    CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId);
+
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-contexts")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudIntegrationContext> getCloudIntegrationContexts(@Param("serviceTaskId") String serviceTaskId);
+    PagedModel<CloudIntegrationContext> getAllCloudIntegrationContexts(@Param("serviceTaskId") String serviceTaskId);
 
     @RequestLine("GET /admin/v1/process-instances?processDefinitionKey={processDefinitionKey}")
     PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(

@@ -99,6 +99,8 @@ public class QueryAdminProcessServiceTasksIT {
 
     private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudServiceTask>() {};
 
+    private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<CloudIntegrationContext>() {};
+
     private static final ParameterizedTypeReference<PagedModel<CloudIntegrationContext>> PAGED_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudIntegrationContext>>() {};
     public static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
 
@@ -494,9 +496,7 @@ public class QueryAdminProcessServiceTasksIT {
         //when
         await()
             .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveIntegrationContexts(
-                    serviceTask.getId()
-                );
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
                 assertThat(cloudIntegrationContext)
                     .extracting(
                         CloudIntegrationContext::getClientId,
@@ -505,12 +505,10 @@ public class QueryAdminProcessServiceTasksIT {
                         CloudIntegrationContext::getStatus
                     )
                     .containsExactly(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_REQUESTED
-                        )
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED
                     );
             });
 
@@ -531,9 +529,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await()
             .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveIntegrationContexts(
-                    serviceTask.getId()
-                );
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
                 assertThat(cloudIntegrationContext)
                     .extracting(
                         CloudIntegrationContext::getClientId,
@@ -544,17 +540,15 @@ public class QueryAdminProcessServiceTasksIT {
                         CloudIntegrationContext::getErrorClassName
                     )
                     .containsExactly(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
-                            error.getErrorCode(),
-                            StringUtils.truncate(error.getMessage(), ERROR_MESSAGE_LENGTH),
-                            error.getClass().getName()
-                        )
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                        error.getErrorCode(),
+                        StringUtils.truncate(error.getMessage(), ERROR_MESSAGE_LENGTH),
+                        error.getClass().getName()
                     );
 
-                assertThat(cloudIntegrationContext.get(0).getStackTraceElements()).isNotEmpty();
+                assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
             });
     }
 
@@ -591,9 +585,7 @@ public class QueryAdminProcessServiceTasksIT {
         //when
         await()
             .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveIntegrationContexts(
-                    serviceTask.getId()
-                );
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
                 assertThat(cloudIntegrationContext)
                     .extracting(
                         CloudIntegrationContext::getClientId,
@@ -602,12 +594,10 @@ public class QueryAdminProcessServiceTasksIT {
                         CloudIntegrationContext::getStatus
                     )
                     .containsExactly(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_REQUESTED
-                        )
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED
                     );
             });
 
@@ -616,9 +606,7 @@ public class QueryAdminProcessServiceTasksIT {
 
         await()
             .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveIntegrationContexts(
-                    serviceTask.getId()
-                );
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
                 assertThat(cloudIntegrationContext)
                     .extracting(
                         CloudIntegrationContext::getClientId,
@@ -626,13 +614,24 @@ public class QueryAdminProcessServiceTasksIT {
                         CloudIntegrationContext::getStatus
                     )
                     .containsExactly(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                        )
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
                     );
             });
+    }
+
+    private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
+        ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
+            "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            SINGLE_INT_CONTEXT_RESPONSE_TYPE,
+            serviceTaskId
+        );
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        return responseEntity.getBody();
     }
 
     private List<CloudIntegrationContext> retrieveIntegrationContexts(String serviceTaskId) {
@@ -714,7 +713,7 @@ public class QueryAdminProcessServiceTasksIT {
         sendActivityCompletedEvent(serviceTaskIt1, process);
 
         waitForServiceTask(BPMNActivityStatus.COMPLETED);
-        waitForIntegrationContext(serviceTaskIt1.getId(), IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
 
         //when the process loop back and reaches the task a second time
         final BPMNActivityImpl bpmnActivity = buildServiceTask(serviceTaskIt1.getExecutionId(), process);
@@ -729,11 +728,7 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContextIt2);
 
         //then
-        waitForIntegrationContext(
-            serviceTaskIt1.getId(),
-            IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED,
-            IntegrationContextStatus.INTEGRATION_REQUESTED
-        );
+        waitForIntegrationContext(serviceTaskIt1, IntegrationContextStatus.INTEGRATION_REQUESTED);
     }
 
     private void sendActivitiStartedEvent(ProcessInstanceImpl process, BPMNActivityImpl bpmnActivity) {
@@ -754,14 +749,11 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
     }
 
-    private void waitForIntegrationContext(String serviceTaskId, IntegrationContextStatus... statuses) {
+    private void waitForIntegrationContext(CloudServiceTask serviceTask, IntegrationContextStatus status) {
         await()
             .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveIntegrationContexts(serviceTaskId);
-                assertThat(cloudIntegrationContext)
-                    .hasSize(statuses.length)
-                    .extracting(CloudIntegrationContext::getStatus)
-                    .containsExactlyInAnyOrder(statuses);
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+                assertThat(cloudIntegrationContext.getStatus()).isEqualTo(status);
             });
     }
 
