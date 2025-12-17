@@ -102,7 +102,7 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
             .buildAndSave();
 
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withInitiator("user1")
             .withLinkedProcessInstanceId("123-lin-ked-222")

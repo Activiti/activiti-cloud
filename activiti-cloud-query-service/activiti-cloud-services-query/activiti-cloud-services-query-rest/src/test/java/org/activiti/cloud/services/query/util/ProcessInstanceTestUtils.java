@@ -28,7 +28,7 @@ public class ProcessInstanceTestUtils {
     private ProcessInstanceTestUtils() {}
 
     public static ProcessInstanceEntity buildProcessInstanceEntity() {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity(
+        return new ProcessInstanceEntity(
             "My-app",
             "My-app",
             "1",
@@ -39,9 +39,6 @@ public class ProcessInstanceTestUtils {
             ProcessInstance.ProcessInstanceStatus.RUNNING,
             new Date()
         );
-        processInstanceEntity.setLinkedProcessInstanceId("123-456-789-1111");
-        processInstanceEntity.setLinkedProcessInstanceType("my-type");
-        return processInstanceEntity;
     }
 
     public static Set<ProcessVariableEntity> createProcessVariables(

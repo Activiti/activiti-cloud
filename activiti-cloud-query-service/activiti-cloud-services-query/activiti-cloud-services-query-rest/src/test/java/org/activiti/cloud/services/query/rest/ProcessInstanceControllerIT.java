@@ -132,6 +132,8 @@ class ProcessInstanceControllerIT {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
         ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
+        processInstanceEntity.setLinkedProcessInstanceId("123-456-789-1111");
+        processInstanceEntity.setLinkedProcessInstanceType("my-type");
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
             Collections.singletonList(processInstanceEntity),
             PageRequest.of(1, 10),
