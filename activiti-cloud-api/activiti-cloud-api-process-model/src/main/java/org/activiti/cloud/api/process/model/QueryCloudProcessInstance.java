@@ -21,4 +21,12 @@ public interface QueryCloudProcessInstance extends CloudProcessInstance {
     Set<QueryCloudSubprocessInstance> getSubprocesses();
 
     void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses);
+
+    String getLinkedProcessInstanceId();
+
+    void setLinkedProcessInstanceId(String linkedProcessInstanceId);
+
+    String getLinkedProcessInstanceType();
+
+    void setLinkedProcessInstanceType(String linkedProcessInstanceType);
 }

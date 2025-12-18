@@ -101,6 +101,21 @@ class ProcessVariablesPayloadConverterTest {
     }
 
     @Test
+    void shouldConvertStartProcessPayloadWithLinkedProcess() {
+        StartProcessPayload payload = subject.convert(
+            ProcessPayloadBuilder
+                .start()
+                .withLinkedProcessInstanceId("linkedProcessId")
+                .withLinkedProcessInstanceType("linkedProcessType")
+                .withVariables(variablesToConvert)
+                .build()
+        );
+        assertThat(payload.getLinkedProcessInstanceId()).isEqualTo("linkedProcessId");
+        assertThat(payload.getLinkedProcessInstanceType()).isEqualTo("linkedProcessType");
+        assertConvertedVariables(payload.getVariables());
+    }
+
+    @Test
     void shouldConvertCompleteTaskPayload() {
         CompleteTaskPayload result = subject.convert(
             TaskPayloadBuilder.complete().withVariables(variablesToConvert).build()
