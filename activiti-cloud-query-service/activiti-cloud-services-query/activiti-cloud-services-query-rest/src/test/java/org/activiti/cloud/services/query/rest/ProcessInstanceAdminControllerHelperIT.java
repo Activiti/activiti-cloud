@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
