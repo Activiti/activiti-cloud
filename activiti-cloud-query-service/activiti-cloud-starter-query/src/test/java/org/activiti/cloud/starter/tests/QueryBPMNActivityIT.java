@@ -171,7 +171,7 @@ class QueryBPMNActivityIT {
 
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
-            new CloudProcessStartedEventImpl(process, null, null),
+            new CloudProcessStartedEventImpl(process),
             new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudSequenceFlowTakenEventImpl(sequenceFlow),
@@ -295,7 +295,7 @@ class QueryBPMNActivityIT {
 
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
-            new CloudProcessStartedEventImpl(process, null, null),
+            new CloudProcessStartedEventImpl(process),
             new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudSequenceFlowTakenEventImpl(sequenceFlow),

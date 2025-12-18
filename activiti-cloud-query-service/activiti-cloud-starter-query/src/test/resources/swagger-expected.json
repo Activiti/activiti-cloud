@@ -1767,7 +1767,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -2034,7 +2047,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2284,7 +2310,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -3433,7 +3472,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -3501,7 +3553,7 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -4012,8 +4064,21 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+            }
+          }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -5028,7 +5093,8 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -5557,6 +5623,18 @@
             "schema": {
               "type": "string"
             }
+          }, {
+            "name":"linkedProcessInstanceId",
+            "in":"query",
+            "schema": {
+              "type" : "string"
+            }
+          }, {
+            "name":"linkedProcessInstanceType",
+            "in":"query",
+            "schema" : {
+              "type" : "string"
+            }
           }
         ],
         "responses": {
@@ -5988,7 +6066,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -6931,7 +7022,8 @@
           },
           "includeSubprocesses": {
             "type": "boolean"
-          }
+          },
+          "linkedProcessInstanceId":{"items":{"type":"string"},"type":"array","uniqueItems":true},"linkedProcessInstanceType":{"items":{"type":"string"},"type":"array","uniqueItems":true}
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
       },
@@ -7037,6 +7129,12 @@
             "type" : "string"
           },
           "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "linkedProcessInstanceId" : {
+            "type" : "string"
+          },
+          "linkedProcessInstanceType" : {
             "type" : "string"
           }
         },
@@ -7453,6 +7551,12 @@
           },
           "processDefinitionKey" : {
             "type" : "string"
+          },
+          "linkedProcessInstanceId": {
+            "type":"string"
+          },
+          "linkedProcessInstanceType": {
+            "type":"string"
           }
         },
         "title" : "QueryCloudProcessInstance_General"

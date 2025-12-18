@@ -87,6 +87,8 @@ class ToCloudProcessRuntimeEventConverterTest {
         ProcessStartedEventImpl event = new ProcessStartedEventImpl(processInstance);
         event.setNestedProcessDefinitionId("myParentProcessDef");
         event.setNestedProcessInstanceId("2");
+        event.setLinkedProcessInstanceId("linkedId");
+        event.setLinkedProcessInstanceType("linkedType");
 
         IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
         identityLink.setDetails(USERNAME_GUID.getBytes());
@@ -107,6 +109,8 @@ class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
         assertThat(processStarted.getActor()).isEqualTo(USERNAME_GUID);
+        assertThat(processStarted.getLinkedProcessInstanceId()).isEqualTo("linkedId");
+        assertThat(processStarted.getLinkedProcessInstanceType()).isEqualTo("linkedType");
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(this.processAuditServiceInfoAppender).appendAuditServiceInfoTo(any(CloudProcessStartedEventImpl.class));
