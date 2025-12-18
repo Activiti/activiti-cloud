@@ -21,12 +21,10 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.springframework.messaging.Message;
 
-class CreateIncidentEventFromExecutionCmd implements CreateIncidentEventCmd {
+class CreateIncidentEventFromExecutionCmd extends CreateIncidentEventCmd {
 
     private final ExecutionContext executionContext;
     private final Exception exception;
-    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
-    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     CreateIncidentEventFromExecutionCmd(
         ExecutionContext executionContext,
@@ -34,24 +32,13 @@ class CreateIncidentEventFromExecutionCmd implements CreateIncidentEventCmd {
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender
     ) {
+        super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender);
         this.executionContext = executionContext;
         this.exception = exception;
-        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
-        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     @Override
     public Message execute(CommandContext commandContext) {
         return createMessage(this.executionContext, this.exception);
-    }
-
-    @Override
-    public MessageBuilderChainFactory<ExecutionContext> getMessageBuilderIncidentsChainFactory() {
-        return this.messageBuilderIncidentsChainFactory;
-    }
-
-    @Override
-    public RuntimeBundleInfoAppender getRuntimeBundleInfoAppender() {
-        return this.runtimeBundleInfoAppender;
     }
 }

@@ -24,13 +24,11 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.springframework.messaging.Message;
 
-class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
+class CreateIncidentEventFromIntegrationCmd extends CreateIncidentEventCmd {
 
     private final IntegrationContext integrationContext;
     private final Exception exception;
     private final RuntimeService runtimeService;
-    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
-    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     CreateIncidentEventFromIntegrationCmd(
         IntegrationContext integrationContext,
@@ -39,11 +37,10 @@ class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender
     ) {
+        super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender);
         this.integrationContext = integrationContext;
         this.exception = exception;
         this.runtimeService = runtimeService;
-        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
-        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     @Override
@@ -52,16 +49,6 @@ class CreateIncidentEventFromIntegrationCmd implements CreateIncidentEventCmd {
         var execution = getExecutionEntity(executionId);
 
         return createMessage(new ExecutionContext(execution), this.exception);
-    }
-
-    @Override
-    public MessageBuilderChainFactory<ExecutionContext> getMessageBuilderIncidentsChainFactory() {
-        return this.messageBuilderIncidentsChainFactory;
-    }
-
-    @Override
-    public RuntimeBundleInfoAppender getRuntimeBundleInfoAppender() {
-        return this.runtimeBundleInfoAppender;
     }
 
     private ExecutionEntity getExecutionEntity(String executionId) {

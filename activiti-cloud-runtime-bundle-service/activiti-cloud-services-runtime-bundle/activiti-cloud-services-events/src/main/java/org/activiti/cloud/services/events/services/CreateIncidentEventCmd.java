@@ -25,12 +25,24 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.Command;
 import org.springframework.messaging.Message;
 
-interface CreateIncidentEventCmd extends Command<Message> {
-    default Message<ArrayList<Object>> createMessage(ExecutionContext rootExecutionContext, Exception exception) {
+abstract class CreateIncidentEventCmd implements Command<Message> {
+
+    private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
+    CreateIncidentEventCmd(
+        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
+        this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+    }
+
+    Message<ArrayList<Object>> createMessage(ExecutionContext rootExecutionContext, Exception exception) {
         var errorEvents = new ArrayList<>();
         var incident = createCloudIncidentCreatedEvent(rootExecutionContext, exception);
         errorEvents.add(incident);
-        return getMessageBuilderIncidentsChainFactory().create(rootExecutionContext).withPayload(errorEvents).build();
+        return this.messageBuilderIncidentsChainFactory.create(rootExecutionContext).withPayload(errorEvents).build();
     }
 
     private CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
@@ -41,7 +53,7 @@ interface CreateIncidentEventCmd extends Command<Message> {
 
         var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext);
         getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
-        getRuntimeBundleInfoAppender().appendRuntimeBundleInfoTo(incident);
+        this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
 
         return incident;
     }
@@ -58,8 +70,4 @@ interface CreateIncidentEventCmd extends Command<Message> {
     private ExecutionContextInfoAppender getExecutionContextInfoAppender(ExecutionContext rootExecutionContext) {
         return new ExecutionContextInfoAppender(rootExecutionContext);
     }
-
-    MessageBuilderChainFactory<ExecutionContext> getMessageBuilderIncidentsChainFactory();
-
-    RuntimeBundleInfoAppender getRuntimeBundleInfoAppender();
 }
