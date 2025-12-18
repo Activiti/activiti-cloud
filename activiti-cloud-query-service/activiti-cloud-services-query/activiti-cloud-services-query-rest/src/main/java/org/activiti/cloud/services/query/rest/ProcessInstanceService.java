@@ -213,4 +213,23 @@ public class ProcessInstanceService {
     public Long count(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceSearchService.countRestricted(searchRequest);
     }
+
+    public Page<ProcessInstanceEntity> linkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            linkedProcessInstanceId,
+            "Unable to find process for the given id:'" + linkedProcessInstanceId + "'"
+        );
+
+        if (!canReadOrAdmin(processInstanceEntity)) {
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for process instance: " + linkedProcessInstanceId
+            );
+        }
+
+        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
+        BooleanExpression expression = process.linkedProcessInstanceId.eq(linkedProcessInstanceId);
+
+        return processInstanceRepository.findAll(expression, pageable);
+    }
 }

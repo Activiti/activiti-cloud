@@ -91,4 +91,8 @@ public class ProcessInstanceControllerHelper {
     public Long countProcessInstances(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceService.count(searchRequest);
     }
+
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceService.linkedProcesses(linkedProcessInstanceId, pageable);
+    }
 }

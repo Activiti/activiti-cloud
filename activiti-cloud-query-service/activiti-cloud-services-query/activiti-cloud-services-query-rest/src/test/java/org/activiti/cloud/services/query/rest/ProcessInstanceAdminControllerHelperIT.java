@@ -16,10 +16,14 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntityWithLinkedProcess;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +32,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
+import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -187,5 +193,86 @@ class ProcessInstanceAdminControllerHelperIT {
 
     private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {
         return PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_ADMIN")
+    void shouldReturnLinkedProcessesAdminById() {
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
+        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        ProcessInstanceEntity processInstance1 = buildProcessInstanceEntityWithLinkedProcess(
+            savedLinkedProcessInstance.getId()
+        );
+        processInstanceRepository.save(processInstance1);
+        ProcessInstanceEntity processInstance2 = buildProcessInstanceEntityWithLinkedProcess(
+            savedLinkedProcessInstance.getId()
+        );
+        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance3 = buildProcessInstanceEntityWithLinkedProcess(
+            savedLinkedProcessInstance.getId()
+        );
+        processInstanceRepository.save(processInstance3);
+
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
+            savedLinkedProcessInstance.getId(),
+            pageable
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getContent())
+            .extracting("id")
+            .containsExactlyInAnyOrder(processInstance1.getId(), processInstance2.getId(), processInstance3.getId());
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_ADMIN")
+    void shouldReturnEmptyListWhenGetLinkedProcessesAdminById() {
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
+        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
+            savedLinkedProcessInstance.getId(),
+            pageable
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    @WithMockUser(roles = { "ACTIVITI_USER", "ACTIVITI_MODELER" })
+    void shouldThrowForbiddenWhenGetLinkedProcessesAdminById() {
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
+        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        assertThatThrownBy(() ->
+                processInstanceAdminControllerHelper.searchLinkedProcesses(savedLinkedProcessInstance.getId(), pageable)
+            )
+            .isInstanceOf(ActivitiForbiddenException.class)
+            .hasMessageContaining(
+                "Operation not permitted for process instance: " + savedLinkedProcessInstance.getId()
+            );
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_ADMIN")
+    void shouldThrowEntityNotFoundExceptionWhenGetLinkedProcessesAdminById() {
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        assertThatThrownBy(() -> processInstanceAdminControllerHelper.searchLinkedProcesses("linkedProcessId", pageable)
+            )
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("Unable to find process for the given id:'linkedProcessId'");
     }
 }

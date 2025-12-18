@@ -206,4 +206,17 @@ public class ProcessInstanceAdminController {
             processInstanceRepresentationModelAssembler
         );
     }
+
+    @JsonView(JsonViews.General.class)
+    @RequestMapping(value = "/{linkedProcessInstanceId}/linkedprocesses", method = RequestMethod.GET)
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> linkedProcesses(
+        @PathVariable String linkedProcessInstanceId,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceAdminControllerHelper.searchLinkedProcesses(linkedProcessInstanceId, pageable),
+            processInstanceRepresentationModelAssembler
+        );
+    }
 }
