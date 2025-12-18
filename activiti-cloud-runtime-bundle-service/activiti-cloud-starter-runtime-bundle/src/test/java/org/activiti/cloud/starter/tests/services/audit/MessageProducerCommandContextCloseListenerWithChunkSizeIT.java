@@ -80,7 +80,7 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
 
     @BeforeEach
     void setUp() {
-        streamHandler.clear();
+        this.streamHandler.clear();
     }
 
     @Test
@@ -89,12 +89,12 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
 
         assertThrows(
             IllegalArgumentException.class,
-            () -> runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
+            () -> this.runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
         );
 
-        verify(incidentService).createAndSendIncidentEvent(executionContextCaptor.capture(), any());
+        verify(this.incidentService).createAndSendIncidentEvent(this.executionContextCaptor.capture(), any());
 
-        var executionContextCaptorValue = executionContextCaptor.getValue();
+        var executionContextCaptorValue = this.executionContextCaptor.getValue();
         assertThat(executionContextCaptorValue.getProcessInstance().getProcessInstanceId()).isNotEmpty();
         assertThat(executionContextCaptorValue.getProcessInstance().getProcessDefinitionKey())
             .isEqualTo(processDefinitionKey);
@@ -102,13 +102,11 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
             .isEqualTo(processDefinitionKey);
         assertThat(executionContextCaptorValue.getExecution().getProcessInstanceId()).isNotEmpty();
 
-        var result = runtimeService
-            .createProcessInstanceQuery()
-            .processDefinitionKey(processDefinitionKey)
-            .singleResult();
+        var result =
+            this.runtimeService.createProcessInstanceQuery().processDefinitionKey(processDefinitionKey).singleResult();
         assertThat(result).isNull();
 
         Thread.sleep(2000);
-        assertThat(streamHandler.getAllReceivedEvents()).isEmpty();
+        assertThat(this.streamHandler.getAllReceivedEvents()).isEmpty();
     }
 }
