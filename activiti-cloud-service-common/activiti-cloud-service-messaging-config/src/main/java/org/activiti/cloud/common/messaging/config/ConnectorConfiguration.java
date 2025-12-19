@@ -19,6 +19,7 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -37,6 +38,8 @@ import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.channel.ExecutorChannel;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -44,6 +47,7 @@ import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -189,6 +193,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             IntegrationFlow inputChannelFlow = IntegrationFlow
                                 .from(inputChannel)
+                                .channel(new QueueChannel(20))
+                                .channel(new ExecutorChannel(Executors.newFixedThreadPool(5))) // parallelismo
+                                .channel("connectorInputQueueChannel")
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                                 .get();
 
