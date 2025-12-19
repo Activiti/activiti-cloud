@@ -35,7 +35,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = { "activiti.connector.channel.parallelism=0", "activiti.connector.channel.capacity=0" }
+)
 @Import(TestChannelBinderConfiguration.class)
 public class TestErrorConnectorIT {
 
