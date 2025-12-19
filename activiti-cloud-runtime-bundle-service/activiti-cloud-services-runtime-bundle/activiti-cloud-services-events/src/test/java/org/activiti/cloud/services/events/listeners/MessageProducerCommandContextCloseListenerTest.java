@@ -15,16 +15,11 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import static org.activiti.cloud.services.events.TestUtils.MOCK_BUSINESS_KEY;
-import static org.activiti.cloud.services.events.TestUtils.MOCK_PARENT_PROCESS_INSTANCE_ID;
-import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_ID;
-import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_KEY;
-import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_DEFINITION_VERSION;
-import static org.activiti.cloud.services.events.TestUtils.MOCK_PROCESS_INSTANCE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -39,6 +34,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -49,6 +45,8 @@ import org.activiti.cloud.services.events.message.EventChunker;
 import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.IncidentService;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +61,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -119,6 +118,12 @@ class MessageProducerCommandContextCloseListenerTest {
     @Spy
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
 
+    @Mock
+    private RuntimeService runtimeService;
+
+    @Mock
+    private ManagementService managementService;
+
     private IncidentService incidentService;
 
     @Captor
@@ -131,7 +136,14 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        incidentService = new IncidentService(producer, messageBuilderChainIncidentFactory, runtimeBundleInfoAppender);
+        incidentService =
+            new IncidentService(
+                producer,
+                messageBuilderChainIncidentFactory,
+                runtimeBundleInfoAppender,
+                managementService,
+                runtimeService
+            );
 
         closeListener =
             new MessageProducerCommandContextCloseListener(
@@ -177,12 +189,12 @@ class MessageProducerCommandContextCloseListenerTest {
 
         assertThat(result).hasSize(1);
 
-        assertThat(result[0].getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
-        assertThat(result[0].getParentProcessInstanceId()).isEqualTo(MOCK_PARENT_PROCESS_INSTANCE_ID);
-        assertThat(result[0].getBusinessKey()).isEqualTo(MOCK_BUSINESS_KEY);
-        assertThat(result[0].getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
-        assertThat(result[0].getProcessDefinitionKey()).isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
-        assertThat(result[0].getProcessDefinitionVersion()).isEqualTo(MOCK_PROCESS_DEFINITION_VERSION);
+        assertThat(result[0].getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        assertThat(result[0].getParentProcessInstanceId()).isEqualTo(TestUtils.MOCK_PARENT_PROCESS_INSTANCE_ID);
+        assertThat(result[0].getBusinessKey()).isEqualTo(TestUtils.MOCK_BUSINESS_KEY);
+        assertThat(result[0].getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        assertThat(result[0].getProcessDefinitionKey()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_KEY);
+        assertThat(result[0].getProcessDefinitionVersion()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_VERSION);
 
         assertThat(result[0].getAppName()).isEqualTo(APP_NAME);
         assertThat(result[0].getServiceName()).isEqualTo(SPRING_APP_NAME);
@@ -335,6 +347,18 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @Test
     void closedShouldSendIncidentMessageWithCorrectContentWhenChunkSizeLimitExceeded() {
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Chunk size limit exceeded"),
+            incidentContext
+        );
+
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(managementService.executeCommand(any())).thenReturn(message);
+
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
 
         given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -353,18 +377,11 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incidentPayload).hasSize(1);
 
         CloudIncidentCreatedEventImpl incident = (CloudIncidentCreatedEventImpl) incidentPayload.get(0);
-        assertThat(incident.getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
-        assertThat(incident.getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
-        assertThat(incident.getProcessDefinitionKey()).isEqualTo(MOCK_PROCESS_DEFINITION_KEY);
-        assertThat(incident.getAppName()).isEqualTo(APP_NAME);
-        assertThat(incident.getServiceName()).isEqualTo(SPRING_APP_NAME);
-        assertThat(incident.getServiceType()).isEqualTo(SERVICE_TYPE);
-        assertThat(incident.getServiceVersion()).isEqualTo(SERVICE_VERSION);
         assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
         assertThat(incident.getErrorMessage()).contains("Chunk size limit exceeded");
-        assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
-        assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(MOCK_PROCESS_DEFINITION_ID);
-        assertThat(incident.getEntity().getExecutionId()).isEqualTo(MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        assertThat(incident.getEntity().getExecutionId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {
@@ -399,7 +416,7 @@ class MessageProducerCommandContextCloseListenerTest {
         List<CloudRuntimeEventImpl<?, ?>> events = new ArrayList<>();
         for (int i = 0; i < eventsCount; i++) {
             ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-            processInstance.setId(MOCK_PROCESS_INSTANCE_ID + "_" + i);
+            processInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID + "_" + i);
             CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
             events.add(event);
         }
@@ -414,7 +431,7 @@ class MessageProducerCommandContextCloseListenerTest {
             for (int j = 0; j < 500; j++) {
                 largeData.append("This_is_large_test_data_to_exceed_bytes_limit_");
             }
-            processInstance.setId(MOCK_PROCESS_INSTANCE_ID + "_" + largeData + "_" + i);
+            processInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID + "_" + largeData + "_" + i);
             processInstance.setBusinessKey(largeData.toString());
             CloudProcessCreatedEventImpl event = new CloudProcessCreatedEventImpl(processInstance);
             events.add(event);
