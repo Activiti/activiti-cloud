@@ -199,16 +199,17 @@ class ProcessInstanceAdminControllerHelperIT {
     void shouldReturnLinkedProcessesAdminById() {
         ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
         var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
         ProcessInstanceEntity processInstance1 = buildProcessInstanceEntityWithLinkedProcess(
-            savedLinkedProcessInstance.getId()
+            saveLinkedProcessInstanceId
         );
         processInstanceRepository.save(processInstance1);
         ProcessInstanceEntity processInstance2 = buildProcessInstanceEntityWithLinkedProcess(
-            savedLinkedProcessInstance.getId()
+            saveLinkedProcessInstanceId
         );
         processInstanceRepository.save(processInstance2);
         ProcessInstanceEntity processInstance3 = buildProcessInstanceEntityWithLinkedProcess(
-            savedLinkedProcessInstance.getId()
+            saveLinkedProcessInstanceId
         );
         processInstanceRepository.save(processInstance3);
 
@@ -216,7 +217,7 @@ class ProcessInstanceAdminControllerHelperIT {
         Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
-            savedLinkedProcessInstance.getId(),
+            saveLinkedProcessInstanceId,
             pageable
         );
 
@@ -232,12 +233,13 @@ class ProcessInstanceAdminControllerHelperIT {
     void shouldReturnEmptyListWhenGetLinkedProcessesAdminById() {
         ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
         var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
 
         int pageSize = 30;
         Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
-            savedLinkedProcessInstance.getId(),
+            saveLinkedProcessInstanceId,
             pageable
         );
 
@@ -250,17 +252,16 @@ class ProcessInstanceAdminControllerHelperIT {
     void shouldThrowForbiddenWhenGetLinkedProcessesAdminById() {
         ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
         var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
 
         int pageSize = 30;
         Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
         assertThatThrownBy(() ->
-                processInstanceAdminControllerHelper.searchLinkedProcesses(savedLinkedProcessInstance.getId(), pageable)
+                processInstanceAdminControllerHelper.searchLinkedProcesses(saveLinkedProcessInstanceId, pageable)
             )
             .isInstanceOf(ActivitiForbiddenException.class)
-            .hasMessageContaining(
-                "Operation not permitted for process instance: " + savedLinkedProcessInstance.getId()
-            );
+            .hasMessageContaining("Operation not permitted for process instance: " + saveLinkedProcessInstanceId);
     }
 
     @Test

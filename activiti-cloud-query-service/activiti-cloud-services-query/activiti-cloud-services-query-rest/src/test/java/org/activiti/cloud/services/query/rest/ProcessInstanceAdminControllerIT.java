@@ -29,8 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.*;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.*;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -215,13 +215,15 @@ class ProcessInstanceAdminControllerIT {
         ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
         var linkedProcessInstanceId = processInstance.getId();
 
-        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString() ))
+        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
             .willReturn(processInstance);
 
         List<String> roles = List.of("ACTIVITI_ADMIN");
         given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
 
-        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(linkedProcessInstanceId);
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(
+            linkedProcessInstanceId
+        );
 
         Page<ProcessInstanceEntity> linkedProcessInstancePage = new PageImpl<>(
             Collections.singletonList(linkedProcessInstance),
@@ -233,7 +235,10 @@ class ProcessInstanceAdminControllerIT {
 
         //when
         mockMvc
-            .perform(get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId).accept(MediaType.APPLICATION_JSON))
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             //then
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries[0].entry.id").value(linkedProcessInstance.getId()))
@@ -250,13 +255,15 @@ class ProcessInstanceAdminControllerIT {
         ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
         var linkedProcessInstanceId = processInstance.getId();
 
-        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString() ))
+        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
             .willReturn(processInstance);
 
         List<String> roles = List.of("ACTIVITI_USER");
         given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
 
-        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(linkedProcessInstanceId);
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(
+            linkedProcessInstanceId
+        );
 
         Page<ProcessInstanceEntity> linkedProcessInstancePage = new PageImpl<>(
             Collections.singletonList(linkedProcessInstance),
@@ -268,20 +275,25 @@ class ProcessInstanceAdminControllerIT {
 
         //when
         mockMvc
-            .perform(get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId).accept(MediaType.APPLICATION_JSON))
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             //then
             .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldReturnNotFoundWhenLinkedProcessInstances() throws Exception {
-
         given(entityFinder.findById(any(), anyString(), anyString()))
             .willThrow(new EntityNotFoundException("Process instance not found"));
 
         //when
         mockMvc
-            .perform(get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", "linkedProcessInstanceId").accept(MediaType.APPLICATION_JSON))
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", "linkedProcessInstanceId")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
             //then
             .andExpect(status().isNotFound());
     }
