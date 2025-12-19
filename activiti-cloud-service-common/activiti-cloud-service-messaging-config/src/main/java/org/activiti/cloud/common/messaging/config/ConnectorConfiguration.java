@@ -43,11 +43,11 @@ import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
@@ -82,7 +82,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
+        @Value("${activiti.connector.channel.capacity:20}") int capacity,
+        @Value("${activiti.connector.channel.parallelism:5}") int parallelism
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -191,11 +193,20 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             String inputChannel = connectorBinding.input();
 
-                            IntegrationFlow inputChannelFlow = IntegrationFlow
-                                .from(inputChannel)
-                                .channel(new QueueChannel(20))
-                                .channel(new ExecutorChannel(Executors.newFixedThreadPool(5))) // parallelismo
-                                .channel("connectorInputQueueChannel")
+                            IntegrationFlowBuilder integrationFlow = IntegrationFlow.from(inputChannel);
+
+                            if (capacity > 0) {
+                                LOGGER.info("Configuring queue channel with size {} for {}.", capacity, beanName);
+                                integrationFlow = integrationFlow.channel(new QueueChannel(capacity));
+                            }
+                            if (parallelism > 0) {
+                                LOGGER.info("Configuring channel parallelism as {} for {}.", parallelism, beanName);
+                                integrationFlow =
+                                    integrationFlow.channel(
+                                        new ExecutorChannel(Executors.newFixedThreadPool(parallelism))
+                                    );
+                            }
+                            IntegrationFlow inputChannelFlow = integrationFlow
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                                 .get();
 

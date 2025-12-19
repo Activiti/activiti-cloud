@@ -87,6 +87,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
         "spring.cloud.stream.bindings.integrationResults.destination=integrationResults",
         "spring.cloud.stream.bindings.[script.EXECUTE].destination=script.EXECUTE",
         "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
+        "activiti.connector.channel.parallelism=0",
+        "activiti.connector.channel.capacity=0",
     }
 )
 @Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
