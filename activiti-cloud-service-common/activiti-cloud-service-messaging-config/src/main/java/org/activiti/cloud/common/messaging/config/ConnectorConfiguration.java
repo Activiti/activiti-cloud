@@ -38,6 +38,7 @@ import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.core.GenericHandler;
@@ -45,6 +46,7 @@ import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlowDefinition;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
@@ -82,9 +84,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
-        @Value("${activiti.connector.channel.capacity:20}") int capacity,
-        @Value("${activiti.connector.channel.parallelism:5}") int parallelism
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -193,20 +193,27 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             String inputChannel = connectorBinding.input();
 
-                            IntegrationFlowBuilder integrationFlow = IntegrationFlow.from(inputChannel);
+                            IntegrationFlowBuilder integrationFlowBuilder = IntegrationFlow.from(inputChannel);
 
-                            if (capacity > 0) {
-                                LOGGER.info("Configuring queue channel with size {} for {}.", capacity, beanName);
-                                integrationFlow = integrationFlow.channel(new QueueChannel(capacity));
+                            if (connectorBinding.capacity() > 0) {
+                                LOGGER.info(
+                                    "Configuring queue channel with size {} for {}.",
+                                    connectorBinding.capacity(),
+                                    beanName
+                                );
+                                integrationFlowBuilder.channel(MessageChannels.queue(connectorBinding.capacity()));
                             }
-                            if (parallelism > 0) {
-                                LOGGER.info("Configuring channel parallelism as {} for {}.", parallelism, beanName);
-                                integrationFlow =
-                                    integrationFlow.channel(
-                                        new ExecutorChannel(Executors.newFixedThreadPool(parallelism))
-                                    );
+                            if (connectorBinding.paralelism() > 0) {
+                                LOGGER.info(
+                                    "Configuring channel parallelism as {} for {}.",
+                                    connectorBinding.capacity(),
+                                    beanName
+                                );
+                                integrationFlowBuilder.channel(
+                                    MessageChannels.executor(Executors.newFixedThreadPool(connectorBinding.capacity()))
+                                );
                             }
-                            IntegrationFlow inputChannelFlow = integrationFlow
+                            IntegrationFlow inputChannelFlow = integrationFlowBuilder
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                                 .get();
 

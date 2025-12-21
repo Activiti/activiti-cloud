@@ -40,4 +40,8 @@ public @interface ConnectorBinding {
 
     // Time to wait before retry in second
     long retryDelay() default 0;
+
+    int capacity() default 0;
+
+    int paralelism() default 0;
 }
