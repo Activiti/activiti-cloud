@@ -37,6 +37,18 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-kafka</artifactId>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.lz4</groupId>
+          <artifactId>lz4-java</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Replacement for older LZ4 dependency util a newer one will be used in Spring -->
+    <dependency>
+      <groupId>at.yawk.lz4</groupId>
+      <artifactId>lz4-java</artifactId>
+      <version>${lz4-java.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
