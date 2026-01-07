@@ -587,6 +587,29 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
+    void testConnectorBindingsAmqpHeadersWithPrefix() {
+        withRabbitMqPrefix(
+            "myapp.",
+            prefix -> {
+                // given
+                Message<String> message = MessageBuilder
+                    .withPayload("run_test();")
+                    .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, prefix.concat("script.EXECUTE"))
+                    .build();
+
+                // when
+                input.send(message, "script.EXECUTE");
+
+                // then
+                await()
+                    .untilAsserted(() -> {
+                        assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+                    });
+            }
+        );
+    }
+
+    @Test
     void messagingProperties() {
         assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
         assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
@@ -737,5 +760,17 @@ public class FunctionRouterBindingConfigurationIT {
             )
         )
             .isTrue();
+    }
+
+    void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {
+        final var current = messagingProperties.getRabbitmq().getPrefix();
+
+        try {
+            messagingProperties.getRabbitmq().setPrefix(prefix);
+
+            runnable.accept(prefix);
+        } finally {
+            messagingProperties.getRabbitmq().setPrefix(current);
+        }
     }
 }
