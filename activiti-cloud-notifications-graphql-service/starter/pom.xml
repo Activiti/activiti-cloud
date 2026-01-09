@@ -13,6 +13,10 @@
   <name>Activiti Cloud Starter :: Notifications GraphQL</name>
   <dependencies>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-metadata</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-security-policies</artifactId>
     </dependency>
