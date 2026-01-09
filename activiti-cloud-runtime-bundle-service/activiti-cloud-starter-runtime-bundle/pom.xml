@@ -32,10 +32,6 @@
       <groupId>org.activiti</groupId>
       <artifactId>activiti-spring-boot-starter</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-metadata</artifactId>
-    </dependency>
     <!-- keycloak included as default identity provider to be excluded if overridden -->
     <dependency>
       <groupId>org.activiti.cloud</groupId>
