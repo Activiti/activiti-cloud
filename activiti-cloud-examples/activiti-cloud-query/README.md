@@ -49,7 +49,4 @@ spring.jackson.serialization.fail-on-unwrapped-type-identifiers=${ACT_QUERY_JACK
 authorizations.security-constraints[0].authRoles[0]=${ACT_KEYCLOAK_ROLES:user}
 authorizations.security-constraints[0].securityCollections[0].patterns[0]=${ACT_KEYCLOAK_PATTERNS:/*}
 spring.rabbitmq.host=${ACT_RABBITMQ_HOST:rabbitmq}
-eureka.client.serviceUrl.defaultZone=${ACT_EUREKA_URL:http://activiti-cloud-registry:8761/eureka/}
-eureka.instance.hostname=${ACT_QUERY_HOST:activiti-cloud-query}
-eureka.client.enabled=${ACT_QUERY_EUREKA_CLIENT_ENABLED:true}
 ```
