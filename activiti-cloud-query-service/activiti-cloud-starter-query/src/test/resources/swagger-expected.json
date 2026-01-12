@@ -1767,7 +1767,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -2034,7 +2047,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2284,7 +2310,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -3433,7 +3472,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -3501,7 +3553,7 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -4012,8 +4064,21 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+            }
+          }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -5129,7 +5194,8 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -5658,6 +5724,18 @@
             "schema": {
               "type": "string"
             }
+          }, {
+            "name":"linkedProcessInstanceId",
+            "in":"query",
+            "schema": {
+              "type" : "string"
+            }
+          }, {
+            "name":"linkedProcessInstanceType",
+            "in":"query",
+            "schema" : {
+              "type" : "string"
+            }
           }
         ],
         "responses": {
@@ -5715,6 +5793,107 @@
             "oauth": []
           }
         ]
+      }
+    },
+    "/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses": {
+      "get": {
+        "tags": [
+          "process-instance-admin-controller"
+        ],
+        "summary": "linkedProcesses",
+        "operationId": "linkedProcesses",
+        "parameters": [
+          {
+            "name": "linkedProcessInstanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudProcessInstance_General"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
       }
     },
     "/admin/v1/process-instances/{processInstanceId}/service-tasks" : {
@@ -6095,7 +6274,20 @@
           "schema" : {
             "type" : "string"
           }
-        } ],
+        }, {
+          "name":"linkedProcessInstanceId",
+          "in":"query",
+          "schema": {
+            "type" : "string"
+          }
+        }, {
+          "name":"linkedProcessInstanceType",
+          "in":"query",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
@@ -7038,7 +7230,8 @@
           },
           "includeSubprocesses": {
             "type": "boolean"
-          }
+          },
+          "linkedProcessInstanceId":{"items":{"type":"string"},"type":"array","uniqueItems":true},"linkedProcessInstanceType":{"items":{"type":"string"},"type":"array","uniqueItems":true}
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
       },
@@ -7144,6 +7337,12 @@
             "type" : "string"
           },
           "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "linkedProcessInstanceId" : {
+            "type" : "string"
+          },
+          "linkedProcessInstanceType" : {
             "type" : "string"
           }
         },
@@ -7560,6 +7759,12 @@
           },
           "processDefinitionKey" : {
             "type" : "string"
+          },
+          "linkedProcessInstanceId": {
+            "type":"string"
+          },
+          "linkedProcessInstanceType": {
+            "type":"string"
           }
         },
         "title" : "QueryCloudProcessInstance_General"

@@ -16,9 +16,12 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntityWithLinkedProcess;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.*;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -203,5 +207,94 @@ class ProcessInstanceAdminControllerIT {
             //then
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0]").value("1.0"));
+    }
+
+    @Test
+    void shouldReturnLinkedProcessInstances() throws Exception {
+        //given
+        ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
+        var linkedProcessInstanceId = processInstance.getId();
+
+        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
+            .willReturn(processInstance);
+
+        List<String> roles = List.of("ACTIVITI_ADMIN");
+        given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
+
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(
+            linkedProcessInstanceId
+        );
+
+        Page<ProcessInstanceEntity> linkedProcessInstancePage = new PageImpl<>(
+            Collections.singletonList(linkedProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(linkedProcessInstancePage);
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries[0].entry.id").value(linkedProcessInstance.getId()))
+            .andExpect(jsonPath("$.list.entries[0].entry.status").value(linkedProcessInstance.getStatus().name()))
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.processDefinitionId")
+                    .value(linkedProcessInstance.getProcessDefinitionId())
+            );
+    }
+
+    @Test
+    void shouldReturnForbiddenWhenLinkedProcessInstances() throws Exception {
+        //given
+        ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
+        var linkedProcessInstanceId = processInstance.getId();
+
+        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
+            .willReturn(processInstance);
+
+        List<String> roles = List.of("ACTIVITI_USER");
+        given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
+
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(
+            linkedProcessInstanceId
+        );
+
+        Page<ProcessInstanceEntity> linkedProcessInstancePage = new PageImpl<>(
+            Collections.singletonList(linkedProcessInstance),
+            PageRequest.of(1, 10),
+            1
+        );
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(linkedProcessInstancePage);
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenLinkedProcessInstances() throws Exception {
+        given(entityFinder.findById(any(), anyString(), anyString()))
+            .willThrow(new EntityNotFoundException("Process instance not found"));
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", "linkedProcessInstanceId")
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isNotFound());
     }
 }

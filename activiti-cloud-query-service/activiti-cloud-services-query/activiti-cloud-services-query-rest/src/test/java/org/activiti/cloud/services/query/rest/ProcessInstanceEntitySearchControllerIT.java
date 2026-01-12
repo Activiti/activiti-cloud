@@ -93,6 +93,46 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
     }
 
     @Test
+    void should_returnProcessInstances_withLinkedProcessInstances() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .withLinkedProcessInstanceId("123-lin-ked-222")
+            .withLinkedProcessInstanceType("my-type")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type");
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(
+                "_embedded.processInstances[0].linkedProcessInstanceId",
+                equalTo(processInstance1.getLinkedProcessInstanceId())
+            )
+            .body(
+                "_embedded.processInstances[0].linkedProcessInstanceType",
+                equalTo(processInstance1.getLinkedProcessInstanceType())
+            );
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByInitiator() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()

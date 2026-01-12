@@ -31,14 +31,14 @@ runs:
       run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
 
     - name: Setup cache
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
 
     - name: Add GitHub Step Summary
       shell: bash

@@ -138,10 +138,22 @@ public class FunctionRouterConfiguration {
         FunctionCatalog functionCatalog
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
+
         return (message, routingContext) -> {
             Optional
                 .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
+                .or(() ->
+                    Optional
+                        .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                        .filter(Predicate.not(String::isBlank))
+                        .flatMap(prefix ->
+                            Optional
+                                .ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
+                                .filter(exchange -> exchange.startsWith(prefix))
+                                .map(exchange -> exchange.substring(prefix.length()))
+                        )
+                )
                 .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
                 .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))

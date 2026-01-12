@@ -32,20 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Check dependabot build
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "Fork PRs cannot be validated in this repository."
       - name: dependabot check
         id: dependabot
         if: ${{ github.event_name == 'push' }}
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           actor: 'dependabot[bot]'
           label: github_actions
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -68,7 +68,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -88,7 +88,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -187,7 +187,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -211,7 +211,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -383,7 +383,7 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -402,7 +402,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -425,7 +425,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -463,12 +463,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -491,6 +491,6 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Teams Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@4657bc5c89f722332e897d8f360b75f08e81b8b9 # v12.1.0
         with:
           webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WORKFLOW_WEBHOOK }}

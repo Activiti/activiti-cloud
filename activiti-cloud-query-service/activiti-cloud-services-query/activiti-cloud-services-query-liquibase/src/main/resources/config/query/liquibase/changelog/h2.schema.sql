@@ -316,3 +316,7 @@ create index idx_process_instance_initiator on process_instance(initiator);
 create INDEX idx_task_id_name_status on task(id, name, status);
 create INDEX idx_task_process_var_taskId_processVarId on task_process_variable (task_id, process_variable_id);
 create INDEX idx_task_createdDate on task (created_date);
+ALTER TABLE process_instance
+  ADD COLUMN linked_process_instance_id VARCHAR(255);
+ALTER TABLE process_instance
+  ADD COLUMN linked_process_instance_type VARCHAR(255);

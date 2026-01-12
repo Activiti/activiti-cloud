@@ -58,4 +58,10 @@ public class ProcessInstanceTestUtils {
         }
         return variables;
     }
+
+    public static ProcessInstanceEntity buildProcessInstanceEntityWithLinkedProcess(String id) {
+        var processInstanceEntity = buildProcessInstanceEntity();
+        processInstanceEntity.setLinkedProcessInstanceId(id);
+        return processInstanceEntity;
+    }
 }

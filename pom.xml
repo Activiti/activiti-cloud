@@ -221,6 +221,7 @@
     <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
 
     <!-- dependencies versions -->
@@ -573,6 +574,11 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${maven-sonar-plugin.version}</version>
       </plugin>
     </plugins>
   </build>

@@ -185,9 +185,17 @@ public class CloudEventsAutoConfiguration {
     public IncidentService incidentService(
         ProcessEngineChannels processEngineChannels,
         ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ManagementService managementService,
+        RuntimeService runtimeService
     ) {
-        return new IncidentService(processEngineChannels, messageBuilderChainFactory, runtimeBundleInfoAppender);
+        return new IncidentService(
+            processEngineChannels,
+            messageBuilderChainFactory,
+            runtimeBundleInfoAppender,
+            managementService,
+            runtimeService
+        );
     }
 
     @Bean

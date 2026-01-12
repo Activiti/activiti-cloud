@@ -37,7 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>8.8.0-alpha.129</activiti.version>
+    <activiti.version>8.8.0-alpha.137</activiti.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -49,6 +49,8 @@
     <java-jwt.version>4.5.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.13</james.apache-mime4j.version>
+    <!-- Replacement for older LZ4 dependency util a newer one will be used in Spring -->
+    <lz4-java.version>1.10.2</lz4-java.version>
     <batik.version>1.19</batik.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
   </properties>

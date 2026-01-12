@@ -78,4 +78,8 @@ public class ProcessInstanceAdminControllerHelper {
     ) {
         return processInstanceControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable);
     }
+
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceControllerHelper.searchLinkedProcesses(linkedProcessInstanceId, pageable);
+    }
 }

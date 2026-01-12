@@ -132,6 +132,8 @@ class ProcessInstanceControllerIT {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
         ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
+        processInstanceEntity.setLinkedProcessInstanceId("123-456-789-1111");
+        processInstanceEntity.setLinkedProcessInstanceType("my-type");
         Page<ProcessInstanceEntity> processInstancePage = new PageImpl<>(
             Collections.singletonList(processInstanceEntity),
             PageRequest.of(1, 10),
@@ -150,7 +152,15 @@ class ProcessInstanceControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries[0].entry.id").value(processInstanceEntity.getId()))
             .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
-            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()));
+            .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()))
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceId")
+                    .value(processInstanceEntity.getLinkedProcessInstanceId())
+            )
+            .andExpect(
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceType")
+                    .value(processInstanceEntity.getLinkedProcessInstanceType())
+            );
     }
 
     @Test
