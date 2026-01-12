@@ -167,7 +167,7 @@ public class ProcessInstanceServiceTasks {
                 assertThat(integrationContextCounter)
                     .isNotNull()
                     .isEqualTo(2)
-                    .as("Service task should have exactly 2 integration contexts");
+                    .as("Service task should have exactly 2 integration contexts (one per execution)");
 
                 assertThatHasIntegrationContexts(serviceTaskId);
                 PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getAllCloudIntegrationContexts(
@@ -176,8 +176,8 @@ public class ProcessInstanceServiceTasks {
 
                 assertThat(integrationContexts.getContent())
                     .isNotNull()
-                    .hasSize(integrationContextCounter)
-                    .as("Should have as many integration contexts as the counter indicates")
+                    .hasSize(2)
+                    .as("Should have exactly 2 integration contexts for 2 executions")
                     .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                     .contains(
                         tuple(
@@ -442,14 +442,14 @@ public class ProcessInstanceServiceTasks {
             .untilAsserted(() -> {
                 PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
-                assertThat(tasks.getContent()).isNotEmpty().hasSize(1);
+                assertThat(tasks.getContent()).isNotEmpty().hasSize(1).as("Should have exactly one service task");
 
                 CloudServiceTask serviceTask = tasks.getContent().iterator().next();
 
                 assertThat(serviceTask.getIntegrationContextCounter())
                     .isNotNull()
                     .isEqualTo(2)
-                    .as("Service task should have 2 integration contexts");
+                    .as("Service task should have exactly 2 integration contexts (one per execution)");
             });
     }
 }
