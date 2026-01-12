@@ -38,8 +38,6 @@
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
     <activiti.version>8.8.0-alpha.138</activiti.version>
-    <commons-configuration.version>1.10</commons-configuration.version>
-    <commons-lang.version>2.6</commons-lang.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
@@ -101,25 +99,6 @@
             <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <!-- avoid older commons dependencies used by Eureka being available for compilation -->
-      <dependency>
-        <groupId>commons-configuration</groupId>
-        <artifactId>commons-configuration</artifactId>
-        <version>${commons-configuration.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${commons-lang.version}</version>
-        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.springdoc</groupId>
