@@ -433,6 +433,7 @@ public class ProcessInstanceServiceTasks {
             });
     }
 
+    @When("the service task is executed two times")
     @Then("the service task is executed two times")
     public void verifyServiceTaskExecutedTwoTimes() {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
