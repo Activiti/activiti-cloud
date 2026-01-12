@@ -166,8 +166,8 @@ public class ProcessInstanceServiceTasks {
 
                 assertThat(integrationContextCounter)
                     .isNotNull()
-                    .isGreaterThan(2)
-                    .as("Service task should have multiple integration contexts (more than 2)");
+                    .isEqualTo(2)
+                    .as("Service task should have exactly 2 integration contexts");
 
                 assertThatHasIntegrationContexts(serviceTaskId);
                 PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getAllCloudIntegrationContexts(
