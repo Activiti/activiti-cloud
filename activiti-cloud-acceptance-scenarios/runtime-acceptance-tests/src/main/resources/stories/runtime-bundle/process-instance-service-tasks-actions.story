@@ -31,7 +31,7 @@ And the process with service tasks is completed
 Scenario: get service task all integration contexts by service task id
 Given the user is authenticated as testadmin
 When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE
-And the service task is executed multiple times
+And the service task is executed two times
 Then the user can get service task all integration contexts by service task id
 And the process with service tasks is completed
 

@@ -158,9 +158,16 @@ public class ProcessInstanceServiceTasks {
             .untilAsserted(() -> {
                 PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
-                assertThat(tasks.getContent()).hasSize(1);
+                assertThat(tasks.getContent()).isNotEmpty().hasSize(1).as("Should have exactly one service task");
 
-                String serviceTaskId = tasks.getContent().iterator().next().getId();
+                CloudServiceTask serviceTask = tasks.getContent().iterator().next();
+                String serviceTaskId = serviceTask.getId();
+                Integer integrationContextCounter = serviceTask.getIntegrationContextCounter();
+
+                assertThat(integrationContextCounter)
+                    .isNotNull()
+                    .isGreaterThan(2)
+                    .as("Service task should have multiple integration contexts (more than 2)");
 
                 assertThatHasIntegrationContexts(serviceTaskId);
                 PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getAllCloudIntegrationContexts(
@@ -169,7 +176,8 @@ public class ProcessInstanceServiceTasks {
 
                 assertThat(integrationContexts.getContent())
                     .isNotNull()
-                    .hasSizeGreaterThan(1)
+                    .hasSize(integrationContextCounter)
+                    .as("Should have as many integration contexts as the counter indicates")
                     .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                     .contains(
                         tuple(
@@ -422,6 +430,25 @@ public class ProcessInstanceServiceTasks {
                     .collect(Collectors.toList());
 
                 assertThat(generatedEvents).hasSize(count);
+            });
+    }
+
+    @Then("the service task is executed two times")
+    public void verifyServiceTaskExecutedTwoTimes() {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await()
+            .untilAsserted(() -> {
+                PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
+
+                assertThat(tasks.getContent()).isNotEmpty().hasSize(1);
+
+                CloudServiceTask serviceTask = tasks.getContent().iterator().next();
+
+                assertThat(serviceTask.getIntegrationContextCounter())
+                    .isNotNull()
+                    .isEqualTo(2)
+                    .as("Service task should have 2 integration contexts");
             });
     }
 }
