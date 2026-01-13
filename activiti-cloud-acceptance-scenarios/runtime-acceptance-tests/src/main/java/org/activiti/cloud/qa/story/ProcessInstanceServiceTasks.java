@@ -80,11 +80,6 @@ public class ProcessInstanceServiceTasks {
         auditSteps.checkServicesHealth();
     }
 
-    @Given("the user provides a variable named $variableName with value $variableValue")
-    public void givenVariable(String variableName, String variableValue) {
-        variableBufferSteps.addVariable(variableName, variableValue);
-    }
-
     @Given("the user provides an integer variable named $variableName with value $variableValue")
     public void givenIntegerVariable(String variableName, Integer variableValue) {
         variableBufferSteps.addVariable(variableName, variableValue);
