@@ -59,14 +59,7 @@ public class ServiceTaskIntegrationContextAdminController {
 
     @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
     public EntityModel<CloudIntegrationContext> findByServiceTaskId(@PathVariable String serviceTaskId) {
-        String[] split = serviceTaskId.trim().split(":");
-        if (split.length != 3) {
-            throw new IllegalArgumentException(
-                "Invalid serviceTaskId format. Expected format: 'processInstanceId:clientId:executionId', but got: '" +
-                serviceTaskId +
-                "'"
-            );
-        }
+        String[] split = parseServiceTaskId(serviceTaskId);
 
         Page<IntegrationContextEntity> page = repository.findByProcessInstanceIdAndClientIdAndExecutionId(
             split[0],
@@ -88,6 +81,22 @@ public class ServiceTaskIntegrationContextAdminController {
         @PathVariable String serviceTaskId,
         Pageable pageable
     ) {
+        String[] split = parseServiceTaskId(serviceTaskId);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            repository.findByProcessInstanceIdAndClientIdAndExecutionId(split[0], split[1], split[2], pageable),
+            representationModelAssembler
+        );
+    }
+
+    /**
+     * Parses the serviceTaskId into its constituent parts.
+     *
+     * @param serviceTaskId the service task ID in format "processInstanceId:clientId:executionId"
+     * @return an array containing [processInstanceId, clientId, executionId]
+     * @throws IllegalArgumentException if the serviceTaskId format is invalid
+     */
+    private String[] parseServiceTaskId(String serviceTaskId) {
         String[] split = serviceTaskId.trim().split(":");
         if (split.length != 3) {
             throw new IllegalArgumentException(
@@ -96,10 +105,6 @@ public class ServiceTaskIntegrationContextAdminController {
                 "'"
             );
         }
-        return pagedCollectionModelAssembler.toModel(
-            pageable,
-            repository.findByProcessInstanceIdAndClientIdAndExecutionId(split[0], split[1], split[2], pageable),
-            representationModelAssembler
-        );
+        return split;
     }
 }
