@@ -4867,7 +4867,16 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
+        },
+        {
+          "name": "integrationContextCounter",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
@@ -5940,7 +5949,16 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
+        },
+        {
+          "name": "integrationContextCounter",
+          "in": "query",
+          "schema": {
+          "type": "integer",
+          "format": "int32"
+          }
+        },
+        {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
