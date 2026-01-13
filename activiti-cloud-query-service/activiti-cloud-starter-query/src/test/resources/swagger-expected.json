@@ -5100,33 +5100,33 @@
             "type" : "string"
           }
         },
-          {
-            "name" : "maxItems",
-            "in" : "query",
-            "required" : false,
-            "style" : "form",
-            "schema" : {
-              "type" : "integer",
-              "format" : "int32"
-            }
-          }, {
-            "name" : "skipCount",
-            "in" : "query",
-            "required" : false,
-            "style" : "form",
-            "schema" : {
-              "type" : "integer",
-              "format" : "int32"
-            }
-          }, {
-            "name" : "sort",
-            "in" : "query",
-            "required" : false,
-            "style" : "form",
-            "schema" : {
-              "type" : "string"
-            }
-          } ],
+        {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
