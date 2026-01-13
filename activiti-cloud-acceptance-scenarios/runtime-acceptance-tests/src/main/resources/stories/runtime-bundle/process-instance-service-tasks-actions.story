@@ -30,7 +30,7 @@ And the process with service tasks is completed
 
 Scenario: get service task all integration contexts by service task id
 Given the user is authenticated as testadmin
-And the user provides an integer variable named instanceCount with value 2
+And the user provides a variable named instanceCount with value 2
 When the user starts a process with service tasks called MI_PARALLEL_CLOUD_CONNECTOR
 And the service task is executed two times
 Then the user can get service task all integration contexts by service task id
