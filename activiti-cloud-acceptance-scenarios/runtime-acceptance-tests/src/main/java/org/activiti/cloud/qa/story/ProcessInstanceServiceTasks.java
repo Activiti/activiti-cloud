@@ -41,14 +41,17 @@ import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ServiceTasksAdminSteps;
+import org.activiti.cloud.acc.shared.steps.VariableBufferSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
+import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel;
 
 public class ProcessInstanceServiceTasks {
@@ -68,6 +71,9 @@ public class ProcessInstanceServiceTasks {
     @Steps
     private ServiceTasksAdminSteps serviceTasksAdminSteps;
 
+    @Steps
+    private VariableBufferSteps variableBufferSteps;
+
     @When("services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
@@ -75,12 +81,28 @@ public class ProcessInstanceServiceTasks {
         auditSteps.checkServicesHealth();
     }
 
+    @Given("the user provides a variable named $variableName with value $variableValue")
+    public void givenVariable(String variableName, String variableValue) {
+        variableBufferSteps.addVariable(variableName, variableValue);
+    }
+
+    @Given("the user provides an integer variable named $variableName with value $variableValue")
+    public void givenIntegerVariable(String variableName, Integer variableValue) {
+        variableBufferSteps.addVariable(variableName, variableValue);
+    }
+
     @When("the user starts a process with service tasks called $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-            processDefinitionKeyMatcher(processName),
-            false
-        );
+        ProcessInstance processInstance;
+        if (variableBufferSteps.availableVariables().isEmpty()) {
+            processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
+        } else {
+            processInstance =
+                processRuntimeBundleSteps.startProcessWithVariables(
+                    processDefinitionKeyMatcher(processName),
+                    variableBufferSteps.availableVariables()
+                );
+        }
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
