@@ -37,6 +37,9 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
     @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
     private List<IntegrationContextEntity> integrationContexts;
 
+    @Formula("(SELECT COUNT(*) FROM INTEGRATION_CONTEXT ic WHERE ic.service_task_id = id)")
+    private Integer integrationContextCounter;
+
     @QueryType(PropertyType.DATE)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Transient
@@ -80,7 +83,7 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     @Override
     public Integer getIntegrationContextCounter() {
-        return integrationContexts != null ? integrationContexts.size() : 0;
+        return integrationContextCounter != null ? integrationContextCounter : 0;
     }
 
     @Override

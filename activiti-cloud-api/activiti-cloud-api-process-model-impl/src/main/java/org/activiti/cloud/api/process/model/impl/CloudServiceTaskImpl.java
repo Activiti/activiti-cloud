@@ -53,7 +53,7 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
-            .append("CloudServiceTaskImpl [integrationContextsCounter=")
+            .append("CloudServiceTaskImpl [integrationContextCounter=")
             .append(integrationContextCounter)
             .append(", toString()=")
             .append(super.toString())

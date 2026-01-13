@@ -60,6 +60,14 @@ public class ServiceTaskIntegrationContextAdminController {
     @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
     public EntityModel<CloudIntegrationContext> findByServiceTaskId(@PathVariable String serviceTaskId) {
         String[] split = serviceTaskId.trim().split(":");
+        if (split.length != 3) {
+            throw new IllegalArgumentException(
+                "Invalid serviceTaskId format. Expected format: 'processInstanceId:clientId:executionId', but got: '" +
+                serviceTaskId +
+                "'"
+            );
+        }
+
         Page<IntegrationContextEntity> page = repository.findByProcessInstanceIdAndClientIdAndExecutionId(
             split[0],
             split[1],
@@ -81,6 +89,13 @@ public class ServiceTaskIntegrationContextAdminController {
         Pageable pageable
     ) {
         String[] split = serviceTaskId.trim().split(":");
+        if (split.length != 3) {
+            throw new IllegalArgumentException(
+                "Invalid serviceTaskId format. Expected format: 'processInstanceId:clientId:executionId', but got: '" +
+                serviceTaskId +
+                "'"
+            );
+        }
         return pagedCollectionModelAssembler.toModel(
             pageable,
             repository.findByProcessInstanceIdAndClientIdAndExecutionId(split[0], split[1], split[2], pageable),
