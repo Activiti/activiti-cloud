@@ -54,6 +54,11 @@ import org.springframework.format.annotation.DateTimeFormat;
     indexes = {
         @Index(name = "integration_context_status_idx", columnList = "status", unique = false),
         @Index(name = "integration_context_processInstance_idx", columnList = "processInstanceId", unique = false),
+        @Index(
+            name = "integration_context_proc_client_exec_idx",
+            columnList = "id, processInstanceId, clientId, executionId",
+            unique = true
+        ),
     }
 )
 @DynamicInsert
