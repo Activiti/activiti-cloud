@@ -305,7 +305,8 @@ create index pcsu_processDefinition_idx on process_candidate_starter_user (proce
 alter table integration_context
   add constraint fk_integration_context_bpmn_activity
   foreign key (process_instance_id, client_id, execution_id)
-  references bpmn_activity (process_instance_id, element_id, execution_id);
+  references bpmn_activity (process_instance_id, element_id, execution_id)
+  on delete cascade;
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
 alter table task_process_variable
