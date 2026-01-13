@@ -5031,7 +5031,7 @@
           "schema" : {
             "type" : "string"
           }
-        }],
+        } ],
         "responses" : {
           "400" : {
             "description" : "Bad Request",
