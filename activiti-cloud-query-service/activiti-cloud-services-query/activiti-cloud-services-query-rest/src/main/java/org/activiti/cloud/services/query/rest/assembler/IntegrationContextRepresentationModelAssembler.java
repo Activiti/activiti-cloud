@@ -29,7 +29,7 @@ public class IntegrationContextRepresentationModelAssembler
     implements RepresentationModelAssembler<IntegrationContextEntity, EntityModel<CloudIntegrationContext>> {
 
     @Override
-    //  The method is for backward compatibility purposes and the entity.getId() returns the service task id in format "processInstanceId:clientId:executionId"
+    //  This method is kept for backward compatibility purposes. entity.getId() returns the service task id in format "processInstanceId:clientId:executionId"
     public EntityModel<CloudIntegrationContext> toModel(IntegrationContextEntity entity) {
         Link selfRel = linkTo(
             methodOn(ServiceTaskIntegrationContextAdminController.class).findByServiceTaskId(entity.getId())
