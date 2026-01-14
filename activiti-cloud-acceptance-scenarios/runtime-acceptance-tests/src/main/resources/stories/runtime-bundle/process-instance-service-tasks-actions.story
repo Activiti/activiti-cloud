@@ -33,7 +33,7 @@ Given the user is authenticated as testadmin
 And the user provides an integer variable named executionCount with value 0
 When the user starts a process with service tasks called CONNECTOR_PROCESS_WITH_LOOP
 And the service task is executed two times
-Then the user can get service task all integration contexts by service task id
+Then the user can get all service task integration contexts by service task id
 And the process with service tasks is completed
 
 Scenario: get service tasks by COMPLETED status for process instance
