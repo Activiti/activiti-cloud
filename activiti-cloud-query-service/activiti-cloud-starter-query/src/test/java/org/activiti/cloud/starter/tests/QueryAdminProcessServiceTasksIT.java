@@ -421,10 +421,9 @@ public class QueryAdminProcessServiceTasksIT {
 
     @Test
     public void shouldGetIntegrationContextCountForServiceTask() throws InterruptedException {
-        //given
+        // given - Start process and wait until related entities are persisted
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
-        //then
         await()
             .untilAsserted(() -> {
                 assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
@@ -434,14 +433,14 @@ public class QueryAdminProcessServiceTasksIT {
         CloudServiceTask serviceTask = waitForServiceTask();
         final String rootProcessInstanceId = UUID.randomUUID().toString();
 
-        // Create and send multiple integration contexts
+        // when - Create and send multiple integration contexts
         IntegrationContext integrationContext1 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
         sendIntegrationRequestedEvent(integrationContext1);
 
         IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
         sendIntegrationRequestedEvent(integrationContext2);
 
-        //when
+        // then - Verify that the integration context counter is available
         await()
             .untilAsserted(() -> {
                 ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
@@ -623,19 +622,20 @@ public class QueryAdminProcessServiceTasksIT {
 
     @Test
     public void shouldGetServiceTaskIntegrationContextsById() throws InterruptedException {
-        //given
+        //given - Start process with service task
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
-        //then
         CloudServiceTask serviceTask = waitForServiceTask();
         final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        //when - sending two integration contexts for the given service task (loop scenario with two service task executions)
         IntegrationContext integrationContext = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
         IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
 
         sendIntegrationRequestedEvent(integrationContext);
         sendIntegrationRequestedEvent(integrationContext2);
 
-        //when
+        //then - verify that for the given service task we get both integration contexts
         await()
             .untilAsserted(() -> {
                 List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
@@ -666,7 +666,6 @@ public class QueryAdminProcessServiceTasksIT {
                     );
             });
 
-        // and given
         sendIntegrationResultReceivedEvent(integrationContext);
 
         await()
