@@ -420,7 +420,7 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    public void shouldGetServiceTaskReturnIntegrationContextCounter() throws InterruptedException {
+    public void shouldGetIntegrationContextCountForServiceTask() throws InterruptedException {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
