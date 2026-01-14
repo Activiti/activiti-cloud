@@ -167,7 +167,7 @@ public class ProcessInstanceServiceTasks {
             });
     }
 
-    @Then("the user can get service task all integration contexts by service task id")
+    @Then("the user can get all service task integration contexts by service task id")
     public void verifyServiceTaskAllIntegrationContextsById() {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
 
