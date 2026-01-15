@@ -21,7 +21,7 @@ repos:
           - markdown
         additional_dependencies:
           - prettier@2.7.1
-          - prettier-plugin-java@1.4.0
+          - prettier-plugin-java@1.6.2
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.31.2
     hooks:
