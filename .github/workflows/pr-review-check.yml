@@ -9,34 +9,12 @@ on:
       - develop
     types:
       - labeled
-      - unlabeled
 
 jobs:
   check:
-    if: github.event.action != 'unlabeled'
     uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@ea211659654c7d82fc7241455140cf08064d9598 # v12.4.2
     with:
       trigger-labels: '["CI", "preview", "skip-tests"]'
-      milestone-name: "Validating"
+      milestone-name: 'Validating'
     secrets:
       BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-  retrigger-on-skip-tests-removal:
-    if: github.event.action == 'unlabeled' && github.event.label.name == 'skip-tests'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Re-trigger workflow on skip-tests label removal
-        env:
-          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          echo "::notice::skip-tests label was removed, re-triggering validation"
-          # Clear and re-set milestone to trigger the main workflow
-          CURRENT_MILESTONE=$(gh pr view $PR_NUMBER --repo $GITHUB_REPOSITORY --json milestone -q '.milestone.title // empty')
-          if [[ -n "$CURRENT_MILESTONE" ]]; then
-            gh pr edit $PR_NUMBER --repo $GITHUB_REPOSITORY --milestone ""
-            gh pr edit $PR_NUMBER --repo $GITHUB_REPOSITORY --milestone "$CURRENT_MILESTONE"
-          else
-            # If no milestone, set Validating to trigger the build
-            gh pr edit $PR_NUMBER --repo $GITHUB_REPOSITORY --milestone "Validating"
-          fi
