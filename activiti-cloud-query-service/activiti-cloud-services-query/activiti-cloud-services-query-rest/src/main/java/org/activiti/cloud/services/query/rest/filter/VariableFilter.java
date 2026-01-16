@@ -18,5 +18,9 @@ package org.activiti.cloud.services.query.rest.filter;
 import jakarta.annotation.Nullable;
 
 public record VariableFilter(
-    @Nullable String processDefinitionKey, String name, VariableType type, String value, FilterOperator operator
+    @Nullable String processDefinitionKey,
+    String name,
+    VariableType type,
+    String value,
+    FilterOperator operator
 ) {}
