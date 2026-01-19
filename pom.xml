@@ -193,7 +193,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
-    <project.year>2025</project.year>
+    <project.year>2026</project.year>
 
     <spring-boot.version>3.5.7</spring-boot.version>
 
