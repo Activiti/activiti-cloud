@@ -175,7 +175,7 @@ public class ProcessInstanceServiceTasks {
             .untilAsserted(() -> {
                 PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
-                assertThat(tasks.getContent()).isNotEmpty().hasSize(1).as("Should have exactly one service task");
+                assertThat(tasks.getContent()).hasSize(1).as("Should have exactly one service task");
 
                 CloudServiceTask serviceTask = tasks.getContent().iterator().next();
                 String serviceTaskId = serviceTask.getId();
@@ -459,12 +459,11 @@ public class ProcessInstanceServiceTasks {
             .untilAsserted(() -> {
                 PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
 
-                assertThat(tasks.getContent()).isNotEmpty().hasSize(1).as("Should have exactly one service task");
+                assertThat(tasks.getContent()).hasSize(1).as("Should have exactly one service task");
 
                 CloudServiceTask serviceTask = tasks.getContent().iterator().next();
 
                 assertThat(serviceTask.getIntegrationContextCounter())
-                    .isNotNull()
                     .isEqualTo(2)
                     .as("Service task should have exactly 2 integration contexts (one per execution)");
             });

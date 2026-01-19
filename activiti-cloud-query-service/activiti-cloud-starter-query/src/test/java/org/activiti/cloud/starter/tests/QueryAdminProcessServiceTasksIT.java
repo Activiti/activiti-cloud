@@ -454,9 +454,8 @@ public class QueryAdminProcessServiceTasksIT {
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
                 assertThat(responseEntity.getBody()).isNotNull();
                 assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
                     .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
-                    .contains(tuple(SERVICE_TASK_TYPE, 2));
+                    .containsExactly(tuple(SERVICE_TASK_TYPE, 2));
             });
     }
 
@@ -642,8 +641,6 @@ public class QueryAdminProcessServiceTasksIT {
                     serviceTask.getId()
                 );
                 assertThat(cloudIntegrationContext)
-                    .isNotEmpty()
-                    .hasSize(2)
                     .extracting(
                         CloudIntegrationContext::getClientId,
                         CloudIntegrationContext::getClientType,
@@ -674,8 +671,6 @@ public class QueryAdminProcessServiceTasksIT {
                     serviceTask.getId()
                 );
                 assertThat(cloudIntegrationContext)
-                    .isNotEmpty()
-                    .hasSize(2)
                     .extracting(
                         CloudIntegrationContext::getClientId,
                         CloudIntegrationContext::getClientType,

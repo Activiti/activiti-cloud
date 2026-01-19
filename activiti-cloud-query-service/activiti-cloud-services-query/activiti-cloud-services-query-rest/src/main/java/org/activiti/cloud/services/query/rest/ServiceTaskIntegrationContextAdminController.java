@@ -57,6 +57,10 @@ public class ServiceTaskIntegrationContextAdminController {
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
+    /**
+     * @deprecated Use {@link #findAllByServiceTaskId(String, Pageable)} instead.
+     */
+    @Deprecated
     @RequestMapping(value = "/{serviceTaskId}/integration-context", method = RequestMethod.GET)
     public EntityModel<CloudIntegrationContext> findByServiceTaskId(@PathVariable String serviceTaskId) {
         String[] split = parseServiceTaskId(serviceTaskId);
