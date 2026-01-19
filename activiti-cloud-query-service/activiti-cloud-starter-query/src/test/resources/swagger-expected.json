@@ -5091,6 +5091,7 @@
             "description" : "Unauthorized"
           }
         },
+        "deprecated": true,
         "security" : [ {
           "oauth" : [ ]
         } ]
@@ -6572,6 +6573,76 @@
         "security" : [ {
           "oauth" : [ ]
         } ]
+      }
+    },
+    "/admin/v1/integration-contexts/{integrationContextId}" : {
+      "get" : {
+        "tags" : [ "integration-context-admin-controller" ],
+        "summary" : "findById",
+        "operationId" : "findById",
+        "parameters" : [ {
+          "name" : "integrationContextId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [
+          {
+            "oauth" : [ ]
+          }
+        ]
       }
     },
     "/admin/v1/applications" : {
