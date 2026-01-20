@@ -6,3 +6,5 @@ ALTER TABLE integration_context
   FOREIGN KEY (process_instance_id, client_id, execution_id)
   REFERENCES bpmn_activity (process_instance_id, element_id, execution_id)
   ON DELETE CASCADE;
+
+CREATE INDEX integration_context_processInstance_idx on integration_context (process_instance_id);

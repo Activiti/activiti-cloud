@@ -302,6 +302,7 @@ create index pcsg_groupId_idx on process_candidate_starter_group (group_id);
 create index pcsg_processDefinition_idx on process_candidate_starter_group (process_definition_id);
 create index pcsu_userId_idx on process_candidate_starter_user (user_id);
 create index pcsu_processDefinition_idx on process_candidate_starter_user (process_definition_id);
+create index integration_context_processInstance_idx on integration_context (process_instance_id);
 alter table integration_context
   add constraint fk_integration_context_bpmn_activity
   foreign key (process_instance_id, client_id, execution_id)
