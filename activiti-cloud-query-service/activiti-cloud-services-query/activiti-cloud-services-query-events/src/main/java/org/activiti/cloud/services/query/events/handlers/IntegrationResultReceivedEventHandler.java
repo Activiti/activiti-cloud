@@ -36,13 +36,15 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
 
-        result.ifPresent(entity -> {
-            entity.setResultDate(new Date(integrationEvent.getTimestamp()));
-            entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+        // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
+        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
+        );
 
-            entityManager.persist(entity);
-        });
+        entity.setResultDate(new Date(integrationEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+
+        entityManager.persist(entity);
     }
 
     @Override

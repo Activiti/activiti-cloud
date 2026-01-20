@@ -41,24 +41,29 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
 
-        result.ifPresent(entity -> {
-            entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
-            entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
-            entity.setErrorCode(integrationEvent.getErrorCode());
-            entity.setErrorMessage(integrationEvent.getErrorMessage());
-            entity.setErrorClassName(integrationEvent.getErrorClassName());
-            entity.setStackTraceElements(addFullErrorMessageAsFirstStackTraceElement(integrationEvent));
-            entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
-            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+        // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
+        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
+        );
 
-            entityManager.persist(entity);
+        entity.setErrorDate(new Date(integrationEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+        entity.setErrorCode(integrationEvent.getErrorCode());
+        entity.setErrorMessage(integrationEvent.getErrorMessage());
+        entity.setErrorClassName(integrationEvent.getErrorClassName());
+        entity.setStackTraceElements(addFullErrorMessageAsFirstStackTraceElement(integrationEvent));
+        entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
-            String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
-            ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
+        entityManager.persist(entity);
+
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
+
+        // Only update service task status if it exists
+        if (serviceTaskEntity != null) {
             serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
-
             entityManager.persist(serviceTaskEntity);
-        });
+        }
     }
 
     private List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(
