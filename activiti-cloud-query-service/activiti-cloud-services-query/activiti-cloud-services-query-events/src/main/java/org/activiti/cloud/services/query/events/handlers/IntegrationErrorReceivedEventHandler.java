@@ -54,12 +54,15 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
         entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
-        entityManager.persist(entity);
-
         String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
         ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
 
-        // Only update service task status if it exists
+        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
+            entity.setServiceTask(serviceTaskEntity);
+        }
+
+        entityManager.persist(entity);
+
         if (serviceTaskEntity != null) {
             serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.ERROR);
             entityManager.persist(serviceTaskEntity);

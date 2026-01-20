@@ -694,6 +694,113 @@ public class QueryAdminProcessServiceTasksIT {
             });
     }
 
+    @Test
+    public void shouldCreateIntegrationContextWhenReceivingErrorEventForMissingEntity() {
+        // given - Start process with service task but DO NOT send IntegrationRequestedEvent
+        // This simulates the scenario where the integration context was purged during migration
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // Build integration context that was never persisted (simulating purged entity)
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            rootProcessInstanceId,
+            serviceTask
+        );
+
+        // when - Send error event for non-existent integration context
+        Throwable cause = new RuntimeException("Integration failed during migration window");
+        CloudBpmnError error = new CloudBpmnError("MIGRATION_ERROR", cause);
+
+        eventsAggregator.addEvents(
+            new CloudIntegrationErrorReceivedEventImpl(
+                integrationContext,
+                error.getErrorCode(),
+                error.getMessage(),
+                error.getClass().getName(),
+                Arrays.asList(error.getCause().getStackTrace())
+            )
+        );
+        eventsAggregator.sendAll();
+
+        // then - Verify that a new integration context was created with error status
+        await()
+            .untilAsserted(() -> {
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus,
+                        CloudIntegrationContext::getErrorCode,
+                        CloudIntegrationContext::getErrorClassName
+                    )
+                    .containsExactly(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                        error.getErrorCode(),
+                        error.getClass().getName()
+                    );
+
+                assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
+                assertThat(cloudIntegrationContext.getErrorDate()).isNotNull();
+            });
+
+        await()
+            .untilAsserted(() -> {
+                CloudServiceTask updatedServiceTask = retrieveServiceTask();
+                assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.ERROR);
+            });
+    }
+
+    @Test
+    public void shouldCreateIntegrationContextWhenReceivingResultEventForMissingEntity() {
+        // given - Start process with service task but DO NOT send IntegrationRequestedEvent
+        // This simulates the scenario where the integration context was purged during migration
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // Build integration context that was never persisted (simulating purged entity)
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            rootProcessInstanceId,
+            serviceTask
+        );
+        integrationContext.addOutBoundVariable("resultKey", "resultValue");
+
+        // when - Send result event for non-existent integration context
+        eventsAggregator.addEvents(new CloudIntegrationResultReceivedEventImpl(integrationContext));
+        eventsAggregator.sendAll();
+
+        // then - Verify that a new integration context was created with result status
+        await()
+            .untilAsserted(() -> {
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .containsExactly(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    );
+
+                assertThat(cloudIntegrationContext.getResultDate()).isNotNull();
+                assertThat(cloudIntegrationContext.getOutBoundVariables()).containsEntry("resultKey", "resultValue");
+                assertThat(cloudIntegrationContext.getInBoundVariables()).containsEntry("key", "value");
+            });
+    }
+
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
         ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
             "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
