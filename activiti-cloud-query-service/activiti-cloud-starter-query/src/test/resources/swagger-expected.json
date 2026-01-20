@@ -1756,6 +1756,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -2036,6 +2042,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -2297,6 +2309,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
         }, {
           "name" : "parentId",
@@ -3461,6 +3479,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -4052,6 +4076,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
         }, {
           "name" : "parentId",
@@ -5722,6 +5752,13 @@
             }
           },
           {
+            "name": "integrationContexts",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "parentId",
             "in": "query",
             "schema": {
@@ -6280,6 +6317,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
         }, {
           "name" : "parentId",
