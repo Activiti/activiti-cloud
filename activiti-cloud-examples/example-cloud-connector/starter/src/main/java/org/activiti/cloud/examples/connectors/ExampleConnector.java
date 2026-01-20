@@ -108,6 +108,15 @@ public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
         Object dateVar = event.getIntegrationContext().getInBoundVariable("test_date_variable_name");
         processDateVar(results, dateVar);
 
+        // Handle executionCount for loop-based processes (e.g., ConnectorProcessWithLoop)
+        Object executionCountVar = event.getIntegrationContext().getInBoundVariable("executionCount");
+        if (executionCountVar != null) {
+            Integer executionCount = executionCountVar instanceof Integer ? (Integer) executionCountVar : 0;
+            // Increment the counter for the next iteration
+            results.put("executionCount", executionCount + 1);
+            logger.info("executionCount incremented from {} to {}", executionCount, executionCount + 1);
+        }
+
         results.put("var1", var1);
         Message<IntegrationResult> message = IntegrationResultBuilder
             .resultFor(event, connectorProperties)

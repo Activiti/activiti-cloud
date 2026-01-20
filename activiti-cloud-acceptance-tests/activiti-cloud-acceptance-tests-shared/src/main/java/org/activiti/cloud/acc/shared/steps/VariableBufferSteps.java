@@ -32,4 +32,9 @@ public class VariableBufferSteps {
     public Map<String, Object> availableVariables() {
         return variables;
     }
+
+    @Step
+    public void clearVariables() {
+        variables.clear();
+    }
 }

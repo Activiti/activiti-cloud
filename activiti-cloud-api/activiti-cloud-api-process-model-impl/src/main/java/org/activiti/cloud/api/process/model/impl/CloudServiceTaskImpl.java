@@ -19,6 +19,17 @@ import org.activiti.cloud.api.process.model.CloudServiceTask;
 
 public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements CloudServiceTask {
 
+    private Integer integrationContextCounter;
+
+    @Override
+    public Integer getIntegrationContextCounter() {
+        return integrationContextCounter;
+    }
+
+    public void setIntegrationContextCounter(Integer integrationContextCounter) {
+        this.integrationContextCounter = integrationContextCounter;
+    }
+
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -41,7 +52,12 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudServiceTaskImpl [toString()=").append(super.toString()).append("]");
+        builder
+            .append("CloudServiceTaskImpl [integrationContextCounter=")
+            .append(integrationContextCounter)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

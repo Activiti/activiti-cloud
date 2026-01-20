@@ -128,6 +128,11 @@ public class ProcessQueryAdminSteps {
     }
 
     @Step
+    public PagedModel<CloudIntegrationContext> getAllCloudIntegrationContexts(String serviceTaskId) {
+        return processQueryAdminService.getAllCloudIntegrationContexts(serviceTaskId);
+    }
+
+    @Step
     public PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(String processDefinitionKey) {
         return this.processQueryAdminService.getProcessInstancesByProcessDefinitionKey(processDefinitionKey);
     }

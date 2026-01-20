@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
-import feign.*;
+import feign.Headers;
+import feign.Param;
+import feign.QueryMap;
+import feign.RequestLine;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -63,6 +66,10 @@ public interface ProcessQueryAdminService {
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
     @Headers("Content-Type: application/json")
     CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId);
+
+    @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-contexts")
+    @Headers("Content-Type: application/json")
+    PagedModel<CloudIntegrationContext> getAllCloudIntegrationContexts(@Param("serviceTaskId") String serviceTaskId);
 
     @RequestLine("GET /admin/v1/process-instances?processDefinitionKey={processDefinitionKey}")
     PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(

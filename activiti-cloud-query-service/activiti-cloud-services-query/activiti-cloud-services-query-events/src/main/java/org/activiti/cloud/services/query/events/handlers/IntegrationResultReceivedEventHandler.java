@@ -23,6 +23,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
@@ -35,14 +36,29 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+        boolean isNewEntity = result.isEmpty();
 
-        result.ifPresent(entity -> {
-            entity.setResultDate(new Date(integrationEvent.getTimestamp()));
-            entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
-            entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+        // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
+        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
+        );
 
-            entityManager.persist(entity);
-        });
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationEvent.getEntity());
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
+
+        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
+            entity.setServiceTask(serviceTaskEntity);
+
+            // Increment counter if this is a newly created entity
+            if (isNewEntity) {
+                serviceTaskEntity.incrementIntegrationContextCounter();
+            }
+        }
+
+        entity.setResultDate(new Date(integrationEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED);
+        entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
+
+        entityManager.persist(entity);
     }
 
     @Override
