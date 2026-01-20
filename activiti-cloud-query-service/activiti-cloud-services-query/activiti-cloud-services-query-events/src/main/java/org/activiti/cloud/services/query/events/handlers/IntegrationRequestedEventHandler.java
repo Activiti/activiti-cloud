@@ -45,6 +45,8 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
 
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
+        boolean isNewEntity = (entity == null);
+
         if (entity == null) {
             entity =
                 new IntegrationContextEntity(
@@ -75,6 +77,11 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);
+
+        // Increment counter only for new integration contexts
+        if (isNewEntity) {
+            serviceTaskEntity.incrementIntegrationContextCounter();
+        }
 
         entity.setServiceTask(serviceTaskEntity);
 

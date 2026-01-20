@@ -36,6 +36,7 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
         CloudIntegrationResultReceivedEvent integrationEvent = CloudIntegrationResultReceivedEvent.class.cast(event);
 
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(integrationEvent);
+        boolean isNewEntity = result.isEmpty();
 
         // If entity doesn't exist (e.g., purged during migration), create a new one with the new PK format
         IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(integrationEvent)
@@ -46,6 +47,11 @@ public class IntegrationResultReceivedEventHandler extends BaseIntegrationEventH
 
         if (serviceTaskEntity != null && entity.getServiceTask() == null) {
             entity.setServiceTask(serviceTaskEntity);
+
+            // Increment counter if this is a newly created entity
+            if (isNewEntity) {
+                serviceTaskEntity.incrementIntegrationContextCounter();
+            }
         }
 
         entity.setResultDate(new Date(integrationEvent.getTimestamp()));

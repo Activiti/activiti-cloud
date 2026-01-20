@@ -23,6 +23,7 @@ create table bpmn_activity
     execution_id	       	   varchar(255),
     started_date               timestamp,
     status                     varchar(255),
+    integration_context_counter INTEGER DEFAULT 0,
 
     primary key (id)
 );
