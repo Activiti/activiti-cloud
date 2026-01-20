@@ -173,11 +173,18 @@ public class QueryEventHandlerContextOptimizer {
                 )
                     .ifPresent(serviceTaskIds -> {
                         fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
-                    });
 
-                findRuntimeEvents(events, CloudIntegrationEvent.class, entity -> true, IntegrationContext::getId)
-                    .ifPresent(integrationContextIds -> {
-                        fetch(fromProcessInstance, entityGraph, INTEGRATION_CONTEXTS, "id", integrationContextIds);
+                        // Fetch integration contexts as subgraph of service tasks
+                        findRuntimeEvents(
+                            events,
+                            CloudIntegrationEvent.class,
+                            entity -> true,
+                            IntegrationContext::getId
+                        )
+                            .ifPresent(integrationContextIds -> {
+                                var serviceTaskSubgraph = entityGraph.addSubgraph(SERVICE_TASKS);
+                                serviceTaskSubgraph.addAttributeNodes(INTEGRATION_CONTEXTS);
+                            });
                     });
 
                 entityManager
