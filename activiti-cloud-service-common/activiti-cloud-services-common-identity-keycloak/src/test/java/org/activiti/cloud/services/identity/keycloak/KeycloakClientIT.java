@@ -139,10 +139,8 @@ public class KeycloakClientIT {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.get(0).getId());
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
     }
 
     @Test
@@ -173,7 +171,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserGroupsCache() throws InterruptedException {
+    public void shouldGetUserGroupsCache() {
         Cache cache = cacheManager.getCache("userGroups");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
@@ -201,10 +199,8 @@ public class KeycloakClientIT {
 
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(key);
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains("ACTIVITI_USER");
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
 
         assertThat(cache.get(key)).isNotNull();
         //check if the cache expires
@@ -249,10 +245,8 @@ public class KeycloakClientIT {
             clients.get(0).getId()
         );
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_ADMIN_ROLE);
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
     }
 
     @Test

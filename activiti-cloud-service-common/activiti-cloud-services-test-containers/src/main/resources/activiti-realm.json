@@ -131,8 +131,6 @@
         }
       ],
       "realmRoles": [
-        "offline_access",
-        "uma_authorization",
         "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
@@ -177,9 +175,7 @@
       ],
       "requiredActions": [],
       "realmRoles": [
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
         "account": [
@@ -187,9 +183,7 @@
           "view-profile"
         ],
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_ADMIN",
-          "offline_access"
+          "ACTIVITI_ADMIN"
         ]
       },
       "notBefore": 0,
@@ -211,9 +205,7 @@
       ],
       "realmRoles": [
         "ACTIVITI_USER",
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "groups": [
         "/hr"
@@ -232,15 +224,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ]
       },
       "groups": [
@@ -260,15 +248,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ]
       },
       "groups": [
@@ -288,9 +272,7 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "groups": [
         "/hr"
@@ -324,9 +306,7 @@
       ],
       "realmRoles": [
         "ACTIVITI_USER",
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
         "account": [
@@ -351,15 +331,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ],
         "realm-management": [
           "manage-users"
@@ -398,9 +374,7 @@
       ],
       "requiredActions": [],
       "realmRoles": [
-        "ACTIVITI_DEVOPS",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_DEVOPS"
       ],
       "clientRoles": {
         "account": [
@@ -426,15 +400,11 @@
         }
       ],
       "realmRoles": [
-        "APPLICATION_MANAGER",
-        "uma_authorization",
-        "offline_access"
+        "APPLICATION_MANAGER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "APPLICATION_MANAGER",
-          "offline_access"
+          "APPLICATION_MANAGER"
         ]
       }
     }
