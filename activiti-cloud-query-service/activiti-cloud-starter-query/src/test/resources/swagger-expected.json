@@ -7403,6 +7403,13 @@
       "QueryCloudProcessInstance_ProcessVariables" : {
         "type" : "object",
         "properties" : {
+          "linkedProcesses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/QueryCloudSubprocessInstance_ProcessVariables"
+            },
+            "uniqueItems" : true
+          },
           "subprocesses" : {
             "type" : "array",
             "items" : {
@@ -7897,6 +7904,13 @@
           },
           "linkedProcessInstanceType": {
             "type":"string"
+          },
+          "linkedProcesses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/QueryCloudSubprocessInstance_General"
+            },
+            "uniqueItems" : true
           }
         },
         "title" : "QueryCloudProcessInstance_General"
