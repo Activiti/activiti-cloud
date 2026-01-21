@@ -25,6 +25,7 @@ public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl impl
     private Set<QueryCloudSubprocessInstance> subprocesses;
     private String linkedProcessInstanceId;
     private String linkedProcessInstanceType;
+    private Set<QueryCloudSubprocessInstance> linkedProcesses;
 
     @Override
     public Set<QueryCloudSubprocessInstance> getSubprocesses() {
@@ -34,6 +35,16 @@ public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl impl
     @Override
     public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
+    }
+
+    @Override
+    public Set<QueryCloudSubprocessInstance> getLinkedProcesses() {
+        return linkedProcesses;
+    }
+
+    @Override
+    public void setLinkedProcesses(Set<QueryCloudSubprocessInstance> linkedProcessSet) {
+        this.linkedProcesses = linkedProcessSet;
     }
 
     @Override

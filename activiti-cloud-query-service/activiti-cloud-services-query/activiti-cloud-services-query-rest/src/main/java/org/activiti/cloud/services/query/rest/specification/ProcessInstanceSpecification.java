@@ -22,6 +22,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
+import java.util.Set;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
@@ -48,6 +49,63 @@ public class ProcessInstanceSpecification
 
     public static ProcessInstanceSpecification restricted(ProcessInstanceSearchRequest searchRequest, String userId) {
         return new ProcessInstanceSpecification(searchRequest, userId);
+    }
+
+    public static ProcessInstanceSpecification linkedProcesses(String linkedProcessInstanceId, String userId) {
+        if (userId == null) {
+            return ProcessInstanceSpecification.unrestricted(
+                new ProcessInstanceSearchRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    Set.of(linkedProcessInstanceId),
+                    null
+                )
+            );
+        }
+
+        return ProcessInstanceSpecification.restricted(
+            new ProcessInstanceSearchRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Set.of(linkedProcessInstanceId),
+                null
+            ),
+            userId
+        );
     }
 
     @Override

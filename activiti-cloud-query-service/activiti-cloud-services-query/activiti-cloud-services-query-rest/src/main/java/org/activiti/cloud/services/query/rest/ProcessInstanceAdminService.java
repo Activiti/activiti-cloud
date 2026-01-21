@@ -135,4 +135,8 @@ public class ProcessInstanceAdminService {
     public Long count(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceSearchService.countUnrestricted(searchRequest);
     }
+
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceSearchService.linkedProcesses(linkedProcessInstanceId, pageable);
+    }
 }

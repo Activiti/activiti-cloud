@@ -100,4 +100,14 @@ public class ProcessInstanceSearchService {
         );
         return processInstanceRepository.count(unrestrictedSpecification);
     }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> linkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.linkedProcesses(
+            linkedProcessInstanceId,
+            null
+        );
+
+        return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
+    }
 }

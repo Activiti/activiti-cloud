@@ -82,4 +82,8 @@ public class QueryTestUtils {
             return value.toString();
         }
     }
+
+    public static String linkedProcessesPath(String processName) {
+        return "_embedded.processInstances.find { it.name == '" + processName + "' }.linkedProcesses";
+    }
 }

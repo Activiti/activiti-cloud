@@ -230,7 +230,7 @@ class ProcessInstanceAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
+        given(processInstanceAdminService.searchLinkedProcesses(anyString(), any(Pageable.class)))
             .willReturn(linkedProcessInstancePage);
 
         //when
@@ -250,43 +250,9 @@ class ProcessInstanceAdminControllerIT {
     }
 
     @Test
-    void shouldReturnForbiddenWhenLinkedProcessInstances() throws Exception {
-        //given
-        ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
-        var linkedProcessInstanceId = processInstance.getId();
-
-        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
-            .willReturn(processInstance);
-
-        List<String> roles = List.of("ACTIVITI_USER");
-        given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
-
-        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntityWithLinkedProcess(
-            linkedProcessInstanceId
-        );
-
-        Page<ProcessInstanceEntity> linkedProcessInstancePage = new PageImpl<>(
-            Collections.singletonList(linkedProcessInstance),
-            PageRequest.of(1, 10),
-            1
-        );
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(linkedProcessInstancePage);
-
-        //when
-        mockMvc
-            .perform(
-                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
-            )
-            //then
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenLinkedProcessInstances() throws Exception {
-        given(entityFinder.findById(any(), anyString(), anyString()))
-            .willThrow(new EntityNotFoundException("Process instance not found"));
+    void shouldReturnEmptyListWhenLinkedProcessInstances() throws Exception {
+        given(processInstanceAdminService.searchLinkedProcesses(anyString(), any(Pageable.class)))
+            .willReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
 
         //when
         mockMvc
@@ -295,6 +261,7 @@ class ProcessInstanceAdminControllerIT {
                     .accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.list.entries").isEmpty());
     }
 }

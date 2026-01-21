@@ -30,6 +30,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -172,7 +173,7 @@ public class ProcessInstanceService {
         return processInstanceSearchService.searchRestricted(searchRequest, pageable);
     }
 
-    private boolean canReadOrAdmin(ProcessInstanceEntity processInstanceEntity) {
+    public boolean canReadOrAdmin(ProcessInstanceEntity processInstanceEntity) {
         return canRead(processInstanceEntity) || securityManager.getAuthenticatedUserRoles().contains(ADMIN_ROLE);
     }
 
@@ -214,22 +215,20 @@ public class ProcessInstanceService {
         return processInstanceSearchService.countRestricted(searchRequest);
     }
 
-    public Page<ProcessInstanceEntity> linkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        entityFinder.findById(
             processInstanceRepository,
             linkedProcessInstanceId,
             "Unable to find process for the given id:'" + linkedProcessInstanceId + "'"
         );
 
-        if (!canReadOrAdmin(processInstanceEntity)) {
-            throw new ActivitiForbiddenException(
-                "Operation not permitted for process instance: " + linkedProcessInstanceId
-            );
-        }
+        String userId = securityManager.getAuthenticatedUserId();
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.linkedProcesses(
+            linkedProcessInstanceId,
+            userId
+        );
 
-        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
-        BooleanExpression expression = process.linkedProcessInstanceId.eq(linkedProcessInstanceId);
-
-        return processInstanceRepository.findAll(expression, pageable);
+        return processInstanceRepository.findAll(restrictedSpecification, pageable);
     }
 }
