@@ -25,6 +25,7 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepre
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -72,6 +73,12 @@ public class KeycloakClientIT {
 
     private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
     private final String ACTIVITI_ADMIN_ROLE = ACTIVITI_ADMIN;
+
+    @AfterAll
+    public static void tearDown() {
+        //stop test to avoid reuse since tests are modifying roles
+        KeycloakContainerApplicationInitializer.getContainer().stop();
+    }
 
     @Test
     public void should_searchUsers() {
@@ -153,7 +160,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetGroupRolesFromCache() throws InterruptedException {
+    public void shouldGetGroupRolesFromCache() {
         Cache cache = cacheManager.getCache("groupRoleMapping");
         cache.clear();
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
@@ -475,7 +482,7 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getGroup_By_Path() {
-        String path = "/hr";
+        String path = "hr";
         KeycloakGroup groupByPath = keycloakClient.getGroupByPath(path);
 
         assertThat(groupByPath).isNotNull();

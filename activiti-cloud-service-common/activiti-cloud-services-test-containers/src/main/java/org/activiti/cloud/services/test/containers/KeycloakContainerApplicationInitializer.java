@@ -28,7 +28,6 @@ public class KeycloakContainerApplicationInitializer
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
-        .withEnv("KC_HTTP_ACCEPT_NON_NORMALIZED_PATHS", "true")
         .withReuse(true);
 
     @Override

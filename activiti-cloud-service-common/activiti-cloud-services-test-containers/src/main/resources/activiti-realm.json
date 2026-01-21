@@ -119,6 +119,23 @@
       }
     },
     {
+      "username": "service-account-test-client",
+      "enabled": true,
+      "serviceAccountClientId": "test-client",
+      "clientRoles": {
+        "realm-management": [
+          "manage-authorization",
+          "manage-users",
+          "manage-clients",
+          "query-realms",
+          "create-client",
+          "query-clients",
+          "view-users",
+          "manage-realm"
+        ]
+      }
+    },
+    {
       "username": "admin",
       "enabled": true,
       "firstName": "Admin",
