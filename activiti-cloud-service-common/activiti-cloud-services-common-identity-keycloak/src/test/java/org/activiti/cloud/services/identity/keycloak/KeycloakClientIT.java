@@ -486,7 +486,7 @@ public class KeycloakClientIT {
         KeycloakGroup groupByPath = keycloakClient.getGroupByPath(path);
 
         assertThat(groupByPath).isNotNull();
-        assertThat(groupByPath.getPath()).isEqualTo(path);
+        assertThat(groupByPath.getPath()).isEqualTo("/" + path);
     }
 
     @Test
