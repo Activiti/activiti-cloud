@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,13 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationRequestedEvent integrationEvent = CloudIntegrationRequestedEvent.class.cast(event);
         IntegrationContext integrationContext = integrationEvent.getEntity();
-        String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
+        String entityId = integrationContext.getId();
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
+        boolean isNewEntity = (entity == null);
+
         if (entity == null) {
             entity =
                 new IntegrationContextEntity(
@@ -70,10 +73,15 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entityId);
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
         serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
         serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
         serviceTaskEntity.setCompletedDate(null);
+
+        // Increment counter only for new integration contexts
+        if (isNewEntity) {
+            serviceTaskEntity.incrementIntegrationContextCounter();
+        }
 
         entity.setServiceTask(serviceTaskEntity);
 

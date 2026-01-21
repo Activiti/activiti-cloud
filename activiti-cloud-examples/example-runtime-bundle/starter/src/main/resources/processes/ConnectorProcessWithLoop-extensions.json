@@ -1,0 +1,32 @@
+{
+  "id": "ConnectorProcessWithLoop-model",
+  "name": "ConnectorProcessWithLoop",
+  "extensions": {
+    "ConnectorProcessWithLoop": {
+      "properties": {
+        "executionCount-id": {
+          "id": "executionCount-id",
+          "name": "executionCount",
+          "type": "integer",
+          "value": 0
+        }
+      },
+      "mappings": {
+        "ServiceTask_Connector": {
+          "inputs": {
+            "executionCount": {
+              "type": "variable",
+              "value": "executionCount"
+            }
+          },
+          "outputs": {
+            "executionCount": {
+              "type": "variable",
+              "value": "executionCount"
+            }
+          }
+        }
+      }
+    }
+  }
+}

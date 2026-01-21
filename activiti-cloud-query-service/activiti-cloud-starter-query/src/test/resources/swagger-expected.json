@@ -1756,6 +1756,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -2036,6 +2042,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -2297,6 +2309,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
         }, {
           "name" : "parentId",
@@ -3461,6 +3479,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -4052,6 +4076,12 @@
           "in" : "query",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
           }
         }, {
           "name" : "parentId",
@@ -4862,6 +4892,21 @@
             "type" : "string"
           }
         }, {
+          "name" : "integrationContexts",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        {
+          "name": "integrationContextCounter",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
@@ -5016,8 +5061,8 @@
     "/admin/v1/service-tasks/{serviceTaskId}/integration-context" : {
       "get" : {
         "tags" : [ "service-task-integration-context-admin-controller" ],
-        "summary" : "findById",
-        "operationId" : "findById",
+        "summary" : "findByServiceTaskId",
+        "operationId" : "findByServiceTaskId",
         "parameters" : [ {
           "name" : "serviceTaskId",
           "in" : "path",
@@ -5068,6 +5113,102 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "deprecated": true,
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
+    "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts" : {
+      "get" : {
+        "tags" : [ "service-task-integration-context-admin-controller" ],
+        "summary" : "findAllByServiceTaskId",
+        "operationId" : "findAllByServiceTaskId",
+        "parameters" : [ {
+          "name" : "serviceTaskId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudIntegrationContext"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudIntegrationContext"
                 }
               }
             }
@@ -5611,6 +5752,13 @@
             }
           },
           {
+            "name": "integrationContexts",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "parentId",
             "in": "query",
             "schema": {
@@ -5834,6 +5982,21 @@
             "type" : "string"
           }
         }, {
+          "name" : "integrationContexts",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        },
+        {
+          "name": "integrationContextCounter",
+          "in": "query",
+          "schema": {
+          "type": "integer",
+          "format": "int32"
+          }
+        },
+        {
           "name" : "startedFrom",
           "in" : "query",
           "schema" : {
@@ -6156,6 +6319,12 @@
             "type" : "string"
           }
         }, {
+          "name": "integrationContexts",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }, {
           "name" : "parentId",
           "in" : "query",
           "schema" : {
@@ -6447,6 +6616,76 @@
         "security" : [ {
           "oauth" : [ ]
         } ]
+      }
+    },
+    "/admin/v1/integration-contexts/{integrationContextId}" : {
+      "get" : {
+        "tags" : [ "integration-context-admin-controller" ],
+        "summary" : "findById",
+        "operationId" : "findById",
+        "parameters" : [ {
+          "name" : "integrationContextId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [
+          {
+            "oauth" : [ ]
+          }
+        ]
       }
     },
     "/admin/v1/applications" : {
@@ -7953,6 +8192,10 @@
       "CloudServiceTask" : {
         "type" : "object",
         "properties" : {
+          "integrationContextCounter" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "id" : {
             "type" : "string"
           },
@@ -8184,6 +8427,21 @@
         },
         "title" : "CloudIntegrationContext"
       },
+      "EntriesResponseContentCloudIntegrationContext" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentCloudIntegrationContext"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentCloudIntegrationContext"
+      },
       "EntryResponseContentCloudIntegrationContext" : {
         "type" : "object",
         "properties" : {
@@ -8192,6 +8450,15 @@
           }
         },
         "title" : "EntryResponseContentCloudIntegrationContext"
+      },
+      "ListResponseContentCloudIntegrationContext" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentCloudIntegrationContext"
+          }
+        },
+        "title" : "ListResponseContentCloudIntegrationContext"
       }
     }
   },

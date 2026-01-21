@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,5 +31,10 @@ public class VariableBufferSteps {
     @Step
     public Map<String, Object> availableVariables() {
         return variables;
+    }
+
+    @Step
+    public void clearVariables() {
+        variables.clear();
     }
 }

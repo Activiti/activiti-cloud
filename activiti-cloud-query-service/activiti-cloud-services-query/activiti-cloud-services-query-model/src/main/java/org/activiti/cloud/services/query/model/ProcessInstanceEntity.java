@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,6 +219,17 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
+    private List<IntegrationContextEntity> integrationContexts = new LinkedList<>();
 
     private String parentId;
 
@@ -524,6 +535,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setSequenceFlows(List<BPMNSequenceFlowEntity> sequenceFlows) {
         this.sequenceFlows = sequenceFlows;
+    }
+
+    public List<IntegrationContextEntity> getIntegrationContexts() {
+        return integrationContexts;
+    }
+
+    public void setIntegrationContexts(List<IntegrationContextEntity> integrationContexts) {
+        this.integrationContexts = integrationContexts;
     }
 
     @Override

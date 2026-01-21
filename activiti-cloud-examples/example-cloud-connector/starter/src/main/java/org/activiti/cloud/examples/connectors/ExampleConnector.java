@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,15 @@ public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
 
         Object dateVar = event.getIntegrationContext().getInBoundVariable("test_date_variable_name");
         processDateVar(results, dateVar);
+
+        // Handle executionCount for loop-based processes (e.g., ConnectorProcessWithLoop)
+        Object executionCountVar = event.getIntegrationContext().getInBoundVariable("executionCount");
+        if (executionCountVar != null) {
+            Integer executionCount = executionCountVar instanceof Integer ? (Integer) executionCountVar : 0;
+            // Increment the counter for the next iteration
+            results.put("executionCount", executionCount + 1);
+            logger.info("executionCount incremented from {} to {}", executionCount, executionCount + 1);
+        }
 
         results.put("var1", var1);
         Message<IntegrationResult> message = IntegrationResultBuilder

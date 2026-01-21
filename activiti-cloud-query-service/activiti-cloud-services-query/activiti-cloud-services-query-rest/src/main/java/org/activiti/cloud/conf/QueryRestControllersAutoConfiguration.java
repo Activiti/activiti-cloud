@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.rest.ApplicationAdminController;
 import org.activiti.cloud.services.query.rest.ApplicationController;
 import org.activiti.cloud.services.query.rest.CommonExceptionHandlerQuery;
+import org.activiti.cloud.services.query.rest.IntegrationContextAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminController;
@@ -40,7 +41,6 @@ import org.activiti.cloud.services.query.rest.TaskController;
 import org.activiti.cloud.services.query.rest.TaskDeleteController;
 import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
-import org.activiti.cloud.services.query.rest.advice.TaskControllerAdvice;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -79,6 +79,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ServiceTaskIntegrationContextAdminController.class,
         ApplicationController.class,
         ApplicationAdminController.class,
+        IntegrationContextAdminController.class,
     }
 )
 @PropertySource("classpath:query-rest.properties")

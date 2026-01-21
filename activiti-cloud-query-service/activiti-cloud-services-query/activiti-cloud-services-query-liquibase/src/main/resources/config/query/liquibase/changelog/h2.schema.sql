@@ -23,6 +23,7 @@ create table bpmn_activity
     execution_id	       	   varchar(255),
     started_date               timestamp,
     status                     varchar(255),
+    integration_context_counter INTEGER DEFAULT 0,
 
     primary key (id)
 );
@@ -302,8 +303,12 @@ create index pcsg_groupId_idx on process_candidate_starter_group (group_id);
 create index pcsg_processDefinition_idx on process_candidate_starter_group (process_definition_id);
 create index pcsu_userId_idx on process_candidate_starter_user (user_id);
 create index pcsu_processDefinition_idx on process_candidate_starter_user (process_definition_id);
+create index integration_context_processInstance_idx on integration_context (process_instance_id);
 alter table integration_context
-    add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
+  add constraint fk_integration_context_bpmn_activity
+  foreign key (process_instance_id, client_id, execution_id)
+  references bpmn_activity (process_instance_id, element_id, execution_id)
+  on delete cascade;
 alter table process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;
 alter table task_process_variable

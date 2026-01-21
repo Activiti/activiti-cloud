@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.IntegrationContext;
@@ -99,6 +100,8 @@ public class QueryAdminProcessServiceTasksIT {
     private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudServiceTask>() {};
 
     private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<CloudIntegrationContext>() {};
+
+    private static final ParameterizedTypeReference<PagedModel<CloudIntegrationContext>> PAGED_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudIntegrationContext>>() {};
     public static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
 
     @Autowired
@@ -417,6 +420,46 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
+    public void shouldGetIntegrationContextCountForServiceTask() throws InterruptedException {
+        // given - Start process and wait until related entities are persisted
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+
+        await()
+            .untilAsserted(() -> {
+                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+            });
+
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // when - Create and send multiple integration contexts
+        IntegrationContext integrationContext1 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        sendIntegrationRequestedEvent(integrationContext1);
+
+        IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        sendIntegrationRequestedEvent(integrationContext2);
+
+        // then - Verify that the integration context counter is available
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                    SERVICE_TASKS_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                );
+
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getContent())
+                    .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
+                    .containsExactly(tuple(SERVICE_TASK_TYPE, 2));
+            });
+    }
+
+    @Test
     public void shouldGetServiceTaskIntegrationContextErrorById() throws InterruptedException {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
@@ -513,6 +556,7 @@ public class QueryAdminProcessServiceTasksIT {
         CloudBPMNActivity serviceTask
     ) {
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setId(UUID.randomUUID().toString());
         integrationContext.setProcessInstanceId(process.getId());
         integrationContext.setRootProcessInstanceId(rootProcessInstanceId);
         integrationContext.setExecutionId(serviceTask.getExecutionId());
@@ -575,6 +619,188 @@ public class QueryAdminProcessServiceTasksIT {
             });
     }
 
+    @Test
+    public void shouldGetServiceTaskIntegrationContextsById() throws InterruptedException {
+        //given - Start process with service task
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        //when - sending two integration contexts for the given service task (loop scenario with two service task executions)
+        IntegrationContext integrationContext = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+        IntegrationContext integrationContext2 = buildIntegrationContext(process, rootProcessInstanceId, serviceTask);
+
+        sendIntegrationRequestedEvent(integrationContext);
+        sendIntegrationRequestedEvent(integrationContext2);
+
+        //then - verify that for the given service task we get both integration contexts
+        await()
+            .untilAsserted(() -> {
+                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
+                    serviceTask.getId()
+                );
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .containsExactly(
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        ),
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        )
+                    );
+            });
+
+        sendIntegrationResultReceivedEvent(integrationContext);
+
+        await()
+            .untilAsserted(() -> {
+                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
+                    serviceTask.getId()
+                );
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .contains(
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                        ),
+                        tuple(
+                            SERVICE_TASK_ELEMENT_ID,
+                            SERVICE_TASK_TYPE,
+                            rootProcessInstanceId,
+                            IntegrationContextStatus.INTEGRATION_REQUESTED
+                        )
+                    );
+            });
+    }
+
+    @Test
+    public void shouldCreateIntegrationContextWhenReceivingErrorEventForMissingEntity() {
+        // given - Start process with service task but DO NOT send IntegrationRequestedEvent
+        // This simulates the scenario where the integration context was purged during migration
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // Build integration context that was never persisted (simulating purged entity)
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            rootProcessInstanceId,
+            serviceTask
+        );
+
+        // when - Send error event for non-existent integration context
+        Throwable cause = new RuntimeException("Integration failed during migration window");
+        CloudBpmnError error = new CloudBpmnError("MIGRATION_ERROR", cause);
+
+        eventsAggregator.addEvents(
+            new CloudIntegrationErrorReceivedEventImpl(
+                integrationContext,
+                error.getErrorCode(),
+                error.getMessage(),
+                error.getClass().getName(),
+                Arrays.asList(error.getCause().getStackTrace())
+            )
+        );
+        eventsAggregator.sendAll();
+
+        // then - Verify that a new integration context was created with error status
+        await()
+            .untilAsserted(() -> {
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus,
+                        CloudIntegrationContext::getErrorCode,
+                        CloudIntegrationContext::getErrorClassName
+                    )
+                    .containsExactly(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                        error.getErrorCode(),
+                        error.getClass().getName()
+                    );
+
+                assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
+                assertThat(cloudIntegrationContext.getErrorDate()).isNotNull();
+            });
+
+        await()
+            .untilAsserted(() -> {
+                CloudServiceTask updatedServiceTask = retrieveServiceTask();
+                assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.ERROR);
+            });
+    }
+
+    @Test
+    public void shouldCreateIntegrationContextWhenReceivingResultEventForMissingEntity() {
+        // given - Start process with service task but DO NOT send IntegrationRequestedEvent
+        // This simulates the scenario where the integration context was purged during migration
+        ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
+        CloudServiceTask serviceTask = waitForServiceTask();
+        final String rootProcessInstanceId = UUID.randomUUID().toString();
+
+        // Build integration context that was never persisted (simulating purged entity)
+        IntegrationContextImpl integrationContext = buildIntegrationContext(
+            process,
+            rootProcessInstanceId,
+            serviceTask
+        );
+        integrationContext.addOutBoundVariable("resultKey", "resultValue");
+
+        // when - Send result event for non-existent integration context
+        eventsAggregator.addEvents(new CloudIntegrationResultReceivedEventImpl(integrationContext));
+        eventsAggregator.sendAll();
+
+        // then - Verify that a new integration context was created with result status
+        await()
+            .untilAsserted(() -> {
+                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+                assertThat(cloudIntegrationContext)
+                    .extracting(
+                        CloudIntegrationContext::getClientId,
+                        CloudIntegrationContext::getClientType,
+                        CloudIntegrationContext::getRootProcessInstanceId,
+                        CloudIntegrationContext::getStatus
+                    )
+                    .containsExactly(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    );
+
+                assertThat(cloudIntegrationContext.getResultDate()).isNotNull();
+                assertThat(cloudIntegrationContext.getOutBoundVariables()).containsEntry("resultKey", "resultValue");
+                assertThat(cloudIntegrationContext.getInBoundVariables()).containsEntry("key", "value");
+            });
+    }
+
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
         ResponseEntity<CloudIntegrationContext> responseEntity = testRestTemplate.exchange(
             "/admin/v1/service-tasks/{serviceTaskId}/integration-context",
@@ -586,6 +812,20 @@ public class QueryAdminProcessServiceTasksIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         return responseEntity.getBody();
+    }
+
+    private List<CloudIntegrationContext> retrieveAllIntegrationContexts(String serviceTaskId) {
+        ResponseEntity<PagedModel<CloudIntegrationContext>> responseEntity = testRestTemplate.exchange(
+            "/admin/v1/service-tasks/{serviceTaskId}/integration-contexts",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_INT_CONTEXT_RESPONSE_TYPE,
+            serviceTaskId
+        );
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getContent()).isNotEmpty();
+        return responseEntity.getBody().getContent().stream().toList();
     }
 
     private void sendIntegrationResultReceivedEvent(IntegrationContext integrationContext) {
@@ -689,6 +929,7 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
     }
 
+    // Get the newest Integration Context for given Service Task
     private void waitForIntegrationContext(CloudServiceTask serviceTask, IntegrationContextStatus status) {
         await()
             .untilAsserted(() -> {

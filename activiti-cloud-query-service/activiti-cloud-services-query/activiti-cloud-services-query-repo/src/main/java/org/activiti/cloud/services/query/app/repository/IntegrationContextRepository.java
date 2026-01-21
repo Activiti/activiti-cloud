@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.QIntegrationContextEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -39,9 +41,10 @@ public interface IntegrationContextRepository
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 
-    IntegrationContextEntity findByProcessInstanceIdAndClientIdAndExecutionId(
+    Page<IntegrationContextEntity> findByProcessInstanceIdAndClientIdAndExecutionId(
         String processInstanceId,
         String clientId,
-        String executionId
+        String executionId,
+        Pageable pageable
     );
 }
