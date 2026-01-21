@@ -224,7 +224,7 @@ public class ProcessInstanceService {
         );
 
         String userId = securityManager.getAuthenticatedUserId();
-        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.linkedProcesses(
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
             linkedProcessInstanceId,
             userId
         );

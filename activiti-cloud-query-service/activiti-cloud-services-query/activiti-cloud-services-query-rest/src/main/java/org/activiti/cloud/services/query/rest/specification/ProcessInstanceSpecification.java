@@ -30,6 +30,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.jspecify.annotations.NonNull;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -51,7 +52,21 @@ public class ProcessInstanceSpecification
         return new ProcessInstanceSpecification(searchRequest, userId);
     }
 
-    public static ProcessInstanceSpecification linkedProcesses(String linkedProcessInstanceId, String userId) {
+    public static ProcessInstanceSpecification unrestrictedLinkedProcesses(String linkedProcessInstanceId) {
+        return configureLinkedProcessSpecification(linkedProcessInstanceId, null);
+    }
+
+    public static ProcessInstanceSpecification restrictedLinkedProcesses(
+        String linkedProcessInstanceId,
+        String userId
+    ) {
+        return configureLinkedProcessSpecification(linkedProcessInstanceId, userId);
+    }
+
+    private static ProcessInstanceSpecification configureLinkedProcessSpecification(
+        String linkedProcessInstanceId,
+        String userId
+    ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
         searchRequest.setLinkedProcessInstanceId(Set.of(linkedProcessInstanceId));
 

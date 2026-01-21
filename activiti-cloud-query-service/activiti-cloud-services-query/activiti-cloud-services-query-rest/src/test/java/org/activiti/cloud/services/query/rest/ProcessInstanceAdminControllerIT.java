@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.*;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;

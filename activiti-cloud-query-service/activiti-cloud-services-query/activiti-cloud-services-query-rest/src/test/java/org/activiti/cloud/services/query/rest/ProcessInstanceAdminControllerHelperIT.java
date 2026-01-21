@@ -19,10 +19,8 @@ import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.bu
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntityWithLinkedProcess;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,7 +29,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
-import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -258,7 +258,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     }
 
     public Boolean getIncludeSubprocesses() {
-        return includeSubprocesses != null ? includeSubprocesses : true;
+        return includeSubprocesses == null || includeSubprocesses;
     }
 
     public void setIncludeSubprocesses(Boolean includeSubprocesses) {
