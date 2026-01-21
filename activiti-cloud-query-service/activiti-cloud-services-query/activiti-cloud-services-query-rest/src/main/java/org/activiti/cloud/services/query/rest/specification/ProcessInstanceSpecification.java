@@ -99,7 +99,7 @@ public class ProcessInstanceSpecification
     }
 
     private void applyIncludeSubprocesses(Root<ProcessInstanceEntity> root) {
-        if (!searchRequest.getIncludeSubprocesses()) {
+        if (Boolean.FALSE.equals(searchRequest.getIncludeSubprocesses())) {
             predicates.add(root.get(ProcessInstanceEntity_.parentId).isNull());
         }
     }
