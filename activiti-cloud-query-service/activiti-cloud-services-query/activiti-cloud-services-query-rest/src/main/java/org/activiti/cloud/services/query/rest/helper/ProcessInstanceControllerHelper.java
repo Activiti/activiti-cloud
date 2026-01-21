@@ -116,6 +116,10 @@ public class ProcessInstanceControllerHelper {
     public static Set<QueryCloudSubprocessInstance> mapLinkedProcessEntities(
         Page<ProcessInstanceEntity> linkedProcesses
     ) {
+        if (linkedProcesses == null) {
+            return Set.of();
+        }
+
         return linkedProcesses
             .getContent()
             .stream()

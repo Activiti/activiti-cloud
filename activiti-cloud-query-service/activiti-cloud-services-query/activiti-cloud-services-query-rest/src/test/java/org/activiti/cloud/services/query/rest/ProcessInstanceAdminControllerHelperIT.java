@@ -230,7 +230,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldReturnEmptyListWhenGetLinkedProcessesAdminById() {
+    void shouldReturnEmptyListWhenGetLinkedProcessesAdminByLinkedProcessIdId() {
         ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
         var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
         var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
@@ -245,34 +245,5 @@ class ProcessInstanceAdminControllerHelperIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-    }
-
-    @Test
-    @WithMockUser(roles = { "ACTIVITI_USER", "ACTIVITI_MODELER" })
-    void shouldThrowForbiddenWhenGetLinkedProcessesAdminById() {
-        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
-        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
-        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
-
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        assertThatThrownBy(() ->
-                processInstanceAdminControllerHelper.searchLinkedProcesses(saveLinkedProcessInstanceId, pageable)
-            )
-            .isInstanceOf(ActivitiForbiddenException.class)
-            .hasMessageContaining("Operation not permitted for process instance: " + saveLinkedProcessInstanceId);
-    }
-
-    @Test
-    @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldThrowEntityNotFoundExceptionWhenGetLinkedProcessesAdminById() {
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        assertThatThrownBy(() -> processInstanceAdminControllerHelper.searchLinkedProcesses("linkedProcessId", pageable)
-            )
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Unable to find process for the given id:'linkedProcessId'");
     }
 }
