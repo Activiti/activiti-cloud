@@ -47,7 +47,7 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchRestricted(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
@@ -59,7 +59,7 @@ public class ProcessInstanceSearchService {
         Pageable pageable
     ) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.unrestricted(searchRequest)
         );

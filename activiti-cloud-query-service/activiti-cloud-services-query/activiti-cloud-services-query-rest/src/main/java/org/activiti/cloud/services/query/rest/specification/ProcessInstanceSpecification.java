@@ -52,60 +52,10 @@ public class ProcessInstanceSpecification
     }
 
     public static ProcessInstanceSpecification linkedProcesses(String linkedProcessInstanceId, String userId) {
-        if (userId == null) {
-            return ProcessInstanceSpecification.unrestricted(
-                new ProcessInstanceSearchRequest(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    Set.of(linkedProcessInstanceId),
-                    null
-                )
-            );
-        }
+        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
+        searchRequest.setLinkedProcessInstanceId(Set.of(linkedProcessInstanceId));
 
-        return ProcessInstanceSpecification.restricted(
-            new ProcessInstanceSearchRequest(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                Set.of(linkedProcessInstanceId),
-                null
-            ),
-            userId
-        );
+        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
     }
 
     @Override
@@ -134,7 +84,7 @@ public class ProcessInstanceSpecification
     }
 
     private void applyIncludeSubprocesses(Root<ProcessInstanceEntity> root) {
-        if (!searchRequest.includeSubprocesses()) {
+        if (!searchRequest.getIncludeSubprocesses()) {
             predicates.add(root.get(ProcessInstanceEntity_.parentId).isNull());
         }
     }
@@ -156,110 +106,115 @@ public class ProcessInstanceSpecification
     }
 
     private void applyLinkedProcessInstanceId(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.linkedProcessInstanceId())) {
+        if (!CollectionUtils.isEmpty(searchRequest.getLinkedProcessInstanceId())) {
             predicates.add(
-                root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.linkedProcessInstanceId())
+                root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.getLinkedProcessInstanceId())
             );
         }
     }
 
     private void applyLinkedProcessInstanceType(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.linkedProcessInstanceType())) {
+        if (!CollectionUtils.isEmpty(searchRequest.getLinkedProcessInstanceType())) {
             predicates.add(
-                root.get(ProcessInstanceEntity_.linkedProcessInstanceType).in(searchRequest.linkedProcessInstanceType())
+                root
+                    .get(ProcessInstanceEntity_.linkedProcessInstanceType)
+                    .in(searchRequest.getLinkedProcessInstanceType())
             );
         }
     }
 
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(searchRequest.name())) {
-            addLikeFilters(predicates, searchRequest.name(), root, criteriaBuilder, ProcessInstanceEntity_.name);
+        if (!CollectionUtils.isEmpty(searchRequest.getName())) {
+            addLikeFilters(predicates, searchRequest.getName(), root, criteriaBuilder, ProcessInstanceEntity_.name);
         }
     }
 
     private void applyProcessDefinitionNameFilter(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.processDefinitionName())) {
+        if (!CollectionUtils.isEmpty(searchRequest.getProcessDefinitionName())) {
             predicates.add(
-                root.get(ProcessInstanceEntity_.processDefinitionName).in(searchRequest.processDefinitionName())
+                root.get(ProcessInstanceEntity_.processDefinitionName).in(searchRequest.getProcessDefinitionName())
             );
         }
     }
 
     private void applyInitiatorFilter(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.initiator())) {
-            predicates.add(root.get(ProcessInstanceEntity_.initiator).in(searchRequest.initiator()));
+        if (!CollectionUtils.isEmpty(searchRequest.getInitiator())) {
+            predicates.add(root.get(ProcessInstanceEntity_.initiator).in(searchRequest.getInitiator()));
         }
     }
 
     private void applyAppVersionFilter(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.appVersion())) {
-            predicates.add(root.get(ProcessInstanceEntity_.appVersion).in(searchRequest.appVersion()));
+        if (!CollectionUtils.isEmpty(searchRequest.getAppVersion())) {
+            predicates.add(root.get(ProcessInstanceEntity_.appVersion).in(searchRequest.getAppVersion()));
         }
     }
 
     private void applyStatusFilter(Root<ProcessInstanceEntity> root) {
-        if (!CollectionUtils.isEmpty(searchRequest.status())) {
-            predicates.add(root.get(ProcessInstanceEntity_.status).in(searchRequest.status()));
+        if (!CollectionUtils.isEmpty(searchRequest.getStatus())) {
+            predicates.add(root.get(ProcessInstanceEntity_.status).in(searchRequest.getStatus()));
         }
     }
 
     private void applyLastModifiedDateFilters(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (searchRequest.lastModifiedFrom() != null) {
+        if (searchRequest.getLastModifiedFrom() != null) {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(ProcessInstanceEntity_.lastModified),
-                    searchRequest.lastModifiedFrom()
+                    searchRequest.getLastModifiedFrom()
                 )
             );
         }
-        if (searchRequest.lastModifiedTo() != null) {
+        if (searchRequest.getLastModifiedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.lastModified), searchRequest.lastModifiedTo())
+                criteriaBuilder.lessThan(
+                    root.get(ProcessInstanceEntity_.lastModified),
+                    searchRequest.getLastModifiedTo()
+                )
             );
         }
     }
 
     private void applyStartFilters(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (searchRequest.startFrom() != null) {
+        if (searchRequest.getStartFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(ProcessInstanceEntity_.startDate), searchRequest.startFrom())
+                criteriaBuilder.greaterThan(root.get(ProcessInstanceEntity_.startDate), searchRequest.getStartFrom())
             );
         }
-        if (searchRequest.startTo() != null) {
+        if (searchRequest.getStartTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.startDate), searchRequest.startTo())
+                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.startDate), searchRequest.getStartTo())
             );
         }
     }
 
     private void applyCompletedFilters(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (searchRequest.completedFrom() != null) {
+        if (searchRequest.getCompletedFrom() != null) {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(ProcessInstanceEntity_.completedDate),
-                    searchRequest.completedFrom()
+                    searchRequest.getCompletedFrom()
                 )
             );
         }
-        if (searchRequest.completedTo() != null) {
+        if (searchRequest.getCompletedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.completedDate), searchRequest.completedTo())
+                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.completedDate), searchRequest.getCompletedTo())
             );
         }
     }
 
     private void applySuspendedFilters(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (searchRequest.suspendedFrom() != null) {
+        if (searchRequest.getSuspendedFrom() != null) {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(ProcessInstanceEntity_.suspendedDate),
-                    searchRequest.suspendedFrom()
+                    searchRequest.getSuspendedFrom()
                 )
             );
         }
-        if (searchRequest.suspendedTo() != null) {
+        if (searchRequest.getSuspendedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.suspendedDate), searchRequest.suspendedTo())
+                criteriaBuilder.lessThan(root.get(ProcessInstanceEntity_.suspendedDate), searchRequest.getSuspendedTo())
             );
         }
     }
