@@ -345,18 +345,11 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_returnApplicationPermissions() throws Exception {
         this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(6)))
+            .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(
                 jsonPath(
                     "$[?(@.role)].role",
-                    containsInAnyOrder(
-                        "ACTIVITI_USER",
-                        "ACTIVITI_ADMIN",
-                        "APPLICATION_MANAGER",
-                        "uma_authorization",
-                        "offline_access",
-                        "DYNAMIC_ROLE"
-                    )
+                    containsInAnyOrder("ACTIVITI_USER", "ACTIVITI_ADMIN", "APPLICATION_MANAGER", "DYNAMIC_ROLE")
                 )
             );
     }
