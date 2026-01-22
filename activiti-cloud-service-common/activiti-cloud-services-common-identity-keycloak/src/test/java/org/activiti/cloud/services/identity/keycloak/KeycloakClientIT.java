@@ -75,7 +75,7 @@ public class KeycloakClientIT {
     private final String ACTIVITI_ADMIN_ROLE = ACTIVITI_ADMIN;
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         //stop test to avoid reuse since tests are modifying roles
         KeycloakContainerApplicationInitializer.getContainer().stop();
     }
@@ -160,7 +160,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetGroupRolesFromCache() {
+    void shouldGetGroupRolesFromCache() {
         Cache cache = cacheManager.getCache("groupRoleMapping");
         cache.clear();
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
@@ -178,7 +178,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserGroupsCache() {
+    void shouldGetUserGroupsCache() {
         Cache cache = cacheManager.getCache("userGroups");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
@@ -197,7 +197,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserRolesCache() throws InterruptedException {
+    void shouldGetUserRolesCache() {
         Cache cache = cacheManager.getCache("userRoleMapping");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
