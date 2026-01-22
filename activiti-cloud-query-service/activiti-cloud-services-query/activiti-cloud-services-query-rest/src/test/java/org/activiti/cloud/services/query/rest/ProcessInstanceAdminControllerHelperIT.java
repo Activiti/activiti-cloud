@@ -19,10 +19,8 @@ import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.bu
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntityWithLinkedProcess;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,7 +29,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
-import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,7 +227,7 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Test
     @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldReturnEmptyListWhenGetLinkedProcessesAdminById() {
+    void shouldReturnEmptyListWhenGetLinkedProcessesAdminByLinkedProcessIdId() {
         ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
         var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
         var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
@@ -245,34 +242,5 @@ class ProcessInstanceAdminControllerHelperIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-    }
-
-    @Test
-    @WithMockUser(roles = { "ACTIVITI_USER", "ACTIVITI_MODELER" })
-    void shouldThrowForbiddenWhenGetLinkedProcessesAdminById() {
-        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
-        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
-        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
-
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        assertThatThrownBy(() ->
-                processInstanceAdminControllerHelper.searchLinkedProcesses(saveLinkedProcessInstanceId, pageable)
-            )
-            .isInstanceOf(ActivitiForbiddenException.class)
-            .hasMessageContaining("Operation not permitted for process instance: " + saveLinkedProcessInstanceId);
-    }
-
-    @Test
-    @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldThrowEntityNotFoundExceptionWhenGetLinkedProcessesAdminById() {
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        assertThatThrownBy(() -> processInstanceAdminControllerHelper.searchLinkedProcesses("linkedProcessId", pageable)
-            )
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Unable to find process for the given id:'linkedProcessId'");
     }
 }

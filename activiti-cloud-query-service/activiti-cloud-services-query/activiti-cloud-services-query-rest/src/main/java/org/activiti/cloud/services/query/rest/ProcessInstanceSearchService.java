@@ -47,7 +47,7 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchRestricted(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
@@ -59,7 +59,7 @@ public class ProcessInstanceSearchService {
         Pageable pageable
     ) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.unrestricted(searchRequest)
         );
@@ -67,8 +67,8 @@ public class ProcessInstanceSearchService {
 
     /**
      * @param processVariableKeys the process variables to fetch for each process instance, each represented by process definition key and variable name
-     * @param pageable the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
-     * @param specification the specification to use for the search. It includes the sorting parameter.
+     * @param pageable            the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
+     * @param specification       the specification to use for the search. It includes the sorting parameter.
      * @return the page of process instances
      */
     private Page<ProcessInstanceEntity> search(
@@ -99,5 +99,14 @@ public class ProcessInstanceSearchService {
             searchRequest
         );
         return processInstanceRepository.count(unrestrictedSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
+            linkedProcessInstanceId
+        );
+
+        return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
     }
 }
