@@ -25,7 +25,6 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepre
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -73,12 +72,6 @@ public class KeycloakClientIT {
 
     private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
     private final String ACTIVITI_ADMIN_ROLE = ACTIVITI_ADMIN;
-
-    @AfterAll
-    static void tearDown() {
-        //stop container to avoid reuse since tests are modifying roles
-        KeycloakContainerApplicationInitializer.getContainer().stop();
-    }
 
     @Test
     public void should_searchUsers() {
