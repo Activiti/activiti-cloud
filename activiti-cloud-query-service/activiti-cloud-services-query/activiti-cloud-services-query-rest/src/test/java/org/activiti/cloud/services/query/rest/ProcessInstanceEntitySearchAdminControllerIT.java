@@ -16,6 +16,8 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -212,5 +214,47 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .then()
             .statusCode(200)
             .body(equalTo("2"));
+    }
+
+    @Test
+    void should_return_AllProcessInstancesWithLinkedProcesses() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedProcessInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process-1")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+        ProcessInstanceEntity linkedProcessInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process-2")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance2.getId()))
+            .body(linkedProcessesPath("linked-process-1"), hasSize(0))
+            .body(linkedProcessesPath("linked-process-2"), hasSize(0))
+            .body(
+                linkedProcessesPath("root-process"),
+                containsInAnyOrder(
+                    Map.of("id", linkedProcessInstance1.getId()),
+                    Map.of("id", linkedProcessInstance2.getId())
+                )
+            );
     }
 }
