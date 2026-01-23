@@ -76,7 +76,7 @@ public class KeycloakClientIT {
 
     @AfterAll
     static void tearDown() {
-        //stop test to avoid reuse since tests are modifying roles
+        //stop container to avoid reuse since tests are modifying roles
         KeycloakContainerApplicationInitializer.getContainer().stop();
     }
 
