@@ -114,7 +114,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private List<User> searchServiceAccountsByUsername(String searchKey) {
-        if (searchKey == null || searchKey.trim().isEmpty()) {
+        if (searchKey == null || searchKey.isBlank()) {
             //prevent listing of all service accounts for security reasons
             return List.of();
         }

@@ -24,7 +24,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static final KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:26.5.0")
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
+        "quay.io/keycloak/keycloak:26.5.0"
+    )
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
@@ -37,13 +39,13 @@ public class KeycloakContainerApplicationInitializer
     }
 
     public void initialize() {
-        if (!keycloakContainer.isRunning()) {
-            keycloakContainer.start();
+        if (!KEYCLOAK_CONTAINER.isRunning()) {
+            KEYCLOAK_CONTAINER.start();
         }
     }
 
     public static KeycloakContainer getContainer() {
-        return keycloakContainer;
+        return KEYCLOAK_CONTAINER;
     }
 
     public static String[] getContainerProperties() {
@@ -57,7 +59,7 @@ public class KeycloakContainerApplicationInitializer
 
     @NotNull
     private static String getAuthServerUrl() {
-        String authServerUrl = keycloakContainer.getAuthServerUrl();
+        String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
         if (authServerUrl.endsWith("/")) {
             return authServerUrl.substring(0, authServerUrl.length() - 1);
         } else {
