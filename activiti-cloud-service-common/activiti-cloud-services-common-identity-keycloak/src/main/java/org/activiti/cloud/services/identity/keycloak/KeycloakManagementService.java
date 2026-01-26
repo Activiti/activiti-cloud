@@ -56,8 +56,8 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     public static final int PAGE_START = 0;
     public static final int PAGE_SIZE = 50;
-
     public static final UserTypeSearchParam DEFAULT_USERTYPE = UserTypeSearchParam.INTERACTIVE;
+    public static final String KEYCLOAK_SERVICE_ACCOUNT_PREFIX = "service-account-";
 
     private final KeycloakClient keycloakClient;
 
@@ -91,7 +91,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
             //UserType=INTERACTIVE: search only users
             case INTERACTIVE -> searchUsers(searchKey, filterDeactivatedUsers);
             //UserType=ALL: search both users and service accounts. Due to Keycloak search params behavior, search must be done by username.
-            case ALL -> searchUsersByUsername(searchKey);
+            case ALL -> searchUsersAndServiceAccounts(searchKey, filterDeactivatedUsers);
         };
     }
 
@@ -106,9 +106,20 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
             .collect(Collectors.toList());
     }
 
-    private List<User> searchUsersByUsername(String searchKey) {
+    private List<User> searchUsersAndServiceAccounts(String searchKey, boolean filterDeactivatedUsers) {
+        List<User> users = searchUsers(searchKey, filterDeactivatedUsers);
+        List<User> serviceAccountUsers = searchServiceAccountsByUsername(searchKey);
+        users.addAll(serviceAccountUsers);
+        return users;
+    }
+
+    private List<User> searchServiceAccountsByUsername(String searchKey) {
+        if (searchKey == null || searchKey.isBlank()) {
+            //prevent listing of all service accounts for security reasons
+            return List.of();
+        }
         return keycloakClient
-            .searchUsersByUsername(searchKey)
+            .searchUsersByUsername(KEYCLOAK_SERVICE_ACCOUNT_PREFIX + searchKey)
             .stream()
             .map(KeycloakUserToUser::toUser)
             .collect(Collectors.toList());

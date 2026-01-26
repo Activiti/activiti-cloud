@@ -16,28 +16,21 @@
 package org.activiti.cloud.services.test.containers;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import java.time.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.3")
+    private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
+        "quay.io/keycloak/keycloak:26.5.0"
+    )
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
-        .waitingFor(legacyHealthCheckStrategy())
         .withReuse(true);
-
-    // Remove once Keycloak is migrated to >= 25. See: https://github.com/dasniko/testcontainers-keycloak/pull/142
-    private static @NotNull WaitStrategy legacyHealthCheckStrategy() {
-        return Wait.forHttp("/health/started").forPort(8080).withStartupTimeout(Duration.ofMinutes(2));
-    }
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -46,13 +39,13 @@ public class KeycloakContainerApplicationInitializer
     }
 
     public void initialize() {
-        if (!keycloakContainer.isRunning()) {
-            keycloakContainer.start();
+        if (!KEYCLOAK_CONTAINER.isRunning()) {
+            KEYCLOAK_CONTAINER.start();
         }
     }
 
     public static KeycloakContainer getContainer() {
-        return keycloakContainer;
+        return KEYCLOAK_CONTAINER;
     }
 
     public static String[] getContainerProperties() {
@@ -66,7 +59,7 @@ public class KeycloakContainerApplicationInitializer
 
     @NotNull
     private static String getAuthServerUrl() {
-        String authServerUrl = keycloakContainer.getAuthServerUrl();
+        String authServerUrl = KEYCLOAK_CONTAINER.getAuthServerUrl();
         if (authServerUrl.endsWith("/")) {
             return authServerUrl.substring(0, authServerUrl.length() - 1);
         } else {
