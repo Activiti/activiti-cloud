@@ -19,7 +19,7 @@
     <module>activiti-cloud-starter-query-rest</module>
   </modules>
   <properties>
-    <activiti.version>0.0.1-PR-5226-2564-SNAPSHOT</activiti.version>
+    <activiti.version>0.0.1-PR-5226-2565-SNAPSHOT</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
