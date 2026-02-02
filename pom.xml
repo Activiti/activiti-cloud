@@ -415,6 +415,7 @@
                       <exclude>junit:*:*:*:compile</exclude>
                       <exclude>org.junit.jupiter:*:*:*:compile</exclude>
                       <exclude>org.awaitility:awaitility:*:*:compile</exclude>
+                      <exclude>net.javacrumbs.json-unit:*:*:compile</exclude>
                     </excludes>
                     <searchTransitive>true</searchTransitive>
                   </bannedDependencies>
