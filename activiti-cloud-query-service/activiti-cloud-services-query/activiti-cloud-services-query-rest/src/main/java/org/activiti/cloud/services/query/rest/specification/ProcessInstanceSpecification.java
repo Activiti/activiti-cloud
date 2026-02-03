@@ -30,7 +30,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
-import org.jspecify.annotations.NonNull;
 import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
@@ -95,6 +94,7 @@ public class ProcessInstanceSpecification
         applyIncludeSubprocesses(root);
         applyLinkedProcessInstanceId(root);
         applyLinkedProcessInstanceType(root);
+        applyProcessRelatedTo(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
     }
 
@@ -250,6 +250,17 @@ public class ProcessInstanceSpecification
                             .get(TaskCandidateUserEntity_.userId),
                         userId
                     )
+                )
+            );
+        }
+    }
+
+    private void applyProcessRelatedTo(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (!CollectionUtils.isEmpty(searchRequest.getProcessRelatedTo())) {
+            predicates.add(
+                criteriaBuilder.or(
+                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.getProcessRelatedTo()),
+                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
                 )
             );
         }
