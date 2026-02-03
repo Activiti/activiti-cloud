@@ -296,7 +296,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     }
 
     public Boolean getIncludeUnlinkedProcesses() {
-        return includeUnlinkedProcesses == null || includeUnlinkedProcesses;
+        return Boolean.TRUE.equals(includeUnlinkedProcesses);
     }
 
     public void setIncludeUnlinkedProcesses(Boolean includeUnlinkedProcesses) {
