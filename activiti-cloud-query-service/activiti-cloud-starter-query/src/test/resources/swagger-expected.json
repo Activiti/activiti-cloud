@@ -7363,7 +7363,7 @@
           "includeSubprocesses": {
             "type": "boolean"
           },
-          "linkedProcessInstanceId":{"items":{"type":"string"},"type":"array","uniqueItems":true},"linkedProcessInstanceType":{"items":{"type":"string"},"type":"array","uniqueItems":true}
+          "linkedProcessInstanceId":{"items":{"type":"string"},"type":"array","uniqueItems":true},"linkedProcessInstanceType":{"items":{"type":"string"},"type":"array","uniqueItems":true}, "processRelatedTo":{"type":"array","items":{"type":"string"},"uniqueItems":true}
         },
         "title" : "ProcessInstanceSearchRequest_ProcessVariables"
       },
