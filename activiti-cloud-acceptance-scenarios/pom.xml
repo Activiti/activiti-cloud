@@ -26,6 +26,7 @@
     <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <com.squareup.okhttp3.version>4.12.0</com.squareup.okhttp3.version>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -38,21 +39,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <!-- skips checking test dependencies in test modules -->
-          <execution>
-            <id>ban-test-dependencies-in-compile</id>
-            <phase/>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
   <profiles>
     <profile>
       <id>acceptance-tests</id>

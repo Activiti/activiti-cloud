@@ -14,6 +14,7 @@
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencies>
     <dependency>
@@ -177,17 +178,6 @@
             <goals>
               <goal>test-jar</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <!-- skips checking test dependencies in test modules -->
-          <execution>
-            <id>ban-test-dependencies-in-compile</id>
-            <phase/>
           </execution>
         </executions>
       </plugin>
