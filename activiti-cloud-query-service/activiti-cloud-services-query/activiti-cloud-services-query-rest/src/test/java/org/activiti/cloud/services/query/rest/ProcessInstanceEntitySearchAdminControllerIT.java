@@ -373,4 +373,50 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()));
     }
+
+    @Test
+    void should_return_UnlinkedProcessInstances() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeUnlinkedProcesses(true);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()));
+    }
+
+    @Test
+    void should_not_return_UnlinkedProcessInstances() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeUnlinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body("page.totalElements", equalTo(0))
+            .body("page.totalPages", equalTo(0));
+    }
 }
