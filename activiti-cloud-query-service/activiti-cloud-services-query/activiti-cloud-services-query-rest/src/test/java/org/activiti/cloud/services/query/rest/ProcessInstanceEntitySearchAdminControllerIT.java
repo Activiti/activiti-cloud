@@ -19,6 +19,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -256,5 +257,41 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
                     Map.of("id", linkedProcessInstance2.getId())
                 )
             );
+    }
+
+    @Test
+    void should_return_AllRelatedToProcessInstancesForASpecificProcess() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity subProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .withRootProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+        ProcessInstanceEntity linkedProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessRelatedTo(rootProcessInstance.getId());
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(rootProcessInstance.getId())))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()));
     }
 }

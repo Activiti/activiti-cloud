@@ -52,6 +52,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Boolean includeSubprocesses;
     private Set<String> linkedProcessInstanceId;
     private Set<String> linkedProcessInstanceType;
+    private Set<String> processRelatedTo;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -172,6 +173,11 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder withProcessRelatedTo(String... processRelatedToIds) {
+        this.processRelatedTo = Set.of(processRelatedToIds);
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -207,7 +213,8 @@ public class ProcessInstanceSearchRequestBuilder {
             sort,
             includeSubprocesses,
             linkedProcessInstanceId,
-            linkedProcessInstanceType
+            linkedProcessInstanceType,
+            processRelatedTo
         );
     }
 

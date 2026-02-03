@@ -167,4 +167,9 @@ public class ProcessInstanceBuilder {
         process.setTasks(tasks);
         return processInstanceRepository.save(process);
     }
+
+    public ProcessInstanceBuilder withRootProcessInstanceId(String rootProcessInstanceId) {
+        process.setRootProcessInstanceId(rootProcessInstanceId);
+        return this;
+    }
 }
