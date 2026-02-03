@@ -19,14 +19,17 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -256,5 +259,48 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
                     Map.of("id", linkedProcessInstance2.getId())
                 )
             );
+    }
+
+    @Test
+    void should_return_AllRelatedToProcessInstancesForASpecificProcess() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity subProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .withRootProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+        ProcessInstanceEntity linkedProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessRelatedTo(rootProcessInstance.getId());
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(rootProcessInstance.getId())))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()))//            .body( //            .body(linkedProcessesPath("linked-process-2"), hasSize(0)) //            .body(linkedProcessesPath("linked-process-1"), hasSize(0))
+        //                linkedProcessesPath("root-process"),
+        //                containsInAnyOrder(
+        //                    Map.of("id", linkedProcessInstance1.getId()),
+        //                    Map.of("id", linkedProcessInstance2.getId())
+        //                )
+        //            )
+        ;
     }
 }
