@@ -399,7 +399,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
     @Test
     void should_not_return_UnlinkedProcessInstances() {
-        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withName("root-process")
             .withInitiator(USER)
