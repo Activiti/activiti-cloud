@@ -268,14 +268,7 @@ public class ProcessInstanceSpecification
     }
 
     private void applyIncludeUnlinkedProcesses(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (Boolean.TRUE.equals(searchRequest.getIncludeUnlinkedProcesses())) {
-            predicates.add(
-                criteriaBuilder.and(
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNull(),
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNotNull()
-                )
-            );
-        } else {
+        if (Boolean.FALSE.equals(searchRequest.getIncludeUnlinkedProcesses())) {
             predicates.add(
                 criteriaBuilder.or(
                     root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNotNull(),

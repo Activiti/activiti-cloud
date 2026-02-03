@@ -376,11 +376,17 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
     @Test
     void should_return_UnlinkedProcessInstances() {
-        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+        var unlinkedProcess = queryTestUtils
             .buildProcessInstance()
-            .withName("root-process")
+            .withName("unlinked-process")
             .withInitiator(USER)
             .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
@@ -393,17 +399,24 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(unlinkedProcess.getId()));
     }
 
     @Test
     void should_not_return_UnlinkedProcessInstances() {
-        queryTestUtils
+        var unlinkedProcess = queryTestUtils
             .buildProcessInstance()
-            .withName("root-process")
+            .withName("unlinked-process")
             .withInitiator(USER)
             .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
@@ -416,7 +429,10 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body("page.totalElements", equalTo(0))
-            .body("page.totalPages", equalTo(0));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(unlinkedProcess.getId())))
+            .body("page.totalElements", equalTo(1))
+            .body("page.totalPages", equalTo(1));
     }
 }
