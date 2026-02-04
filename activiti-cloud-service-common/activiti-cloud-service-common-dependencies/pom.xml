@@ -64,6 +64,7 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-services-test</artifactId>
         <version>${project.version}</version>
+        <classifier>tests</classifier>
         <type>test-jar</type>
         <scope>test</scope>
       </dependency>
