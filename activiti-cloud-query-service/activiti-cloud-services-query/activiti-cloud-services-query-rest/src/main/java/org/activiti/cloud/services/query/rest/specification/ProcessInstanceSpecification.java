@@ -96,6 +96,7 @@ public class ProcessInstanceSpecification
         applyLinkedProcessInstanceType(root);
         applyProcessRelatedTo(root, criteriaBuilder);
         applyIncludeUnlinkedProcesses(root, criteriaBuilder);
+        applyIncludeLinkedProcesses(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
     }
 
@@ -272,6 +273,17 @@ public class ProcessInstanceSpecification
             predicates.add(
                 criteriaBuilder.or(
                     root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNotNull(),
+                    root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNull()
+                )
+            );
+        }
+    }
+
+    private void applyIncludeLinkedProcesses(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (Boolean.FALSE.equals(searchRequest.getIncludeLinkedProcesses())) {
+            predicates.add(
+                criteriaBuilder.and(
+                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNull(),
                     root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNull()
                 )
             );

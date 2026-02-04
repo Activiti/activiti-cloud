@@ -54,6 +54,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<String> linkedProcessInstanceType;
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
+    private Boolean includeLinkedProcesses;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -221,7 +222,8 @@ public class ProcessInstanceSearchRequestBuilder {
             linkedProcessInstanceId,
             linkedProcessInstanceType,
             processRelatedTo,
-            includeUnlinkedProcesses
+            includeUnlinkedProcesses,
+            includeLinkedProcesses
         );
     }
 
@@ -233,5 +235,10 @@ public class ProcessInstanceSearchRequestBuilder {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ProcessInstanceSearchRequestBuilder withIncludeLinkedProcesses(Boolean includeLinkedProcesses) {
+        this.includeLinkedProcesses = includeLinkedProcesses;
+        return this;
     }
 }
