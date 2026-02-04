@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,7 +32,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
-import org.springframework.data.domain.Page;
 
 public class ProcessInstanceBuilder {
 
