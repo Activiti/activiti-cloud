@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -287,7 +286,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
                 .contains(Map.of("id", linkedProcessInstance.getId()));
             assertThat(response.body().jsonPath().getList(linkedProcessesPath(linkedProcessInstance.getName())))
-                .hasSize(0);
+                .isEmpty();
         }
     }
 
@@ -334,10 +333,8 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .contains(rootProcessInstance.getId());
 
         for (ProcessInstanceEntity linkedProcessInstance : linkedProcesses) {
-            //            assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(linkedProcessInstance.getId());
             assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
                 .contains(Map.of("id", linkedProcessInstance.getId()));
-            //            assertThat(response.body().jsonPath().getList(linkedProcessesPath(linkedProcessInstance.getName()))).hasSize(0);
         }
     }
 
