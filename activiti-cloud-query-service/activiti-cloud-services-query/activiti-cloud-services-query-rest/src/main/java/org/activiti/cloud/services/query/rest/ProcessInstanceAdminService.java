@@ -139,4 +139,8 @@ public class ProcessInstanceAdminService {
     public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
         return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId, pageable);
     }
+
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId);
+    }
 }

@@ -231,4 +231,21 @@ public class ProcessInstanceService {
 
         return processInstanceRepository.findAll(restrictedSpecification, pageable);
     }
+
+    @Transactional(readOnly = true)
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        entityFinder.findById(
+            processInstanceRepository,
+            linkedProcessInstanceId,
+            "Unable to find process for the given id:'" + linkedProcessInstanceId + "'"
+        );
+
+        String userId = securityManager.getAuthenticatedUserId();
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
+            linkedProcessInstanceId,
+            userId
+        );
+
+        return processInstanceRepository.findAll(restrictedSpecification);
+    }
 }

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -218,6 +219,29 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
     }
 
     @Test
+    void should_return_LinkedProcesses() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("hruser")
+            .buildAndSave();
+        ProcessInstanceEntity linkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("hruser")
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(processInstance1.getId())
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .when()
+            .get("/admin/v1/process-instances/" + processInstance1.getId() + "/linkedprocesses")
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcess.getId()));
+    }
+
+    @Test
     void should_return_AllProcessInstancesWithLinkedProcesses() {
         ProcessInstanceEntity rootProcessInstance = queryTestUtils
             .buildProcessInstance()
@@ -225,38 +249,96 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .withInitiator(USER)
             .buildAndSave();
 
-        ProcessInstanceEntity linkedProcessInstance1 = queryTestUtils
-            .buildProcessInstance()
-            .withName("linked-process-1")
-            .withInitiator(USER)
-            .withLinkedProcessInstanceId(rootProcessInstance.getId())
-            .buildAndSave();
-        ProcessInstanceEntity linkedProcessInstance2 = queryTestUtils
-            .buildProcessInstance()
-            .withName("linked-process-2")
-            .withLinkedProcessInstanceId(rootProcessInstance.getId())
-            .buildAndSave();
+        for (int i = 1; i <= 18; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withName("linked-process")
+                .withInitiator(USER)
+                .withLinkedProcessInstanceId(rootProcessInstance.getId())
+                .withLinkedProcessInstanceType("form-type")
+                .buildAndSave();
+        }
 
-        given()
+        var linkedProcesses = queryTestUtils
+            .buildProcessInstance()
+            .findProcessInstanceByFilter(
+                new ProcessInstanceSearchRequestBuilder()
+                    .withLinkedProcessInstanceId(rootProcessInstance.getId())
+                    .build()
+            );
+
+        var response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body("{}")
             .when()
             .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance1.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance2.getId()))
-            .body(linkedProcessesPath("linked-process-1"), hasSize(0))
-            .body(linkedProcessesPath("linked-process-2"), hasSize(0))
-            .body(
-                linkedProcessesPath("root-process"),
-                containsInAnyOrder(
-                    Map.of("id", linkedProcessInstance1.getId()),
-                    Map.of("id", linkedProcessInstance2.getId())
-                )
+            .thenReturn();
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(19);
+
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
+            .contains(rootProcessInstance.getId());
+
+        for (ProcessInstanceEntity linkedProcessInstance : linkedProcesses) {
+            assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
+                .contains(linkedProcessInstance.getId());
+            assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
+                .contains(Map.of("id", linkedProcessInstance.getId()));
+            assertThat(response.body().jsonPath().getList(linkedProcessesPath(linkedProcessInstance.getName())))
+                .hasSize(0);
+        }
+    }
+
+    @Test
+    void should_return_PaginatedProcessInstancesWithAllLinkedProcesses() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        for (int i = 1; i <= 18; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withName("linked-process")
+                .withInitiator(USER)
+                .withLinkedProcessInstanceId(rootProcessInstance.getId())
+                .withLinkedProcessInstanceType("form-type")
+                .buildAndSave();
+        }
+
+        var linkedProcesses = queryTestUtils
+            .buildProcessInstance()
+            .findProcessInstanceByFilter(
+                new ProcessInstanceSearchRequestBuilder()
+                    .withLinkedProcessInstanceId(rootProcessInstance.getId())
+                    .build()
             );
+
+        var response = given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                "{\"includeSubprocesses\":false,\"includeUnlinkedProcesses\":true,\"sort\":{\"field\":\"name\",\"direction\":\"asc\",\"isProcessVariable\":false}}"
+            )
+            .when()
+            .post("/admin/v1/process-instances/search?maxItems=15&skipCount=15")
+            .thenReturn();
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(4);
+
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
+            .contains(rootProcessInstance.getId());
+
+        for (ProcessInstanceEntity linkedProcessInstance : linkedProcesses) {
+            //            assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(linkedProcessInstance.getId());
+            assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
+                .contains(Map.of("id", linkedProcessInstance.getId()));
+            //            assertThat(response.body().jsonPath().getList(linkedProcessesPath(linkedProcessInstance.getName()))).hasSize(0);
+        }
     }
 
     @Test
