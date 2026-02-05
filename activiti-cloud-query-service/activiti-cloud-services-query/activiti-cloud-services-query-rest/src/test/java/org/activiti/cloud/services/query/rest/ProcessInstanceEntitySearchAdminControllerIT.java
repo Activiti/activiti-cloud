@@ -373,4 +373,66 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()));
     }
+
+    @Test
+    void should_return_UnlinkedProcessInstances() {
+        var unlinkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("unlinked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeUnlinkedProcesses(true);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(unlinkedProcess.getId()));
+    }
+
+    @Test
+    void should_not_return_UnlinkedProcessInstances() {
+        var unlinkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("unlinked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeUnlinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(unlinkedProcess.getId())))
+            .body("page.totalElements", equalTo(1))
+            .body("page.totalPages", equalTo(1));
+    }
 }
