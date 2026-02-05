@@ -69,7 +69,7 @@ public class ProcessInstanceControllerHelper {
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
         processInstances = mapAllSubprocesses(processInstances, pageable);
-        return mapAllLinkedProcesses(processInstances, pageable);
+        return mapAllLinkedProcesses(processInstances);
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -96,16 +96,12 @@ public class ProcessInstanceControllerHelper {
         return processInstanceService.count(searchRequest);
     }
 
-    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(
-        Page<ProcessInstanceEntity> processInstances,
-        Pageable pageable
-    ) {
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
         processInstances
             .getContent()
             .forEach(processInstance -> {
-                Page<ProcessInstanceEntity> linkedProcesses = processInstanceService.searchLinkedProcesses(
-                    processInstance.getId(),
-                    pageable
+                List<ProcessInstanceEntity> linkedProcesses = processInstanceService.searchLinkedProcesses(
+                    processInstance.getId()
                 );
                 processInstance.setLinkedProcesses(mapLinkedProcessEntities(linkedProcesses));
             });
@@ -114,14 +110,13 @@ public class ProcessInstanceControllerHelper {
     }
 
     public static Set<QueryCloudSubprocessInstance> mapLinkedProcessEntities(
-        Page<ProcessInstanceEntity> linkedProcesses
+        List<ProcessInstanceEntity> linkedProcesses
     ) {
         if (linkedProcesses == null) {
             return Set.of();
         }
 
         return linkedProcesses
-            .getContent()
             .stream()
             .map(lp -> {
                 QueryCloudSubprocessInstance instance = new QueryCloudSubprocessInstance();

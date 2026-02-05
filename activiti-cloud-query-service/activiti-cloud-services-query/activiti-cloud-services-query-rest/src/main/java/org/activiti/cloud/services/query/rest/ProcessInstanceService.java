@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class ProcessInstanceService {
 
+    private static final String UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID = "Unable to find process for the given id:'";
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceService.class);
 
     private static final String ADMIN_ROLE = "ACTIVITI_ADMIN";
@@ -142,7 +143,7 @@ public class ProcessInstanceService {
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
             processInstanceRepository,
             processInstanceId,
-            "Unable to find process for the given id:'" + processInstanceId + "'"
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + processInstanceId + "'"
         );
 
         if (!canReadOrAdmin(processInstanceEntity)) {
@@ -220,7 +221,7 @@ public class ProcessInstanceService {
         entityFinder.findById(
             processInstanceRepository,
             linkedProcessInstanceId,
-            "Unable to find process for the given id:'" + linkedProcessInstanceId + "'"
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + linkedProcessInstanceId + "'"
         );
 
         String userId = securityManager.getAuthenticatedUserId();
@@ -230,5 +231,22 @@ public class ProcessInstanceService {
         );
 
         return processInstanceRepository.findAll(restrictedSpecification, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        entityFinder.findById(
+            processInstanceRepository,
+            linkedProcessInstanceId,
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + linkedProcessInstanceId + "'"
+        );
+
+        String userId = securityManager.getAuthenticatedUserId();
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
+            linkedProcessInstanceId,
+            userId
+        );
+
+        return processInstanceRepository.findAll(restrictedSpecification);
     }
 }
