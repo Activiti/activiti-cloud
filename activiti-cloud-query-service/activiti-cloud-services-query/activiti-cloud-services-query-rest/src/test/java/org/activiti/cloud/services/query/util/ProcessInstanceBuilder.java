@@ -30,6 +30,8 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 
 public class ProcessInstanceBuilder {
 
@@ -171,5 +173,11 @@ public class ProcessInstanceBuilder {
     public ProcessInstanceBuilder withRootProcessInstanceId(String rootProcessInstanceId) {
         process.setRootProcessInstanceId(rootProcessInstanceId);
         return this;
+    }
+
+    public List<ProcessInstanceEntity> findProcessInstanceByFilter(ProcessInstanceSearchRequest searchRequest) {
+        var specification = ProcessInstanceSpecification.unrestricted(searchRequest);
+
+        return processInstanceRepository.findAll(specification);
     }
 }

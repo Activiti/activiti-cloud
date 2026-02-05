@@ -69,7 +69,7 @@ public class ProcessInstanceAdminControllerHelper {
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
         processInstances = processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
-        return mapAllLinkedProcesses(processInstances, pageable);
+        return mapAllLinkedProcesses(processInstances);
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -84,16 +84,12 @@ public class ProcessInstanceAdminControllerHelper {
         return processInstanceAdminService.searchLinkedProcesses(linkedProcessInstanceId, pageable);
     }
 
-    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(
-        Page<ProcessInstanceEntity> processInstances,
-        Pageable pageable
-    ) {
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
         processInstances
             .getContent()
             .forEach(processInstance -> {
-                Page<ProcessInstanceEntity> linkedProcesses = processInstanceAdminService.searchLinkedProcesses(
-                    processInstance.getId(),
-                    pageable
+                List<ProcessInstanceEntity> linkedProcesses = processInstanceAdminService.searchLinkedProcesses(
+                    processInstance.getId()
                 );
                 processInstance.setLinkedProcesses(
                     ProcessInstanceControllerHelper.mapLinkedProcessEntities(linkedProcesses)
