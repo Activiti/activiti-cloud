@@ -35,9 +35,9 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest(
     classes = { QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class },
@@ -54,7 +54,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @Override
     protected String getSearchEndpoint() {
@@ -432,6 +432,70 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(unlinkedProcess.getId())))
+            .body("page.totalElements", equalTo(1))
+            .body("page.totalPages", equalTo(1));
+    }
+
+    @Test
+    void should_return_LinkedProcessInstances() {
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var linkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(normalProcess.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeLinkedProcesses(true);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcess.getId()));
+    }
+
+    @Test
+    void should_not_return_LinkedProcessInstances() {
+        var normalProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var linkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(normalProcess.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeLinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())))
             .body("page.totalElements", equalTo(1))
             .body("page.totalPages", equalTo(1));
     }
