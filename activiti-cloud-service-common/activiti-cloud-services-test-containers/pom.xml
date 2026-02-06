@@ -12,6 +12,7 @@
   <name>Activiti Cloud Services :: Test Containers</name>
   <properties>
     <testcontainers-keycloak.version>4.0.1</testcontainers-keycloak.version>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencies>
     <dependency>

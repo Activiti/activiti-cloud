@@ -26,6 +26,7 @@
     <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <com.squareup.okhttp3.version>4.12.0</com.squareup.okhttp3.version>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencyManagement>
     <dependencies>

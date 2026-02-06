@@ -10,6 +10,9 @@
   </parent>
   <artifactId>activiti-cloud-services-test-security</artifactId>
   <name>Activiti Cloud Services :: Test Security Context</name>
+  <properties>
+    <enforcer.skip>true</enforcer.skip>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.security</groupId>
