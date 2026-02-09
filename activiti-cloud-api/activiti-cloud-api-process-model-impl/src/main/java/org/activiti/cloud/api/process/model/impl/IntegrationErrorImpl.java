@@ -24,6 +24,7 @@ import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.springframework.util.StringUtils;
 
 public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements IntegrationError {
 
@@ -51,7 +52,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
 
         Throwable cause = findRootCause(error);
 
-        this.errorMessage = cause.getMessage();
+        this.errorMessage = this.getDetailedErrorMessage(error);
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
@@ -150,5 +151,55 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         }
 
         return rootCause;
+    }
+
+    private String getDetailedErrorMessage(Throwable error) {
+        var message = error.getMessage();
+        var rootCause = this.findRootCause(error);
+        var rootMessage = rootCause.getMessage();
+
+        if (StringUtils.hasText(rootMessage)) {
+            if (this.isJsonFormat(rootMessage)) return rootMessage;
+            rootMessage = this.removeClassNameFromErrorMessage(rootMessage);
+        }
+
+        if (StringUtils.hasText(message)) {
+            if (this.isJsonFormat(message)) return message;
+            message = this.removeClassNameFromErrorMessage(message);
+        }
+
+        if (!StringUtils.hasText(message)) return rootMessage;
+        if (!StringUtils.hasText(rootMessage)) return message;
+
+        if (rootMessage.toLowerCase().contains(message.toLowerCase())) return rootMessage;
+        if (message.toLowerCase().contains(rootMessage.toLowerCase())) return message;
+
+        return message + " caused by: " + rootMessage;
+    }
+
+    private boolean isJsonFormat(String message) {
+        return message.startsWith("{") && message.endsWith("}");
+    }
+
+    private String removeClassNameFromErrorMessage(String message) {
+        int endIndex = message.indexOf(":");
+        if (this.startsWithClassName(message, endIndex)) {
+            var messageWithoutClassName = message.substring(endIndex + 1);
+            if (StringUtils.hasText(messageWithoutClassName)) return messageWithoutClassName.trim(); else return null;
+        }
+        return message;
+    }
+
+    private boolean startsWithClassName(String message, int endIndex) {
+        return endIndex != -1 && isValidClassName(message.substring(0, endIndex));
+    }
+
+    private boolean isValidClassName(String clazz) {
+        try {
+            Class.forName(clazz, false, Thread.currentThread().getContextClassLoader());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
