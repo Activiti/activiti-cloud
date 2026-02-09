@@ -31,6 +31,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
+import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -151,5 +152,15 @@ public class ProcessInstanceController {
     @PostMapping("/count")
     public Long countProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {
         return processInstanceControllerHelper.countProcessInstances(searchRequest);
+    }
+
+    @Operation(summary = "Link orphan process instances to a main process instance")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/{mainProcessInstanceId}/link")
+    public void linkProcessInstances(
+        @RequestBody LinkProcessInstancesRequest request,
+        @PathVariable String mainProcessInstanceId
+    ) {
+        processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstanceId);
     }
 }

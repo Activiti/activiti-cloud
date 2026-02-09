@@ -20,8 +20,10 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -248,5 +250,44 @@ public class ProcessInstanceService {
         );
 
         return processInstanceRepository.findAll(restrictedSpecification);
+    }
+
+    public void linkProcessInstances(
+        String mainProcessInstanceId,
+        List<String> processInstanceIds,
+        String linkProcessInstanceType
+    ) {
+        var mainProcess = entityFinder.findById(
+            processInstanceRepository,
+            mainProcessInstanceId,
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + mainProcessInstanceId + "'"
+        );
+
+        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequest();
+        request.setId(new HashSet<>(processInstanceIds));
+        request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
+
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestricted(request);
+
+        var orphanProcesses = processInstanceRepository.findAll(unrestrictedSpecification);
+
+        if (orphanProcesses.isEmpty()) {
+            LOGGER.debug("No process instance found for the given ids:'{}'", processInstanceIds);
+            return;
+        }
+
+        orphanProcesses.forEach(orphanProcess -> {
+            if (orphanProcess.getInitiator().equals(mainProcess.getInitiator())) {
+                orphanProcess.setLinkedProcessInstanceId(mainProcess.getId());
+                processInstanceRepository.save(orphanProcess);
+            } else {
+                LOGGER.debug(
+                    "User {} not permitted to link process instance id {} to main process instance id {}",
+                    securityManager.getAuthenticatedUserId(),
+                    orphanProcess.getId(),
+                    mainProcessInstanceId
+                );
+            }
+        });
     }
 }
