@@ -263,7 +263,7 @@ public class ProcessInstanceService {
             UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + mainProcessInstanceId + "'"
         );
 
-        ProcessInstanceSearchRequest request = new ProcessInstanceSearchRequest();
+        var request = new ProcessInstanceSearchRequest();
         request.setId(new HashSet<>(processInstanceIds));
         request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
 
