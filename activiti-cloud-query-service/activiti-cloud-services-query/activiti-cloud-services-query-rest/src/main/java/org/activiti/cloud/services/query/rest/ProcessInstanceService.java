@@ -267,9 +267,9 @@ public class ProcessInstanceService {
         request.setId(new HashSet<>(processInstanceIds));
         request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
 
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestricted(request);
-
-        var orphanProcesses = processInstanceRepository.findAll(unrestrictedSpecification);
+        var orphanProcesses = processInstanceRepository.findAll(
+            ProcessInstanceSpecification.restricted(request, securityManager.getAuthenticatedUserId())
+        );
 
         if (orphanProcesses.isEmpty()) {
             LOGGER.debug("No process instance found for the given ids:'{}'", processInstanceIds);

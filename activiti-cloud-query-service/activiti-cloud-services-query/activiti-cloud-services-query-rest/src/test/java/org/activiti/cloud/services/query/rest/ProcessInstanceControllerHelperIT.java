@@ -279,7 +279,7 @@ class ProcessInstanceControllerHelperIT {
         }
 
         @Test
-        void shouldNotLinkProcessInstancesIfUserIsNotInitiator() {
+        void shouldNotLinkProcessInstancesWithDifferentMainProcessInstanceInitiator() {
             ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
             mainProcessInstance.setInitiator("anotherUser");
             processInstanceRepository.save(mainProcessInstance);
@@ -289,17 +289,71 @@ class ProcessInstanceControllerHelperIT {
             orphanProcessInstance.setLinkedProcessInstanceType("form-type");
             processInstanceRepository.save(orphanProcessInstance);
 
+            ProcessInstanceEntity orphanProcessInstanceWithSameMainInitiator = buildProcessInstanceEntity();
+            orphanProcessInstanceWithSameMainInitiator.setInitiator("anotherUser");
+            orphanProcessInstanceWithSameMainInitiator.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithSameMainInitiator);
+
             var request = new LinkProcessInstancesRequest();
-            request.setProcessInstanceIds(List.of(orphanProcessInstance.getId()));
+            request.setProcessInstanceIds(
+                List.of(orphanProcessInstance.getId(), orphanProcessInstanceWithSameMainInitiator.getId())
+            );
             request.setLinkProcessInstanceType("form-type");
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
             processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
 
-            ProcessInstanceEntity updatedOrphan = processInstanceRepository
+            ProcessInstanceEntity orphanProcessTestUserInitiator = processInstanceRepository
                 .findById(orphanProcessInstance.getId())
                 .orElseThrow();
 
-            assertThat(updatedOrphan.getLinkedProcessInstanceId()).isNull();
+            assertThat(orphanProcessTestUserInitiator.getLinkedProcessInstanceId()).isNull();
+
+            ProcessInstanceEntity orphanProcessMainProcessInitiator = processInstanceRepository
+                .findById(orphanProcessInstanceWithSameMainInitiator.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessMainProcessInitiator.getLinkedProcessInstanceId()).isNull();
+        }
+
+        @Test
+        void shouldLinkOnlyProcessInstancesWithInitiatorSameLoggedInUser() {
+            ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
+            mainProcessInstance.setInitiator(TEST_USER);
+            processInstanceRepository.save(mainProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
+            orphanProcessInstance.setInitiator("anotherUser");
+            orphanProcessInstance.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstanceWithSameMainInitiator = buildProcessInstanceEntity();
+            orphanProcessInstanceWithSameMainInitiator.setInitiator(TEST_USER);
+            orphanProcessInstanceWithSameMainInitiator.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithSameMainInitiator);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(
+                List.of(orphanProcessInstance.getId(), orphanProcessInstanceWithSameMainInitiator.getId())
+            );
+            request.setLinkProcessInstanceType("form-type");
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
+
+            ProcessInstanceEntity orphanProcessTestUserInitiator = processInstanceRepository
+                .findById(orphanProcessInstance.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessTestUserInitiator.getLinkedProcessInstanceId()).isNull();
+
+            ProcessInstanceEntity orphanProcessMainProcessInitiator = processInstanceRepository
+                .findById(orphanProcessInstanceWithSameMainInitiator.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessMainProcessInitiator.getLinkedProcessInstanceId()).isNotNull();
         }
 
         @Test
