@@ -21,7 +21,7 @@ runs:
   using: composite
   steps:
 
-    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+    - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
       with:
         node-version: '20.18.3'
 
@@ -31,14 +31,14 @@ runs:
       run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
 
     - name: Setup cache
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.npm-cache-dir.outputs.dir }}
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ee10ec96d25c2cdfc6f45d3398aae1c6190f4d5d # v10.5.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@1c7cd7fb5f8130b8ddc9d512ecb958c12fc18e89 # v12.10.2
 
     - name: Add GitHub Step Summary
       shell: bash

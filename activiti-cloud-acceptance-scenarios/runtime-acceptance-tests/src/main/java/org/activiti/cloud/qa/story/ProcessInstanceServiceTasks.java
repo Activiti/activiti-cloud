@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,14 @@ import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.activiti.cloud.acc.core.steps.runtime.ProcessRuntimeBundleSteps;
 import org.activiti.cloud.acc.core.steps.runtime.admin.ServiceTasksAdminSteps;
+import org.activiti.cloud.acc.shared.steps.VariableBufferSteps;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
+import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.PagedModel;
@@ -68,6 +70,9 @@ public class ProcessInstanceServiceTasks {
     @Steps
     private ServiceTasksAdminSteps serviceTasksAdminSteps;
 
+    @Steps
+    private VariableBufferSteps variableBufferSteps;
+
     @When("services are started")
     public void checkServicesStatus() {
         processRuntimeBundleSteps.checkServicesHealth();
@@ -75,12 +80,24 @@ public class ProcessInstanceServiceTasks {
         auditSteps.checkServicesHealth();
     }
 
+    @Given("the user provides an integer variable named $variableName with value $variableValue")
+    public void givenIntegerVariable(String variableName, Integer variableValue) {
+        variableBufferSteps.addVariable(variableName, variableValue);
+    }
+
     @When("the user starts a process with service tasks called $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
-        ProcessInstance processInstance = processRuntimeBundleSteps.startProcess(
-            processDefinitionKeyMatcher(processName),
-            false
-        );
+        ProcessInstance processInstance;
+        if (variableBufferSteps.availableVariables().isEmpty()) {
+            processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
+        } else {
+            processInstance =
+                processRuntimeBundleSteps.startProcessWithVariables(
+                    processDefinitionKeyMatcher(processName),
+                    variableBufferSteps.availableVariables()
+                );
+            variableBufferSteps.clearVariables();
+        }
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
@@ -136,14 +153,54 @@ public class ProcessInstanceServiceTasks {
                 String serviceTaskId = tasks.getContent().iterator().next().getId();
 
                 assertThatHasIntegrationContext(serviceTaskId);
-                CloudIntegrationContext serviceTask = processQueryAdminSteps.getCloudIntegrationContext(serviceTaskId);
+                CloudIntegrationContext integrationContext = processQueryAdminSteps.getCloudIntegrationContext(
+                    serviceTaskId
+                );
 
-                assertThat(serviceTask)
+                assertThat(integrationContext)
                     .isNotNull()
                     .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
                     .containsOnly(
                         "ServiceTask",
                         CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    );
+            });
+    }
+
+    @Then("the user can get all service task integration contexts by service task id")
+    public void verifyServiceTaskAllIntegrationContextsById() {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await()
+            .untilAsserted(() -> {
+                PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
+
+                assertThat(tasks.getContent()).hasSize(1).as("Should have exactly one service task");
+
+                CloudServiceTask serviceTask = tasks.getContent().iterator().next();
+                String serviceTaskId = serviceTask.getId();
+                Integer integrationContextCounter = serviceTask.getIntegrationContextCounter();
+
+                assertThat(integrationContextCounter)
+                    .isNotNull()
+                    .isEqualTo(2)
+                    .as("Service task should have exactly 2 integration contexts (one per execution)");
+
+                assertThatHasIntegrationContexts(serviceTaskId);
+                PagedModel<CloudIntegrationContext> integrationContexts = processQueryAdminSteps.getAllCloudIntegrationContexts(
+                    serviceTaskId
+                );
+
+                assertThat(integrationContexts.getContent())
+                    .isNotNull()
+                    .hasSize(2)
+                    .as("Should have exactly 2 integration contexts for 2 executions")
+                    .extracting(CloudIntegrationContext::getClientType, CloudIntegrationContext::getStatus)
+                    .contains(
+                        tuple(
+                            "ServiceTask",
+                            CloudIntegrationContext.IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                        )
                     );
             });
     }
@@ -158,6 +215,17 @@ public class ProcessInstanceServiceTasks {
             //the step will be marked to be skipped and any subsequent call to
             //processQueryAdminSteps will return mocks instead of calling the real endpoint.
             //Without clearing step failures the await block become useless.
+            StepEventBus.getEventBus().clearStepFailures();
+        }
+        assertThat(thrown).isNull();
+    }
+
+    private void assertThatHasIntegrationContexts(String serviceTaskId) {
+        FeignException thrown = catchThrowableOfType(
+            () -> processQueryAdminSteps.getAllCloudIntegrationContexts(serviceTaskId),
+            FeignException.class
+        );
+        if (thrown != null) {
             StepEventBus.getEventBus().clearStepFailures();
         }
         assertThat(thrown).isNull();
@@ -379,6 +447,25 @@ public class ProcessInstanceServiceTasks {
                     .collect(Collectors.toList());
 
                 assertThat(generatedEvents).hasSize(count);
+            });
+    }
+
+    @When("the service task is executed two times")
+    @Then("the service task is executed two times")
+    public void verifyServiceTaskExecutedTwoTimes() {
+        String processId = Serenity.sessionVariableCalled("processInstanceId");
+
+        await()
+            .untilAsserted(() -> {
+                PagedModel<CloudServiceTask> tasks = processQueryAdminSteps.getServiceTasks(processId);
+
+                assertThat(tasks.getContent()).hasSize(1).as("Should have exactly one service task");
+
+                CloudServiceTask serviceTask = tasks.getContent().iterator().next();
+
+                assertThat(serviceTask.getIntegrationContextCounter())
+                    .isEqualTo(2)
+                    .as("Service task should have exactly 2 integration contexts (one per execution)");
             });
     }
 }

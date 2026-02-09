@@ -14,6 +14,7 @@
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencies>
     <dependency>

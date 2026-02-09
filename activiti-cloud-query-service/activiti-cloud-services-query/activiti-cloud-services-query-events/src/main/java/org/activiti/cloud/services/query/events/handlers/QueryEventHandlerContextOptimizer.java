@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
@@ -36,6 +37,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -79,6 +81,7 @@ public class QueryEventHandlerContextOptimizer {
     public static final String TASKS = "tasks";
     public static final String ACTIVITIES = "activities";
     public static final String SERVICE_TASKS = "serviceTasks";
+    public static final String INTEGRATION_CONTEXTS = "integrationContexts";
     public static final String SEQUENCE_FLOWS = "sequenceFlows";
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
@@ -170,6 +173,11 @@ public class QueryEventHandlerContextOptimizer {
                 )
                     .ifPresent(serviceTaskIds -> {
                         fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
+                    });
+
+                findRuntimeEvents(events, CloudIntegrationEvent.class, entity -> true, IntegrationContext::getId)
+                    .ifPresent(integrationContextIds -> {
+                        fetch(fromProcessInstance, entityGraph, INTEGRATION_CONTEXTS, "id", integrationContextIds);
                     });
 
                 entityManager

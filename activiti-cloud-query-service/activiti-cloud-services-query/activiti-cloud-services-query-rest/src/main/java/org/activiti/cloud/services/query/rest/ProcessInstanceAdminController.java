@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -203,6 +204,19 @@ public class ProcessInstanceAdminController {
         return pagedCollectionModelAssembler.toModel(
             pageable,
             processInstanceAdminControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable),
+            processInstanceRepresentationModelAssembler
+        );
+    }
+
+    @JsonView(JsonViews.General.class)
+    @GetMapping(value = "/{linkedProcessInstanceId}/linkedprocesses")
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> linkedProcesses(
+        @PathVariable String linkedProcessInstanceId,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceAdminControllerHelper.searchLinkedProcesses(linkedProcessInstanceId, pageable),
             processInstanceRepresentationModelAssembler
         );
     }

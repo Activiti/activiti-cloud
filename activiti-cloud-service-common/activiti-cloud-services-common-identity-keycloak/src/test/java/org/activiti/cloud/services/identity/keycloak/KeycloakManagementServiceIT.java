@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.KEYCLOAK_SERVICE_ACCOUNT_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -49,41 +50,59 @@ class KeycloakManagementServiceIT {
     @Test
     void should_Not_RetrieveServiceAccounts_WhenUserTypeSearchParamIsInteractive() {
         UserSearchParams searchParams = new UserSearchParams();
-        searchParams.setSearch("");
+        searchParams.setSearch("test");
         searchParams.setType(UserTypeSearchParam.INTERACTIVE);
 
         List<User> users = keycloakManagementService.findUsers(searchParams);
 
-        assertThat(users).isNotEmpty();
-        assertThat(users).noneMatch(user -> user.getUsername().startsWith("service-account"));
+        assertThat(users).hasSize(5).extracting(User::getUsername).allMatch(username -> username.contains("test"));
     }
 
     @Test
     void should_Not_RetrieveServiceAccounts_WhenUserTypeSearchParamIsNull() {
         UserSearchParams searchParams = new UserSearchParams();
-        searchParams.setSearch("");
-
-        assertThat(searchParams.getType()).isNull();
+        searchParams.setSearch("test");
 
         List<User> users = keycloakManagementService.findUsers(searchParams);
 
-        assertThat(users).isNotEmpty();
-        assertThat(users).noneMatch(user -> user.getUsername().startsWith("service-account"));
+        assertThat(users)
+            .hasSize(5)
+            .extracting(User::getUsername)
+            .allSatisfy(username -> {
+                assertThat(username).contains("test");
+                assertThat(username).doesNotStartWith(KEYCLOAK_SERVICE_ACCOUNT_PREFIX);
+            });
     }
 
     @Test
     void should_RetrieveUsersAndServiceAccounts_WhenUserTypeSearchParamIsAll() {
         UserSearchParams searchParams = new UserSearchParams();
-        searchParams.setSearch("");
-        searchParams.setType(UserTypeSearchParam.INTERACTIVE);
-
-        List<User> justUsers = keycloakManagementService.findUsers(searchParams);
-
+        searchParams.setSearch("test");
         searchParams.setType(UserTypeSearchParam.ALL);
         List<User> usersAndServiceAccounts = keycloakManagementService.findUsers(searchParams);
-
-        assertThat(usersAndServiceAccounts.size()).isGreaterThan(justUsers.size());
         assertThat(usersAndServiceAccounts)
-            .allMatch(element -> element.getUsername().startsWith("service-account") ^ justUsers.contains(element));
+            .hasSize(6)
+            .extracting(User::getUsername)
+            .allSatisfy(username -> assertThat(username).contains("test"))
+            .satisfiesOnlyOnce(username -> assertThat(username).startsWith(KEYCLOAK_SERVICE_ACCOUNT_PREFIX));
+    }
+
+    @Test
+    void should_notReturnServiceAccounts_whenSearchParamIsNullOrEmpty() {
+        //prevent listing of all service accounts for security reasons
+        UserSearchParams searchParams = new UserSearchParams();
+        searchParams.setType(UserTypeSearchParam.ALL);
+        List<User> usersAndServiceAccounts = keycloakManagementService.findUsers(searchParams);
+        assertThat(usersAndServiceAccounts)
+            .hasSize(11)
+            .extracting(User::getUsername)
+            .noneMatch(username -> username.startsWith(KEYCLOAK_SERVICE_ACCOUNT_PREFIX));
+
+        searchParams.setSearch("");
+        usersAndServiceAccounts = keycloakManagementService.findUsers(searchParams);
+        assertThat(usersAndServiceAccounts)
+            .hasSize(11)
+            .extracting(User::getUsername)
+            .noneMatch(username -> username.startsWith(KEYCLOAK_SERVICE_ACCOUNT_PREFIX));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import java.util.List;
@@ -93,6 +96,46 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
     }
 
     @Test
+    void should_returnProcessInstances_withLinkedProcessInstances() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .withLinkedProcessInstanceId("123-lin-ked-222")
+            .withLinkedProcessInstanceType("my-type")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withLinkedProcessInstanceId("123-lin-ked-111")
+            .withLinkedProcessInstanceType("my-type");
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(
+                "_embedded.processInstances[0].linkedProcessInstanceId",
+                equalTo(processInstance1.getLinkedProcessInstanceId())
+            )
+            .body(
+                "_embedded.processInstances[0].linkedProcessInstanceType",
+                equalTo(processInstance1.getLinkedProcessInstanceType())
+            );
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByInitiator() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -156,5 +199,70 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
+    }
+
+    @Test
+    void should_return_AllProcessInstancesWithLinkedProcesses() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedProcessInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process-1")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+        ProcessInstanceEntity linkedProcessInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process-2")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcessInstance2.getId())))
+            .body(linkedProcessesPath("linked-process-1"), hasSize(0))
+            .body(
+                linkedProcessesPath("root-process"),
+                containsInAnyOrder(Map.of("id", linkedProcessInstance1.getId()))
+            );
+    }
+
+    @Test
+    void should_return_processInstancesWithEmptyLinkedProcesses() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedProcessInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process-2")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcessInstance2.getId())))
+            .body(linkedProcessesPath("root-process"), hasSize(0));
     }
 }

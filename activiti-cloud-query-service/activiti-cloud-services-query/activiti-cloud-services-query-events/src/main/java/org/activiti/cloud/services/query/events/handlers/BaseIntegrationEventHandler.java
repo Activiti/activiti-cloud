@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,40 @@ public abstract class BaseIntegrationEventHandler {
 
     protected Optional<IntegrationContextEntity> findIntegrationContextEntity(CloudIntegrationEvent event) {
         IntegrationContext integrationContext = event.getEntity();
-        String pkId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
-        IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, pkId);
+        IntegrationContextEntity entity = entityManager.find(
+            IntegrationContextEntity.class,
+            integrationContext.getId()
+        );
 
         return Optional.ofNullable(entity);
+    }
+
+    protected IntegrationContextEntity createMissingIntegrationContextEntity(CloudIntegrationEvent integrationEvent) {
+        IntegrationContext integrationContext = integrationEvent.getEntity();
+
+        IntegrationContextEntity entity = new IntegrationContextEntity(
+            integrationEvent.getServiceName(),
+            integrationEvent.getServiceFullName(),
+            integrationEvent.getServiceVersion(),
+            integrationEvent.getAppName(),
+            integrationEvent.getAppVersion()
+        );
+
+        entity.setId(integrationContext.getId());
+        entity.setClientId(integrationContext.getClientId());
+        entity.setClientName(integrationContext.getClientName());
+        entity.setClientType(integrationContext.getClientType());
+        entity.setConnectorType(integrationContext.getConnectorType());
+        entity.setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+        entity.setProcessInstanceId(integrationContext.getProcessInstanceId());
+        entity.setRootProcessInstanceId(integrationContext.getRootProcessInstanceId());
+        entity.setExecutionId(integrationContext.getExecutionId());
+        entity.setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
+        entity.setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+        entity.setBusinessKey(integrationContext.getBusinessKey());
+        entity.setInBoundVariables(integrationContext.getInBoundVariables());
+
+        return entity;
     }
 }

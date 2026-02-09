@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,10 +138,22 @@ public class FunctionRouterConfiguration {
         FunctionCatalog functionCatalog
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
+
         return (message, routingContext) -> {
             Optional
                 .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
+                .or(() ->
+                    Optional
+                        .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                        .filter(Predicate.not(String::isBlank))
+                        .flatMap(prefix ->
+                            Optional
+                                .ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class))
+                                .filter(exchange -> exchange.startsWith(prefix))
+                                .map(exchange -> exchange.substring(prefix.length()))
+                        )
+                )
                 .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
                 .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
                 .filter(Predicate.not(Collection::isEmpty))

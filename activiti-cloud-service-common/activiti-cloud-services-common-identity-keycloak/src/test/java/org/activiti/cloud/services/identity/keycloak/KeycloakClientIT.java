@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,10 +139,8 @@ public class KeycloakClientIT {
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(users.get(0).getId());
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
     }
 
     @Test
@@ -155,7 +153,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetGroupRolesFromCache() throws InterruptedException {
+    void shouldGetGroupRolesFromCache() {
         Cache cache = cacheManager.getCache("groupRoleMapping");
         cache.clear();
         List<KeycloakGroup> users = keycloakClient.searchGroups("salesgroup", 0, 50);
@@ -173,7 +171,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserGroupsCache() throws InterruptedException {
+    void shouldGetUserGroupsCache() {
         Cache cache = cacheManager.getCache("userGroups");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
@@ -192,7 +190,7 @@ public class KeycloakClientIT {
     }
 
     @Test
-    public void shouldGetUserRolesCache() throws InterruptedException {
+    void shouldGetUserRolesCache() {
         Cache cache = cacheManager.getCache("userRoleMapping");
         cache.clear();
         List<KeycloakUser> users = keycloakClient.searchUsers("hruser", 0, 50);
@@ -201,10 +199,8 @@ public class KeycloakClientIT {
 
         List<KeycloakRoleMapping> roles = keycloakClient.getUserRoleMapping(key);
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains("ACTIVITI_USER");
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
 
         assertThat(cache.get(key)).isNotNull();
         //check if the cache expires
@@ -249,10 +245,8 @@ public class KeycloakClientIT {
             clients.get(0).getId()
         );
 
-        assertThat(roles).hasSize(3);
+        assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_ADMIN_ROLE);
-        assertThat(roles).extracting("name").contains("uma_authorization");
-        assertThat(roles).extracting("name").contains("offline_access");
     }
 
     @Test
@@ -481,11 +475,11 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getGroup_By_Path() {
-        String path = "/hr";
+        String path = "hr";
         KeycloakGroup groupByPath = keycloakClient.getGroupByPath(path);
 
         assertThat(groupByPath).isNotNull();
-        assertThat(groupByPath.getPath()).isEqualTo(path);
+        assertThat(groupByPath.getPath()).isEqualTo("/" + path);
     }
 
     @Test

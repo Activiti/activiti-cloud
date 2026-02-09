@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.*;
@@ -34,9 +34,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 @DynamicUpdate
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "serviceTask", fetch = FetchType.LAZY, optional = true)
-    private IntegrationContextEntity integrationContext;
+    @OneToMany(mappedBy = "serviceTask", fetch = FetchType.LAZY)
+    private List<IntegrationContextEntity> integrationContexts;
+
+    @Column(name = "integration_context_counter")
+    private Integer integrationContextCounter = 0;
 
     @QueryType(PropertyType.DATE)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -71,12 +73,29 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
         super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
-    public IntegrationContextEntity getIntegrationContext() {
-        return integrationContext;
+    public List<IntegrationContextEntity> getIntegrationContexts() {
+        return integrationContexts;
     }
 
-    public void setIntegrationContext(IntegrationContextEntity integrationContext) {
-        this.integrationContext = integrationContext;
+    public void setIntegrationContexts(List<IntegrationContextEntity> integrationContexts) {
+        this.integrationContexts = integrationContexts;
+    }
+
+    @Override
+    public Integer getIntegrationContextCounter() {
+        return integrationContextCounter != null ? integrationContextCounter : 0;
+    }
+
+    public void setIntegrationContextCounter(Integer integrationContextCounter) {
+        this.integrationContextCounter = integrationContextCounter;
+    }
+
+    /**
+     * Increments the integration context counter by one.
+     * Called when a new integration context is created.
+     */
+    public void incrementIntegrationContextCounter() {
+        this.integrationContextCounter = getIntegrationContextCounter() + 1;
     }
 
     @Override

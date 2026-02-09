@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.activiti.cloud.services.query.rest.helper;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
@@ -65,7 +68,8 @@ public class ProcessInstanceControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
-        return mapAllSubprocesses(processInstances, pageable);
+        processInstances = mapAllSubprocesses(processInstances, pageable);
+        return mapAllLinkedProcesses(processInstances);
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -90,5 +94,36 @@ public class ProcessInstanceControllerHelper {
 
     public Long countProcessInstances(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceService.count(searchRequest);
+    }
+
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        processInstances
+            .getContent()
+            .forEach(processInstance -> {
+                List<ProcessInstanceEntity> linkedProcesses = processInstanceService.searchLinkedProcesses(
+                    processInstance.getId()
+                );
+                processInstance.setLinkedProcesses(mapLinkedProcessEntities(linkedProcesses));
+            });
+
+        return processInstances;
+    }
+
+    public static Set<QueryCloudSubprocessInstance> mapLinkedProcessEntities(
+        List<ProcessInstanceEntity> linkedProcesses
+    ) {
+        if (linkedProcesses == null) {
+            return Set.of();
+        }
+
+        return linkedProcesses
+            .stream()
+            .map(lp -> {
+                QueryCloudSubprocessInstance instance = new QueryCloudSubprocessInstance();
+                instance.setId(lp.getId());
+                instance.setProcessDefinitionName(lp.getProcessDefinitionName());
+                return instance;
+            })
+            .collect(Collectors.toSet());
     }
 }

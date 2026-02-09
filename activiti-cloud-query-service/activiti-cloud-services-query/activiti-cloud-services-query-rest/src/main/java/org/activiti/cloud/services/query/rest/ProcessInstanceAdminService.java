@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,5 +134,13 @@ public class ProcessInstanceAdminService {
     @Transactional(readOnly = true)
     public Long count(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceSearchService.countUnrestricted(searchRequest);
+    }
+
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId, pageable);
+    }
+
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId);
     }
 }

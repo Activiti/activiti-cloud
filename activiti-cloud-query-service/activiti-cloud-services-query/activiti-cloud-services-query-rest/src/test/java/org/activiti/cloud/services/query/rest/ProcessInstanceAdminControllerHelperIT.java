@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntityWithLinkedProcess;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +39,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -187,5 +189,58 @@ class ProcessInstanceAdminControllerHelperIT {
 
     private PageRequest getPageableSortedByLastModifiedDescending(int pageSize) {
         return PageRequest.of(0, pageSize, Sort.by("lastModified").descending());
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_ADMIN")
+    void shouldReturnLinkedProcessesAdminById() {
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
+        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
+        ProcessInstanceEntity processInstance1 = buildProcessInstanceEntityWithLinkedProcess(
+            saveLinkedProcessInstanceId
+        );
+        processInstanceRepository.save(processInstance1);
+        ProcessInstanceEntity processInstance2 = buildProcessInstanceEntityWithLinkedProcess(
+            saveLinkedProcessInstanceId
+        );
+        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance3 = buildProcessInstanceEntityWithLinkedProcess(
+            saveLinkedProcessInstanceId
+        );
+        processInstanceRepository.save(processInstance3);
+
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
+            saveLinkedProcessInstanceId,
+            pageable
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getContent())
+            .extracting("id")
+            .containsExactlyInAnyOrder(processInstance1.getId(), processInstance2.getId(), processInstance3.getId());
+    }
+
+    @Test
+    @WithMockUser(roles = "ACTIVITI_ADMIN")
+    void shouldReturnEmptyListWhenGetLinkedProcessesAdminByLinkedProcessIdId() {
+        ProcessInstanceEntity linkedProcessInstance = buildProcessInstanceEntity();
+        var savedLinkedProcessInstance = processInstanceRepository.save(linkedProcessInstance);
+        var saveLinkedProcessInstanceId = savedLinkedProcessInstance.getId();
+
+        int pageSize = 30;
+        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
+
+        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchLinkedProcesses(
+            saveLinkedProcessInstanceId,
+            pageable
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
     }
 }

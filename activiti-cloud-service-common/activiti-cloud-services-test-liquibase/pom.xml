@@ -11,7 +11,9 @@
   </parent>
 
   <artifactId>activiti-cloud-services-test-liquibase</artifactId>
-
+  <properties>
+    <enforcer.skip>true</enforcer.skip>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -23,5 +25,4 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
-
 </project>

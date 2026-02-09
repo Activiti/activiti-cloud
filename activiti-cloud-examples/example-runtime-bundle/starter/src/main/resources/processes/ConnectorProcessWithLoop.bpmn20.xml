@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" targetNamespace="http://www.activiti.org/processdef">
+  <process id="ConnectorProcessWithLoop" name="Connector Process With Loop" isExecutable="true">
+    <documentation>Connector process with a loop that executes the service task twice using a counter variable and exclusive gateway.</documentation>
+    <startEvent id="StartEvent_1">
+      <outgoing>Flow_Start_To_Gateway</outgoing>
+    </startEvent>
+    <exclusiveGateway id="Gateway_LoopCheck" name="Check Execution Count">
+      <incoming>Flow_Start_To_Gateway</incoming>
+      <incoming>Flow_Connector_To_Gateway</incoming>
+      <outgoing>Flow_Gateway_To_End</outgoing>
+      <outgoing>Flow_Gateway_To_Connector</outgoing>
+    </exclusiveGateway>
+    <serviceTask id="ServiceTask_Connector" name="Connector Task" implementation="ExampleConnector">
+      <incoming>Flow_Gateway_To_Connector</incoming>
+      <outgoing>Flow_Connector_To_Gateway</outgoing>
+    </serviceTask>
+    <endEvent id="EndEvent_1">
+      <incoming>Flow_Gateway_To_End</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_Start_To_Gateway" sourceRef="StartEvent_1" targetRef="Gateway_LoopCheck" />
+    <sequenceFlow id="Flow_Gateway_To_Connector" name="executionCount &lt; 2" sourceRef="Gateway_LoopCheck" targetRef="ServiceTask_Connector">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${(executionCount lt 2)}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_Connector_To_Gateway" sourceRef="ServiceTask_Connector" targetRef="Gateway_LoopCheck" />
+    <sequenceFlow id="Flow_Gateway_To_End" name="executionCount &gt;= 2" sourceRef="Gateway_LoopCheck" targetRef="EndEvent_1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${(executionCount ge 2)}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ConnectorProcessWithLoop">
+    <bpmndi:BPMNPlane bpmnElement="ConnectorProcessWithLoop" id="BPMNPlane_ConnectorProcessWithLoop">
+      <bpmndi:BPMNShape bpmnElement="StartEvent_1" id="BPMNShape_StartEvent_1">
+        <omgdc:Bounds height="36.0" width="36.0" x="100.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Gateway_LoopCheck" id="BPMNShape_Gateway_LoopCheck">
+        <omgdc:Bounds height="50.0" width="50.0" x="200.0" y="153.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ServiceTask_Connector" id="BPMNShape_ServiceTask_Connector">
+        <omgdc:Bounds height="80.0" width="100.0" x="320.0" y="138.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="EndEvent_1" id="BPMNShape_EndEvent_1">
+        <omgdc:Bounds height="36.0" width="36.0" x="207.0" y="280.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Start_To_Gateway" id="BPMNEdge_Flow_Start_To_Gateway">
+        <omgdi:waypoint x="136.0" y="178.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="178.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Gateway_To_Connector" id="BPMNEdge_Flow_Gateway_To_Connector">
+        <omgdi:waypoint x="250.0" y="178.0"></omgdi:waypoint>
+        <omgdi:waypoint x="320.0" y="178.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="235.0" y="160.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Connector_To_Gateway" id="BPMNEdge_Flow_Connector_To_Gateway">
+        <omgdi:waypoint x="370.0" y="138.0"></omgdi:waypoint>
+        <omgdi:waypoint x="370.0" y="100.0"></omgdi:waypoint>
+        <omgdi:waypoint x="225.0" y="100.0"></omgdi:waypoint>
+        <omgdi:waypoint x="225.0" y="153.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Gateway_To_End" id="BPMNEdge_Flow_Gateway_To_End">
+        <omgdi:waypoint x="225.0" y="203.0"></omgdi:waypoint>
+        <omgdi:waypoint x="225.0" y="280.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="130.0" y="235.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

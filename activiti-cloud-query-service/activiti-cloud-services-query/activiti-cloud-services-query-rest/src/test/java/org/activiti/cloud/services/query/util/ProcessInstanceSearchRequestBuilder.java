@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,11 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<ProcessVariableKey> processVariableKeys;
     private CloudRuntimeEntitySort sort;
     private Boolean includeSubprocesses;
+    private Set<String> linkedProcessInstanceId;
+    private Set<String> linkedProcessInstanceType;
+    private Set<String> processRelatedTo;
+    private Boolean includeUnlinkedProcesses;
+    private Boolean includeLinkedProcesses;
 
     public ProcessInstanceSearchRequestBuilder withIds(String... ids) {
         this.ids = Set.of(ids);
@@ -160,6 +165,26 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder withLinkedProcessInstanceId(String... linkedProcessInstanceIds) {
+        this.linkedProcessInstanceId = Set.of(linkedProcessInstanceIds);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withLinkedProcessInstanceType(String... linkedProcessInstanceTypes) {
+        this.linkedProcessInstanceType = Set.of(linkedProcessInstanceTypes);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withProcessRelatedTo(String... processRelatedToIds) {
+        this.processRelatedTo = Set.of(processRelatedToIds);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withIncludeUnlinkedProcesses(Boolean includeUnlinkedProcesses) {
+        this.includeUnlinkedProcesses = includeUnlinkedProcesses;
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -193,7 +218,12 @@ public class ProcessInstanceSearchRequestBuilder {
             processVariableFilters,
             processVariableKeys,
             sort,
-            includeSubprocesses
+            includeSubprocesses,
+            linkedProcessInstanceId,
+            linkedProcessInstanceType,
+            processRelatedTo,
+            includeUnlinkedProcesses,
+            includeLinkedProcesses
         );
     }
 
@@ -205,5 +235,10 @@ public class ProcessInstanceSearchRequestBuilder {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ProcessInstanceSearchRequestBuilder withIncludeLinkedProcesses(Boolean includeLinkedProcesses) {
+        this.includeLinkedProcesses = includeLinkedProcesses;
+        return this;
     }
 }

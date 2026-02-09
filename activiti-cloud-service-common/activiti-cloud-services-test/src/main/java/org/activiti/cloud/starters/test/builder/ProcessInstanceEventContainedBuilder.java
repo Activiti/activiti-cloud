@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class ProcessInstanceEventContainedBuilder {
         ProcessInstance processInstance = buildProcessInstance(name);
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(processInstance),
-            new CloudProcessStartedEventImpl(processInstance, null, null),
+            new CloudProcessStartedEventImpl(processInstance),
             new CloudProcessCompletedEventImpl(processInstance)
         );
         return processInstance;
@@ -53,7 +53,7 @@ public class ProcessInstanceEventContainedBuilder {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(processInstance),
-            new CloudProcessStartedEventImpl(processInstance, null, null)
+            new CloudProcessStartedEventImpl(processInstance)
         );
         return processInstance;
     }
@@ -90,7 +90,7 @@ public class ProcessInstanceEventContainedBuilder {
 
         eventsAggregator.addEvents(
             new CloudProcessCreatedEventImpl(process),
-            new CloudProcessStartedEventImpl(process, null, null),
+            new CloudProcessStartedEventImpl(process),
             new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
             new CloudSequenceFlowTakenEventImpl(sequenceFlow),

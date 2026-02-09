@@ -193,7 +193,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
-    <project.year>2025</project.year>
+    <project.year>2026</project.year>
 
     <spring-boot.version>3.5.7</spring-boot.version>
 
@@ -221,6 +221,7 @@
     <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
 
     <!-- dependencies versions -->
@@ -397,6 +398,31 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>ban-test-dependencies-in-compile</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <bannedDependencies>
+                    <excludes>
+                      <!-- These should only be test-scoped -->
+                      <exclude>org.assertj:*:*:*:compile</exclude>
+                      <exclude>org.mockito:*:*:*:compile</exclude>
+                      <exclude>org.springframework:spring-test:*:*:compile</exclude>
+                      <exclude>junit:*:*:*:compile</exclude>
+                      <exclude>org.junit.jupiter:*:*:*:compile</exclude>
+                      <exclude>org.springframework.boot:spring-boot-test:*:*:compile</exclude>
+                    </excludes>
+                    <searchTransitive>true</searchTransitive>
+                  </bannedDependencies>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>
@@ -573,6 +599,11 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${maven-sonar-plugin.version}</version>
       </plugin>
     </plugins>
   </build>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -730,7 +729,7 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void should_searchByUsername_whenUserTypeSearchParamIsAll() {
+    void should_searchUsersAndServiceAccounts_whenUserTypeSearchParamIsAll() {
         defineSearchUsersByUsernameFromKeycloak();
         setUpUsersRealmRoles();
         UserSearchParams userSearchParams = new UserSearchParams();
@@ -740,7 +739,8 @@ class KeycloakManagementServiceTest {
 
         keycloakManagementService.findUsers(userSearchParams);
 
-        verify(keycloakClient).searchUsersByUsername(searchKey);
+        verify(keycloakClient).searchUsers(searchKey, PAGE_START, PAGE_SIZE);
+        verify(keycloakClient).searchUsersByUsername(KEYCLOAK_SERVICE_ACCOUNT_PREFIX + searchKey);
     }
 
     @Test

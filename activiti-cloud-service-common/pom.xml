@@ -37,9 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>8.8.0-alpha.130</activiti.version>
-    <commons-configuration.version>1.10</commons-configuration.version>
-    <commons-lang.version>2.6</commons-lang.version>
+    <activiti.version>8.8.0-alpha.149</activiti.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
@@ -49,6 +47,8 @@
     <java-jwt.version>4.5.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.13</james.apache-mime4j.version>
+    <!-- Replacement for older LZ4 dependency util a newer one will be used in Spring -->
+    <lz4-java.version>1.10.2</lz4-java.version>
     <batik.version>1.19</batik.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
   </properties>
@@ -99,25 +99,6 @@
             <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <!-- avoid older commons dependencies used by Eureka being available for compilation -->
-      <dependency>
-        <groupId>commons-configuration</groupId>
-        <artifactId>commons-configuration</artifactId>
-        <version>${commons-configuration.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${commons-lang.version}</version>
-        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.springdoc</groupId>

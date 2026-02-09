@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,18 +345,11 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_returnApplicationPermissions() throws Exception {
         this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(6)))
+            .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(
                 jsonPath(
                     "$[?(@.role)].role",
-                    containsInAnyOrder(
-                        "ACTIVITI_USER",
-                        "ACTIVITI_ADMIN",
-                        "APPLICATION_MANAGER",
-                        "uma_authorization",
-                        "offline_access",
-                        "DYNAMIC_ROLE"
-                    )
+                    containsInAnyOrder("ACTIVITI_USER", "ACTIVITI_ADMIN", "APPLICATION_MANAGER", "DYNAMIC_ROLE")
                 )
             );
     }

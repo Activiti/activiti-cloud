@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 
 public class ProcessInstanceBuilder {
 
@@ -139,8 +141,18 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        process.setLinkedProcessInstanceId(linkedProcessInstanceId);
+        return this;
+    }
+
     public ProcessInstanceBuilder subprocessOf(ProcessInstanceEntity processInstance) {
         process.setParentId(processInstance.getId());
+        return this;
+    }
+
+    public ProcessInstanceBuilder withLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        process.setLinkedProcessInstanceType(linkedProcessInstanceType);
         return this;
     }
 
@@ -156,5 +168,16 @@ public class ProcessInstanceBuilder {
         }
         process.setTasks(tasks);
         return processInstanceRepository.save(process);
+    }
+
+    public ProcessInstanceBuilder withRootProcessInstanceId(String rootProcessInstanceId) {
+        process.setRootProcessInstanceId(rootProcessInstanceId);
+        return this;
+    }
+
+    public List<ProcessInstanceEntity> findProcessInstanceByFilter(ProcessInstanceSearchRequest searchRequest) {
+        var specification = ProcessInstanceSpecification.unrestricted(searchRequest);
+
+        return processInstanceRepository.findAll(specification);
     }
 }

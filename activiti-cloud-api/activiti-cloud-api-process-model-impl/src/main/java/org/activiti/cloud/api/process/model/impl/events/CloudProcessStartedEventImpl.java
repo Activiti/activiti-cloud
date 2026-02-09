@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl 
 
     private String nestedProcessDefinitionId;
     private String nestedProcessInstanceId;
+    private String linkedProcessInstanceId;
+    private String linkedProcessInstanceType;
 
     public CloudProcessStartedEventImpl() {}
 
@@ -36,8 +38,22 @@ public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl 
         this.nestedProcessInstanceId = nestedProcessInstanceId;
     }
 
+    public CloudProcessStartedEventImpl(
+        ProcessInstance processInstance,
+        String nestedProcessDefinitionId,
+        String nestedProcessInstanceId,
+        String linkedProcessInstanceId,
+        String linkedProcessInstanceType
+    ) {
+        super(processInstance);
+        this.nestedProcessDefinitionId = nestedProcessDefinitionId;
+        this.nestedProcessInstanceId = nestedProcessInstanceId;
+        this.linkedProcessInstanceId = linkedProcessInstanceId;
+        this.linkedProcessInstanceType = linkedProcessInstanceType;
+    }
+
     public CloudProcessStartedEventImpl(ProcessInstance processInstance) {
-        this(processInstance, null, null);
+        this(processInstance, null, null, null, null);
     }
 
     public CloudProcessStartedEventImpl(String id, Long timestamp, ProcessInstance processInstance) {
@@ -64,6 +80,16 @@ public class CloudProcessStartedEventImpl extends CloudProcessInstanceEventImpl 
     @Override
     public String getNestedProcessDefinitionId() {
         return nestedProcessDefinitionId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceId() {
+        return linkedProcessInstanceId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceType() {
+        return linkedProcessInstanceType;
     }
 
     @Override

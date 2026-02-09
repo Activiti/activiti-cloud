@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.List;
 import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -47,7 +48,7 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchRestricted(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
@@ -59,7 +60,7 @@ public class ProcessInstanceSearchService {
         Pageable pageable
     ) {
         return search(
-            searchRequest.processVariableKeys(),
+            searchRequest.getProcessVariableKeys(),
             pageable,
             ProcessInstanceSpecification.unrestricted(searchRequest)
         );
@@ -67,8 +68,8 @@ public class ProcessInstanceSearchService {
 
     /**
      * @param processVariableKeys the process variables to fetch for each process instance, each represented by process definition key and variable name
-     * @param pageable the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
-     * @param specification the specification to use for the search. It includes the sorting parameter.
+     * @param pageable            the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
+     * @param specification       the specification to use for the search. It includes the sorting parameter.
      * @return the page of process instances
      */
     private Page<ProcessInstanceEntity> search(
@@ -99,5 +100,23 @@ public class ProcessInstanceSearchService {
             searchRequest
         );
         return processInstanceRepository.count(unrestrictedSpecification);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
+            linkedProcessInstanceId
+        );
+
+        return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId) {
+        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
+            linkedProcessInstanceId
+        );
+
+        return processInstanceRepository.findAll(unrestrictedSpecification);
     }
 }

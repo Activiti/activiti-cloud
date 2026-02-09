@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,21 @@ class ProcessVariablesPayloadConverterTest {
         StartProcessPayload payload = subject.convert(
             ProcessPayloadBuilder.start().withVariables(variablesToConvert).build()
         );
+        assertConvertedVariables(payload.getVariables());
+    }
+
+    @Test
+    void shouldConvertStartProcessPayloadWithLinkedProcess() {
+        StartProcessPayload payload = subject.convert(
+            ProcessPayloadBuilder
+                .start()
+                .withLinkedProcessInstanceId("linkedProcessId")
+                .withLinkedProcessInstanceType("linkedProcessType")
+                .withVariables(variablesToConvert)
+                .build()
+        );
+        assertThat(payload.getLinkedProcessInstanceId()).isEqualTo("linkedProcessId");
+        assertThat(payload.getLinkedProcessInstanceType()).isEqualTo("linkedProcessType");
         assertConvertedVariables(payload.getVariables());
     }
 

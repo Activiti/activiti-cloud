@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,9 @@ public class ToCloudProcessRuntimeEventConverter {
         CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(
             event.getEntity(),
             event.getNestedProcessDefinitionId(),
-            event.getNestedProcessInstanceId()
+            event.getNestedProcessInstanceId(),
+            event.getLinkedProcessInstanceId(),
+            event.getLinkedProcessInstanceType()
         );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessStartedEvent);
         this.processAuditServiceInfoAppender.appendAuditServiceInfoTo(cloudProcessStartedEvent);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class ProcessDefinitionRegistry {
         {
             put("SIMPLE_PROCESS_INSTANCE", "SimpleProcess");
             put("CONNECTOR_PROCESS_INSTANCE", "ConnectorProcess");
+            put("CONNECTOR_PROCESS_WITH_LOOP", "ConnectorProcessWithLoop");
             put("SIGNAL_THROW_PROCESS_INSTANCE", "SignalThrowEventProcess");
             put("SIGNAL_START_EVENT_PROCESS", "SignalStartEventProcess");
             put("PROCESS_INSTANCE_WITH_CALL_ACTIVITIES", "parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8");

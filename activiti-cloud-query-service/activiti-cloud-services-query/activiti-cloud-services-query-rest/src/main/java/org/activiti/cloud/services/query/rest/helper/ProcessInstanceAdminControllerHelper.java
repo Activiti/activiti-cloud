@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ public class ProcessInstanceAdminControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
-        return processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
+        processInstances = processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
+        return mapAllLinkedProcesses(processInstances);
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -77,5 +78,23 @@ public class ProcessInstanceAdminControllerHelper {
         Pageable pageable
     ) {
         return processInstanceControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable);
+    }
+
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceAdminService.searchLinkedProcesses(linkedProcessInstanceId, pageable);
+    }
+
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        processInstances
+            .getContent()
+            .forEach(processInstance -> {
+                List<ProcessInstanceEntity> linkedProcesses = processInstanceAdminService.searchLinkedProcesses(
+                    processInstance.getId()
+                );
+                processInstance.setLinkedProcesses(
+                    ProcessInstanceControllerHelper.mapLinkedProcessEntities(linkedProcesses)
+                );
+            });
+        return processInstances;
     }
 }

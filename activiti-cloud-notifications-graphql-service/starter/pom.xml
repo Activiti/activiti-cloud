@@ -156,6 +156,7 @@
     <dependency>
       <groupId>org.springframework.graphql</groupId>
       <artifactId>spring-graphql-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
@@ -55,9 +55,9 @@ import org.springframework.format.annotation.DateTimeFormat;
         @Index(name = "integration_context_status_idx", columnList = "status", unique = false),
         @Index(name = "integration_context_processInstance_idx", columnList = "processInstanceId", unique = false),
         @Index(
-            name = "integration_context_processInstance_elementId_idx",
-            columnList = "processInstanceId,clientId,executionId",
-            unique = true
+            name = "integration_context_proc_client_exec_idx",
+            columnList = "processInstanceId, clientId, executionId",
+            unique = false
         ),
     }
 )
@@ -122,9 +122,24 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private IntegrationContextStatus status;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @MapsId
-    @JoinColumn(name = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumns(
+        {
+            @JoinColumn(
+                name = "processInstanceId",
+                referencedColumnName = "processInstanceId",
+                insertable = false,
+                updatable = false
+            ),
+            @JoinColumn(name = "clientId", referencedColumnName = "elementId", insertable = false, updatable = false),
+            @JoinColumn(
+                name = "executionId",
+                referencedColumnName = "executionId",
+                insertable = false,
+                updatable = false
+            ),
+        }
+    )
     private ServiceTaskEntity serviceTask;
 
     @Transient
@@ -380,14 +395,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     public void setServiceTask(ServiceTaskEntity serviceTask) {
-        if (serviceTask == null) {
-            if (this.serviceTask != null) {
-                this.serviceTask.setIntegrationContext(null);
-            }
-        } else {
-            serviceTask.setIntegrationContext(this);
-        }
-
         this.serviceTask = serviceTask;
     }
 

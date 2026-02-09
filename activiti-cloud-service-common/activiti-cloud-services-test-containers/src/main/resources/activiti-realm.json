@@ -119,6 +119,23 @@
       }
     },
     {
+      "username": "service-account-test-client",
+      "enabled": true,
+      "serviceAccountClientId": "test-client",
+      "clientRoles": {
+        "realm-management": [
+          "manage-authorization",
+          "manage-users",
+          "manage-clients",
+          "query-realms",
+          "create-client",
+          "query-clients",
+          "view-users",
+          "manage-realm"
+        ]
+      }
+    },
+    {
       "username": "admin",
       "enabled": true,
       "firstName": "Admin",
@@ -131,8 +148,6 @@
         }
       ],
       "realmRoles": [
-        "offline_access",
-        "uma_authorization",
         "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
@@ -177,9 +192,7 @@
       ],
       "requiredActions": [],
       "realmRoles": [
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
         "account": [
@@ -187,9 +200,7 @@
           "view-profile"
         ],
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_ADMIN",
-          "offline_access"
+          "ACTIVITI_ADMIN"
         ]
       },
       "notBefore": 0,
@@ -211,9 +222,7 @@
       ],
       "realmRoles": [
         "ACTIVITI_USER",
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "groups": [
         "/hr"
@@ -232,15 +241,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ]
       },
       "groups": [
@@ -260,15 +265,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ]
       },
       "groups": [
@@ -288,9 +289,7 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "groups": [
         "/hr"
@@ -324,9 +323,7 @@
       ],
       "realmRoles": [
         "ACTIVITI_USER",
-        "uma_authorization",
-        "ACTIVITI_ADMIN",
-        "offline_access"
+        "ACTIVITI_ADMIN"
       ],
       "clientRoles": {
         "account": [
@@ -351,15 +348,11 @@
         }
       ],
       "realmRoles": [
-        "ACTIVITI_USER",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_USER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "ACTIVITI_USER",
-          "offline_access"
+          "ACTIVITI_USER"
         ],
         "realm-management": [
           "manage-users"
@@ -398,9 +391,7 @@
       ],
       "requiredActions": [],
       "realmRoles": [
-        "ACTIVITI_DEVOPS",
-        "uma_authorization",
-        "offline_access"
+        "ACTIVITI_DEVOPS"
       ],
       "clientRoles": {
         "account": [
@@ -426,15 +417,11 @@
         }
       ],
       "realmRoles": [
-        "APPLICATION_MANAGER",
-        "uma_authorization",
-        "offline_access"
+        "APPLICATION_MANAGER"
       ],
       "clientRoles": {
         "activiti": [
-          "uma_authorization",
-          "APPLICATION_MANAGER",
-          "offline_access"
+          "APPLICATION_MANAGER"
         ]
       }
     }
@@ -463,7 +450,24 @@
         "phone",
         "offline_access",
         "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "name": "sub-protocol-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "id",
+            "claim.name": "sub",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
       ]
+
     },
     {
       "clientId": "activiti-keycloak",

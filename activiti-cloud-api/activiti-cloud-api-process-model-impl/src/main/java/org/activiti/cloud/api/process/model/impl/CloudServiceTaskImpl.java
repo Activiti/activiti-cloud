@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,17 @@ package org.activiti.cloud.api.process.model.impl;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 
 public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements CloudServiceTask {
+
+    private Integer integrationContextCounter;
+
+    @Override
+    public Integer getIntegrationContextCounter() {
+        return integrationContextCounter;
+    }
+
+    public void setIntegrationContextCounter(Integer integrationContextCounter) {
+        this.integrationContextCounter = integrationContextCounter;
+    }
 
     @Override
     public int hashCode() {
@@ -41,7 +52,12 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudServiceTaskImpl [toString()=").append(super.toString()).append("]");
+        builder
+            .append("CloudServiceTaskImpl [integrationContextCounter=")
+            .append(integrationContextCounter)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

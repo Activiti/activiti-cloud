@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.metadata.eureka.dynamic;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.springframework.context.annotation.Import;
+ALTER TABLE process_instance
+  ADD COLUMN linked_process_instance_id VARCHAR(255);
 
-@Target({ ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Import(DynamicRegistrationConfiguration.class)
-public @interface EnableDynamicEurekaMetadataRegistration {
-}
+ALTER TABLE process_instance
+  ADD COLUMN linked_process_instance_type VARCHAR(255);

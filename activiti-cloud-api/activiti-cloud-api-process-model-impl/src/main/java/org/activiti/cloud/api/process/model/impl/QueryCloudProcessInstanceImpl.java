@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl implements QueryCloudProcessInstance {
 
     private Set<QueryCloudSubprocessInstance> subprocesses;
+    private String linkedProcessInstanceId;
+    private String linkedProcessInstanceType;
+    private Set<QueryCloudSubprocessInstance> linkedProcesses;
 
     @Override
     public Set<QueryCloudSubprocessInstance> getSubprocesses() {
@@ -32,6 +35,36 @@ public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl impl
     @Override
     public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
+    }
+
+    @Override
+    public Set<QueryCloudSubprocessInstance> getLinkedProcesses() {
+        return linkedProcesses;
+    }
+
+    @Override
+    public void setLinkedProcesses(Set<QueryCloudSubprocessInstance> linkedProcessSet) {
+        this.linkedProcesses = linkedProcessSet;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceId() {
+        return linkedProcessInstanceId;
+    }
+
+    @Override
+    public void setLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        this.linkedProcessInstanceId = linkedProcessInstanceId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceType() {
+        return linkedProcessInstanceType;
+    }
+
+    @Override
+    public void setLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        this.linkedProcessInstanceType = linkedProcessInstanceType;
     }
 
     @Override
@@ -46,11 +79,15 @@ public class QueryCloudProcessInstanceImpl extends CloudProcessInstanceImpl impl
             return false;
         }
         QueryCloudProcessInstanceImpl other = (QueryCloudProcessInstanceImpl) obj;
-        return Objects.equals(subprocesses, other.subprocesses);
+        return (
+            Objects.equals(subprocesses, other.subprocesses) &&
+            Objects.equals(linkedProcessInstanceId, other.linkedProcessInstanceId) &&
+            Objects.equals(linkedProcessInstanceType, other.linkedProcessInstanceType)
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subprocesses);
+        return Objects.hash(super.hashCode(), subprocesses, linkedProcessInstanceId, linkedProcessInstanceType);
     }
 }

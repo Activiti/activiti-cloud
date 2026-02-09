@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,23 @@
 package org.activiti.cloud.services.events.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.ExecutionContextIncidentEventMessageBuilderFactory;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.context.ExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +43,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class IncidentServiceTest {
@@ -56,6 +63,12 @@ class IncidentServiceTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
+    @Mock
+    private ManagementService managementService;
+
+    @Mock
+    private RuntimeService runtimeService;
 
     @Spy
     private RuntimeBundleProperties properties = new RuntimeBundleProperties() {
@@ -81,19 +94,36 @@ class IncidentServiceTest {
         when(this.producer.auditProducerIncidents()).thenReturn(this.auditIncidentsChannel);
 
         this.incidentService =
-            new IncidentService(producer, messageBuilderChainIncidentFactory, runtimeBundleInfoAppender);
+            new IncidentService(
+                producer,
+                messageBuilderChainIncidentFactory,
+                runtimeBundleInfoAppender,
+                managementService,
+                runtimeService
+            );
     }
 
     @Test
-    void shouldCreateAndSendIncidentEvent() {
-        var executionContext = TestUtils.mockExecutionContext();
+    void shouldCreateAndSendExecutionContextIncidentEvent() {
+        var executionContext = mock(ExecutionContext.class);
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test exception"),
+            incidentContext
+        );
+
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromExecutionCmd.class))).thenReturn(message);
         var exception = new IllegalArgumentException("Test exception");
 
         this.incidentService.createAndSendIncidentEvent(executionContext, exception);
 
         verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
 
-        Message<?> capturedMessage = this.messageArgumentCaptor.getValue();
+        var capturedMessage = this.messageArgumentCaptor.getValue();
 
         var payload = (List) capturedMessage.getPayload();
         assertThat(payload).hasSize(1);
@@ -108,15 +138,43 @@ class IncidentServiceTest {
         assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
         assertThat(incident.getStackTraceElements()).isNotNull();
         assertThat(incident.getStackTraceElements()).isNotEmpty();
+    }
 
-        assertThat(incident.getProcessDefinitionKey()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_KEY);
-        assertThat(incident.getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
-        assertThat(incident.getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+    @Test
+    void shouldCreateAndSendIntegrationContextIncidentEvent() {
+        var integrationContext = mock(IntegrationContext.class);
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test exception"),
+            incidentContext
+        );
 
-        assertThat(capturedMessage.getHeaders())
-            .contains(
-                entry("routingKey", "engineEvents.springAppName.appName"),
-                entry("messagePayloadType", "java.util.ArrayList")
-            );
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class)))
+            .thenReturn(message);
+        var exception = new IllegalArgumentException("Test exception");
+
+        this.incidentService.createAndSendIncidentEvent(integrationContext, exception);
+
+        verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
+
+        var capturedMessage = this.messageArgumentCaptor.getValue();
+
+        var payload = (List) capturedMessage.getPayload();
+        assertThat(payload).hasSize(1);
+        assertThat(payload.get(0)).isInstanceOf(CloudIncidentCreatedEventImpl.class);
+
+        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        assertThat(incident.getEntity().getExecutionId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+
+        assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
+        assertThat(incident.getStackTraceElements()).isNotNull();
+        assertThat(incident.getStackTraceElements()).isNotEmpty();
     }
 }

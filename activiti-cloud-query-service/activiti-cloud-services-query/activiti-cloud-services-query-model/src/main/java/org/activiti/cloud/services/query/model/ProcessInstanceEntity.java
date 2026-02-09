@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,12 +220,30 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     )
     private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
 
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
+    private List<IntegrationContextEntity> integrationContexts = new LinkedList<>();
+
     private String parentId;
 
     private String rootProcessInstanceId;
 
     @Transient
     private Set<QueryCloudSubprocessInstance> subprocesses;
+
+    @Transient
+    private Set<QueryCloudSubprocessInstance> linkedProcesses;
+
+    private String linkedProcessInstanceId;
+
+    private String linkedProcessInstanceType;
 
     public ProcessInstanceEntity() {}
 
@@ -333,6 +351,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         this.processDefinitionKey = processDefinitionKey;
     }
 
+    public void setLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        this.linkedProcessInstanceId = linkedProcessInstanceId;
+    }
+
+    public void setLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        this.linkedProcessInstanceType = linkedProcessInstanceType;
+    }
+
     @Override
     public String getId() {
         return id;
@@ -395,6 +421,16 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     @Override
     public String getRootProcessInstanceId() {
         return rootProcessInstanceId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceId() {
+        return linkedProcessInstanceId;
+    }
+
+    @Override
+    public String getLinkedProcessInstanceType() {
+        return linkedProcessInstanceType;
     }
 
     public void setRootProcessInstanceId(String rootProcessInstanceId) {
@@ -504,6 +540,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         this.sequenceFlows = sequenceFlows;
     }
 
+    public List<IntegrationContextEntity> getIntegrationContexts() {
+        return integrationContexts;
+    }
+
+    public void setIntegrationContexts(List<IntegrationContextEntity> integrationContexts) {
+        this.integrationContexts = integrationContexts;
+    }
+
     @Override
     public int hashCode() {
         return getClass().hashCode();
@@ -533,5 +577,14 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses) {
         this.subprocesses = subprocesses;
+    }
+
+    @Override
+    public Set<QueryCloudSubprocessInstance> getLinkedProcesses() {
+        return linkedProcesses;
+    }
+
+    public void setLinkedProcesses(Set<QueryCloudSubprocessInstance> linkedProcesses) {
+        this.linkedProcesses = linkedProcesses;
     }
 }

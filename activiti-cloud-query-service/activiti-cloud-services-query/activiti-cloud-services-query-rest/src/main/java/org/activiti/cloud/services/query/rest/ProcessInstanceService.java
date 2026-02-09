@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class ProcessInstanceService {
 
+    private static final String UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID = "Unable to find process for the given id:'";
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceService.class);
 
     private static final String ADMIN_ROLE = "ACTIVITI_ADMIN";
@@ -141,7 +143,7 @@ public class ProcessInstanceService {
         ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
             processInstanceRepository,
             processInstanceId,
-            "Unable to find process for the given id:'" + processInstanceId + "'"
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + processInstanceId + "'"
         );
 
         if (!canReadOrAdmin(processInstanceEntity)) {
@@ -172,7 +174,7 @@ public class ProcessInstanceService {
         return processInstanceSearchService.searchRestricted(searchRequest, pageable);
     }
 
-    private boolean canReadOrAdmin(ProcessInstanceEntity processInstanceEntity) {
+    public boolean canReadOrAdmin(ProcessInstanceEntity processInstanceEntity) {
         return canRead(processInstanceEntity) || securityManager.getAuthenticatedUserRoles().contains(ADMIN_ROLE);
     }
 
@@ -212,5 +214,39 @@ public class ProcessInstanceService {
     @Transactional(readOnly = true)
     public Long count(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceSearchService.countRestricted(searchRequest);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        entityFinder.findById(
+            processInstanceRepository,
+            linkedProcessInstanceId,
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + linkedProcessInstanceId + "'"
+        );
+
+        String userId = securityManager.getAuthenticatedUserId();
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
+            linkedProcessInstanceId,
+            userId
+        );
+
+        return processInstanceRepository.findAll(restrictedSpecification, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        entityFinder.findById(
+            processInstanceRepository,
+            linkedProcessInstanceId,
+            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + linkedProcessInstanceId + "'"
+        );
+
+        String userId = securityManager.getAuthenticatedUserId();
+        ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
+            linkedProcessInstanceId,
+            userId
+        );
+
+        return processInstanceRepository.findAll(restrictedSpecification);
     }
 }
