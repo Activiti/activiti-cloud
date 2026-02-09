@@ -414,6 +414,7 @@
                       <exclude>org.springframework:spring-test:*:*:compile</exclude>
                       <exclude>junit:*:*:*:compile</exclude>
                       <exclude>org.junit.jupiter:*:*:*:compile</exclude>
+                      <exclude>org.springframework.boot:spring-boot-test:*:*:compile</exclude>
                     </excludes>
                     <searchTransitive>true</searchTransitive>
                   </bannedDependencies>
