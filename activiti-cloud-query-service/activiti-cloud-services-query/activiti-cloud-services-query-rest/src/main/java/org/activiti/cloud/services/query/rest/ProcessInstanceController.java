@@ -155,7 +155,6 @@ public class ProcessInstanceController {
     }
 
     @Operation(summary = "Link orphan process instances to a main process instance")
-    @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/{mainProcessInstanceId}/link")
     public void linkProcessInstances(
         @RequestBody LinkProcessInstancesRequest request,
