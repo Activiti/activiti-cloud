@@ -31,6 +31,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
+import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(
@@ -151,5 +154,18 @@ public class ProcessInstanceController {
     @PostMapping("/count")
     public Long countProcessInstances(@RequestBody ProcessInstanceSearchRequest searchRequest) {
         return processInstanceControllerHelper.countProcessInstances(searchRequest);
+    }
+
+    @Operation(summary = "Link orphan process instances to a main process instance")
+    @PostMapping("/{mainProcessInstanceId}/link")
+    public void linkProcessInstances(
+        @RequestBody LinkProcessInstancesRequest request,
+        @PathVariable String mainProcessInstanceId
+    ) {
+        try {
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstanceId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to link process instances", e);
+        }
     }
 }

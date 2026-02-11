@@ -23,6 +23,7 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
+import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -125,5 +126,13 @@ public class ProcessInstanceControllerHelper {
                 return instance;
             })
             .collect(Collectors.toSet());
+    }
+
+    public void linkProcessInstances(LinkProcessInstancesRequest request, String mainProcessInstanceId) {
+        processInstanceService.linkProcessInstances(
+            mainProcessInstanceId,
+            request.getProcessInstanceIds(),
+            request.getLinkProcessInstanceType()
+        );
     }
 }

@@ -18,9 +18,11 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,8 +32,10 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
+import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -44,9 +48,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest(
     properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
@@ -61,7 +65,7 @@ class ProcessInstanceControllerHelperIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @Autowired
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
@@ -191,5 +195,185 @@ class ProcessInstanceControllerHelperIT {
             .filter(pi -> pi.getId().equals(parentProcessInstance.getId()))
             .findFirst()
             .orElse(null);
+    }
+
+    @Nested
+    class LinkProcessInstancesTest {
+
+        @Test
+        void shouldLinkOrphanProcessInstancesToMainProcessInstance() {
+            ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
+            mainProcessInstance.setInitiator(TEST_USER);
+            processInstanceRepository.save(mainProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstance1 = buildProcessInstanceEntity();
+            orphanProcessInstance1.setInitiator(TEST_USER);
+            orphanProcessInstance1.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance1);
+
+            ProcessInstanceEntity orphanProcessInstance2 = buildProcessInstanceEntity();
+            orphanProcessInstance2.setInitiator(TEST_USER);
+            orphanProcessInstance2.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance2);
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(List.of(orphanProcessInstance1.getId(), orphanProcessInstance2.getId()));
+            request.setLinkProcessInstanceType("form-type");
+
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
+
+            ProcessInstanceEntity updatedOrphan1 = processInstanceRepository
+                .findById(orphanProcessInstance1.getId())
+                .orElseThrow();
+            ProcessInstanceEntity updatedOrphan2 = processInstanceRepository
+                .findById(orphanProcessInstance2.getId())
+                .orElseThrow();
+
+            assertThat(updatedOrphan1.getLinkedProcessInstanceId()).isEqualTo(mainProcessInstance.getId());
+            assertThat(updatedOrphan2.getLinkedProcessInstanceId()).isEqualTo(mainProcessInstance.getId());
+        }
+
+        @Test
+        void shouldNotLinkProcessInstancesWithDifferentLinkType() {
+            ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
+            mainProcessInstance.setInitiator(TEST_USER);
+            processInstanceRepository.save(mainProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstanceWithDifferentType = buildProcessInstanceEntity();
+            orphanProcessInstanceWithDifferentType.setInitiator(TEST_USER);
+            orphanProcessInstanceWithDifferentType.setLinkedProcessInstanceType("different-form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithDifferentType);
+
+            ProcessInstanceEntity orphanProcessInstanceWithSameRequestType = buildProcessInstanceEntity();
+            orphanProcessInstanceWithSameRequestType.setInitiator(TEST_USER);
+            orphanProcessInstanceWithSameRequestType.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithSameRequestType);
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(
+                List.of(
+                    orphanProcessInstanceWithDifferentType.getId(),
+                    orphanProcessInstanceWithSameRequestType.getId()
+                )
+            );
+            request.setLinkProcessInstanceType("form-type");
+
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
+
+            ProcessInstanceEntity updatedOrphan = processInstanceRepository
+                .findById(orphanProcessInstanceWithDifferentType.getId())
+                .orElseThrow();
+
+            assertThat(updatedOrphan.getLinkedProcessInstanceId()).isNull();
+
+            ProcessInstanceEntity updatedOrphanWithSameRequestType = processInstanceRepository
+                .findById(orphanProcessInstanceWithSameRequestType.getId())
+                .orElseThrow();
+
+            assertThat(updatedOrphanWithSameRequestType.getLinkedProcessInstanceId())
+                .isEqualTo(mainProcessInstance.getId());
+        }
+
+        @Test
+        void shouldNotLinkProcessInstancesWithDifferentMainProcessInstanceInitiator() {
+            ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
+            mainProcessInstance.setInitiator("anotherUser");
+            processInstanceRepository.save(mainProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
+            orphanProcessInstance.setInitiator(TEST_USER);
+            orphanProcessInstance.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstanceWithSameMainInitiator = buildProcessInstanceEntity();
+            orphanProcessInstanceWithSameMainInitiator.setInitiator("anotherUser");
+            orphanProcessInstanceWithSameMainInitiator.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithSameMainInitiator);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(
+                List.of(orphanProcessInstance.getId(), orphanProcessInstanceWithSameMainInitiator.getId())
+            );
+            request.setLinkProcessInstanceType("form-type");
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
+
+            ProcessInstanceEntity orphanProcessTestUserInitiator = processInstanceRepository
+                .findById(orphanProcessInstance.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessTestUserInitiator.getLinkedProcessInstanceId()).isNull();
+
+            ProcessInstanceEntity orphanProcessMainProcessInitiator = processInstanceRepository
+                .findById(orphanProcessInstanceWithSameMainInitiator.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessMainProcessInitiator.getLinkedProcessInstanceId()).isNull();
+        }
+
+        @Test
+        void shouldLinkOnlyProcessInstancesWithInitiatorSameLoggedInUser() {
+            ProcessInstanceEntity mainProcessInstance = buildProcessInstanceEntity();
+            mainProcessInstance.setInitiator(TEST_USER);
+            processInstanceRepository.save(mainProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
+            orphanProcessInstance.setInitiator("anotherUser");
+            orphanProcessInstance.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance);
+
+            ProcessInstanceEntity orphanProcessInstanceWithSameMainInitiator = buildProcessInstanceEntity();
+            orphanProcessInstanceWithSameMainInitiator.setInitiator(TEST_USER);
+            orphanProcessInstanceWithSameMainInitiator.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstanceWithSameMainInitiator);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(
+                List.of(orphanProcessInstance.getId(), orphanProcessInstanceWithSameMainInitiator.getId())
+            );
+            request.setLinkProcessInstanceType("form-type");
+
+            given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
+
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstance.getId());
+
+            ProcessInstanceEntity orphanProcessTestUserInitiator = processInstanceRepository
+                .findById(orphanProcessInstance.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessTestUserInitiator.getLinkedProcessInstanceId()).isNull();
+
+            ProcessInstanceEntity orphanProcessMainProcessInitiator = processInstanceRepository
+                .findById(orphanProcessInstanceWithSameMainInitiator.getId())
+                .orElseThrow();
+
+            assertThat(orphanProcessMainProcessInitiator.getLinkedProcessInstanceId()).isNotNull();
+        }
+
+        @Test
+        void shouldThrowExceptionWhenLinkingProcessInstancesWithInvalidMainProcessInstanceId() {
+            ProcessInstanceEntity orphanProcessInstance = buildProcessInstanceEntity();
+            orphanProcessInstance.setInitiator(TEST_USER);
+            orphanProcessInstance.setLinkedProcessInstanceType("form-type");
+            processInstanceRepository.save(orphanProcessInstance);
+
+            var request = new LinkProcessInstancesRequest();
+            request.setProcessInstanceIds(List.of(orphanProcessInstance.getId()));
+            request.setLinkProcessInstanceType("form-type");
+
+            String invalidMainProcessInstanceId = UUID.randomUUID().toString();
+
+            assertThatThrownBy(() ->
+                    processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
+                )
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Unable to find process for the given id:'" + invalidMainProcessInstanceId + "'");
+        }
     }
 }
