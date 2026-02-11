@@ -39,6 +39,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(
@@ -160,6 +162,10 @@ public class ProcessInstanceController {
         @RequestBody LinkProcessInstancesRequest request,
         @PathVariable String mainProcessInstanceId
     ) {
-        processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstanceId);
+        try {
+            processInstanceControllerHelper.linkProcessInstances(request, mainProcessInstanceId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to link process instances", e);
+        }
     }
 }

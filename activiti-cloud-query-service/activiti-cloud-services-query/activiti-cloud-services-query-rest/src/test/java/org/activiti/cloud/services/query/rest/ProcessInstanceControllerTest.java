@@ -21,8 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,7 +81,7 @@ import org.springframework.test.web.servlet.MvcResult;
     locations = { "classpath:application-test.properties" },
     properties = "activiti.cloud.rest.max-items.enabled=true"
 )
-class ProcessInstanceControllerIT {
+class ProcessInstanceControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -229,5 +232,89 @@ class ProcessInstanceControllerIT {
 
         assertThat(result.getResponse().getContentAsString())
             .contains(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
+    }
+
+    @Test
+    void should_returnOk_when_linkProcessInstances() throws Exception {
+        //when
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{mainProcessInstanceId}/link", "mainProcessInstanceId")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "processInstanceIds": ["%s", "%s"],
+                            "linkProcessInstanceType": "%s"
+                        }
+                        """.formatted(
+                                "orphanProcessInstanceId1",
+                                "orphanProcessInstanceId2",
+                                "linkType"
+                            )
+                    )
+                    .with(csrf())
+            )
+            //then
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_return_InternalServerError_when_linkProcessInstances() throws Exception {
+        RuntimeException generic = new RuntimeException("boom");
+        doThrow(generic)
+            .when(processInstanceService)
+            .linkProcessInstances(
+                "mainProcessInstanceId",
+                List.of("orphanProcessInstanceId1", "orphanProcessInstanceId2"),
+                "linkType"
+            );
+
+        //when
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{mainProcessInstanceId}/link", "mainProcessInstanceId")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "processInstanceIds": ["%s", "%s"],
+                            "linkProcessInstanceType": "%s"
+                        }
+                        """.formatted(
+                                "orphanProcessInstanceId1",
+                                "orphanProcessInstanceId2",
+                                "linkType"
+                            )
+                    )
+                    .with(csrf())
+            )
+            //then
+            .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void should_return_BadRequest_when_linkProcessInstances_with_invalid_request() throws Exception {
+        //when
+        mockMvc
+            .perform(
+                post("/v1/process-instances/{mainProcessInstanceId}/link", "")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "processInstanceIds": ["%s", "%s"],
+                            "linkProcessInstanceType": "%s"
+                        }
+                        """.formatted(
+                                "orphanProcessInstanceId1",
+                                "orphanProcessInstanceId2",
+                                "linkType"
+                            )
+                    )
+                    .with(csrf())
+            )
+            //then
+            .andExpect(status().isBadRequest());
     }
 }

@@ -263,31 +263,38 @@ public class ProcessInstanceService {
             UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + mainProcessInstanceId + "'"
         );
 
-        var request = new ProcessInstanceSearchRequest();
-        request.setId(new HashSet<>(processInstanceIds));
-        request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
+        if (processInstanceIds != null && !processInstanceIds.isEmpty()) {
+            var request = new ProcessInstanceSearchRequest();
+            request.setId(new HashSet<>(processInstanceIds));
+            request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
 
-        var orphanProcesses = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.restricted(request, securityManager.getAuthenticatedUserId())
-        );
+            var orphanProcesses = processInstanceRepository.findAll(
+                ProcessInstanceSpecification.restricted(request, securityManager.getAuthenticatedUserId())
+            );
 
-        if (orphanProcesses.isEmpty()) {
-            LOGGER.debug("No process instance found for the given ids:'{}'", processInstanceIds);
-            return;
-        }
-
-        orphanProcesses.forEach(orphanProcess -> {
-            if (orphanProcess.getInitiator().equals(mainProcess.getInitiator())) {
-                orphanProcess.setLinkedProcessInstanceId(mainProcess.getId());
-                processInstanceRepository.save(orphanProcess);
-            } else {
-                LOGGER.debug(
-                    "User {} not permitted to link process instance id {} to main process instance id {}",
-                    securityManager.getAuthenticatedUserId(),
-                    orphanProcess.getId(),
-                    mainProcessInstanceId
-                );
+            if (orphanProcesses.isEmpty()) {
+                LOGGER.debug("No process instance found for the given ids:'{}'", processInstanceIds);
+                return;
             }
-        });
+
+            orphanProcesses.forEach(orphanProcess -> {
+                if (orphanProcess.getInitiator().equals(mainProcess.getInitiator())) {
+                    orphanProcess.setLinkedProcessInstanceId(mainProcess.getId());
+                    processInstanceRepository.save(orphanProcess);
+                } else {
+                    LOGGER.debug(
+                        "User {} not permitted to link process instance id {} to main process instance id {}",
+                        securityManager.getAuthenticatedUserId(),
+                        orphanProcess.getId(),
+                        mainProcessInstanceId
+                    );
+                }
+            });
+        } else {
+            LOGGER.debug(
+                "No process instance id provided to link to main process instance id '{}'",
+                mainProcessInstanceId
+            );
+        }
     }
 }
