@@ -37,7 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>8.8.0-alpha.151</activiti.version>
+    <activiti.version>8.8.0-alpha.155</activiti.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
