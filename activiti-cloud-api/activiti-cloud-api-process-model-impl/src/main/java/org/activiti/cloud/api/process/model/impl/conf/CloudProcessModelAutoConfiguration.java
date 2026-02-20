@@ -52,6 +52,7 @@ import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.CloudApplicationImpl;
 import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
@@ -64,6 +65,7 @@ import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.api.process.model.impl.IntegrationWarningImpl;
 import org.activiti.cloud.api.process.model.impl.QueryCloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
@@ -326,6 +328,7 @@ public class CloudProcessModelAutoConfiguration {
         resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
         resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);
         resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);
+        resolver.addMapping(IntegrationWarning.class, IntegrationWarningImpl.class);
 
         resolver.addMapping(CloudProcessDefinition.class, CloudProcessDefinitionImpl.class);
         resolver.addMapping(

@@ -15,6 +15,8 @@
  */
 package org.activiti.services.connectors.channel;
 
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationWarningReceivedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -41,13 +43,30 @@ class AggregateIntegrationWarningReceivedEventCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationWarningReceivedEventImpl warningEvent = new CloudIntegrationWarningReceivedEventImpl(
-                integrationWarning.getIntegrationContext(),
-                integrationWarning.getWarningCode(),
-                integrationWarning.getWarningMessage()
-            ) {};
+            CloudIntegrationWarningReceivedEventImpl warningEvent;
+            if (integrationWarning.getIntegrationContext().hasEphemeralVariables()) {
+                IntegrationContextImpl sanitizedContext = new IntegrationContextImpl(
+                    integrationWarning.getIntegrationContext()
+                );
+                sanitizedContext.clearOutBoundVariables();
+                sanitizedContext.clearInBoundVariables();
+                warningEvent = createIntegrationWarningReceivedEvent(sanitizedContext);
+            } else {
+                warningEvent =
+                    createIntegrationWarningReceivedEvent(integrationWarning.getIntegrationContext());
+            }
             processEngineEventsAggregator.add(warningEvent);
         }
         return null;
+    }
+
+    private CloudIntegrationWarningReceivedEventImpl createIntegrationWarningReceivedEvent(
+        IntegrationContext integrationContext
+    ) {
+        return new CloudIntegrationWarningReceivedEventImpl(
+            integrationContext,
+            integrationWarning.getWarningCode(),
+            integrationWarning.getWarningMessage()
+        );
     }
 }
