@@ -58,7 +58,8 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "messageEvents_default-app",
                 "signalEvent",
                 "integrationResult_my-runtime-bundle",
-                "integrationError_my-runtime-bundle"
+                "integrationError_my-runtime-bundle",
+                "integrationWarning_my-runtime-bundle"
             );
     }
 
@@ -69,6 +70,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "commandConsumer",
                 "integrationErrorsConsumer",
                 "integrationResultsConsumer",
+                "integrationWarningsConsumer",
                 "myCmdResults",
                 "signalConsumer",
                 "messageConnectorInput",
@@ -114,6 +116,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "commandConsumer",
                 "integrationErrorsConsumer",
                 "integrationResultsConsumer",
+                "integrationWarningsConsumer",
                 "myCmdResults",
                 "signalConsumer",
                 "messageConnectorInput",
@@ -125,6 +128,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "commandConsumer",
                 "integrationErrorsConsumer",
                 "integrationResultsConsumer",
+                "integrationWarningsConsumer",
                 "myCmdResults",
                 "signalConsumer",
                 "messageConnectorInput",
@@ -138,6 +142,7 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "messageEvents_default-app",
                 "integrationResult_my-runtime-bundle",
                 "integrationError_my-runtime-bundle",
+                "integrationWarning_my-runtime-bundle",
                 "signalEvent"
             );
     }

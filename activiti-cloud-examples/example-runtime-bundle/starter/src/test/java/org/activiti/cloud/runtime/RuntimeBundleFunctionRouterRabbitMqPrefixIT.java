@@ -44,7 +44,8 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
                 "default-app.messageEvents_default-app",
                 "default-app.signalEvent",
                 "default-app.integrationResult_my-runtime-bundle",
-                "default-app.integrationError_my-runtime-bundle"
+                "default-app.integrationError_my-runtime-bundle",
+                "default-app.integrationWarning_my-runtime-bundle"
             );
     }
 
