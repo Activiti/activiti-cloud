@@ -49,6 +49,10 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private String errorMessage;
     private String errorClassName;
     private List<StackTraceElement> stackTraceElements;
+    private Date warningDate;
+    private String warningCode;
+    private String warningMessage;
+    private String warningClassName;
     private IntegrationContextStatus status;
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
@@ -264,6 +268,42 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
+    public Date getWarningDate() {
+        return warningDate;
+    }
+
+    public void setWarningDate(Date warningDate) {
+        this.warningDate = warningDate;
+    }
+
+    @Override
+    public String getWarningCode() {
+        return warningCode;
+    }
+
+    public void setWarningCode(String warningCode) {
+        this.warningCode = warningCode;
+    }
+
+    @Override
+    public String getWarningMessage() {
+        return warningMessage;
+    }
+
+    public void setWarningMessage(String warningMessage) {
+        this.warningMessage = warningMessage;
+    }
+
+    @Override
+    public String getWarningClassName() {
+        return warningClassName;
+    }
+
+    public void setWarningClassName(String warningClassName) {
+        this.warningClassName = warningClassName;
+    }
+
+    @Override
     public void addOutBoundVariable(String name, Object value) {
         outBoundVariables.put(name, value);
     }
@@ -338,7 +378,11 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                 resultDate,
                 stackTraceElements,
                 status,
-                ephemeralVariables
+                ephemeralVariables,
+                warningDate,
+                warningCode,
+                warningMessage,
+                warningClassName
             );
         return result;
     }
@@ -379,7 +423,11 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             Objects.equals(resultDate, other.resultDate) &&
             Objects.equals(stackTraceElements, other.stackTraceElements) &&
             status == other.status &&
-            Objects.equals(ephemeralVariables, other.ephemeralVariables)
+            Objects.equals(ephemeralVariables, other.ephemeralVariables) &&
+            Objects.equals(warningDate, other.warningDate) &&
+            Objects.equals(warningCode, other.warningCode) &&
+            Objects.equals(warningMessage, other.warningMessage) &&
+            Objects.equals(warningClassName, other.warningClassName)
         );
     }
 
@@ -428,6 +476,14 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             .append(errorClassName)
             .append(", stackTraceElements=")
             .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
+            .append(", warningDate=")
+            .append(warningDate)
+            .append(", warningCode=")
+            .append(warningCode)
+            .append(", warningMessage=")
+            .append(warningMessage)
+            .append(", warningClassName=")
+            .append(warningClassName)
             .append(", status=")
             .append(status)
             .append(", inBoundVariables=")

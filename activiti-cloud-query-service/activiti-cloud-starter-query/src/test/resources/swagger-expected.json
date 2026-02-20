@@ -9342,6 +9342,19 @@
           "errorCode": {
             "type": "string"
           },
+          "warningDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warningCode": {
+            "type": "string"
+          },
+          "warningMessage": {
+            "type": "string"
+          },
+          "warningClassName": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [

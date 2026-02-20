@@ -66,6 +66,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
 
     public static final int ERROR_MESSAGE_LENGTH = 255;
+    public static final int WARNING_MESSAGE_LENGTH = 255;
 
     @Id
     private String id;
@@ -116,6 +117,17 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @Column(columnDefinition = "text")
     @Basic(fetch = FetchType.LAZY)
     private List<StackTraceElement> stackTraceElements;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
+    private Date warningDate;
+
+    private String warningCode;
+
+    @Column(length = WARNING_MESSAGE_LENGTH)
+    private String warningMessage;
+
+    private String warningClassName;
 
     @JsonFormat(shape = Shape.STRING)
     @Enumerated(EnumType.STRING)
@@ -357,6 +369,42 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    @Override
+    public Date getWarningDate() {
+        return warningDate;
+    }
+
+    public void setWarningDate(Date warningDate) {
+        this.warningDate = warningDate;
+    }
+
+    @Override
+    public String getWarningCode() {
+        return warningCode;
+    }
+
+    public void setWarningCode(String warningCode) {
+        this.warningCode = warningCode;
+    }
+
+    @Override
+    public String getWarningMessage() {
+        return warningMessage;
+    }
+
+    public void setWarningMessage(String warningMessage) {
+        this.warningMessage = StringUtils.truncate(warningMessage, WARNING_MESSAGE_LENGTH);
+    }
+
+    @Override
+    public String getWarningClassName() {
+        return warningClassName;
+    }
+
+    public void setWarningClassName(String warningClassName) {
+        this.warningClassName = warningClassName;
     }
 
     @Override

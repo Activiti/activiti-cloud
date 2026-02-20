@@ -43,4 +43,12 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
     String getErrorClassName();
 
     List<StackTraceElement> getStackTraceElements();
+
+    Date getWarningDate();
+
+    String getWarningCode();
+
+    String getWarningMessage();
+
+    String getWarningClassName();
 }

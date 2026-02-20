@@ -16,17 +16,16 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
+import java.util.Date;
 import java.util.Optional;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationWarningReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 
 public class IntegrationWarningReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationWarningReceivedEventHandler.class);
 
     public IntegrationWarningReceivedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -36,19 +35,29 @@ public class IntegrationWarningReceivedEventHandler extends BaseIntegrationEvent
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudIntegrationWarningReceivedEvent warningEvent = CloudIntegrationWarningReceivedEvent.class.cast(event);
 
-        LOGGER.debug(
-            "Handling integration warning: code={}, message={}",
-            warningEvent.getWarningCode(),
-            warningEvent.getWarningMessage()
-        );
-
-        // No status change, no error date, no service task status update
-        // Just persist the warning context for audit/query purposes
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(warningEvent);
+        boolean isNewEntity = result.isEmpty();
+
         IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(warningEvent));
 
+        entity.setWarningDate(new Date(warningEvent.getTimestamp()));
+        entity.setStatus(IntegrationContextStatus.INTEGRATION_WARNING_RECEIVED);
+        entity.setWarningCode(warningEvent.getWarningCode());
+        entity.setWarningMessage(warningEvent.getWarningMessage());
+        entity.setWarningClassName(warningEvent.getWarningClassName());
         entity.setInBoundVariables(warningEvent.getEntity().getInBoundVariables());
         entity.setOutBoundVariables(warningEvent.getEntity().getOutBoundVariables());
+
+        String serviceTaskId = IntegrationContextEntity.IdBuilderHelper.from(warningEvent.getEntity());
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, serviceTaskId);
+
+        if (serviceTaskEntity != null && entity.getServiceTask() == null) {
+            entity.setServiceTask(serviceTaskEntity);
+
+            if (isNewEntity) {
+                serviceTaskEntity.incrementIntegrationContextCounter();
+            }
+        }
 
         entityManager.persist(entity);
     }
