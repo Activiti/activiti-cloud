@@ -25,6 +25,7 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
         INTEGRATION_REQUESTED,
         INTEGRATION_RESULT_RECEIVED,
         INTEGRATION_ERROR_RECEIVED,
+        INTEGRATION_WARNING_RECEIVED,
     }
 
     IntegrationContextStatus getStatus();

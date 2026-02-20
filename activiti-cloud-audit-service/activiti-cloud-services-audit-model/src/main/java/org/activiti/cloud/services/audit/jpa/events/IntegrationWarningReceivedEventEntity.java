@@ -31,12 +31,12 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
 
     protected static final String INTEGRATION_WARNING_RECEIVED_EVENT = "IntegrationWarningReceivedEvent";
 
-    private String warningCode;
+    private String errorCode;
 
     @Column(length = WARNING_MESSAGE_LENGTH)
-    private String warningMessage;
+    private String errorMessage;
 
-    private String warningClassName;
+    private String errorClassName;
 
     @Convert(converter = ListOfStackTraceElementsJpaJsonConverter.class)
     @Column(columnDefinition = "text")
@@ -46,36 +46,36 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
 
     public IntegrationWarningReceivedEventEntity(CloudIntegrationWarningReceivedEvent event) {
         super(event);
-        this.warningCode = event.getWarningCode();
-        this.warningMessage = event.getWarningMessage();
-        this.warningClassName = event.getWarningClassName();
+        this.errorCode = event.getWarningCode();
+        this.errorMessage = event.getWarningMessage();
+        this.errorClassName = event.getWarningClassName();
         this.stackTraceElements = event.getStackTraceElements();
     }
 
     // Getters and setters for warningCode, warningMessage, warningClassName, stackTraceElements
 
     public String getWarningCode() {
-        return warningCode;
+        return errorCode;
     }
 
-    public void setWarningCode(String warningCode) {
-        this.warningCode = warningCode;
+    public void setErrorCode(String warningCode) {
+        this.errorCode = warningCode;
     }
 
     public String getWarningMessage() {
-        return warningMessage;
+        return errorMessage;
     }
 
-    public void setWarningMessage(String warningMessage) {
-        this.warningMessage = warningMessage;
+    public void serErrorMessage(String warningMessage) {
+        this.errorMessage = warningMessage;
     }
 
     public String getWarningClassName() {
-        return warningClassName;
+        return errorClassName;
     }
 
-    public void setWarningClassName(String warningClassName) {
-        this.warningClassName = warningClassName;
+    public void setErrorClassName(String warningClassName) {
+        this.errorClassName = warningClassName;
     }
 
     public List<StackTraceElement> getStackTraceElements() {
@@ -90,9 +90,9 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
     public String toString() {
         return (
             "IntegrationWarningReceivedEventEntity [warningCode=" +
-            warningCode +
+            errorCode +
             ", warningMessage=" +
-            warningMessage +
+            errorMessage +
             "]"
         );
     }
