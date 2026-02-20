@@ -29,6 +29,7 @@ import org.activiti.cloud.services.audit.jpa.converters.IncidentCreatedEventConv
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.IntegrationWarningReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageSubscriptionCancelledEventConverter;
@@ -424,6 +425,14 @@ public class AuditJPAAutoConfiguration {
         EventContextInfoAppender eventContextInfoAppender
     ) {
         return new IntegrationErrorReceivedEventConverter(eventContextInfoAppender);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public IntegrationWarningReceivedEventConverter integrationWarningReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
+        return new IntegrationWarningReceivedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean

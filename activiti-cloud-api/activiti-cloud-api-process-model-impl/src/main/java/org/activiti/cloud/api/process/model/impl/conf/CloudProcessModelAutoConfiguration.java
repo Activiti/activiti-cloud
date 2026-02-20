@@ -86,6 +86,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationWarningReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
@@ -201,6 +202,13 @@ public class CloudProcessModelAutoConfiguration {
             new NamedType(
                 CloudIntegrationErrorReceivedEventImpl.class,
                 IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()
+            )
+        );
+
+        module.registerSubtypes(
+            new NamedType(
+                CloudIntegrationWarningReceivedEventImpl.class,
+                IntegrationEvent.IntegrationEvents.INTEGRATION_WARNING_RECEIVED.name()
             )
         );
 
