@@ -66,6 +66,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -264,6 +265,200 @@ class QueryBPMNActivityIT {
                             reviewTaskActivity.getElementId(),
                             reviewTaskActivity.getActivityType(),
                             BPMNActivityEntity.BPMNActivityStatus.STARTED
+                        )
+                    );
+            });
+    }
+
+    @Test
+    void shouldHandleCyclicalBpmnServiceTaskEvents() {
+        //given
+        ProcessInstanceImpl process = new ProcessInstanceImpl();
+        process.setId(UUID.randomUUID().toString());
+        process.setName("process");
+        process.setProcessDefinitionKey("mySimpleProcess2");
+        process.setProcessDefinitionId(processDefinitionId);
+        process.setProcessDefinitionVersion(1);
+
+        BPMNActivityImpl startActivity = new BPMNActivityImpl("startEvent1", "", "startEvent");
+        startActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        startActivity.setProcessInstanceId(process.getId());
+        startActivity.setExecutionId("executionId");
+
+        BPMNSequenceFlowImpl sequenceFlow = new BPMNSequenceFlowImpl("sf-1", "startEvent1", "reviewTaskActivity");
+        sequenceFlow.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow.setProcessInstanceId(process.getId());
+
+        BPMNActivityImpl servitTaskActivity = new BPMNActivityImpl(
+            "serviceTaskActivity",
+            "Run Service Task",
+            "serviceTask"
+        );
+        servitTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        servitTaskActivity.setProcessInstanceId(process.getId());
+        servitTaskActivity.setExecutionId("executionId");
+
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(process),
+            new CloudProcessStartedEventImpl(process),
+            new CloudBPMNActivityStartedEventImpl(startActivity, processDefinitionId, process.getId()),
+            new CloudBPMNActivityCompletedEventImpl(startActivity, processDefinitionId, process.getId()),
+            new CloudSequenceFlowTakenEventImpl(sequenceFlow),
+            new CloudBPMNActivityStartedEventImpl(servitTaskActivity, processDefinitionId, process.getId())
+        );
+
+        //when
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+
+                assertThat(activities).hasSize(2);
+                assertThat(activities)
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityType,
+                        BPMNActivityEntity::getStatus
+                    )
+                    .containsExactly(
+                        tuple(
+                            startActivity.getElementId(),
+                            startActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            servitTaskActivity.getElementId(),
+                            servitTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.STARTED
+                        )
+                    );
+            });
+
+        eventsAggregator.addEvents(
+            new CloudBPMNActivityCompletedEventImpl(servitTaskActivity, processDefinitionId, process.getId())
+        );
+
+        //when
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+
+                assertThat(activities).hasSize(2);
+                assertThat(activities)
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityType,
+                        BPMNActivityEntity::getStatus
+                    )
+                    .containsExactly(
+                        tuple(
+                            startActivity.getElementId(),
+                            startActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            servitTaskActivity.getElementId(),
+                            servitTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        )
+                    );
+            });
+
+        BPMNSequenceFlowImpl sequenceFlow2 = new BPMNSequenceFlowImpl(
+            "sf-2",
+            "reviewTaskActivity",
+            "employeeTaskActivity"
+        );
+        sequenceFlow2.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow2.setProcessInstanceId(process.getId());
+
+        BPMNActivityImpl employeeTaskActivity = new BPMNActivityImpl("employeeTaskActivity", "Employee", "userTask");
+        employeeTaskActivity.setProcessDefinitionId(process.getProcessDefinitionId());
+        employeeTaskActivity.setProcessInstanceId(process.getId());
+        employeeTaskActivity.setExecutionId("executionId");
+
+        BPMNSequenceFlowImpl sequenceFlow3 = new BPMNSequenceFlowImpl(
+            "sf-3",
+            "employeeTaskActivity",
+            "reviewTaskActivity"
+        );
+        sequenceFlow3.setProcessDefinitionId(process.getProcessDefinitionId());
+        sequenceFlow3.setProcessInstanceId(process.getId());
+
+        eventsAggregator.addEvents(
+            new CloudSequenceFlowTakenEventImpl(sequenceFlow2),
+            new CloudBPMNActivityStartedEventImpl(employeeTaskActivity, processDefinitionId, process.getId()),
+            new CloudBPMNActivityCompletedEventImpl(employeeTaskActivity, processDefinitionId, process.getId()),
+            new CloudSequenceFlowTakenEventImpl(sequenceFlow3),
+            new CloudBPMNActivityStartedEventImpl(servitTaskActivity, processDefinitionId, process.getId())
+        );
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+
+                assertThat(activities).hasSize(3);
+                assertThat(activities)
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityType,
+                        BPMNActivityEntity::getStatus
+                    )
+                    .containsOnly(
+                        tuple(
+                            startActivity.getElementId(),
+                            startActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            employeeTaskActivity.getElementId(),
+                            employeeTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            servitTaskActivity.getElementId(),
+                            servitTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.STARTED
+                        )
+                    );
+            });
+        eventsAggregator.addEvents(
+            new CloudBPMNActivityCompletedEventImpl(servitTaskActivity, processDefinitionId, process.getId())
+        );
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+
+                assertThat(activities).hasSize(3);
+                assertThat(activities)
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityType,
+                        BPMNActivityEntity::getStatus
+                    )
+                    .containsOnly(
+                        tuple(
+                            startActivity.getElementId(),
+                            startActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            employeeTaskActivity.getElementId(),
+                            employeeTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                        ),
+                        tuple(
+                            servitTaskActivity.getElementId(),
+                            servitTaskActivity.getActivityType(),
+                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
                         )
                     );
             });
