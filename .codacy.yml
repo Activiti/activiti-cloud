@@ -1,0 +1,6 @@
+---
+engines:
+  tsqllint:
+    exclude_paths:
+      - "**/*.h2.schema*.sql"
+      - "**/h2.schema.sql"
