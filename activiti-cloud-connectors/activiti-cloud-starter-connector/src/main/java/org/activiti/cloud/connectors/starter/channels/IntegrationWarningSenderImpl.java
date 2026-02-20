@@ -17,8 +17,8 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
-import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -43,4 +43,3 @@ public class IntegrationWarningSenderImpl implements IntegrationWarningSender {
         );
     }
 }
-

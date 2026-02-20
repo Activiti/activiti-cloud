@@ -21,4 +21,3 @@ import org.springframework.messaging.Message;
 public interface IntegrationWarningSender {
     void send(Message<IntegrationWarning> message);
 }
-

@@ -54,16 +54,24 @@ public class CloudIntegrationWarningReceivedEventImpl
     }
 
     @Override
-    public String getWarningCode() { return warningCode; }
+    public String getWarningCode() {
+        return warningCode;
+    }
 
     @Override
-    public String getWarningMessage() { return warningMessage; }
+    public String getWarningMessage() {
+        return warningMessage;
+    }
 
     @Override
-    public String getWarningClassName() { return warningClassName; }
+    public String getWarningClassName() {
+        return warningClassName;
+    }
 
     @Override
-    public List<StackTraceElement> getStackTraceElements() { return stackTraceElements; }
+    public List<StackTraceElement> getStackTraceElements() {
+        return stackTraceElements;
+    }
 
     @Override
     public int hashCode() {
@@ -79,15 +87,22 @@ public class CloudIntegrationWarningReceivedEventImpl
         if (!super.equals(obj)) return false;
         if (getClass() != obj.getClass()) return false;
         CloudIntegrationWarningReceivedEventImpl other = (CloudIntegrationWarningReceivedEventImpl) obj;
-        return Objects.equals(warningCode, other.warningCode)
-            && Objects.equals(warningMessage, other.warningMessage)
-            && Objects.equals(warningClassName, other.warningClassName)
-            && Objects.equals(stackTraceElements, other.stackTraceElements);
+        return (
+            Objects.equals(warningCode, other.warningCode) &&
+            Objects.equals(warningMessage, other.warningMessage) &&
+            Objects.equals(warningClassName, other.warningClassName) &&
+            Objects.equals(stackTraceElements, other.stackTraceElements)
+        );
     }
 
     @Override
     public String toString() {
-        return "CloudIntegrationWarningReceivedEventImpl [warningCode=" + warningCode
-            + ", warningMessage=" + warningMessage + "]";
+        return (
+            "CloudIntegrationWarningReceivedEventImpl [warningCode=" +
+            warningCode +
+            ", warningMessage=" +
+            warningMessage +
+            "]"
+        );
     }
 }

@@ -32,4 +32,3 @@ public interface IntegrationWarning extends CloudRuntimeEntity {
 
     public String getWarningClassName();
 }
-

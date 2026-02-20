@@ -30,4 +30,3 @@ public class IntegrationWarningChannelResolverImpl implements IntegrationWarning
         return builder.buildDestination(event);
     }
 }
-

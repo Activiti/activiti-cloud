@@ -54,19 +54,46 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
 
     // Getters and setters for warningCode, warningMessage, warningClassName, stackTraceElements
 
-    public String getWarningCode() { return warningCode; }
-    public void setWarningCode(String warningCode) { this.warningCode = warningCode; }
-    public String getWarningMessage() { return warningMessage; }
-    public void setWarningMessage(String warningMessage) { this.warningMessage = warningMessage; }
-    public String getWarningClassName() { return warningClassName; }
-    public void setWarningClassName(String warningClassName) { this.warningClassName = warningClassName; }
-    public List<StackTraceElement> getStackTraceElements() { return stackTraceElements; }
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) { this.stackTraceElements = stackTraceElements; }
+    public String getWarningCode() {
+        return warningCode;
+    }
+
+    public void setWarningCode(String warningCode) {
+        this.warningCode = warningCode;
+    }
+
+    public String getWarningMessage() {
+        return warningMessage;
+    }
+
+    public void setWarningMessage(String warningMessage) {
+        this.warningMessage = warningMessage;
+    }
+
+    public String getWarningClassName() {
+        return warningClassName;
+    }
+
+    public void setWarningClassName(String warningClassName) {
+        this.warningClassName = warningClassName;
+    }
+
+    public List<StackTraceElement> getStackTraceElements() {
+        return stackTraceElements;
+    }
+
+    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+        this.stackTraceElements = stackTraceElements;
+    }
 
     @Override
     public String toString() {
-        return "IntegrationWarningReceivedEventEntity [warningCode=" + warningCode
-            + ", warningMessage=" + warningMessage + "]";
+        return (
+            "IntegrationWarningReceivedEventEntity [warningCode=" +
+            warningCode +
+            ", warningMessage=" +
+            warningMessage +
+            "]"
+        );
     }
 }
-

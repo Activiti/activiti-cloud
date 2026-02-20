@@ -16,8 +16,8 @@
 package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Objects;
-import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.impl.IntegrationWarningImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
@@ -57,7 +57,9 @@ public class IntegrationWarningBuilder {
         Objects.requireNonNull(warningCode);
 
         IntegrationWarningImpl integrationWarning = new IntegrationWarningImpl(
-            integrationRequest, warningCode, warningMessage
+            integrationRequest,
+            warningCode,
+            warningMessage
         );
         if (connectorProperties != null) {
             integrationWarning.setAppVersion(connectorProperties.getAppVersion());
@@ -84,4 +86,3 @@ public class IntegrationWarningBuilder {
             .setHeader("targetService", integrationRequest.getServiceFullName());
     }
 }
-

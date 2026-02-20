@@ -56,9 +56,11 @@ public class ServiceTaskIntegrationWarningEventHandler {
     }
 
     public void receive(IntegrationWarning integrationWarning) {
-        LOGGER.info("Integration warning received: code={}, message={}",
+        LOGGER.info(
+            "Integration warning received: code={}, message={}",
             integrationWarning.getWarningCode(),
-            integrationWarning.getWarningMessage());
+            integrationWarning.getWarningMessage()
+        );
 
         // No process stopping. No IntegrationContext deletion. Just log and aggregate.
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {

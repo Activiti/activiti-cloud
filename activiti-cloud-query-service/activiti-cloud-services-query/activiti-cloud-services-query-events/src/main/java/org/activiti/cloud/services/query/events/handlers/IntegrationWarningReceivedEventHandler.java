@@ -41,18 +41,18 @@ public class IntegrationWarningReceivedEventHandler extends BaseIntegrationEvent
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudIntegrationWarningReceivedEvent warningEvent =
-            CloudIntegrationWarningReceivedEvent.class.cast(event);
+        CloudIntegrationWarningReceivedEvent warningEvent = CloudIntegrationWarningReceivedEvent.class.cast(event);
 
-        LOGGER.debug("Handling integration warning: code={}, message={}",
-            warningEvent.getWarningCode(), warningEvent.getWarningMessage());
+        LOGGER.debug(
+            "Handling integration warning: code={}, message={}",
+            warningEvent.getWarningCode(),
+            warningEvent.getWarningMessage()
+        );
 
         // No status change, no error date, no service task status update
         // Just persist the warning context for audit/query purposes
         Optional<IntegrationContextEntity> result = findIntegrationContextEntity(warningEvent);
-        IntegrationContextEntity entity = result.orElseGet(
-            () -> createMissingIntegrationContextEntity(warningEvent)
-        );
+        IntegrationContextEntity entity = result.orElseGet(() -> createMissingIntegrationContextEntity(warningEvent));
 
         entity.setInBoundVariables(warningEvent.getEntity().getInBoundVariables());
         entity.setOutBoundVariables(warningEvent.getEntity().getOutBoundVariables());
@@ -65,4 +65,3 @@ public class IntegrationWarningReceivedEventHandler extends BaseIntegrationEvent
         return IntegrationEvents.INTEGRATION_WARNING_RECEIVED.name();
     }
 }
-

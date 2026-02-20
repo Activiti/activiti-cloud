@@ -20,4 +20,3 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 public interface IntegrationWarningDestinationBuilder {
     String buildDestination(IntegrationRequest event);
 }
-

@@ -26,4 +26,3 @@ public interface CloudIntegrationWarningReceivedEvent extends CloudIntegrationEv
 
     List<StackTraceElement> getStackTraceElements();
 }
-

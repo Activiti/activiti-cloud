@@ -43,16 +43,13 @@ class AggregateIntegrationWarningReceivedEventCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         if (runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()) {
-            CloudIntegrationWarningReceivedEvent warningEvent =
-                new CloudIntegrationWarningReceivedEvent(
-                    integrationWarning.getIntegrationContext(),
-                    integrationWarning.getWarningCode(),
-                    integrationWarning.getWarningMessage()
-                ) {
-                };
+            CloudIntegrationWarningReceivedEvent warningEvent = new CloudIntegrationWarningReceivedEvent(
+                integrationWarning.getIntegrationContext(),
+                integrationWarning.getWarningCode(),
+                integrationWarning.getWarningMessage()
+            ) {};
             processEngineEventsAggregator.add(warningEvent);
         }
         return null;
     }
 }
-

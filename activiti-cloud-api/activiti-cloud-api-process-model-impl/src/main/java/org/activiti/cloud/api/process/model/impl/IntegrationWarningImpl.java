@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
-import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.IntegrationWarning;
 
 public class IntegrationWarningImpl extends CloudRuntimeEntityImpl implements IntegrationWarning {
 
@@ -101,10 +101,17 @@ public class IntegrationWarningImpl extends CloudRuntimeEntityImpl implements In
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(
-            warningCode, warningMessage, warningClassName,
-            integrationContext, integrationRequest, stackTraceElements
-        );
+        result =
+            prime *
+            result +
+            Objects.hash(
+                warningCode,
+                warningMessage,
+                warningClassName,
+                integrationContext,
+                integrationRequest,
+                stackTraceElements
+            );
         return result;
     }
 
@@ -114,18 +121,21 @@ public class IntegrationWarningImpl extends CloudRuntimeEntityImpl implements In
         if (!super.equals(obj)) return false;
         if (getClass() != obj.getClass()) return false;
         IntegrationWarningImpl other = (IntegrationWarningImpl) obj;
-        return Objects.equals(warningCode, other.warningCode)
-            && Objects.equals(warningMessage, other.warningMessage)
-            && Objects.equals(warningClassName, other.warningClassName)
-            && Objects.equals(integrationContext, other.integrationContext)
-            && Objects.equals(integrationRequest, other.integrationRequest)
-            && Objects.equals(stackTraceElements, other.stackTraceElements);
+        return (
+            Objects.equals(warningCode, other.warningCode) &&
+            Objects.equals(warningMessage, other.warningMessage) &&
+            Objects.equals(warningClassName, other.warningClassName) &&
+            Objects.equals(integrationContext, other.integrationContext) &&
+            Objects.equals(integrationRequest, other.integrationRequest) &&
+            Objects.equals(stackTraceElements, other.stackTraceElements)
+        );
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationWarningImpl [warningCode=")
+        builder
+            .append("IntegrationWarningImpl [warningCode=")
             .append(warningCode)
             .append(", warningMessage=")
             .append(warningMessage)

@@ -57,4 +57,3 @@ public class IntegrationWarningReceivedEventConverter extends BaseEventToEntityC
         );
     }
 }
-
