@@ -23,11 +23,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -132,10 +136,31 @@ public class FunctionRouterConfiguration {
     }
 
     @Bean
+    Function<Message<?>, ExecutorService> functionExecutor(ActivitiCloudMessagingProperties messagingProperties) {
+        final AtomicInteger sequence = new AtomicInteger(0);
+        final var parallelism = messagingProperties.getFunctionRouter().getParallelism();
+
+        final var executors = IntStream
+            .range(0, parallelism + 1)
+            .mapToObj(i -> Executors.newSingleThreadExecutor())
+            .toList();
+
+        return message ->
+            Optional
+                .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
+                .map(String::hashCode)
+                .or(() -> Optional.of(sequence.getAndIncrement()))
+                .map(it -> Math.abs(it % parallelism))
+                .map(executors::get)
+                .get();
+    }
+
+    @Bean
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties,
-        FunctionCatalog functionCatalog
+        FunctionCatalog functionCatalog,
+        Function<Message<?>, ExecutorService> functionExecutor
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -176,7 +201,10 @@ public class FunctionRouterConfiguration {
                             .map(functionRequest ->
                                 supplyAsyncWithRetry(
                                         () ->
-                                            CompletableFuture.supplyAsync(() -> routingFunction.apply(functionRequest)),
+                                            CompletableFuture.supplyAsync(
+                                                () -> routingFunction.apply(functionRequest),
+                                                functionExecutor.apply(functionRequest)
+                                            ),
                                         functionRouter.getMaxRetries(),
                                         functionRouter.getRetryInterval()
                                     )

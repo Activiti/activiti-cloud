@@ -446,6 +446,8 @@ public class ActivitiCloudMessagingProperties {
         @NestedConfigurationProperty
         private ConsumerProperties consumer = new ConsumerProperties();
 
+        private Integer parallelism = Runtime.getRuntime().availableProcessors() * 2;
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -616,7 +618,8 @@ public class ActivitiCloudMessagingProperties {
                 retryInterval,
                 consumer,
                 anonymous,
-                errorHandlerDefinition
+                errorHandlerDefinition,
+                parallelism
             );
         }
 
@@ -633,6 +636,7 @@ public class ActivitiCloudMessagingProperties {
                 .add("consumer=" + consumer)
                 .add("anonymous=" + anonymous)
                 .add("errorHandlerDefinition=" + errorHandlerDefinition)
+                .add("parallelism=" + parallelism)
                 .toString();
         }
 
@@ -646,6 +650,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setErrorHandlerDefinition(String errorHandlerDefinition) {
             this.errorHandlerDefinition = errorHandlerDefinition;
+        }
+
+        public Integer getParallelism() {
+            return parallelism;
+        }
+
+        public void setParallelism(Integer parallelism) {
+            this.parallelism = parallelism;
         }
     }
 
