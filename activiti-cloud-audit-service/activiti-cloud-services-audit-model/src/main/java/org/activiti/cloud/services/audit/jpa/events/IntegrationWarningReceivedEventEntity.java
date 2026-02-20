@@ -47,35 +47,33 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
     public IntegrationWarningReceivedEventEntity(CloudIntegrationWarningReceivedEvent event) {
         super(event);
         this.errorCode = event.getWarningCode();
-        this.errorMessage = event.getWarningMessage();
+        this.errorMessage = StringUtils.truncate(event.getWarningMessage(), WARNING_MESSAGE_LENGTH);
         this.errorClassName = event.getWarningClassName();
         this.stackTraceElements = event.getStackTraceElements();
     }
-
-    // Getters and setters for warningCode, warningMessage, warningClassName, stackTraceElements
 
     public String getWarningCode() {
         return errorCode;
     }
 
-    public void setErrorCode(String warningCode) {
-        this.errorCode = warningCode;
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     public String getWarningMessage() {
         return errorMessage;
     }
 
-    public void serErrorMessage(String warningMessage) {
-        this.errorMessage = warningMessage;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = StringUtils.truncate(errorMessage, WARNING_MESSAGE_LENGTH);
     }
 
     public String getWarningClassName() {
         return errorClassName;
     }
 
-    public void setErrorClassName(String warningClassName) {
-        this.errorClassName = warningClassName;
+    public void setErrorClassName(String errorClassName) {
+        this.errorClassName = errorClassName;
     }
 
     public List<StackTraceElement> getStackTraceElements() {
