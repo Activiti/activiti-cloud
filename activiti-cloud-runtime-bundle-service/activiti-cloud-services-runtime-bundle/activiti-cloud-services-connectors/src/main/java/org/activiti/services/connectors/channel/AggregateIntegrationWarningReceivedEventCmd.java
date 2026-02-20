@@ -52,8 +52,7 @@ class AggregateIntegrationWarningReceivedEventCmd implements Command<Void> {
                 sanitizedContext.clearInBoundVariables();
                 warningEvent = createIntegrationWarningReceivedEvent(sanitizedContext);
             } else {
-                warningEvent =
-                    createIntegrationWarningReceivedEvent(integrationWarning.getIntegrationContext());
+                warningEvent = createIntegrationWarningReceivedEvent(integrationWarning.getIntegrationContext());
             }
             processEngineEventsAggregator.add(warningEvent);
         }
