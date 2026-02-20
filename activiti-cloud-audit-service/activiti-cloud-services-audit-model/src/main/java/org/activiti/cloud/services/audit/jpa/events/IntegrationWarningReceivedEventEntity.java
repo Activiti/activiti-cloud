@@ -89,11 +89,7 @@ public class IntegrationWarningReceivedEventEntity extends IntegrationEventEntit
     @Override
     public String toString() {
         return (
-            "IntegrationWarningReceivedEventEntity [warningCode=" +
-            errorCode +
-            ", warningMessage=" +
-            errorMessage +
-            "]"
+            "IntegrationWarningReceivedEventEntity [warningCode=" + errorCode + ", warningMessage=" + errorMessage + "]"
         );
     }
 }
