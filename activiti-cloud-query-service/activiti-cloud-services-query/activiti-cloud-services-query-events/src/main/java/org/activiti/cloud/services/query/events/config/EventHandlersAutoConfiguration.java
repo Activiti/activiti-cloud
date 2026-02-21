@@ -28,7 +28,6 @@ import org.activiti.cloud.services.query.events.handlers.EntityManagerFinder;
 import org.activiti.cloud.services.query.events.handlers.IntegrationErrorReceivedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.IntegrationRequestedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.IntegrationResultReceivedEventHandler;
-import org.activiti.cloud.services.query.events.handlers.IntegrationWarningReceivedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessCancelledEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessCandidateStarterGroupAddedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessCandidateStarterGroupRemovedEventHandler;
@@ -304,12 +303,6 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public IntegrationErrorReceivedEventHandler integrationErrorReceivedEventHandler(EntityManager entityManager) {
         return new IntegrationErrorReceivedEventHandler(entityManager);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public IntegrationWarningReceivedEventHandler integrationWarningReceivedEventHandler(EntityManager entityManager) {
-        return new IntegrationWarningReceivedEventHandler(entityManager);
     }
 
     @Bean

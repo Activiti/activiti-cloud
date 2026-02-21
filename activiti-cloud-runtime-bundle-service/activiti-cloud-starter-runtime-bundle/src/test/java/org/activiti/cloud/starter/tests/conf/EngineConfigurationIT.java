@@ -177,9 +177,6 @@ class EngineConfigurationIT {
         BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties(
             "integrationErrorsConsumer"
         );
-        BindingProperties integrationWarningsConsumer = bindingServiceProperties.getBindingProperties(
-            "integrationWarningsConsumer"
-        );
 
         //then
         assertThat(integrationResultsConsumer.getDestination())
@@ -188,9 +185,6 @@ class EngineConfigurationIT {
         assertThat(integrationErrorsConsumer.getDestination())
             .isEqualTo("namespace.integration-error.my-activiti-rb-app");
         assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(integrationWarningsConsumer.getDestination())
-            .isEqualTo("namespace.integration-warning.my-activiti-rb-app");
-        assertThat(integrationWarningsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
     @Test

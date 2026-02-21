@@ -31,12 +31,6 @@ import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinati
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilderImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImpl;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningChannelResolver;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningChannelResolverImpl;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningDestinationBuilder;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningDestinationBuilderImpl;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningSender;
-import org.activiti.cloud.connectors.starter.channels.IntegrationWarningSenderImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -121,30 +115,5 @@ public class ActivitiCloudConnectorAutoConfiguration {
         IntegrationErrorChannelResolver integrationChannelResolver
     ) {
         return new IntegrationErrorSenderImpl(streamBridge, integrationChannelResolver);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public IntegrationWarningDestinationBuilder integrationWarningDestinationBuilder(
-        ConnectorProperties connectorProperties
-    ) {
-        return new IntegrationWarningDestinationBuilderImpl(connectorProperties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public IntegrationWarningChannelResolver integrationWarningChannelResolver(
-        IntegrationWarningDestinationBuilder builder
-    ) {
-        return new IntegrationWarningChannelResolverImpl(builder);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public IntegrationWarningSender integrationWarningSender(
-        StreamBridge streamBridge,
-        IntegrationWarningChannelResolver resolver
-    ) {
-        return new IntegrationWarningSenderImpl(streamBridge, resolver);
     }
 }

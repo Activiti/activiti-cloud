@@ -9342,26 +9342,12 @@
           "errorCode": {
             "type": "string"
           },
-          "warningDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "warningCode": {
-            "type": "string"
-          },
-          "warningMessage": {
-            "type": "string"
-          },
-          "warningClassName": {
-            "type": "string"
-          },
           "status": {
             "type": "string",
             "enum": [
               "INTEGRATION_REQUESTED",
               "INTEGRATION_RESULT_RECEIVED",
-              "INTEGRATION_ERROR_RECEIVED",
-              "INTEGRATION_WARNING_RECEIVED"
+              "INTEGRATION_ERROR_RECEIVED"
             ]
           },
           "id": {

@@ -235,11 +235,6 @@ create table integration_context
     error_class_name    	   	varchar(255),
 	stack_trace_elements 	   	text,
 
-    warning_date               	timestamp,
-    warning_code			   	varchar(255),
-    warning_message			   	varchar(255),
-    warning_class_name    	   	varchar(255),
-
 	inbound_variables	 	   	text,
 	out_bound_variables 	   	text,
 

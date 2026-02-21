@@ -25,7 +25,6 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
         INTEGRATION_REQUESTED,
         INTEGRATION_RESULT_RECEIVED,
         INTEGRATION_ERROR_RECEIVED,
-        INTEGRATION_WARNING_RECEIVED,
     }
 
     IntegrationContextStatus getStatus();
@@ -43,12 +42,4 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
     String getErrorClassName();
 
     List<StackTraceElement> getStackTraceElements();
-
-    Date getWarningDate();
-
-    String getWarningCode();
-
-    String getWarningMessage();
-
-    String getWarningClassName();
 }

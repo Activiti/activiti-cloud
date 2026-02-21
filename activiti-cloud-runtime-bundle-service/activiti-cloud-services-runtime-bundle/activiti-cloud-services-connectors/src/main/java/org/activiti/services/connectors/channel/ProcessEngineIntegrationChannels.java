@@ -24,8 +24,6 @@ public interface ProcessEngineIntegrationChannels {
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
-    String INTEGRATION_WARNINGS_CONSUMER = "integrationWarningsConsumer";
-
     @InputBinding(INTEGRATION_RESULTS_CONSUMER)
     default SubscribableChannel integrationResultsConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER).getObject();
@@ -34,10 +32,5 @@ public interface ProcessEngineIntegrationChannels {
     @InputBinding(INTEGRATION_ERRORS_CONSUMER)
     default SubscribableChannel integrationErrorsConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER).getObject();
-    }
-
-    @InputBinding(INTEGRATION_WARNINGS_CONSUMER)
-    default SubscribableChannel integrationWarningsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_WARNINGS_CONSUMER).getObject();
     }
 }

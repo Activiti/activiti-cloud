@@ -339,31 +339,4 @@
       splitStatements="true"
       stripComments="true"/>
   </changeSet>
-  <changeSet author="activiti-audit" runInTransaction="false"
-    id="alter19-schema" dbms="postgresql">
-    <sqlFile dbms="postgresql"
-      encoding="utf8"
-      path="changelog/19-alter.pg.schema.8.8.1.sql"
-      relativeToChangelogFile="true"
-      splitStatements="true"
-      stripComments="true"/>
-  </changeSet>
-  <changeSet author="activiti-audit" runInTransaction="false"
-    id="alter19-oracle-schema" dbms="oracle">
-    <sqlFile dbms="oracle"
-      encoding="utf8"
-      path="changelog/19-alter.oracle.schema.8.8.1.sql"
-      relativeToChangelogFile="true"
-      splitStatements="false"
-      stripComments="true"/>
-  </changeSet>
-  <changeSet author="activiti-audit"
-    id="h2-schema-alter19" dbms="h2">
-    <sqlFile dbms="h2"
-      encoding="utf8"
-      path="changelog/19-alter.h2.schema.8.8.1.sql"
-      relativeToChangelogFile="true"
-      splitStatements="true"
-      stripComments="true"/>
-  </changeSet>
 </databaseChangeLog>

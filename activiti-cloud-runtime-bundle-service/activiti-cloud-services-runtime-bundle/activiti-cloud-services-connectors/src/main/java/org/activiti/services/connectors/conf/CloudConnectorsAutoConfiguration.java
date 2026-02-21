@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.IntegrationWarning;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -42,7 +41,6 @@ import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationCompletionHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
-import org.activiti.services.connectors.channel.ServiceTaskIntegrationWarningEventHandler;
 import org.activiti.services.connectors.enricher.IntegrationContextEnricher;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -129,28 +127,6 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     public Consumer<Message<IntegrationError>> serviceTaskIntegrationErrorEventConsumer(
         ServiceTaskIntegrationErrorEventHandler handler
-    ) {
-        return message -> handler.receive(message.getPayload());
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ServiceTaskIntegrationWarningEventHandler serviceTaskIntegrationWarningEventHandler(
-        RuntimeBundleProperties runtimeBundleProperties,
-        ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
-    ) {
-        return new ServiceTaskIntegrationWarningEventHandler(
-            runtimeBundleProperties,
-            managementService,
-            processEngineEventsAggregator
-        );
-    }
-
-    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_WARNINGS_CONSUMER)
-    @Bean
-    public Consumer<Message<IntegrationWarning>> serviceTaskIntegrationWarningEventConsumer(
-        ServiceTaskIntegrationWarningEventHandler handler
     ) {
         return message -> handler.receive(message.getPayload());
     }

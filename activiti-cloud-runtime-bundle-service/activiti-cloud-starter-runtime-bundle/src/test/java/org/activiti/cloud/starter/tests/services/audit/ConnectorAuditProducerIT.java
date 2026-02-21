@@ -21,11 +21,9 @@ import static org.activiti.api.process.model.events.BPMNErrorReceivedEvent.Error
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
-import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_WARNING_RECEIVED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
-import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_WARNINGS_CONSUMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -49,11 +47,9 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationWarningReceivedEvent;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.api.process.model.impl.IntegrationWarningImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -129,9 +125,6 @@ public class ConnectorAuditProducerIT {
 
     @Value("integrationError_${spring.application.name}")
     private String integrationErrorDestination;
-
-    @Value("integrationWarning_${spring.application.name}")
-    private String integrationWarningDestination;
 
     @BeforeEach
     public void setUp() {
