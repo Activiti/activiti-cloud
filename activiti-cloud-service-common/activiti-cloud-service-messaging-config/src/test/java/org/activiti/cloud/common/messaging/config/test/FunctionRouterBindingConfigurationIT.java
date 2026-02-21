@@ -31,12 +31,14 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -169,6 +171,9 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private Function<Message<?>, ExecutorService> functionExecutorSelector;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -177,6 +182,8 @@ public class FunctionRouterBindingConfigurationIT {
         public Consumer<Message<?>> queryConsumerHandler() {
             return message -> {
                 queryMessage.set(message);
+
+                assertThat(Thread.currentThread().getName()).isEqualTo("queryConsumerHandler_registration");
             };
         }
 
@@ -185,6 +192,8 @@ public class FunctionRouterBindingConfigurationIT {
         public Consumer<Message<?>> auditConsumerHandler() {
             return message -> {
                 auditMessage.set(message);
+
+                assertThat(Thread.currentThread().getName()).isEqualTo("auditConsumerHandler_registration");
             };
         }
 
@@ -760,6 +769,28 @@ public class FunctionRouterBindingConfigurationIT {
             )
         )
             .isTrue();
+    }
+
+    @Test
+    void functionExecutorSelector() {
+        //given
+        final Message<String> message = MessageBuilder
+            .withPayload("foo")
+            .setHeader(FUNCTION_DEFINITION, "foo_registration")
+            .build();
+
+        final AtomicReference<Thread> threadHolder = new AtomicReference<>();
+
+        //when
+        final var functionExecutor = functionExecutorSelector.apply(message);
+
+        functionExecutor.submit(() -> threadHolder.set(Thread.currentThread()));
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).isEqualTo("foo_registration");
+            });
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {

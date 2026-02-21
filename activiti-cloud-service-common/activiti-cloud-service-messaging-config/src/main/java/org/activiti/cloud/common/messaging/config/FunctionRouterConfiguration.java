@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
@@ -66,7 +67,6 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
@@ -139,29 +139,52 @@ public class FunctionRouterConfiguration {
     @Bean
     @ConditionalOnMissingBean
     Function<String, ExecutorService> functionExecutorFactory() {
-        return registration ->
+        final Function<String, ExecutorService> executorServiceFactory = registration ->
             Executors.newSingleThreadScheduledExecutor(runnable -> {
                 final var thread = new Thread(runnable);
                 thread.setName(registration);
 
                 return thread;
             });
+
+        return new Function<>() {
+            final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+
+            @Override
+            public ExecutorService apply(String registration) {
+                return executors.computeIfAbsent(registration, executorServiceFactory);
+            }
+        };
     }
 
     @Bean
-    Function<Message<?>, ExecutorService> functionExecutor(Function<String, ExecutorService> functionExecutorFactory) {
-        final Map<String, ExecutorService> executors = new ConcurrentReferenceHashMap<>();
+    Function<Message<?>, String> functionRegistrationSelector() {
+        return new Function<>() {
+            @Override
+            public String apply(Message<?> message) {
+                return Optional
+                    .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
+                    .filter(Predicate.not(String::isBlank))
+                    .orElseThrow(() ->
+                        new MessageDispatchingException(
+                            String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
+                        )
+                    );
+            }
+        };
+    }
 
-        return message ->
-            Optional
-                .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
-                .filter(Predicate.not(String::isBlank))
-                .map(registration -> executors.computeIfAbsent(registration, functionExecutorFactory))
-                .orElseThrow(() ->
-                    new MessageDispatchingException(
-                        String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
-                    )
-                );
+    @Bean
+    Function<Message<?>, ExecutorService> functionExecutorSelector(
+        Function<Message<?>, String> functionRegistrationSelector,
+        Function<String, ExecutorService> functionExecutorFactory
+    ) {
+        return new Function<>() {
+            @Override
+            public ExecutorService apply(Message<?> message) {
+                return functionRegistrationSelector.andThen(functionExecutorFactory).apply(message);
+            }
+        };
     }
 
     @Bean
@@ -169,7 +192,7 @@ public class FunctionRouterConfiguration {
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties,
         FunctionCatalog functionCatalog,
-        Function<Message<?>, ExecutorService> functionExecutor
+        Function<Message<?>, ExecutorService> functionExecutorSelector
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -212,7 +235,7 @@ public class FunctionRouterConfiguration {
                                         () ->
                                             CompletableFuture.supplyAsync(
                                                 () -> routingFunction.apply(functionRequest),
-                                                functionExecutor.apply(functionRequest)
+                                                functionExecutorSelector.apply(functionRequest)
                                             ),
                                         functionRouter.getMaxRetries(),
                                         functionRouter.getRetryInterval()
