@@ -25,13 +25,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -47,6 +45,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
@@ -57,6 +56,7 @@ import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
@@ -66,6 +66,7 @@ import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
@@ -136,23 +137,31 @@ public class FunctionRouterConfiguration {
     }
 
     @Bean
-    Function<Message<?>, ExecutorService> functionExecutor(ActivitiCloudMessagingProperties messagingProperties) {
-        final AtomicInteger sequence = new AtomicInteger(0);
-        final var parallelism = messagingProperties.getFunctionRouter().getParallelism();
+    @ConditionalOnMissingBean
+    Function<String, ExecutorService> functionExecutorFactory() {
+        return registration ->
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                final var thread = new Thread(runnable);
+                thread.setName(registration);
 
-        final var executors = IntStream
-            .range(0, parallelism + 1)
-            .mapToObj(i -> Executors.newSingleThreadExecutor())
-            .toList();
+                return thread;
+            });
+    }
+
+    @Bean
+    Function<Message<?>, ExecutorService> functionExecutor(Function<String, ExecutorService> functionExecutorFactory) {
+        final Map<String, ExecutorService> executors = new ConcurrentReferenceHashMap<>();
 
         return message ->
             Optional
                 .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
-                .map(String::hashCode)
-                .or(() -> Optional.of(sequence.getAndIncrement()))
-                .map(it -> Math.abs(it % parallelism))
-                .map(executors::get)
-                .get();
+                .filter(Predicate.not(String::isBlank))
+                .map(registration -> executors.computeIfAbsent(registration, functionExecutorFactory))
+                .orElseThrow(() ->
+                    new MessageDispatchingException(
+                        String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
+                    )
+                );
     }
 
     @Bean
