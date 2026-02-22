@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -361,11 +362,11 @@ public class FunctionRouterConfiguration {
         };
     }
 
-    public static class FunctionExecutorFactory implements Function<String, ExecutorService> {
+    static class FunctionExecutorFactory implements Function<String, ExecutorService> {
 
-        final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+        private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
 
-        final Function<String, ExecutorService> executorServiceFactory = registration ->
+        private final Function<String, ExecutorService> executorServiceFactory = registration ->
             Executors.newSingleThreadScheduledExecutor(runnable -> {
                 final var thread = new Thread(runnable);
                 thread.setName(registration);
@@ -381,15 +382,30 @@ public class FunctionRouterConfiguration {
         }
 
         @PreDestroy
-        public void shutdown() {
-            executors.values().forEach(ExecutorService::shutdown);
+        public void destroy() {
+            try {
+                shutdown();
 
-            awaitTermination(5, TimeUnit.SECONDS);
-
-            executors.clear();
+                if (!awaitTermination(5, TimeUnit.SECONDS)) {
+                    shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                shutdownNow();
+            } finally {
+                executors.clear();
+            }
         }
 
-        public boolean awaitTermination(final long timeout, final TimeUnit unit) {
+        public void shutdown() {
+            executors.values().forEach(ExecutorService::shutdown);
+        }
+
+        public void shutdownNow() {
+            executors.values().forEach(ExecutorService::shutdownNow);
+        }
+
+        public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
             final var cfs = executors
                 .values()
                 .stream()
@@ -404,11 +420,16 @@ public class FunctionRouterConfiguration {
                         return false;
                     })
                 )
-                .toArray(CompletableFuture[]::new);
+                .toList();
 
-            CompletableFuture.allOf(cfs).join();
-
-            return true;
+            try {
+                return CompletableFuture
+                    .allOf(cfs.toArray(CompletableFuture[]::new))
+                    .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
+                    .get();
+            } catch (ExecutionException e) {
+                throw new InterruptedException();
+            }
         }
     }
 }
