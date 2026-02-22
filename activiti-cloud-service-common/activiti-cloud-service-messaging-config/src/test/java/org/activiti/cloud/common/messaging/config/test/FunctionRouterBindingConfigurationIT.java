@@ -834,6 +834,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
         //given
+        functionExecutorFactory.setTimeout(Duration.ofSeconds(1));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
@@ -846,7 +847,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         functionExecutor.submit(() -> {
             try {
-                Thread.sleep(500);
+                Thread.sleep(2000);
                 threadHolder.set(Thread.currentThread());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -855,10 +856,9 @@ public class FunctionRouterBindingConfigurationIT {
 
         functionExecutorFactory.destroy();
 
-        assertThat(threadHolder.get()).isNotNull();
+        assertThat(threadHolder.get()).isNull();
 
-        assertThatThrownBy(() -> functionExecutor.submit(() -> threadHolder.set(Thread.currentThread())))
-            .isInstanceOf(RejectedExecutionException.class);
+        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {

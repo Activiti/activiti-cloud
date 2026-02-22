@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config;
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
 import jakarta.annotation.PreDestroy;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -365,6 +366,7 @@ public class FunctionRouterConfiguration {
     public static class FunctionExecutorFactory implements Function<String, ExecutorService> {
 
         private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+        private Duration timeout = Duration.ofSeconds(5);
 
         private final Function<String, ExecutorService> executorServiceFactory = registration ->
             Executors.newSingleThreadScheduledExecutor(runnable -> {
@@ -386,7 +388,7 @@ public class FunctionRouterConfiguration {
             try {
                 shutdown();
 
-                if (!awaitTermination(5, TimeUnit.SECONDS)) {
+                if (!awaitTermination(timeout.getSeconds(), TimeUnit.SECONDS)) {
                     shutdownNow();
                 }
             } catch (InterruptedException e) {
@@ -430,6 +432,10 @@ public class FunctionRouterConfiguration {
             } catch (ExecutionException e) {
                 throw new InterruptedException();
             }
+        }
+
+        public void setTimeout(Duration timeout) {
+            this.timeout = timeout;
         }
     }
 }
