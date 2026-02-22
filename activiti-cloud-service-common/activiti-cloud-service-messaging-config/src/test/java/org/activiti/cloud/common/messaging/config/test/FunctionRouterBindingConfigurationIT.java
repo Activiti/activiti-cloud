@@ -36,13 +36,17 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
@@ -772,7 +776,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionExecutorSelector() {
+    void functionExecutorSelectorShouldExecuteFunctionInTheNamedThread() {
         //given
         final Message<String> message = MessageBuilder
             .withPayload("foo")
@@ -791,6 +795,34 @@ public class FunctionRouterBindingConfigurationIT {
             .untilAsserted(() -> {
                 assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).isEqualTo("foo_registration");
             });
+    }
+
+    @Test
+    void functionExecutorShouldExecuteSameFunctionByTheSameThreadInTheSameOrder() {
+        //given
+        final Map<Integer, String> executionThreadMap = new ConcurrentHashMap<>();
+        final List<Integer> executionOrder = new LinkedList<>();
+
+        //when
+        final var executions = IntStream
+            .range(0, 100)
+            .mapToObj(i -> MessageBuilder.withPayload(i).setHeader(FUNCTION_DEFINITION, "foo_registration").build())
+            .map(m ->
+                CompletableFuture.runAsync(
+                    () -> {
+                        executionThreadMap.put(m.getPayload(), Thread.currentThread().getName());
+                        executionOrder.add(m.getPayload());
+                    },
+                    functionExecutorSelector.apply(m)
+                )
+            )
+            .toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(executions).join();
+
+        //then
+        assertThat(executionThreadMap.values().stream().distinct().count()).isEqualTo(1);
+        assertThat(IntStream.range(0, 100).boxed().toList()).isEqualTo(executionOrder);
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {

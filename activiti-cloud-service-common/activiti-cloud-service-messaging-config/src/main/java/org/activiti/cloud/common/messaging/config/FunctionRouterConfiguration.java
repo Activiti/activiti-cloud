@@ -17,6 +17,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
+import jakarta.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -139,22 +141,7 @@ public class FunctionRouterConfiguration {
     @Bean
     @ConditionalOnMissingBean
     Function<String, ExecutorService> functionExecutorFactory() {
-        final Function<String, ExecutorService> executorServiceFactory = registration ->
-            Executors.newSingleThreadScheduledExecutor(runnable -> {
-                final var thread = new Thread(runnable);
-                thread.setName(registration);
-
-                return thread;
-            });
-
-        return new Function<>() {
-            final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
-
-            @Override
-            public ExecutorService apply(String registration) {
-                return executors.computeIfAbsent(registration, executorServiceFactory);
-            }
-        };
+        return new FunctionExecutorFactory();
     }
 
     @Bean
@@ -372,5 +359,56 @@ public class FunctionRouterConfiguration {
                 return bean;
             }
         };
+    }
+
+    public static class FunctionExecutorFactory implements Function<String, ExecutorService> {
+
+        final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
+
+        final Function<String, ExecutorService> executorServiceFactory = registration ->
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                final var thread = new Thread(runnable);
+                thread.setName(registration);
+
+                return thread;
+            });
+
+        public FunctionExecutorFactory() {}
+
+        @Override
+        public ExecutorService apply(String key) {
+            return executors.computeIfAbsent(key, executorServiceFactory);
+        }
+
+        @PreDestroy
+        public void shutdown() {
+            executors.values().forEach(ExecutorService::shutdown);
+
+            awaitTermination(5, TimeUnit.SECONDS);
+
+            executors.clear();
+        }
+
+        public boolean awaitTermination(final long timeout, final TimeUnit unit) {
+            final var cfs = executors
+                .values()
+                .stream()
+                .map(executor ->
+                    CompletableFuture.supplyAsync(() -> {
+                        try {
+                            return executor.awaitTermination(timeout, unit);
+                        } catch (InterruptedException ignored) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        return false;
+                    })
+                )
+                .toArray(CompletableFuture[]::new);
+
+            CompletableFuture.allOf(cfs).join();
+
+            return true;
+        }
     }
 }
