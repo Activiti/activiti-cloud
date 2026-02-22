@@ -362,7 +362,7 @@ public class FunctionRouterConfiguration {
         };
     }
 
-    static class FunctionExecutorFactory implements Function<String, ExecutorService> {
+    public static class FunctionExecutorFactory implements Function<String, ExecutorService> {
 
         private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
 

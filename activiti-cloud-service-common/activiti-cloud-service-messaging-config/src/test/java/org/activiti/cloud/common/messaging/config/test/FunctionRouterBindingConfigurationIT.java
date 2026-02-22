@@ -30,6 +30,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.REST_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,6 +52,7 @@ import java.util.stream.IntStream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
+import org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -177,6 +180,9 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Autowired
     private Function<Message<?>, ExecutorService> functionExecutorSelector;
+
+    @Autowired
+    private FunctionRouterConfiguration.FunctionExecutorFactory functionExecutorFactory;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -823,6 +829,36 @@ public class FunctionRouterBindingConfigurationIT {
         //then
         assertThat(executionThreadMap.values().stream().distinct().count()).isEqualTo(1);
         assertThat(IntStream.range(0, 100).boxed().toList()).isEqualTo(executionOrder);
+    }
+
+    @Test
+    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
+        //given
+        final Message<String> message = MessageBuilder
+            .withPayload("foo")
+            .setHeader(FUNCTION_DEFINITION, "foo_registration")
+            .build();
+
+        final AtomicReference<Thread> threadHolder = new AtomicReference<>();
+
+        //when
+        final var functionExecutor = functionExecutorSelector.apply(message);
+
+        functionExecutor.submit(() -> {
+            try {
+                Thread.sleep(500);
+                threadHolder.set(Thread.currentThread());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        functionExecutorFactory.destroy();
+
+        assertThat(threadHolder.get()).isNotNull();
+
+        assertThatThrownBy(() -> functionExecutor.submit(() -> threadHolder.set(Thread.currentThread())))
+            .isInstanceOf(RejectedExecutionException.class);
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {
