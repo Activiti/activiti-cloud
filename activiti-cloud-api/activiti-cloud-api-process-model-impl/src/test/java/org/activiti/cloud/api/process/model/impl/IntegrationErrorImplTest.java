@@ -80,10 +80,8 @@ class IntegrationErrorImplTest {
     @ParameterizedTest
     @MethodSource("combinedMessagesProvider")
     void should_returnCombinedMessage_when_messagesAreDifferent(Throwable error, String expected) {
-        // when
         var result = new IntegrationErrorImpl(integrationRequest, error);
 
-        // then
         assertThat(result.getErrorMessage()).isEqualTo(expected);
     }
 
@@ -101,23 +99,18 @@ class IntegrationErrorImplTest {
 
     @Test
     void should_returnErrorMessage_when_errorHasNoCause() {
-        // given
         var error = new RuntimeException("Error message");
 
-        // when
         var result = new IntegrationErrorImpl(integrationRequest, error);
 
-        // then
         assertThat(result.getErrorMessage()).isEqualTo("Error message");
     }
 
     @ParameterizedTest
     @MethodSource("nullMessagesProvider")
     void should_returnNull_when_bothMessagesAreNull(Throwable error) {
-        // when
         var result = new IntegrationErrorImpl(integrationRequest, error);
 
-        // then
         assertThat(result.getErrorMessage()).isNull();
     }
 
@@ -152,60 +145,17 @@ class IntegrationErrorImplTest {
     }
 
     private void parametrizedAssertion(String errorMessage, String rootCauseMessage, String expected) {
-        // given
         var rootCause = new RuntimeException(rootCauseMessage);
         var error = new RuntimeException(errorMessage, rootCause);
 
-        // when
         var result = new IntegrationErrorImpl(integrationRequest, error);
 
-        // then
         assertThat(result.getErrorMessage()).isEqualTo(expected);
     }
 
     static Stream<Arguments> jsonMessagesProvider() {
         var jsonError = "{\"message\":\"Dmn table notDefined-v2.dmn not valid or not found\",\"severity\":\"ERROR\"}";
         return Stream.of(Arguments.of(jsonError, "Error", jsonError), Arguments.of("ERROR", jsonError, jsonError));
-    }
-
-    @Test
-    void should_preserveOriginalMessage_when_messageHasNoColon() {
-        // given
-        var rootCause = new RuntimeException("Simple error without colon");
-        var error = new RuntimeException("Another simple message", rootCause);
-
-        // when
-        var result = new IntegrationErrorImpl(integrationRequest, error);
-
-        // then
-        assertThat(result.getErrorMessage()).isEqualTo("Another simple message caused by: Simple error without colon");
-    }
-
-    @Test
-    void should_preserveOriginalMessage_when_prefixIsNotValidClassName() {
-        // given
-        var rootCause = new RuntimeException("com.nonexistent.FakeClass: root error");
-        var error = new RuntimeException("org.fake.NotARealClass: top error", rootCause);
-
-        // when
-        var result = new IntegrationErrorImpl(integrationRequest, error);
-
-        // then
-        assertThat(result.getErrorMessage())
-            .isEqualTo("org.fake.NotARealClass: top error caused by: com.nonexistent.FakeClass: root error");
-    }
-
-    @Test
-    void should_removeClassName_when_prefixIsValidClassName() {
-        // given
-        var rootCause = new RuntimeException("java.lang.IllegalArgumentException: invalid argument");
-        var error = new RuntimeException("java.lang.RuntimeException: runtime failure", rootCause);
-
-        // when
-        var result = new IntegrationErrorImpl(integrationRequest, error);
-
-        // then
-        assertThat(result.getErrorMessage()).isEqualTo("runtime failure caused by: invalid argument");
     }
 
     @ParameterizedTest
@@ -220,29 +170,33 @@ class IntegrationErrorImplTest {
 
     static Stream<Arguments> classNamePrefixedMessagesProvider() {
         return Stream.of(
-            // Valid class name is stripped
+            Arguments.of(
+                "Another simple message",
+                "Simple error without colon",
+                "Another simple message caused by: Simple error without colon"
+            ),
+            Arguments.of(
+                "org.fake.NotARealClass: top error",
+                "com.nonexistent.FakeClass: root error",
+                "org.fake.NotARealClass: top error caused by: com.nonexistent.FakeClass: root error"
+            ),
+            Arguments.of("NotAClass: some error", "root message", "NotAClass: some error caused by: root message"),
+            Arguments.of(
+                "java.lang.RuntimeException: runtime failure",
+                "java.lang.IllegalArgumentException: invalid argument",
+                "runtime failure caused by: invalid argument"
+            ),
             Arguments.of(
                 "java.lang.NullPointerException: value is null",
                 "simple root",
                 "value is null caused by: simple root"
             ),
-            // Invalid class name prefix is preserved
-            Arguments.of("NotAClass: some error", "root message", "NotAClass: some error caused by: root message"),
-            // Colon in middle of message without class prefix
-            Arguments.of("Error: details: more info", "root", "Error: details: more info caused by: root")
+            Arguments.of("Error: details: more info", "root", "Error: details: more info caused by: root"),
+            Arguments.of(
+                "java.lang.RuntimeException: actual error message",
+                "actual error message",
+                "actual error message"
+            )
         );
-    }
-
-    @Test
-    void should_returnRootCauseMessage_when_errorMessageContainsOnlyClassName() {
-        // given
-        var rootCause = new RuntimeException("actual error message");
-        var error = new RuntimeException("java.lang.RuntimeException: actual error message", rootCause);
-
-        // when
-        var result = new IntegrationErrorImpl(integrationRequest, error);
-
-        // then
-        assertThat(result.getErrorMessage()).isEqualTo("actual error message");
     }
 }
