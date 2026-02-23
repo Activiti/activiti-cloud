@@ -841,28 +841,30 @@ public class FunctionRouterBindingConfigurationIT {
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
             .build();
 
-        final AtomicReference<Thread> threadHolder = new AtomicReference<>();
         final var phaser = new Phaser(2);
-
-        //when
         final var functionExecutor = functionExecutorSelector.apply(message);
-
-        functionExecutor.submit(() -> {
+        final var futureResult = functionExecutor.submit(() -> {
             try {
                 phaser.arriveAndAwaitAdvance();
-                Thread.sleep(200);
-                threadHolder.set(Thread.currentThread());
+                synchronized (this) {
+                    wait();
+                }
+
+                return "never";
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+
+            return null;
         });
 
         phaser.arriveAndAwaitAdvance();
 
+        //when
         functionRouterExecutorFactory.destroy();
 
-        assertThat(threadHolder.get()).isNull();
-
+        //then
+        assertThat(futureResult.resultNow()).isNull();
         assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
     }
 
