@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.BPMNActivityImpl;
@@ -315,25 +316,11 @@ class QueryBPMNActivityIT {
         //when
         eventsAggregator.sendAll();
 
-        final List<CompletableFuture<Throwable>> startedServiceTasks = IntStream
-            .range(0, 100)
-            .mapToObj(i ->
-                CompletableFuture.supplyAsync(() -> {
-                    eventsAggregator.addEvents(
-                        new CloudBPMNActivityStartedEventImpl(serviceTaskActivity, processDefinitionId, process.getId())
-                    );
-
-                    eventsAggregator.sendAll();
-
-                    return eventsAggregator.getException();
-                })
-            )
-            .toList();
-
-        final var startedSuccess = CompletableFuture
-            .allOf(startedServiceTasks.toArray(CompletableFuture[]::new))
-            .thenApply(v -> startedServiceTasks.stream().map(CompletableFuture::join).allMatch(Objects::isNull))
-            .join();
+        final var startedSuccess = withSupplyAsyncEventsSendResult(() ->
+            new CloudRuntimeEvent[] {
+                new CloudBPMNActivityStartedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
+            }
+        );
 
         assertThat(startedSuccess).isTrue();
 
@@ -362,29 +349,11 @@ class QueryBPMNActivityIT {
                     );
             });
 
-        final List<CompletableFuture<Throwable>> completedServiceTasks = IntStream
-            .range(0, 100)
-            .mapToObj(i ->
-                CompletableFuture.supplyAsync(() -> {
-                    eventsAggregator.addEvents(
-                        new CloudBPMNActivityCompletedEventImpl(
-                            serviceTaskActivity,
-                            processDefinitionId,
-                            process.getId()
-                        )
-                    );
-
-                    eventsAggregator.sendAll();
-
-                    return eventsAggregator.getException();
-                })
-            )
-            .toList();
-
-        final var completedSuccess = CompletableFuture
-            .allOf(completedServiceTasks.toArray(CompletableFuture[]::new))
-            .thenApply(v -> completedServiceTasks.stream().map(CompletableFuture::join).allMatch(Objects::isNull))
-            .join();
+        final var completedSuccess = withSupplyAsyncEventsSendResult(() ->
+            new CloudRuntimeEvent[] {
+                new CloudBPMNActivityCompletedEventImpl(serviceTaskActivity, processDefinitionId, process.getId()),
+            }
+        );
 
         assertThat(completedSuccess).isTrue();
 
@@ -536,5 +505,26 @@ class QueryBPMNActivityIT {
                         tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED)
                     );
             });
+    }
+
+    private Boolean withSupplyAsyncEventsSendResult(Supplier<CloudRuntimeEvent[]> supplier) {
+        final List<CompletableFuture<Throwable>> completedServiceTasks = IntStream
+            .range(0, 100)
+            .mapToObj(i ->
+                CompletableFuture.supplyAsync(() -> {
+                    synchronized (eventsAggregator) {
+                        eventsAggregator.addEvents(supplier.get());
+                        eventsAggregator.sendAll();
+
+                        return eventsAggregator.getException();
+                    }
+                })
+            )
+            .toList();
+
+        return CompletableFuture
+            .allOf(completedServiceTasks.toArray(CompletableFuture[]::new))
+            .thenApply(v -> completedServiceTasks.stream().map(CompletableFuture::join).allMatch(Objects::isNull))
+            .join();
     }
 }
