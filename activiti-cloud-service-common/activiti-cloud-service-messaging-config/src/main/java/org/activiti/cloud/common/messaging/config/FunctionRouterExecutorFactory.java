@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +48,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         try {
             shutdown();
 
-            if (!awaitTermination(timeout)) {
+            if (!awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
                 shutdownNow();
             }
         } catch (InterruptedException e) {
@@ -68,14 +67,14 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         executors.values().forEach(ExecutorService::shutdownNow);
     }
 
-    public boolean awaitTermination(final Duration timeout) throws InterruptedException {
+    public boolean awaitTermination(final long timeout, TimeUnit timeUnit) throws InterruptedException {
         final var cfs = executors
             .values()
             .stream()
             .map(executor ->
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        return executor.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                        return executor.awaitTermination(timeout, timeUnit);
                     } catch (InterruptedException ignored) {
                         Thread.currentThread().interrupt();
                     }
@@ -85,14 +84,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             )
             .toList();
 
-        try {
-            return CompletableFuture
-                .allOf(cfs.toArray(CompletableFuture[]::new))
-                .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
-                .get();
-        } catch (ExecutionException e) {
-            throw new InterruptedException();
-        }
+        return CompletableFuture
+            .allOf(cfs.toArray(CompletableFuture[]::new))
+            .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
+            .join();
     }
 
     public void setTimeout(Duration timeout) {
