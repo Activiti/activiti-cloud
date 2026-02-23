@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionProperties;
@@ -53,6 +55,7 @@ import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.MessageDispatchingException;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
@@ -132,10 +135,38 @@ public class FunctionRouterConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    Function<String, ExecutorService> functionRouterExecutorFactory() {
+        return new FunctionRouterExecutorFactory();
+    }
+
+    @Bean
+    Function<Message<?>, String> functionRegistrationSelector() {
+        return message ->
+            Optional
+                .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
+                .filter(Predicate.not(String::isBlank))
+                .orElseThrow(() ->
+                    new MessageDispatchingException(
+                        String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
+                    )
+                );
+    }
+
+    @Bean
+    Function<Message<?>, ExecutorService> functionExecutorSelector(
+        Function<Message<?>, String> functionRegistrationSelector,
+        Function<String, ExecutorService> functionRouterExecutorFactory
+    ) {
+        return message -> functionRegistrationSelector.andThen(functionRouterExecutorFactory).apply(message);
+    }
+
+    @Bean
     BiConsumer<Message<?>, String> functionRouterMessageHandler(
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties,
-        FunctionCatalog functionCatalog
+        FunctionCatalog functionCatalog,
+        Function<Message<?>, ExecutorService> functionExecutorSelector
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -176,7 +207,10 @@ public class FunctionRouterConfiguration {
                             .map(functionRequest ->
                                 supplyAsyncWithRetry(
                                         () ->
-                                            CompletableFuture.supplyAsync(() -> routingFunction.apply(functionRequest)),
+                                            CompletableFuture.supplyAsync(
+                                                () -> routingFunction.apply(functionRequest),
+                                                functionExecutorSelector.apply(functionRequest)
+                                            ),
                                         functionRouter.getMaxRetries(),
                                         functionRouter.getRetryInterval()
                                     )

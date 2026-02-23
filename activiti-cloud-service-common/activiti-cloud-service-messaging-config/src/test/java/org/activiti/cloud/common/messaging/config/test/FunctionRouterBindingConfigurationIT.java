@@ -30,20 +30,30 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.REST_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.springframework.cloud.function.context.FunctionProperties.FUNCTION_DEFINITION;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Phaser;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
+import org.activiti.cloud.common.messaging.config.FunctionRouterExecutorFactory;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -169,6 +179,12 @@ public class FunctionRouterBindingConfigurationIT {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private Function<Message<?>, ExecutorService> functionExecutorSelector;
+
+    @Autowired
+    private FunctionRouterExecutorFactory functionRouterExecutorFactory;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -177,6 +193,8 @@ public class FunctionRouterBindingConfigurationIT {
         public Consumer<Message<?>> queryConsumerHandler() {
             return message -> {
                 queryMessage.set(message);
+
+                assertThat(Thread.currentThread().getName()).isEqualTo("queryConsumerHandler_registration");
             };
         }
 
@@ -185,6 +203,8 @@ public class FunctionRouterBindingConfigurationIT {
         public Consumer<Message<?>> auditConsumerHandler() {
             return message -> {
                 auditMessage.set(message);
+
+                assertThat(Thread.currentThread().getName()).isEqualTo("auditConsumerHandler_registration");
             };
         }
 
@@ -760,6 +780,92 @@ public class FunctionRouterBindingConfigurationIT {
             )
         )
             .isTrue();
+    }
+
+    @Test
+    void functionExecutorSelectorShouldExecuteFunctionInTheNamedThread() {
+        //given
+        final Message<String> message = MessageBuilder
+            .withPayload("foo")
+            .setHeader(FUNCTION_DEFINITION, "foo_registration")
+            .build();
+
+        final AtomicReference<Thread> threadHolder = new AtomicReference<>();
+
+        //when
+        final var functionExecutor = functionExecutorSelector.apply(message);
+
+        functionExecutor.submit(() -> threadHolder.set(Thread.currentThread()));
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).isEqualTo("foo_registration");
+            });
+    }
+
+    @Test
+    void functionExecutorShouldExecuteSameFunctionByTheSameThreadInTheSameOrder() {
+        //given
+        final Map<Integer, String> executionThreadMap = new ConcurrentHashMap<>();
+        final List<Integer> executionOrder = new LinkedList<>();
+
+        //when
+        final var executions = IntStream
+            .range(0, 100)
+            .mapToObj(i -> MessageBuilder.withPayload(i).setHeader(FUNCTION_DEFINITION, "foo_registration").build())
+            .map(m ->
+                CompletableFuture.runAsync(
+                    () -> {
+                        executionThreadMap.put(m.getPayload(), Thread.currentThread().getName());
+                        executionOrder.add(m.getPayload());
+                    },
+                    functionExecutorSelector.apply(m)
+                )
+            )
+            .toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(executions).join();
+
+        //then
+        assertThat(executionThreadMap.values().stream().distinct().count()).isEqualTo(1);
+        assertThat(IntStream.range(0, 100).boxed().toList()).isEqualTo(executionOrder);
+    }
+
+    @Test
+    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
+        //given
+        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(100));
+        final Message<String> message = MessageBuilder
+            .withPayload("foo")
+            .setHeader(FUNCTION_DEFINITION, "foo_registration")
+            .build();
+
+        final var phaser = new Phaser(2);
+        final var functionExecutor = functionExecutorSelector.apply(message);
+        final var futureResult = functionExecutor.submit(() -> {
+            try {
+                phaser.arriveAndAwaitAdvance();
+                synchronized (this) {
+                    wait();
+                }
+
+                return "never";
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            return null;
+        });
+
+        phaser.arriveAndAwaitAdvance();
+
+        //when
+        functionRouterExecutorFactory.destroy();
+
+        //then
+        assertThat(futureResult.resultNow()).isNull();
+        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {

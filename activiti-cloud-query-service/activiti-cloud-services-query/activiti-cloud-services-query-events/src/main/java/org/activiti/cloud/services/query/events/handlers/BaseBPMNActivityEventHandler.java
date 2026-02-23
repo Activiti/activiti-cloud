@@ -47,7 +47,7 @@ public abstract class BaseBPMNActivityEventHandler {
         }
 
         if (bpmnActivityEntity == null) {
-            bpmnActivityEntity = createBpmnActivityEntity(event);
+            bpmnActivityEntity = entityManager.merge(createBpmnActivityEntity(event));
         }
 
         return bpmnActivityEntity;
