@@ -52,7 +52,7 @@ import java.util.stream.IntStream;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
-import org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration;
+import org.activiti.cloud.common.messaging.config.FunctionRouterExecutorFactory;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -182,7 +182,7 @@ public class FunctionRouterBindingConfigurationIT {
     private Function<Message<?>, ExecutorService> functionExecutorSelector;
 
     @Autowired
-    private FunctionRouterConfiguration.FunctionExecutorFactory functionExecutorFactory;
+    private FunctionRouterExecutorFactory functionRouterExecutorFactory;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -834,7 +834,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
         //given
-        functionExecutorFactory.setTimeout(Duration.ofSeconds(1));
+        functionRouterExecutorFactory.setTimeout(Duration.ofSeconds(1));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
@@ -854,7 +854,7 @@ public class FunctionRouterBindingConfigurationIT {
             }
         });
 
-        functionExecutorFactory.destroy();
+        functionRouterExecutorFactory.destroy();
 
         assertThat(threadHolder.get()).isNull();
 
