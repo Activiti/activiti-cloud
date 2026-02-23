@@ -142,19 +142,15 @@ public class FunctionRouterConfiguration {
 
     @Bean
     Function<Message<?>, String> functionRegistrationSelector() {
-        return new Function<>() {
-            @Override
-            public String apply(Message<?> message) {
-                return Optional
-                    .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
-                    .filter(Predicate.not(String::isBlank))
-                    .orElseThrow(() ->
-                        new MessageDispatchingException(
-                            String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
-                        )
-                    );
-            }
-        };
+        return message ->
+            Optional
+                .ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
+                .filter(Predicate.not(String::isBlank))
+                .orElseThrow(() ->
+                    new MessageDispatchingException(
+                        String.format("Message header %s is required", FunctionProperties.FUNCTION_DEFINITION)
+                    )
+                );
     }
 
     @Bean
@@ -162,12 +158,7 @@ public class FunctionRouterConfiguration {
         Function<Message<?>, String> functionRegistrationSelector,
         Function<String, ExecutorService> functionRouterExecutorFactory
     ) {
-        return new Function<>() {
-            @Override
-            public ExecutorService apply(Message<?> message) {
-                return functionRegistrationSelector.andThen(functionRouterExecutorFactory).apply(message);
-            }
-        };
+        return message -> functionRegistrationSelector.andThen(functionRouterExecutorFactory).apply(message);
     }
 
     @Bean

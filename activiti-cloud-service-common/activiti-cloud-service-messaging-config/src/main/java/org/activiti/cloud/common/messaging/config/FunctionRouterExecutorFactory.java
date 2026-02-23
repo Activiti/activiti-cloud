@@ -39,8 +39,6 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             return thread;
         });
 
-    public FunctionRouterExecutorFactory() {}
-
     @Override
     public ExecutorService apply(String key) {
         return executors.computeIfAbsent(key, executorServiceFactory);
@@ -51,7 +49,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         try {
             shutdown();
 
-            if (!awaitTermination(timeout.getSeconds(), TimeUnit.SECONDS)) {
+            if (!awaitTermination(timeout)) {
                 shutdownNow();
             }
         } catch (InterruptedException e) {
@@ -70,14 +68,14 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         executors.values().forEach(ExecutorService::shutdownNow);
     }
 
-    public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
+    public boolean awaitTermination(final Duration timeout) throws InterruptedException {
         final var cfs = executors
             .values()
             .stream()
             .map(executor ->
                 CompletableFuture.supplyAsync(() -> {
                     try {
-                        return executor.awaitTermination(timeout, unit);
+                        return executor.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
                     } catch (InterruptedException ignored) {
                         Thread.currentThread().interrupt();
                     }

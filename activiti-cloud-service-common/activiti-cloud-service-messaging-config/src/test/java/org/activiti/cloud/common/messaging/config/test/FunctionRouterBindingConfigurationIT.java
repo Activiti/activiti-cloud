@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -834,25 +835,29 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
         //given
-        functionRouterExecutorFactory.setTimeout(Duration.ofSeconds(1));
+        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(100));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
             .build();
 
         final AtomicReference<Thread> threadHolder = new AtomicReference<>();
+        final var phaser = new Phaser(2);
 
         //when
         final var functionExecutor = functionExecutorSelector.apply(message);
 
         functionExecutor.submit(() -> {
             try {
-                Thread.sleep(2000);
+                phaser.arriveAndAwaitAdvance();
+                Thread.sleep(200);
                 threadHolder.set(Thread.currentThread());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         });
+
+        phaser.arriveAndAwaitAdvance();
 
         functionRouterExecutorFactory.destroy();
 
