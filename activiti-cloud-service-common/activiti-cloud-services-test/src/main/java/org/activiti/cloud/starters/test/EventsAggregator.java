@@ -55,6 +55,13 @@ public class EventsAggregator implements MessageHandler {
         return sentEvents.toArray(CloudRuntimeEvent[]::new);
     }
 
+    public Optional<Throwable> sendAll(CloudRuntimeEvent<?, ?>[] events) {
+        errorMessageRef.set(null);
+        producer.send(events);
+
+        return Optional.ofNullable(getException());
+    }
+
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         errorMessageRef.set(message);

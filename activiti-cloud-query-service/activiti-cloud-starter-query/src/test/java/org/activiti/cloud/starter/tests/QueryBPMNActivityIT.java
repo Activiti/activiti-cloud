@@ -510,16 +510,7 @@ class QueryBPMNActivityIT {
     private Boolean withSupplyAsyncEventsSendResult(Supplier<CloudRuntimeEvent[]> supplier) {
         final List<CompletableFuture<Throwable>> completedServiceTasks = IntStream
             .range(0, 100)
-            .mapToObj(i ->
-                CompletableFuture.supplyAsync(() -> {
-                    synchronized (eventsAggregator) {
-                        eventsAggregator.addEvents(supplier.get());
-                        eventsAggregator.sendAll();
-
-                        return eventsAggregator.getException();
-                    }
-                })
-            )
+            .mapToObj(i -> CompletableFuture.supplyAsync(() -> eventsAggregator.sendAll(supplier.get()).orElse(null)))
             .toList();
 
         return CompletableFuture
