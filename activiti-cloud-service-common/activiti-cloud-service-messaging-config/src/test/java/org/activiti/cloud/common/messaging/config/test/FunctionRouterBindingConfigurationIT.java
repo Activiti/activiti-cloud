@@ -42,9 +42,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Phaser;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -833,7 +834,7 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() {
+    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException {
         //given
         functionRouterExecutorFactory.setTimeout(Duration.ofMillis(100));
         final Message<String> message = MessageBuilder
@@ -841,16 +842,14 @@ public class FunctionRouterBindingConfigurationIT {
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
             .build();
 
-        final var phaser = new Phaser(2);
         final var functionExecutor = functionExecutorSelector.apply(message);
         final var futureResult = functionExecutor.submit(() -> {
             try {
-                phaser.arriveAndAwaitAdvance();
                 synchronized (this) {
                     wait();
                 }
 
-                return "never";
+                throw new RuntimeException("never");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -858,13 +857,11 @@ public class FunctionRouterBindingConfigurationIT {
             return null;
         });
 
-        phaser.arriveAndAwaitAdvance();
-
         //when
         functionRouterExecutorFactory.destroy();
 
         //then
-        assertThat(futureResult.resultNow()).isNull();
+        assertThat(futureResult.isDone()).isFalse();
         assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
     }
 
