@@ -95,8 +95,7 @@ public class ProcessInstanceSpecification
         applyLinkedProcessInstanceId(root);
         applyLinkedProcessInstanceType(root);
         applyProcessRelatedTo(root, criteriaBuilder);
-        applyIncludeUnlinkedProcesses(root, criteriaBuilder);
-        applyIncludeLinkedProcesses(root, criteriaBuilder);
+        applyLinkedAndOrphanProcessesFilter(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
     }
 
@@ -268,25 +267,32 @@ public class ProcessInstanceSpecification
         }
     }
 
-    private void applyIncludeUnlinkedProcesses(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (Boolean.FALSE.equals(searchRequest.getIncludeUnlinkedProcesses())) {
-            predicates.add(
-                criteriaBuilder.or(
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNotNull(),
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNull()
-                )
-            );
-        }
-    }
+    private void applyLinkedAndOrphanProcessesFilter(
+        Root<ProcessInstanceEntity> root,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        boolean includeLinked = Boolean.TRUE.equals(searchRequest.getIncludeLinkedProcesses());
+        boolean excludeOrphan = Boolean.FALSE.equals(searchRequest.getIncludeUnlinkedProcesses());
 
-    private void applyIncludeLinkedProcesses(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (Boolean.FALSE.equals(searchRequest.getIncludeLinkedProcesses())) {
-            predicates.add(
-                criteriaBuilder.and(
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNull(),
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNull()
-                )
-            );
+        if (includeLinked && !excludeOrphan) {
+            return;
+        }
+
+        Predicate isLinkedProcess = criteriaBuilder.and(
+            root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNotNull(),
+            root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNotNull()
+        );
+        Predicate isOrphanProcess = criteriaBuilder.and(
+            root.get(ProcessInstanceEntity_.linkedProcessInstanceId).isNull(),
+            root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNotNull()
+        );
+
+        if (includeLinked) {
+            predicates.add(criteriaBuilder.not(isOrphanProcess));
+        } else if (excludeOrphan) {
+            predicates.add(criteriaBuilder.not(criteriaBuilder.or(isLinkedProcess, isOrphanProcess)));
+        } else {
+            predicates.add(criteriaBuilder.not(isLinkedProcess));
         }
     }
 }
