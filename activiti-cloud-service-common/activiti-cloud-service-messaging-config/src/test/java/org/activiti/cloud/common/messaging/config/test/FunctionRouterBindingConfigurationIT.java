@@ -42,10 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -843,19 +841,21 @@ public class FunctionRouterBindingConfigurationIT {
             .build();
 
         final var functionExecutor = functionExecutorSelector.apply(message);
-        final var futureResult = functionExecutor.submit(() -> {
-            try {
-                synchronized (this) {
-                    wait();
+
+        final var futureResult = CompletableFuture.supplyAsync(
+            () -> {
+                try {
+                    synchronized (this) {
+                        wait();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
 
-                throw new RuntimeException("never");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            return null;
-        });
+                return null;
+            },
+            functionExecutor
+        );
 
         //when
         functionRouterExecutorFactory.destroy();
