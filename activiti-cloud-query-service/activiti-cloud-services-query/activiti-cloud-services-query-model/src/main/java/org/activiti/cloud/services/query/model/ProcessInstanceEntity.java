@@ -50,6 +50,7 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ProcessInstance")
@@ -244,6 +245,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     private String linkedProcessInstanceId;
 
     private String linkedProcessInstanceType;
+
+    @Formula(
+        "CASE " +
+        "WHEN parent_id IS NULL OR parent_id = id THEN 'main-process' " +
+        "WHEN linked_process_instance_type IS NOT NULL THEN linked_process_instance_type " +
+        "WHEN parent_id IS NOT NULL AND parent_id != id THEN 'call-activity' " +
+        "ELSE null END"
+    )
+    private String type;
 
     public ProcessInstanceEntity() {}
 
@@ -586,5 +596,9 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setLinkedProcesses(Set<QueryCloudSubprocessInstance> linkedProcesses) {
         this.linkedProcesses = linkedProcesses;
+    }
+
+    public String getType() {
+        return type;
     }
 }
