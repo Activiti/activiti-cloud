@@ -145,7 +145,7 @@
             <path>
               <groupId>org.hibernate.orm</groupId>
               <artifactId>hibernate-jpamodelgen</artifactId>
-              <version>6.5.2.Final</version>
+              <version>6.6.43.Final</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
