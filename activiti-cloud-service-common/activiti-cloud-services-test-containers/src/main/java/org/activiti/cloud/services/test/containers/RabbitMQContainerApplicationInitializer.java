@@ -15,9 +15,14 @@
  */
 package org.activiti.cloud.services.test.containers;
 
+import java.io.IOException;
+import java.util.UUID;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.RabbitMQContainer;
 
 public class RabbitMQContainerApplicationInitializer
@@ -30,7 +35,12 @@ public class RabbitMQContainerApplicationInitializer
     @Override
     public void initialize(ConfigurableApplicationContext context) {
         initialize();
-        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+        String vhostName = UUID.randomUUID().toString();
+        createVhost(vhostName);
+        context.addApplicationListener(
+            (ApplicationListener<ContextClosedEvent>) event -> deleteVhost(vhostName)
+        );
+        TestPropertyValues.of(getContainerProperties(vhostName)).applyTo(context.getEnvironment());
     }
 
     public void initialize() {
@@ -48,5 +58,56 @@ public class RabbitMQContainerApplicationInitializer
             "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
             "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort(),
         };
+    }
+
+    private static String[] getContainerProperties(String vhostName) {
+        return new String[] {
+            "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort(),
+            "spring.rabbitmq.virtual-host=" + vhostName,
+        };
+    }
+
+    private static void createVhost(String name) {
+        try {
+            Container.ExecResult addResult = rabbitMQContainer.execInContainer("rabbitmqctl", "add_vhost", name);
+            if (addResult.getExitCode() != 0) {
+                throw new RuntimeException(
+                    "Failed to create RabbitMQ vhost '" + name + "': " + addResult.getStderr()
+                );
+            }
+            Container.ExecResult permResult = rabbitMQContainer.execInContainer(
+                "rabbitmqctl",
+                "set_permissions",
+                "-p",
+                name,
+                "guest",
+                ".*",
+                ".*",
+                ".*"
+            );
+            if (permResult.getExitCode() != 0) {
+                throw new RuntimeException(
+                    "Failed to set permissions on RabbitMQ vhost '" + name + "': " + permResult.getStderr()
+                );
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while creating RabbitMQ vhost: " + name, e);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create RabbitMQ vhost: " + name, e);
+        }
+    }
+
+    private static void deleteVhost(String name) {
+        if (rabbitMQContainer.isRunning()) {
+            try {
+                rabbitMQContainer.execInContainer("rabbitmqctl", "delete_vhost", name);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                // best-effort cleanup
+            }
+        }
     }
 }
