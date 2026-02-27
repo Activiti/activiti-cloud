@@ -127,9 +127,9 @@ class IncidentServiceTest {
 
         var payload = (List) capturedMessage.getPayload();
         assertThat(payload).hasSize(1);
-        assertThat(payload.get(0)).isInstanceOf(CloudIncidentCreatedEventImpl.class);
+        assertThat(payload.getFirst()).isInstanceOf(CloudIncidentCreatedEventImpl.class);
 
-        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        var incident = (CloudIncidentCreatedEventImpl) payload.getFirst();
         assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
         assertThat(incident.getEntity().getExecutionId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);

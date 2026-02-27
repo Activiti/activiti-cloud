@@ -475,7 +475,7 @@ class QueryBPMNActivityIT {
         eventsAggregator.sendAll();
 
         //then
-        String processInstanceId = events.get(0).getProcessInstanceId();
+        String processInstanceId = events.getFirst().getProcessInstanceId();
 
         await()
             .untilAsserted(() -> {

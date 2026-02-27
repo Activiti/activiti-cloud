@@ -70,7 +70,7 @@ public class EventSpecificationsBuilder {
             return null;
         }
 
-        Specification<AuditEventEntity> result = new EventSpecification(params.get(0));
+        Specification<AuditEventEntity> result = new EventSpecification(params.getFirst());
 
         for (int i = 1; i < params.size(); i++) {
             result =

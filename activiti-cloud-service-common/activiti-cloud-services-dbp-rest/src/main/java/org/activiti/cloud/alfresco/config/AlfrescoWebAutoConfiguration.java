@@ -66,8 +66,7 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(
-            0,
+        resolvers.addFirst(
             new AlfrescoPageArgumentMethodResolver(
                 new AlfrescoPageParameterParser(defaultPageSize),
                 pageableHandlerMethodArgumentResolver,

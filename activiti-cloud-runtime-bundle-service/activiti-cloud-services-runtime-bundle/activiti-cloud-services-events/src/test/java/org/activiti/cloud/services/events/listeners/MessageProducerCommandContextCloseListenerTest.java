@@ -264,7 +264,7 @@ class MessageProducerCommandContextCloseListenerTest {
 
         List<Message<CloudRuntimeEvent<?, ?>[]>> capturedMessages = this.messageArgumentCaptor.getAllValues();
 
-        assertThat(capturedMessages.get(0).getPayload()).hasSize(3);
+        assertThat(capturedMessages.getFirst().getPayload()).hasSize(3);
         assertThat(capturedMessages.get(1).getPayload()).hasSize(3);
         assertThat(capturedMessages.get(2).getPayload()).hasSize(2);
 
@@ -376,7 +376,7 @@ class MessageProducerCommandContextCloseListenerTest {
         List<CloudRuntimeEvent<?, ?>> incidentPayload = incidentMessageArgumentCaptor.getValue().getPayload();
         assertThat(incidentPayload).hasSize(1);
 
-        CloudIncidentCreatedEventImpl incident = (CloudIncidentCreatedEventImpl) incidentPayload.get(0);
+        CloudIncidentCreatedEventImpl incident = (CloudIncidentCreatedEventImpl) incidentPayload.getFirst();
         assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
         assertThat(incident.getErrorMessage()).contains("Chunk size limit exceeded");
         assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);

@@ -92,7 +92,7 @@ public class ServiceTaskIntegrationResultEventHandler {
             String executionId = integrationContext.getExecutionId();
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
             if (executions.size() > 0) {
-                Execution execution = executions.get(0);
+                Execution execution = executions.getFirst();
 
                 if (execution.getActivityId().equals(integrationContext.getClientId())) {
                     commands.add(

@@ -13,7 +13,7 @@
   <name>Activiti Cloud :: BOM (Bill of Materials) Parent</name>
   <properties>
     <java.release>${java.version}</java.release>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>

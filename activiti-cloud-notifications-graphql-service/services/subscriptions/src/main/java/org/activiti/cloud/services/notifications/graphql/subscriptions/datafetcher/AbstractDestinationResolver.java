@@ -63,7 +63,7 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
     }
 
     protected String resolveFieldName(DataFetchingEnvironment environment) {
-        return environment.getFields().iterator().next().getName();
+        return environment.getFields().getFirst().getName();
     }
 
     protected String[] resolveArgumentNames(DataFetchingEnvironment environment) {
@@ -131,7 +131,7 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
                 index = -1;
             }
             iterators = new Stack<>();
-            iterators.add(this.factors.get(0).iterator());
+            iterators.add(this.factors.getFirst().iterator());
             current = new Stack<>();
             computeNext();
         }

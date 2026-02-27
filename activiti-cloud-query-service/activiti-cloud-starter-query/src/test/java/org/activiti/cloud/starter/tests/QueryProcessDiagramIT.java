@@ -212,7 +212,7 @@ public class QueryProcessDiagramIT {
                 //then
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
                 assertThat(responseEntity.getBody()).isNotNull();
-                System.out.println(responseEntity.getBody());
+                IO.println(responseEntity.getBody());
                 assertThat(responseEntity.getBody()).contains("<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'");
             });
     }
