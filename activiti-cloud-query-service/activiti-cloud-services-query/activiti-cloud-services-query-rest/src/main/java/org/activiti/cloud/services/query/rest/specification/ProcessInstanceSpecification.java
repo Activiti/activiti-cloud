@@ -271,10 +271,10 @@ public class ProcessInstanceSpecification
         Root<ProcessInstanceEntity> root,
         CriteriaBuilder criteriaBuilder
     ) {
-        boolean includeLinked = Boolean.TRUE.equals(searchRequest.getIncludeLinkedProcesses());
+        boolean excludeLinked = Boolean.FALSE.equals(searchRequest.getIncludeLinkedProcesses());
         boolean excludeOrphan = Boolean.FALSE.equals(searchRequest.getIncludeUnlinkedProcesses());
 
-        if (includeLinked && !excludeOrphan) {
+        if (!excludeLinked && !excludeOrphan) {
             return;
         }
 
@@ -287,12 +287,12 @@ public class ProcessInstanceSpecification
             root.get(ProcessInstanceEntity_.linkedProcessInstanceType).isNotNull()
         );
 
-        if (includeLinked) {
-            predicates.add(criteriaBuilder.not(isOrphanProcess));
-        } else if (excludeOrphan) {
+        if (excludeLinked && excludeOrphan) {
             predicates.add(criteriaBuilder.not(criteriaBuilder.or(isLinkedProcess, isOrphanProcess)));
-        } else {
+        } else if (excludeLinked) {
             predicates.add(criteriaBuilder.not(isLinkedProcess));
+        } else {
+            predicates.add(criteriaBuilder.not(isOrphanProcess));
         }
     }
 }
