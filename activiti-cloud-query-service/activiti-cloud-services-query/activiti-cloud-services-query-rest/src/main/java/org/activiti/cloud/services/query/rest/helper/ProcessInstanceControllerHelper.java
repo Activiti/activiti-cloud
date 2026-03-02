@@ -93,6 +93,10 @@ public class ProcessInstanceControllerHelper {
         return processInstanceRepository.mapSubprocesses(processInstances, pageable);
     }
 
+    public Page<ProcessInstanceEntity> mapAllSubprocesses(Page<ProcessInstanceEntity> processInstances) {
+        return processInstanceRepository.mapSubprocesses(processInstances);
+    }
+
     public Long countProcessInstances(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceService.count(searchRequest);
     }

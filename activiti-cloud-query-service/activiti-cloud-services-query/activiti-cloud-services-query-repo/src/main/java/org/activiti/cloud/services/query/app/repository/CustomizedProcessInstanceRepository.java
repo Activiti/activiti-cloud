@@ -22,5 +22,7 @@ import org.springframework.data.domain.Pageable;
 public interface CustomizedProcessInstanceRepository {
     Page<ProcessInstanceEntity> mapSubprocesses(Page<ProcessInstanceEntity> processInstances, Pageable pageable);
 
+    Page<ProcessInstanceEntity> mapSubprocesses(Page<ProcessInstanceEntity> processInstances);
+
     ProcessInstanceEntity mapSubprocesses(ProcessInstanceEntity processInstance);
 }

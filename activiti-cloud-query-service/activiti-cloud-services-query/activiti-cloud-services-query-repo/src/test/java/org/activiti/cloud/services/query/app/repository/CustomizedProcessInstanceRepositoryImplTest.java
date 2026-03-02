@@ -35,7 +35,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.support.Querydsl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,16 +49,12 @@ class CustomizedProcessInstanceRepositoryImplTest {
     @Mock
     private JPAQuery<ProcessInstanceEntity> jpaQuery;
 
-    @Mock
-    private Querydsl querydsl;
-
     private CustomizedProcessInstanceRepositoryImpl repository;
 
     @BeforeEach
     void setUp() {
         repository = new CustomizedProcessInstanceRepositoryImpl(entityManager);
         ReflectionTestUtils.setField(repository, "queryFactory", queryFactory);
-        ReflectionTestUtils.setField(repository, "querydsl", querydsl);
     }
 
     @Test
@@ -91,9 +86,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
         List<ProcessInstanceEntity> subprocessesList = createSubprocessInstances(2, parentIdOne);
         subprocessesList.addAll(createSubprocessInstances(3, parentIdTwo));
 
-        Page<ProcessInstanceEntity> subprocesses = new PageImpl<>(subprocessesList);
-
-        Map<String, Set<QueryCloudSubprocessInstance>> result = repository.groupSubprocesses(subprocesses);
+        Map<String, Set<QueryCloudSubprocessInstance>> result = repository.groupSubprocesses(subprocessesList);
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(2);
@@ -129,7 +122,6 @@ class CustomizedProcessInstanceRepositoryImplTest {
     @Test
     void testFindSubprocessesByParentIds() {
         List<String> parentIds = Arrays.asList("parent1", "parent2");
-        Pageable pageable = PageRequest.of(0, 10);
 
         List<ProcessInstanceEntity> expectedSubprocesses = createSubprocessInstances(2, "parent1");
         expectedSubprocesses.addAll(createSubprocessInstances(3, "parent2"));
@@ -139,14 +131,13 @@ class CustomizedProcessInstanceRepositoryImplTest {
         when(queryFactory.selectFrom(processInstanceEntity)).thenReturn(jpaQuery);
         when(jpaQuery.where(processInstanceEntity.parentId.in(parentIds))).thenReturn(jpaQuery);
         when(jpaQuery.fetch()).thenReturn(expectedSubprocesses);
-        when(querydsl.applyPagination(pageable, jpaQuery)).thenReturn(jpaQuery);
 
-        Page<ProcessInstanceEntity> result = repository.findSubprocessesByParentIds(parentIds, pageable);
+        List<ProcessInstanceEntity> result = repository.findSubprocessesByParentIds(parentIds);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(5);
-        assertThat(result.getContent().getFirst().getId()).isNotNull();
-        assertThat(result.getContent().get(1).getId()).isNotNull();
+        assertThat(result).hasSize(5);
+        assertThat(result.getFirst().getId()).isNotNull();
+        assertThat(result.get(1).getId()).isNotNull();
 
         verify(queryFactory).selectFrom(processInstanceEntity);
         verify(jpaQuery).where(processInstanceEntity.parentId.in(parentIds));
@@ -174,7 +165,6 @@ class CustomizedProcessInstanceRepositoryImplTest {
         when(queryFactory.selectFrom(processInstanceEntity)).thenReturn(jpaQuery);
         when(jpaQuery.where(processInstanceEntity.parentId.in(parentIds))).thenReturn(jpaQuery);
         when(jpaQuery.fetch()).thenReturn(subprocessesList);
-        when(querydsl.applyPagination(pageable, jpaQuery)).thenReturn(jpaQuery);
 
         Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances, pageable);
 
