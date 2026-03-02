@@ -38,7 +38,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@5d3892d468ee27bfdcd297c83b9da319a3c5c9d0 # v15.5.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@92747a5b1a1ac64917ab7f3379d8879cb9415aed # v15.6.4
 
     - name: Add GitHub Step Summary
       shell: bash
