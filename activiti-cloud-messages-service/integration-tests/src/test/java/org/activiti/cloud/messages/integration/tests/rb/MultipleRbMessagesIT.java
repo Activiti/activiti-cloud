@@ -118,11 +118,9 @@ class MultipleRbMessagesIT {
     }
 
     @BeforeAll
-    public static void setUp() {
-        KeycloakContainerApplicationInitializer keycloakContainerApplicationInitializer = new KeycloakContainerApplicationInitializer();
-        keycloakContainerApplicationInitializer.initialize();
-        RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
-        rabbitMQContainerApplicationInitializer.initialize();
+    static void setUp() {
+        new KeycloakContainerApplicationInitializer().initialize();
+        RabbitMQContainerApplicationInitializer.initialize();
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
@@ -159,7 +157,7 @@ class MultipleRbMessagesIT {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         rb1Context.close();
         rb2Context.close();
         h2Context.close();

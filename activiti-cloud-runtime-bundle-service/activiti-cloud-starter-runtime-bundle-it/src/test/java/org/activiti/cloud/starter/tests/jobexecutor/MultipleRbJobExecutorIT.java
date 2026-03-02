@@ -34,7 +34,6 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.event.ActivitiEventType;
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,16 +43,13 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.test.util.TestSocketUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @Testcontainers
 class MultipleRbJobExecutorIT {
-
-    private static final Integer DB_PORT = TestSocketUtils.findAvailableTcpPort();
 
     private static final String ASYNC_TASK = "asyncTask";
 
@@ -62,7 +58,7 @@ class MultipleRbJobExecutorIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @SpringBootApplication
     @ActivitiRuntimeBundle
@@ -70,21 +66,14 @@ class MultipleRbJobExecutorIT {
 
         @Bean
         public JobMessageHandlerFactory jobMessageHandlerFactory() {
-            return new JobMessageHandlerFactory() {
-                @Override
-                public MessageHandler create(ProcessEngineConfigurationImpl configuration) {
-                    return spy(new JobMessageHandler(configuration));
-                }
-            };
+            return configuration -> spy(new JobMessageHandler(configuration));
         }
     }
 
     @BeforeAll
-    public static void setUp() {
-        KeycloakContainerApplicationInitializer keycloakContainerApplicationInitializer = new KeycloakContainerApplicationInitializer();
-        keycloakContainerApplicationInitializer.initialize();
-        RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
-        rabbitMQContainerApplicationInitializer.initialize();
+    static void setUp() {
+        new KeycloakContainerApplicationInitializer().initialize();
+        RabbitMQContainerApplicationInitializer.initialize();
         final String[] datasource = new String[] {
             "spring.datasource.url=" + postgres.getJdbcUrl(),
             "spring.datasource.username=" + postgres.getUsername(),
@@ -110,13 +99,13 @@ class MultipleRbJobExecutorIT {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         rbCtx1.close();
         rbCtx2.close();
     }
 
     @Test
-    void contextLoads() throws Exception {
+    void contextLoads() {
         assertThat(rbCtx1).isNotNull();
         assertThat(rbCtx2).isNotNull();
     }
@@ -165,10 +154,9 @@ class MultipleRbJobExecutorIT {
 
         await("the async executions should complete and no more jobs should exist")
             .untilAsserted(() -> {
-                assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
-
+                assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isZero();
                 assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count())
-                    .isEqualTo(0);
+                    .isZero();
             });
         // rb1 message handler is invoked
         verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
