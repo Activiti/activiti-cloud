@@ -64,12 +64,16 @@ public class RabbitMQContainerApplicationInitializer
     }
 
     private static void registerShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            String vhost;
-            while ((vhost = trackedVhosts.poll()) != null) {
-                deleteVhost(vhost);
-            }
-        }));
+        Runtime
+            .getRuntime()
+            .addShutdownHook(
+                new Thread(() -> {
+                    String vhost;
+                    while ((vhost = trackedVhosts.poll()) != null) {
+                        deleteVhost(vhost);
+                    }
+                })
+            );
     }
 
     private static String[] buildProperties(String vhostName) {
