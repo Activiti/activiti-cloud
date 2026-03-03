@@ -29,15 +29,15 @@ public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExec
 
     @Override
     public void afterTestMethod(TestContext testContext) {
-        purgeAllQueues();
+        purgeAllQueues(testContext);
     }
 
-    private static void purgeAllQueues() {
+    private static void purgeAllQueues(TestContext testContext) {
         RabbitMQContainer container = RabbitMQContainerApplicationInitializer.getContainer();
         if (!container.isRunning()) {
             return;
         }
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
+        String vhost = testContext.getApplicationContext().getEnvironment().getProperty("spring.rabbitmq.virtual-host");
         try {
             Container.ExecResult listResult = container.execInContainer(
                 "rabbitmqctl",

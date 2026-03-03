@@ -22,7 +22,9 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
@@ -40,11 +42,18 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
 
     private static final String TEST_QUEUE = "cleanup-listener-test-queue";
 
+    @Autowired
+    private Environment environment;
+
+    private String vhost() {
+        return environment.getProperty("spring.rabbitmq.virtual-host");
+    }
+
     @Test
     @Order(1)
     void shouldHaveMessagesInQueueBeforeListenerRuns() throws IOException, InterruptedException {
         RabbitMQContainer container = RabbitMQContainerApplicationInitializer.getContainer();
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
+        String vhost = vhost();
 
         declareQueue(container, vhost);
         publishMessage(container, vhost, "message-1");
@@ -59,7 +68,7 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     @Order(2)
     void shouldHaveQueuePurgedAfterPreviousTest() throws IOException, InterruptedException {
         RabbitMQContainer container = RabbitMQContainerApplicationInitializer.getContainer();
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
+        String vhost = vhost();
 
         // The listener ran after @Order(1) — queue must be empty
         assertThat(getMessageCount(container, vhost))
@@ -71,7 +80,7 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     @Order(3)
     void shouldPurgeMessagesPublishedInCurrentTestAsWell() throws IOException, InterruptedException {
         RabbitMQContainer container = RabbitMQContainerApplicationInitializer.getContainer();
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
+        String vhost = vhost();
 
         publishMessage(container, vhost, "message-3");
 
@@ -85,7 +94,7 @@ class RabbitMQQueuesCleanupTestExecutionListenerIT {
     @Order(4)
     void shouldHaveQueuePurgedAfterThirdTest() throws IOException, InterruptedException {
         RabbitMQContainer container = RabbitMQContainerApplicationInitializer.getContainer();
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
+        String vhost = vhost();
 
         assertThat(getMessageCount(container, vhost))
             .as("Queue should be empty after cleanup listener ran following the third test")
