@@ -73,7 +73,7 @@ class MultipleRbJobExecutorIT {
     @BeforeAll
     static void setUp() {
         new KeycloakContainerApplicationInitializer().initialize();
-        RabbitMQContainerApplicationInitializer.initialize();
+        var rabbitMqProperties = RabbitMQContainerApplicationInitializer.initialize();
         final String[] datasource = new String[] {
             "spring.datasource.url=" + postgres.getJdbcUrl(),
             "spring.datasource.username=" + postgres.getUsername(),
@@ -82,7 +82,7 @@ class MultipleRbJobExecutorIT {
 
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
-            .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
+            .and(rabbitMqProperties)
             .and(datasource)
             .applyToSystemProperties(() -> {
                 rbCtx1 =

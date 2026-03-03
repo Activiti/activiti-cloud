@@ -35,7 +35,6 @@ public class RabbitMQContainerApplicationInitializer
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQContainerApplicationInitializer.class);
 
     private static final ConcurrentLinkedQueue<String> trackedVhosts = new ConcurrentLinkedQueue<>();
-    private static volatile String currentVhostName;
 
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
         .withReuse(true)
@@ -43,24 +42,25 @@ public class RabbitMQContainerApplicationInitializer
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-        initialize();
-        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+        TestPropertyValues.of(initialize()).applyTo(context.getEnvironment());
     }
 
-    public static void initialize() {
+    public static String[] initialize() {
         synchronized (LOCK) {
             if (!rabbitMQContainer.isRunning()) {
                 LOGGER.debug("Starting RabbitMQ Testcontainer...");
                 rabbitMQContainer.start();
+                registerShutdownHook();
             }
-            initializeVhost();
+            return initializeVhost();
         }
     }
 
-    private static void initializeVhost() {
-        currentVhostName = UUID.randomUUID().toString();
-        createVhost(currentVhostName);
-        trackedVhosts.add(currentVhostName);
+    private static String[] initializeVhost() {
+        String vhostName = UUID.randomUUID().toString();
+        createVhost(vhostName);
+        trackedVhosts.add(vhostName);
+        return buildProperties(vhostName);
     }
 
     private static void registerShutdownHook() {
@@ -72,24 +72,20 @@ public class RabbitMQContainerApplicationInitializer
         }));
     }
 
+    private static String[] buildProperties(String vhostName) {
+        return new String[] {
+            "spring.rabbitmq.host=" + rabbitMQContainer.getHost(),
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort(),
+            "spring.rabbitmq.virtual-host=" + vhostName,
+        };
+    }
+
     public static RabbitMQContainer getContainer() {
         return rabbitMQContainer;
     }
 
-    public static String getCurrentVhostName() {
-        return currentVhostName;
-    }
-
     public static Collection<String> getTrackedVhosts() {
         return Collections.unmodifiableCollection(trackedVhosts);
-    }
-
-    public static String[] getContainerProperties() {
-        return new String[] {
-            "spring.rabbitmq.host=" + rabbitMQContainer.getHost(),
-            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort(),
-            "spring.rabbitmq.virtual-host=" + currentVhostName,
-        };
     }
 
     private static void createVhost(String name) {

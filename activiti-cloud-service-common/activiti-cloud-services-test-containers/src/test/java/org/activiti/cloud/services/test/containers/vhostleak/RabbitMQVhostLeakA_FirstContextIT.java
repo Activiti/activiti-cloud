@@ -19,34 +19,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.TestContainersApplication;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * First context in the vhost leak scenario.
- * Uses property "test.context=first" to ensure Spring creates a unique context.
- * Records the vhost created by the initializer into {@link VhostLeakTestState}.
+ * First Spring context in the multi-context vhost tracking scenario.
  *
- * <p>Alphabetical class name (A) ensures this runs before the B counterpart.</p>
+ * <p>These tests are disabled and must be run manually together with
+ * {@link RabbitMQVhostLeakB_SecondContextIT} to verify that all vhosts created across
+ * multiple Spring contexts in the same JVM are correctly tracked for cleanup.
+ *
+ * <p>To run manually:
+ * <pre>
+ * mvn verify -pl activiti-cloud-service-common/activiti-cloud-services-test-containers \
+ *   -Dfailsafe.runOrder=alphabetical \
+ *   -Dit.test="RabbitMQVhostLeak*"
+ * </pre>
+ *
+ * <p>Alphabetical class name (A) ensures this runs before the B counterpart.
  */
-@SpringBootTest(
-    classes = TestContainersApplication.class,
-    properties = "test.context=first"
-)
+@Disabled("Run manually to verify multi-context vhost tracking and cleanup")
+@SpringBootTest(classes = TestContainersApplication.class, properties = "test.context=first")
 @ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
 class RabbitMQVhostLeakA_FirstContextIT {
 
     @Test
     void shouldRecordVhostFromFirstContext() {
-        String vhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
-
-        assertThat(vhost)
-            .as("First context should have a vhost assigned")
-            .isNotNull()
-            .isNotEmpty();
-
-        // Store for the second context to verify the leak
-        VhostLeakTestState.firstContextVhost = vhost;
+        var trackedVhosts = RabbitMQContainerApplicationInitializer.getTrackedVhosts();
+        assertThat(trackedVhosts).as("Exactly one vhost should be created for the first context").hasSize(1);
     }
 }

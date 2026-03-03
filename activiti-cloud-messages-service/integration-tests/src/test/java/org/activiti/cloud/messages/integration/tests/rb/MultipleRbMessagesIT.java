@@ -120,10 +120,10 @@ class MultipleRbMessagesIT {
     @BeforeAll
     static void setUp() {
         new KeycloakContainerApplicationInitializer().initialize();
-        RabbitMQContainerApplicationInitializer.initialize();
+        var rabbitMqProperties = RabbitMQContainerApplicationInitializer.initialize();
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
-            .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
+            .and(rabbitMqProperties)
             .applyToSystemProperties(() -> {
                 h2Context =
                     new SpringApplicationBuilder(H2Application.class)

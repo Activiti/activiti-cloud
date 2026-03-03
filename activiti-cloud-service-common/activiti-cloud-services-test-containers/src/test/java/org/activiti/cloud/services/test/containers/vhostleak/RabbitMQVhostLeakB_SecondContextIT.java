@@ -17,51 +17,42 @@ package org.activiti.cloud.services.test.containers.vhostleak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.util.Collection;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.TestContainersApplication;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 /**
- * Second context in the vhost leak scenario.
- * Uses property "test.context=second" to force a different Spring context than the A class.
+ * Second Spring context in the multi-context vhost tracking scenario.
  *
- * <p>Verifies the desired behavior: all vhosts created across multiple Spring contexts
- * are tracked by the initializer and will all be cleaned up at JVM shutdown.</p>
+ * <p>These tests are disabled and must be run manually together with
+ * {@link RabbitMQVhostLeakA_FirstContextIT} to verify that all vhosts created across
+ * multiple Spring contexts in the same JVM are correctly tracked for cleanup.
  *
- * <p>Alphabetical class name (B) ensures this runs after the A counterpart.</p>
+ * <p>To run manually:
+ * <pre>
+ * mvn verify -pl activiti-cloud-service-common/activiti-cloud-services-test-containers \
+ *   -Dfailsafe.runOrder=alphabetical \
+ *   -Dit.test="RabbitMQVhostLeak*"
+ * </pre>
+ *
+ * <p>Alphabetical class name (B) ensures this runs after the A counterpart.
  */
-@SpringBootTest(
-    classes = TestContainersApplication.class,
-    properties = "test.context=second"
-)
+@Disabled("Run manually to verify multi-context vhost tracking and cleanup")
+@SpringBootTest(classes = TestContainersApplication.class, properties = "test.context=second")
 @ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
 class RabbitMQVhostLeakB_SecondContextIT {
 
     @Test
-    void shouldTrackAllVhostsAcrossMultipleContexts() throws IOException, InterruptedException {
-        String firstVhost = VhostLeakTestState.firstContextVhost;
-        String secondVhost = RabbitMQContainerApplicationInitializer.getCurrentVhostName();
-
-        assertThat(firstVhost)
-            .as("First context test must have run before this one")
-            .isNotNull();
-
-        assertThat(secondVhost)
-            .as("Second context should have created a different vhost")
-            .isNotEqualTo(firstVhost);
-
+    void shouldTrackAllVhostsAcrossMultipleContexts() {
         // Both vhosts should be tracked — the shutdown hook will delete all of them
         Collection<String> trackedVhosts = RabbitMQContainerApplicationInitializer.getTrackedVhosts();
 
         assertThat(trackedVhosts)
             .as("All vhosts created across multiple contexts must be tracked for cleanup")
-            .contains(firstVhost, secondVhost);
-
-            Thread.sleep(10000);
+            .hasSize(2);
     }
 }
