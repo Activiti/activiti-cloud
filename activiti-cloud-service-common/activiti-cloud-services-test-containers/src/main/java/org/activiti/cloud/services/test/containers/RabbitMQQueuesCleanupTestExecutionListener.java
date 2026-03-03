@@ -38,56 +38,31 @@ public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExec
             return;
         }
         String vhost = testContext.getApplicationContext().getEnvironment().getProperty("spring.rabbitmq.virtual-host");
-        try {
-            Container.ExecResult listResult = container.execInContainer(
-                "rabbitmqctl",
-                "list_queues",
-                "name",
-                "--no-table-headers",
-                "-p",
-                vhost
+        if (vhost == null || vhost.isEmpty()) {
+            LOGGER.warn(
+                "RabbitMQ virtual host property 'spring.rabbitmq.virtual-host' is not set; skipping queue purge"
             );
-            if (listResult.getExitCode() != 0) {
-                LOGGER.warn("Failed to list RabbitMQ queues: {}", listResult.getStderr());
-                return;
-            }
-            String output = listResult.getStdout().trim();
-            if (output.isEmpty()) {
-                return;
-            }
-            for (String queueName : output.split("\\n")) {
-                queueName = queueName.trim();
-                if (!queueName.isEmpty()) {
-                    purgeQueue(container, vhost, queueName);
-                }
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.warn("Interrupted while listing RabbitMQ queues", e);
-        } catch (IOException e) {
-            LOGGER.warn("Failed to list RabbitMQ queues", e);
+            return;
         }
-    }
-
-    private static void purgeQueue(RabbitMQContainer container, String vhost, String queueName) {
         try {
-            Container.ExecResult purgeResult = container.execInContainer(
-                "rabbitmqctl",
-                "purge_queue",
-                queueName,
-                "-p",
+            // Execute a single shell command in the container that lists all queues for the vhost
+            // and purges each of them. This avoids one Docker exec per queue.
+            String purgeCommand = String.format(
+                "rabbitmqctl list_queues name --no-table-headers -p '%s' | grep -vE '^\\s*(Timeout|Listing|$)' | while read q; do rabbitmqctl purge_queue \"$q\" -p '%s'; done",
+                vhost,
                 vhost
             );
+            Container.ExecResult purgeResult = container.execInContainer("sh", "-c", purgeCommand);
             if (purgeResult.getExitCode() != 0) {
-                LOGGER.warn("Failed to purge RabbitMQ queue '{}': {}", queueName, purgeResult.getStderr());
+                LOGGER.warn("Failed to purge RabbitMQ queues for vhost '{}': {}", vhost, purgeResult.getStderr());
             } else {
-                LOGGER.debug("Purged RabbitMQ queue '{}'", queueName);
+                LOGGER.debug("Purged all RabbitMQ queues for vhost '{}'", vhost);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOGGER.warn("Interrupted while purging RabbitMQ queue '{}'", queueName, e);
+            LOGGER.warn("Interrupted while purging RabbitMQ queues for vhost '{}'", vhost, e);
         } catch (IOException e) {
-            LOGGER.warn("Failed to purge RabbitMQ queue '{}'", queueName, e);
+            LOGGER.warn("Failed to purge RabbitMQ queues for vhost '{}'", vhost, e);
         }
     }
 }
