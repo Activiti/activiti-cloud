@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.test.containers;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -31,7 +34,7 @@ public class RabbitMQContainerApplicationInitializer
     private static final Object LOCK = new Object();
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQContainerApplicationInitializer.class);
 
-    private static volatile boolean shutdownHookRegistered = false;
+    private static final ConcurrentLinkedQueue<String> trackedVhosts = new ConcurrentLinkedQueue<>();
     private static volatile String currentVhostName;
 
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
@@ -51,24 +54,22 @@ public class RabbitMQContainerApplicationInitializer
                 rabbitMQContainer.start();
             }
             initializeVhost();
-            registerShutdownHook();
         }
     }
 
     private static void initializeVhost() {
         currentVhostName = UUID.randomUUID().toString();
         createVhost(currentVhostName);
+        trackedVhosts.add(currentVhostName);
     }
 
     private static void registerShutdownHook() {
-        if (!shutdownHookRegistered) {
-            synchronized (LOCK) {
-                if (!shutdownHookRegistered) {
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteVhost(currentVhostName)));
-                    shutdownHookRegistered = true;
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            String vhost;
+            while ((vhost = trackedVhosts.poll()) != null) {
+                deleteVhost(vhost);
             }
-        }
+        }));
     }
 
     public static RabbitMQContainer getContainer() {
@@ -77,6 +78,10 @@ public class RabbitMQContainerApplicationInitializer
 
     public static String getCurrentVhostName() {
         return currentVhostName;
+    }
+
+    public static Collection<String> getTrackedVhosts() {
+        return Collections.unmodifiableCollection(trackedVhosts);
     }
 
     public static String[] getContainerProperties() {
