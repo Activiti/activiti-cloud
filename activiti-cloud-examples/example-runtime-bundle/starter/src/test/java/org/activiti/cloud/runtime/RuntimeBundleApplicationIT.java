@@ -99,21 +99,21 @@ public class RuntimeBundleApplicationIT {
         Context.setProcessEngineConfiguration(processEngineConfiguration);
         Context.setCommandContext(new CommandContext(commandContext -> null, processEngineConfiguration));
 
-        final var expression = expressionManager.createExpression("${[]}");
-
-        final var value = expression.getValue(new TaskEntityImpl());
+        final var value = expressionManager.createExpression("${[]}").getValue(new TaskEntityImpl());
 
         assertThat(value).isNotNull().isInstanceOf(List.class);
 
-        final var expression2 = expressionManager.createExpression("${[var]}");
-
-        final var value2 = expression2.getValue(
-            expressionManager,
-            new DefaultDelegateInterceptor(),
-            Map.of("var", "foo")
-        );
+        final var value2 = expressionManager
+            .createExpression("${[var]}")
+            .getValue(expressionManager, new DefaultDelegateInterceptor(), Map.of("var", "foo"));
 
         assertThat(value2).isNotNull().asInstanceOf(InstanceOfAssertFactories.list(Object.class)).contains("foo");
+
+        final var value3 = expressionManager
+            .createExpression("${(var ne [])}")
+            .getValue(expressionManager, new DefaultDelegateInterceptor(), Map.of("var", List.of("foo")));
+
+        assertThat(value3).isNotNull().isInstanceOf(Boolean.class).isEqualTo(true);
     }
 
     @Test
