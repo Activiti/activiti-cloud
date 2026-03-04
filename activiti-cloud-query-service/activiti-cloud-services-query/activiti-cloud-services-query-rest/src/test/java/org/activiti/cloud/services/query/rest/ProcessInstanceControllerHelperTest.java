@@ -114,6 +114,7 @@ class ProcessInstanceControllerHelperTest {
         given(processInstanceService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
             .willReturn(pageResult);
         given(processInstanceRepository.mapSubprocesses(pageResult, pageable)).willReturn(pageResult);
+        given(processInstanceRepository.mapAllLinkedProcesses(pageResult)).willReturn(pageResult);
 
         //when
         Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(

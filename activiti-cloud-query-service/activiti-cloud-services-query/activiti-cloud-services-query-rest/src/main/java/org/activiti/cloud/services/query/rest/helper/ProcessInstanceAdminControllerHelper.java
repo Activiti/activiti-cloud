@@ -85,16 +85,6 @@ public class ProcessInstanceAdminControllerHelper {
     }
 
     public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
-        processInstances
-            .getContent()
-            .forEach(processInstance -> {
-                List<ProcessInstanceEntity> linkedProcesses = processInstanceAdminService.searchLinkedProcesses(
-                    processInstance.getId()
-                );
-                processInstance.setLinkedProcesses(
-                    ProcessInstanceControllerHelper.mapLinkedProcessEntities(linkedProcesses)
-                );
-            });
-        return processInstances;
+        return processInstanceRepository.mapAllLinkedProcesses(processInstances);
     }
 }

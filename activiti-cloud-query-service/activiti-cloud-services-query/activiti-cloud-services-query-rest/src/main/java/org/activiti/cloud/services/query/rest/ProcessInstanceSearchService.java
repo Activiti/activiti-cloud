@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.List;
 import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -109,14 +108,5 @@ public class ProcessInstanceSearchService {
         );
 
         return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId) {
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceId
-        );
-
-        return processInstanceRepository.findAll(unrestrictedSpecification);
     }
 }

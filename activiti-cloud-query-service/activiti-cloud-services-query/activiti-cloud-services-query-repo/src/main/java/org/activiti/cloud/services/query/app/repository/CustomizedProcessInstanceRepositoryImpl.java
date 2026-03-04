@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.app.repository;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,26 +51,103 @@ public class CustomizedProcessInstanceRepositoryImpl
 
     @Override
     public Page<ProcessInstanceEntity> mapSubprocesses(Page<ProcessInstanceEntity> processInstances) {
-        List<String> parentIds = getParentIds(processInstances);
+        List<ProcessInstanceEntity> content = processInstances.getContent();
+        if (content.isEmpty()) {
+            return processInstances;
+        }
 
-        List<ProcessInstanceEntity> subprocesses = findSubprocessesByParentIds(parentIds);
+        Set<String> pageIds = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
+        List<String> rootIds = content.stream()
+            .map(ProcessInstanceEntity::getRootProcessInstanceId)
+            .filter(id -> id != null)
+            .distinct()
+            .toList();
 
-        Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap = groupSubprocesses(subprocesses);
+        if (rootIds.isEmpty()) {
+            content.forEach(pi -> pi.setSubprocesses(Set.of()));
+            return processInstances;
+        }
 
-        setSubprocesses(processInstances.getContent(), subprocessMap);
+        // Single query: all descendants at every level belonging to the same process trees
+        List<ProcessInstanceEntity> allDescendants = findAllDescendantsByRootIds(rootIds, pageIds);
+
+        // parentId → children map (covers all levels)
+        Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId = buildChildrenByParentIdMap(allDescendants);
+
+        // For each page entity, recursively collect its full subtree
+        content.forEach(pi -> pi.setSubprocesses(collectAllSubprocesses(pi.getId(), childrenByParentId)));
 
         return processInstances;
     }
 
     @Override
     public ProcessInstanceEntity mapSubprocesses(ProcessInstanceEntity processInstance) {
-        List<ProcessInstanceEntity> subprocesses = findSubprocessesByParentId(processInstance.getId());
+        String rootId = processInstance.getRootProcessInstanceId();
+        if (rootId == null) {
+            processInstance.setSubprocesses(Set.of());
+            return processInstance;
+        }
 
-        Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap = groupSubprocesses(subprocesses);
+        List<ProcessInstanceEntity> allDescendants = findAllDescendantsByRootIds(
+            List.of(rootId),
+            Set.of(processInstance.getId())
+        );
 
-        setSubprocesses(List.of(processInstance), subprocessMap);
+        Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId = buildChildrenByParentIdMap(allDescendants);
+
+        processInstance.setSubprocesses(collectAllSubprocesses(processInstance.getId(), childrenByParentId));
 
         return processInstance;
+    }
+
+    /**
+     * Fetches all process instances that share any of the given root process instance ids,
+     * excluding the page-level entries themselves (they are not their own subprocesses).
+     */
+    public List<ProcessInstanceEntity> findAllDescendantsByRootIds(List<String> rootIds, Set<String> excludeIds) {
+        QProcessInstanceEntity pi = QProcessInstanceEntity.processInstanceEntity;
+
+        JPQLQuery<ProcessInstanceEntity> query = queryFactory
+            .selectFrom(pi)
+            .where(pi.rootProcessInstanceId.in(rootIds).and(pi.id.notIn(excludeIds)));
+
+        return query.fetch();
+    }
+
+    /**
+     * Builds a map of parentId -> direct children (as QueryCloudSubprocessInstance).
+     * Used to traverse the tree in memory.
+     */
+    public Map<String, Set<QueryCloudSubprocessInstance>> buildChildrenByParentIdMap(
+        List<ProcessInstanceEntity> descendants
+    ) {
+        return descendants.stream()
+            .filter(d -> d.getParentId() != null)
+            .collect(
+                Collectors.groupingBy(
+                    ProcessInstanceEntity::getParentId,
+                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
+                )
+            );
+    }
+
+    /**
+     * Recursively collects all subprocess ids (direct and indirect) for a given process instance id.
+     */
+    public Set<QueryCloudSubprocessInstance> collectAllSubprocesses(
+        String processId,
+        Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId
+    ) {
+        Set<QueryCloudSubprocessInstance> directChildren = childrenByParentId.getOrDefault(processId, Set.of());
+        if (directChildren.isEmpty()) {
+            return Set.of();
+        }
+
+        Set<QueryCloudSubprocessInstance> all = new HashSet<>(directChildren);
+        for (QueryCloudSubprocessInstance child : directChildren) {
+            all.addAll(collectAllSubprocesses(child.getId(), childrenByParentId));
+        }
+        return all;
     }
 
     public QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
@@ -124,5 +202,31 @@ public class CustomizedProcessInstanceRepositoryImpl
             .selectFrom(processInstanceEntity)
             .where(processInstanceEntity.parentId.eq(parentId))
             .fetch();
+    }
+
+    @Override
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        List<String> ids = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
+
+        QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
+        List<ProcessInstanceEntity> allLinked = queryFactory
+            .selectFrom(processInstanceEntity)
+            .where(processInstanceEntity.linkedProcessInstanceId.in(ids))
+            .fetch();
+
+        Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = allLinked
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    ProcessInstanceEntity::getLinkedProcessInstanceId,
+                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
+                )
+            );
+
+        processInstances.getContent().forEach(pi ->
+            pi.setLinkedProcesses(linkedMap.getOrDefault(pi.getId(), Set.of()))
+        );
+
+        return processInstances;
     }
 }
