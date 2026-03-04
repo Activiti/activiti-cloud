@@ -161,6 +161,7 @@ public class ProcessInstanceAdminService {
         // parentId → children map (covers all levels)
         Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId = allDescendants
             .stream()
+            .filter(pi -> pi.getParentId() != null)
             .collect(
                 Collectors.groupingBy(
                     ProcessInstanceEntity::getParentId,
