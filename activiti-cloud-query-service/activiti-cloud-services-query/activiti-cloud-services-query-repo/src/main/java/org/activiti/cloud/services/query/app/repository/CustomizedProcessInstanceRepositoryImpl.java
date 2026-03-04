@@ -125,7 +125,12 @@ public class CustomizedProcessInstanceRepositoryImpl
             .selectFrom(processInstanceEntity)
             .where(processInstanceEntity.parentId.in(parentIds));
 
-        return subprocessQuery.fetch();
+        long totalElements = subprocessQuery.fetchCount();
+
+        assert querydsl != null;
+        List<ProcessInstanceEntity> subprocesses = querydsl.applyPagination(pageable, subprocessQuery).fetch();
+
+        return PageableExecutionUtils.getPage(subprocesses, pageable, () -> totalElements);
     }
 
     public List<ProcessInstanceEntity> findSubprocessesByParentId(String parentId) {
