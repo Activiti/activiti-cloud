@@ -17,11 +17,21 @@ package org.activiti.cloud.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.el.ExpressionFactory;
+import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.liquibase.EnableCleanupLiquibaseAfterTest;
 import org.activiti.cloud.starters.test.binder.BinderFactoryListenerTestContext;
 import org.activiti.cloud.starters.test.binder.EnableBinderFactoryListenerTestContext;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.delegate.invocation.DefaultDelegateInterceptor;
+import org.activiti.engine.impl.el.ExpressionManager;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.TaskEntityImpl;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
@@ -66,9 +76,44 @@ public class RuntimeBundleApplicationIT {
     @Autowired
     private ActivitiCloudMessagingProperties messagingProperties;
 
+    @Autowired
+    private ExpressionManager expressionManager;
+
+    @Autowired
+    private ProcessEngineConfigurationImpl processEngineConfiguration;
+
     @Test
     public void contextLoads() {
         assertThat(applicationContext).isNotNull();
+    }
+
+    @Test
+    void expressionFactory() {
+        final var expressionFactory = ExpressionFactory.newInstance();
+
+        assertThat(expressionFactory).isInstanceOf(org.apache.el.ExpressionFactoryImpl.class);
+    }
+
+    @Test
+    void expressionManager() {
+        Context.setProcessEngineConfiguration(processEngineConfiguration);
+        Context.setCommandContext(new CommandContext(commandContext -> null, processEngineConfiguration));
+
+        final var expression = expressionManager.createExpression("${[]}");
+
+        final var value = expression.getValue(new TaskEntityImpl());
+
+        assertThat(value).isNotNull().isInstanceOf(List.class);
+
+        final var expression2 = expressionManager.createExpression("${[var]}");
+
+        final var value2 = expression2.getValue(
+            expressionManager,
+            new DefaultDelegateInterceptor(),
+            Map.of("var", "foo")
+        );
+
+        assertThat(value2).isNotNull().asInstanceOf(InstanceOfAssertFactories.list(Object.class)).contains("foo");
     }
 
     @Test
