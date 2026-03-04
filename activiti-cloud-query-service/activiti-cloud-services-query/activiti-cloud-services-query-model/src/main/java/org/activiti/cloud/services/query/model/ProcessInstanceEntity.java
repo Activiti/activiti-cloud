@@ -35,6 +35,8 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
@@ -50,7 +52,6 @@ import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ProcessInstance")
@@ -77,6 +78,9 @@ import org.springframework.format.annotation.DateTimeFormat;
     }
 )
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements QueryCloudProcessInstance {
+
+    private static final String CALL_ACTIVITY_TYPE_VALUE = "call-activity";
+    private static final String MAIN_PROCESS_TYPE_VALUE = "main-process";
 
     @Id
     private String id;
@@ -246,13 +250,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     private String linkedProcessInstanceType;
 
-    @Formula(
-        "CASE " +
-        "WHEN parent_id IS NULL OR parent_id = id THEN 'main-process' " +
-        "WHEN linked_process_instance_type IS NOT NULL THEN linked_process_instance_type " +
-        "WHEN parent_id IS NOT NULL AND parent_id != id THEN 'call-activity' " +
-        "ELSE null END"
-    )
     private String type;
 
     public ProcessInstanceEntity() {}
@@ -600,5 +597,15 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public String getType() {
         return type;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if (parentId != null && !parentId.equals(id)) {
+            type = CALL_ACTIVITY_TYPE_VALUE;
+        } else {
+            type = Objects.requireNonNullElse(linkedProcessInstanceType, MAIN_PROCESS_TYPE_VALUE);
+        }
     }
 }

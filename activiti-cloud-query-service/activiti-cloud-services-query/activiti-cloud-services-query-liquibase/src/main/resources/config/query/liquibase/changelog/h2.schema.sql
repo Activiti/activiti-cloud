@@ -96,6 +96,7 @@ create table process_instance
     status                     varchar(255),
     process_definition_name    varchar(255),
     root_process_instance_id   varchar(255),
+    type                       varchar(255) not null,
     primary key (id)
 );
 create table process_model
