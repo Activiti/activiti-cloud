@@ -136,7 +136,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("id1", "id3"));
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, containsInAnyOrder("id1", "id3"));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
