@@ -17,6 +17,10 @@
       <artifactId>activiti-engine</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.tomcat.embed</groupId>
+      <artifactId>tomcat-embed-el</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-config</artifactId>
     </dependency>
