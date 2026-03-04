@@ -47,6 +47,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
+    private Set<String> rootProcessInstanceId;
 
     public ProcessInstanceSearchRequest() {}
 
@@ -74,7 +75,8 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         Set<String> linkedProcessInstanceType,
         Set<String> processRelatedTo,
         Boolean includeUnlinkedProcesses,
-        Boolean includeLinkedProcesses
+        Boolean includeLinkedProcesses,
+        Set<String> rootProcessInstanceId
     ) {
         this.id = id;
         this.parentId = parentId;
@@ -100,6 +102,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.processRelatedTo = processRelatedTo;
         this.includeUnlinkedProcesses = includeUnlinkedProcesses;
         this.includeLinkedProcesses = includeLinkedProcesses;
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     @Override
@@ -140,6 +143,10 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
 
     public void setParentId(Set<String> parentId) {
         this.parentId = parentId;
+    }
+
+    public void setRootProcessInstanceId(Set<String> rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public Set<String> getName() {
@@ -312,5 +319,9 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
 
     public void setIncludeLinkedProcesses(Boolean includeLinkedProcesses) {
         this.includeLinkedProcesses = includeLinkedProcesses;
+    }
+
+    public Set<String> getRootProcessInstanceId() {
+        return rootProcessInstanceId;
     }
 }
