@@ -57,7 +57,8 @@ public class CustomizedProcessInstanceRepositoryImpl
         }
 
         Set<String> pageIds = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
-        List<String> rootIds = content.stream()
+        List<String> rootIds = content
+            .stream()
             .map(ProcessInstanceEntity::getRootProcessInstanceId)
             .filter(id -> id != null)
             .distinct()
@@ -121,7 +122,8 @@ public class CustomizedProcessInstanceRepositoryImpl
     public Map<String, Set<QueryCloudSubprocessInstance>> buildChildrenByParentIdMap(
         List<ProcessInstanceEntity> descendants
     ) {
-        return descendants.stream()
+        return descendants
+            .stream()
             .filter(d -> d.getParentId() != null)
             .collect(
                 Collectors.groupingBy(
@@ -223,9 +225,9 @@ public class CustomizedProcessInstanceRepositoryImpl
                 )
             );
 
-        processInstances.getContent().forEach(pi ->
-            pi.setLinkedProcesses(linkedMap.getOrDefault(pi.getId(), Set.of()))
-        );
+        processInstances
+            .getContent()
+            .forEach(pi -> pi.setLinkedProcesses(linkedMap.getOrDefault(pi.getId(), Set.of())));
 
         return processInstances;
     }

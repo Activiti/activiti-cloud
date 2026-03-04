@@ -102,16 +102,28 @@ class CustomizedProcessInstanceRepositoryImplIT {
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(3);
 
-        ProcessInstanceEntity resultParent1 = result.getContent().stream()
-            .filter(p -> p.getId().equals(parent1.getId())).findFirst().orElseThrow();
+        ProcessInstanceEntity resultParent1 = result
+            .getContent()
+            .stream()
+            .filter(p -> p.getId().equals(parent1.getId()))
+            .findFirst()
+            .orElseThrow();
         assertThat(resultParent1.getSubprocesses()).hasSize(2);
 
-        ProcessInstanceEntity resultParent2 = result.getContent().stream()
-            .filter(p -> p.getId().equals(parent2.getId())).findFirst().orElseThrow();
+        ProcessInstanceEntity resultParent2 = result
+            .getContent()
+            .stream()
+            .filter(p -> p.getId().equals(parent2.getId()))
+            .findFirst()
+            .orElseThrow();
         assertThat(resultParent2.getSubprocesses()).hasSize(3);
 
-        ProcessInstanceEntity resultUnrelated = result.getContent().stream()
-            .filter(p -> p.getId().equals(unrelated.getId())).findFirst().orElseThrow();
+        ProcessInstanceEntity resultUnrelated = result
+            .getContent()
+            .stream()
+            .filter(p -> p.getId().equals(unrelated.getId()))
+            .findFirst()
+            .orElseThrow();
         assertThat(resultUnrelated.getSubprocesses()).isEmpty();
     }
 
@@ -213,12 +225,20 @@ class CustomizedProcessInstanceRepositoryImplIT {
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(2);
 
-        ProcessInstanceEntity resultMain1 = result.getContent().stream()
-            .filter(p -> p.getId().equals(mainId1)).findFirst().orElseThrow();
+        ProcessInstanceEntity resultMain1 = result
+            .getContent()
+            .stream()
+            .filter(p -> p.getId().equals(mainId1))
+            .findFirst()
+            .orElseThrow();
         assertThat(resultMain1.getLinkedProcesses()).hasSize(2);
 
-        ProcessInstanceEntity resultMain2 = result.getContent().stream()
-            .filter(p -> p.getId().equals(mainId2)).findFirst().orElseThrow();
+        ProcessInstanceEntity resultMain2 = result
+            .getContent()
+            .stream()
+            .filter(p -> p.getId().equals(mainId2))
+            .findFirst()
+            .orElseThrow();
         assertThat(resultMain2.getLinkedProcesses()).hasSize(1);
     }
 

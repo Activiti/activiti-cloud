@@ -181,17 +181,19 @@ class CustomizedProcessInstanceRepositoryImplTest {
         QueryCloudSubprocessInstance gc2 = subprocessRef(grandchild2Id);
 
         Map<String, Set<QueryCloudSubprocessInstance>> childrenMap = Map.of(
-            rootId, Set.of(child1, child2),
-            child1Id, Set.of(gc1, gc2)
+            rootId,
+            Set.of(child1, child2),
+            child1Id,
+            Set.of(gc1, gc2)
         );
 
         Set<QueryCloudSubprocessInstance> result = repository.collectAllSubprocesses(rootId, childrenMap);
 
-        assertThat(result).hasSize(4)
+        assertThat(result)
+            .hasSize(4)
             .extracting(QueryCloudSubprocessInstance::getId)
             .containsExactlyInAnyOrder(child1Id, child2Id, grandchild1Id, grandchild2Id);
     }
-
 
     @Test
     void testMapSubprocesses_fetchesAllLevelsInOneBulkQuery() {
@@ -214,8 +216,7 @@ class CustomizedProcessInstanceRepositoryImplTest {
 
         QProcessInstanceEntity q = QProcessInstanceEntity.processInstanceEntity;
         when(queryFactory.selectFrom(q)).thenReturn(jpaQuery);
-        when(jpaQuery.where(q.rootProcessInstanceId.in(List.of(rootId)).and(q.id.notIn(pageIds))))
-            .thenReturn(jpaQuery);
+        when(jpaQuery.where(q.rootProcessInstanceId.in(List.of(rootId)).and(q.id.notIn(pageIds)))).thenReturn(jpaQuery);
         when(jpaQuery.fetch()).thenReturn(List.of(child1, child2, grandchild, child3));
 
         Page<ProcessInstanceEntity> result = repository.mapSubprocesses(processInstances);
@@ -268,7 +269,6 @@ class CustomizedProcessInstanceRepositoryImplTest {
         assertThat(result.getSubprocesses()).isEmpty();
         verifyNoInteractions(queryFactory);
     }
-
 
     @Test
     void testMapAllLinkedProcesses() {
