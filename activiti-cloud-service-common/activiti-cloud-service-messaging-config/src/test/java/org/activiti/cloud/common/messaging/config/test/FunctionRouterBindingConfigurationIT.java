@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -841,13 +842,12 @@ public class FunctionRouterBindingConfigurationIT {
             .build();
 
         final var functionExecutor = functionExecutorSelector.apply(message);
+        final var countDownLatch = new CountDownLatch(1);
 
         final var futureResult = CompletableFuture.supplyAsync(
             () -> {
                 try {
-                    synchronized (this) {
-                        wait();
-                    }
+                    countDownLatch.await();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
