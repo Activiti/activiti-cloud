@@ -688,10 +688,6 @@ limitations under the License.]]>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <argLine>@{argLine} -Xmx1024m</argLine>
-              <!-- temporary fix for https://github.com/testcontainers/testcontainers-java/issues/11491 -->
-              <systemPropertyVariables>
-                <api.version>1.44</api.version>
-              </systemPropertyVariables>
             </configuration>
             <executions>
               <execution>
