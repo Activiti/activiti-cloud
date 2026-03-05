@@ -21,8 +21,7 @@
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.130.Final</netty.version>
-    <jackson.core.version>2.21.1</jackson.core.version>
-    <jackson.annotations.version>2.21</jackson.annotations.version>
+    <jackson.version>2.21.1</jackson.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -122,19 +121,11 @@
       </dependency>
       <!-- AAE-42877 Update jackson to fix security issue -->
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.annotations.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson.core.version}</version>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
