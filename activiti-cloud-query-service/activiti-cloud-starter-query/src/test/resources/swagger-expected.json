@@ -8268,17 +8268,17 @@
             "type": "boolean"
           },
           "linkedProcessInstanceId": {
+            "type": "array",
             "items": {
               "type": "string"
             },
-            "type": "array",
             "uniqueItems": true
           },
           "linkedProcessInstanceType": {
+            "type": "array",
             "items": {
               "type": "string"
             },
-            "type": "array",
             "uniqueItems": true
           },
           "processRelatedTo": {
@@ -8293,6 +8293,13 @@
           },
           "includeLinkedProcesses": {
             "type": "boolean"
+          },
+          "rootProcessInstanceId": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
           }
         },
         "title": "ProcessInstanceSearchRequest_ProcessVariables"
