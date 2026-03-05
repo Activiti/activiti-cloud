@@ -72,6 +72,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()
@@ -95,6 +96,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()
@@ -165,6 +167,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()

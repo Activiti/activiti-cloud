@@ -100,6 +100,7 @@ public class ProcessInstanceAdminControllerHelper {
 
         Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = allLinked
             .stream()
+            .filter(lp -> lp.getLinkedProcessInstanceId() != null)
             .collect(
                 Collectors.groupingBy(
                     ProcessInstanceEntity::getLinkedProcessInstanceId,
