@@ -599,13 +599,19 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @PrePersist
     @PreUpdate
     public void prePersist() {
-        if (parentId != null && !parentId.equals(id)) {
-            type = CALL_ACTIVITY_TYPE_VALUE;
+        if (linkedProcessInstanceType != null) {
+            this.type = linkedProcessInstanceType;
+        } else if (parentId != null && !parentId.equals(id)) {
+            this.type = CALL_ACTIVITY_TYPE_VALUE;
         } else {
-            type = Objects.requireNonNullElse(linkedProcessInstanceType, MAIN_PROCESS_TYPE_VALUE);
+            this.type = MAIN_PROCESS_TYPE_VALUE;
         }
     }
 }
