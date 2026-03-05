@@ -348,12 +348,14 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
         ProcessInstanceEntity subProcessInstance = queryTestUtils
             .buildProcessInstance()
+            .withParentId(rootProcessInstance.getId())
             .withName("sub-process")
             .withInitiator(USER)
             .withRootProcessInstanceId(rootProcessInstance.getId())
             .buildAndSave();
         ProcessInstanceEntity linkedProcessInstance = queryTestUtils
             .buildProcessInstance()
+            .withParentId(rootProcessInstance.getId())
             .withName("linked-process")
             .withLinkedProcessInstanceId(rootProcessInstance.getId())
             .buildAndSave();
@@ -376,21 +378,30 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
     @Test
     void should_return_UnlinkedProcessInstances() {
-        var unlinkedProcess = queryTestUtils
+        var mainProcess = queryTestUtils
             .buildProcessInstance()
-            .withName("unlinked-process")
+            .withName("main-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var orphanProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("orphan-process")
             .withInitiator(USER)
             .withLinkedProcessInstanceType("task-form")
             .buildAndSave();
 
-        var normalProcess = queryTestUtils
+        var linkedProcess = queryTestUtils
             .buildProcessInstance()
-            .withName("process")
+            .withName("linked-process")
             .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(mainProcess.getId())
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withIncludeUnlinkedProcesses(true);
+            .withIncludeUnlinkedProcesses(true)
+            .withIncludeLinkedProcesses(false);
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -400,48 +411,24 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(unlinkedProcess.getId()));
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(mainProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(orphanProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())));
     }
 
     @Test
     void should_not_return_UnlinkedProcessInstances() {
-        var unlinkedProcess = queryTestUtils
+        var mainProcess = queryTestUtils
             .buildProcessInstance()
-            .withName("unlinked-process")
+            .withName("main-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var orphanProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("orphan-process")
             .withInitiator(USER)
             .withLinkedProcessInstanceType("task-form")
-            .buildAndSave();
-
-        var normalProcess = queryTestUtils
-            .buildProcessInstance()
-            .withName("process")
-            .withInitiator(USER)
-            .buildAndSave();
-
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withIncludeUnlinkedProcesses(false);
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(unlinkedProcess.getId())))
-            .body("page.totalElements", equalTo(1))
-            .body("page.totalPages", equalTo(1));
-    }
-
-    @Test
-    void should_return_LinkedProcessInstances() {
-        var normalProcess = queryTestUtils
-            .buildProcessInstance()
-            .withName("process")
-            .withInitiator(USER)
             .buildAndSave();
 
         var linkedProcess = queryTestUtils
@@ -449,41 +436,11 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .withName("linked-process")
             .withInitiator(USER)
             .withLinkedProcessInstanceType("task-form")
-            .withLinkedProcessInstanceId(normalProcess.getId())
+            .withLinkedProcessInstanceId(mainProcess.getId())
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withIncludeLinkedProcesses(true);
-
-        given()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.buildJson())
-            .when()
-            .post(getSearchEndpoint())
-            .then()
-            .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcess.getId()));
-    }
-
-    @Test
-    void should_not_return_LinkedProcessInstances() {
-        var normalProcess = queryTestUtils
-            .buildProcessInstance()
-            .withName("process")
-            .withInitiator(USER)
-            .buildAndSave();
-
-        var linkedProcess = queryTestUtils
-            .buildProcessInstance()
-            .withName("linked-process")
-            .withInitiator(USER)
-            .withLinkedProcessInstanceType("task-form")
-            .withLinkedProcessInstanceId(normalProcess.getId())
-            .buildAndSave();
-
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeUnlinkedProcesses(false)
             .withIncludeLinkedProcesses(false);
 
         given()
@@ -494,9 +451,88 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .then()
             .statusCode(200)
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(normalProcess.getId()))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())))
-            .body("page.totalElements", equalTo(1))
-            .body("page.totalPages", equalTo(1));
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(mainProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(orphanProcess.getId())))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())));
+    }
+
+    @Test
+    void should_return_LinkedProcessInstances() {
+        var mainProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("main-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var orphanProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("orphan-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var linkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(mainProcess.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeLinkedProcesses(true)
+            .withIncludeUnlinkedProcesses(true);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(mainProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(orphanProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcess.getId()));
+    }
+
+    @Test
+    void should_not_return_LinkedProcessInstances() {
+        var mainProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("main-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        var orphanProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("orphan-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var linkedProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceType("task-form")
+            .withLinkedProcessInstanceId(mainProcess.getId())
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeLinkedProcesses(false)
+            .withIncludeUnlinkedProcesses(true);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(mainProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(orphanProcess.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())));
     }
 }

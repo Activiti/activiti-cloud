@@ -166,10 +166,6 @@
               <forkCount>1</forkCount>
               <useSystemClassLoader>false</useSystemClassLoader>
               <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-              <!-- temporary fix for https://github.com/testcontainers/testcontainers-java/issues/11491 -->
-              <systemPropertyVariables>
-                <api.version>1.44</api.version>
-              </systemPropertyVariables>
             </configuration>
             <executions>
               <execution>
