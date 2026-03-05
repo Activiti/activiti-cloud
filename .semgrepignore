@@ -1,0 +1,24 @@
+# Version control
+.git
+.svn
+.hg
+
+# Maven build output - exclude compiled artifacts
+target/
+
+# Node / frontend deps and build output
+node_modules/
+.npm/
+.yarn/
+dist/
+build/
+*.min.js
+
+# Python envs (acceptance tests)
+.venv/
+.tox/
+.env/
+
+# Other VCS
+_darcs
+CVS

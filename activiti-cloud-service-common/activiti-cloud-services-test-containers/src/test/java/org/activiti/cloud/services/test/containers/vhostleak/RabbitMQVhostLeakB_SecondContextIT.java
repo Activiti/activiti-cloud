@@ -19,11 +19,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.containers.TestContainersApplication;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 
 /**
  * Second Spring context in the multi-context vhost tracking scenario.
@@ -44,6 +46,10 @@ import org.springframework.test.context.ContextConfiguration;
 @Disabled("Run manually to verify multi-context vhost tracking and cleanup")
 @SpringBootTest(classes = TestContainersApplication.class, properties = "test.context=second")
 @ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
+)
 class RabbitMQVhostLeakB_SecondContextIT {
 
     @Test
