@@ -806,7 +806,8 @@
               "WRAPPER_OBJECT",
               "WRAPPER_ARRAY",
               "EXTERNAL_PROPERTY",
-              "EXISTING_PROPERTY"
+              "EXISTING_PROPERTY",
+              "DEDUCTION"
             ]
           },
           "typeIdResolver": {
