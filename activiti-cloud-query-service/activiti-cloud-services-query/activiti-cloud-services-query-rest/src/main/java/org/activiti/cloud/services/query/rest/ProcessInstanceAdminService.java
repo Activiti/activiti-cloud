@@ -158,19 +158,19 @@ public class ProcessInstanceAdminService {
             ProcessInstanceSpecification.unrestrictedSubprocesses(ids)
         );
 
-        // parentId → children map (covers all levels)
-        Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId = allDescendants
+        // RootProcessInstanceId → children map (covers all levels)
+        Map<String, Set<QueryCloudSubprocessInstance>> childrenByRootProcessInstanceId = allDescendants
             .stream()
-            .filter(pi -> pi.getParentId() != null)
+            .filter(pi -> pi.getRootProcessInstanceId() != null)
             .collect(
                 Collectors.groupingBy(
-                    ProcessInstanceEntity::getParentId,
+                    ProcessInstanceEntity::getRootProcessInstanceId,
                     Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
                 )
             );
 
         // For each page entity, collect only its direct children (grandchildren are nested inside them)
-        content.forEach(pi -> pi.setSubprocesses(childrenByParentId.getOrDefault(pi.getId(), Set.of())));
+        content.forEach(pi -> pi.setSubprocesses(childrenByRootProcessInstanceId.getOrDefault(pi.getId(), Set.of())));
 
         return processInstances;
     }

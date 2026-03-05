@@ -182,6 +182,49 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
     }
 
     @Test
+    void should_return_ProcessInstancesWithSubSubProcesses() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withName("root-process")
+            .buildAndSave();
+        ProcessInstanceEntity subProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
+            .buildAndSave();
+
+        ProcessInstanceEntity subSubProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withName("sub-sub-process")
+            .withRootProcessInstanceId(processInstance1.getId())
+            .subprocessOf(subProcessInstance)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeSubprocesses(false)
+            .withIncludeUnlinkedProcesses(false)
+            .withIncludeLinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subProcessInstance.getId())))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subSubProcessInstance.getId())))
+            .body(
+                PROCESS_INSTANCE_SUBPROCESS_JSON_PATH,
+                hasItem(List.of(Map.of("id", subProcessInstance.getId()), Map.of("id", subSubProcessInstance.getId())))
+            );
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByInitiator() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
