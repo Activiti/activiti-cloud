@@ -17,7 +17,6 @@ package org.activiti.cloud.services.test.containers.vhostleak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collection;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.containers.TestContainersApplication;
@@ -28,10 +27,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
- * Second Spring context in the multi-context vhost tracking scenario.
+ * First Spring context in the multi-context vhost tracking scenario.
  *
  * <p>These tests are disabled and must be run manually together with
- * {@link RabbitMQVhostLeakA_FirstContextIT} to verify that all vhosts created across
+ * {@link RabbitMQVhostLeakBSecondContextIT} to verify that all vhosts created across
  * multiple Spring contexts in the same JVM are correctly tracked for cleanup.
  *
  * <p>To run manually:
@@ -41,24 +40,20 @@ import org.springframework.test.context.TestExecutionListeners;
  *   -Dit.test="RabbitMQVhostLeak*"
  * </pre>
  *
- * <p>Alphabetical class name (B) ensures this runs after the A counterpart.
+ * <p>Alphabetical class name (A) ensures this runs before the B counterpart.
  */
 @Disabled("Run manually to verify multi-context vhost tracking and cleanup")
-@SpringBootTest(classes = TestContainersApplication.class, properties = "test.context=second")
+@SpringBootTest(classes = TestContainersApplication.class, properties = "test.context=first")
 @ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
 @TestExecutionListeners(
     value = RabbitMQQueuesCleanupTestExecutionListener.class,
     mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
 )
-class RabbitMQVhostLeakB_SecondContextIT {
+class RabbitMQVhostLeakAFirstContextIT {
 
     @Test
-    void shouldTrackAllVhostsAcrossMultipleContexts() {
-        // Both vhosts should be tracked — the shutdown hook will delete all of them
-        Collection<String> trackedVhosts = RabbitMQContainerApplicationInitializer.getTrackedVhosts();
-
-        assertThat(trackedVhosts)
-            .as("All vhosts created across multiple contexts must be tracked for cleanup")
-            .hasSize(2);
+    void shouldRecordVhostFromFirstContext() {
+        var trackedVhosts = RabbitMQContainerApplicationInitializer.getTrackedVhosts();
+        assertThat(trackedVhosts).as("Exactly one vhost should be created for the first context").hasSize(1);
     }
 }
