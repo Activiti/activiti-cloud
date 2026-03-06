@@ -21,6 +21,7 @@
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.130.Final</netty.version>
+    <jackson.version>2.21.1</jackson.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -117,6 +118,14 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
         <version>1.15.0</version>
+      </dependency>
+      <!-- AAE-42877 Update jackson to fix security issue -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
