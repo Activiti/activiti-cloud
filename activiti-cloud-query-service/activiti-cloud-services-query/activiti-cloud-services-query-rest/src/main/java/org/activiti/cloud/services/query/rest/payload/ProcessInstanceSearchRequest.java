@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest.payload;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
@@ -48,6 +48,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
+
     @JsonIgnore
     private Set<String> subprocessParentIds;
 
