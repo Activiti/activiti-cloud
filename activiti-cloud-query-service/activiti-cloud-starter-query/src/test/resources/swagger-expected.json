@@ -8293,13 +8293,6 @@
           },
           "includeLinkedProcesses": {
             "type": "boolean"
-          },
-          "subprocessParentIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "uniqueItems": true
           }
         },
         "title": "ProcessInstanceSearchRequest_ProcessVariables"
