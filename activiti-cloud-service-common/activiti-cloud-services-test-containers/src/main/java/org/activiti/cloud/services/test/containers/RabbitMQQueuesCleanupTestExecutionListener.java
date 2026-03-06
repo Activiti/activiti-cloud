@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.testcontainers.containers.Container;
+import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExecutionListener {
@@ -47,12 +47,7 @@ public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExec
         try {
             // Execute a single shell command in the container that lists all queues for the vhost
             // and purges each of them. This avoids one Docker exec per queue.
-            String purgeCommand = String.format(
-                "rabbitmqctl list_queues name --no-table-headers -p '%s' | grep -vE '^\\s*(Timeout|Listing|$)' | while read q; do rabbitmqctl purge_queue \"$q\" -p '%s'; done",
-                vhost,
-                vhost
-            );
-            Container.ExecResult purgeResult = container.execInContainer("sh", "-c", purgeCommand);
+            var purgeResult = executePurgeAllQueues(vhost, container);
             if (purgeResult.getExitCode() != 0) {
                 LOGGER.warn("Failed to purge RabbitMQ queues for vhost '{}': {}", vhost, purgeResult.getStderr());
             } else {
@@ -64,5 +59,15 @@ public class RabbitMQQueuesCleanupTestExecutionListener extends AbstractTestExec
         } catch (IOException e) {
             LOGGER.warn("Failed to purge RabbitMQ queues for vhost '{}'", vhost, e);
         }
+    }
+
+    private static ExecResult executePurgeAllQueues(String vhost, RabbitMQContainer container)
+        throws IOException, InterruptedException {
+        String purgeCommand = String.format(
+            "rabbitmqctl list_queues name --no-table-headers -p '%s' | grep -vE '^\\s*(Timeout|Listing|$)' | while read q; do rabbitmqctl purge_queue \"$q\" -p '%s'; done",
+            vhost,
+            vhost
+        );
+        return container.execInContainer("sh", "-c", purgeCommand);
     }
 }

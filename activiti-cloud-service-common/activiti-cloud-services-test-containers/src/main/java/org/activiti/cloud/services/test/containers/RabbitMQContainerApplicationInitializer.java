@@ -26,6 +26,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.Container;
+import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 public class RabbitMQContainerApplicationInitializer
@@ -39,6 +40,9 @@ public class RabbitMQContainerApplicationInitializer
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
         .withReuse(true)
         .withExposedPorts(5672, 5671, 15672, 15671);
+    protected static final String SET_PERMISSIONS_COMMAND =
+        "rabbitmqctl set_permissions --vhost %s guest '.*' '.*' '.*'";
+    protected static final String ADD_VHOST_COMMAND = "rabbitmqctl add_vhost %s";
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
@@ -94,22 +98,13 @@ public class RabbitMQContainerApplicationInitializer
 
     private static void createVhost(String name) {
         try {
-            Container.ExecResult addResult = rabbitMQContainer.execInContainer("rabbitmqctl", "add_vhost", name);
+            Container.ExecResult addResult = executeInContainer(ADD_VHOST_COMMAND.formatted(name));
             if (addResult.getExitCode() != 0) {
                 throw new RabbitMQContainerException(
                     "Failed to create RabbitMQ vhost '" + name + "': " + addResult.getStderr()
                 );
             }
-            Container.ExecResult permResult = rabbitMQContainer.execInContainer(
-                "rabbitmqctl",
-                "set_permissions",
-                "-p",
-                name,
-                "guest",
-                ".*",
-                ".*",
-                ".*"
-            );
+            Container.ExecResult permResult = executeInContainer(SET_PERMISSIONS_COMMAND.formatted(name));
             if (permResult.getExitCode() != 0) {
                 throw new RabbitMQContainerException(
                     "Failed to set permissions on RabbitMQ vhost '" + name + "': " + permResult.getStderr()
@@ -121,6 +116,10 @@ public class RabbitMQContainerApplicationInitializer
         } catch (IOException e) {
             throw new RabbitMQContainerException("Failed to create RabbitMQ vhost: " + name, e);
         }
+    }
+
+    private static ExecResult executeInContainer(String command) throws IOException, InterruptedException {
+        return rabbitMQContainer.execInContainer("sh", "-c", command);
     }
 
     private static void deleteVhost(String name) {
