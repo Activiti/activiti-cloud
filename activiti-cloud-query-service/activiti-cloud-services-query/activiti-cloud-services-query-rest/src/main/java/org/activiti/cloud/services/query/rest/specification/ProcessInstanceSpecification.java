@@ -85,8 +85,7 @@ public class ProcessInstanceSpecification
         String userId
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        searchRequest.setParentId(parentIds);
-        searchRequest.setRootProcessInstanceId(parentIds);
+        searchRequest.setSubprocessParentIds(parentIds);
 
         return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
     }
@@ -113,7 +112,7 @@ public class ProcessInstanceSpecification
         applyIncludeSubprocesses(root);
         applyLinkedProcessInstanceId(root);
         applyLinkedProcessInstanceType(root);
-        applySubprocessesFilter(root, criteriaBuilder);
+        applySubprocessParentIdsFilter(root, criteriaBuilder);
         applyProcessRelatedTo(root, criteriaBuilder);
         applyLinkedAndOrphanProcessesFilter(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
@@ -136,17 +135,14 @@ public class ProcessInstanceSpecification
     }
 
     private void applyParentIdFilter(Root<ProcessInstanceEntity> root) {
-        if (
-            !CollectionUtils.isEmpty(searchRequest.parentId()) &&
-            CollectionUtils.isEmpty(searchRequest.getRootProcessInstanceId())
-        ) {
+        if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
             predicates.add(root.get(ProcessInstanceEntity_.parentId).in(searchRequest.parentId()));
         }
     }
 
-    private void applySubprocessesFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(searchRequest.getRootProcessInstanceId())) {
-            Set<String> ids = searchRequest.getRootProcessInstanceId();
+    private void applySubprocessParentIdsFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (!CollectionUtils.isEmpty(searchRequest.getSubprocessParentIds())) {
+            Set<String> ids = searchRequest.getSubprocessParentIds();
             predicates.add(
                 criteriaBuilder.or(
                     root.get(ProcessInstanceEntity_.parentId).in(ids),

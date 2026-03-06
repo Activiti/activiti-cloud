@@ -47,7 +47,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Set<String> processRelatedTo;
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
-    private Set<String> rootProcessInstanceId;
+    private Set<String> subprocessParentIds;
 
     public ProcessInstanceSearchRequest() {}
 
@@ -76,7 +76,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         Set<String> processRelatedTo,
         Boolean includeUnlinkedProcesses,
         Boolean includeLinkedProcesses,
-        Set<String> rootProcessInstanceId
+        Set<String> subprocessParentIds
     ) {
         this.id = id;
         this.parentId = parentId;
@@ -102,7 +102,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.processRelatedTo = processRelatedTo;
         this.includeUnlinkedProcesses = includeUnlinkedProcesses;
         this.includeLinkedProcesses = includeLinkedProcesses;
-        this.rootProcessInstanceId = rootProcessInstanceId;
+        this.subprocessParentIds = subprocessParentIds;
     }
 
     @Override
@@ -143,10 +143,6 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
 
     public void setParentId(Set<String> parentId) {
         this.parentId = parentId;
-    }
-
-    public void setRootProcessInstanceId(Set<String> rootProcessInstanceId) {
-        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     public Set<String> getName() {
@@ -321,7 +317,11 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.includeLinkedProcesses = includeLinkedProcesses;
     }
 
-    public Set<String> getRootProcessInstanceId() {
-        return rootProcessInstanceId;
+    public Set<String> getSubprocessParentIds() {
+        return subprocessParentIds;
+    }
+
+    public void setSubprocessParentIds(Set<String> subprocessParentIds) {
+        this.subprocessParentIds = subprocessParentIds;
     }
 }
