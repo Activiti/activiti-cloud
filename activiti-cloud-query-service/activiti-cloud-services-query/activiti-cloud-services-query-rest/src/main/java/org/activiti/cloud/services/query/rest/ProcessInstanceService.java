@@ -22,9 +22,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -228,7 +231,7 @@ public class ProcessInstanceService {
 
         String userId = securityManager.getAuthenticatedUserId();
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
-            linkedProcessInstanceId,
+            Set.of(linkedProcessInstanceId),
             userId
         );
 
@@ -236,16 +239,10 @@ public class ProcessInstanceService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
-        entityFinder.findById(
-            processInstanceRepository,
-            linkedProcessInstanceId,
-            UNABLE_TO_FIND_PROCESS_FOR_THE_GIVEN_ID + linkedProcessInstanceId + "'"
-        );
-
+    public List<ProcessInstanceEntity> searchLinkedProcesses(Set<String> linkedProcessInstanceIds) {
         String userId = securityManager.getAuthenticatedUserId();
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
-            linkedProcessInstanceId,
+            linkedProcessInstanceIds,
             userId
         );
 
@@ -296,5 +293,41 @@ public class ProcessInstanceService {
                 mainProcessInstanceId
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> searchSubProcesses(Page<ProcessInstanceEntity> processInstances) {
+        List<ProcessInstanceEntity> content = processInstances.getContent();
+
+        Set<String> ids = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
+
+        String userId = securityManager.getAuthenticatedUserId();
+        // Single query: direct children via parentId, grandchildren+ via rootProcessInstanceId
+        List<ProcessInstanceEntity> allDescendants = processInstanceRepository.findAll(
+            ProcessInstanceSpecification.restrictedSubprocesses(ids, userId)
+        );
+
+        // parentId → children map (covers all levels)
+        Map<String, Set<QueryCloudSubprocessInstance>> childrenByParentId = allDescendants
+            .stream()
+            .filter(pi -> pi.getParentId() != null)
+            .collect(
+                Collectors.groupingBy(
+                    ProcessInstanceEntity::getParentId,
+                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
+                )
+            );
+
+        // For each page entity, collect only its direct children (grandchildren are nested inside them)
+        content.forEach(pi -> pi.setSubprocesses(childrenByParentId.getOrDefault(pi.getId(), Set.of())));
+
+        return processInstances;
+    }
+
+    private QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
+        QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
+        subProcessInstance.setId(subprocess.getId());
+        subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
+        return subProcessInstance;
     }
 }
