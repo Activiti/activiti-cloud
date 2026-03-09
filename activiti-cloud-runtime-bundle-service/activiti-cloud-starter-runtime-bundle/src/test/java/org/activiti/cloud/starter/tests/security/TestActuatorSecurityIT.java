@@ -21,18 +21,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ContextConfiguration(
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
 public class TestActuatorSecurityIT {
 

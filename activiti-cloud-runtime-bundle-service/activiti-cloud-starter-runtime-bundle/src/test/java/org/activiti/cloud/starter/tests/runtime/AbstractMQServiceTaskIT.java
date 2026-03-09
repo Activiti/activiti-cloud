@@ -39,6 +39,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
@@ -63,6 +64,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
@@ -71,6 +74,10 @@ import org.springframework.test.context.TestPropertySource;
 @ContextConfiguration(
     classes = { RuntimeITConfiguration.class, ServicesAuditITConfiguration.class },
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
 public abstract class AbstractMQServiceTaskIT {
 

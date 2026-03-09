@@ -55,3 +55,21 @@ rules:
     severity: ERROR
     languages: [xml]
     pattern-regex: "<groupId>\\s*org\\.projectlombok"
+
+  - id: require-rabbitmq-cleanup-listener-with-rabbitmq-initializer
+    languages: [java]
+    message: |
+      Test classes annotated with @SpringBootTest that import RabbitMQContainerApplicationInitializer must also import
+      RabbitMQQueuesCleanupTestExecutionListener and include it in @TestExecutionListeners
+      to prevent RabbitMQ queue pollution between tests.
+    severity: ERROR
+    patterns:
+      - pattern-inside: |
+          import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+          ...
+      - pattern: |
+          @SpringBootTest(...)
+          class $CLASS { ... }
+      - pattern-not-inside: |
+          import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
+          ...

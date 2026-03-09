@@ -46,6 +46,7 @@ import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionC
 import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
 import org.awaitility.Durations;
@@ -60,6 +61,8 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.bean.override.mockito.MockReset;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -79,6 +82,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ContextConfiguration(
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
 class MessageEventsIT {
 

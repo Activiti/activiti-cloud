@@ -35,4 +35,4 @@ repos:
         types_or:
           - java
           - xml
-        args: ["--config", ".sempgrep.yaml", "--error", "--metrics=off"]
+        args: ["--config", ".semgrep.yaml", "--error", "--metrics=off"]
