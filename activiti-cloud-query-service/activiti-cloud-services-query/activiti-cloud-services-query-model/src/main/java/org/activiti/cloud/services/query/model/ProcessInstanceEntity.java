@@ -35,6 +35,8 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
@@ -76,6 +78,9 @@ import org.springframework.format.annotation.DateTimeFormat;
     }
 )
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements QueryCloudProcessInstance {
+
+    private static final String CALL_ACTIVITY_TYPE_VALUE = "call-activity";
+    private static final String MAIN_PROCESS_TYPE_VALUE = "main-process";
 
     @Id
     private String id;
@@ -244,6 +249,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     private String linkedProcessInstanceId;
 
     private String linkedProcessInstanceType;
+
+    private String type;
 
     public ProcessInstanceEntity() {}
 
@@ -586,5 +593,25 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
 
     public void setLinkedProcesses(Set<QueryCloudSubprocessInstance> linkedProcesses) {
         this.linkedProcesses = linkedProcesses;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if (linkedProcessInstanceType != null) {
+            this.type = linkedProcessInstanceType;
+        } else if (parentId != null && !parentId.equals(id)) {
+            this.type = CALL_ACTIVITY_TYPE_VALUE;
+        } else {
+            this.type = MAIN_PROCESS_TYPE_VALUE;
+        }
     }
 }
