@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -28,10 +29,12 @@ import java.util.Map;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
@@ -72,6 +75,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()
@@ -95,6 +99,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()
@@ -165,6 +170,7 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
             .buildAndSave();
 
         given()
@@ -179,6 +185,49 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()))
             .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of()))
             .body(PROCESS_INSTANCE_SUBPROCESS_JSON_PATH, hasItem(List.of(Map.of("id", processInstance2.getId()))));
+    }
+
+    @Test
+    void should_return_ProcessInstancesWithSubSubProcesses() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withName("root-process")
+            .buildAndSave();
+        ProcessInstanceEntity subProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .subprocessOf(processInstance1)
+            .withRootProcessInstanceId(processInstance1.getId())
+            .buildAndSave();
+
+        ProcessInstanceEntity subSubProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withName("sub-sub-process")
+            .withRootProcessInstanceId(processInstance1.getId())
+            .subprocessOf(subProcessInstance)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeSubprocesses(false)
+            .withIncludeUnlinkedProcesses(false)
+            .withIncludeLinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subProcessInstance.getId())))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(subSubProcessInstance.getId())))
+            .body(
+                PROCESS_INSTANCE_SUBPROCESS_JSON_PATH,
+                hasItem(List.of(Map.of("id", subProcessInstance.getId()), Map.of("id", subSubProcessInstance.getId())))
+            );
     }
 
     @Test
@@ -374,6 +423,69 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(rootProcessInstance.getId())))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()));
+    }
+
+    @Test
+    void should_return_AllRelatedToProcessInstancesForASpecificProcess_sortedByProcessType() {
+        ProcessInstanceEntity rootProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withId("root-process-id")
+            .withName("root-process")
+            .withInitiator(USER)
+            .withParentId("root-process-id")
+            .withRootProcessInstanceId("root-process-id")
+            .buildAndSave();
+
+        ProcessInstanceEntity subProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .withParentId(rootProcessInstance.getId())
+            .withRootProcessInstanceId(rootProcessInstance.getId())
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-process")
+            .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .withRootProcessInstanceId(rootProcessInstance.getId())
+            .withParentId(rootProcessInstance.getId())
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessRelatedTo(rootProcessInstance.getId())
+            .withSort(new CloudRuntimeEntitySort("type", Sort.Direction.ASC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH,
+                contains(subProcessInstance.getId(), rootProcessInstance.getId(), linkedProcessInstance.getId())
+            )
+            .body("_embedded.processInstances.type", contains("call-activity", "main-process", "task-form"));
+
+        requestBuilder.invertSort();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(3))
+            .body(
+                PROCESS_INSTANCE_IDS_JSON_PATH,
+                contains(linkedProcessInstance.getId(), rootProcessInstance.getId(), subProcessInstance.getId())
+            )
+            .body("_embedded.processInstances.type", contains("task-form", "main-process", "call-activity"));
     }
 
     @Test

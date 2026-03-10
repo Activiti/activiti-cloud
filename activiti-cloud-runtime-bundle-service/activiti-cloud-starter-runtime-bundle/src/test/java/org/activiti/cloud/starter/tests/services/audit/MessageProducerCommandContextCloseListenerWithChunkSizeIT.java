@@ -24,6 +24,7 @@ import org.activiti.cloud.services.events.listeners.MessageProducerCommandContex
 import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
@@ -55,6 +58,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
+)
 class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
 
     @Autowired

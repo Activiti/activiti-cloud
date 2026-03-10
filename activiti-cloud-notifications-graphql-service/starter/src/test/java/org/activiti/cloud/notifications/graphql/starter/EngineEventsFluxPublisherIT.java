@@ -34,6 +34,7 @@ import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQQueuesCleanupTestExecutionListener;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
@@ -45,6 +46,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
@@ -54,6 +57,10 @@ import reactor.test.StepVerifier;
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
     initializers = { RabbitMQContainerApplicationInitializer.class }
+)
+@TestExecutionListeners(
+    value = RabbitMQQueuesCleanupTestExecutionListener.class,
+    mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
 class EngineEventsFluxPublisherIT {
 
