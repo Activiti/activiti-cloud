@@ -146,9 +146,6 @@ class IncidentServiceTest {
     void shouldCreateAndSendExecutionContextIncidentEventWithWarningSeverity() {
         var executionContext = mock(ExecutionContext.class);
         var incidentContext = mock(IncidentContext.class);
-        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
-        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
-        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
             incidentContext
@@ -216,9 +213,6 @@ class IncidentServiceTest {
     void shouldCreateAndSendIntegrationContextIncidentEventWithWarningSeverity() {
         var integrationContext = mock(IntegrationContext.class);
         var incidentContext = mock(IncidentContext.class);
-        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
-        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
-        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
             incidentContext
