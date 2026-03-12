@@ -120,7 +120,7 @@ class IncidentServiceTest {
         when(this.managementService.executeCommand(any(CreateIncidentEventFromExecutionCmd.class))).thenReturn(message);
         var exception = new IllegalArgumentException("Test exception");
 
-        this.incidentService.createAndSendIncidentEvent(executionContext, exception);
+        this.incidentService.createAndSendIncidentEvent(executionContext, exception, IncidentSeverity.ERROR);
 
         verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
 
@@ -187,7 +187,7 @@ class IncidentServiceTest {
             .thenReturn(message);
         var exception = new IllegalArgumentException("Test exception");
 
-        this.incidentService.createAndSendIncidentEvent(integrationContext, exception);
+        this.incidentService.createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.ERROR);
 
         verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
 

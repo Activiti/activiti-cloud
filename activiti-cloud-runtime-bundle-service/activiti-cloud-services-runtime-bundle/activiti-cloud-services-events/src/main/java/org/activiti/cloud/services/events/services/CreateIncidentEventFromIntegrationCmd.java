@@ -36,19 +36,6 @@ class CreateIncidentEventFromIntegrationCmd extends CreateIncidentEventCmd {
         Exception exception,
         RuntimeService runtimeService,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
-    ) {
-        super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender);
-        this.integrationContext = integrationContext;
-        this.exception = exception;
-        this.runtimeService = runtimeService;
-    }
-
-    CreateIncidentEventFromIntegrationCmd(
-        IntegrationContext integrationContext,
-        Exception exception,
-        RuntimeService runtimeService,
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         IncidentSeverity severity
     ) {

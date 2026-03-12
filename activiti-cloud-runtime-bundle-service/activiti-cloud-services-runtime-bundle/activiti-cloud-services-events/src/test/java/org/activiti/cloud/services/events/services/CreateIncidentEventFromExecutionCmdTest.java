@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.entry;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -62,8 +64,7 @@ class CreateIncidentEventFromExecutionCmdTest {
 
     @Spy
     private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
-        properties
-    );
+            properties);
 
     private IllegalArgumentException testException = new IllegalArgumentException("Test exception");
 
@@ -71,13 +72,12 @@ class CreateIncidentEventFromExecutionCmdTest {
     void setUp() {
         this.executionContext = TestUtils.mockExecutionContext();
 
-        this.createIncidentEventFromExecutionCmd =
-            new CreateIncidentEventFromExecutionCmd(
+        this.createIncidentEventFromExecutionCmd = new CreateIncidentEventFromExecutionCmd(
                 this.executionContext,
                 testException,
                 this.messageBuilderChainIncidentFactory,
-                this.runtimeBundleInfoAppender
-            );
+                this.runtimeBundleInfoAppender,
+                IncidentSeverity.ERROR);
     }
 
     @Test
@@ -103,9 +103,8 @@ class CreateIncidentEventFromExecutionCmdTest {
         assertThat(incident.getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
 
         assertThat(message.getHeaders())
-            .contains(
-                entry("routingKey", "engineEvents.springAppName.appName"),
-                entry("messagePayloadType", "java.util.ArrayList")
-            );
+                .contains(
+                        entry("routingKey", "engineEvents.springAppName.appName"),
+                        entry("messagePayloadType", "java.util.ArrayList"));
     }
 }

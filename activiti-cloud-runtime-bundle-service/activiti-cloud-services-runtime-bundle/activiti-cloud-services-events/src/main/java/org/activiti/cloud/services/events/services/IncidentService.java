@@ -34,12 +34,11 @@ public class IncidentService {
     private final RuntimeService runtimeService;
 
     public IncidentService(
-        ProcessEngineChannels producer,
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        ManagementService managementService,
-        RuntimeService runtimeService
-    ) {
+            ProcessEngineChannels producer,
+            MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
+            RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+            ManagementService managementService,
+            RuntimeService runtimeService) {
         this.producer = producer;
         this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
@@ -48,46 +47,40 @@ public class IncidentService {
     }
 
     public void createAndSendIncidentEvent(IntegrationContext integrationContext, Exception exception) {
-        createAndSendIncidentEvent(integrationContext, exception, null);
+        createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.ERROR);
     }
 
     public void createAndSendIncidentEvent(
-        IntegrationContext integrationContext,
-        Exception exception,
-        IncidentSeverity severity
-    ) {
+            IntegrationContext integrationContext,
+            Exception exception,
+            IncidentSeverity severity) {
         var incidentMessage = createIncidentMessage(
-            new CreateIncidentEventFromIntegrationCmd(
-                integrationContext,
-                exception,
-                this.runtimeService,
-                this.messageBuilderIncidentsChainFactory,
-                this.runtimeBundleInfoAppender,
-                severity
-            )
-        );
+                new CreateIncidentEventFromIntegrationCmd(
+                        integrationContext,
+                        exception,
+                        this.runtimeService,
+                        this.messageBuilderIncidentsChainFactory,
+                        this.runtimeBundleInfoAppender,
+                        severity));
 
         sendIncident(incidentMessage);
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
-        createAndSendIncidentEvent(rootExecutionContext, exception, null);
+        createAndSendIncidentEvent(rootExecutionContext, exception, IncidentSeverity.ERROR);
     }
 
     public void createAndSendIncidentEvent(
-        ExecutionContext rootExecutionContext,
-        Exception exception,
-        IncidentSeverity severity
-    ) {
+            ExecutionContext rootExecutionContext,
+            Exception exception,
+            IncidentSeverity severity) {
         var incidentMessage = createIncidentMessage(
-            new CreateIncidentEventFromExecutionCmd(
-                rootExecutionContext,
-                exception,
-                this.messageBuilderIncidentsChainFactory,
-                this.runtimeBundleInfoAppender,
-                severity
-            )
-        );
+                new CreateIncidentEventFromExecutionCmd(
+                        rootExecutionContext,
+                        exception,
+                        this.messageBuilderIncidentsChainFactory,
+                        this.runtimeBundleInfoAppender,
+                        severity));
 
         sendIncident(incidentMessage);
     }

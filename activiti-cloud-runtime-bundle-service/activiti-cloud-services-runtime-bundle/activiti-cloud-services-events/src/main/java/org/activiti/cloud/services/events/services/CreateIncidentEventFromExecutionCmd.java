@@ -31,17 +31,6 @@ class CreateIncidentEventFromExecutionCmd extends CreateIncidentEventCmd {
         ExecutionContext executionContext,
         Exception exception,
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
-    ) {
-        super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender);
-        this.executionContext = executionContext;
-        this.exception = exception;
-    }
-
-    CreateIncidentEventFromExecutionCmd(
-        ExecutionContext executionContext,
-        Exception exception,
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
         IncidentSeverity severity
     ) {

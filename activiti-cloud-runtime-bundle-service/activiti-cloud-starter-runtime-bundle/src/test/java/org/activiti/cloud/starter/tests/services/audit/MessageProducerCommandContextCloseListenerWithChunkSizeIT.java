@@ -99,7 +99,7 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
             () -> this.runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
         );
 
-        verify(this.incidentService).createAndSendIncidentEvent(this.executionContextCaptor.capture(), any());
+        verify(this.incidentService).createAndSendIncidentEvent(this.executionContextCaptor.capture(), any(), any());
 
         var executionContextCaptorValue = this.executionContextCaptor.getValue();
         assertThat(executionContextCaptorValue.getProcessInstance().getProcessInstanceId()).isNotEmpty();

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -100,7 +101,8 @@ class CreateIncidentEventFromIntegrationCmdTest {
                     this.testException,
                     this.runtimeService,
                     this.messageBuilderChainIncidentFactory,
-                    this.runtimeBundleInfoAppender
+                    this.runtimeBundleInfoAppender,
+                    IncidentSeverity.ERROR
                 )
             );
     }

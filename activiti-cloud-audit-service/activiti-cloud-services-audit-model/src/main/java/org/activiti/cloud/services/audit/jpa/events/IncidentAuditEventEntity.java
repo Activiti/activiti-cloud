@@ -33,7 +33,7 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     private IncidentContext incidentContext;
 
     @Enumerated(EnumType.STRING)
-    private IncidentSeverity severity;
+    private IncidentSeverity severity = IncidentSeverity.ERROR;
 
     public IncidentAuditEventEntity() {}
 
