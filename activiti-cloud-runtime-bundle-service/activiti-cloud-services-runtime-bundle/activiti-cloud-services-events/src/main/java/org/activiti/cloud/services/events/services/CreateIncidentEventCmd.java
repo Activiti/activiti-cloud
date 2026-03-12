@@ -33,9 +33,10 @@ abstract class CreateIncidentEventCmd implements Command<Message> {
     private final IncidentSeverity severity;
 
     CreateIncidentEventCmd(
-            MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-            RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-            IncidentSeverity severity) {
+        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        IncidentSeverity severity
+    ) {
         this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.severity = severity;
@@ -49,8 +50,9 @@ abstract class CreateIncidentEventCmd implements Command<Message> {
     }
 
     private CloudIncidentCreatedEventImpl createCloudIncidentCreatedEvent(
-            ExecutionContext rootExecutionContext,
-            Exception exception) {
+        ExecutionContext rootExecutionContext,
+        Exception exception
+    ) {
         var incidentContext = getIncidentContext(rootExecutionContext);
 
         var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext, this.severity);

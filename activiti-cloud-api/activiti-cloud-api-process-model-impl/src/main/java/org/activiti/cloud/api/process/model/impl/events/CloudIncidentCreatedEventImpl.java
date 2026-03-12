@@ -27,8 +27,8 @@ import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
 import org.activiti.cloud.api.process.model.IncidentSeverity;
 
 public class CloudIncidentCreatedEventImpl
-        extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
-        implements IncidentEvent {
+    extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
+    implements IncidentEvent {
 
     private String errorCode;
     private String errorMessage;
@@ -36,8 +36,7 @@ public class CloudIncidentCreatedEventImpl
     private String errorClassName;
     private IncidentSeverity severity = IncidentSeverity.ERROR;
 
-    public CloudIncidentCreatedEventImpl() {
-    }
+    public CloudIncidentCreatedEventImpl() {}
 
     public CloudIncidentCreatedEventImpl(Throwable error, IncidentContext incidentContext) {
         this(error, incidentContext, IncidentSeverity.ERROR);
@@ -46,7 +45,8 @@ public class CloudIncidentCreatedEventImpl
     public CloudIncidentCreatedEventImpl(Throwable error, IncidentContext incidentContext, IncidentSeverity severity) {
         super(incidentContext);
         this.errorClassName = error.getClass().getName();
-        this.errorCode = Optional
+        this.errorCode =
+            Optional
                 .of(error)
                 .filter(CloudBpmnError.class::isInstance)
                 .map(CloudBpmnError.class::cast)
@@ -61,14 +61,15 @@ public class CloudIncidentCreatedEventImpl
     }
 
     public CloudIncidentCreatedEventImpl(
-            String id,
-            Long timestamp,
-            IncidentContext entity,
-            String errorClassName,
-            String errorCode,
-            String errorMessage,
-            List<StackTraceElement> stackTraceElements,
-            IncidentSeverity severity) {
+        String id,
+        Long timestamp,
+        IncidentContext entity,
+        String errorClassName,
+        String errorCode,
+        String errorMessage,
+        List<StackTraceElement> stackTraceElements,
+        IncidentSeverity severity
+    ) {
         super(id, timestamp, entity);
         this.errorClassName = errorClassName;
         this.errorCode = errorCode;
