@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.services;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.engine.RuntimeService;
@@ -38,6 +39,20 @@ class CreateIncidentEventFromIntegrationCmd extends CreateIncidentEventCmd {
         RuntimeBundleInfoAppender runtimeBundleInfoAppender
     ) {
         super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender);
+        this.integrationContext = integrationContext;
+        this.exception = exception;
+        this.runtimeService = runtimeService;
+    }
+
+    CreateIncidentEventFromIntegrationCmd(
+        IntegrationContext integrationContext,
+        Exception exception,
+        RuntimeService runtimeService,
+        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        IncidentSeverity severity
+    ) {
+        super(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender, severity);
         this.integrationContext = integrationContext;
         this.exception = exception;
         this.runtimeService = runtimeService;

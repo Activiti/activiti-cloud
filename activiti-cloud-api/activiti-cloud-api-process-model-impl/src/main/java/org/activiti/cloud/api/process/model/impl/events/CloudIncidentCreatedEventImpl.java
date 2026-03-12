@@ -24,6 +24,7 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 
 public class CloudIncidentCreatedEventImpl
     extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
@@ -33,6 +34,7 @@ public class CloudIncidentCreatedEventImpl
     private String errorMessage;
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
+    private IncidentSeverity severity = IncidentSeverity.ERROR;
 
     public CloudIncidentCreatedEventImpl() {}
 
@@ -60,13 +62,15 @@ public class CloudIncidentCreatedEventImpl
         String errorClassName,
         String errorCode,
         String errorMessage,
-        List<StackTraceElement> stackTraceElements
+        List<StackTraceElement> stackTraceElements,
+        IncidentSeverity severity
     ) {
         super(id, timestamp, entity);
         this.errorClassName = errorClassName;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.stackTraceElements = stackTraceElements;
+        this.severity = severity != null ? severity : IncidentSeverity.ERROR;
     }
 
     @Override
@@ -92,6 +96,15 @@ public class CloudIncidentCreatedEventImpl
     @Override
     public String getErrorCode() {
         return errorCode;
+    }
+
+    @Override
+    public IncidentSeverity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(IncidentSeverity severity) {
+        this.severity = severity;
     }
 
     protected Throwable findRootCause(Throwable throwable) {

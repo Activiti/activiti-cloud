@@ -15,22 +15,8 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.util.List;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
-
-public interface IncidentEvent extends CloudRuntimeEvent<IncidentContext, IncidentEventType> {
-    String getErrorCode();
-
-    List<StackTraceElement> getStackTraceElements();
-
-    String getErrorMessage();
-
-    String getErrorClassName();
-
-    IncidentSeverity getSeverity();
-
-    enum IncidentEventType {
-        INCIDENT_CREATED,
-    }
+public enum IncidentSeverity {
+    FATAL,
+    ERROR,
+    WARNING,
 }

@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.services;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
@@ -47,13 +48,22 @@ public class IncidentService {
     }
 
     public void createAndSendIncidentEvent(IntegrationContext integrationContext, Exception exception) {
+        createAndSendIncidentEvent(integrationContext, exception, null);
+    }
+
+    public void createAndSendIncidentEvent(
+        IntegrationContext integrationContext,
+        Exception exception,
+        IncidentSeverity severity
+    ) {
         var incidentMessage = createIncidentMessage(
             new CreateIncidentEventFromIntegrationCmd(
                 integrationContext,
                 exception,
                 this.runtimeService,
                 this.messageBuilderIncidentsChainFactory,
-                this.runtimeBundleInfoAppender
+                this.runtimeBundleInfoAppender,
+                severity
             )
         );
 
@@ -61,12 +71,21 @@ public class IncidentService {
     }
 
     public void createAndSendIncidentEvent(ExecutionContext rootExecutionContext, Exception exception) {
+        createAndSendIncidentEvent(rootExecutionContext, exception, null);
+    }
+
+    public void createAndSendIncidentEvent(
+        ExecutionContext rootExecutionContext,
+        Exception exception,
+        IncidentSeverity severity
+    ) {
         var incidentMessage = createIncidentMessage(
             new CreateIncidentEventFromExecutionCmd(
                 rootExecutionContext,
                 exception,
                 this.messageBuilderIncidentsChainFactory,
-                this.runtimeBundleInfoAppender
+                this.runtimeBundleInfoAppender,
+                severity
             )
         );
 

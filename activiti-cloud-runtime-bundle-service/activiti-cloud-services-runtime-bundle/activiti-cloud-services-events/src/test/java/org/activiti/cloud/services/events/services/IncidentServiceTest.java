@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IncidentContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.TestUtils;
@@ -138,6 +139,38 @@ class IncidentServiceTest {
         assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
         assertThat(incident.getStackTraceElements()).isNotNull();
         assertThat(incident.getStackTraceElements()).isNotEmpty();
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldCreateAndSendExecutionContextIncidentEventWithWarningSeverity() {
+        var executionContext = mock(ExecutionContext.class);
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test exception"),
+            incidentContext
+        );
+        incidentCreatedEvent.setSeverity(IncidentSeverity.WARNING);
+
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromExecutionCmd.class))).thenReturn(message);
+        var exception = new IllegalArgumentException("Test exception");
+
+        this.incidentService.createAndSendIncidentEvent(executionContext, exception, IncidentSeverity.WARNING);
+
+        verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
+
+        var capturedMessage = this.messageArgumentCaptor.getValue();
+
+        var payload = (List) capturedMessage.getPayload();
+        assertThat(payload).hasSize(1);
+        assertThat(payload.get(0)).isInstanceOf(CloudIncidentCreatedEventImpl.class);
+
+        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
     }
 
     @Test
@@ -176,5 +209,38 @@ class IncidentServiceTest {
         assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
         assertThat(incident.getStackTraceElements()).isNotNull();
         assertThat(incident.getStackTraceElements()).isNotEmpty();
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldCreateAndSendIntegrationContextIncidentEventWithWarningSeverity() {
+        var integrationContext = mock(IntegrationContext.class);
+        var incidentContext = mock(IncidentContext.class);
+        when(incidentContext.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        when(incidentContext.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test exception"),
+            incidentContext
+        );
+        incidentCreatedEvent.setSeverity(IncidentSeverity.WARNING);
+
+        var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
+        when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class)))
+            .thenReturn(message);
+        var exception = new IllegalArgumentException("Test exception");
+
+        this.incidentService.createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.WARNING);
+
+        verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
+
+        var capturedMessage = this.messageArgumentCaptor.getValue();
+
+        var payload = (List) capturedMessage.getPayload();
+        assertThat(payload).hasSize(1);
+        assertThat(payload.get(0)).isInstanceOf(CloudIncidentCreatedEventImpl.class);
+
+        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
     }
 }

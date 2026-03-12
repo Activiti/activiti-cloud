@@ -18,6 +18,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.IncidentCreatedEventEntity;
@@ -50,6 +51,7 @@ class IncidentCreatedEventConverterTest {
         assertThat(entity.getErrorMessage()).isEqualTo("Test Exception");
         assertThat(entity.getErrorClassName()).isEqualTo(IllegalArgumentException.class.getName());
         assertThat(entity.getIncidentContext()).isEqualTo(event.getEntity());
+        assertThat(entity.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
     }
 
     @Test
@@ -63,6 +65,7 @@ class IncidentCreatedEventConverterTest {
         assertThat(event.getErrorMessage()).isEqualTo("Test Exception");
         assertThat(event.getErrorClassName()).isEqualTo(IllegalArgumentException.class.getName());
         assertThat(event.getEntity()).isEqualTo(entity.getIncidentContext());
+        assertThat(event.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
     }
 
     private CloudIncidentCreatedEventImpl getIncidentCreatedEvent() {

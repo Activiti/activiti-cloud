@@ -121,7 +121,8 @@ class AuditConsumerChannelHandlerImplTest {
             "ErrorClassName",
             "ERROR_CODE",
             "Error message",
-            List.of(new StackTraceElement[0])
+            List.of(new StackTraceElement[0]),
+            null
         );
         incidentEvent.setAppName("test-app");
         incidentEvent.setServiceName("test-service");
