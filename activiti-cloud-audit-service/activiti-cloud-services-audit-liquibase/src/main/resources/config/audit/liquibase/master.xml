@@ -366,4 +366,31 @@
       splitStatements="true"
       stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit"
+    id="alter20-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/20-alter.pg.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit"
+    id="alter20-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+      encoding="utf8"
+      path="changelog/20-alter.oracle.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="false"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit"
+    id="h2-schema-alter20" dbms="h2">
+    <sqlFile dbms="h2"
+      encoding="utf8"
+      path="changelog/20-alter.h2.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>

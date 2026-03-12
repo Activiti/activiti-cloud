@@ -47,6 +47,7 @@ create table audit_event
     integration_context		   text,
     incident_context		   text,
     stack_trace_elements	   text,
+    severity			   varchar(255),
     deployment                 text,
     candidate_starter_user     text,
     candidate_starter_group    text,
