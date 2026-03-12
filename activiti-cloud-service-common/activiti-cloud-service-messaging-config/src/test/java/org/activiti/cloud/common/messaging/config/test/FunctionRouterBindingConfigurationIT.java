@@ -836,7 +836,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException, ExecutionException {
         //given
-        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(100));
+        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(1000));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
