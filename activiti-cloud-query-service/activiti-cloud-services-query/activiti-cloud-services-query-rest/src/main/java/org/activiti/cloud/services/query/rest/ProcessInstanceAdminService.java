@@ -22,12 +22,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -35,7 +33,6 @@ import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
@@ -139,46 +136,11 @@ public class ProcessInstanceAdminService {
         return processInstanceSearchService.countUnrestricted(searchRequest);
     }
 
-    public Page<ProcessInstanceEntity> searchLinkedProcesses(Set<String> linkedProcessInstanceIds, Pageable pageable) {
-        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceIds, pageable);
+    public Page<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId, pageable);
     }
 
-    public List<ProcessInstanceEntity> searchLinkedProcesses(Set<String> linkedProcessInstanceIds) {
-        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceIds);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ProcessInstanceEntity> searchSubProcesses(Page<ProcessInstanceEntity> processInstances) {
-        List<ProcessInstanceEntity> content = processInstances.getContent();
-
-        Set<String> ids = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
-
-        // Single query: direct children via parentId, grandchildren+ via rootProcessInstanceId
-        List<ProcessInstanceEntity> allDescendants = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.unrestrictedSubprocesses(ids)
-        );
-
-        // RootProcessInstanceId → children map (covers all levels)
-        Map<String, Set<QueryCloudSubprocessInstance>> childrenByRootProcessInstanceId = allDescendants
-            .stream()
-            .filter(pi -> pi.getRootProcessInstanceId() != null)
-            .collect(
-                Collectors.groupingBy(
-                    ProcessInstanceEntity::getRootProcessInstanceId,
-                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
-                )
-            );
-
-        // For each page entity, collect only its direct children (grandchildren are nested inside them)
-        content.forEach(pi -> pi.setSubprocesses(childrenByRootProcessInstanceId.getOrDefault(pi.getId(), Set.of())));
-
-        return processInstances;
-    }
-
-    private QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
-        QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
-        subProcessInstance.setId(subprocess.getId());
-        subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-        return subProcessInstance;
+    public List<ProcessInstanceEntity> searchLinkedProcesses(String linkedProcessInstanceId) {
+        return processInstanceSearchService.unrestrictedLinkedProcesses(linkedProcessInstanceId);
     }
 }

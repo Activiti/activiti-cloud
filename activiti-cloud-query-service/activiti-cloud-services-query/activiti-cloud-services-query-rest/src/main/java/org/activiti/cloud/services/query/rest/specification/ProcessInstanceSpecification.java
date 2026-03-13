@@ -51,41 +51,23 @@ public class ProcessInstanceSpecification
         return new ProcessInstanceSpecification(searchRequest, userId);
     }
 
-    public static ProcessInstanceSpecification unrestrictedLinkedProcesses(Set<String> linkedProcessInstanceIds) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, null);
+    public static ProcessInstanceSpecification unrestrictedLinkedProcesses(String linkedProcessInstanceId) {
+        return configureLinkedProcessSpecification(linkedProcessInstanceId, null);
     }
 
     public static ProcessInstanceSpecification restrictedLinkedProcesses(
-        Set<String> linkedProcessInstanceIds,
+        String linkedProcessInstanceId,
         String userId
     ) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, userId);
+        return configureLinkedProcessSpecification(linkedProcessInstanceId, userId);
     }
 
     private static ProcessInstanceSpecification configureLinkedProcessSpecification(
-        Set<String> linkedProcessInstanceIds,
+        String linkedProcessInstanceId,
         String userId
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        searchRequest.setLinkedProcessInstanceId(linkedProcessInstanceIds);
-
-        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
-    }
-
-    public static ProcessInstanceSpecification unrestrictedSubprocesses(Set<String> parentIds) {
-        return configureSubprocessesSpecification(parentIds, null);
-    }
-
-    public static ProcessInstanceSpecification restrictedSubprocesses(Set<String> parentIds, String userId) {
-        return configureSubprocessesSpecification(parentIds, userId);
-    }
-
-    private static ProcessInstanceSpecification configureSubprocessesSpecification(
-        Set<String> parentIds,
-        String userId
-    ) {
-        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        searchRequest.setSubprocessParentIds(parentIds);
+        searchRequest.setLinkedProcessInstanceId(Set.of(linkedProcessInstanceId));
 
         return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
     }
@@ -112,7 +94,6 @@ public class ProcessInstanceSpecification
         applyIncludeSubprocesses(root);
         applyLinkedProcessInstanceId(root);
         applyLinkedProcessInstanceType(root);
-        applySubprocessParentIdsFilter(root, criteriaBuilder);
         applyProcessRelatedTo(root, criteriaBuilder);
         applyLinkedAndOrphanProcessesFilter(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
@@ -137,18 +118,6 @@ public class ProcessInstanceSpecification
     private void applyParentIdFilter(Root<ProcessInstanceEntity> root) {
         if (!CollectionUtils.isEmpty(searchRequest.parentId())) {
             predicates.add(root.get(ProcessInstanceEntity_.parentId).in(searchRequest.parentId()));
-        }
-    }
-
-    private void applySubprocessParentIdsFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(searchRequest.getSubprocessParentIds())) {
-            Set<String> ids = searchRequest.getSubprocessParentIds();
-            predicates.add(
-                criteriaBuilder.or(
-                    root.get(ProcessInstanceEntity_.parentId).in(ids),
-                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(ids)
-                )
-            );
         }
     }
 

@@ -20,7 +20,6 @@ import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.bu
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.createProcessVariables;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -230,7 +229,7 @@ class ProcessInstanceAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class)))
+        given(processInstanceAdminService.searchLinkedProcesses(anyString(), any(Pageable.class)))
             .willReturn(linkedProcessInstancePage);
 
         //when
@@ -251,7 +250,7 @@ class ProcessInstanceAdminControllerIT {
 
     @Test
     void shouldReturnEmptyListWhenLinkedProcessInstances() throws Exception {
-        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class)))
+        given(processInstanceAdminService.searchLinkedProcesses(anyString(), any(Pageable.class)))
             .willReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
 
         //when
