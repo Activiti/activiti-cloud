@@ -736,6 +736,14 @@
              relativeToChangelogFile="true"
              splitStatements="false"
              stripComments="true"/>
+    <rollback>
+      BEGIN
+        EXECUTE IMMEDIATE 'DROP INDEX idx_task_var_name_value_btree';
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE != -1418 THEN RAISE; END IF;
+      END;
+    </rollback>
   </changeSet>
 
   <changeSet author="activiti-query" runInTransaction="false"
@@ -746,6 +754,9 @@
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
+    <rollback>
+      DROP INDEX IF EXISTS idx_task_var_name_value_btree;
+    </rollback>
   </changeSet>
 
 </databaseChangeLog>
