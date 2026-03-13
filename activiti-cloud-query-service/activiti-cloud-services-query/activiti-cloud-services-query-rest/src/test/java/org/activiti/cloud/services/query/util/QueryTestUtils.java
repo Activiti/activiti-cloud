@@ -87,8 +87,4 @@ public class QueryTestUtils {
     public static String linkedProcessesPath(String processName) {
         return "_embedded.processInstances.find { it.name == '" + processName + "' }.linkedProcesses";
     }
-
-    public void updateProcessInstance(ProcessInstanceEntity processInstance) {
-        processInstanceRepository.save(processInstance);
-    }
 }
