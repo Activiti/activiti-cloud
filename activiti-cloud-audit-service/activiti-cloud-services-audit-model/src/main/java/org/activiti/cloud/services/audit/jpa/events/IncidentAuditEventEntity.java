@@ -41,7 +41,7 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     public IncidentAuditEventEntity(IncidentEvent cloudEvent) {
         super(cloudEvent);
         setIncidentContext(cloudEvent.getEntity());
-        this.severity = cloudEvent.getSeverity();
+        setSeverity(cloudEvent.getSeverity());
     }
 
     public IncidentContext getIncidentContext() {
