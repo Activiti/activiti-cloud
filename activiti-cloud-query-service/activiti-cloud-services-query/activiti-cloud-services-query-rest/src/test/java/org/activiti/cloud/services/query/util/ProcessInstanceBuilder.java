@@ -148,6 +148,10 @@ public class ProcessInstanceBuilder {
 
     public ProcessInstanceBuilder subprocessOf(ProcessInstanceEntity processInstance) {
         process.setParentId(processInstance.getId());
+        String rootId = processInstance.getRootProcessInstanceId() != null
+            ? processInstance.getRootProcessInstanceId()
+            : processInstance.getId();
+        process.setRootProcessInstanceId(rootId);
         return this;
     }
 
@@ -167,12 +171,13 @@ public class ProcessInstanceBuilder {
             tasks.add(builder.buildAndSave());
         }
         process.setTasks(tasks);
-        return processInstanceRepository.save(process);
-    }
+        var processInstance = processInstanceRepository.save(process);
 
-    public ProcessInstanceBuilder withRootProcessInstanceId(String rootProcessInstanceId) {
-        process.setRootProcessInstanceId(rootProcessInstanceId);
-        return this;
+        if (processInstance.getRootProcessInstanceId() == null) {
+            processInstance.setRootProcessInstanceId(processInstance.getId());
+            return processInstanceRepository.save(processInstance);
+        }
+        return processInstance;
     }
 
     public List<ProcessInstanceEntity> findProcessInstanceByFilter(ProcessInstanceSearchRequest searchRequest) {

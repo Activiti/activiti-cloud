@@ -22,6 +22,7 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateUserReposit
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -85,5 +86,9 @@ public class QueryTestUtils {
 
     public static String linkedProcessesPath(String processName) {
         return "_embedded.processInstances.find { it.name == '" + processName + "' }.linkedProcesses";
+    }
+
+    public void updateProcessInstance(ProcessInstanceEntity processInstance) {
+        processInstanceRepository.save(processInstance);
     }
 }

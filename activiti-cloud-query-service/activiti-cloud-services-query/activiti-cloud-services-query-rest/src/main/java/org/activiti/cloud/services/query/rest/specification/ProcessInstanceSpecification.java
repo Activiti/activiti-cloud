@@ -144,9 +144,12 @@ public class ProcessInstanceSpecification
         if (!CollectionUtils.isEmpty(searchRequest.getSubprocessParentIds())) {
             Set<String> ids = searchRequest.getSubprocessParentIds();
             predicates.add(
-                criteriaBuilder.or(
-                    root.get(ProcessInstanceEntity_.parentId).in(ids),
-                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(ids)
+                criteriaBuilder.and(
+                    root.get(ProcessInstanceEntity_.parentId).isNotNull(),
+                    criteriaBuilder.or(
+                        root.get(ProcessInstanceEntity_.parentId).in(ids),
+                        root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(ids)
+                    )
                 )
             );
         }
@@ -292,7 +295,10 @@ public class ProcessInstanceSpecification
             predicates.add(
                 criteriaBuilder.or(
                     root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.getProcessRelatedTo()),
-                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
+                    criteriaBuilder.and(
+                        root.get(ProcessInstanceEntity_.parentId).isNotNull(),
+                        root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
+                    )
                 )
             );
         }
