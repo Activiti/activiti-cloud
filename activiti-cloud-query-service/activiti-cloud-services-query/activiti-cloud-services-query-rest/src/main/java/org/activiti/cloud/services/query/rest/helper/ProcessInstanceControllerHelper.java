@@ -16,9 +16,7 @@
 package org.activiti.cloud.services.query.rest.helper;
 
 import com.querydsl.core.types.Predicate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
@@ -71,7 +69,7 @@ public class ProcessInstanceControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
-        processInstances = mapAllSubprocesses(processInstances);
+        processInstances = mapAllSubprocesses(processInstances, pageable);
         return mapAllLinkedProcesses(processInstances);
     }
 
@@ -95,12 +93,39 @@ public class ProcessInstanceControllerHelper {
         return processInstanceRepository.mapSubprocesses(processInstances, pageable);
     }
 
-    public Page<ProcessInstanceEntity> mapAllSubprocesses(Page<ProcessInstanceEntity> processInstances) {
-        return processInstanceService.searchSubProcesses(processInstances);
-    }
-
     public Long countProcessInstances(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceService.count(searchRequest);
+    }
+
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        processInstances
+            .getContent()
+            .forEach(processInstance -> {
+                List<ProcessInstanceEntity> linkedProcesses = processInstanceService.searchLinkedProcesses(
+                    processInstance.getId()
+                );
+                processInstance.setLinkedProcesses(mapLinkedProcessEntities(linkedProcesses));
+            });
+
+        return processInstances;
+    }
+
+    public static Set<QueryCloudSubprocessInstance> mapLinkedProcessEntities(
+        List<ProcessInstanceEntity> linkedProcesses
+    ) {
+        if (linkedProcesses == null) {
+            return Set.of();
+        }
+
+        return linkedProcesses
+            .stream()
+            .map(lp -> {
+                QueryCloudSubprocessInstance instance = new QueryCloudSubprocessInstance();
+                instance.setId(lp.getId());
+                instance.setProcessDefinitionName(lp.getProcessDefinitionName());
+                return instance;
+            })
+            .collect(Collectors.toSet());
     }
 
     public void linkProcessInstances(LinkProcessInstancesRequest request, String mainProcessInstanceId) {
@@ -109,34 +134,5 @@ public class ProcessInstanceControllerHelper {
             request.getProcessInstanceIds(),
             request.getLinkProcessInstanceType()
         );
-    }
-
-    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
-        List<String> ids = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
-
-        List<ProcessInstanceEntity> allLinked = processInstanceService.searchLinkedProcesses(new HashSet<>(ids));
-
-        Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = allLinked
-            .stream()
-            .filter(pi -> pi.getLinkedProcessInstanceId() != null)
-            .collect(
-                Collectors.groupingBy(
-                    ProcessInstanceEntity::getLinkedProcessInstanceId,
-                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
-                )
-            );
-
-        processInstances
-            .getContent()
-            .forEach(pi -> pi.setLinkedProcesses(linkedMap.getOrDefault(pi.getId(), Set.of())));
-
-        return processInstances;
-    }
-
-    private QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
-        QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
-        subProcessInstance.setId(subprocess.getId());
-        subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-        return subProcessInstance;
     }
 }
