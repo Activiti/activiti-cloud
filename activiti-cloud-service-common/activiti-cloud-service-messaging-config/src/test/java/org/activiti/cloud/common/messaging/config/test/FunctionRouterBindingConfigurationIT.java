@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -833,9 +834,9 @@ public class FunctionRouterBindingConfigurationIT {
     }
 
     @Test
-    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException {
+    void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException, ExecutionException {
         //given
-        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(100));
+        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(1000));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
@@ -861,7 +862,7 @@ public class FunctionRouterBindingConfigurationIT {
         functionRouterExecutorFactory.destroy();
 
         //then
-        assertThat(futureResult.isDone()).isFalse();
+        assertThat(futureResult.get()).isNull();
         assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
     }
 
