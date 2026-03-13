@@ -66,6 +66,8 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
         builder
                 .append("IncidentAuditEventEntity [IncidentAuditEventEntity=")
                 .append(incidentContext)
+                .append(", severity=")
+                .append(severity)
                 .append(", toString()=")
                 .append(super.toString())
                 .append("]");
