@@ -35,6 +35,8 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.IncidentContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -353,7 +355,8 @@ class MessageProducerCommandContextCloseListenerTest {
         when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Chunk size limit exceeded"),
-            incidentContext
+            incidentContext,
+            IncidentSeverity.ERROR
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();

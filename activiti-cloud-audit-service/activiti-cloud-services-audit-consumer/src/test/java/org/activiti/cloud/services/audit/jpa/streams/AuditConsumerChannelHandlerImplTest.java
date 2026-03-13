@@ -27,6 +27,7 @@ import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
@@ -122,7 +123,7 @@ class AuditConsumerChannelHandlerImplTest {
             "ERROR_CODE",
             "Error message",
             List.of(new StackTraceElement[0]),
-            null
+            IncidentSeverity.ERROR
         );
         incidentEvent.setAppName("test-app");
         incidentEvent.setServiceName("test-service");

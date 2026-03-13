@@ -113,7 +113,8 @@ class IncidentServiceTest {
         when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
-            incidentContext
+            incidentContext,
+            IncidentSeverity.ERROR
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
@@ -148,9 +149,9 @@ class IncidentServiceTest {
         var incidentContext = mock(IncidentContext.class);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
-            incidentContext
+            incidentContext,
+            IncidentSeverity.WARNING
         );
-        incidentCreatedEvent.setSeverity(IncidentSeverity.WARNING);
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
         when(this.managementService.executeCommand(any(CreateIncidentEventFromExecutionCmd.class))).thenReturn(message);
@@ -179,7 +180,8 @@ class IncidentServiceTest {
         when(incidentContext.getExecutionId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
-            incidentContext
+            incidentContext,
+            IncidentSeverity.ERROR
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
@@ -215,9 +217,9 @@ class IncidentServiceTest {
         var incidentContext = mock(IncidentContext.class);
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
-            incidentContext
+            incidentContext,
+            IncidentSeverity.WARNING
         );
-        incidentCreatedEvent.setSeverity(IncidentSeverity.WARNING);
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
         when(this.managementService.executeCommand(any(CreateIncidentEventFromIntegrationCmd.class)))

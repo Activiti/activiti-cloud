@@ -71,7 +71,8 @@ class IncidentCreatedEventConverterTest {
     private CloudIncidentCreatedEventImpl getIncidentCreatedEvent() {
         return new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test Exception"),
-            new IncidentContextImpl()
+            new IncidentContextImpl(),
+            IncidentSeverity.ERROR
         );
     }
 }
