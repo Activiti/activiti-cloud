@@ -728,4 +728,35 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter36-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/36-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+    <rollback>
+      BEGIN
+        EXECUTE IMMEDIATE 'DROP INDEX idx_task_var_name_value_btree';
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE != -1418 THEN RAISE; END IF;
+      END;
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter36-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/36-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      DROP INDEX IF EXISTS idx_task_var_name_value_btree;
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>
