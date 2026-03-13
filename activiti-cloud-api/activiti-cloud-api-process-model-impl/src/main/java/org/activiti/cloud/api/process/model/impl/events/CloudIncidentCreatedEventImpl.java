@@ -108,6 +108,7 @@ public class CloudIncidentCreatedEventImpl
         return severity;
     }
 
+    @Override
     public void setSeverity(IncidentSeverity severity) {
         this.severity = Objects.requireNonNullElse(severity, IncidentSeverity.ERROR);
     }
