@@ -29,8 +29,7 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private IncidentContext incidentContext;
 
-    public IncidentAuditEventEntity() {
-    }
+    public IncidentAuditEventEntity() {}
 
     public IncidentAuditEventEntity(IncidentEvent cloudEvent) {
         super(cloudEvent);
@@ -49,11 +48,11 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
-                .append("IncidentAuditEventEntity [IncidentAuditEventEntity=")
-                .append(incidentContext)
-                .append(", toString()=")
-                .append(super.toString())
-                .append("]");
+            .append("IncidentAuditEventEntity [IncidentAuditEventEntity=")
+            .append(incidentContext)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

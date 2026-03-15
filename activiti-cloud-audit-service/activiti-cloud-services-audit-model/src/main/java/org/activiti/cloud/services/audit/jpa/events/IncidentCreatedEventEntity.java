@@ -44,7 +44,6 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
 
     private String errorClassName;
 
-
     @Convert(converter = ListOfStackTraceElementsJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
