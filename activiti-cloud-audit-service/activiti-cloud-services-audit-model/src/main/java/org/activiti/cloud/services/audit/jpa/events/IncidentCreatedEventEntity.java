@@ -45,8 +45,7 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
     @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
 
-    protected IncidentCreatedEventEntity() {
-    }
+    protected IncidentCreatedEventEntity() {}
 
     public IncidentCreatedEventEntity(IncidentEvent event) {
         super(event);
@@ -98,24 +97,25 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder
-                .append("IncidentCreatedEventEntity [errorMessage=")
-                .append(errorCode)
-                .append(", errorCode=")
-                .append(errorMessage)
-                .append(", severity=")
-                .append(severity)
-                .append(", incidentContext=")
-                .append(getIncidentContext())
-                .append(", errorClassName=")
-                .append(errorClassName)
-                .append(", stackTraceElements=")
-                .append(
-                        stackTraceElements != null
-                                ? stackTraceElements.subList(0, Math.min(stackTraceElements.size(), maxLen))
-                                : null)
-                .append(", toString()=")
-                .append(super.toString())
-                .append("]");
+            .append("IncidentCreatedEventEntity [errorMessage=")
+            .append(errorCode)
+            .append(", errorCode=")
+            .append(errorMessage)
+            .append(", severity=")
+            .append(severity)
+            .append(", incidentContext=")
+            .append(getIncidentContext())
+            .append(", errorClassName=")
+            .append(errorClassName)
+            .append(", stackTraceElements=")
+            .append(
+                stackTraceElements != null
+                    ? stackTraceElements.subList(0, Math.min(stackTraceElements.size(), maxLen))
+                    : null
+            )
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

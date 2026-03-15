@@ -35,8 +35,7 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     @Enumerated(EnumType.STRING)
     private IncidentSeverity severity = IncidentSeverity.ERROR;
 
-    public IncidentAuditEventEntity() {
-    }
+    public IncidentAuditEventEntity() {}
 
     public IncidentAuditEventEntity(IncidentEvent cloudEvent) {
         super(cloudEvent);
@@ -64,13 +63,13 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
-                .append("IncidentAuditEventEntity [incidentContext=")
-                .append(incidentContext)
-                .append(", severity=")
-                .append(severity)
-                .append(", toString()=")
-                .append(super.toString())
-                .append("]");
+            .append("IncidentAuditEventEntity [incidentContext=")
+            .append(incidentContext)
+            .append(", severity=")
+            .append(severity)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }
