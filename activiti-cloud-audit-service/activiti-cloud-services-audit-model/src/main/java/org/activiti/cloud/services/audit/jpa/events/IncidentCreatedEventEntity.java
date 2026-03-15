@@ -19,8 +19,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import java.util.List;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IncidentSeverity;
@@ -34,10 +32,9 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
 
     protected static final String INCIDENT_CREATED_EVENT = "IncidentCreatedEvent";
 
-    @Enumerated(EnumType.STRING)
-    private IncidentSeverity severity = IncidentSeverity.ERROR;
-
     private String errorCode;
+
+    private IncidentSeverity severity = IncidentSeverity.ERROR;
 
     @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
@@ -48,23 +45,16 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
     @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
 
-    protected IncidentCreatedEventEntity() {}
+    protected IncidentCreatedEventEntity() {
+    }
 
     public IncidentCreatedEventEntity(IncidentEvent event) {
         super(event);
-        this.severity = event.getSeverity();
         this.errorCode = event.getErrorCode();
         this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
-    }
-
-    public IncidentSeverity getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(IncidentSeverity severity) {
-        this.severity = severity;
+        this.severity = event.getSeverity();
     }
 
     public String getErrorCode() {
@@ -95,30 +85,37 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
         this.stackTraceElements = stackTraceElements;
     }
 
+    public IncidentSeverity getSeverity() {
+        return this.severity;
+    }
+
+    public void setSeverity(IncidentSeverity severity) {
+        this.severity = severity;
+    }
+
     @Override
     public String toString() {
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
         builder
-            .append("IncidentCreatedEventEntity [errorMessage=")
-            .append(errorCode)
-            .append(", errorCode=")
-            .append(", severity=")
-            .append(severity)
-            .append(errorMessage)
-            .append(", incidentContext=")
-            .append(getIncidentContext())
-            .append(", errorClassName=")
-            .append(errorClassName)
-            .append(", stackTraceElements=")
-            .append(
-                stackTraceElements != null
-                    ? stackTraceElements.subList(0, Math.min(stackTraceElements.size(), maxLen))
-                    : null
-            )
-            .append(", toString()=")
-            .append(super.toString())
-            .append("]");
+                .append("IncidentCreatedEventEntity [errorMessage=")
+                .append(errorCode)
+                .append(", errorCode=")
+                .append(errorMessage)
+                .append(", severity=")
+                .append(severity)
+                .append(", incidentContext=")
+                .append(getIncidentContext())
+                .append(", errorClassName=")
+                .append(errorClassName)
+                .append(", stackTraceElements=")
+                .append(
+                        stackTraceElements != null
+                                ? stackTraceElements.subList(0, Math.min(stackTraceElements.size(), maxLen))
+                                : null)
+                .append(", toString()=")
+                .append(super.toString())
+                .append("]");
         return builder.toString();
     }
 }
