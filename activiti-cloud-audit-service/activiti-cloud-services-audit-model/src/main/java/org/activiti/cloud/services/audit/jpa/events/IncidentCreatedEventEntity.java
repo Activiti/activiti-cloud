@@ -21,7 +21,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.util.List;
 import org.activiti.cloud.api.process.model.IncidentEvent;
-import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
 
 @Entity(name = IncidentCreatedEventEntity.INCIDENT_CREATED_EVENT)
@@ -33,8 +32,6 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
     protected static final String INCIDENT_CREATED_EVENT = "IncidentCreatedEvent";
 
     private String errorCode;
-
-    private IncidentSeverity severity = IncidentSeverity.ERROR;
 
     @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
@@ -53,7 +50,6 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
         this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
-        this.severity = event.getSeverity();
     }
 
     public String getErrorCode() {
@@ -84,14 +80,6 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
         this.stackTraceElements = stackTraceElements;
     }
 
-    public IncidentSeverity getSeverity() {
-        return this.severity;
-    }
-
-    public void setSeverity(IncidentSeverity severity) {
-        this.severity = severity;
-    }
-
     @Override
     public String toString() {
         final int maxLen = 10;
@@ -101,8 +89,6 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
             .append(errorCode)
             .append(", errorCode=")
             .append(errorMessage)
-            .append(", severity=")
-            .append(severity)
             .append(", incidentContext=")
             .append(getIncidentContext())
             .append(", errorClassName=")
