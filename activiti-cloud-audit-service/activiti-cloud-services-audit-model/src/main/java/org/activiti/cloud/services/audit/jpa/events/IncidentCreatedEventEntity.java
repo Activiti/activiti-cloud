@@ -19,8 +19,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.util.List;
 import org.activiti.cloud.api.process.model.IncidentEvent;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
 
 @Entity(name = IncidentCreatedEventEntity.INCIDENT_CREATED_EVENT)
@@ -31,12 +34,16 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
 
     protected static final String INCIDENT_CREATED_EVENT = "IncidentCreatedEvent";
 
+    @Enumerated(EnumType.STRING)
+    private IncidentSeverity severity = IncidentSeverity.ERROR;
+
     private String errorCode;
 
     @Column(length = ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
     private String errorClassName;
+
 
     @Convert(converter = ListOfStackTraceElementsJpaJsonConverter.class)
     @Column(columnDefinition = "text")
@@ -46,10 +53,19 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
 
     public IncidentCreatedEventEntity(IncidentEvent event) {
         super(event);
+        this.severity = event.getSeverity();
         this.errorCode = event.getErrorCode();
         this.errorMessage = StringUtils.truncate(event.getErrorMessage(), ERROR_MESSAGE_LENGTH);
         this.errorClassName = event.getErrorClassName();
         this.stackTraceElements = event.getStackTraceElements();
+    }
+
+    public IncidentSeverity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(IncidentSeverity severity) {
+        this.severity = severity;
     }
 
     public String getErrorCode() {
@@ -88,6 +104,8 @@ public class IncidentCreatedEventEntity extends IncidentAuditEventEntity {
             .append("IncidentCreatedEventEntity [errorMessage=")
             .append(errorCode)
             .append(", errorCode=")
+            .append(", severity=")
+            .append(severity)
             .append(errorMessage)
             .append(", incidentContext=")
             .append(getIncidentContext())
