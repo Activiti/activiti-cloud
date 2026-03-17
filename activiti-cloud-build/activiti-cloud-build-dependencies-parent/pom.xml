@@ -22,6 +22,7 @@
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.130.Final</netty.version>
     <jackson.version>2.21.1</jackson.version>
+    <tomcat-embed-core.version>10.1.52</tomcat-embed-core.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -37,6 +38,13 @@
         <artifactId>aspectjweaver</artifactId>
         <version>${aspectweaver.version}</version>
       </dependency>
+      <!-- Security fix AAE-42677 -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>${tomcat-embed-core.version}</version>
+      </dependency>
+      <!-- Security fix AAE-42677 -->
       <!-- Update netty separately -->
       <dependency>
         <groupId>io.netty</groupId>
