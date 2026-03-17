@@ -105,7 +105,12 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             GenericHandler<Message> handler = (message, headers) -> {
                                 FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
+                                function.setSkipOutputConversion(true);
                                 Object result = function.apply(message);
+
+                                if (result instanceof Message<?> msg) {
+                                    result = msg.getPayload();
+                                }
 
                                 Message<?> response = null;
                                 if (result != null) {
