@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.model;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -47,7 +46,7 @@ public class VariableValueJsonConverter implements AttributeConverter<VariableVa
             } else {
                 return new VariableValue<Object>(null);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to deserialize variable.", e);
         }
     }
