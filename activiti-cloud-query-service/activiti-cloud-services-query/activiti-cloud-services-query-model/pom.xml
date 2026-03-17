@@ -114,7 +114,7 @@
       <scope>test</scope>
       <exclusions>
         <exclusion>
-          <groupId>com.jayway.jsonpath</groupId>
+          <groupId>com.vaadin.external.google</groupId>
           <artifactId>android-json</artifactId>
         </exclusion>
       </exclusions>
