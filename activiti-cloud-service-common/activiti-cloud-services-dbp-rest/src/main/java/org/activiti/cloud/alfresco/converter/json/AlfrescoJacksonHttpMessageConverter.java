@@ -28,6 +28,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import tools.jackson.databind.json.JsonMapper;
 
 public class AlfrescoJacksonHttpMessageConverter<T> extends JacksonJsonHttpMessageConverter {
@@ -50,7 +51,12 @@ public class AlfrescoJacksonHttpMessageConverter<T> extends JacksonJsonHttpMessa
         HttpOutputMessage outputMessage,
         Map<String, Object> hints
     ) throws IOException, HttpMessageNotWritableException {
-        defaultWriteInternal(transformObject(object), type, outputMessage, hints);
+        if (object instanceof MappingJacksonValue mappingJacksonValueObject) {
+            mappingJacksonValueObject.setValue(transformObject(mappingJacksonValueObject.getValue()));
+            defaultWriteInternal(mappingJacksonValueObject, type, outputMessage, hints);
+        } else {
+            defaultWriteInternal(transformObject(object), type, outputMessage, hints);
+        }
     }
 
     protected void defaultWriteInternal(
@@ -80,6 +86,11 @@ public class AlfrescoJacksonHttpMessageConverter<T> extends JacksonJsonHttpMessa
 
     @Override
     public boolean canWrite(ResolvableType type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
-        return !String.class.equals(type.toClass()) && super.canWrite(type, clazz, mediaType);
+        Class<?> resolvedClass = type.toClass();
+        return (
+            !String.class.equals(resolvedClass) &&
+            !byte[].class.equals(resolvedClass) &&
+            super.canWrite(type, clazz, mediaType)
+        );
     }
 }

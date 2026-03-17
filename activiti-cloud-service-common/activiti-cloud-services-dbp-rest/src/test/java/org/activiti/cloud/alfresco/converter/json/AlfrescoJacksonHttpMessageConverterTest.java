@@ -17,6 +17,7 @@ package org.activiti.cloud.alfresco.converter.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -41,6 +42,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -157,5 +159,33 @@ public class AlfrescoJacksonHttpMessageConverterTest {
 
         //then
         assertThat(canWrite).isTrue();
+    }
+
+    @Test
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue()
+        throws Exception {
+        //given
+        final MappingJacksonValue baseMappingJacksonValue = new MappingJacksonValue(basePagedModel);
+        given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
+            .willReturn(alfrescoPageContentListWrapper);
+
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(baseMappingJacksonValue, type, outputMessage, hints);
+
+        //when
+        httpMessageConverter.writeInternal(baseMappingJacksonValue, type, outputMessage, hints);
+
+        //then
+        verify(httpMessageConverter)
+            .defaultWriteInternal(
+                argThat(argument ->
+                    argument instanceof MappingJacksonValue &&
+                    ((MappingJacksonValue) argument).getValue() == alfrescoPageContentListWrapper
+                ),
+                eq(type),
+                eq(outputMessage),
+                eq(hints)
+            );
     }
 }

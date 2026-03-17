@@ -452,62 +452,6 @@
         },
         "title": "PaginationMetadata"
       },
-      "AnnotatedMember": {
-        "type": "object",
-        "properties": {
-          "fullName": {
-            "type": "string"
-          },
-          "member": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "modifiers": {
-                "type": "integer",
-                "format": "int32"
-              },
-              "synthetic": {
-                "type": "boolean"
-              }
-            }
-          },
-          "typeContext": {
-            "$ref": "#/components/schemas/TypeResolutionContext",
-            "deprecated": true
-          },
-          "allAnnotations": {
-            "$ref": "#/components/schemas/AnnotationMap"
-          },
-          "name": {
-            "type": "string"
-          },
-          "static": {
-            "type": "boolean"
-          },
-          "public": {
-            "type": "boolean"
-          },
-          "annotated": {
-            "type": "object",
-            "properties": {
-              "annotations": {
-                "type": "array",
-                "items": {}
-              },
-              "declaredAnnotations": {
-                "type": "array",
-                "items": {}
-              }
-            }
-          }
-        },
-        "title": "AnnotatedMember"
-      },
-      "AnnotationMap": {
-        "title": "AnnotationMap"
-      },
       "EntryResponseContentExtendedJsonDeserializerWrapper": {
         "type": "object",
         "properties": {
@@ -520,22 +464,11 @@
       "ExtendedJsonDeserializer": {
         "type": "object",
         "properties": {
-          "delegatee": {
-            "$ref": "#/components/schemas/JsonDeserializerObject"
-          },
           "cachable": {
             "type": "boolean"
           },
-          "emptyValue": {
-            "deprecated": true
-          },
-          "nullValue": {
-            "type": "array",
-            "deprecated": true,
-            "items": {
-              "$ref": "#/components/schemas/ExtendedJsonDeserializer"
-            },
-            "uniqueItems": true
+          "delegatee": {
+            "$ref": "#/components/schemas/ValueDeserializerObject"
           },
           "knownPropertyNames": {
             "type": "array",
@@ -556,9 +489,6 @@
               "CONSTANT",
               "DYNAMIC"
             ]
-          },
-          "objectIdReader": {
-            "$ref": "#/components/schemas/ObjectIdReader"
           },
           "test": {
             "type": "string"
@@ -579,19 +509,13 @@
         },
         "title": "ExtendedJsonDeserializerWrapper"
       },
-      "JsonDeserializerObject": {
+      "ValueDeserializerObject": {
         "type": "object",
         "properties": {
-          "delegatee": {},
           "cachable": {
             "type": "boolean"
           },
-          "emptyValue": {
-            "deprecated": true
-          },
-          "nullValue": {
-            "deprecated": true
-          },
+          "delegatee": {},
           "knownPropertyNames": {
             "type": "array",
             "items": {}
@@ -611,12 +535,9 @@
               "CONSTANT",
               "DYNAMIC"
             ]
-          },
-          "objectIdReader": {
-            "$ref": "#/components/schemas/ObjectIdReader"
           }
         },
-        "title": "JsonDeserializerObject"
+        "title": "ValueDeserializerObject"
       },
       "MergeInfo": {
         "type": "object",
