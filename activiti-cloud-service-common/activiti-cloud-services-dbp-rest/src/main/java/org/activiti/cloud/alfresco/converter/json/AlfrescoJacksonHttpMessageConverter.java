@@ -50,7 +50,16 @@ public class AlfrescoJacksonHttpMessageConverter<T> extends JacksonJsonHttpMessa
         HttpOutputMessage outputMessage,
         Map<String, Object> hints
     ) throws IOException, HttpMessageNotWritableException {
-        super.writeInternal(transformObject(object), type, outputMessage, hints);
+        defaultWriteInternal(transformObject(object), type, outputMessage, hints);
+    }
+
+    protected void defaultWriteInternal(
+        Object object,
+        @Nullable ResolvableType type,
+        HttpOutputMessage outputMessage,
+        Map<String, Object> hints
+    ) throws IOException, HttpMessageNotWritableException {
+        super.writeInternal(object, type, outputMessage, hints);
     }
 
     @SuppressWarnings("unchecked")

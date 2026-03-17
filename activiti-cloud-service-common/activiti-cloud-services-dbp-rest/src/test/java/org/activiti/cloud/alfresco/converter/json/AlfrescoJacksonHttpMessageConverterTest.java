@@ -84,13 +84,13 @@ public class AlfrescoJacksonHttpMessageConverterTest {
 
         doNothing()
             .when(httpMessageConverter)
-            .writeInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
+            .defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
 
         //when
         httpMessageConverter.writeInternal(basePagedModel, type, outputMessage, hints);
 
         //then
-        verify(httpMessageConverter).writeInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
+        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
     }
 
     @Test
@@ -102,27 +102,27 @@ public class AlfrescoJacksonHttpMessageConverterTest {
 
         doNothing()
             .when(httpMessageConverter)
-            .writeInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
+            .defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
 
         //when
         httpMessageConverter.writeInternal(baseCollectionModel, type, outputMessage, hints);
 
         //then
-        verify(httpMessageConverter).writeInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
+        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage, hints);
     }
 
     @Test
     public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource()
         throws Exception {
         //given
-        doNothing().when(httpMessageConverter).writeInternal(any(), eq(type), eq(outputMessage), eq(hints));
+        doNothing().when(httpMessageConverter).defaultWriteInternal(any(), eq(type), eq(outputMessage), eq(hints));
 
         //when
         httpMessageConverter.writeInternal(EntityModel.of("content"), type, outputMessage, hints);
 
         //then
         verify(httpMessageConverter)
-            .writeInternal(contentEntryArgumentCaptor.capture(), eq(type), eq(outputMessage), eq(hints));
+            .defaultWriteInternal(contentEntryArgumentCaptor.capture(), eq(type), eq(outputMessage), eq(hints));
         assertThat(contentEntryArgumentCaptor.getValue().getEntry()).isEqualTo("content");
     }
 
@@ -151,7 +151,6 @@ public class AlfrescoJacksonHttpMessageConverterTest {
     public void canWriteShouldReturnTrueWhenTypeIsNotStringAndMediaTypeIsApplicationJson() {
         //given
         ResolvableType resolvableType = ResolvableType.forClass(EntityModel.class);
-        given(httpMessageConverter.canWrite(EntityModel.class, MediaType.APPLICATION_JSON)).willReturn(true);
 
         //when
         boolean canWrite = httpMessageConverter.canWrite(resolvableType, EntityModel.class, MediaType.APPLICATION_JSON);
