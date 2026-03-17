@@ -174,12 +174,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                    function.setSkipOutputConversion(true);
-                                    Object result = function.apply(message);
-                                    if (result instanceof Message<?> msg) {
-                                        return msg.getPayload();
-                                    }
-                                    return result;
+                                    return function.apply(message);
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
