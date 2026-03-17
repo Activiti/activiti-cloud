@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNError;
@@ -104,7 +103,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
             } else {
                 return null;
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to deserialize object.", e);
         }
     }
