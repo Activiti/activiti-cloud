@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.audit.api.AuditException;
@@ -48,7 +47,7 @@ public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConver
             } else {
                 return Collections.emptyList();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to deserialize object.", e);
         }
     }
