@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.model;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import tools.jackson.core.JacksonException;
@@ -50,7 +49,7 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
             } else {
                 return Collections.emptyList();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to deserialize list of StackTraceElements", e);
         }
     }
