@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.model;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import tools.jackson.core.JacksonException;
@@ -46,7 +45,7 @@ public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<St
             } else {
                 return Collections.emptyMap();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to deserialize map of string objects", e);
         }
     }
