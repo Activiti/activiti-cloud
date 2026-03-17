@@ -17,12 +17,9 @@ package org.activiti.cloud.services.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
-import tools.jackson.core.ObjectCodec;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ValueDeserializer;
@@ -52,11 +49,9 @@ public class ProcessDefinitionServiceTask extends ValueDeserializer<Set<ProcessD
     }
 
     @Override
-    public Set<ProcessDefinitionServiceTask> deserialize(JsonParser jp, DeserializationContext ctxt)
-        throws IOException, JacksonException {
+    public Set<ProcessDefinitionServiceTask> deserialize(JsonParser jp, DeserializationContext ctxt) {
         Set<ProcessDefinitionServiceTask> tasks = new HashSet<ProcessDefinitionServiceTask>();
-        ObjectCodec oc = jp.objectReadContext();
-        JsonNode nodes = oc.readTree(jp);
+        JsonNode nodes = jp.readValueAsTree();
 
         for (int i = 0; i < nodes.size(); i++) {
             ProcessDefinitionServiceTask task = new ProcessDefinitionServiceTask(

@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import org.activiti.cloud.services.audit.api.AuditException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -42,7 +41,7 @@ public class VariableValueJpaConverter implements AttributeConverter<VariableVal
             } else {
                 return null;
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to deserialize object.", e);
         }
     }
