@@ -224,6 +224,7 @@
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
+    <org-json.version>20250107</org-json.version>
 
     <!-- dependencies versions -->
     <hibernate.version>7.1.19.Final</hibernate.version>
