@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -83,7 +84,7 @@ public class VariableValueJsonConverterTest {
     @Test
     public void convertToEntityAttributeShouldThrowExceptionWhenExceptionOccursWhileReading() throws Exception {
         //given
-        DatabindException exception = new DatabindException(null, "test");
+        DatabindException exception = DatabindException.from((JsonParser) null, "test");
         given(objectMapper.readValue(JSON_REPRESENTATION, VariableValue.class)).willThrow(exception);
 
         //when
