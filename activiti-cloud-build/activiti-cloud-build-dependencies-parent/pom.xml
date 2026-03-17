@@ -22,10 +22,9 @@
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.132.Final</netty.version>
-    <jackson.version>2.21.2</jackson.version>
-    <tomcat-embed-core.version>10.1.54</tomcat-embed-core.version>
-    <!-- AAE-43503: Temporary fix for CVE-2026-22732. Remove after Spring Boot upgrade -->
-    <spring-security.version>6.5.9</spring-security.version>
+    <jackson.version>3.0.4</jackson.version>
+    <tomcat-embed-core.version>10.1.52</tomcat-embed-core.version>
+    <rest-assured.version>5.5.6</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
   </properties>
@@ -67,17 +66,6 @@
         <groupId>com.h2database</groupId>
         <artifactId>h2</artifactId>
         <version>${h2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-core</artifactId>
-        <version>${liquibase.version}</version>
-        <exclusions>
-          <exclusion> <!-- due to SB 3.0 switch to Jakarta -->
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
@@ -129,11 +117,6 @@
         <version>${hibernate.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-jpamodelgen</artifactId>
-        <version>${hibernate.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql.version}</version>
@@ -161,7 +144,7 @@
       </dependency>
       <!-- AAE-42877 Update jackson to fix security issue -->
       <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
+        <groupId>tools.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson.version}</version>
         <type>pom</type>
@@ -171,6 +154,11 @@
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
         <version>${assertj-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>spring-mock-mvc</artifactId>
+        <version>${rest-assured.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

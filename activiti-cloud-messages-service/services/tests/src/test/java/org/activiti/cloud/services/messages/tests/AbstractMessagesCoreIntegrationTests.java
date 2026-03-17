@@ -27,9 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
@@ -80,6 +77,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the Message Connector Aggregator Processor.
@@ -102,8 +101,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     protected static final int TEST_TIMEOUT = 30;
 
-    protected ObjectMapper objectMapper = new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    protected ObjectMapper objectMapper;
 
     @Autowired
     protected StreamBridge streamBridge;
@@ -189,7 +187,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     @Timeout(TEST_TIMEOUT)
-    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
+    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JacksonException {
         // given
         String messageEventName = "start";
         Integer count = 100;
@@ -232,8 +230,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     @Timeout(TEST_TIMEOUT)
-    public void shouldProcessMessageEventsConcurrentlyInReversedOrder()
-        throws InterruptedException, JsonProcessingException {
+    public void shouldProcessMessageEventsConcurrentlyInReversedOrder() throws InterruptedException, JacksonException {
         // given
         String messageEventName = "start";
         Integer count = 100;
@@ -833,7 +830,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         String json;
         try {
             json = objectMapper.writeValueAsString(message.getPayload());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
 

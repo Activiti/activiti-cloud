@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -44,7 +45,10 @@ public class CustomAuthorizationManager<RequestAuthorizationContext>
     }
 
     @Override
-    public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
+    public AuthorizationResult authorize(
+        Supplier<? extends Authentication> authentication,
+        RequestAuthorizationContext object
+    ) {
         return new AuthorizationDecision(
             authentication
                 .get()

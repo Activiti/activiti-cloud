@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.test;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -30,23 +27,25 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.boot.restclient.autoconfigure.RestTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @AutoConfigureBefore(value = RestTemplateAutoConfiguration.class)
 public class TestConfiguration {
 
-    private final List<Module> modules;
+    private final List<JacksonModule> modules;
 
-    public TestConfiguration(List<Module> modules) {
+    public TestConfiguration(List<JacksonModule> modules) {
         this.modules = modules;
     }
 
@@ -75,26 +74,24 @@ public class TestConfiguration {
     public RestTemplateBuilder restTemplateBuilder(
         @Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor
     ) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonMapper.Builder builder = JsonMapper.builder().addModule(new HalJacksonModule());
 
-        mapper.registerModule(new Jackson2HalModule());
-
-        for (Module module : modules) {
+        for (JacksonModule module : modules) {
             if (module.getModuleName().startsWith("map")) {
-                mapper.registerModule(module);
+                builder.addModule(module);
             }
         }
 
-        MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        jackson2HttpMessageConverter.setSupportedMediaTypes(
+        JsonMapper mapper = builder.build();
+
+        JacksonJsonHttpMessageConverter jacksonHttpMessageConverter = new JacksonJsonHttpMessageConverter(mapper);
+        jacksonHttpMessageConverter.setSupportedMediaTypes(
             Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
         );
-        jackson2HttpMessageConverter.setObjectMapper(mapper);
 
         RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
             .additionalMessageConverters(
-                jackson2HttpMessageConverter,
+                jacksonHttpMessageConverter,
                 new StringHttpMessageConverter(StandardCharsets.UTF_8),
                 new ByteArrayHttpMessageConverter()
             );

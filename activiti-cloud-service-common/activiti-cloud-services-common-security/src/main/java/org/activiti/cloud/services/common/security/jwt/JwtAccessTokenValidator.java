@@ -18,9 +18,9 @@ package org.activiti.cloud.services.common.security.jwt;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JwtAccessTokenValidator {

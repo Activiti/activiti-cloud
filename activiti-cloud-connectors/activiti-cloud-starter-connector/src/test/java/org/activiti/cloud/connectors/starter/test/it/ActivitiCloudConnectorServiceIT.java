@@ -18,8 +18,6 @@ package org.activiti.cloud.connectors.starter.test.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -43,6 +41,8 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ActivitiCloudConnectorApp.class)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
@@ -282,7 +282,7 @@ public class ActivitiCloudConnectorServiceIT {
     }
 
     @Test
-    void integrationRequestErrorChannelListener() throws JsonProcessingException {
+    void integrationRequestErrorChannelListener() throws JacksonException {
         streamHandler.isIntegrationErrorEventProduced().set(false);
 
         //given

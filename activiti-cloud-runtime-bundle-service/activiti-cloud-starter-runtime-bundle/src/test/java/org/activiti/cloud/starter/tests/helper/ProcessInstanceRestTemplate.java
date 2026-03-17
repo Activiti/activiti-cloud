@@ -33,18 +33,19 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.engine.impl.util.IoUtil;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
@@ -55,9 +56,11 @@ public class ProcessInstanceRestTemplate {
 
     public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances";
 
-    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
-        Map.of("Content-type", List.of("application/json"))
-    );
+    public static final HttpHeaders CONTENT_TYPE_HEADER = new HttpHeaders();
+
+    static {
+        CONTENT_TYPE_HEADER.setContentType(MediaType.APPLICATION_JSON);
+    }
 
     private TestRestTemplate testRestTemplate;
 
@@ -465,7 +468,7 @@ public class ProcessInstanceRestTemplate {
             .withVariables(variables)
             .build();
 
-        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.PUT,
@@ -488,7 +491,7 @@ public class ProcessInstanceRestTemplate {
             .withVariableNames(variableNames)
             .build();
 
-        HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(removeProcessVariablesPayload, null);
+        HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(removeProcessVariablesPayload);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processId).concat("/variables"),
             HttpMethod.DELETE,

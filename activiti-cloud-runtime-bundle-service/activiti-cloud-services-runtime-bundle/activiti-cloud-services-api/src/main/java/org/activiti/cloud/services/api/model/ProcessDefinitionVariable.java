@@ -17,17 +17,17 @@ package org.activiti.cloud.services.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectCodec;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
 
-public class ProcessDefinitionVariable extends JsonDeserializer<Set<ProcessDefinitionVariable>> {
+public class ProcessDefinitionVariable extends ValueDeserializer<Set<ProcessDefinitionVariable>> {
 
     @JsonProperty("variableName")
     private String variableName;
@@ -53,15 +53,15 @@ public class ProcessDefinitionVariable extends JsonDeserializer<Set<ProcessDefin
 
     @Override
     public Set<ProcessDefinitionVariable> deserialize(JsonParser jp, DeserializationContext ctxt)
-        throws IOException, JsonProcessingException {
+        throws IOException, JacksonException {
         Set<ProcessDefinitionVariable> variables = new HashSet<ProcessDefinitionVariable>();
-        ObjectCodec oc = jp.getCodec();
+        ObjectCodec oc = jp.objectReadContext();
         JsonNode nodes = oc.readTree(jp);
 
         for (int i = 0; i < nodes.size(); i++) {
             ProcessDefinitionVariable variable = new ProcessDefinitionVariable(
-                nodes.get(i).get("variableName").asText(),
-                nodes.get(i).get("variableType").asText()
+                nodes.get(i).get("variableName").asString(),
+                nodes.get(i).get("variableType").asString()
             );
             variables.add(variable);
         }

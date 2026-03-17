@@ -42,9 +42,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
@@ -57,7 +57,7 @@ public class RestrictVariableEntityQueryIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @Autowired
     private TaskRepository taskRepository;

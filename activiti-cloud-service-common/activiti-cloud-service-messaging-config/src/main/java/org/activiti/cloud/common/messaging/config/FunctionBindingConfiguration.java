@@ -18,10 +18,6 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -56,6 +52,7 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
@@ -238,19 +235,22 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         ObjectMapper copiedMapper;
         if (objectMapper == null) {
             copiedMapper = new ObjectMapper();
-            copiedMapper.registerModule(new JavaTimeModule());
-            copiedMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         } else {
             try {
-                copiedMapper = objectMapper.copy();
+                copiedMapper = objectMapper.rebuild().build();
             } catch (Exception e) {
                 copiedMapper = new ObjectMapper();
             }
         }
-        //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
-        copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
+        //logic from AlfrescoWebAutoConfiguration.configureJsonMapperForBigDecimal
+        copiedMapper =
+            copiedMapper
+                .rebuild()
+                .withConfigOverride(
+                    BigDecimal.class,
+                    o -> o.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING))
+                )
+                .build();
         return new JacksonMapper(copiedMapper);
     }
 }

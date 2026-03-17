@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -55,43 +46,39 @@ import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.services.audit.api.AuditException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.Version;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleAbstractTypeResolver;
+import tools.jackson.databind.module.SimpleModule;
 
 public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper;
 
     static {
-        {
-            SimpleModule module = new SimpleModule("mapCommonModelInterfaces", Version.unknownVersion());
-            SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
-                //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
-                //once version 2.9.6 is related we can remove this @override method
-                @Override
-                public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc) {
-                    return findTypeMapping(config, typeDesc.getType());
-                }
-            };
+        SimpleModule module = new SimpleModule("mapCommonModelInterfaces", Version.unknownVersion());
+        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
 
-            resolver.addMapping(ProcessDefinition.class, ProcessDefinitionImpl.class);
-            resolver.addMapping(VariableInstance.class, VariableInstanceImpl.class);
-            resolver.addMapping(ProcessInstance.class, ProcessInstanceImpl.class);
-            resolver.addMapping(Task.class, TaskImpl.class);
-            resolver.addMapping(BPMNActivity.class, BPMNActivityImpl.class);
-            resolver.addMapping(BPMNSequenceFlow.class, BPMNSequenceFlowImpl.class);
-            resolver.addMapping(BPMNSignal.class, BPMNSignalImpl.class);
-            resolver.addMapping(BPMNTimer.class, BPMNTimerImpl.class);
-            resolver.addMapping(BPMNError.class, BPMNErrorImpl.class);
-            resolver.addMapping(BPMNMessage.class, BPMNMessageImpl.class);
-            resolver.addMapping(MessageSubscription.class, MessageSubscriptionImpl.class);
-            resolver.addMapping(IntegrationContext.class, IntegrationContextImpl.class);
-            resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
-            resolver.addMapping(Deployment.class, DeploymentImpl.class);
+        resolver.addMapping(ProcessDefinition.class, ProcessDefinitionImpl.class);
+        resolver.addMapping(VariableInstance.class, VariableInstanceImpl.class);
+        resolver.addMapping(ProcessInstance.class, ProcessInstanceImpl.class);
+        resolver.addMapping(Task.class, TaskImpl.class);
+        resolver.addMapping(BPMNActivity.class, BPMNActivityImpl.class);
+        resolver.addMapping(BPMNSequenceFlow.class, BPMNSequenceFlowImpl.class);
+        resolver.addMapping(BPMNSignal.class, BPMNSignalImpl.class);
+        resolver.addMapping(BPMNTimer.class, BPMNTimerImpl.class);
+        resolver.addMapping(BPMNError.class, BPMNErrorImpl.class);
+        resolver.addMapping(BPMNMessage.class, BPMNMessageImpl.class);
+        resolver.addMapping(MessageSubscription.class, MessageSubscriptionImpl.class);
+        resolver.addMapping(IntegrationContext.class, IntegrationContextImpl.class);
+        resolver.addMapping(IncidentContext.class, IncidentContextImpl.class);
+        resolver.addMapping(Deployment.class, DeploymentImpl.class);
 
-            module.setAbstractTypes(resolver);
+        module.setAbstractTypes(resolver);
 
-            objectMapper.registerModule(module);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        }
+        objectMapper = JsonMapper.builder().addModule(module).build();
     }
 
     private Class<T> entityClass;
@@ -104,7 +91,7 @@ public class JpaJsonConverter<T> implements AttributeConverter<T, String> {
     public String convertToDatabaseColumn(T entity) {
         try {
             return objectMapper.writeValueAsString(entity);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to serialize object.", e);
         }
     }

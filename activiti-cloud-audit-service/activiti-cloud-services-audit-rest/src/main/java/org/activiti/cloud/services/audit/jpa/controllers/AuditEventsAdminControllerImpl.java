@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping(

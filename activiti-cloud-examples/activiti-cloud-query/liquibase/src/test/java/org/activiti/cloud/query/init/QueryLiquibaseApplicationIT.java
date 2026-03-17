@@ -17,7 +17,6 @@ package org.activiti.cloud.query.init;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.activiti.cloud.query.liquibase.QueryLiquibaseApplication;
@@ -25,13 +24,14 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = { QueryLiquibaseApplication.class }, properties = "spring.jpa.hibernate.ddl-auto=validate")
 @Testcontainers
@@ -46,7 +46,7 @@ public class QueryLiquibaseApplicationIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine");
 
     @Test
     public void contextLoads() {

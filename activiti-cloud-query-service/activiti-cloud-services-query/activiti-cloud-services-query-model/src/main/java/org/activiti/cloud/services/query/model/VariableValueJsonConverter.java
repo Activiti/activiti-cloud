@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class VariableValueJsonConverter implements AttributeConverter<VariableValue<?>, String> {
 
@@ -34,7 +34,7 @@ public class VariableValueJsonConverter implements AttributeConverter<VariableVa
     public String convertToDatabaseColumn(VariableValue<?> variableValue) {
         try {
             return objectMapper.writeValueAsString(variableValue);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to serialize variable.", e);
         }
     }

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.common.properties;
 
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import tools.jackson.databind.util.StdDateFormat;
 
 public class StdDateFormatWithoutColonInTimeZone extends StdDateFormat {
 

@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.acc.core.rest;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

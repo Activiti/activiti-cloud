@@ -17,18 +17,18 @@ package org.activiti.cloud.starter.audit.tests.it;
 
 import static org.activiti.test.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.databind.ObjectMapper;
 
 @TestComponent
 public class EventsRestTemplate {

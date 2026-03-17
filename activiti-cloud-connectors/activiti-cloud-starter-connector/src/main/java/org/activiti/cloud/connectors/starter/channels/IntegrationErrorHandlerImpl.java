@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
+import tools.jackson.databind.ObjectMapper;
 
 public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
 

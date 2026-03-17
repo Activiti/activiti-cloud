@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolver;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolverImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilder;
@@ -37,6 +36,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:activiti-cloud-connector.properties")

@@ -38,9 +38,9 @@ import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationPro
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -152,10 +152,10 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
         // does not contains the object mapper customizations provided by custom Module beans.
         // need to call configure here to ensure that the customisations are registered
         for (HttpMessageConverter<?> converter : converters) {
-            //should exclude TypeConstrainedMappingJackson2HttpMessageConverter from configuration
+            //should exclude TypeConstrainedJacksonJsonHttpMessageConverter from configuration
             if (
                 converter instanceof MappingJackson2HttpMessageConverter &&
-                !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter)
+                !(converter instanceof TypeConstrainedJacksonJsonHttpMessageConverter)
             ) {
                 objectMapperBuilder.configure(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
             }

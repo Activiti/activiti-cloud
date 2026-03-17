@@ -17,7 +17,6 @@ package org.activiti.cloud.services.graphql.autoconfigure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
@@ -33,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components

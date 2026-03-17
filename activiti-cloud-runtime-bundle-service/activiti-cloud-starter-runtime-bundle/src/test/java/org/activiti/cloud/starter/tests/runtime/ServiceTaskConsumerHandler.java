@@ -18,9 +18,6 @@ package org.activiti.cloud.starter.tests.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +38,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @TestConfiguration
 @Import(ConnectorIntegrationChannelsConfiguration.class)
@@ -174,7 +174,7 @@ public class ServiceTaskConsumerHandler {
                 integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
 
                 integrationResultSender.send(message.getPayload(), integrationContext);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new IllegalStateException(e);
             }
         };

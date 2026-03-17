@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.alfresco.argument.resolver;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;

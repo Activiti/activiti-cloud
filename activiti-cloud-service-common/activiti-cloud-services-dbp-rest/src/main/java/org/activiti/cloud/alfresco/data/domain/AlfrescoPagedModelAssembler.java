@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.alfresco.data.domain;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
@@ -23,7 +24,6 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
-import org.springframework.lang.Nullable;
 import org.springframework.web.util.UriComponents;
 
 public class AlfrescoPagedModelAssembler<T> extends PagedResourcesAssembler<T> {

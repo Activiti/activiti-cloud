@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class JwtPrincipalRolesProviderChain implements PrincipalRolesProvider {
 

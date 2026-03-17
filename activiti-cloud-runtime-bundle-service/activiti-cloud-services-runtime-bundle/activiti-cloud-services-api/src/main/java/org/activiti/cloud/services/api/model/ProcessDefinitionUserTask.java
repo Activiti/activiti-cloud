@@ -17,17 +17,17 @@ package org.activiti.cloud.services.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectCodec;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
 
-public class ProcessDefinitionUserTask extends JsonDeserializer<Set<ProcessDefinitionUserTask>> {
+public class ProcessDefinitionUserTask extends ValueDeserializer<Set<ProcessDefinitionUserTask>> {
 
     @JsonProperty("taskName")
     private String taskName;
@@ -53,15 +53,15 @@ public class ProcessDefinitionUserTask extends JsonDeserializer<Set<ProcessDefin
 
     @Override
     public Set<ProcessDefinitionUserTask> deserialize(JsonParser jp, DeserializationContext ctxt)
-        throws IOException, JsonProcessingException {
+        throws IOException, JacksonException {
         Set<ProcessDefinitionUserTask> tasks = new HashSet<ProcessDefinitionUserTask>();
-        ObjectCodec oc = jp.getCodec();
+        ObjectCodec oc = jp.objectReadContext();
         JsonNode nodes = oc.readTree(jp);
 
         for (int i = 0; i < nodes.size(); i++) {
             ProcessDefinitionUserTask task = new ProcessDefinitionUserTask(
-                nodes.get(i).get("taskName").asText(),
-                nodes.get(i).get("taskDocumentation").asText()
+                nodes.get(i).get("taskName").asString(),
+                nodes.get(i).get("taskDocumentation").asString()
             );
             tasks.add(task);
         }

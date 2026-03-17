@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
 import org.activiti.cloud.services.audit.api.AuditException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class VariableValueJpaConverter implements AttributeConverter<VariableValue<?>, String> {
 
@@ -29,7 +29,7 @@ public class VariableValueJpaConverter implements AttributeConverter<VariableVal
     public String convertToDatabaseColumn(VariableValue<?> entity) {
         try {
             return objectMapper.writeValueAsString(entity);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to serialize object.", e);
         }
     }

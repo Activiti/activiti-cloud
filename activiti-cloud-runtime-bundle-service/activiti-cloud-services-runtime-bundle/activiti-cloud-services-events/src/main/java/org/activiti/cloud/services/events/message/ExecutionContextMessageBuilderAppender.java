@@ -20,7 +20,7 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 

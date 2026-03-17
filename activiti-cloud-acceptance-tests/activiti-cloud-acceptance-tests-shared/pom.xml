@@ -12,11 +12,6 @@
   <name>Activiti Cloud :: Acceptance Tests Shared</name>
   <dependencies>
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpclient.version}</version>
-    </dependency>
-    <dependency>
       <groupId>net.serenity-bdd</groupId>
       <artifactId>serenity-jbehave</artifactId>
     </dependency>
@@ -29,7 +24,7 @@
       <artifactId>serenity-spring</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>

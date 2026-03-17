@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.query.model.conf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.query.model.VariableValueJsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 public class QueryModelAutoConfiguration {

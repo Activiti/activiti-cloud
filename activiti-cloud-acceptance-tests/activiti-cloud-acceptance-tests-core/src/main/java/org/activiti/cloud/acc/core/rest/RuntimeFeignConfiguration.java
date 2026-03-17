@@ -56,7 +56,7 @@ import org.activiti.cloud.services.rest.api.ProcessInstanceTasksApiClient;
 import org.activiti.cloud.services.rest.api.ProcessInstanceVariableApiClient;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.activiti.cloud.services.rest.api.TaskVariableApiClient;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,12 +84,9 @@ public class RuntimeFeignConfiguration {
 
     private final ObjectMapper objectMapper;
 
-    public RuntimeFeignConfiguration(
-        RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties,
-        ObjectMapper objectMapper
-    ) {
+    public RuntimeFeignConfiguration(RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties) {
         this.runtimeTestsConfigurationProperties = runtimeTestsConfigurationProperties;
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper().findAndRegisterModules();
     }
 
     @Bean
@@ -101,7 +98,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public TaskApiClient taskApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(TaskApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -109,7 +106,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public TaskVariableApiClient taskVariableApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(TaskVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -117,7 +114,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessInstanceVariableApiClient processInstanceVariableApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(ProcessInstanceVariableApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -125,7 +122,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessInstanceApiClient processInstanceApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(ProcessInstanceApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -133,7 +130,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessInstanceTasksApiClient processInstanceTasksApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(ProcessInstanceTasksApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -141,7 +138,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessDefinitionsApiClient processDefinitionsApiClient() {
         return FeignRestDataClient
-            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder(objectMapper))
+            .builder(new PageableQueryEncoder(new JacksonEncoder(objectMapper)), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(ProcessDefinitionsApiClient.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -149,7 +146,7 @@ public class RuntimeFeignConfiguration {
     @Bean(name = "runtimeBundleBaseService")
     public BaseService runtimeBundleBaseService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(BaseService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
@@ -157,7 +154,7 @@ public class RuntimeFeignConfiguration {
     @Bean(name = "queryBaseService")
     public BaseService queryBaseService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(BaseService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
@@ -165,7 +162,7 @@ public class RuntimeFeignConfiguration {
     @Bean(name = "auditBaseService")
     public BaseService auditBaseService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .contract(new SpringMvcContract())
             .target(BaseService.class, runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
@@ -173,70 +170,70 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessRuntimeAdminService processRuntimeAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(ProcessRuntimeAdminService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
     public TaskRuntimeAdminService taskRuntimeAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(TaskRuntimeAdminService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
     public ServiceTasksAdminService serviceTasksAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(ServiceTasksAdminService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
     @Bean
     public ProcessQueryService processQueryService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(ProcessQueryService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
 
     @Bean
     public TaskQueryService taskQueryService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(TaskQueryService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
 
     @Bean
     public ProcessQueryAdminService processQueryAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(ProcessQueryAdminService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
 
     @Bean
     public TaskQueryAdminService taskQueryAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(TaskQueryAdminService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
 
     @Bean
     public AuditService auditClient() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(AuditService.class, runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
 
     @Bean
     public AuditAdminService auditAdminClient() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(AuditAdminService.class, runtimeTestsConfigurationProperties.getAuditEventUrl());
     }
 
     @Bean
     public ProcessVariablesRuntimeAdminService processVariablesRuntimeAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(
                 ProcessVariablesRuntimeAdminService.class,
                 runtimeTestsConfigurationProperties.getRuntimeBundleUrl()
@@ -246,7 +243,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ProcessVariablesRuntimeService processVariablesRuntimeService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(ProcessVariablesRuntimeService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
@@ -267,7 +264,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public TaskVariablesRuntimeAdminService taskVariablesRuntimeAdminService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder())
             .target(TaskVariablesRuntimeAdminService.class, runtimeTestsConfigurationProperties.getRuntimeBundleUrl());
     }
 
@@ -311,7 +308,7 @@ public class RuntimeFeignConfiguration {
     @Bean
     public ApplicationQueryService applicationQueryService() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(), new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(), new HalDecoder())
             .target(ApplicationQueryService.class, runtimeTestsConfigurationProperties.getQueryUrl());
     }
 }

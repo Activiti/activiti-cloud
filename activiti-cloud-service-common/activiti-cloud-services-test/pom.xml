@@ -88,6 +88,10 @@
       <artifactId>spring-boot-autoconfigure</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>spring-mock-mvc</artifactId>
     </dependency>
@@ -108,7 +112,7 @@
       <artifactId>spring-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>

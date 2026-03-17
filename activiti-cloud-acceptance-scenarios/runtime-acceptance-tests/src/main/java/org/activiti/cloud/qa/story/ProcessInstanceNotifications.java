@@ -19,7 +19,6 @@ import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.processDef
 import static org.activiti.cloud.qa.helpers.ProcessDefinitionRegistry.withTasks;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -59,6 +58,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.test.StepVerifier;
 import reactor.test.StepVerifier.Step;
+import tools.jackson.core.JacksonException;
 
 public class ProcessInstanceNotifications {
 
@@ -284,14 +284,14 @@ public class ProcessInstanceNotifications {
         "notifications: the payload with $eventTypes notifications is expected with process definition key value $processDefinitionKey"
     )
     public void expectPayloadWithEventTypesNotification(String eventTypes, String processDefinitionKey)
-        throws JsonProcessingException {
+        throws JacksonException {
         List messagePayload = messagePayload(eventTypes, processDefinitionKey);
 
         stepVerifier.expectNext(messagePayload);
     }
 
     @Then("notifications: the payload with $eventTypes notifications is expected")
-    public void expectPayloadWithEventTypesNotification(String eventTypes) throws JsonProcessingException {
+    public void expectPayloadWithEventTypesNotification(String eventTypes) throws JacksonException {
         String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
 
         List messagePayload = messagePayload(eventTypes, processDefinitionKey);
@@ -300,7 +300,7 @@ public class ProcessInstanceNotifications {
     }
 
     @Then("notifications: the payload with $eventTypes notifications with actor filter is expected")
-    public void expectPayloadWithEventTypesNotificationWithActor(String eventTypes) throws JsonProcessingException {
+    public void expectPayloadWithEventTypesNotificationWithActor(String eventTypes) throws JacksonException {
         String processDefinitionKey = processInstanceRef.get().getProcessDefinitionKey();
 
         List messagePayload = messagePayloadWithActor(eventTypes, processDefinitionKey);

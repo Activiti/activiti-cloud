@@ -17,7 +17,7 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.security.Principal;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public class JwtPrincipalIdentityProvider implements PrincipalIdentityProvider {
 

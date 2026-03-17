@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.events.message;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class EventChunker {
 
@@ -81,7 +81,7 @@ public class EventChunker {
     private int getEventSizeInBytes(CloudRuntimeEventImpl<?, ?> event) {
         try {
             return this.objectMapper.writeValueAsBytes(event).length;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to serialize event to JSON", e);
         }
     }

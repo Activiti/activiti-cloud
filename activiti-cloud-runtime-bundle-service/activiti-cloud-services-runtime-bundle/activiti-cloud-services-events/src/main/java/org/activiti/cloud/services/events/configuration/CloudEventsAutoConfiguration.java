@@ -17,7 +17,6 @@ package org.activiti.cloud.services.events.configuration;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -88,6 +87,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.annotation.Order;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @PropertySources(

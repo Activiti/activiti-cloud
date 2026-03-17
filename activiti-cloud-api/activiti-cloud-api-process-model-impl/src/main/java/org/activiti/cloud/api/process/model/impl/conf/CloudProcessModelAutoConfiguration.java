@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.api.process.model.impl.conf;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
@@ -104,13 +96,21 @@ import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEv
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.core.Version;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.DeserializationConfig;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.jsontype.NamedType;
+import tools.jackson.databind.module.SimpleAbstractTypeResolver;
+import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration
 public class CloudProcessModelAutoConfiguration {
 
     //this bean will be automatically injected inside boot's ObjectMapper
     @Bean
-    public Module customizeCloudProcessModelObjectMapper() {
+    public JacksonModule customizeCloudProcessModelObjectMapper() {
         SimpleModule module = new SimpleModule("mapProcessRuntimeEvents", Version.unknownVersion());
         module.registerSubtypes(
             new NamedType(
@@ -306,14 +306,7 @@ public class CloudProcessModelAutoConfiguration {
             new NamedType(CloudIncidentCreatedEventImpl.class, IncidentEvent.IncidentEventType.INCIDENT_CREATED.name())
         );
 
-        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
-            //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
-            //once version 2.9.6 is related we can remove this @override method
-            @Override
-            public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc) {
-                return findTypeMapping(config, typeDesc.getType());
-            }
-        };
+        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {};
 
         resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
         resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);

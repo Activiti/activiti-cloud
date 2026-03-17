@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers.csv;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.exceptions.CsvBadConverterException;
+import tools.jackson.databind.ObjectMapper;
 
 public class ObjectToJsonStrategy extends HeaderColumnNameMappingStrategy {
 

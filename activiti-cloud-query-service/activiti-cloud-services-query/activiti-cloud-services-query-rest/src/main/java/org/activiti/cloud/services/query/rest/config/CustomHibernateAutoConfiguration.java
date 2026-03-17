@@ -19,8 +19,8 @@ import java.util.Map;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 
 @AutoConfiguration(after = DataSourceAutoConfiguration.class)
 @ConditionalOnExpression(

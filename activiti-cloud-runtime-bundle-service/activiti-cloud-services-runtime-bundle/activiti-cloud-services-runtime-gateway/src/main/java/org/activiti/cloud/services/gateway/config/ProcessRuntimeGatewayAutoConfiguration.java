@@ -18,7 +18,6 @@ package org.activiti.cloud.services.gateway.config;
 import static org.activiti.cloud.services.gateway.channels.ProcessRuntimeGatewayChannels.PROCESS_RUNTIME_GATEWAY_PRODUCER;
 import static org.activiti.cloud.services.gateway.channels.ProcessRuntimeGatewayChannels.PROCESS_RUNTIME_GATEWAY_RESULTS;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +42,7 @@ import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.integration.support.channel.HeaderChannelRegistry;
 import org.springframework.integration.support.json.Jackson2JsonObjectMapper;
 import org.springframework.messaging.Message;
+import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(ProcessRuntimeGatewayProperties.class)

@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
@@ -66,7 +66,7 @@ public class AlfrescoWebAutoConfigurationTest {
         //given
 
         //when
-        TypeConstrainedMappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+        TypeConstrainedJacksonJsonHttpMessageConverter halConverter = new TypeConstrainedJacksonJsonHttpMessageConverter(
             EntityModel.class
         );
         halConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
