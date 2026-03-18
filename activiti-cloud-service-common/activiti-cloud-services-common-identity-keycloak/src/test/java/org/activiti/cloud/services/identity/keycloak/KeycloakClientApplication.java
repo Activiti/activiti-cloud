@@ -23,14 +23,12 @@ import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.config.ActivitiKeycloakAutoConfiguration;
 import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
+import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
@@ -67,8 +65,7 @@ public class KeycloakClientApplication {
     @Bean
     public TestKeycloakClient testKeycloakClient(
         @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
-        ObjectFactory<HttpMessageConverters> messageConverters,
-        ObjectProvider<HttpMessageConverterCustomizer> customizers,
+        ObjectProvider<FeignHttpMessageConverters> messageConverters,
         OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
         ClientRegistrationRepository clientRegistrationRepository
     ) {
@@ -86,7 +83,7 @@ public class KeycloakClientApplication {
             .builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
-            .decoder(new SpringDecoder(messageConverters, customizers))
+            .decoder(new SpringDecoder(messageConverters))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(TestKeycloakClient.class, url);
         return testKeycloakClient;

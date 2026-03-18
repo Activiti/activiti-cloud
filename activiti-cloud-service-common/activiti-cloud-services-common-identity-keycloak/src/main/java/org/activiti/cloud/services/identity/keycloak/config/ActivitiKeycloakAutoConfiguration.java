@@ -26,16 +26,14 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
+import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
@@ -101,8 +99,7 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     public KeycloakClient keycloakClient(
         @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
-        ObjectFactory<HttpMessageConverters> messageConverters,
-        ObjectProvider<HttpMessageConverterCustomizer> customizers
+        ObjectProvider<FeignHttpMessageConverters> messageConverters
     ) {
         ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
         ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(
@@ -118,7 +115,7 @@ public class ActivitiKeycloakAutoConfiguration {
             .builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
-            .decoder(new SpringDecoder(messageConverters, customizers))
+            .decoder(new SpringDecoder(messageConverters))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(KeycloakClient.class, url);
     }
