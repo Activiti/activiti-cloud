@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -934,7 +933,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             } else if (payload instanceof byte[]) {
                 return objectMapper.readValue((byte[]) payload, MessageEventPayload.class);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.warn(
                 "The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}",
                 payload,
