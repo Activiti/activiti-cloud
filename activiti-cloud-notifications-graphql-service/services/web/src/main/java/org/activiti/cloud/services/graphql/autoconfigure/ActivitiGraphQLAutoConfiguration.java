@@ -22,17 +22,16 @@ import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -58,11 +57,14 @@ public class ActivitiGraphQLAutoConfiguration {
         /**
          * This is needed because the graphql spec says that null values should be present
          */
-        @Autowired
-        public void configureObjectMapper(ObjectMapper objectMapper) {
-            objectMapper
-                .configOverride(Map.class)
-                .setInclude(Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS));
+        @Bean
+        public JsonMapperBuilderCustomizer graphqlIncludeAlwaysCustomizer() {
+            return builder ->
+                builder.withConfigOverride(
+                    Map.class,
+                    override ->
+                        override.setInclude(Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS))
+                );
         }
 
         @Bean
