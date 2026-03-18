@@ -27,16 +27,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import tools.jackson.databind.ObjectMapper;
 
-@SpringBootTest(classes = { QueryLiquibaseApplication.class }, properties = "spring.jpa.hibernate.ddl-auto=validate")
+@SpringBootTest(
+    classes = { QueryLiquibaseApplication.class, QueryLiquibaseApplicationIT.TestEntityScanConfig.class },
+    properties = "spring.jpa.hibernate.ddl-auto=validate"
+)
 @Testcontainers
-@EntityScan(basePackageClasses = { ProcessInstanceEntity.class, AuditEventEntity.class })
 public class QueryLiquibaseApplicationIT {
+
+    @Configuration
+    @EntityScan(
+        basePackages = { "org.activiti.cloud.services.query.model", "org.activiti.cloud.services.audit.jpa.events" }
+    )
+    static class TestEntityScanConfig {}
 
     @MockitoBean
     private ObjectMapper objectMapper;
