@@ -181,5 +181,10 @@
           <artifactId>json-unit-assertj</artifactId>
           <scope>test</scope>
       </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-security</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
