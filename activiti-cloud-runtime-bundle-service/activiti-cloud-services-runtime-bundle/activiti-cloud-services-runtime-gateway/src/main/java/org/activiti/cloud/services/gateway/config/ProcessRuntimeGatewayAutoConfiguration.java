@@ -40,9 +40,9 @@ import org.springframework.integration.config.IntegrationConverter;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.integration.support.channel.HeaderChannelRegistry;
-import org.springframework.integration.support.json.Jackson2JsonObjectMapper;
+import org.springframework.integration.support.json.JacksonJsonObjectMapper;
 import org.springframework.messaging.Message;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(ProcessRuntimeGatewayProperties.class)
@@ -110,8 +110,8 @@ public class ProcessRuntimeGatewayAutoConfiguration {
 
     @IntegrationConverter
     @Bean
-    ConditionalGenericConverter processRuntimeGatewayResultConverter(ObjectMapper objectMapper) {
-        final var jackson2JsonObjectMapper = new Jackson2JsonObjectMapper(objectMapper);
+    ConditionalGenericConverter processRuntimeGatewayResultConverter(JsonMapper jsonMapper) {
+        final var jacksonJsonObjectMapper = new JacksonJsonObjectMapper(jsonMapper);
 
         return new ConditionalGenericConverter() {
             @Override
@@ -129,7 +129,7 @@ public class ProcessRuntimeGatewayAutoConfiguration {
             @Override
             public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
                 try {
-                    return jackson2JsonObjectMapper.fromJson(source, targetType.getType());
+                    return jacksonJsonObjectMapper.fromJson(source, targetType.getType());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
