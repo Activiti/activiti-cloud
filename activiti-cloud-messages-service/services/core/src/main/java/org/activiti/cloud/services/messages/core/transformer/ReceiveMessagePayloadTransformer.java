@@ -36,6 +36,11 @@ public class ReceiveMessagePayloadTransformer
     }
 
     @Override
+    public String getComponentType() {
+        return "transformer";
+    }
+
+    @Override
     protected ReceiveMessagePayload transformPayload(MessageEventPayload eventPayload) {
         return MessagePayloadBuilder
             .receive(eventPayload.getName())
