@@ -236,7 +236,6 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
-    <aspectweaver.version>1.9.25.1</aspectweaver.version>
     <swagger-annotations.version>2.2.41</swagger-annotations.version>
   </properties>
   <repositories>
