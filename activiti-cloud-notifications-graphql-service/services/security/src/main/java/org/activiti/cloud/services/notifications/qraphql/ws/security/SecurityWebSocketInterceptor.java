@@ -27,6 +27,7 @@ import org.springframework.graphql.server.support.AuthenticationExtractor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import reactor.core.publisher.Mono;
@@ -90,9 +91,12 @@ public class SecurityWebSocketInterceptor extends AbstractAuthenticationWebSocke
     private void authorize(WebSocketSessionInfo sessionInfo) {
         Map<String, Object> attributes = sessionInfo.getAttributes();
         SecurityContext securityContext = (SecurityContext) attributes.get(authenticationAttribute);
-        var authorizationDecision = authorizationManager.check(securityContext::getAuthentication, null);
-        if (authorizationDecision != null && !authorizationDecision.isGranted()) {
-            throw new AuthorizationDeniedException("Access denied", authorizationDecision);
+        AuthorizationResult authorizationResult = authorizationManager.authorize(
+            securityContext::getAuthentication,
+            null
+        );
+        if (authorizationResult != null && !authorizationResult.isGranted()) {
+            throw new AuthorizationDeniedException("Access denied", authorizationResult);
         }
     }
 }
