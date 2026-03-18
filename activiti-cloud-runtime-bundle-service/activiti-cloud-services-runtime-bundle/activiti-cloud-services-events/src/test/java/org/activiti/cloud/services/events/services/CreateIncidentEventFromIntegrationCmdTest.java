@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -156,6 +157,46 @@ class CreateIncidentEventFromIntegrationCmdTest {
                 entry("routingKey", "engineEvents.springAppName.appName"),
                 entry("messagePayloadType", "java.util.ArrayList")
             );
+    }
+
+    @Test
+    void shouldDefaultSeverityToError() {
+        var executionContext = TestUtils.mockExecutionContext();
+
+        Message<ArrayList<Object>> message =
+            this.createIncidentEventFromIntegrationCmd.createMessage(executionContext, this.testException);
+
+        var incident = (CloudIncidentCreatedEventImpl) ((List) message.getPayload()).get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldCreateIncidentEventWithWarningSeverity() {
+        var integrationContext = mock(IntegrationContext.class);
+        lenient().when(integrationContext.getExecutionId()).thenReturn(EXECUTION_ID);
+
+        var cmd = spy(
+            new CreateIncidentEventFromIntegrationCmd(
+                integrationContext,
+                this.testException,
+                this.runtimeService,
+                this.messageBuilderChainIncidentFactory,
+                this.runtimeBundleInfoAppender,
+                IncidentSeverity.WARNING
+            )
+        );
+
+        var executionContext = TestUtils.mockExecutionContext();
+
+        Message<ArrayList<Object>> message = cmd.createMessage(executionContext, this.testException);
+
+        var payload = (List) message.getPayload();
+        assertThat(payload).hasSize(1);
+
+        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
+        assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
     }
 
     private void mockExecutionQuery(ExecutionEntityImpl executionEntity) {

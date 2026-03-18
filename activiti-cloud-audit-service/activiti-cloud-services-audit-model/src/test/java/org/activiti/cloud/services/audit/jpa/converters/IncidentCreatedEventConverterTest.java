@@ -18,6 +18,7 @@ package org.activiti.cloud.services.audit.jpa.converters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.IncidentCreatedEventEntity;
@@ -53,6 +54,28 @@ class IncidentCreatedEventConverterTest {
     }
 
     @Test
+    void shouldCreateEventEntityWithDefaultSeverity() {
+        var event = getIncidentCreatedEvent();
+
+        var entity = this.incidentCreatedEventConverter.createEventEntity(event);
+
+        assertThat(entity.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldCreateEventEntityWithExplicitSeverity() {
+        var event = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test Exception"),
+            new IncidentContextImpl(),
+            IncidentSeverity.WARNING
+        );
+
+        var entity = this.incidentCreatedEventConverter.createEventEntity(event);
+
+        assertThat(entity.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
+    }
+
+    @Test
     void shouldCreateAPIEvent() {
         var createdEvent = getIncidentCreatedEvent();
         createdEvent.setSequenceNumber(100);
@@ -63,6 +86,30 @@ class IncidentCreatedEventConverterTest {
         assertThat(event.getErrorMessage()).isEqualTo("Test Exception");
         assertThat(event.getErrorClassName()).isEqualTo(IllegalArgumentException.class.getName());
         assertThat(event.getEntity()).isEqualTo(entity.getIncidentContext());
+    }
+
+    @Test
+    void shouldRoundTripDefaultSeverity() {
+        var createdEvent = getIncidentCreatedEvent();
+        var entity = new IncidentCreatedEventEntity(createdEvent);
+
+        var event = (CloudIncidentCreatedEventImpl) this.incidentCreatedEventConverter.createAPIEvent(entity);
+
+        assertThat(event.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldRoundTripExplicitWarningSeverity() {
+        var createdEvent = new CloudIncidentCreatedEventImpl(
+            new IllegalArgumentException("Test Exception"),
+            new IncidentContextImpl(),
+            IncidentSeverity.WARNING
+        );
+        var entity = new IncidentCreatedEventEntity(createdEvent);
+
+        var event = (CloudIncidentCreatedEventImpl) this.incidentCreatedEventConverter.createAPIEvent(entity);
+
+        assertThat(event.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
     }
 
     private CloudIncidentCreatedEventImpl getIncidentCreatedEvent() {
