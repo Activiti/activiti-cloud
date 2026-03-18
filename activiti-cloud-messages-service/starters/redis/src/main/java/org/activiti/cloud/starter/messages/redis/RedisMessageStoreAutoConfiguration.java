@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,7 +31,7 @@ import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.locks.LockRegistry;
 
-@AutoConfiguration(before = { MessagesCoreAutoConfiguration.class }, after = { RedisAutoConfiguration.class })
+@AutoConfiguration(before = { MessagesCoreAutoConfiguration.class }, after = { DataRedisAutoConfiguration.class })
 @ConditionalOnClass(RedisMessageStore.class)
 public class RedisMessageStoreAutoConfiguration {
 

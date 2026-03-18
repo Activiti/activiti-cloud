@@ -62,6 +62,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-data-redis</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-messages-tests</artifactId>
       <scope>test</scope>
