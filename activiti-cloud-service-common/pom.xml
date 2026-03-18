@@ -52,7 +52,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- temporary security fix -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
