@@ -56,6 +56,7 @@ class IncidentCreatedEventConverterTest {
     @Test
     void shouldCreateEventEntityWithDefaultSeverity() {
         var event = getIncidentCreatedEvent();
+        event.setSequenceNumber(0);
 
         var entity = this.incidentCreatedEventConverter.createEventEntity(event);
 
@@ -69,6 +70,7 @@ class IncidentCreatedEventConverterTest {
             new IncidentContextImpl(),
             IncidentSeverity.WARNING
         );
+        event.setSequenceNumber(0);
 
         var entity = this.incidentCreatedEventConverter.createEventEntity(event);
 
@@ -91,6 +93,7 @@ class IncidentCreatedEventConverterTest {
     @Test
     void shouldRoundTripDefaultSeverity() {
         var createdEvent = getIncidentCreatedEvent();
+        createdEvent.setSequenceNumber(0);
         var entity = new IncidentCreatedEventEntity(createdEvent);
 
         var event = (CloudIncidentCreatedEventImpl) this.incidentCreatedEventConverter.createAPIEvent(entity);
@@ -105,6 +108,7 @@ class IncidentCreatedEventConverterTest {
             new IncidentContextImpl(),
             IncidentSeverity.WARNING
         );
+        createdEvent.setSequenceNumber(0);
         var entity = new IncidentCreatedEventEntity(createdEvent);
 
         var event = (CloudIncidentCreatedEventImpl) this.incidentCreatedEventConverter.createAPIEvent(entity);
