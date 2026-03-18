@@ -38,7 +38,6 @@
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
     <activiti.version>0.0.1-PR-5331-2692-SNAPSHOT</activiti.version>
-    <commons-lang3.version>3.20.0</commons-lang3.version>
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
     <logstash.version>8.1</logstash.version>
@@ -53,12 +52,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- temporary security fix for AAE-36930 -->
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang3.version}</version>
-      </dependency>
       <!-- temporary security fix -->
       <dependency>
         <groupId>org.activiti.cloud</groupId>

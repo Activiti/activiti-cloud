@@ -30,12 +30,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- security fix AAE-36687, to be removed after Spring Boot update with that version included -->
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang3.version}</version>
-      </dependency>
       <!-- security fix AAE-36687 -->
       <dependency>
         <groupId>org.aspectj</groupId>
