@@ -29,15 +29,6 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- Security fix AAE-42677 -->
-      <!-- Update netty separately -->
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-bom</artifactId>
-        <version>${netty.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
