@@ -415,11 +415,19 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .withName("sub-process")
             .withInitiator(USER)
             .buildAndSave();
+
+        ProcessInstanceEntity subSubProcessInstance = queryTestUtils
+            .buildProcessInstance()
+            .subprocessOf(subProcessInstance)
+            .withName("sub-sub-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
         ProcessInstanceEntity linkedProcessInstance = queryTestUtils
             .buildProcessInstance()
-            .subprocessOf(rootProcessInstance)
             .withName("linked-process")
             .withLinkedProcessInstanceId(rootProcessInstance.getId())
+            .withLinkedProcessInstanceType("form-type")
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
@@ -432,9 +440,10 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
-            .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(rootProcessInstance.getId())))
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcessInstance.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subProcessInstance.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(subSubProcessInstance.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(linkedProcessInstance.getId()));
     }
 
@@ -459,7 +468,6 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .buildProcessInstance()
             .withName("linked-process")
             .withLinkedProcessInstanceId(rootProcessInstance.getId())
-            .subprocessOf(rootProcessInstance)
             .withLinkedProcessInstanceType("task-form")
             .buildAndSave();
 

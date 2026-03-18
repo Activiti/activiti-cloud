@@ -295,10 +295,7 @@ public class ProcessInstanceSpecification
             predicates.add(
                 criteriaBuilder.or(
                     root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.getProcessRelatedTo()),
-                    criteriaBuilder.and(
-                        root.get(ProcessInstanceEntity_.parentId).isNotNull(),
-                        root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
-                    )
+                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
                 )
             );
         }
