@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -104,7 +105,12 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
             () -> this.runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
         );
 
-        verify(this.incidentService).createAndSendIncidentEvent(this.executionContextCaptor.capture(), any());
+        verify(this.incidentService)
+            .createAndSendIncidentEvent(
+                this.executionContextCaptor.capture(),
+                any(Exception.class),
+                any(IncidentSeverity.class)
+            );
 
         var executionContextCaptorValue = this.executionContextCaptor.getValue();
         assertThat(executionContextCaptorValue.getProcessInstance().getProcessInstanceId()).isNotEmpty();
