@@ -103,18 +103,21 @@ public class ProcessInstanceSearchService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId, Pageable pageable) {
+    public Page<ProcessInstanceEntity> unrestrictedLinkedProcesses(
+        Set<String> linkedProcessInstanceIds,
+        Pageable pageable
+    ) {
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceId
+            linkedProcessInstanceIds
         );
 
         return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<ProcessInstanceEntity> unrestrictedLinkedProcesses(String linkedProcessInstanceId) {
+    public List<ProcessInstanceEntity> unrestrictedLinkedProcesses(Set<String> linkedProcessInstanceIds) {
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceId
+            linkedProcessInstanceIds
         );
 
         return processInstanceRepository.findAll(unrestrictedSpecification);

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest.payload;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Set;
 import org.activiti.api.process.model.ProcessInstance;
@@ -48,6 +49,9 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
     private Boolean includeUnlinkedProcesses;
     private Boolean includeLinkedProcesses;
 
+    @JsonIgnore
+    private Set<String> subprocessParentIds;
+
     public ProcessInstanceSearchRequest() {}
 
     public ProcessInstanceSearchRequest(
@@ -74,7 +78,8 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         Set<String> linkedProcessInstanceType,
         Set<String> processRelatedTo,
         Boolean includeUnlinkedProcesses,
-        Boolean includeLinkedProcesses
+        Boolean includeLinkedProcesses,
+        Set<String> subprocessParentIds
     ) {
         this.id = id;
         this.parentId = parentId;
@@ -100,6 +105,7 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
         this.processRelatedTo = processRelatedTo;
         this.includeUnlinkedProcesses = includeUnlinkedProcesses;
         this.includeLinkedProcesses = includeLinkedProcesses;
+        this.subprocessParentIds = subprocessParentIds;
     }
 
     @Override
@@ -312,5 +318,13 @@ public class ProcessInstanceSearchRequest implements CloudRuntimeEntityFilterReq
 
     public void setIncludeLinkedProcesses(Boolean includeLinkedProcesses) {
         this.includeLinkedProcesses = includeLinkedProcesses;
+    }
+
+    public Set<String> getSubprocessParentIds() {
+        return subprocessParentIds;
+    }
+
+    public void setSubprocessParentIds(Set<String> subprocessParentIds) {
+        this.subprocessParentIds = subprocessParentIds;
     }
 }
