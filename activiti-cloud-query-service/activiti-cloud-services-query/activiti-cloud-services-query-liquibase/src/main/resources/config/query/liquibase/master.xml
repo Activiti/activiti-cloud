@@ -759,4 +759,32 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter37-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/37-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+    <rollback>
+      CREATE INDEX idx_task_var_name_value_btree
+      ON task_variable (name, JSON_SERIALIZE(value RETURNING VARCHAR2(4000)))
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter37-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/37-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_task_var_name_value_btree
+      ON task_variable (name, (value::text));
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>

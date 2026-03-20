@@ -40,7 +40,6 @@ import org.hibernate.annotations.DynamicUpdate;
         @Index(name = "task_var_taskId_idx", columnList = "taskId", unique = false),
         @Index(name = "task_var_name_idx", columnList = "name", unique = false),
         @Index(name = "task_var_executionId_idx", columnList = "executionId", unique = false),
-        @Index(name = "idx_task_var_name_value_btree", columnList = "name, value", unique = false),
     }
 )
 @DynamicInsert

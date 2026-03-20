@@ -1,6 +1,7 @@
 ---
-engines:
-  tsqllint:
-    exclude_paths:
-      - "**/*.h2.schema*.sql"
-      - "**/h2.schema.sql"
+exclude_paths:
+  - "**/*.pg.schema*.sql"
+  - "**/*.oracle.schema*.sql"
+  - "**/oracle.schema.sql"
+  - "**/*.h2.schema*.sql"
+  - "**/h2.schema.sql"
