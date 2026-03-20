@@ -768,12 +768,8 @@
              splitStatements="false"
              stripComments="true"/>
     <rollback>
-      BEGIN
-        EXECUTE IMMEDIATE 'DROP INDEX idx_task_var_name_value_btree';
-      EXCEPTION
-        WHEN OTHERS THEN
-          IF SQLCODE != -1418 THEN RAISE; END IF;
-      END;
+      CREATE INDEX idx_task_var_name_value_btree
+      ON task_variable (name, JSON_SERIALIZE(value RETURNING VARCHAR2(4000)))
     </rollback>
   </changeSet>
 
@@ -786,7 +782,8 @@
              splitStatements="true"
              stripComments="true"/>
     <rollback>
-      DROP INDEX IF EXISTS idx_task_var_name_value_btree;
+      CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_task_var_name_value_btree
+      ON task_variable (name, (value::text));
     </rollback>
   </changeSet>
 
