@@ -4,3 +4,6 @@ engines:
     exclude_paths:
       - "**/*.h2.schema*.sql"
       - "**/h2.schema.sql"
+      - "**/*.pg.schema*.sql"
+      - "**/*.oracle.schema*.sql"
+      - "**/oracle.schema.sql"
