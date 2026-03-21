@@ -22,7 +22,7 @@
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.132.Final</netty.version>
     <jackson.version>3.0.4</jackson.version>
-    <rest-assured.version>5.5.6</rest-assured.version>
+    <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
   </properties>
@@ -86,6 +86,17 @@
         <groupId>io.rest-assured</groupId>
         <artifactId>spring-mock-mvc</artifactId>
         <version>${rest-assured.version}</version>
+      </dependency>
+      <!-- Exclude android-json stub from jsonassert -->
+      <dependency>
+        <groupId>org.skyscreamer</groupId>
+        <artifactId>jsonassert</artifactId>
+        <exclusions>
+          <exclusion>
+            <groupId>com.vaadin.external.google</groupId>
+            <artifactId>android-json</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>

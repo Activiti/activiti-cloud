@@ -84,8 +84,8 @@ class EventsEngineEventsAdminControllerIT {
     private static String CSV_CONTENT =
         """
         "ACTOR","APPNAME","APPVERSION","BUSINESSKEY","ENTITY","ENTITYID","EVENTTYPE","ID","MESSAGEID","PARENTPROCESSINSTANCEID","PROCESSDEFINITIONID","PROCESSDEFINITIONKEY","PROCESSDEFINITIONVERSION","PROCESSINSTANCEID","SEQUENCENUMBER","SERVICEFULLNAME","SERVICENAME","SERVICETYPE","SERVICEVERSION","TIME"
-        "service_user","testApp","","","{""appVersion"":null,""id"":""10"",""name"":null,""processDefinitionId"":""1"",""processDefinitionKey"":null,""initiator"":null,""startDate"":null,""completedDate"":null,""businessKey"":null,""status"":null,""parentId"":null,""processDefinitionVersion"":null,""processDefinitionName"":null,""rootProcessInstanceId"":null}","","PROCESS_STARTED","processEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
-        "service_user","testApp","","","{""name"":""var"",""type"":null,""processInstanceId"":""processId"",""value"":null,""taskId"":""taskId"",""taskVariable"":true}","var","VARIABLE_CREATED","variableEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
+        "service_user","testApp","","","{""appVersion"":null,""businessKey"":null,""completedDate"":null,""id"":""10"",""initiator"":null,""name"":null,""parentId"":null,""processDefinitionId"":""1"",""processDefinitionKey"":null,""processDefinitionName"":null,""processDefinitionVersion"":null,""rootProcessInstanceId"":null,""startDate"":null,""status"":null}","","PROCESS_STARTED","processEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
+        "service_user","testApp","","","{""name"":""var"",""type"":null,""value"":null,""processInstanceId"":""processId"",""taskId"":""taskId"",""taskVariable"":true}","var","VARIABLE_CREATED","variableEventId","","","1","","","10","0","","rb-my-app","","","2022-07-07 14:59:37"
         """;
 
     @MockitoBean

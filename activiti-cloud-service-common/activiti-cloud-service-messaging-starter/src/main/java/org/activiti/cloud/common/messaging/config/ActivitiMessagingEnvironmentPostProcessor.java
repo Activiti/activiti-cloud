@@ -20,8 +20,8 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
 import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties.MessagingBroker;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.EnvironmentPostProcessor;
+import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 

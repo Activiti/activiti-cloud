@@ -35,7 +35,8 @@ import org.springframework.stereotype.Component;
     input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,
     condition = "headers['processDefinitionVersion']!=null",
     outputHeader = "",
-    connectorType = "headers.GET"
+    connectorType = "headers.GET",
+    inputType = IntegrationRequest.class
 )
 @Component(HEADERS_CONNECTOR_CONSUMER + "Connector")
 public class HeadersConnector implements ConsumerConnector<Message<IntegrationRequest>> {

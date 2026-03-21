@@ -61,6 +61,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.rabbitmq.RabbitMQContainer;
 
@@ -80,7 +81,9 @@ public class QueryRestApplicationIT {
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").withReuse(true);
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
+        .withReuse(true)
+        .waitingFor(Wait.forListeningPort());
 
     @Autowired
     protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;

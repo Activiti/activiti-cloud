@@ -58,6 +58,7 @@ import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
@@ -78,6 +79,7 @@ import tools.jackson.databind.node.JsonNodeFactory;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@AutoConfigureTestRestTemplate
 @DirtiesContext
 public class ProcessVariablesIT {
 
@@ -405,7 +407,7 @@ public class ProcessVariablesIT {
 
     private void updateDateVariableWithADate(boolean isAdmin, String processInstanceId) {
         Map<String, Object> variables = new HashMap<>();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = new Date();
 

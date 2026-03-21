@@ -276,6 +276,11 @@
           <artifactId>json-unit-assertj</artifactId>
           <scope>test</scope>
       </dependency>
+      <dependency>
+          <groupId>org.json</groupId>
+          <artifactId>json</artifactId>
+          <scope>test</scope>
+      </dependency>
   </dependencies>
   <build>
     <plugins>

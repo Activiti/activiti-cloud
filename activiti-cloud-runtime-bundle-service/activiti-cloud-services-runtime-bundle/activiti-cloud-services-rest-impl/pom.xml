@@ -176,14 +176,24 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-connectors</artifactId>
     </dependency>
-      <dependency>
-          <groupId>net.javacrumbs.json-unit</groupId>
-          <artifactId>json-unit-assertj</artifactId>
-          <scope>test</scope>
-      </dependency>
+    <dependency>
+       <groupId>net.javacrumbs.json-unit</groupId>
+       <artifactId>json-unit-assertj</artifactId>
+       <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-security</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-hateoas</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

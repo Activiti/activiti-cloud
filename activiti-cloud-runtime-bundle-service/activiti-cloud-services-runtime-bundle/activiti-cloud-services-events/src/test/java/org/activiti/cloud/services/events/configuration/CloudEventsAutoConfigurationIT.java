@@ -31,30 +31,29 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class CloudEventsAutoConfigurationIT {
 
+    @MockitoBean
+    private RuntimeService runtimeService;
+
+    @MockitoBean
+    private ManagementService managementService;
+
+    @MockitoBean
+    private TaskService taskService;
+
+    @MockitoBean
+    private UserGroupManager userGroupManager;
+
+    @MockitoBean
+    private SecurityManager securityManager;
+
+    @MockitoBean
+    private RepositoryService repositoryService;
+
+    @MockitoBean
+    private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
+
     @SpringBootApplication
-    static class MockRuntimeBundleApplication {
-
-        @MockitoBean
-        private RuntimeService runtimeService;
-
-        @MockitoBean
-        private ManagementService managementService;
-
-        @MockitoBean
-        private TaskService taskService;
-
-        @MockitoBean
-        private UserGroupManager userGroupManager;
-
-        @MockitoBean
-        private SecurityManager securityManager;
-
-        @MockitoBean
-        private RepositoryService repositoryService;
-
-        @MockitoBean
-        private ProcessSecurityPoliciesManager processSecurityPoliciesManager;
-    }
+    static class MockRuntimeBundleApplication {}
 
     @Test
     void contextLoads() {

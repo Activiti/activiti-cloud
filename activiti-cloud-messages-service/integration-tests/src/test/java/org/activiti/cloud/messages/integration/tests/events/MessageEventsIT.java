@@ -65,6 +65,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.bean.override.mockito.MockReset;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -90,7 +91,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 class MessageEventsIT {
 
     @Container
-    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:15");
+    private static PostgreSQLContainer postgresContainer = new PostgreSQLContainer("postgres:15")
+        .waitingFor(Wait.forListeningPort());
 
     private static final String BOUNDARY_SUBPROCESS_THROW_CATCH_MESSAGE_IT_PROCESS1 =
         "BoundarySubprocessThrowCatchMessageIT_Process1";

@@ -18,12 +18,14 @@ package org.activiti.cloud.starter.messages.test.jdbc;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 public class PostgresApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer("postgres:10")
-        .withReuse(false);
+        .withReuse(false)
+        .waitingFor(Wait.forListeningPort());
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {

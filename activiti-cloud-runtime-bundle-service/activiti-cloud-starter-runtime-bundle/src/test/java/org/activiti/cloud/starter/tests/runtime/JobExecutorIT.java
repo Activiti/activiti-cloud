@@ -63,11 +63,14 @@ import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -103,6 +106,8 @@ import org.springframework.transaction.support.TransactionTemplate;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@AutoConfigureTestRestTemplate
+@ExtendWith(MockitoExtension.class)
 @DirtiesContext
 public class JobExecutorIT {
 

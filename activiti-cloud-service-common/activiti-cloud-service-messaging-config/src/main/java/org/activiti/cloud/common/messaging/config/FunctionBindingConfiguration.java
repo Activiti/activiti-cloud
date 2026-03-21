@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -35,15 +36,18 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -51,6 +55,7 @@ import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import tools.jackson.databind.ObjectMapper;
 
@@ -123,7 +128,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        GenericApplicationContext applicationContext
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -156,7 +162,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            if (Supplier.class.isInstance(bean)) {
+                            if (bean instanceof Supplier) {
                                 FunctionInvocationWrapper supplier = functionFromDefinition(functionDefinition);
 
                                 IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow
@@ -174,8 +180,9 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                    function.setSkipOutputConversion(true);
-                                    Object result = function.apply(message);
+                                    function.setSkipOutputConversion(false);
+                                    Message<?> messageToProcess = message;
+                                    Object result = function.apply(messageToProcess);
                                     if (result instanceof Message<?> msg) {
                                         return msg;
                                     }
@@ -184,7 +191,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
                                     .from(
-                                        getGatewayInterface(Function.class.isInstance(bean)),
+                                        getGatewayInterface(bean instanceof Function),
                                         gateway -> gateway.replyTimeout(0L)
                                     )
                                     .log(DEBUG, beanName + "." + functionBinding.input())

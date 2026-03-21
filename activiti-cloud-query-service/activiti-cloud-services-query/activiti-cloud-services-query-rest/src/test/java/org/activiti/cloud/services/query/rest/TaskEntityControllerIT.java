@@ -272,7 +272,7 @@ class TaskEntityControllerIT {
             .inPath("entry.permissions")
             .isArray()
             .hasSize(1)
-            .contains(TaskPermissions.VIEW);
+            .contains("VIEW");
     }
 
     @Test

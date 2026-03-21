@@ -53,7 +53,8 @@ public class TaskCandidateUserId implements Serializable {
         if (taskId == null) {
             if (other.taskId != null) return false;
         } else if (!taskId.equals(other.taskId)) return false;
-        if (userId != other.userId) return false;
-        return true;
+        if (userId == null) {
+            return other.userId == null;
+        } else return userId.equals(other.userId);
     }
 }

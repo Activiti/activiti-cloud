@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.config;
 
 import java.util.Map;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.hibernate.cfg.MappingSettings;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
@@ -32,5 +33,6 @@ public class CustomHibernateAutoConfiguration implements HibernatePropertiesCust
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put("hibernate.dialect", CustomPostgreSQLDialect.class.getName());
         hibernateProperties.put("hibernate.order_by.default_null_ordering", "last");
+        hibernateProperties.put(MappingSettings.JSON_FORMAT_MAPPER, new Jackson3JsonFormatMapper());
     }
 }

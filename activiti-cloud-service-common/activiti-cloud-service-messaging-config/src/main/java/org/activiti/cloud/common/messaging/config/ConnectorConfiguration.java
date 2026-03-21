@@ -89,7 +89,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
-                            final Type functionType = discoverFunctionType(bean, beanName);
+                            final Type functionType = connectorBinding.inputType() != Void.class
+                                ? buildFunctionType(bean, connectorBinding.inputType())
+                                : discoverFunctionType(bean, beanName);
                             final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration<Object> functionRegistration = new FunctionRegistration<>(bean)
@@ -106,7 +108,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             GenericHandler<Message> handler = (message, headers) -> {
                                 FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                 function.setSkipOutputConversion(true);
-                                Object result = function.apply(message);
+                                Message<?> messageToProcess = message;
+
+                                Object result = function.apply(messageToProcess);
 
                                 if (result instanceof Message<?> msg) {
                                     result = msg.getPayload();
