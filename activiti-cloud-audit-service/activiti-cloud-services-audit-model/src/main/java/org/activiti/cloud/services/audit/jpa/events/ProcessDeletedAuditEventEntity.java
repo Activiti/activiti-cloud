@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessDeletedAuditEventEntity.PROCESS_DELETED_EVENT)
 @DiscriminatorValue(value = ProcessDeletedAuditEventEntity.PROCESS_DELETED_EVENT)

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;

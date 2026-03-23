@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl.events;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import org.activiti.api.process.model.IntegrationContext;

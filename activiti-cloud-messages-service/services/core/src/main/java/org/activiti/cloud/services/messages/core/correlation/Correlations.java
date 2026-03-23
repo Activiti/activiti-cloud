@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.messages.core.correlation;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.*;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_CORRELATION_KEY;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_NAME;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;

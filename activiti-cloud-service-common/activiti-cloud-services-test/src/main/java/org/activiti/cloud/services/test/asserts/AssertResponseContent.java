@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 import io.restassured.module.mockmvc.response.MockMvcResponse;

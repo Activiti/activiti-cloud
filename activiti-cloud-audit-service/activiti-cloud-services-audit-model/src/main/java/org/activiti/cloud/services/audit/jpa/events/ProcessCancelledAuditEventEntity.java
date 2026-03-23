@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudProcessCancelledEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)
 @DiscriminatorValue(value = ProcessCancelledAuditEventEntity.PROCESS_CANCELLED_EVENT)

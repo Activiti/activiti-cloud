@@ -20,7 +20,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.activiti.cloud.identity.exceptions.*;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidRoleException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserTypeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ExceptionHandler;

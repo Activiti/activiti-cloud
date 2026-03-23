@@ -20,7 +20,9 @@ import java.util.Optional;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserRemovedEvent;
-import org.activiti.cloud.services.query.model.*;
+import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserEntity;
+import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserId;
+import org.activiti.cloud.services.query.model.QueryException;
 
 public class ProcessCandidateStarterUserRemovedEventHandler implements QueryEventHandler {
 
