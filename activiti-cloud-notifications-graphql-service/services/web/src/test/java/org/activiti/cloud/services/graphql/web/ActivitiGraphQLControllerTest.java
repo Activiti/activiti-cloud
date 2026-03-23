@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -60,7 +61,13 @@ public class ActivitiGraphQLControllerTest {
 
     @Configuration
     @Import(GraphQLController.class)
-    static class Config {}
+    static class Config {
+
+        @Bean
+        ObjectMapper jackson2ObjectMapper() {
+            return new ObjectMapper();
+        }
+    }
 
     /**
      * Mock executor responses to be non-null in order for Mock MVC

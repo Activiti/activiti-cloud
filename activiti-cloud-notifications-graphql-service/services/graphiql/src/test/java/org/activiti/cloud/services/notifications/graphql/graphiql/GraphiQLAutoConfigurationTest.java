@@ -18,10 +18,13 @@ package org.activiti.cloud.services.notifications.graphql.graphiql;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
@@ -29,6 +32,9 @@ public class GraphiQLAutoConfigurationTest {
 
     @MockitoBean
     private BuildProperties buildProperties;
+
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private KeycloakJsonController keycloakJsonController;
@@ -40,6 +46,7 @@ public class GraphiQLAutoConfigurationTest {
     private GraphiQLIndexController graphiQLIndexController;
 
     @SpringBootApplication
+    @EnableAutoConfiguration(exclude = { SpringDocConfiguration.class })
     static class Application {
         //
     }
