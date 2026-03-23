@@ -19,6 +19,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -38,6 +39,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
     private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
+    private final LockRegistry lockRegistry;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -61,7 +64,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
+        LockRegistry lockRegistry
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -70,12 +74,13 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
         this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
+        this.lockRegistry = lockRegistry;
     }
 
     @Retryable(
         value = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
+        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:100}")
     )
     @Transactional(propagation = REQUIRES_NEW)
     public void receive(IntegrationResult integrationResult) {
@@ -85,67 +90,78 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         if (integrationContextEntity != null) {
-            List<Command<?>> commands = new ArrayList<>();
-
-            commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
-
-            String executionId = integrationContext.getExecutionId();
-            List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
-            if (executions.size() > 0) {
-                Execution execution = executions.getFirst();
-
-                if (execution.getActivityId().equals(integrationContext.getClientId())) {
-                    commands.add(
-                        new TriggerCmd(
-                            integrationContext.getExecutionId(),
-                            integrationContext.getOutBoundVariables(),
-                            variablesPropagator
-                        )
-                    );
-                } else {
-                    LOGGER.warn(
-                        "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
-                        integrationContext.getClientId(),
-                        integrationResult,
-                        execution.getId()
-                    );
-                }
-            } else {
-                String message =
-                    "No task is in this RB is waiting for integration result with execution id `" +
-                    executionId +
-                    ", flow node id `" +
-                    integrationContext.getClientId() +
-                    "`. The integration result for the integration context `" +
-                    integrationContext.getId() +
-                    "` will be ignored.";
-                LOGGER.warn(message);
-            }
-
-            commands.add(
-                new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator
-                )
-            );
-
+            Lock lock = lockRegistry.obtain(integrationContext.getProcessInstanceId());
             try {
-                managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
-            } catch (ActivitiOptimisticLockingException e) {
-                throw e;
-            } catch (Exception triggerException) {
-                LOGGER.warn(
-                    "Failed to update integration context {}. It might have been already deleted.",
-                    integrationContext.getId(),
-                    triggerException
+                lock.lockInterruptibly();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProcessInstanceLockException(integrationContext.getProcessInstanceId(), e);
+            }
+            try {
+                List<Command<?>> commands = new ArrayList<>();
+
+                commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
+
+                String executionId = integrationContext.getExecutionId();
+                List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
+                if (executions.size() > 0) {
+                    Execution execution = executions.getFirst();
+
+                    if (execution.getActivityId().equals(integrationContext.getClientId())) {
+                        commands.add(
+                            new TriggerCmd(
+                                integrationContext.getExecutionId(),
+                                integrationContext.getOutBoundVariables(),
+                                variablesPropagator
+                            )
+                        );
+                    } else {
+                        LOGGER.warn(
+                            "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                            integrationContext.getClientId(),
+                            integrationResult,
+                            execution.getId()
+                        );
+                    }
+                } else {
+                    String message =
+                        "No task is in this RB is waiting for integration result with execution id `" +
+                        executionId +
+                        ", flow node id `" +
+                        integrationContext.getClientId() +
+                        "`. The integration result for the integration context `" +
+                        integrationContext.getId() +
+                        "` will be ignored.";
+                    LOGGER.warn(message);
+                }
+
+                commands.add(
+                    new AggregateIntegrationResultReceivedEventCmd(
+                        integrationContext,
+                        runtimeBundleProperties,
+                        processEngineEventsAggregator
+                    )
                 );
-                IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
-                IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
-                this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
-                        integrationError,
-                        integrationContextEntity
+
+                try {
+                    managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+                } catch (ActivitiOptimisticLockingException e) {
+                    throw e;
+                } catch (Exception triggerException) {
+                    LOGGER.warn(
+                        "Failed to update integration context {}. It might have been already deleted.",
+                        integrationContext.getId(),
+                        triggerException
                     );
+                    IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
+                    IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
+                    this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
+                            integrationError,
+                            integrationContextEntity
+                        );
+                }
+            } finally {
+                lock.unlock();
             }
         }
     }

@@ -20,7 +20,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -47,9 +50,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.integration.support.locks.LockRegistry;
 
 @ExtendWith(MockitoExtension.class)
 class ServiceTaskIntegrationResultEventHandlerTest {
@@ -77,8 +82,15 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Mock
     private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
+    @Mock
+    private LockRegistry lockRegistry;
+
+    @Mock
+    private Lock lock;
+
     @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
+        doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -102,6 +114,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receive_should_bubbleOptimisticLockingExceptionForRetry() {
+        doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -120,6 +133,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receive_should_delegateGenericExceptionToCompletionHandler() {
+        doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -142,6 +156,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
         //given
+        doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -176,6 +191,59 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContextEntity.setProcessInstanceId(PROC_INST_ID);
         integrationContextEntity.setProcessDefinitionId(PROC_DEF_ID);
         return integrationContextEntity;
+    }
+
+    @Test
+    void receive_should_acquireAndReleaseLockByProcessInstanceId() throws InterruptedException {
+        doReturn(lock).when(lockRegistry).obtain(any());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        List<Execution> executions = List.of(buildExecutionEntity());
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        verify(lockRegistry).obtain(PROC_INST_ID);
+        InOrder inOrder = inOrder(lock, managementService);
+        inOrder.verify(lock).lockInterruptibly();
+        inOrder.verify(managementService).executeCommand(any());
+        inOrder.verify(lock).unlock();
+    }
+
+    @Test
+    void receive_should_releaseLockEvenWhenCommandThrows() throws InterruptedException {
+        doReturn(lock).when(lockRegistry).obtain(any());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        List<Execution> executions = List.of(buildExecutionEntity());
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
+
+        ActivitiOptimisticLockingException ex = new ActivitiOptimisticLockingException("concurrent update");
+        doThrow(ex).when(managementService).executeCommand(any());
+
+        assertThatThrownBy(() ->
+                handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
+            )
+            .isSameAs(ex);
+
+        verify(lock).lockInterruptibly();
+        verify(lock).unlock();
+    }
+
+    @Test
+    void receive_should_notAcquireLockWhenIntegrationContextEntityIsNull() throws InterruptedException {
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        verify(lockRegistry, never()).obtain(any());
+        verify(lock, never()).lockInterruptibly();
+        verify(lock, never()).unlock();
     }
 
     @Test

@@ -42,6 +42,7 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -79,6 +80,9 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockitoBean
     private BuildProperties buildProperties;
+
+    @MockitoBean
+    private LockRegistry lockRegistry;
 
     @BeforeEach
     public void beforeEach() {

@@ -50,6 +50,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.EnableRetry;
 
@@ -70,7 +71,8 @@ public class CloudConnectorsAutoConfiguration {
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
-        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler
+        ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
+        LockRegistry lockRegistry
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
@@ -79,7 +81,8 @@ public class CloudConnectorsAutoConfiguration {
             managementService,
             processEngineEventsAggregator,
             variablesPropagator,
-            serviceTaskIntegrationCompletionHandler
+            serviceTaskIntegrationCompletionHandler,
+            lockRegistry
         );
     }
 
