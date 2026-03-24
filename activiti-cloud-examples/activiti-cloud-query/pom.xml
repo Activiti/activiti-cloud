@@ -12,7 +12,7 @@
   <name>Activiti Cloud :: Query</name>
 
   <properties>
-    <graphql-java.version>22.1</graphql-java.version>
+    <graphql-java.version>25.0</graphql-java.version>
   </properties>
 
   <modules>

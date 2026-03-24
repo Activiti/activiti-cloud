@@ -53,6 +53,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
 @TestPropertySource("classpath:application-test.properties")
@@ -78,6 +79,11 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @SpringBootApplication
     static class TestApplication {
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
 
         @Bean
         RestrictedKeysProvider restrictedKeysProviderMock() {
