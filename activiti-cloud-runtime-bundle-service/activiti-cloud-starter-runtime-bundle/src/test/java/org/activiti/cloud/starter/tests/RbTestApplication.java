@@ -16,11 +16,14 @@
 package org.activiti.cloud.starter.tests;
 
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
+import org.activiti.cloud.starter.tests.conf.ITLockRegistryConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
+@Import(ITLockRegistryConfiguration.class)
 public class RbTestApplication {
 
     public static void main(String[] args) {

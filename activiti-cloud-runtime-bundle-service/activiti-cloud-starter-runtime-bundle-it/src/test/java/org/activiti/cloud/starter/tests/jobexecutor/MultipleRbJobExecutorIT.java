@@ -38,11 +38,16 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.integration.support.locks.DefaultLockRegistry;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.test.util.TestSocketUtils;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -62,7 +67,18 @@ class MultipleRbJobExecutorIT {
 
     @SpringBootApplication
     @ActivitiRuntimeBundle
+    @Import(RbApplication.LockRegistryConfiguration.class)
     static class RbApplication {
+
+        @Configuration
+        static class LockRegistryConfiguration {
+
+            @Bean
+            @ConditionalOnMissingBean(LockRegistry.class)
+            LockRegistry lockRegistry() {
+                return new DefaultLockRegistry();
+            }
+        }
 
         @Bean
         public JobMessageHandlerFactory jobMessageHandlerFactory() {
@@ -100,8 +116,12 @@ class MultipleRbJobExecutorIT {
 
     @AfterAll
     static void tearDown() {
-        rbCtx1.close();
-        rbCtx2.close();
+        if (rbCtx2 != null) {
+            rbCtx2.close();
+        }
+        if (rbCtx1 != null) {
+            rbCtx1.close();
+        }
     }
 
     @Test

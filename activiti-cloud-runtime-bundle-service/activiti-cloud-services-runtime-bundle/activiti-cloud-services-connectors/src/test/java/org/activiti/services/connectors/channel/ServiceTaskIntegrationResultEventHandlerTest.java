@@ -37,9 +37,12 @@ import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
@@ -81,6 +84,15 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Mock
     private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
+
+    @Mock
+    private RuntimeBundleProperties runtimeBundleProperties;
+
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    @Mock
+    private VariablesPropagator variablesPropagator;
 
     @Mock
     private LockRegistry lockRegistry;
