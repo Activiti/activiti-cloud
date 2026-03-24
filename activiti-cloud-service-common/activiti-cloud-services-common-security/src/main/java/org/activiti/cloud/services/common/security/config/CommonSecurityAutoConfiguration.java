@@ -82,13 +82,17 @@ public class CommonSecurityAutoConfiguration {
     @Value("${cors.allowedOrigins:*}")
     private List<String> allowedOrigins;
 
+    private final List<HttpSecurityCustomizer> httpSecurityCustomizers;
+
     @Autowired
     public CommonSecurityAutoConfiguration(
         AuthorizationConfigurer authorizationConfigurer,
-        Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter
+        Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter,
+        @Autowired(required = false) List<HttpSecurityCustomizer> httpSecurityCustomizers
     ) {
         this.authorizationConfigurer = authorizationConfigurer;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+        this.httpSecurityCustomizers = httpSecurityCustomizers != null ? httpSecurityCustomizers : List.of();
     }
 
     @Bean
@@ -201,7 +205,7 @@ public class CommonSecurityAutoConfiguration {
     @SuppressWarnings({ "java:S4502", "java:S5122" })
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
-        return http
+        http
             .authorizeHttpRequests(spec ->
                 spec.requestMatchers(actuatorEndpointsMatcher()).authenticated().anyRequest().permitAll()
             )
@@ -217,8 +221,13 @@ public class CommonSecurityAutoConfiguration {
                 spec.accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             )
             .httpBasic(spec -> spec.disable())
-            .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
-            .build();
+            .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+
+        for (HttpSecurityCustomizer customizer : httpSecurityCustomizers) {
+            customizer.customize(http);
+        }
+
+        return http.build();
     }
 
     private RequestMatcher actuatorEndpointsMatcher() {
