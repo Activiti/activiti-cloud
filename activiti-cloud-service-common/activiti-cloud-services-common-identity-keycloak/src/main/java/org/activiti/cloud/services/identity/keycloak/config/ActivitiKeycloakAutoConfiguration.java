@@ -33,8 +33,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.http.converter.autoconfigure.ClientHttpMessageConvertersCustomizer;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.cloud.openfeign.support.FeignHttpMessageConverters;
+import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
@@ -97,6 +99,15 @@ public class ActivitiKeycloakAutoConfiguration {
         @Value("${keycloak.realm}") String realm
     ) {
         return new RealmValidationCheck(authServerUrl, realm);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FeignHttpMessageConverters feignHttpMessageConverters(
+        ObjectProvider<ClientHttpMessageConvertersCustomizer> customizers,
+        ObjectProvider<HttpMessageConverterCustomizer> cloudCustomizers
+    ) {
+        return new FeignHttpMessageConverters(customizers, cloudCustomizers);
     }
 
     @Bean
