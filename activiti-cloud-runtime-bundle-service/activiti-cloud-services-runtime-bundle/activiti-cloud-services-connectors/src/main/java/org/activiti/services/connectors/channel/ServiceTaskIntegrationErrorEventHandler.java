@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -43,22 +41,19 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final RuntimeBundleProperties runtimeBundleProperties;
+    private final IntegrationEventCommandFactory integrationEventCommandFactory;
     private final ManagementService managementService;
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     public ServiceTaskIntegrationErrorEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        ManagementService managementService,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        IntegrationEventCommandFactory integrationEventCommandFactory,
+        ManagementService managementService
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.runtimeBundleProperties = runtimeBundleProperties;
+        this.integrationEventCommandFactory = integrationEventCommandFactory;
         this.managementService = managementService;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
     @Retryable(
@@ -106,11 +101,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
                             commands.add(
                                 new AggregateIntegrationErrorReceivedClosingEventCmd(
-                                    new AggregateIntegrationErrorReceivedEventCmd(
-                                        integrationError,
-                                        runtimeBundleProperties,
-                                        processEngineEventsAggregator
-                                    )
+                                    integrationEventCommandFactory.createErrorReceivedEventCmd(integrationError)
                                 )
                             );
 
@@ -149,13 +140,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 LOGGER.warn(message);
             }
 
-            commands.add(
-                new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator
-                )
-            );
+            commands.add(integrationEventCommandFactory.createErrorReceivedEventCmd(integrationError));
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }

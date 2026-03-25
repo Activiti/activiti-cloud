@@ -18,6 +18,7 @@ package org.activiti.services.connectors.channel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -65,6 +66,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     @Mock
     private IntegrationContextService integrationContextService;
 
+    @Mock
+    private IntegrationEventCommandFactory integrationEventCommandFactory;
+
     @Captor
     private ArgumentCaptor<CompositeCommand> commandArgumentCaptor;
 
@@ -78,6 +82,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     public void setUp() {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(EXECUTION_ID)).thenReturn(executionQuery);
+        doReturn(mock(AggregateIntegrationErrorReceivedEventCmd.class))
+            .when(integrationEventCommandFactory)
+            .createErrorReceivedEventCmd(any());
     }
 
     @Test

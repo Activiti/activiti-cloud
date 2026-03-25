@@ -38,8 +38,6 @@ import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -87,10 +85,7 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     private ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
-
-    @Mock
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+    private IntegrationEventCommandFactory integrationEventCommandFactory;
 
     @Mock
     private VariablesPropagator variablesPropagator;
@@ -104,6 +99,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     void receive_should_skipTriggerWhenNoExecutionsFound() {
         doReturn(lock).when(lockRegistry).obtain(any());
+        doReturn(mock(AggregateIntegrationResultReceivedEventCmd.class))
+            .when(integrationEventCommandFactory)
+            .createResultReceivedEventCmd(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -143,6 +141,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
         doReturn(lock).when(lockRegistry).obtain(any());
+        doReturn(mock(AggregateIntegrationResultReceivedEventCmd.class))
+            .when(integrationEventCommandFactory)
+            .createResultReceivedEventCmd(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -158,7 +159,6 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         verify(managementService).executeCommand(captor.capture());
         CompositeCommand composite = captor.getValue();
 
-        // Expect only aggregate + delete
         assertThat(composite.getCommands()).hasSize(2);
         assertThat(composite.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(composite.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
@@ -208,8 +208,10 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
     @Test
     void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
-        //given
         doReturn(lock).when(lockRegistry).obtain(any());
+        doReturn(mock(AggregateIntegrationResultReceivedEventCmd.class))
+            .when(integrationEventCommandFactory)
+            .createResultReceivedEventCmd(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
@@ -218,10 +220,8 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
             .thenReturn(executions);
 
-        //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
-        //then
         final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();

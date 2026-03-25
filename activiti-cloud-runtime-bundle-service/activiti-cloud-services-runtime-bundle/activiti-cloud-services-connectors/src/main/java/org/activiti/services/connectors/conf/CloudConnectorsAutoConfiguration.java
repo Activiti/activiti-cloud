@@ -35,6 +35,7 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.IntegrationEventCommandFactory;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -64,23 +65,30 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public IntegrationEventCommandFactory integrationEventCommandFactory(
+        RuntimeBundleProperties runtimeBundleProperties,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
+    ) {
+        return new IntegrationEventCommandFactory(runtimeBundleProperties, processEngineEventsAggregator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
+        IntegrationEventCommandFactory integrationEventCommandFactory,
         ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
         LockRegistry lockRegistry
     ) {
         return new ServiceTaskIntegrationResultEventHandler(
             runtimeService,
             integrationContextService,
-            runtimeBundleProperties,
             managementService,
-            processEngineEventsAggregator,
             variablesPropagator,
+            integrationEventCommandFactory,
             serviceTaskIntegrationCompletionHandler,
             lockRegistry
         );
@@ -89,15 +97,10 @@ public class CloudConnectorsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler(
-        RuntimeBundleProperties runtimeBundleProperties,
-        ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        IntegrationEventCommandFactory integrationEventCommandFactory,
+        ManagementService managementService
     ) {
-        return new ServiceTaskIntegrationCompletionHandler(
-            runtimeBundleProperties,
-            managementService,
-            processEngineEventsAggregator
-        );
+        return new ServiceTaskIntegrationCompletionHandler(integrationEventCommandFactory, managementService);
     }
 
     @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -113,16 +116,14 @@ public class CloudConnectorsAutoConfiguration {
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        ManagementService managementService,
-        RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator
+        IntegrationEventCommandFactory integrationEventCommandFactory,
+        ManagementService managementService
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
             integrationContextService,
-            managementService,
-            runtimeBundleProperties,
-            processEngineEventsAggregator
+            integrationEventCommandFactory,
+            managementService
         );
     }
 

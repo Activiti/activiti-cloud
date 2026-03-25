@@ -25,8 +25,6 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -50,29 +48,26 @@ public class ServiceTaskIntegrationResultEventHandler {
 
     private final RuntimeService runtimeService;
     private final IntegrationContextService integrationContextService;
-    private final RuntimeBundleProperties runtimeBundleProperties;
     private final ManagementService managementService;
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
+    private final IntegrationEventCommandFactory integrationEventCommandFactory;
     private final ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler;
     private final LockRegistry lockRegistry;
 
     public ServiceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
-        RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
         VariablesPropagator variablesPropagator,
+        IntegrationEventCommandFactory integrationEventCommandFactory,
         ServiceTaskIntegrationCompletionHandler serviceTaskIntegrationCompletionHandler,
         LockRegistry lockRegistry
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
-        this.runtimeBundleProperties = runtimeBundleProperties;
         this.managementService = managementService;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
         this.variablesPropagator = variablesPropagator;
+        this.integrationEventCommandFactory = integrationEventCommandFactory;
         this.serviceTaskIntegrationCompletionHandler = serviceTaskIntegrationCompletionHandler;
         this.lockRegistry = lockRegistry;
     }
@@ -133,13 +128,7 @@ public class ServiceTaskIntegrationResultEventHandler {
                     }
                 }
 
-                commands.add(
-                    new AggregateIntegrationResultReceivedEventCmd(
-                        integrationContext,
-                        runtimeBundleProperties,
-                        processEngineEventsAggregator
-                    )
-                );
+                commands.add(integrationEventCommandFactory.createResultReceivedEventCmd(integrationContext));
 
                 try {
                     managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));

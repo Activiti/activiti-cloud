@@ -18,14 +18,14 @@ package org.activiti.services.connectors.channel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
@@ -41,20 +41,19 @@ import org.springframework.transaction.annotation.Transactional;
 class ServiceTaskIntegrationCompletionHandlerTest {
 
     @Mock
-    private RuntimeBundleProperties runtimeBundleProperties;
+    private IntegrationEventCommandFactory integrationEventCommandFactory;
 
     @Mock
     private ManagementService managementService;
 
-    @Mock
-    private ProcessEngineEventsAggregator processEngineEventsAggregator;
-
     @Test
     void handlePropagationFailure_shouldExecuteCompositeCommand() {
+        doReturn(mock(AggregateIntegrationErrorReceivedEventCmd.class))
+            .when(integrationEventCommandFactory)
+            .createErrorReceivedEventCmd(any());
         ServiceTaskIntegrationCompletionHandler handler = new ServiceTaskIntegrationCompletionHandler(
-            runtimeBundleProperties,
-            managementService,
-            processEngineEventsAggregator
+            integrationEventCommandFactory,
+            managementService
         );
 
         IntegrationErrorImpl error = mock(IntegrationErrorImpl.class);
