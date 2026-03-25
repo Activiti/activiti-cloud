@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest.config;
 import java.lang.reflect.Type;
 import org.hibernate.type.format.AbstractJsonFormatMapper;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 /**

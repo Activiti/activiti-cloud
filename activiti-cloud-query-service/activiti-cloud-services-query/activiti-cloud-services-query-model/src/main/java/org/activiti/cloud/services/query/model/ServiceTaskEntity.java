@@ -31,7 +31,7 @@ import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ServiceTask")

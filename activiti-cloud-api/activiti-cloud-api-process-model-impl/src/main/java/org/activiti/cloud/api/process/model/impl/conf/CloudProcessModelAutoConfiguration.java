@@ -97,10 +97,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeploye
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.core.Version;
-import tools.jackson.databind.BeanDescription;
-import tools.jackson.databind.DeserializationConfig;
 import tools.jackson.databind.JacksonModule;
-import tools.jackson.databind.JavaType;
 import tools.jackson.databind.jsontype.NamedType;
 import tools.jackson.databind.module.SimpleAbstractTypeResolver;
 import tools.jackson.databind.module.SimpleModule;

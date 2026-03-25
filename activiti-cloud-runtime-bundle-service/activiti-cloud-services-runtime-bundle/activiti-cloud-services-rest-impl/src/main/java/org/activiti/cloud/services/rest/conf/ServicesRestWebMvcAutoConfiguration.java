@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.List;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
