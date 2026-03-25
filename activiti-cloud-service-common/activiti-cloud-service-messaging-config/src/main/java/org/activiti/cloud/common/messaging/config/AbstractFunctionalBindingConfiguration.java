@@ -100,6 +100,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         return function;
     }
 
+    //TODO: review sb 4 migration
     protected Type buildFunctionType(Object bean, Class<?> inputType) {
         if (bean instanceof Function) {
             return ResolvableType
@@ -110,9 +111,14 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
                 )
                 .getType();
         }
-        return ResolvableType
-            .forClassWithGenerics(Consumer.class, ResolvableType.forClassWithGenerics(Message.class, inputType))
-            .getType();
+        if (bean instanceof Consumer) {
+            return ResolvableType
+                .forClassWithGenerics(Consumer.class, ResolvableType.forClassWithGenerics(Message.class, inputType))
+                .getType();
+        }
+        throw new IllegalArgumentException(
+            "Unsupported bean type: " + bean.getClass().getName() + ". Expected Function or Consumer."
+        );
     }
 
     protected Type discoverFunctionType(Object bean, String beanName) {
