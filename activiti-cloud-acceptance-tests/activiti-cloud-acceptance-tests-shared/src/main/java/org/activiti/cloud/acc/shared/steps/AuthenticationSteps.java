@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.shared.steps;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.shared.model.AuthToken;

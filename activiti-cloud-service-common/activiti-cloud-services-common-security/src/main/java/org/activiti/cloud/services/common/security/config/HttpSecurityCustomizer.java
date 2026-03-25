@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.channels;
+package org.activiti.cloud.services.common.security.config;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
-public interface IntegrationErrorChannelResolver {
-    String resolveDestination(IntegrationRequest event);
+/**
+ * Extension point that allows applications using this library to contribute additional
+ * configuration to the {@link HttpSecurity} used when building the main
+ * {@link org.springframework.security.web.SecurityFilterChain}.
+ *
+ *
+ */
+@FunctionalInterface
+public interface HttpSecurityCustomizer {
+    void customize(HttpSecurity http) throws Exception;
 }

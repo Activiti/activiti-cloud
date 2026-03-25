@@ -22,7 +22,11 @@ import org.activiti.core.common.spring.security.policies.ActivitiForbiddenExcept
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)

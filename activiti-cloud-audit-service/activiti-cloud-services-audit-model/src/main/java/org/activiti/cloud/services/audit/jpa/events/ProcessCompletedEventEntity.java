@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)
 @DiscriminatorValue(value = ProcessCompletedEventEntity.PROCESS_COMPLETED_EVENT)

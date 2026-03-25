@@ -16,7 +16,8 @@
 package org.activiti.cloud.services.test.asserts;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import org.activiti.cloud.services.common.file.FileContent;

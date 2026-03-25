@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageSentEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = MessageSentAuditEventEntity.MESSAGE_SENT_EVENT)
 @DiscriminatorValue(value = MessageSentAuditEventEntity.MESSAGE_SENT_EVENT)
