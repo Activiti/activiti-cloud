@@ -16,6 +16,7 @@
 package org.activiti.services.connectors.channel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -101,6 +102,45 @@ class ServiceTaskIntegrationResultEventHandlerTest {
     private Lock lock;
 
     @Test
+    void receive_should_skipTriggerWhenNoExecutionsFound() {
+        doReturn(lock).when(lockRegistry).obtain(any());
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(Collections.emptyList());
+
+        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+
+        ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
+        verify(managementService).executeCommand(captor.capture());
+        assertThat(captor.getValue().getCommands()).hasSize(2);
+        assertThat(captor.getValue().getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(captor.getValue().getCommands().get(1))
+            .isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        verify(lock).unlock();
+    }
+
+    @Test
+    void receive_should_wrapInterruptedExceptionWhenLockAcquisitionInterrupted() throws InterruptedException {
+        doReturn(lock).when(lockRegistry).obtain(any());
+        doThrow(new InterruptedException("interrupted")).when(lock).lockInterruptibly();
+        IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
+        IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
+        given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
+
+        Throwable thrown = catchThrowable(() ->
+            handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
+        );
+        assertThat(thrown)
+            .isInstanceOf(ProcessInstanceLockException.class)
+            .hasCauseInstanceOf(InterruptedException.class);
+        assertThat(((ProcessInstanceLockException) thrown).getProcessInstanceId()).isEqualTo(PROC_INST_ID);
+
+        verify(lock, never()).unlock();
+    }
+
+    @Test
     void receive_should_skipTriggerWhenActivityIdMismatch() {
         doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Map.of());
@@ -163,10 +203,11 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         verify(serviceTaskIntegrationCompletionHandler)
             .handlePropagationFailure(errorCaptor.capture(), eq(integrationContextEntity));
         assertThat(errorCaptor.getValue()).isNotNull();
+        verify(lock).unlock();
     }
 
     @Test
-    public void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
+    void receive_should_triggerExecutionAndDeleteRelatedIntegrationContext() {
         //given
         doReturn(lock).when(lockRegistry).obtain(any());
         IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
@@ -256,19 +297,6 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         verify(lockRegistry, never()).obtain(any());
         verify(lock, never()).lockInterruptibly();
         verify(lock, never()).unlock();
-    }
-
-    @Test
-    void receiveShouldDoNothingWhenIntegrationContextsIsNull() {
-        //given
-        IntegrationContextImpl integrationContext = buildIntegrationContext(Collections.singletonMap("var1", "v"));
-        given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
-
-        //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
-
-        //then
-        verify(managementService, never()).executeCommand(any());
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {

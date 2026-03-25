@@ -78,7 +78,7 @@ public class ServiceTaskIntegrationResultEventHandler {
     }
 
     @Retryable(
-        value = ActivitiOptimisticLockingException.class,
+        retryFor = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:100}")
     )
@@ -104,7 +104,15 @@ public class ServiceTaskIntegrationResultEventHandler {
 
                 String executionId = integrationContext.getExecutionId();
                 List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
-                if (executions.size() > 0) {
+                if (executions.isEmpty()) {
+                    LOGGER.warn(
+                        "No task in this runtime bundle is waiting for integration result with execution id `{}`, " +
+                        "flow node id `{}`. The integration result for integration context `{}` will be ignored.",
+                        executionId,
+                        integrationContext.getClientId(),
+                        integrationContext.getId()
+                    );
+                } else {
                     Execution execution = executions.getFirst();
 
                     if (execution.getActivityId().equals(integrationContext.getClientId())) {
@@ -117,22 +125,12 @@ public class ServiceTaskIntegrationResultEventHandler {
                         );
                     } else {
                         LOGGER.warn(
-                            "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                            "Could not find matching activityId '{}' for integration context '{}' with executionId '{}'",
                             integrationContext.getClientId(),
-                            integrationResult,
+                            integrationContext.getId(),
                             execution.getId()
                         );
                     }
-                } else {
-                    String message =
-                        "No task is in this RB is waiting for integration result with execution id `" +
-                        executionId +
-                        ", flow node id `" +
-                        integrationContext.getClientId() +
-                        "`. The integration result for the integration context `" +
-                        integrationContext.getId() +
-                        "` will be ignored.";
-                    LOGGER.warn(message);
                 }
 
                 commands.add(
