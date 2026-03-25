@@ -178,7 +178,7 @@ class IntegrationErrorImplTest {
             Arguments.of(
                 "org.fake.NotARealClass: top error",
                 "com.nonexistent.FakeClass: root error",
-                "org.fake.NotARealClass: top error caused by: com.nonexistent.FakeClass: root error"
+                "top error caused by: root error"
             ),
             Arguments.of("NotAClass: some error", "root message", "NotAClass: some error caused by: root message"),
             Arguments.of(
@@ -198,5 +198,63 @@ class IntegrationErrorImplTest {
                 "actual error message"
             )
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidFqcnPrefixProvider")
+    void should_notStripPrefix_when_prefixIsNotValidFqcn(
+        String errorMessage,
+        String rootCauseMessage,
+        String expected
+    ) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> invalidFqcnPrefixProvider() {
+        return Stream.of(
+            Arguments.of(": colon first", "root", ": colon first caused by: root"),
+            Arguments.of(".org.test.MyClass: error", "root", ".org.test.MyClass: error caused by: root"),
+            Arguments.of("org.test.MyClass.: error", "root", "org.test.MyClass.: error caused by: root"),
+            Arguments.of("Org.test.MyClass: error", "root", "Org.test.MyClass: error caused by: root"),
+            Arguments.of("org.class.MyClass: error", "root", "org.class.MyClass: error caused by: root"),
+            Arguments.of("org.2test.MyClass: error", "root", "org.2test.MyClass: error caused by: root"),
+            Arguments.of("org.test.myClass: error", "root", "org.test.myClass: error caused by: root"),
+            Arguments.of("org..test.MyClass: error", "root", "org..test.MyClass: error caused by: root"),
+            Arguments.of("org.test.My-Class: error", "root", "org.test.My-Class: error caused by: root")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validFqcnPrefixProvider")
+    void should_stripPrefix_when_prefixIsValidFqcn(String errorMessage, String rootCauseMessage, String expected) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> validFqcnPrefixProvider() {
+        return Stream.of(
+            Arguments.of("com.MyClass: error", "root", "error caused by: root"),
+            Arguments.of("com.example.ValidClass: error", "root", "error caused by: root"),
+            Arguments.of("com.example.deep.pkg.ValidClass: error", "root", "error caused by: root")
+        );
+    }
+
+    @Test
+    void should_returnRootMessage_when_fqcnStrippingLeavesBlankErrorMessage() {
+        var rootCause = new RuntimeException("root error");
+        var error = new RuntimeException("com.example.MyClass: ", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo("root error");
+    }
+
+    @Test
+    void should_returnErrorMessage_when_fqcnStrippingLeavesBlankRootMessage() {
+        var rootCause = new RuntimeException("com.example.MyClass: ");
+        var error = new RuntimeException("actual error", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo("actual error");
     }
 }

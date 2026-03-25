@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.lang.model.SourceVersion;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -191,15 +192,34 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     }
 
     private boolean startsWithClassName(String message, int endIndex) {
-        return endIndex != -1 && isValidClassName(message.substring(0, endIndex));
+        return endIndex != -1 && isStrictFQCN(message.substring(0, endIndex));
     }
 
-    private boolean isValidClassName(String clazz) {
-        try {
-            Class.forName(clazz, false, Thread.currentThread().getContextClassLoader());
-            return true;
-        } catch (Exception e) {
-            return false;
+    private boolean isStrictFQCN(String fqcn) {
+        if (!StringUtils.hasText(fqcn)) return false;
+
+        fqcn = fqcn.trim();
+        if (fqcn.startsWith(".") || fqcn.endsWith(".")) return false;
+
+        String[] parts = fqcn.split("\\.");
+        if (parts.length < 2) return false;
+
+        return isValidFQCN(parts);
+    }
+
+    private boolean isValidFQCN(String... parts) {
+        for (int i = 0; i < parts.length - 1; i++) {
+            var part = parts[i];
+            if (
+                !StringUtils.hasText(part) || !part.equals(part.toLowerCase()) || !isValidIdentifier(part)
+            ) return false;
         }
+
+        String className = parts[parts.length - 1];
+        return Character.isUpperCase(className.charAt(0)) && isValidIdentifier(className);
+    }
+
+    private boolean isValidIdentifier(String name) {
+        return StringUtils.hasText(name) && SourceVersion.isIdentifier(name) && !SourceVersion.isKeyword(name);
     }
 }
