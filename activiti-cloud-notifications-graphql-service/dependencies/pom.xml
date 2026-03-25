@@ -62,6 +62,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-notifications-graphql-gatling-tests</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
         <version>${project.version}</version>
       </dependency>

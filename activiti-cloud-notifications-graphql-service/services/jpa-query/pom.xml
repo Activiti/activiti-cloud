@@ -96,7 +96,12 @@
     <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>java-dataloader</artifactId>
-      <version>5.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <version>3.52.0</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
