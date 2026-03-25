@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.*;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.KEYCLOAK_SERVICE_ACCOUNT_PREFIX;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;

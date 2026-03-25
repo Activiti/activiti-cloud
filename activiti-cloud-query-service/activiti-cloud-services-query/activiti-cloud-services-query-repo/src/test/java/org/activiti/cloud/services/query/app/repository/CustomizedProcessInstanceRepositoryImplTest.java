@@ -15,14 +15,21 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.*;
+import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.createParentProcessInstances;
+import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.createProcessInstance;
+import static org.activiti.cloud.services.query.app.repository.utils.ProcessInstanceHelper.createSubprocessInstances;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;

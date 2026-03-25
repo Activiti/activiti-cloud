@@ -18,15 +18,11 @@ package org.activiti.cloud.services.rest.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
-import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.services.rest.api.CandidateUserAdminController;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
-import org.activiti.cloud.services.rest.assemblers.GroupCandidatesRepresentationModelAssembler;
-import org.activiti.cloud.services.rest.assemblers.ToCandidateGroupConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCandidateUserConverter;
 import org.activiti.cloud.services.rest.assemblers.UserCandidatesRepresentationModelAssembler;
 import org.springframework.hateoas.CollectionModel;

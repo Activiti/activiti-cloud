@@ -19,7 +19,12 @@ import static org.springdoc.core.utils.Constants.GLOBAL_OPEN_API_CUSTOMIZER;
 
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-import org.activiti.cloud.common.swagger.springdoc.customizer.*;
+import org.activiti.cloud.common.swagger.springdoc.customizer.CustomOperationIdCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.ErrorResponsesOperationCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.PathPrefixOpenApiCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.SchemaTitleOpenApiCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.SecurityItemOperationCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.SummaryOperationCustomizer;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
 import org.activiti.cloud.common.swagger.springdoc.modelconverter.IgnoredTypesModelConverter;

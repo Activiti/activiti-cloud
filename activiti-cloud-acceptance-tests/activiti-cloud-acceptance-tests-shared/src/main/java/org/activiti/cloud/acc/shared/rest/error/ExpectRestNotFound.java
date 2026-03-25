@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.acc.shared.rest.error;
 
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 
 import java.lang.annotation.ElementType;

@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
 @DiscriminatorValue(value = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)

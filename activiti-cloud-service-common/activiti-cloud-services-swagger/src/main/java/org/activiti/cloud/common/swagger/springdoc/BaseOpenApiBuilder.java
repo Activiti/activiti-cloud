@@ -23,7 +23,11 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.*;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.IgnoredTypesModelConverter;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.PageableMixin;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Pageable;
 
