@@ -1,4 +1,4 @@
-    
+
 insert into PROCESS_INSTANCE (id, last_modified, last_modified_from, last_modified_to, process_definition_id, status, initiator, start_date, business_key, process_definition_key) values
   ('0', CURRENT_TIMESTAMP, null, null, 'process_definition_id', 'RUNNING', 'initiator', null, '232951752337576','def_key'),
   ('1', CURRENT_TIMESTAMP, null, null, 'process_definition_id', 'RUNNING', 'initiator', null, '232951752337577','def_key'),
@@ -1070,7 +1070,7 @@ insert into TASK_VARIABLE (id, create_time, execution_id, last_updated_time, nam
   (33, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable5', 1, '50', 'double', '{"value":1.2345}'),
   (34, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'accountNumber', 1, '50', 'int', '{"value":12345}'),
   (35, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable7', 1, '50', 'json', '{"value":[1,2,3,4,5]}'),
-  
+
   (36, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '70', 'string', '{"value":"data"}'),
   (37, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable2', 0, '70', 'boolean', '{"value":true}'),
   (38, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable3', 0, '70', 'null', '{"value":null}'),
@@ -1078,8 +1078,8 @@ insert into TASK_VARIABLE (id, create_time, execution_id, last_updated_time, nam
   (40, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable5', 1, '90', 'double', '{"value":1.2345}'),
   (41, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'accountNumber', 1, '90', 'int', '{"value":12345}'),
   (42, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable7', 1, '100', 'json', '{"value":[1,2,3,4,5]}')
-;	
-  
+;
+
 insert into BPMN_ACTIVITY (id, element_id, activity_name, execution_id, process_instance_id) values
 	('1', '1', 'serviceTask', '1', '1'),
 	('2', '1', 'serviceTask', '2', '1'),
