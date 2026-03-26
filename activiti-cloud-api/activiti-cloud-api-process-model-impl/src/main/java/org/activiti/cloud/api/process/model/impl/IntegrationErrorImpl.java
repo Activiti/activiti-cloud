@@ -160,20 +160,32 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         var rootMessage = rootCause.getMessage();
 
         if (StringUtils.hasText(rootMessage)) {
-            if (this.isJsonFormat(rootMessage)) return rootMessage;
+            if (this.isJsonFormat(rootMessage)) {
+                return rootMessage;
+            }
             rootMessage = this.removeClassNameFromErrorMessage(rootMessage);
         }
 
         if (StringUtils.hasText(message)) {
-            if (this.isJsonFormat(message)) return message;
+            if (this.isJsonFormat(message)) {
+                return message;
+            }
             message = this.removeClassNameFromErrorMessage(message);
         }
 
-        if (!StringUtils.hasText(message)) return rootMessage;
-        if (!StringUtils.hasText(rootMessage)) return message;
+        if (!StringUtils.hasText(message)) {
+            return rootMessage;
+        }
+        if (!StringUtils.hasText(rootMessage)) {
+            return message;
+        }
 
-        if (rootMessage.toLowerCase().contains(message.toLowerCase())) return rootMessage;
-        if (message.toLowerCase().contains(rootMessage.toLowerCase())) return message;
+        if (rootMessage.toLowerCase().contains(message.toLowerCase())) {
+            return rootMessage;
+        }
+        if (message.toLowerCase().contains(rootMessage.toLowerCase())) {
+            return message;
+        }
 
         return message + " caused by: " + rootMessage;
     }
@@ -186,7 +198,10 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         int endIndex = message.indexOf(":");
         if (this.startsWithClassName(message, endIndex)) {
             var messageWithoutClassName = message.substring(endIndex + 1);
-            if (StringUtils.hasText(messageWithoutClassName)) return messageWithoutClassName.trim(); else return null;
+            if (StringUtils.hasText(messageWithoutClassName)) {
+                return messageWithoutClassName.trim();
+            }
+            return null;
         }
         return message;
     }
