@@ -1,0 +1,31 @@
+name: "Dependency Graph Submission of Transitive Dependencies"
+
+on:
+  push:
+    branches: ["develop"]
+jobs:
+  submit:
+    name: Submit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: "25"
+          distribution: "corretto"
+      - name: Submit Dependency Graph
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@661ab6a0d23f6a269da039831907cffad37cc061 # v15.12.1
+        with:
+          java-version: '25'
+          maven-version: '3.9.9'
+          maven-args: -Dmaven.wagon.http.pool=false
+          maven-username: ${{ secrets.NEXUS_USERNAME }}
+          maven-password: ${{ secrets.NEXUS_PASSWORD }}
