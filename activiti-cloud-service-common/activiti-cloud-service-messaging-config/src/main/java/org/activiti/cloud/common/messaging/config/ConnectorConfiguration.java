@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
@@ -83,15 +84,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (Connector.class.isInstance(bean) || ConsumerConnector.class.isInstance(bean)) {
+                if (
+                    Connector.class.isInstance(bean) ||
+                    ConsumerConnector.class.isInstance(bean) ||
+                    Consumer.class.isInstance(bean)
+                ) {
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
-                            final Type functionType = connectorBinding.inputType() != Void.class
-                                ? buildFunctionType(bean, connectorBinding.inputType())
-                                : discoverFunctionType(bean, beanName);
+                            final Type functionType = discoverFunctionType(bean, beanName);
                             final var functionRouter = messagingProperties.getFunctionRouter();
 
                             FunctionRegistration<Object> functionRegistration = new FunctionRegistration<>(bean)

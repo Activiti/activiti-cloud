@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
@@ -40,7 +39,6 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.messaging.Message;
@@ -98,27 +96,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         FunctionInvocationWrapper function = functionRegistry.lookup(definition + REGISTRATION_NAME_SUFFIX);
         Assert.notNull(function, "Failed to lookup function '" + definition + "'");
         return function;
-    }
-
-    //TODO: review sb 4 migration
-    protected Type buildFunctionType(Object bean, Class<?> inputType) {
-        if (bean instanceof Function) {
-            return ResolvableType
-                .forClassWithGenerics(
-                    Function.class,
-                    ResolvableType.forClassWithGenerics(Message.class, inputType),
-                    ResolvableType.forClassWithGenerics(Message.class, inputType)
-                )
-                .getType();
-        }
-        if (bean instanceof Consumer) {
-            return ResolvableType
-                .forClassWithGenerics(Consumer.class, ResolvableType.forClassWithGenerics(Message.class, inputType))
-                .getType();
-        }
-        throw new IllegalArgumentException(
-            "Unsupported bean type: " + bean.getClass().getName() + ". Expected Function or Consumer."
-        );
     }
 
     protected Type discoverFunctionType(Object bean, String beanName) {
