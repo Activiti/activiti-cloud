@@ -21,7 +21,7 @@ jobs:
           java-version: '25'
           maven-version: '3.9.9'
           restore-artifact-pattern: 'm2*'
-          restore-artifact-path: "~/.m2/repository/com/hyland"
+          restore-artifact-path: "~/.m2/repository"
           maven-args: -Dmaven.wagon.http.pool=false
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
