@@ -2,7 +2,7 @@ name: "Dependency Graph Submission of Transitive Dependencies"
 
 on:
   push:
-    branches: ["develop", "feature/AAE-43788-add-dependency-graph"]
+    branches: ["develop"]
 jobs:
   submit:
     name: Submit
