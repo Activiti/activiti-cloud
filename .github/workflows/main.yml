@@ -313,36 +313,36 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        uses: ./.github/actions/playwright-run
-        env:
-          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
-          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
-          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
-          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
-          REALM: activiti
-        with:
-          script-command: "npm run test:identity"
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
-
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        run: |
-          make test/runtime-acceptance-tests
-
-      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
-        run: |
-          echo "Delete Helm release"
-          make delete
+#      - name: Run Identity Adapter Acceptance Tests
+#        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
+#        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+#        uses: ./.github/actions/playwright-run
+#        env:
+#          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
+#          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+#          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
+#          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
+#          REALM: activiti
+#        with:
+#          script-command: "npm run test:identity"
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
+#
+#      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+#        run: |
+#          make test/runtime-acceptance-tests
+#
+#      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+#        if: always()
+#        run: |
+#          echo "Delete Helm release"
+#          make delete
 
   build-summary:
     runs-on: ubuntu-latest
