@@ -87,7 +87,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <jmxPort>9015</jmxPort>
+          <jmxPort>9001</jmxPort>
         </configuration>
         <executions>
           <execution>
@@ -98,6 +98,7 @@
             </goals>
             <configuration>
               <skip>${skipTests}</skip>
+              <maxAttempts>120</maxAttempts>
               <mainClass>org.activiti.cloud.notifications.graphql.gatling.tests.TestApplication</mainClass>
               <useTestClasspath>true</useTestClasspath>
               <classesDirectory>${project.build.outputDirectory}</classesDirectory>

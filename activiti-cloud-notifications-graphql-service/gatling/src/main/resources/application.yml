@@ -7,8 +7,11 @@ server:
     threads:
       max: 200
       min-spare: 100
+  shutdown: immediate
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 5s
   jpa:
     hibernate.ddl-auto: validate
     generate-ddl: false
