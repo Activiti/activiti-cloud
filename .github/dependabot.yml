@@ -7,6 +7,10 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "org.activiti:*"
+      # Security update for Netty 4.1.x, remove with Spring Boot upgrade
+      - dependency-name: "io.netty:*"
+        versions:
+          - ">= 4.2"
 
   - package-ecosystem: "github-actions"
     directories:
