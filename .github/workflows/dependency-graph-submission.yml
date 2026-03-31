@@ -16,7 +16,7 @@ jobs:
           java-version: "25"
           distribution: "corretto"
       - name: Submit Dependency Graph
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@661ab6a0d23f6a269da039831907cffad37cc061 # v15.12.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@c9a680085778995856d8b0367dd7fa737b441b08 # v15.13.0
         with:
           java-version: '25'
           maven-version: '3.9.9'
