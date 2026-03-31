@@ -23,6 +23,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.serenitybdd.core.Serenity;
@@ -78,11 +79,9 @@ public class ProcessInstanceConnectors {
 
     @When("the user starts an instance of process called $processDefinitionKey with the provided variables")
     public void startProcessWithAvailableVariables(String processDefinitionKey) {
-        processInstance =
-            processRuntimeBundleSteps.startProcessWithVariables(
-                processDefinitionKey,
-                variableBufferSteps.availableVariables()
-            );
+        Map<String, Object> variables = new HashMap<>(variableBufferSteps.availableVariables());
+        variableBufferSteps.clearVariables();
+        processInstance = processRuntimeBundleSteps.startProcessWithVariables(processDefinitionKey, variables);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
