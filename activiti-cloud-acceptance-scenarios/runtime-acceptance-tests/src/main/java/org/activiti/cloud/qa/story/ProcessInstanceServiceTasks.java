@@ -25,6 +25,7 @@ import static org.awaitility.Awaitility.await;
 import feign.FeignException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -87,16 +88,17 @@ public class ProcessInstanceServiceTasks {
 
     @When("the user starts a process with service tasks called $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
+        Map<String, Object> variables = new HashMap<>(variableBufferSteps.availableVariables());
+        variableBufferSteps.clearVariables();
         ProcessInstance processInstance;
-        if (variableBufferSteps.availableVariables().isEmpty()) {
+        if (variables.isEmpty()) {
             processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
         } else {
             processInstance =
                 processRuntimeBundleSteps.startProcessWithVariables(
                     processDefinitionKeyMatcher(processName),
-                    variableBufferSteps.availableVariables()
+                    variables
                 );
-            variableBufferSteps.clearVariables();
         }
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }

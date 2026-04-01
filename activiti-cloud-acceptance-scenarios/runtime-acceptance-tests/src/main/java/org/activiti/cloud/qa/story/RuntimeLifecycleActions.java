@@ -29,7 +29,9 @@ import org.activiti.cloud.acc.core.steps.runtime.admin.ProcessVariablesRuntimeAd
 import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.acc.shared.rest.EnableDirtyContext;
 import org.activiti.cloud.acc.shared.steps.AuthenticationSteps;
+import org.activiti.cloud.acc.shared.steps.VariableBufferSteps;
 import org.jbehave.core.annotations.AfterScenario;
+import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -75,7 +77,15 @@ public class RuntimeLifecycleActions {
     @Steps
     private ProcessVariablesRuntimeAdminSteps processVariablesRuntimeAdminSteps;
 
+    @Steps
+    private VariableBufferSteps variableBufferSteps;
+
     public RuntimeLifecycleActions() {}
+
+    @BeforeScenario
+    public void clearVariableBuffer() {
+        variableBufferSteps.clearVariables();
+    }
 
     @BeforeStories
     public void checkServicesHealth() throws Exception {
