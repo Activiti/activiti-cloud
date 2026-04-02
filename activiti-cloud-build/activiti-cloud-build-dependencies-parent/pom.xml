@@ -27,7 +27,7 @@
     <!-- AAE-43503: Temporary fix for CVE-2026-22732. Remove after Spring Boot upgrade -->
     <spring-security.version>6.5.9</spring-security.version>
     <!-- AAE-43864 temporary update for security issue -->
-    <plexus-utils.version>3.6.0</plexus-utils.version>
+    <plexus-utils.version>4.0.3</plexus-utils.version>
   </properties>
   <dependencyManagement>
     <dependencies>
