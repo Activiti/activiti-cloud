@@ -72,7 +72,7 @@ public class ProcessInstanceConnectors {
         variableBufferSteps.addVariable(variableName, variableValue);
     }
 
-    @Given("the user provides an integer variable named $variableName with value $variableValue")
+    @Given("the user supplies an integer variable named $variableName with value $variableValue")
     public void givenVariable(String variableName, Integer variableValue) {
         variableBufferSteps.addVariable(variableName, variableValue);
     }
