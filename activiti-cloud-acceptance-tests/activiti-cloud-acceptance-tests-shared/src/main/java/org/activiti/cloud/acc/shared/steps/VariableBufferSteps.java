@@ -21,20 +21,20 @@ import net.thucydides.core.annotations.Step;
 
 public class VariableBufferSteps {
 
-    private Map<String, Object> variables = new HashMap<>();
+    private static final ThreadLocal<Map<String, Object>> variables = ThreadLocal.withInitial(HashMap::new);
 
     @Step
     public void addVariable(String name, Object value) {
-        variables.put(name, value);
+        variables.get().put(name, value);
     }
 
     @Step
     public Map<String, Object> availableVariables() {
-        return variables;
+        return variables.get();
     }
 
     @Step
     public void clearVariables() {
-        variables.clear();
+        variables.remove();
     }
 }

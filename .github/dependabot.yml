@@ -6,22 +6,11 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "org.activiti:activiti-dependencies"
-      - dependency-name: "org.activiti:activiti-api-dependencies"
-      - dependency-name: "org.activiti:activiti-core-dependencies"
-      - dependency-name: "org.activiti:activiti-core-common-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-audit-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-api-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-parent"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-build-parent"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-build-dependencies-parent"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-connectors-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-messages-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-query-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-acceptance-tests-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-service-common-dependencies"
+      - dependency-name: "org.activiti:*"
+      # Security update for Netty 4.1.x, remove with Spring Boot upgrade
+      - dependency-name: "io.netty:*"
+        versions:
+          - ">= 4.2"
 
   - package-ecosystem: "github-actions"
     directories:

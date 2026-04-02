@@ -91,7 +91,6 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>${commons-fileupload.version}</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
