@@ -11,10 +11,6 @@ updates:
       - dependency-name: "io.netty:*"
         versions:
           - ">= 4.2"
-      # Security update for plexus-utils 3.x
-      - dependency-name: "org.codehaus.plexus:plexus-utils"
-        versions:
-          - ">= 4.0"
 
   - package-ecosystem: "github-actions"
     directories:
