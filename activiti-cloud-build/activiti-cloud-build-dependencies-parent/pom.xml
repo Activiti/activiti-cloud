@@ -26,6 +26,8 @@
     <tomcat-embed-core.version>10.1.52</tomcat-embed-core.version>
     <!-- AAE-43503: Temporary fix for CVE-2026-22732. Remove after Spring Boot upgrade -->
     <spring-security.version>6.5.9</spring-security.version>
+    <!-- AAE-43864 temporary update for security issue -->
+    <plexus-utils.version>4.0.3</plexus-utils.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -143,6 +145,11 @@
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>${commons-fileupload.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>${plexus-utils.version}</version>
       </dependency>
       <!-- AAE-42877 Update jackson to fix security issue -->
       <dependency>
