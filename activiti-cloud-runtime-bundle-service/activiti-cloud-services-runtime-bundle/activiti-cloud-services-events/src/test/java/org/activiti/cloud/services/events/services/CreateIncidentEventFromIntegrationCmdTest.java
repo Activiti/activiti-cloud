@@ -219,7 +219,6 @@ class CreateIncidentEventFromIntegrationCmdTest {
 
     private ExecutionEntityImpl mockExecutionEntity() {
         var executionEntity = mock(ExecutionEntityImpl.class);
-        when(executionEntity.getId()).thenReturn(EXECUTION_ID);
         when(executionEntity.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         when(executionEntity.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
         return executionEntity;
