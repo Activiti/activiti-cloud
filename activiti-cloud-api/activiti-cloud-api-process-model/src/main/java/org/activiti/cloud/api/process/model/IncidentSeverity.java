@@ -16,7 +16,6 @@
 package org.activiti.cloud.api.process.model;
 
 public enum IncidentSeverity {
-    FATAL,
     ERROR,
     WARNING,
 }

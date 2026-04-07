@@ -218,7 +218,7 @@ class IncidentServiceTest {
         var incidentCreatedEvent = new CloudIncidentCreatedEventImpl(
             new IllegalArgumentException("Test exception"),
             incidentContext,
-            IncidentSeverity.FATAL
+            IncidentSeverity.WARNING
         );
 
         var message = MessageBuilder.withPayload(List.of(incidentCreatedEvent)).build();
@@ -226,7 +226,7 @@ class IncidentServiceTest {
             .thenReturn(message);
         var exception = new IllegalArgumentException("Test exception");
 
-        this.incidentService.createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.FATAL);
+        this.incidentService.createAndSendIncidentEvent(integrationContext, exception, IncidentSeverity.WARNING);
 
         verify(this.producer.auditProducerIncidents()).send(this.messageArgumentCaptor.capture());
 
@@ -237,7 +237,7 @@ class IncidentServiceTest {
         assertThat(payload.get(0)).isInstanceOf(CloudIncidentCreatedEventImpl.class);
 
         var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
-        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.FATAL);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
         assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
         assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
     }
