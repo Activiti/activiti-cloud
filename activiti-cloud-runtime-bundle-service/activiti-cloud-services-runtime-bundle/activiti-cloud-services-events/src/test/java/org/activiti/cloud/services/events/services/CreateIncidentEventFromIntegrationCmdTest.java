@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -92,7 +91,6 @@ class CreateIncidentEventFromIntegrationCmdTest {
     @BeforeEach
     void setUp() {
         var integrationContext = mock(IntegrationContext.class);
-        lenient().when(integrationContext.getExecutionId()).thenReturn(EXECUTION_ID);
 
         this.createIncidentEventFromIntegrationCmd =
             spy(
@@ -108,6 +106,20 @@ class CreateIncidentEventFromIntegrationCmdTest {
 
     @Test
     void shouldExecuteCreateIncidentEventFromIntegration() {
+        var integrationContext = mock(IntegrationContext.class);
+        when(integrationContext.getExecutionId()).thenReturn(EXECUTION_ID);
+
+        this.createIncidentEventFromIntegrationCmd =
+            spy(
+                new CreateIncidentEventFromIntegrationCmd(
+                    integrationContext,
+                    this.testException,
+                    this.runtimeService,
+                    this.messageBuilderChainIncidentFactory,
+                    this.runtimeBundleInfoAppender
+                )
+            );
+
         var executionEntity = mockExecutionEntity();
         mockExecutionQuery(executionEntity);
         doReturn(null)
@@ -173,7 +185,6 @@ class CreateIncidentEventFromIntegrationCmdTest {
     @Test
     void shouldCreateIncidentEventWithWarningSeverity() {
         var integrationContext = mock(IntegrationContext.class);
-        lenient().when(integrationContext.getExecutionId()).thenReturn(EXECUTION_ID);
 
         var cmd = spy(
             new CreateIncidentEventFromIntegrationCmd(
@@ -208,9 +219,9 @@ class CreateIncidentEventFromIntegrationCmdTest {
 
     private ExecutionEntityImpl mockExecutionEntity() {
         var executionEntity = mock(ExecutionEntityImpl.class);
-        lenient().when(executionEntity.getId()).thenReturn(EXECUTION_ID);
+        when(executionEntity.getId()).thenReturn(EXECUTION_ID);
         when(executionEntity.getProcessInstanceId()).thenReturn(TestUtils.MOCK_PROCESS_INSTANCE_ID);
-        lenient().when(executionEntity.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        when(executionEntity.getProcessDefinitionId()).thenReturn(TestUtils.MOCK_PROCESS_DEFINITION_ID);
         return executionEntity;
     }
 }
