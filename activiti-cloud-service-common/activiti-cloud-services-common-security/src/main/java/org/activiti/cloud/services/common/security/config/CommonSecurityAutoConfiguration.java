@@ -79,6 +79,12 @@ public class CommonSecurityAutoConfiguration {
     @Value("${authorization.validation.offset:0}")
     private long offset;
 
+    @Value("${authorization.validation.expiredOffset:0}")
+    private long expiredOffset;
+
+    @Value("${authorization.validation.isNotBeforeOffset:0}")
+    private long isNotBeforeOffset;
+
     @Value("${cors.allowedOrigins:*}")
     private List<String> allowedOrigins;
 
@@ -110,13 +116,13 @@ public class CommonSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ExpiredValidationCheck expiredValidationCheck() {
-        return new ExpiredValidationCheck(offset);
+        return new ExpiredValidationCheck(offset > 0 ? offset : expiredOffset);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public IsNotBeforeValidationCheck isNotBeforeValidationCheck() {
-        return new IsNotBeforeValidationCheck(offset);
+        return new IsNotBeforeValidationCheck(offset > 0 ? offset : isNotBeforeOffset);
     }
 
     @Bean

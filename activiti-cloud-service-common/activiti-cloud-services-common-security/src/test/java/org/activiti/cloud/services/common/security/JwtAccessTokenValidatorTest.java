@@ -44,6 +44,26 @@ public class JwtAccessTokenValidatorTest {
     private JwtAdapter jwtAdapter;
 
     @Test
+    public void should_validate_whenTokenIsExpiredWithOffset() {
+        JwtAccessTokenValidator validatorWithExpiredOffset = new JwtAccessTokenValidator(
+            List.of(
+                new ExpiredValidationCheck(-60000), //allow tokens expired since 60 seconds
+                new IsNotBeforeValidationCheck(0)
+            )
+        );
+        // given a token expired 60 seconds ago
+        Jwt accessToken = createAccessToken(-60, 0);
+
+        when(jwtAdapter.getJwt()).thenReturn(accessToken);
+
+        // when
+        Boolean result = validatorWithExpiredOffset.isValid(jwtAdapter);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
     public void should_validate_whenTokenIsValid() {
         // given
         Jwt accessToken = createAccessToken(true, false);
@@ -100,28 +120,22 @@ public class JwtAccessTokenValidatorTest {
     }
 
     private Jwt createAccessToken(boolean valid, boolean notBefore) {
+        int issuedAtSecondsToAdd = valid ? 0 : -60;
+        int notBeforeSecondsToAdd = notBefore ? 10 : -10;
+        return createAccessToken(issuedAtSecondsToAdd, notBeforeSecondsToAdd);
+    }
+
+    private Jwt createAccessToken(int issuedAtSecondsToAdd, int notBeforeSecondsToAdd) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("testHeaderName", "testHeaderValue");
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("testClaimName", "testClaimValue");
 
-        Instant issuedAt;
-        Instant expiresAt;
-
-        if (valid) {
-            issuedAt = Instant.now();
-            expiresAt = Instant.now().plusSeconds(10);
-        } else {
-            issuedAt = Instant.now().minusSeconds(60);
-            expiresAt = Instant.now().minusSeconds(50);
-        }
-
-        if (notBefore) {
-            claims.put("nbf", Instant.now().plusSeconds(10));
-        } else {
-            claims.put("nbf", Instant.now().minusSeconds(10));
-        }
+        Instant now = Instant.now();
+        Instant issuedAt = now.plusSeconds(issuedAtSecondsToAdd);
+        Instant expiresAt = now.plusSeconds(issuedAtSecondsToAdd + 10);
+        claims.put("nbf", now.plusSeconds(notBeforeSecondsToAdd));
 
         return new Jwt(TOKEN_VALUE, issuedAt, expiresAt, headers, claims);
     }

@@ -25,6 +25,14 @@ public class ExpiredValidationCheck implements AbastractTimeValidationCheck {
 
     private final long offset;
 
+    /**
+     * Constructs an {@code ExpiredValidationCheck} with the given clock skew offset.
+     *
+     * @param offset the time offset in milliseconds added to the current system time
+     *               when evaluating token expiration. A positive value makes the check
+     *               stricter (treats "now" as further in the future), while a negative
+     *               value adds leniency (tolerates tokens slightly past their expiration).
+     */
     public ExpiredValidationCheck(long offset) {
         this.offset = offset;
     }
