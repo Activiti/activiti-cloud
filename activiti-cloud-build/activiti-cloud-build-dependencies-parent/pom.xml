@@ -159,6 +159,19 @@
         <artifactId>plexus-utils</artifactId>
         <version>${plexus-utils.version}</version>
       </dependency>
+      <!-- AAE-42877 Update jackson to fix security issue -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj-core.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
