@@ -174,7 +174,7 @@ jobs:
       - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
+      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: fix/AAE-44241-add-traefik-config-for-query
     strategy:
       # avoid overloading test cluster
       max-parallel: 2
