@@ -225,7 +225,8 @@
     <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
 
-    <!-- dependencies versions -->
+    <!-- security fix AAE-41710, remove with Spring update -->
+    <assertj-core.version>3.27.7</assertj-core.version>
     <hibernate.version>6.5.3.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
