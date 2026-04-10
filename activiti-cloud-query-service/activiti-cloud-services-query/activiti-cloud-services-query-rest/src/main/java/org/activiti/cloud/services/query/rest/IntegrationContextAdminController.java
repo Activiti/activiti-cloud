@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
@@ -52,7 +52,7 @@ public class IntegrationContextAdminController {
         IntegrationContextEntity entity = repository
             .findById(integrationContextId)
             .orElseThrow(() ->
-                new EntityNotFoundException(
+                new QueryEntityNotFoundException(
                     "Unable to find integration context for the given id: '" + integrationContextId + "'"
                 )
             );
