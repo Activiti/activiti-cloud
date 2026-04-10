@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -220,6 +221,22 @@ class ProcessInstanceControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.entry.id").value(processInstanceEntity.getId()))
             .andExpect(jsonPath("$.entry.status").value(processInstanceEntity.getStatus().name()));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenProcessInstanceDoesNotExist() throws Exception {
+        //given
+        String processInstanceId = "nonexistent-id";
+        given(processInstanceService.findById(processInstanceId))
+            .willThrow(new EntityNotFoundException("Unable to find process instance for the given id:'" + processInstanceId + "'"));
+
+        //when
+        mockMvc
+            .perform(
+                get("/v1/process-instances/{processInstanceId}", processInstanceId).accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isNotFound());
     }
 
     @Test

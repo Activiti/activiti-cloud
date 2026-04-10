@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -186,48 +188,64 @@ public class TaskAdminController extends TaskControllerAdvice {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findByIdTaskAdmin(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
+    public ResponseEntity<EntityModel<QueryCloudTask>> findByIdTaskAdmin(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
+            );
 
-        return taskRepresentationModelAssembler.toModel(taskEntity);
+            return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(taskEntity));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
-    public List<String> getTaskCandidateUsersAdmin(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
+    public ResponseEntity<List<String>> getTaskCandidateUsersAdmin(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
+            );
 
-        return taskEntity.getTaskCandidateUsers() != null
-            ? taskEntity
-                .getTaskCandidateUsers()
-                .stream()
-                .map(TaskCandidateUserEntity::getUserId)
-                .collect(Collectors.toList())
-            : null;
+            return ResponseEntity.ok(
+                taskEntity.getTaskCandidateUsers() != null
+                    ? taskEntity
+                        .getTaskCandidateUsers()
+                        .stream()
+                        .map(TaskCandidateUserEntity::getUserId)
+                        .collect(Collectors.toList())
+                    : null
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
-    public List<String> getTaskCandidateGroupsAdmin(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
+    public ResponseEntity<List<String>> getTaskCandidateGroupsAdmin(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
+            );
 
-        return taskEntity.getTaskCandidateGroups() != null
-            ? taskEntity
-                .getTaskCandidateGroups()
-                .stream()
-                .map(TaskCandidateGroupEntity::getGroupId)
-                .collect(Collectors.toList())
-            : null;
+            return ResponseEntity.ok(
+                taskEntity.getTaskCandidateGroups() != null
+                    ? taskEntity
+                        .getTaskCandidateGroups()
+                        .stream()
+                        .map(TaskCandidateGroupEntity::getGroupId)
+                        .collect(Collectors.toList())
+                    : null
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Count tasks")

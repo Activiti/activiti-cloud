@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -176,73 +178,98 @@ public class TaskController extends TaskControllerAdvice {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findByIdTask(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
-
-        taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
-        boolean canUserViewTask =
-            taskEntity.getPermissions() != null && taskEntity.getPermissions().contains(TaskPermissions.VIEW);
-        if (!canUserViewTask) {
-            LOGGER.debug(
-                "User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId
+    public ResponseEntity<EntityModel<QueryCloudTask>> findByIdTask(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
             );
-            throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+
+            taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
+            boolean canUserViewTask =
+                taskEntity.getPermissions() != null && taskEntity.getPermissions().contains(TaskPermissions.VIEW);
+            if (!canUserViewTask) {
+                LOGGER.debug(
+                    "User " +
+                    securityManager.getAuthenticatedUserId() +
+                    " not permitted to access taskEntity " +
+                    taskId
+                );
+                throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+            }
+            return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(taskEntity));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-        return taskRepresentationModelAssembler.toModel(taskEntity);
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
-    public List<String> getTaskCandidateUsers(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
-
-        //do restricted query and check if still able to see it
-        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
-        if (!canUserViewTask) {
-            LOGGER.debug(
-                "User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId
+    public ResponseEntity<List<String>> getTaskCandidateUsers(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
             );
-            throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+
+            //do restricted query and check if still able to see it
+            boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+            if (!canUserViewTask) {
+                LOGGER.debug(
+                    "User " +
+                    securityManager.getAuthenticatedUserId() +
+                    " not permitted to access taskEntity " +
+                    taskId
+                );
+                throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+            }
+            return ResponseEntity.ok(
+                taskEntity.getTaskCandidateUsers() != null
+                    ? taskEntity
+                        .getTaskCandidateUsers()
+                        .stream()
+                        .map(TaskCandidateUserEntity::getUserId)
+                        .collect(Collectors.toList())
+                    : null
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-        return taskEntity.getTaskCandidateUsers() != null
-            ? taskEntity
-                .getTaskCandidateUsers()
-                .stream()
-                .map(TaskCandidateUserEntity::getUserId)
-                .collect(Collectors.toList())
-            : null;
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
-    public List<String> getTaskCandidateGroups(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(
-            taskRepository,
-            taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'"
-        );
-
-        //do restricted query and check if still able to see it
-        boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
-        if (!canUserViewTask) {
-            LOGGER.debug(
-                "User " + securityManager.getAuthenticatedUserId() + " not permitted to access taskEntity " + taskId
+    public ResponseEntity<List<String>> getTaskCandidateGroups(@PathVariable String taskId) {
+        try {
+            TaskEntity taskEntity = entityFinder.findById(
+                taskRepository,
+                taskId,
+                "Unable to find taskEntity for the given id:'" + taskId + "'"
             );
-            throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+
+            //do restricted query and check if still able to see it
+            boolean canUserViewTask = taskControllerHelper.canUserViewTask(QTaskEntity.taskEntity.id.eq(taskId));
+            if (!canUserViewTask) {
+                LOGGER.debug(
+                    "User " +
+                    securityManager.getAuthenticatedUserId() +
+                    " not permitted to access taskEntity " +
+                    taskId
+                );
+                throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
+            }
+            return ResponseEntity.ok(
+                taskEntity.getTaskCandidateGroups() != null
+                    ? taskEntity
+                        .getTaskCandidateGroups()
+                        .stream()
+                        .map(TaskCandidateGroupEntity::getGroupId)
+                        .collect(Collectors.toList())
+                    : null
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-        return taskEntity.getTaskCandidateGroups() != null
-            ? taskEntity
-                .getTaskCandidateGroups()
-                .stream()
-                .map(TaskCandidateGroupEntity::getGroupId)
-                .collect(Collectors.toList())
-            : null;
     }
 
     @Operation(summary = "Count tasks")

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -169,10 +171,18 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
-        return processInstanceRepresentationModelAssembler.toModel(
-            processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId)
-        );
+    public ResponseEntity<EntityModel<QueryCloudProcessInstance>> findByIdProcessAdmin(
+        @PathVariable String processInstanceId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                processInstanceRepresentationModelAssembler.toModel(
+                    processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId)
+                )
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Find application versions for process instances")

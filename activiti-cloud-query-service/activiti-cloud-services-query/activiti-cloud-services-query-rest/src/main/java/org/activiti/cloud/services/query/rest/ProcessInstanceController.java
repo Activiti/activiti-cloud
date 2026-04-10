@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
@@ -41,6 +42,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -127,10 +129,18 @@ public class ProcessInstanceController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudProcessInstance> findByIdProcess(@PathVariable String processInstanceId) {
-        return processInstanceRepresentationModelAssembler.toModel(
-            processInstanceControllerHelper.findById(processInstanceId)
-        );
+    public ResponseEntity<EntityModel<QueryCloudProcessInstance>> findByIdProcess(
+        @PathVariable String processInstanceId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                processInstanceRepresentationModelAssembler.toModel(
+                    processInstanceControllerHelper.findById(processInstanceId)
+                )
+            );
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @JsonView(JsonViews.General.class)
