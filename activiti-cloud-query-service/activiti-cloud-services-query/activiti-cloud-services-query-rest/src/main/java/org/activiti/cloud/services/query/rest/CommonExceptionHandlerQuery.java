@@ -82,6 +82,7 @@ public class CommonExceptionHandlerQuery {
         EntityNotFoundException ex,
         HttpServletResponse response
     ) {
+        LOGGER.debug("Entity not found: {}", ex.getMessage(), ex);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }

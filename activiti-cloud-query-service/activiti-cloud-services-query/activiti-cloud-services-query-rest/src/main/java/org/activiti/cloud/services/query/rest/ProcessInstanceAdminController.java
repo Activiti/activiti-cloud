@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,13 +37,17 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresent
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +64,8 @@ import org.springframework.web.bind.annotation.RestController;
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public class ProcessInstanceAdminController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceAdminController.class);
 
     private final ProcessInstanceAdminService processInstanceAdminService;
 
@@ -169,10 +176,19 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
-        return processInstanceRepresentationModelAssembler.toModel(
-            processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId)
-        );
+    public ResponseEntity<EntityModel<QueryCloudProcessInstance>> findByIdProcessAdmin(
+        @PathVariable String processInstanceId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                processInstanceRepresentationModelAssembler.toModel(
+                    processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId)
+                )
+            );
+        } catch (EntityNotFoundException e) {
+            LOGGER.debug("Process instance {} not found.", processInstanceId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @Operation(summary = "Find application versions for process instances")
