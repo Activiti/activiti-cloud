@@ -26,11 +26,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -331,5 +333,56 @@ class TaskEntityControllerIT {
         mockMvc
             .perform(get("/v1/tasks?page=0&size=1000").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenTaskDoesNotExist() throws Exception {
+        //given
+        String taskId = "nonexistent-task-id";
+        given(entityFinder.findById(eq(taskRepository), eq(taskId), anyString()))
+            .willThrow(new EntityNotFoundException("Unable to find taskEntity for the given id:'" + taskId + "'"));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}", taskId).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.statusCode").value(404))
+            .andExpect(jsonPath("$.message").value("Unable to find taskEntity for the given id:'" + taskId + "'"));
+    }
+
+    @Test
+    void shouldReturnNotFoundForCandidateUsersWhenTaskDoesNotExist() throws Exception {
+        //given
+        String taskId = "nonexistent-task-id";
+        given(entityFinder.findById(eq(taskRepository), eq(taskId), anyString()))
+            .willThrow(new EntityNotFoundException("Unable to find taskEntity for the given id:'" + taskId + "'"));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-users", taskId).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.statusCode").value(404))
+            .andExpect(jsonPath("$.message").value("Unable to find taskEntity for the given id:'" + taskId + "'"));
+    }
+
+    @Test
+    void shouldReturnNotFoundForCandidateGroupsWhenTaskDoesNotExist() throws Exception {
+        //given
+        String taskId = "nonexistent-task-id";
+        given(entityFinder.findById(eq(taskRepository), eq(taskId), anyString()))
+            .willThrow(new EntityNotFoundException("Unable to find taskEntity for the given id:'" + taskId + "'"));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks/{taskId}/candidate-groups", taskId).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.statusCode").value(404))
+            .andExpect(jsonPath("$.message").value("Unable to find taskEntity for the given id:'" + taskId + "'"));
     }
 }
