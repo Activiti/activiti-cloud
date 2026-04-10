@@ -77,7 +77,7 @@ import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.messaging.Message;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -248,8 +248,8 @@ public class ServicesCoreAutoConfiguration {
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(ObjectMapper objectMapper) {
-        return new ProcessVariableJsonNodeConverter(objectMapper);
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(JsonMapper jsonMapper) {
+        return new ProcessVariableJsonNodeConverter(jsonMapper);
     }
 
     @Bean

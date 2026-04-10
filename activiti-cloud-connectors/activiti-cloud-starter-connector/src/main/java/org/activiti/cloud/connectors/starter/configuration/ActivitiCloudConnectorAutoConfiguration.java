@@ -36,7 +36,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:activiti-cloud-connector.properties")
@@ -54,9 +54,9 @@ public class ActivitiCloudConnectorAutoConfiguration {
     public IntegrationErrorHandler integrationErrorHandler(
         IntegrationErrorSender integrationErrorSender,
         ConnectorProperties connectorProperties,
-        ObjectMapper objectMapper
+        JsonMapper jsonMapper
     ) {
-        return new IntegrationErrorHandlerImpl(integrationErrorSender, connectorProperties, objectMapper);
+        return new IntegrationErrorHandlerImpl(integrationErrorSender, connectorProperties, jsonMapper);
     }
 
     @Bean

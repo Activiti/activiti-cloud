@@ -18,15 +18,15 @@ package org.activiti.cloud.services.query.model.conf;
 import org.activiti.cloud.services.query.model.VariableValueJsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 public class QueryModelAutoConfiguration {
 
     @Bean
-    public VariableValueJsonConverter variableValueJsonConverter(ObjectMapper objectMapper) {
+    public VariableValueJsonConverter variableValueJsonConverter(JsonMapper jsonMapper) {
         //this bean is not directly used as it's instantiated by Hibernate as a converter.
         //it's only here as a workaround to be able to inject the object mapper
-        return new VariableValueJsonConverter(objectMapper);
+        return new VariableValueJsonConverter(jsonMapper);
     }
 }

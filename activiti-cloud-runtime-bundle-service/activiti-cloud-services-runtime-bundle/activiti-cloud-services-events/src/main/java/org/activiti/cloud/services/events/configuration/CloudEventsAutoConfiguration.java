@@ -87,7 +87,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.annotation.Order;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySources(
@@ -176,8 +176,8 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EventChunker eventChunker(ObjectMapper objectMapper, RuntimeBundleProperties properties) {
-        return new EventChunker(objectMapper, properties);
+    public EventChunker eventChunker(JsonMapper jsonMapper, RuntimeBundleProperties properties) {
+        return new EventChunker(jsonMapper, properties);
     }
 
     @Bean
