@@ -30,6 +30,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
@@ -54,6 +55,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -178,7 +180,7 @@ public class TaskController extends TaskControllerAdvice {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public ResponseEntity<EntityModel<QueryCloudTask>> findByIdTask(@PathVariable String taskId) {
+    public ResponseEntity<?> findByIdTask(@PathVariable String taskId) {
         try {
             TaskEntity taskEntity = entityFinder.findById(
                 taskRepository,
@@ -200,12 +202,15 @@ public class TaskController extends TaskControllerAdvice {
             }
             return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(taskEntity));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), e.getMessage())));
         }
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
-    public ResponseEntity<List<String>> getTaskCandidateUsers(@PathVariable String taskId) {
+    public ResponseEntity<?> getTaskCandidateUsers(@PathVariable String taskId) {
         try {
             TaskEntity taskEntity = entityFinder.findById(
                 taskRepository,
@@ -234,12 +239,15 @@ public class TaskController extends TaskControllerAdvice {
                     : null
             );
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), e.getMessage())));
         }
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
-    public ResponseEntity<List<String>> getTaskCandidateGroups(@PathVariable String taskId) {
+    public ResponseEntity<?> getTaskCandidateGroups(@PathVariable String taskId) {
         try {
             TaskEntity taskEntity = entityFinder.findById(
                 taskRepository,
@@ -268,7 +276,10 @@ public class TaskController extends TaskControllerAdvice {
                     : null
             );
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), e.getMessage())));
         }
     }
 

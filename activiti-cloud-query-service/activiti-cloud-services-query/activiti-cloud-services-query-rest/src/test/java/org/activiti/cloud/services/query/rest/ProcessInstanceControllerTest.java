@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -236,7 +237,10 @@ class ProcessInstanceControllerTest {
                 get("/v1/process-instances/{processInstanceId}", processInstanceId).accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.statusCode").value(404))
+            .andExpect(jsonPath("$.message").value("Unable to find process instance for the given id:'" + processInstanceId + "'"));
     }
 
     @Test

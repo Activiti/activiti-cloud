@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -43,6 +44,7 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -171,9 +173,7 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public ResponseEntity<EntityModel<QueryCloudProcessInstance>> findByIdProcessAdmin(
-        @PathVariable String processInstanceId
-    ) {
+    public ResponseEntity<?> findByIdProcessAdmin(@PathVariable String processInstanceId) {
         try {
             return ResponseEntity.ok(
                 processInstanceRepresentationModelAssembler.toModel(
@@ -181,7 +181,10 @@ public class ProcessInstanceAdminController {
                 )
             );
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), e.getMessage())));
         }
     }
 

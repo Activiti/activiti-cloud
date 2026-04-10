@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -129,9 +130,7 @@ public class ProcessInstanceController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public ResponseEntity<EntityModel<QueryCloudProcessInstance>> findByIdProcess(
-        @PathVariable String processInstanceId
-    ) {
+    public ResponseEntity<?> findByIdProcess(@PathVariable String processInstanceId) {
         try {
             return ResponseEntity.ok(
                 processInstanceRepresentationModelAssembler.toModel(
@@ -139,7 +138,10 @@ public class ProcessInstanceController {
                 )
             );
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), e.getMessage())));
         }
     }
 

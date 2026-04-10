@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -212,7 +213,10 @@ class ProcessInstanceAdminControllerIT {
                     .accept(MediaType.APPLICATION_JSON)
             )
             //then
-            .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.statusCode").value(404))
+            .andExpect(jsonPath("$.message").value("Unable to find process instance for the given id:'" + processInstanceId + "'"));
     }
 
     @Test
