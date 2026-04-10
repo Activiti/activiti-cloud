@@ -158,10 +158,9 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                         cloudProcessDeletedService.delete(processInstanceId);
                         return ResponseEntity.status(HttpStatus.OK).build();
                     } catch (ActivitiObjectNotFoundException e) {
-                        LOGGER.debug(
+                        LOGGER.info(
                             "Process instance {} was not found during force delete. Sending PROCESS_DELETE event.",
-                            processInstanceId,
-                            e
+                            processInstanceId
                         );
                     }
                 } else {
@@ -169,10 +168,9 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                 }
             }
         } catch (NotFoundException | ActivitiObjectNotFoundException e) {
-            LOGGER.debug(
+            LOGGER.info(
                 "Process instance {} not found. Sending PROCESS_DELETE event.",
-                processInstanceId,
-                e
+                processInstanceId
             );
         }
 

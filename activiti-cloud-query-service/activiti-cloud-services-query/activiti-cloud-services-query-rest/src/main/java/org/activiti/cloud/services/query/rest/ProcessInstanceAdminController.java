@@ -186,7 +186,7 @@ public class ProcessInstanceAdminController {
                 )
             );
         } catch (EntityNotFoundException e) {
-            LOGGER.debug("Process instance {} not found.", processInstanceId, e);
+            LOGGER.info("Process instance {} not found.", processInstanceId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
