@@ -18,6 +18,7 @@ package org.activiti.cloud.services.rest.controllers;
 import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -47,6 +48,7 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -232,6 +234,36 @@ class ProcessInstanceAdminControllerImplIT {
 
         verify(cloudProcessDeletedService).delete("1");
         verify(cloudProcessDeletedService, never()).sendDeleteEvent("1");
+    }
+
+    @Test
+    void destroyRunningProcessInstanceWithForce_ShouldSendDeleteEvent_WhenDeleteFailsDueToRaceCondition()
+        throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+        doThrow(new ActivitiObjectNotFoundException("Process instance not found"))
+            .when(cloudProcessDeletedService)
+            .delete("1");
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy?force=true", 1))
+            .andExpect(status().isOk());
+
+        verify(cloudProcessDeletedService).delete("1");
+        verify(cloudProcessDeletedService).sendDeleteEvent("1");
+    }
+
+    @Test
+    void destroyProcessInstance_ShouldSendDeleteEvent_WhenProcessInstanceLookupThrowsActivitiObjectNotFoundException()
+        throws Exception {
+        when(processAdminRuntime.processInstance("1"))
+            .thenThrow(new ActivitiObjectNotFoundException("Process instance not found"));
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
+            .andExpect(status().isOk());
+
+        verify(cloudProcessDeletedService, never()).delete(any());
+        verify(cloudProcessDeletedService).sendDeleteEvent("1");
     }
 
     @Test

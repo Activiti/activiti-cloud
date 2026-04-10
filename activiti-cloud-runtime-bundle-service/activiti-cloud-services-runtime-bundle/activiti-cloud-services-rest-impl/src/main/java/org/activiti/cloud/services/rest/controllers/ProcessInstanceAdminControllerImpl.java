@@ -42,6 +42,7 @@ import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
@@ -153,14 +154,24 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
             ProcessInstance processInstance = processAdminRuntime.processInstance(processInstanceId);
             if (processInstance != null && !deleteStatuses.contains(processInstance.getStatus())) {
                 if (force) {
-                    cloudProcessDeletedService.delete(processInstanceId);
-                    return ResponseEntity.status(HttpStatus.OK).build();
+                    try {
+                        cloudProcessDeletedService.delete(processInstanceId);
+                        return ResponseEntity.status(HttpStatus.OK).build();
+                    } catch (ActivitiObjectNotFoundException e) {
+                        LOGGER.debug(
+                            "Process instance {} was not found during force delete. Sending PROCESS_DELETE event.",
+                            processInstanceId
+                        );
+                    }
                 } else {
                     throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
                 }
             }
-        } catch (NotFoundException e) {
-            LOGGER.debug("Process Instance " + processInstanceId + " not found. Sending PROCESS_DELETE event.");
+        } catch (NotFoundException | ActivitiObjectNotFoundException e) {
+            LOGGER.debug(
+                "Process instance {} not found. Sending PROCESS_DELETE event.",
+                processInstanceId
+            );
         }
 
         cloudProcessDeletedService.sendDeleteEvent(processInstanceId);
