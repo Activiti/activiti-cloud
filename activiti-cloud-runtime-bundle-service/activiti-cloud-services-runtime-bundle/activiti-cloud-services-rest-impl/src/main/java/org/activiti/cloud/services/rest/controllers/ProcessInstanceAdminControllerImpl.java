@@ -123,8 +123,17 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId) {
-        return representationModelAssembler.toModel(processAdminRuntime.processInstance(processInstanceId));
+    public ResponseEntity<EntityModel<CloudProcessInstance>> getProcessInstanceById(
+        @PathVariable String processInstanceId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                representationModelAssembler.toModel(processAdminRuntime.processInstance(processInstanceId))
+            );
+        } catch (NotFoundException | ActivitiObjectNotFoundException e) {
+            LOGGER.info("Process instance {} not found.", processInstanceId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @Override

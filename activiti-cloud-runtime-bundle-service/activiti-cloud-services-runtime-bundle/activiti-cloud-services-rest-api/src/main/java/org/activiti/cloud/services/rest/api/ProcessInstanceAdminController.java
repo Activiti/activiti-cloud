@@ -45,7 +45,7 @@ public interface ProcessInstanceAdminController {
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    EntityModel<CloudProcessInstance> getProcessInstanceById(
+    ResponseEntity<EntityModel<CloudProcessInstance>> getProcessInstanceById(
         @Parameter(
             description = "Enter the processInstanceId to get process instance by id candidate groups"
         ) @PathVariable String processInstanceId

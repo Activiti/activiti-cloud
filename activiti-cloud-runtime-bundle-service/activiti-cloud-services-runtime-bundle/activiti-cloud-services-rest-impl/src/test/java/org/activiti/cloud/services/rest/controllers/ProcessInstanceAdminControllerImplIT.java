@@ -173,6 +173,17 @@ class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
+    void getProcessInstanceById_ShouldReturnNotFound_WhenProcessInstanceDoesNotExist() throws Exception {
+        when(processAdminRuntime.processInstance("1"))
+            .thenThrow(new ActivitiObjectNotFoundException("Process instance not found"));
+
+        this.mockMvc.perform(
+                get("/admin/v1/process-instances/{processInstanceId}", 1).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     void resume() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
 
