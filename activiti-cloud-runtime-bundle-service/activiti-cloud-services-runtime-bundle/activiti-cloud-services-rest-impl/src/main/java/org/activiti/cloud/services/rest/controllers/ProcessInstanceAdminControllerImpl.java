@@ -160,7 +160,8 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
                     } catch (ActivitiObjectNotFoundException e) {
                         LOGGER.debug(
                             "Process instance {} was not found during force delete. Sending PROCESS_DELETE event.",
-                            processInstanceId
+                            processInstanceId,
+                            e
                         );
                     }
                 } else {
@@ -170,7 +171,8 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         } catch (NotFoundException | ActivitiObjectNotFoundException e) {
             LOGGER.debug(
                 "Process instance {} not found. Sending PROCESS_DELETE event.",
-                processInstanceId
+                processInstanceId,
+                e
             );
         }
 
