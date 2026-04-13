@@ -16,11 +16,13 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +44,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoJackson2HttpMessageConverterTest {
@@ -181,5 +184,17 @@ public class AlfrescoJackson2HttpMessageConverterTest {
                 eq(type),
                 eq(outputMessage)
             );
+    }
+
+    @Test
+    public void writeInternalShouldHandleAsyncRequestNotUsableExceptionGracefully() throws Exception {
+        //given
+        doThrow(new AsyncRequestNotUsableException("Broken pipe"))
+            .when(httpMessageConverter)
+            .defaultWriteInternal(any(), eq(type), eq(outputMessage));
+
+        //when/then
+        assertThatCode(() -> httpMessageConverter.writeInternal(EntityModel.of("content"), type, outputMessage))
+            .doesNotThrowAnyException();
     }
 }

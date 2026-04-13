@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -29,8 +31,11 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.lang.Nullable;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 
 public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2HttpMessageConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoJackson2HttpMessageConverter.class);
 
     private final PagedModelConverter pagedCollectionModelConverter;
     private final ObjectMapper objectMapper;
@@ -48,12 +53,16 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
     @Override
     protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
         throws IOException, HttpMessageNotWritableException {
-        if (object instanceof MappingJacksonValue) {
-            MappingJacksonValue mappingJacksonValueObject = ((MappingJacksonValue) object);
-            mappingJacksonValueObject.setValue(transformObject(mappingJacksonValueObject.getValue()));
-            defaultWriteInternal(mappingJacksonValueObject, type, outputMessage);
-        } else {
-            defaultWriteInternal(transformObject(object), type, outputMessage);
+        try {
+            if (object instanceof MappingJacksonValue) {
+                MappingJacksonValue mappingJacksonValueObject = ((MappingJacksonValue) object);
+                mappingJacksonValueObject.setValue(transformObject(mappingJacksonValueObject.getValue()));
+                defaultWriteInternal(mappingJacksonValueObject, type, outputMessage);
+            } else {
+                defaultWriteInternal(transformObject(object), type, outputMessage);
+            }
+        } catch (AsyncRequestNotUsableException ex) {
+            LOGGER.debug("Client disconnected while writing response: {}", ex.getMessage());
         }
     }
 
