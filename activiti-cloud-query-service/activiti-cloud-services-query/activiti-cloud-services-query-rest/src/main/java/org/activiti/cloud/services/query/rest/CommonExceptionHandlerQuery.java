@@ -17,10 +17,10 @@ package org.activiti.cloud.services.query.rest;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
-import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

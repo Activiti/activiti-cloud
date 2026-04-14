@@ -272,8 +272,13 @@ class ProcessInstanceAdminControllerIT {
     void shouldReturnNotFoundWhenProcessInstanceDoesNotExist() throws Exception {
         //given
         String processInstanceId = "nonexistent-id";
-        willThrow(new QueryEntityNotFoundException("Unable to find process instance for the given id:'" + processInstanceId + "'"))
-            .given(processInstanceAdminService).findById(processInstanceId);
+        willThrow(
+            new QueryEntityNotFoundException(
+                "Unable to find process instance for the given id:'" + processInstanceId + "'"
+            )
+        )
+            .given(processInstanceAdminService)
+            .findById(processInstanceId);
 
         //when
         mockMvc
@@ -284,6 +289,9 @@ class ProcessInstanceAdminControllerIT {
             //then
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.entry.code").value(404))
-            .andExpect(jsonPath("$.entry.message").value("Unable to find process instance for the given id:'" + processInstanceId + "'"));
+            .andExpect(
+                jsonPath("$.entry.message")
+                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+            );
     }
 }

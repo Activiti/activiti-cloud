@@ -16,9 +16,9 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.springframework.data.domain.Page;
