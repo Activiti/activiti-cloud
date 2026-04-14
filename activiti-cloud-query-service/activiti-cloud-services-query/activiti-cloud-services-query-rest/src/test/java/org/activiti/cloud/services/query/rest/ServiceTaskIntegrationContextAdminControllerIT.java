@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.persistence.EntityManagerFactory;
+import java.util.List;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -49,8 +50,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
 
 @WebMvcTest(ServiceTaskIntegrationContextAdminController.class)
 @Import(
@@ -115,7 +114,8 @@ class ServiceTaskIntegrationContextAdminControllerIT {
                 eq("exec1"),
                 any(Pageable.class)
             )
-        ).willReturn(new PageImpl<>(List.of()));
+        )
+            .willReturn(new PageImpl<>(List.of()));
 
         //when
         mockMvc
@@ -128,10 +128,7 @@ class ServiceTaskIntegrationContextAdminControllerIT {
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
                 jsonPath("$.entry.message")
-                    .value(
-                        "Unable to find integration context entity for the given id:'" + serviceTaskId + "'"
-                    )
+                    .value("Unable to find integration context entity for the given id:'" + serviceTaskId + "'")
             );
     }
-
 }

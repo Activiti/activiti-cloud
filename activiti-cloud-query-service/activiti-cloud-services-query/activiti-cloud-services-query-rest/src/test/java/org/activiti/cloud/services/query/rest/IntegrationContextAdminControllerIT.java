@@ -116,9 +116,7 @@ class IntegrationContextAdminControllerIT {
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
                 jsonPath("$.entry.message")
-                    .value(
-                        "Unable to find integration context for the given id: '" + integrationContextId + "'"
-                    )
+                    .value("Unable to find integration context for the given id: '" + integrationContextId + "'")
             );
     }
 }
