@@ -23,7 +23,7 @@
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.132.Final</netty.version>
     <jackson.version>2.21.2</jackson.version>
-    <tomcat-embed-core.version>10.1.52</tomcat-embed-core.version>
+    <tomcat-embed-core.version>10.1.54</tomcat-embed-core.version>
     <!-- AAE-43503: Temporary fix for CVE-2026-22732. Remove after Spring Boot upgrade -->
     <spring-security.version>6.5.9</spring-security.version>
     <!-- AAE-43864 temporary update for security issue -->
