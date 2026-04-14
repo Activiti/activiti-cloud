@@ -295,4 +295,31 @@ class ProcessInstanceAdminControllerIT {
                     .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
             );
     }
+
+    @Test
+    void shouldReturnNotFoundWhenJpaEntityNotFoundExceptionIsThrown() throws Exception {
+        //given
+        String processInstanceId = "nonexistent-id";
+        willThrow(
+            new jakarta.persistence.EntityNotFoundException(
+                "Unable to find process instance for the given id:'" + processInstanceId + "'"
+            )
+        )
+            .given(processInstanceAdminService)
+            .findById(processInstanceId);
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.entry.code").value(404))
+            .andExpect(
+                jsonPath("$.entry.message")
+                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+            );
+    }
 }

@@ -66,7 +66,8 @@ public class EntityFinderTest {
         //when
         assertThatExceptionOfType(QueryEntityNotFoundException.class)
             .isThrownBy(() -> entityFinder.findById(repository, processInstanceId, "Error"))
-            .withMessageContaining("Error");
+            .withMessageContaining("Error")
+            .satisfies(ex -> assertThat(ex.getStackTrace()).isEmpty());
     }
 
     @Test
