@@ -91,7 +91,7 @@
         <version>${classgraph.version}</version>
       </dependency>
       <!-- AAE-35073: Override transitive webdrivermanager from serenity-core to fix CVE-2025-4641 (XXE vulnerability).
-           Remove after Serenity 4.x upgrade, which drops this dependency entirely. -->
+           Remove after Serenity 4.x upgrade. -->
       <dependency>
         <groupId>io.github.bonigarcia</groupId>
         <artifactId>webdrivermanager</artifactId>
