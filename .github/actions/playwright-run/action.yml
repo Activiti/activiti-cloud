@@ -42,19 +42,23 @@ runs:
 
     - name: Add GitHub Step Summary
       shell: bash
+      env:
+        SCRIPT_COMMAND: ${{ inputs.script-command }}
       run: |
         echo "#### ⏱ Before Playwright Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
         echo "#### ⚙ Configuration" >> $GITHUB_STEP_SUMMARY
-        echo "- Script command: ${{ inputs.script-command }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Script command: ${SCRIPT_COMMAND}" >> $GITHUB_STEP_SUMMARY
 
     - name: Run Tests (continue on error)
       id: launch-tests
       shell: bash
       working-directory: ${{ github.workspace }}/${{ inputs.working-directory }}
+      env:
+        SCRIPT_COMMAND: ${{ inputs.script-command }}
       run: |
         npm clean-install
         npx playwright install chromium
-        ${{ inputs.script-command }}
+        eval "${SCRIPT_COMMAND}"
       continue-on-error: true
 
     - name: Update GitHub Step Summary
