@@ -22,6 +22,8 @@
     <feign-form.version>3.8.0</feign-form.version>
     <batik.version>1.19</batik.version>
     <httpclient.version>4.5.14</httpclient.version>
+    <!-- AAE-35073: Temporary fix for CVE-2025-4641. Remove after Serenity 4.x upgrade -->
+    <webdrivermanager.version>6.1.0</webdrivermanager.version>
     <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencyManagement>
@@ -87,6 +89,13 @@
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>${classgraph.version}</version>
+      </dependency>
+      <!-- AAE-35073: Override transitive webdrivermanager from serenity-core to fix CVE-2025-4641 (XXE vulnerability).
+           Remove after Serenity 4.x upgrade, which drops this dependency entirely. -->
+      <dependency>
+        <groupId>io.github.bonigarcia</groupId>
+        <artifactId>webdrivermanager</artifactId>
+        <version>${webdrivermanager.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
