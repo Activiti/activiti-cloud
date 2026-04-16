@@ -31,7 +31,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest(
     classes = { QueryLiquibaseApplication.class, QueryLiquibaseApplicationIT.TestEntityScanConfig.class },
@@ -47,7 +47,7 @@ public class QueryLiquibaseApplicationIT {
     static class TestEntityScanConfig {}
 
     @MockitoBean
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @Autowired
     private EntityManager entityManager;
