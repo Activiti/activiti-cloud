@@ -7,10 +7,17 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "org.activiti:*"
+      - dependency-name: "org.assertj:assertj-core"
+        versions:
+          - ">= 4"
       # Security update for Netty 4.1.x, remove with Spring Boot upgrade
       - dependency-name: "io.netty:*"
         versions:
           - ">= 4.2"
+      # Security updates to Spring Boot on 3.5.x, remove with 4.x update
+      - dependency-name: "org.springframework.boot:*"
+        versions:
+          - ">= 4.0"
 
   - package-ecosystem: "github-actions"
     directories:

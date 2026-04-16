@@ -1,0 +1,263 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.api.process.model.impl;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
+import java.util.stream.Stream;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class IntegrationErrorImplTest {
+
+    @Mock
+    private IntegrationRequest integrationRequest;
+
+    @Mock
+    private IntegrationContext integrationContext;
+
+    @BeforeEach
+    void setUp() {
+        given(integrationRequest.getIntegrationContext()).willReturn(integrationContext);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = { "", "   " })
+    void should_returnRootCauseMessage_when_errorMessageIsNullOrBlank(String errorMessage) {
+        parametrizedAssertion(errorMessage, "Root cause message", "Root cause message");
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = { "", "   " })
+    void should_returnErrorMessage_when_rootCauseMessageIsNullOrBlank(String rootCauseMessage) {
+        parametrizedAssertion("Error message", rootCauseMessage, "Error message");
+    }
+
+    @ParameterizedTest
+    @MethodSource("equalMessagesProvider")
+    void should_returnRootCauseMessage_when_messagesAreEqualIgnoringCase(
+        String errorMessage,
+        String rootCauseMessage,
+        String expected
+    ) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> equalMessagesProvider() {
+        return Stream.of(
+            Arguments.of("Same message", "Same message", "Same message"),
+            Arguments.of("SAME MESSAGE", "same message", "same message")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("combinedMessagesProvider")
+    void should_returnCombinedMessage_when_messagesAreDifferent(Throwable error, String expected) {
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> combinedMessagesProvider() {
+        var simpleError = new RuntimeException("Error message", new RuntimeException("Root cause message"));
+        var deepRootCause = new RuntimeException("Deep root cause");
+        var intermediateCause = new RuntimeException("Intermediate cause", deepRootCause);
+        var nestedError = new RuntimeException("Top level error", intermediateCause);
+
+        return Stream.of(
+            Arguments.of(simpleError, "Error message caused by: Root cause message"),
+            Arguments.of(nestedError, "Top level error caused by: Deep root cause")
+        );
+    }
+
+    @Test
+    void should_returnErrorMessage_when_errorHasNoCause() {
+        var error = new RuntimeException("Error message");
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo("Error message");
+    }
+
+    @ParameterizedTest
+    @MethodSource("nullMessagesProvider")
+    void should_returnNull_when_bothMessagesAreNull(Throwable error) {
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isNull();
+    }
+
+    static Stream<Arguments> nullMessagesProvider() {
+        return Stream.of(
+            Arguments.of(new RuntimeException(null, new RuntimeException((String) null))),
+            Arguments.of(new RuntimeException((String) null))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("redundantMessagesProvider")
+    void should_returnTheMostInformative_when_messagesAreRedundant(
+        String errorMessage,
+        String rootCauseMessage,
+        String expected
+    ) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> redundantMessagesProvider() {
+        return Stream.of(
+            Arguments.of("java.lang.RuntimeException: Error", "Error", "Error"),
+            Arguments.of("ERROR", "java.lang.RuntimeException: error", "error")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("jsonMessagesProvider")
+    void should_returnJson_when_messagesAreJson(String errorMessage, String rootCauseMessage, String expected) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    private void parametrizedAssertion(String errorMessage, String rootCauseMessage, String expected) {
+        var rootCause = new RuntimeException(rootCauseMessage);
+        var error = new RuntimeException(errorMessage, rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> jsonMessagesProvider() {
+        var jsonError =
+            """
+            {"message":"Dmn table notDefined-v2.dmn not valid or not found","severity":"ERROR"}
+            """;
+        return Stream.of(Arguments.of(jsonError, "Error", jsonError), Arguments.of("ERROR", jsonError, jsonError));
+    }
+
+    @ParameterizedTest
+    @MethodSource("classNamePrefixedMessagesProvider")
+    void should_handleClassNamePrefix_when_messageStartsWithClassName(
+        String errorMessage,
+        String rootCauseMessage,
+        String expected
+    ) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> classNamePrefixedMessagesProvider() {
+        return Stream.of(
+            Arguments.of(
+                "Another simple message",
+                "Simple error without colon",
+                "Another simple message caused by: Simple error without colon"
+            ),
+            Arguments.of(
+                "org.fake.NotARealClass: top error",
+                "com.nonexistent.FakeClass: root error",
+                "top error caused by: root error"
+            ),
+            Arguments.of("NotAClass: some error", "root message", "NotAClass: some error caused by: root message"),
+            Arguments.of(
+                "java.lang.RuntimeException: runtime failure",
+                "java.lang.IllegalArgumentException: invalid argument",
+                "runtime failure caused by: invalid argument"
+            ),
+            Arguments.of(
+                "java.lang.NullPointerException: value is null",
+                "simple root",
+                "value is null caused by: simple root"
+            ),
+            Arguments.of("Error: details: more info", "root", "Error: details: more info caused by: root"),
+            Arguments.of(
+                "java.lang.RuntimeException: actual error message",
+                "actual error message",
+                "actual error message"
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidFqcnPrefixProvider")
+    void should_notStripPrefix_when_prefixIsNotValidFqcn(
+        String errorMessage,
+        String rootCauseMessage,
+        String expected
+    ) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> invalidFqcnPrefixProvider() {
+        return Stream.of(
+            Arguments.of(": colon first", "root", ": colon first caused by: root"),
+            Arguments.of(".org.test.MyClass: error", "root", ".org.test.MyClass: error caused by: root"),
+            Arguments.of("org.test.MyClass.: error", "root", "org.test.MyClass.: error caused by: root"),
+            Arguments.of("Org.test.MyClass: error", "root", "Org.test.MyClass: error caused by: root"),
+            Arguments.of("org.class.MyClass: error", "root", "org.class.MyClass: error caused by: root"),
+            Arguments.of("org.2test.MyClass: error", "root", "org.2test.MyClass: error caused by: root"),
+            Arguments.of("org.test.myClass: error", "root", "org.test.myClass: error caused by: root"),
+            Arguments.of("org..test.MyClass: error", "root", "org..test.MyClass: error caused by: root"),
+            Arguments.of("org.test.My-Class: error", "root", "org.test.My-Class: error caused by: root")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validFqcnPrefixProvider")
+    void should_stripPrefix_when_prefixIsValidFqcn(String errorMessage, String rootCauseMessage, String expected) {
+        parametrizedAssertion(errorMessage, rootCauseMessage, expected);
+    }
+
+    static Stream<Arguments> validFqcnPrefixProvider() {
+        return Stream.of(
+            Arguments.of("com.MyClass: error", "root", "error caused by: root"),
+            Arguments.of("com.example.ValidClass: error", "root", "error caused by: root"),
+            Arguments.of("com.example.deep.pkg.ValidClass: error", "root", "error caused by: root")
+        );
+    }
+
+    @Test
+    void should_returnRootMessage_when_fqcnStrippingLeavesBlankErrorMessage() {
+        var rootCause = new RuntimeException("root error");
+        var error = new RuntimeException("com.example.MyClass: ", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo("root error");
+    }
+
+    @Test
+    void should_returnErrorMessage_when_fqcnStrippingLeavesBlankRootMessage() {
+        var rootCause = new RuntimeException("com.example.MyClass: ");
+        var error = new RuntimeException("actual error", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error);
+
+        assertThat(result.getErrorMessage()).isEqualTo("actual error");
+    }
+}

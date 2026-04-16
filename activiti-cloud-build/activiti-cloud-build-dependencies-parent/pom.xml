@@ -22,10 +22,12 @@
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.132.Final</netty.version>
-    <jackson.version>2.21.1</jackson.version>
-    <tomcat-embed-core.version>10.1.52</tomcat-embed-core.version>
+    <jackson.version>2.21.2</jackson.version>
+    <tomcat-embed-core.version>10.1.54</tomcat-embed-core.version>
     <!-- AAE-43503: Temporary fix for CVE-2026-22732. Remove after Spring Boot upgrade -->
     <spring-security.version>6.5.9</spring-security.version>
+    <!-- AAE-43864 temporary update for security issue -->
+    <plexus-utils.version>4.0.3</plexus-utils.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -92,6 +94,14 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- security fix AAE-42877, remove with Spring update-->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -144,6 +154,11 @@
         <artifactId>commons-fileupload</artifactId>
         <version>${commons-fileupload.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>${plexus-utils.version}</version>
+      </dependency>
       <!-- AAE-42877 Update jackson to fix security issue -->
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
@@ -151,6 +166,11 @@
         <version>${jackson.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj-core.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

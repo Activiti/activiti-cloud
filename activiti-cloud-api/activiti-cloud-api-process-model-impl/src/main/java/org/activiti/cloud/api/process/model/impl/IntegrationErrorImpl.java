@@ -19,11 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.lang.model.SourceVersion;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.springframework.util.StringUtils;
 
 public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements IntegrationError {
 
@@ -51,7 +53,7 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
 
         Throwable cause = findRootCause(error);
 
-        this.errorMessage = cause.getMessage();
+        this.errorMessage = this.getDetailedErrorMessage(error);
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
@@ -150,5 +152,89 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         }
 
         return rootCause;
+    }
+
+    private String getDetailedErrorMessage(Throwable error) {
+        var message = error.getMessage();
+        var rootCause = this.findRootCause(error);
+        var rootMessage = rootCause.getMessage();
+
+        if (StringUtils.hasText(rootMessage)) {
+            if (this.isJsonFormat(rootMessage)) {
+                return rootMessage;
+            }
+            rootMessage = this.removeClassNameFromErrorMessage(rootMessage);
+        }
+
+        if (StringUtils.hasText(message)) {
+            if (this.isJsonFormat(message)) {
+                return message;
+            }
+            message = this.removeClassNameFromErrorMessage(message);
+        }
+
+        if (!StringUtils.hasText(message)) {
+            return rootMessage;
+        }
+        if (!StringUtils.hasText(rootMessage)) {
+            return message;
+        }
+
+        if (rootMessage.toLowerCase().contains(message.toLowerCase())) {
+            return rootMessage;
+        }
+        if (message.toLowerCase().contains(rootMessage.toLowerCase())) {
+            return message;
+        }
+
+        return message + " caused by: " + rootMessage;
+    }
+
+    private boolean isJsonFormat(String message) {
+        return message.startsWith("{") && message.endsWith("}");
+    }
+
+    private String removeClassNameFromErrorMessage(String message) {
+        int endIndex = message.indexOf(":");
+        if (this.startsWithClassName(message, endIndex)) {
+            var messageWithoutClassName = message.substring(endIndex + 1);
+            if (StringUtils.hasText(messageWithoutClassName)) {
+                return messageWithoutClassName.trim();
+            }
+            return null;
+        }
+        return message;
+    }
+
+    private boolean startsWithClassName(String message, int endIndex) {
+        return endIndex != -1 && isStrictFQCN(message.substring(0, endIndex));
+    }
+
+    private boolean isStrictFQCN(String fqcn) {
+        if (!StringUtils.hasText(fqcn)) return false;
+
+        fqcn = fqcn.trim();
+        if (fqcn.startsWith(".") || fqcn.endsWith(".")) return false;
+
+        String[] parts = fqcn.split("\\.");
+        if (parts.length < 2) return false;
+
+        return isValidFQCN(parts);
+    }
+
+    private boolean isValidFQCN(String... parts) {
+        for (int i = 0; i < parts.length - 1; i++) {
+            var part = parts[i];
+            if (
+                !StringUtils.hasText(part) || !part.equals(part.toLowerCase()) || !isValidIdentifier(part)
+            ) return false;
+        }
+
+        String className = parts[parts.length - 1];
+        return Character.isUpperCase(className.charAt(0)) && isValidIdentifier(className);
+    }
+
+    private boolean isValidIdentifier(String name) {
+        return StringUtils.hasText(name) && SourceVersion.isIdentifier(name) && !SourceVersion.isKeyword(name);
     }
 }
