@@ -17,7 +17,6 @@ package org.activiti.cloud.services.graphql.autoconfigure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
@@ -54,16 +53,6 @@ public class ActivitiGraphQLAutoConfiguration {
      */
     @Configuration
     public static class DefaultActivitiGraphQLJpaConfiguration {
-
-        /**
-         * Provides a Jackson 2 ObjectMapper bean required by the graphql-jpa-query-web
-         * GraphQLController which has not yet migrated to Jackson 3.
-         */
-        @Bean
-        @ConditionalOnMissingBean(ObjectMapper.class)
-        public ObjectMapper jackson2ObjectMapper() {
-            return new ObjectMapper();
-        }
 
         /**
          * This is needed because the graphql spec says that null values should be present

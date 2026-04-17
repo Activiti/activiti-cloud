@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import com.introproventures.graphql.jpa.query.web.GraphQLController;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -44,6 +42,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(GraphQLController.class)
 public class ActivitiGraphQLControllerTest {
@@ -61,13 +60,7 @@ public class ActivitiGraphQLControllerTest {
 
     @Configuration
     @Import(GraphQLController.class)
-    static class Config {
-
-        @Bean
-        ObjectMapper jackson2ObjectMapper() {
-            return new ObjectMapper();
-        }
-    }
+    static class Config {}
 
     /**
      * Mock executor responses to be non-null in order for Mock MVC
