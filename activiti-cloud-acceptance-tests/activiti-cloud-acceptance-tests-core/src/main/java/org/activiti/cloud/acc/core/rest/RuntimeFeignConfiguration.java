@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.core.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import feign.Feign.Builder;
 import feign.gson.GsonEncoder;
 import feign.jackson.JacksonEncoder;
@@ -82,11 +82,11 @@ public class RuntimeFeignConfiguration {
 
     private final RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     public RuntimeFeignConfiguration(RuntimeTestsConfigurationProperties runtimeTestsConfigurationProperties) {
         this.runtimeTestsConfigurationProperties = runtimeTestsConfigurationProperties;
-        this.objectMapper = new ObjectMapper().findAndRegisterModules();
+        this.objectMapper = JsonMapper.builder().findAndAddModules().build();
     }
 
     @Bean
