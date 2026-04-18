@@ -1,0 +1,75 @@
+{
+  "id": "process-6d34f760-a853-4f40-b60c-b85e2e812f5d",
+  "type": "PROCESS",
+  "name": "simple-process",
+  "key": "simple-process-wdhyd",
+  "extensions": {
+    "Process_1770387490219": {
+      "constants": {
+        "Activity_1wcnejq": {
+          "_activiti_script_": {
+            "value": "update-variable-tkuno"
+          }
+        }
+      },
+      "mappings": {
+        "Activity_1wcnejq": {
+          "inputs": {
+            "testDocument": {
+              "type": "variable",
+              "value": "testDoc"
+            }
+          },
+          "outputs": {
+            "testDoc": {
+              "type": "variable",
+              "value": "testDocument"
+            }
+          }
+        }
+      },
+      "properties": {
+        "57a03b3b-cd3d-4314-8716-9c1e7b1f7df8": {
+          "id": "57a03b3b-cd3d-4314-8716-9c1e7b1f7df8",
+          "name": "testDoc",
+          "type": "json",
+          "model": {
+            "$ref": "#/$defs/primitive/json"
+          },
+          "required": false,
+          "ephemeral": false,
+          "description": "",
+          "category": "input/output"
+        },
+        "89bd6640-c74d-4ab5-951a-854fceda725a": {
+          "id": "89bd6640-c74d-4ab5-951a-854fceda725a",
+          "name": "testIndex",
+          "type": "integer",
+          "model": {
+            "$ref": "#/$defs/primitive/integer"
+          },
+          "required": false,
+          "ephemeral": false,
+          "analytics": false,
+          "description": "",
+          "category": "input"
+        },
+        "71c2836d-206e-4518-b86a-6473eab0185b": {
+          "id": "71c2836d-206e-4518-b86a-6473eab0185b",
+          "name": "testVar",
+          "type": "string",
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          },
+          "required": false,
+          "ephemeral": false,
+          "analytics": false,
+          "value": "test ${testIndex}",
+          "description": "",
+          "category": "local"
+        }
+      },
+      "assignments": {}
+    }
+  }
+}

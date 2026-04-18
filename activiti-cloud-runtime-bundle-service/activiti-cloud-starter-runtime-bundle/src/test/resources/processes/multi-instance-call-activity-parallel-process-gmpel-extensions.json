@@ -1,0 +1,120 @@
+{
+  "id": "process-0bf74e1a-7e06-439a-8163-4b29451a87db",
+  "type": "PROCESS",
+  "name": "parallel-process",
+  "key": "parallel-process-gmpel",
+  "extensions": {
+    "Process_1770387614252": {
+      "constants": {},
+      "mappings": {
+        "Activity_03t1ziz": {
+          "inputs": {
+            "testDoc": {
+              "type": "variable",
+              "value": "document"
+            },
+            "testIndex": {
+              "type": "variable",
+              "value": "documentIndex"
+            }
+          },
+          "outputs": {
+            "document": {
+              "type": "variable",
+              "value": "testDoc"
+            },
+            "index": {
+              "type": "variable",
+              "value": "testIndex"
+            },
+            "documentVar": {
+              "type": "variable",
+              "value": "testVar"
+            }
+          }
+        }
+      },
+      "properties": {
+        "33395f37-acff-400f-83a5-d53af0272cdc": {
+          "id": "33395f37-acff-400f-83a5-d53af0272cdc",
+          "name": "batchState",
+          "type": "json",
+          "model": {
+            "$ref": "#/$defs/primitive/json"
+          },
+          "required": false,
+          "ephemeral": false,
+          "value": {
+            "documents": [
+              {
+                "id": "11",
+                "fields": [
+                  {
+                    "id": "test",
+                    "value": "111"
+                  }
+                ]
+              },
+              {
+                "id": "22",
+                "fields": [
+                  {
+                    "id": "test",
+                    "value": "222"
+                  }
+                ]
+              },
+              {
+                "id": "33",
+                "fields": [
+                  {
+                    "id": "test",
+                    "value": "333"
+                  }
+                ]
+              },
+              {
+                "id": "44",
+                "fields": [
+                  {
+                    "id": "test",
+                    "value": "444"
+                  }
+                ]
+              },
+              {
+                "id": "55",
+                "fields": [
+                  {
+                    "id": "test",
+                    "value": "555"
+                  }
+                ]
+              }
+            ]
+          },
+          "description": "",
+          "category": "local"
+        },
+        "8121b267-82bb-43c7-bb3d-58b5c3192c17": {
+          "id": "8121b267-82bb-43c7-bb3d-58b5c3192c17",
+          "name": "response",
+          "type": "array",
+          "model": {
+            "type": "array",
+            "description": "Array of json items",
+            "items": {
+              "$ref": "#/$defs/primitive/json"
+            },
+            "examples": []
+          },
+          "required": false,
+          "ephemeral": false,
+          "description": "",
+          "category": "local"
+        }
+      },
+      "assignments": {}
+    }
+  }
+}

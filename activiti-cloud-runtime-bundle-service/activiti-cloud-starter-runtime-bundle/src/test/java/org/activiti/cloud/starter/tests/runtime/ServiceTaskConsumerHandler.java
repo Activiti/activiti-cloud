@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.activiti.cloud.starter.tests.runtime.ConnectorIntegrationChannels.SCRIPT_RUNTIME_CONSUMER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -313,6 +314,22 @@ public class ServiceTaskConsumerHandler {
                 throw new RuntimeException(e);
             }
             integrationResultSender.send(message.getPayload(), message.getPayload().getIntegrationContext());
+        };
+    }
+
+    @Bean
+    @FunctionBinding(input = SCRIPT_RUNTIME_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> scriptRuntimeExecutor() {
+        return message -> {
+            final var integrationContext = message.getPayload().getIntegrationContext();
+
+            final Map<String, Object> testDocument = integrationContext.getInBoundVariable("testDocument");
+
+            testDocument.put("updated", true);
+
+            integrationContext.addOutBoundVariable("testDocument", testDocument);
+
+            integrationResultSender.send(message.getPayload(), integrationContext);
         };
     }
 }
