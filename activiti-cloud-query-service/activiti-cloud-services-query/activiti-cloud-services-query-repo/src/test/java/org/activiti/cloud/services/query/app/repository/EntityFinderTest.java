@@ -21,7 +21,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.junit.jupiter.api.Test;
@@ -65,9 +64,10 @@ public class EntityFinderTest {
 
         //then
         //when
-        assertThatExceptionOfType(EntityNotFoundException.class)
+        assertThatExceptionOfType(QueryEntityNotFoundException.class)
             .isThrownBy(() -> entityFinder.findById(repository, processInstanceId, "Error"))
-            .withMessageContaining("Error");
+            .withMessageContaining("Error")
+            .satisfies(ex -> assertThat(ex.getStackTrace()).isEmpty());
     }
 
     @Test
@@ -92,7 +92,7 @@ public class EntityFinderTest {
 
         //then
         //when
-        assertThatExceptionOfType(EntityNotFoundException.class)
+        assertThatExceptionOfType(QueryEntityNotFoundException.class)
             .isThrownBy(() -> entityFinder.findOne(repository, predicate, "Error"))
             .withMessageContaining("Error");
     }

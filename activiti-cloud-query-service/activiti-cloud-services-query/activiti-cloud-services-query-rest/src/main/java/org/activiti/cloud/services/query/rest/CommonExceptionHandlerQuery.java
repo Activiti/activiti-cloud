@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,12 +77,24 @@ public class CommonExceptionHandlerQuery {
         );
     }
 
+    @ExceptionHandler(QueryEntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        QueryEntityNotFoundException ex,
+        HttpServletResponse response
+    ) {
+        LOGGER.debug(ex.getMessage());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public EntityModel<ActivitiErrorMessage> handleAppException(
         EntityNotFoundException ex,
         HttpServletResponse response
     ) {
+        LOGGER.debug(ex.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }

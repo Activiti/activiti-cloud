@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,6 +41,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -265,5 +267,59 @@ class ProcessInstanceAdminControllerIT {
             //then
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries").isEmpty());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenProcessInstanceDoesNotExist() throws Exception {
+        //given
+        String processInstanceId = "nonexistent-id";
+        willThrow(
+            new QueryEntityNotFoundException(
+                "Unable to find process instance for the given id:'" + processInstanceId + "'"
+            )
+        )
+            .given(processInstanceAdminService)
+            .findById(processInstanceId);
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.entry.code").value(404))
+            .andExpect(
+                jsonPath("$.entry.message")
+                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+            );
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenJpaEntityNotFoundExceptionIsThrown() throws Exception {
+        //given
+        String processInstanceId = "nonexistent-id";
+        willThrow(
+            new jakarta.persistence.EntityNotFoundException(
+                "Unable to find process instance for the given id:'" + processInstanceId + "'"
+            )
+        )
+            .given(processInstanceAdminService)
+            .findById(processInstanceId);
+
+        //when
+        mockMvc
+            .perform(
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.entry.code").value(404))
+            .andExpect(
+                jsonPath("$.entry.message")
+                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+            );
     }
 }

@@ -22,13 +22,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
@@ -372,7 +372,7 @@ class ProcessInstanceControllerHelperIT {
             assertThatThrownBy(() ->
                     processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
                 )
-                .isInstanceOf(EntityNotFoundException.class)
+                .isInstanceOf(QueryEntityNotFoundException.class)
                 .hasMessage("Unable to find process for the given id:'" + invalidMainProcessInstanceId + "'");
         }
     }

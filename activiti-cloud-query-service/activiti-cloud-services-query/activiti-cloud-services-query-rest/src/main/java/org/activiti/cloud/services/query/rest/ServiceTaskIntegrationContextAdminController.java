@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.services.query.app.repository.IntegrationContextRepository;
+import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.springframework.data.domain.Page;
@@ -74,7 +74,7 @@ public class ServiceTaskIntegrationContextAdminController {
         if (page.hasContent()) {
             return representationModelAssembler.toModel(page.getContent().getFirst());
         } else {
-            throw new EntityNotFoundException(
+            throw new QueryEntityNotFoundException(
                 "Unable to find integration context entity for the given id:'" + serviceTaskId + "'"
             );
         }
