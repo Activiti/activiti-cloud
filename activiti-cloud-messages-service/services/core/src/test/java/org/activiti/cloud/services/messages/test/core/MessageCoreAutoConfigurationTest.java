@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 
 @SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
@@ -43,7 +43,7 @@ public class MessageCoreAutoConfigurationTest {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private DirectChannel discardChannel;
+    private PublishSubscribeChannel discardChannel;
 
     @SpringBootApplication
     static class Application {}
