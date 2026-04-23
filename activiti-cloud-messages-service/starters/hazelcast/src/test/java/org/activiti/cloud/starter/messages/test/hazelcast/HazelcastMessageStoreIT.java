@@ -46,8 +46,6 @@ public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTest
         public Config hazelcastConfig() {
             Config config = new Config();
 
-            config.getCPSubsystemConfig().setCPMemberCount(3);
-
             NetworkConfig network = config.getNetworkConfig().setPortAutoIncrement(true);
             network.setPort(5701).setPortCount(20);
 

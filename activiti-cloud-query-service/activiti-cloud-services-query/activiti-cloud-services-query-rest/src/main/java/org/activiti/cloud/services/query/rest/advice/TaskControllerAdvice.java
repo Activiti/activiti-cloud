@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -26,7 +27,7 @@ public class TaskControllerAdvice {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerAdvice.class);
 
-    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    @ExceptionHandler(value = InvalidDataAccessApiUsageException.class, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e) {
         LOGGER.warn("Invalid data access in task search: {}", e.getMessage());
         return ResponseEntity

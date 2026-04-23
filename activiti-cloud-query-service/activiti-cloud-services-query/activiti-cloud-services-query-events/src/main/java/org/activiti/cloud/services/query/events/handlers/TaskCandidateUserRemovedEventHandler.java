@@ -53,7 +53,10 @@ public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
                 );
                 Optional
                     .ofNullable(entityManager.find(TaskCandidateUserEntity.class, id))
-                    .ifPresent(entityManager::remove);
+                    .ifPresent(entity -> {
+                        findResult.get().getTaskCandidateUsers().remove(entity);
+                        entityManager.remove(entity);
+                    });
             } catch (Exception cause) {
                 LOGGER.debug("Error handling TaskCandidateUserRemovedEvent[" + event + "]", cause);
             }

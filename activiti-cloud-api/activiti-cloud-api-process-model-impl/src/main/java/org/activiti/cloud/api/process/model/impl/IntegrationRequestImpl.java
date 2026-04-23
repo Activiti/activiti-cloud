@@ -31,7 +31,9 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     public IntegrationRequestImpl(IntegrationContext integrationContext) {
         this.integrationContext = integrationContext;
-        this.setAppVersion(integrationContext.getAppVersion());
+        if (integrationContext != null) {
+            this.setAppVersion(integrationContext.getAppVersion());
+        }
     }
 
     @Override

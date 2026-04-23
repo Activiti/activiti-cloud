@@ -16,8 +16,8 @@
 package org.activiti.cloud.services.query.test;
 
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 
 @TestComponent
 public class ProcessDefinitionAdminRestTemplate extends BaseProcessDefinitionRestTemplate {

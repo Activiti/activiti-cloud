@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Objects;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 

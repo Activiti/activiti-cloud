@@ -17,7 +17,6 @@ package org.activiti.cloud.starter.tests.helper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Map;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -34,26 +33,29 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 
 @TestComponent
 public class TaskRestTemplate {
 
     private static final String TASK_RELATIVE_URL = "/v1/tasks";
     private static final String ADMIN_TASK_RELATIVE_URL = "/admin/v1/tasks";
-    private static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
-        Map.of("Content-type", List.of("application/json"))
-    );
+    private static final HttpHeaders CONTENT_TYPE_HEADER = new HttpHeaders();
+
+    static {
+        CONTENT_TYPE_HEADER.setContentType(MediaType.APPLICATION_JSON);
+    }
 
     private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {};
     private static final ParameterizedTypeReference<PagedModel<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudTask>>() {};
@@ -369,7 +371,7 @@ public class TaskRestTemplate {
             .withVariable(name, value)
             .build();
 
-        HttpEntity<CreateTaskVariablePayload> requestEntity = new HttpEntity<>(createTaskVariablePayload, null);
+        HttpEntity<CreateTaskVariablePayload> requestEntity = new HttpEntity<>(createTaskVariablePayload);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             TaskRestTemplate.ADMIN_TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables"),
             HttpMethod.POST,
@@ -386,7 +388,7 @@ public class TaskRestTemplate {
             .withVariable(name, value)
             .build();
 
-        HttpEntity<UpdateTaskVariablePayload> requestEntity = new HttpEntity<>(updateTaskVariablePayload, null);
+        HttpEntity<UpdateTaskVariablePayload> requestEntity = new HttpEntity<>(updateTaskVariablePayload);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
             TaskRestTemplate.ADMIN_TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables/{variableName}"),
             HttpMethod.PUT,

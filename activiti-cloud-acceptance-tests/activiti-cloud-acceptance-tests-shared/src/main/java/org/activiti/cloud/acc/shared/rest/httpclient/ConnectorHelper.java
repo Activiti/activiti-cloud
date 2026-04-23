@@ -19,22 +19,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import org.activiti.cloud.acc.shared.model.AuthToken;
-import org.apache.http.Header;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
 
 public class ConnectorHelper {
 
@@ -50,7 +52,7 @@ public class ConnectorHelper {
     }
 
     public static String get(String url, Map<String, String> params, AuthToken authToken)
-        throws URISyntaxException, IOException {
+        throws URISyntaxException, IOException, ParseException {
         CloseableHttpClient client = ConnectorHelper.connect();
 
         URIBuilder builder = new URIBuilder(url);
@@ -66,7 +68,7 @@ public class ConnectorHelper {
 
         CloseableHttpResponse httpResponse = client.execute(httpGet);
 
-        assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(httpResponse.getCode()).isEqualTo(200);
 
         String responseBody = EntityUtils.toString(httpResponse.getEntity());
 
@@ -75,7 +77,7 @@ public class ConnectorHelper {
         return responseBody;
     }
 
-    public static String postJson(String url, Object object, AuthToken authToken) throws IOException {
+    public static String postJson(String url, Object object, AuthToken authToken) throws IOException, ParseException {
         CloseableHttpClient client = ConnectorHelper.connect();
         HttpPost httpPost = new HttpPost(url);
 
@@ -85,7 +87,7 @@ public class ConnectorHelper {
 
         CloseableHttpResponse httpResponse = client.execute(httpPost);
 
-        assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(httpResponse.getCode()).isEqualTo(200);
 
         String responseBody = EntityUtils.toString(httpResponse.getEntity());
 
@@ -94,7 +96,8 @@ public class ConnectorHelper {
         return responseBody;
     }
 
-    public static String postForm(String url, Map<String, String> form, AuthToken authToken) throws IOException {
+    public static String postForm(String url, Map<String, String> form, AuthToken authToken)
+        throws IOException, ParseException {
         CloseableHttpClient client = ConnectorHelper.connect();
         ArrayList<NameValuePair> postParameters;
         HttpPost httpPost = new HttpPost(url);
@@ -104,7 +107,7 @@ public class ConnectorHelper {
             postParameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
 
-        httpPost.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+        httpPost.setEntity(new UrlEncodedFormEntity(postParameters, StandardCharsets.UTF_8));
         //if it is calling the auth service, there is not token yet
         if (authToken != null) {
             httpPost.setHeaders(headers(authToken.getAccess_token()));
@@ -112,7 +115,7 @@ public class ConnectorHelper {
 
         CloseableHttpResponse httpResponse = client.execute(httpPost);
 
-        assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(httpResponse.getCode()).isEqualTo(200);
 
         String responseBody = EntityUtils.toString(httpResponse.getEntity());
 

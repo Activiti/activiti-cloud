@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
-public class VariableValue<T> {
+import java.io.Serializable;
+
+public class VariableValue<T> implements Serializable {
 
     private T value;
 

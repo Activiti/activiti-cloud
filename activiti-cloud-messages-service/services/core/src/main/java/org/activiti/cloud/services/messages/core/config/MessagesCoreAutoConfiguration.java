@@ -160,13 +160,13 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
-        return MessageChannels.direct(DISCARD_CHANNEL).getObject();
+        return MessageChannels.publishSubscribe(DISCARD_CHANNEL).getObject();
     }
 
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL_INTEGRATION_FLOW)
     public IntegrationFlow discardChannelIntegrationFlow() {
-        return IntegrationFlow.from(DISCARD_CHANNEL).log(LoggingHandler.Level.DEBUG).get();
+        return IntegrationFlow.from(DISCARD_CHANNEL).log(LoggingHandler.Level.DEBUG).nullChannel();
     }
 
     @Bean

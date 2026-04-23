@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
@@ -83,7 +84,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (Connector.class.isInstance(bean) || ConsumerConnector.class.isInstance(bean)) {
+                if (
+                    Connector.class.isInstance(bean) ||
+                    ConsumerConnector.class.isInstance(bean) ||
+                    Consumer.class.isInstance(bean)
+                ) {
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
                     Optional
@@ -105,7 +110,14 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             GenericHandler<Message> handler = (message, headers) -> {
                                 FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                Object result = function.apply(message);
+                                function.setSkipOutputConversion(true);
+                                Message<?> messageToProcess = message;
+
+                                Object result = function.apply(messageToProcess);
+
+                                if (result instanceof Message<?> msg) {
+                                    result = msg.getPayload();
+                                }
 
                                 Message<?> response = null;
                                 if (result != null) {

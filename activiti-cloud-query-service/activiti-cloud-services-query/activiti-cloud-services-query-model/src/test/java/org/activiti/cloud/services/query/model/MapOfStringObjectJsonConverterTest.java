@@ -30,6 +30,6 @@ class MapOfStringObjectJsonConverterTest {
 
         String date = converter.convertToDatabaseColumn(Map.of("date", localDateTime));
 
-        assertThat(date).startsWith("{\"date\":[2000,1,1,1,1]}");
+        assertThat(date).startsWith("{\"date\":\"2000-01-01T01:01:00\"}");
     }
 }

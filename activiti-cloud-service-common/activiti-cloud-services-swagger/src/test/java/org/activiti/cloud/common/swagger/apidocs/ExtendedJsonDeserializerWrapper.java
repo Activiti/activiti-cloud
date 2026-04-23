@@ -16,11 +16,11 @@
 package org.activiti.cloud.common.swagger.apidocs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Set;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 public class ExtendedJsonDeserializerWrapper {
 
@@ -35,7 +35,7 @@ public class ExtendedJsonDeserializerWrapper {
         this.jsonDeserializers = jsonDeserializers;
     }
 
-    public static class ExtendedJsonDeserializer extends JsonDeserializer<Set<ExtendedJsonDeserializer>> {
+    public static class ExtendedJsonDeserializer extends ValueDeserializer<Set<ExtendedJsonDeserializer>> {
 
         @JsonProperty("test")
         private String test;

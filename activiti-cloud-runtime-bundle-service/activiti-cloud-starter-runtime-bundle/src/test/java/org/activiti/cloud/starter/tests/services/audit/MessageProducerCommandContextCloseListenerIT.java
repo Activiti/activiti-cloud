@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
@@ -59,6 +60,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
     classes = ServicesAuditITConfiguration.class,
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
+@AutoConfigureTestRestTemplate
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestExecutionListeners(
     value = RabbitMQQueuesCleanupTestExecutionListener.class,

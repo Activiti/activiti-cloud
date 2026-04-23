@@ -17,8 +17,6 @@ package org.activiti.cloud.notifications.graphql.starter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -72,9 +70,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
@@ -97,7 +96,10 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
+@AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
 @ContextConfiguration(
     classes = { EngineEventsConfiguration.class },
@@ -161,16 +163,16 @@ class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JacksonException {
         testConnectionInit(TESTADMIN);
     }
 
     @Test
-    void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JacksonException {
         testConnectionInit(HRUSER);
     }
 
-    private void testConnectionInit(String user) throws JsonProcessingException {
+    private void testConnectionInit(String user) throws JacksonException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         identityTokenProducer.withTestUser(user);
@@ -211,7 +213,7 @@ class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JacksonException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         identityTokenProducer.withTestUser(TESTDEVOPS);
@@ -849,7 +851,7 @@ class ActivitiGraphQLWsNativeStarterIT {
     }
 
     @Test
-    void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
+    void testGraphqlWsSubprotocolServerUnauthorized() throws JacksonException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
         var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(null));

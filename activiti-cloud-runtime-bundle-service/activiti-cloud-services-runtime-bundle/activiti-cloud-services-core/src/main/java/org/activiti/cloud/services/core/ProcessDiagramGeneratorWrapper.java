@@ -28,8 +28,8 @@ import org.activiti.image.exception.ActivitiImageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Service logic for generating process diagrams
@@ -116,7 +116,7 @@ public class ProcessDiagramGeneratorWrapper {
      * @return the file name
      */
     public String getDiagramImageFileName() {
-        return !StringUtils.isEmpty(getDefaultDiagramImageFileName())
+        return !ObjectUtils.isEmpty(getDefaultDiagramImageFileName())
             ? getDefaultDiagramImageFileName()
             : processDiagramGenerator.getDefaultDiagramImageFileName();
     }
@@ -155,7 +155,7 @@ public class ProcessDiagramGeneratorWrapper {
      * @return true if the specified font name exists
      */
     private boolean isFontAvailable(String fontName) {
-        if (StringUtils.isEmpty(fontName)) {
+        if (ObjectUtils.isEmpty(fontName)) {
             return false;
         }
 

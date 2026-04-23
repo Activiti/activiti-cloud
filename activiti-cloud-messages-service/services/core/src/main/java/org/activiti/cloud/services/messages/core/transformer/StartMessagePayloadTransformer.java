@@ -36,6 +36,11 @@ public class StartMessagePayloadTransformer
     }
 
     @Override
+    public String getComponentType() {
+        return "transformer";
+    }
+
+    @Override
     protected StartMessagePayload transformPayload(MessageEventPayload eventPayload) {
         return MessagePayloadBuilder
             .start(eventPayload.getName())

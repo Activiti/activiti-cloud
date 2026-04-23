@@ -19,12 +19,12 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
 import org.activiti.engine.runtime.Job;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.MessageDispatchingException;
-import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;

@@ -56,7 +56,10 @@ public class TaskCandidateGroupRemovedEventHandler implements QueryEventHandler 
                 );
                 Optional
                     .ofNullable(entityManager.find(TaskCandidateGroupEntity.class, id))
-                    .ifPresent(entityManager::remove);
+                    .ifPresent(entity -> {
+                        findResult.get().getTaskCandidateGroups().remove(entity);
+                        entityManager.remove(entity);
+                    });
             } catch (Exception cause) {
                 LOGGER.debug("Error handling TaskCandidateGroupRemovedEvent[" + event + "]", cause);
             }

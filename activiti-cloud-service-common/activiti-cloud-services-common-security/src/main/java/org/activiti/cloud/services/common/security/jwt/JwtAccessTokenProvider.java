@@ -18,7 +18,7 @@ package org.activiti.cloud.services.common.security.jwt;
 import java.security.Principal;
 import java.util.Optional;
 import java.util.function.Function;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 

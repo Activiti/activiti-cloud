@@ -195,7 +195,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2026</project.year>
 
-    <spring-boot.version>3.5.13</spring-boot.version>
+    <spring-boot.version>4.0.4</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -224,10 +224,10 @@
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-sonar-plugin.version>5.5.0.6356</maven-sonar-plugin.version>
     <json-unit.version>4.1.1</json-unit.version>
+    <org-json.version>20250107</org-json.version>
 
-    <!-- security fix AAE-41710, remove with Spring update -->
-    <assertj-core.version>3.27.7</assertj-core.version>
-    <hibernate.version>6.5.3.Final</hibernate.version>
+    <!-- dependencies versions -->
+    <hibernate.version>7.2.9.Final</hibernate.version>
     <!-- Temporary Dependency. Remove when Hibernate version for Java 25 is available -->
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
@@ -236,7 +236,6 @@
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
-    <aspectweaver.version>1.9.25.1</aspectweaver.version>
     <swagger-annotations.version>2.2.41</swagger-annotations.version>
   </properties>
   <repositories>
@@ -490,8 +489,8 @@ limitations under the License.]]>
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.hibernate.orm.tooling</groupId>
-          <artifactId>hibernate-enhance-maven-plugin</artifactId>
+          <groupId>org.hibernate.orm</groupId>
+          <artifactId>hibernate-maven-plugin</artifactId>
           <version>${hibernate.version}</version>
         </plugin>
         <plugin>

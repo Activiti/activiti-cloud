@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
-import java.util.List;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
@@ -38,23 +37,13 @@ import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationPro
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfiguration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
-
-    private final Jackson2ObjectMapperBuilder objectMapperBuilder;
-
-    public ServicesRestWebMvcAutoConfiguration(Jackson2ObjectMapperBuilder objectMapperBuilder) {
-        this.objectMapperBuilder = objectMapperBuilder;
-    }
 
     @Bean
     public CollectionModelAssembler resourcesAssembler() {
@@ -144,22 +133,6 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
         ToCloudVariableInstanceConverter converter
     ) {
         return new TaskVariableInstanceRepresentationModelAssembler(converter);
-    }
-
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        // for some, not yet identified, reason the ObjectMapper used by MappingJackson2HttpMessageConverter
-        // does not contains the object mapper customizations provided by custom Module beans.
-        // need to call configure here to ensure that the customisations are registered
-        for (HttpMessageConverter<?> converter : converters) {
-            //should exclude TypeConstrainedMappingJackson2HttpMessageConverter from configuration
-            if (
-                converter instanceof MappingJackson2HttpMessageConverter &&
-                !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter)
-            ) {
-                objectMapperBuilder.configure(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
-            }
-        }
     }
 
     @Bean

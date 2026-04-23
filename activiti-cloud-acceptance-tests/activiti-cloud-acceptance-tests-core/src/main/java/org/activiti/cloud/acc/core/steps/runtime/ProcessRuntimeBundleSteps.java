@@ -19,7 +19,6 @@ import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatR
 import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -52,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
+import tools.jackson.databind.ObjectMapper;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {

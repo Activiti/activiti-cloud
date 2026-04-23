@@ -17,12 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +30,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class EngineEventsTransformerTest {
 
@@ -54,7 +54,7 @@ public class EngineEventsTransformerTest {
     }
 
     @Test
-    public void transform() throws JsonProcessingException {
+    public void transform() throws JacksonException {
         // given
         List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
@@ -144,7 +144,7 @@ public class EngineEventsTransformerTest {
     }
 
     @Test
-    public void transformNullAttributes() throws JsonProcessingException {
+    public void transformNullAttributes() throws JacksonException {
         // given
         List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
@@ -230,7 +230,7 @@ public class EngineEventsTransformerTest {
     }
 
     @Test
-    public void transformFilterMissingAttributes() throws JsonProcessingException {
+    public void transformFilterMissingAttributes() throws JacksonException {
         // given
         List<Map<String, Object>> events = new ArrayList<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
@@ -319,7 +319,7 @@ public class EngineEventsTransformerTest {
     }
 
     @Test
-    public void testJson() throws JsonParseException, JsonMappingException, IOException {
+    public void testJson() throws StreamReadException, DatabindException, IOException {
         // given
         List<Map<String, Object>> events = new ObjectMapper()
             .readValue(json, new TypeReference<List<Map<String, Object>>>() {});

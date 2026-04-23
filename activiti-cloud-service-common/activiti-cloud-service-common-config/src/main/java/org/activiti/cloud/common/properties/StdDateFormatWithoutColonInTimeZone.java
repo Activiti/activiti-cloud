@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.common.properties;
 
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import tools.jackson.databind.util.StdDateFormat;
 
 public class StdDateFormatWithoutColonInTimeZone extends StdDateFormat {
 
     private static final long serialVersionUID = 1L;
 
     public StdDateFormatWithoutColonInTimeZone() {
-        super(DEFAULT_TIMEZONE, DEFAULT_LOCALE, null, false);
+        super(DEFAULT_TIMEZONE, DEFAULT_LOCALE, null, false, false);
     }
 }

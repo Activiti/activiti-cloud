@@ -29,9 +29,12 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -57,11 +60,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
     classes = ServicesAuditITConfiguration.class,
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
+@AutoConfigureTestRestTemplate
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestExecutionListeners(
     value = RabbitMQQueuesCleanupTestExecutionListener.class,
     mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
+@ExtendWith(MockitoExtension.class)
 class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
 
     @Autowired

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -22,11 +24,18 @@ import org.activiti.api.model.shared.Payload;
 
 public class SyncCloudProcessDefinitionsPayload implements Payload {
 
-    private final String id = UUID.randomUUID().toString();
+    private final String id;
     private List<String> processDefinitionKeys;
     private List<String> excludedProcessDefinitionIds;
 
-    public SyncCloudProcessDefinitionsPayload() {}
+    public SyncCloudProcessDefinitionsPayload() {
+        this.id = UUID.randomUUID().toString();
+    }
+
+    @JsonCreator
+    public SyncCloudProcessDefinitionsPayload(@JsonProperty("id") String id) {
+        this.id = id != null ? id : UUID.randomUUID().toString();
+    }
 
     @Override
     public String getId() {

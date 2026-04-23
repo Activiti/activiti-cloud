@@ -31,12 +31,12 @@ import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ServiceTask")
 @Table(name = "BPMN_ACTIVITY")
-@Where(clause = "activity_type='serviceTask'")
+@SQLRestriction("activity_type='serviceTask'")
 @DynamicInsert
 @DynamicUpdate
 public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudServiceTask {

@@ -15,10 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.controller;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -34,17 +35,18 @@ import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEnti
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.util.TestConverter;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = { "spring.main.banner-mode=off" })
+@AutoConfigureMockMvc
 @Import({ AlfrescoWebAutoConfiguration.class, AuditTestConfiguration.class })
 class AuditEventsControllerImpIT {
 
@@ -52,7 +54,7 @@ class AuditEventsControllerImpIT {
     private EventsRepository<AuditEventEntity> eventsRepository;
 
     @Autowired
-    private WebApplicationContext context;
+    private MockMvc mockMvc;
 
     @MockitoBean
     private UserDetailsService userDetailsService;
@@ -64,13 +66,8 @@ class AuditEventsControllerImpIT {
         .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         .withZone(ZoneOffset.UTC);
 
-    private static final String ENTRIES_ROOT = "_embedded.events";
-    private static final String EVENTS_ID_ROOT = ENTRIES_ROOT + ".id";
-
-    @BeforeEach
-    void setUp() {
-        webAppContextSetup(context);
-    }
+    private static final String ENTRIES_ROOT = "$._embedded.events";
+    private static final String EVENTS_ID_ROOT = "$._embedded.events[*].id";
 
     @AfterEach
     void cleanUp() {
@@ -78,7 +75,7 @@ class AuditEventsControllerImpIT {
     }
 
     @Test
-    void should_returnAuditEvents_filteredByEventTimeFrom() {
+    void should_returnAuditEvents_filteredByEventTimeFrom() throws Exception {
         AuditEventEntity audit1 = new ProcessStartedAuditEventEntity();
         audit1.setTimestamp(1000L);
         audit1.setEventType(TestConverter.EVENT_TYPE);
@@ -93,20 +90,24 @@ class AuditEventsControllerImpIT {
 
         eventsRepository.saveAll(List.of(audit1, audit2, audit3));
 
-        given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param("eventTimeFrom", dateTimeFormatter.format(Instant.ofEpochMilli(2000L).atZone(ZoneOffset.UTC)))
-            .when()
-            .get("/v1/events")
-            .then()
-            .statusCode(200)
-            .body(ENTRIES_ROOT, hasSize(2))
-            .body(EVENTS_ID_ROOT, contains(audit2.getId().toString(), audit3.getId().toString()));
+        mockMvc
+            .perform(
+                get("/v1/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param(
+                        "eventTimeFrom",
+                        dateTimeFormatter.format(Instant.ofEpochMilli(2000L).atZone(ZoneOffset.UTC))
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(ENTRIES_ROOT, hasSize(2)))
+            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit2.getId().toString(), audit3.getId().toString())));
+
         eventsRepository.deleteAll();
     }
 
     @Test
-    void should_returnAuditEvents_filteredByEventTimeTo() {
+    void should_returnAuditEvents_filteredByEventTimeTo() throws Exception {
         AuditEventEntity audit1 = new ProcessStartedAuditEventEntity();
         audit1.setTimestamp(1000L);
         audit1.setEventType(TestConverter.EVENT_TYPE);
@@ -121,14 +122,14 @@ class AuditEventsControllerImpIT {
 
         eventsRepository.saveAll(List.of(audit1, audit2, audit3));
 
-        given()
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .param("eventTimeTo", dateTimeFormatter.format(Instant.ofEpochMilli(2000L).atZone(ZoneOffset.UTC)))
-            .when()
-            .get("/v1/events")
-            .then()
-            .statusCode(200)
-            .body(ENTRIES_ROOT, hasSize(2))
-            .body(EVENTS_ID_ROOT, contains(audit1.getId().toString(), audit2.getId().toString()));
+        mockMvc
+            .perform(
+                get("/v1/events")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .param("eventTimeTo", dateTimeFormatter.format(Instant.ofEpochMilli(2000L).atZone(ZoneOffset.UTC)))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(ENTRIES_ROOT, hasSize(2)))
+            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit1.getId().toString(), audit2.getId().toString())));
     }
 }

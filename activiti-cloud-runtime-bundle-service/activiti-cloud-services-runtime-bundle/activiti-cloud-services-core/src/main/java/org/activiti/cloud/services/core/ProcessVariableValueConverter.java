@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.core;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
@@ -25,6 +24,7 @@ import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.engine.ActivitiException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
+import tools.jackson.databind.JsonNode;
 
 public class ProcessVariableValueConverter {
 

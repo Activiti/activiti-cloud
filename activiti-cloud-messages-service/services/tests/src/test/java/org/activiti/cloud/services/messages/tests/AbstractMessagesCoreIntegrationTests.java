@@ -27,11 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -40,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
+import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -69,6 +67,7 @@ import org.springframework.integration.annotation.BridgeFrom;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.GlobalChannelInterceptor;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.mapping.support.JsonHeaders;
 import org.springframework.integration.store.MessageGroup;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.MessageBuilder;
@@ -80,6 +79,9 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.MimeType;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the Message Connector Aggregator Processor.
@@ -102,8 +104,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     protected static final int TEST_TIMEOUT = 30;
 
-    protected ObjectMapper objectMapper = new ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @Autowired
     protected StreamBridge streamBridge;
@@ -189,7 +191,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     @Timeout(TEST_TIMEOUT)
-    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
+    public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JacksonException {
         // given
         String messageEventName = "start";
         Integer count = 100;
@@ -232,8 +234,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     @Timeout(TEST_TIMEOUT)
-    public void shouldProcessMessageEventsConcurrentlyInReversedOrder()
-        throws InterruptedException, JsonProcessingException {
+    public void shouldProcessMessageEventsConcurrentlyInReversedOrder() throws InterruptedException, JacksonException {
         // given
         String messageEventName = "start";
         Integer count = 100;
@@ -533,8 +534,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         send(messageSentEvent(messageName, correlationKey, "sent1"));
         send(messageSentEvent(messageName, correlationKey, "sent2"));
-
-        // when
+        //
+        //        // when
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
 
         // then
@@ -786,6 +787,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     ) {
         return messageBuilder(messageName, correlationKey, businessKey)
             .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_SENT.name())
+            .setHeader(JsonHeaders.TYPE_ID, "org.activiti.api.process.model.payloads.MessageEventPayload")
             .build();
     }
 
@@ -800,12 +802,14 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     ) {
         return messageBuilder(messageName, correlationKey, businessKey)
             .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_WAITING.name())
+            .setHeader(JsonHeaders.TYPE_ID, "org.activiti.api.process.model.payloads.MessageEventPayload")
             .build();
     }
 
     protected Message<MessageEventPayload> messageWaitingEvent(String messageName, String correlationKey) {
         return messageBuilder(messageName, correlationKey)
             .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_WAITING.name())
+            .setHeader(JsonHeaders.TYPE_ID, "org.activiti.api.process.model.payloads.MessageEventPayload")
             .build();
     }
 
@@ -833,13 +837,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         String json;
         try {
             json = objectMapper.writeValueAsString(message.getPayload());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
-
+        var headers = new LinkedHashMap<String, Object>();
+        headers.put(JsonHeaders.TYPE_ID, "org.activiti.api.process.model.payloads.MessagePayload");
+        headers.putAll(message.getHeaders());
         streamBridge.send(
             MessageConnectorProcessor.INPUT,
-            MessageBuilder.withPayload(json).copyHeaders(message.getHeaders()).build()
+            MessageBuilder.withPayload(json).copyHeaders(headers).build(),
+            MimeType.valueOf("application/json")
         );
     }
 
@@ -933,11 +940,11 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         Object payload = message.getPayload();
         try {
             if (payload instanceof String) {
-                return objectMapper.readValue((String) payload, MessageEventPayload.class);
+                return objectMapper.readValue((String) payload, Payload.class);
             } else if (payload instanceof byte[]) {
-                return objectMapper.readValue((byte[]) payload, MessageEventPayload.class);
+                return objectMapper.readValue((byte[]) payload, Payload.class);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.warn(
                 "The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}",
                 payload,

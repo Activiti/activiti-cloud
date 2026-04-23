@@ -15,28 +15,24 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<String, Object>, String> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MapOfStringObjectJsonConverter() {
-        objectMapper.registerModule(new JavaTimeModule());
-    }
+    public MapOfStringObjectJsonConverter() {}
 
     @Override
     public String convertToDatabaseColumn(Map<String, Object> variableValue) {
         try {
             return objectMapper.writeValueAsString(variableValue);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to serialize list of map of string objects", e);
         }
     }
@@ -49,7 +45,7 @@ public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<St
             } else {
                 return Collections.emptyMap();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to deserialize map of string objects", e);
         }
     }

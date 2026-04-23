@@ -23,6 +23,7 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 public class VariablesJpaJsonConverterTest {
 
@@ -91,7 +92,7 @@ public class VariablesJpaJsonConverterTest {
         //then
         assertThatJson(jsonRepresentation).inPath("name").isEqualTo("var-name");
         assertThatJson(jsonRepresentation).inPath("type").isEqualTo("Invoice");
-        assertThatJson(jsonRepresentation).inPath("value").isEqualTo(invoice);
+        assertThatJson(jsonRepresentation).inPath("value").isEqualTo(new ObjectMapper().writeValueAsString(invoice));
         assertThatJson(jsonRepresentation).inPath("taskId").isEqualTo("task-id");
         assertThatJson(jsonRepresentation).inPath("processInstanceId").isEqualTo("proc-inst-id");
     }

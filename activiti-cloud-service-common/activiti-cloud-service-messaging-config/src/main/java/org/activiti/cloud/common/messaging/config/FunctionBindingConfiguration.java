@@ -17,13 +17,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,7 +25,6 @@ import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -40,14 +33,13 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -126,7 +118,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
-        ActivitiCloudMessagingProperties messagingProperties
+        ActivitiCloudMessagingProperties messagingProperties,
+        GenericApplicationContext applicationContext
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -159,7 +152,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            if (Supplier.class.isInstance(bean)) {
+                            if (bean instanceof Supplier) {
                                 FunctionInvocationWrapper supplier = functionFromDefinition(functionDefinition);
 
                                 IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow
@@ -177,12 +170,18 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                    return function.apply(message);
+                                    function.setSkipOutputConversion(false);
+                                    Message<?> messageToProcess = message;
+                                    Object result = function.apply(messageToProcess);
+                                    if (result instanceof Message<?> msg) {
+                                        return msg;
+                                    }
+                                    return result;
                                 };
 
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
                                     .from(
-                                        getGatewayInterface(Function.class.isInstance(bean)),
+                                        getGatewayInterface(bean instanceof Function),
                                         gateway -> gateway.replyTimeout(0L)
                                     )
                                     .log(DEBUG, beanName + "." + functionBinding.input())
@@ -228,29 +227,5 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         default String getBindingDestination(String bindingName) {
             return apply(bindingName);
         }
-    }
-
-    @Bean
-    @ConditionalOnClass(JacksonMapper.class)
-    @Primary
-    public JacksonMapper jacksonMapper(@Autowired(required = false) ObjectMapper objectMapper) {
-        //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
-        ObjectMapper copiedMapper;
-        if (objectMapper == null) {
-            copiedMapper = new ObjectMapper();
-            copiedMapper.registerModule(new JavaTimeModule());
-            copiedMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        } else {
-            try {
-                copiedMapper = objectMapper.copy();
-            } catch (Exception e) {
-                copiedMapper = new ObjectMapper();
-            }
-        }
-        //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
-        copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
-        return new JacksonMapper(copiedMapper);
     }
 }

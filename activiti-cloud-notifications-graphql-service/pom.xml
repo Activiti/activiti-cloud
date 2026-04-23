@@ -53,6 +53,7 @@
   <modules>
     <module>dependencies</module>
     <module>services</module>
+    <module>gatling</module>
     <module>starter</module>
   </modules>
 </project>

@@ -18,10 +18,7 @@ package org.activiti.cloud.services.query.model;
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
-import jakarta.persistence.Convert;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -31,8 +28,6 @@ import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @MappedSuperclass
@@ -51,12 +46,6 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private Date lastUpdatedTime;
 
     private String executionId;
-
-    @Convert(converter = VariableValueJsonConverter.class)
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "`value`", columnDefinition = "jsonb")
-    @Basic(fetch = FetchType.LAZY)
-    private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
 
@@ -104,7 +93,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.processInstanceId = cloudVariableEvent.getEntity().getProcessInstanceId();
         this.createTime = new Date(cloudVariableEvent.getTimestamp());
         this.lastUpdatedTime = new Date(cloudVariableEvent.getTimestamp());
-        this.value = new VariableValue<>(cloudVariableEvent.getEntity().getValue());
+        setValue(cloudVariableEvent.getEntity().getValue());
     }
 
     public abstract Long getId();
@@ -151,14 +140,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         this.executionId = executionId;
     }
 
-    public <T> void setValue(T value) {
-        this.value = new VariableValue<>(value);
-    }
-
-    @Override
-    public <T> T getValue() {
-        return (T) value.getValue();
-    }
+    public abstract <T> void setValue(T value);
 
     public Boolean getMarkedAsDeleted() {
         return markedAsDeleted;

@@ -19,10 +19,14 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-messaging-config</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
     <!-- Third-party -->
     <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jdk8</artifactId>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
     <!-- Spring -->
     <dependency>
