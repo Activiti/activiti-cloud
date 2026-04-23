@@ -56,14 +56,14 @@ public class VariablesUtil {
     }
 
     public String getExpectedDateFormattedString(Date date) throws Exception {
-        SimpleDateFormat expDTFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat expDTFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         expDTFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         return expDTFormat.format(dateFormatterProvider.parse(getDateFormattedString(date)));
     }
 
     public String getExpectedDateTimeFormattedString(Date date) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.format(date);
     }
