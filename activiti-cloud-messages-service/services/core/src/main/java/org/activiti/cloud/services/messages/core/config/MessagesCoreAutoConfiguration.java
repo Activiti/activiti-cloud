@@ -160,7 +160,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
-        return MessageChannels.direct(DISCARD_CHANNEL).getObject();
+        return MessageChannels.publishSubscribe(DISCARD_CHANNEL).getObject();
     }
 
     @Bean
