@@ -407,7 +407,7 @@ public class ProcessVariablesIT {
 
     private void updateDateVariableWithADate(boolean isAdmin, String processInstanceId) {
         Map<String, Object> variables = new HashMap<>();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = new Date();
 
