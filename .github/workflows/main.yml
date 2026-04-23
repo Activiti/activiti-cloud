@@ -116,7 +116,7 @@ jobs:
             TEST_OPTS="-DskipTests=true"
             echo "::warning::Tests are being skipped due to 'skip-tests' label. This PR cannot be merged until the label is removed."
           fi
-          mvn -fae -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install $TEST_OPTS ${{ env.MAVEN_CLI_OPTS }}
+          mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install $TEST_OPTS ${{ env.MAVEN_CLI_OPTS }}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
