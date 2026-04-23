@@ -28,7 +28,6 @@ public class ConnectorIncidentEvent implements Serializable {
     private IntegrationContext integrationContext;
     private Exception exception;
     private IncidentSeverity severity;
-    private String targetAppName;
 
     public ConnectorIncidentEvent() {}
 
@@ -37,19 +36,9 @@ public class ConnectorIncidentEvent implements Serializable {
         Exception exception,
         IncidentSeverity severity
     ) {
-        this(integrationContext, exception, severity, null);
-    }
-
-    public ConnectorIncidentEvent(
-        IntegrationContext integrationContext,
-        Exception exception,
-        IncidentSeverity severity,
-        String targetAppName
-    ) {
         this.integrationContext = integrationContext;
         this.exception = exception;
         this.severity = severity;
-        this.targetAppName = targetAppName;
     }
 
     public IntegrationContext getIntegrationContext() {
@@ -76,14 +65,6 @@ public class ConnectorIncidentEvent implements Serializable {
         this.severity = severity;
     }
 
-    public String getTargetAppName() {
-        return targetAppName;
-    }
-
-    public void setTargetAppName(String targetAppName) {
-        this.targetAppName = targetAppName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,28 +73,17 @@ public class ConnectorIncidentEvent implements Serializable {
         return (
             Objects.equals(integrationContext, that.integrationContext) &&
             Objects.equals(exception, that.exception) &&
-            severity == that.severity &&
-            Objects.equals(targetAppName, that.targetAppName)
+            severity == that.severity
         );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(integrationContext, exception, severity, targetAppName);
+        return Objects.hash(integrationContext, exception, severity);
     }
 
     @Override
     public String toString() {
-        return (
-            "ConnectorIncidentEvent{" +
-            "exception=" +
-            exception +
-            ", severity=" +
-            severity +
-            ", targetAppName='" +
-            targetAppName +
-            '\'' +
-            '}'
-        );
+        return "ConnectorIncidentEvent{" + "exception=" + exception + ", severity=" + severity + '}';
     }
 }
