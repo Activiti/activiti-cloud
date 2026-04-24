@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.core.conf;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -78,6 +76,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.messaging.Message;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -248,8 +248,8 @@ public class ServicesCoreAutoConfiguration {
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(ObjectMapper objectMapper) {
-        return new ProcessVariableJsonNodeConverter(objectMapper);
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(JsonMapper jsonMapper) {
+        return new ProcessVariableJsonNodeConverter(jsonMapper);
     }
 
     @Bean

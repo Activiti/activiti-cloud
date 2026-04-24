@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers.csv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.AbstractBeanField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class ObjectToJsonConvertor extends AbstractBeanField {
 
@@ -40,7 +40,7 @@ public class ObjectToJsonConvertor extends AbstractBeanField {
     public String convertToWrite(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("CSV export exception. Could not serialise event entity " + value + " to json.", e);
             throw new ObjectToJsonConversionException("Export to CSV failed. Could not serialise event entity.");
         }

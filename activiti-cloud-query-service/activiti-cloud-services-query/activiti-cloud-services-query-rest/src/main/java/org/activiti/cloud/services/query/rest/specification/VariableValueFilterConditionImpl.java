@@ -21,6 +21,9 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
@@ -86,10 +89,15 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
         if (variableJavaType == Boolean.class) {
             return criteriaBuilder.literal(Boolean.parseBoolean(filter.value()) ? 1 : 0);
         }
-        if (variableJavaType == BigDecimal.class) {
+        if (variableJavaType == BigDecimal.class || variableJavaType == Integer.class) {
             return criteriaBuilder.literal(new BigDecimal(filter.value()));
         }
-        Expression<String> value = criteriaBuilder.literal(filter.value());
-        return variableJavaType == String.class ? value : value.as(variableJavaType);
+        if (variableJavaType == LocalDateTime.class) {
+            return criteriaBuilder.literal(OffsetDateTime.parse(filter.value()));
+        }
+        if (variableJavaType == LocalDate.class) {
+            return criteriaBuilder.literal(LocalDate.parse(filter.value()));
+        }
+        return criteriaBuilder.literal(filter.value());
     }
 }

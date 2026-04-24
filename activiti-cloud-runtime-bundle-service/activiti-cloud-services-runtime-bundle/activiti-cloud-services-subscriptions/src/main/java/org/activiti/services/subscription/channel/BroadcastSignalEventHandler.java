@@ -19,8 +19,7 @@ import java.util.function.Consumer;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.RuntimeService;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 
 public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
 
@@ -31,9 +30,9 @@ public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
     }
 
     @Retryable(
-        value = ActivitiOptimisticLockingException.class,
-        maxAttemptsExpression = "${activiti.cloud.subscription.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.subscription.retry.backoff.delay:0}")
+        includes = ActivitiOptimisticLockingException.class,
+        maxRetriesString = "${activiti.cloud.subscription.retry.max-attempts:3}",
+        delayString = "${activiti.cloud.subscription.retry.backoff.delay:0}"
     )
     @Override
     public void accept(SignalPayload signalPayload) {

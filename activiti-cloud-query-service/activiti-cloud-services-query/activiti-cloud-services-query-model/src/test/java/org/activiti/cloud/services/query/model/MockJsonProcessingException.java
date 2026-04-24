@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 
-public class MockJsonProcessingException extends JsonProcessingException {
+public class MockJsonProcessingException extends JacksonException {
 
     protected MockJsonProcessingException(String msg) {
         super(msg);

@@ -41,10 +41,12 @@ public abstract class CloudIntegrationEventImpl
             setEntityId(getEntity().getId());
         }
 
-        setProcessInstanceId(integrationContext.getProcessInstanceId());
-        setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-        setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-        setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-        setBusinessKey(integrationContext.getBusinessKey());
+        if (integrationContext != null) {
+            setProcessInstanceId(integrationContext.getProcessInstanceId());
+            setProcessDefinitionId(integrationContext.getProcessDefinitionId());
+            setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
+            setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
+            setBusinessKey(integrationContext.getBusinessKey());
+        }
     }
 }

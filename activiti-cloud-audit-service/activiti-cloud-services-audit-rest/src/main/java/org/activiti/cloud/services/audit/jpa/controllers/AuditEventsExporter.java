@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +25,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.controllers.csv.CsvLogEntry;
 import org.activiti.cloud.services.audit.jpa.controllers.csv.ObjectToJsonStrategy;
+import tools.jackson.databind.ObjectMapper;
 
 public class AuditEventsExporter {
 

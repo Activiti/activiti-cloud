@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +34,8 @@ import java.util.Date;
 import java.util.Objects;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity(name = "TaskVariable")
 @Table(
@@ -50,6 +55,12 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     @GeneratedValue(generator = "task_variable_sequence", strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name = "task_variable_sequence", sequenceName = "task_variable_sequence", allocationSize = 50)
     private Long id;
+
+    @Convert(converter = VariableValueJsonConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "`value`", columnDefinition = "jsonb")
+    @Basic(fetch = FetchType.LAZY)
+    private VariableValue<?> value;
 
     private String taskId;
 
@@ -119,6 +130,17 @@ public class TaskVariableEntity extends AbstractVariableEntity {
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
+    }
+
+    @Override
+    public <T> void setValue(T value) {
+        this.value = new VariableValue<>(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getValue() {
+        return (T) value.getValue();
     }
 
     @Override

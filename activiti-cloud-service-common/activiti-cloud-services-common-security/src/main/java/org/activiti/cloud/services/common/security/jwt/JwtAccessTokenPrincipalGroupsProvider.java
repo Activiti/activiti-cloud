@@ -18,8 +18,8 @@ package org.activiti.cloud.services.common.security.jwt;
 import java.security.Principal;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsProvider {
 

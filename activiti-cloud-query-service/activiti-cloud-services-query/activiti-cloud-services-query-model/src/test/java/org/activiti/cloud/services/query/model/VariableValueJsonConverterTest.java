@@ -19,13 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class VariableValueJsonConverterTest {
@@ -83,7 +84,7 @@ public class VariableValueJsonConverterTest {
     @Test
     public void convertToEntityAttributeShouldThrowExceptionWhenExceptionOccursWhileReading() throws Exception {
         //given
-        JsonMappingException exception = new JsonMappingException(null, "test");
+        DatabindException exception = DatabindException.from((JsonParser) null, "test");
         given(objectMapper.readValue(JSON_REPRESENTATION, VariableValue.class)).willThrow(exception);
 
         //when

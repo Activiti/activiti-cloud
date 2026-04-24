@@ -17,13 +17,13 @@ package org.activiti.cloud.services.messages.core.aggregator;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.integration.aggregator.AbstractCorrelatingMessageHandler;
 import org.springframework.integration.aggregator.CorrelationStrategy;
 import org.springframework.integration.aggregator.MessageGroupProcessor;
 import org.springframework.integration.aggregator.ReleaseStrategy;
 import org.springframework.integration.store.MessageGroup;
 import org.springframework.integration.store.MessageGroupStore;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 /**

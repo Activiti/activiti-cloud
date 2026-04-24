@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 public class ListOfStackTraceElementsJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 
@@ -37,7 +36,7 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
     public String convertToDatabaseColumn(List<StackTraceElement> variableValue) {
         try {
             return objectMapper.writeValueAsString(variableValue);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to serialize list of StackTraceElements", e);
         }
     }
@@ -50,7 +49,7 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
             } else {
                 return Collections.emptyList();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new QueryException("Unable to deserialize list of StackTraceElements", e);
         }
     }

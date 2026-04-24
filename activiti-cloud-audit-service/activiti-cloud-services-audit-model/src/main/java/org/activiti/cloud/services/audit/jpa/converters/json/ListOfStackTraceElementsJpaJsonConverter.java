@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.audit.api.AuditException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 
@@ -32,7 +31,7 @@ public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConver
     public String convertToDatabaseColumn(List<StackTraceElement> entity) {
         try {
             return objectMapper.writeValueAsString(entity);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to serialize object.", e);
         }
     }
@@ -48,7 +47,7 @@ public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConver
             } else {
                 return Collections.emptyList();
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new AuditException("Unable to deserialize object.", e);
         }
     }

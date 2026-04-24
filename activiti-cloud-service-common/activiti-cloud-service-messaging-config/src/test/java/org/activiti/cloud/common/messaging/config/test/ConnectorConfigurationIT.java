@@ -42,8 +42,10 @@ import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,6 +94,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
     }
 )
 @Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
+@ExtendWith(MockitoExtension.class)
 public class ConnectorConfigurationIT {
 
     private static final String FUNCTION_NAME_A = "auditConsumerHandlerA";
@@ -461,12 +464,9 @@ public class ConnectorConfigurationIT {
         // then
         verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
 
-        assertThat(myErrorHandler.getReference())
-            .extracting(AtomicReference::get)
-            .extracting(ErrorMessage::getPayload)
-            .extracting(Throwable::getCause)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Test Audit Consumer Error");
+        Assertions
+            .assertThat(myErrorHandler.getReference().get().getPayload())
+            .hasRootCauseMessage("Test Audit Consumer Error");
     }
 
     @Test

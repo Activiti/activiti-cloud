@@ -15,28 +15,47 @@
  */
 package org.activiti.cloud.acc.shared.rest.feign;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.jackson.JacksonDecoder;
+import feign.Response;
+import feign.Util;
+import feign.codec.Decoder;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
- * HAL decoder
+ * HAL decoder using Jackson 3
  */
 public class HalDecoder extends ResponseEntityDecoder {
 
     public HalDecoder() {
-        this(new ObjectMapper());
+        this(JsonMapper.builder().addModule(new HalJacksonModule()).build());
     }
 
-    public HalDecoder(ObjectMapper objectMapper) {
-        super(
-            new JacksonDecoder(
-                objectMapper
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    .registerModule(new Jackson2HalModule())
-            )
-        );
+    public HalDecoder(JsonMapper mapper) {
+        super(new Jackson3Decoder(mapper));
+    }
+
+    private static class Jackson3Decoder implements Decoder {
+
+        private final JsonMapper mapper;
+
+        Jackson3Decoder(JsonMapper mapper) {
+            this.mapper = mapper;
+        }
+
+        @Override
+        public Object decode(Response response, Type type) throws IOException {
+            if (response.body() == null) {
+                return null;
+            }
+            if (String.class.equals(type)) {
+                return Util.toString(response.body().asReader(Util.UTF_8));
+            }
+            JavaType javaType = mapper.constructType(type);
+            return mapper.readValue(response.body().asInputStream(), javaType);
+        }
     }
 }

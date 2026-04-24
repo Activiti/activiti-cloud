@@ -31,7 +31,7 @@ import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheabl
 import org.activiti.spring.cache.config.ActivitiSpringCacheManagerAutoConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;

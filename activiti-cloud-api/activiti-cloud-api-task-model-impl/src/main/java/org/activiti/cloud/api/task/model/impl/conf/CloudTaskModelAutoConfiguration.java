@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.api.task.model.impl.conf;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -43,13 +35,18 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.core.Version;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.jsontype.NamedType;
+import tools.jackson.databind.module.SimpleAbstractTypeResolver;
+import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration
 public class CloudTaskModelAutoConfiguration {
 
     //this bean will be automatically injected inside boot's ObjectMapper
     @Bean
-    public Module customizeCloudTaskModelObjectMapper() {
+    public JacksonModule customizeCloudTaskModelObjectMapper() {
         SimpleModule module = new SimpleModule("mapCloudTaskModelInterfaces", Version.unknownVersion());
 
         module.registerSubtypes(
@@ -100,14 +97,7 @@ public class CloudTaskModelAutoConfiguration {
             )
         );
 
-        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
-            //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
-            //once version 2.9.6 is related we can remove this @override method
-            @Override
-            public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc) {
-                return findTypeMapping(config, typeDesc.getType());
-            }
-        };
+        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {};
 
         resolver.addMapping(CloudTask.class, CloudTaskImpl.class);
         resolver.addMapping(QueryCloudTask.class, QueryCloudTaskImpl.class);

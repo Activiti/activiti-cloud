@@ -21,9 +21,9 @@ import org.activiti.api.process.runtime.events.listener.BPMNElementEventListener
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
 import org.activiti.cloud.services.messages.events.support.BpmnMessageEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 
 public class BpmnMessageWaitingEventMessageProducer implements BPMNElementEventListener<BPMNMessageWaitingEvent> {

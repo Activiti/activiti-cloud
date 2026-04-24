@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.acc.shared.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import tools.jackson.databind.ObjectMapper;
 
 public class AuthToken {
 

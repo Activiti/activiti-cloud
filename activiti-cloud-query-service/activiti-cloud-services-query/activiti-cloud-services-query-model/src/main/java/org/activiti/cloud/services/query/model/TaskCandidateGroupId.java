@@ -52,7 +52,8 @@ public class TaskCandidateGroupId implements Serializable {
         if (taskId == null) {
             if (other.taskId != null) return false;
         } else if (!taskId.equals(other.taskId)) return false;
-        if (groupId != other.groupId) return false;
-        return true;
+        if (groupId == null) {
+            return other.groupId == null;
+        } else return groupId.equals(other.groupId);
     }
 }

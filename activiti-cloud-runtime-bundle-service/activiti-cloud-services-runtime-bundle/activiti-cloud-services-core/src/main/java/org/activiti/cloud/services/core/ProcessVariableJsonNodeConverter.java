@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.core;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpringConverter<JsonNode> {
 
@@ -31,7 +31,7 @@ public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpr
     public JsonNode convert(String source) {
         try {
             return objectMapper.readTree(source);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

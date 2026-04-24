@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +38,8 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
 
-    IntegrationErrorImpl() {}
+    @JsonCreator
+    public IntegrationErrorImpl() {}
 
     public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error) {
         this.integrationRequest = integrationRequest;
@@ -85,6 +87,30 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
     @Override
     public String getErrorCode() {
         return errorCode;
+    }
+
+    public void setIntegrationRequest(IntegrationRequest integrationRequest) {
+        this.integrationRequest = integrationRequest;
+    }
+
+    public void setIntegrationContext(IntegrationContext integrationContext) {
+        this.integrationContext = integrationContext;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+        this.stackTraceElements = stackTraceElements;
+    }
+
+    public void setErrorClassName(String errorClassName) {
+        this.errorClassName = errorClassName;
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
+import tools.jackson.databind.ObjectMapper;
 
 public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
 
@@ -83,6 +83,9 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
                 .ofNullable(errorMessage.getPayload().getCause())
                 .orElse(errorMessage.getPayload());
 
+            // SC Stream 5.x wraps the original exception as suppressed in RetryException
+            cause = unwrapRetryException(cause);
+
             Message<IntegrationError> message = IntegrationErrorBuilder
                 .errorFor(integrationRequest, connectorProperties, cause)
                 .buildMessage();
@@ -90,5 +93,16 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         } catch (Throwable cause) {
             logger.error("Error sending IntegrationError for IntegrationRequest", cause);
         }
+    }
+
+    private Throwable unwrapRetryException(Throwable cause) {
+        if (cause instanceof org.springframework.core.retry.RetryException && cause.getSuppressed().length > 0) {
+            Throwable suppressed = cause.getSuppressed()[0];
+            if (suppressed.getCause() != null) {
+                return suppressed.getCause();
+            }
+            return suppressed;
+        }
+        return cause;
     }
 }

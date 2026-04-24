@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.common.security.config;
 
 import feign.RequestInterceptor;
-import java.util.Arrays;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
@@ -60,8 +59,9 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatchers;
 import org.springframework.web.cors.CorsConfiguration;
 
 @AutoConfiguration
@@ -231,13 +231,12 @@ public class CommonSecurityAutoConfiguration {
     }
 
     private RequestMatcher actuatorEndpointsMatcher() {
-        RequestMatcher actuatorMatcher = new AntPathRequestMatcher("/actuator/**");
-        RequestMatcher healthMatcher = new AntPathRequestMatcher("/actuator/health/**");
-        RequestMatcher infoMatcher = new AntPathRequestMatcher("/actuator/info/**");
+        RequestMatcher actuatorMatcher = PathPatternRequestMatcher.pathPattern("/actuator/**");
+        RequestMatcher healthMatcher = PathPatternRequestMatcher.pathPattern("/actuator/health/**");
+        RequestMatcher infoMatcher = PathPatternRequestMatcher.pathPattern("/actuator/info/**");
 
-        List<RequestMatcher> excludeMatchers = Arrays.asList(healthMatcher, infoMatcher);
+        RequestMatcher excludeMatcher = RequestMatchers.anyOf(healthMatcher, infoMatcher);
 
-        return request ->
-            actuatorMatcher.matches(request) && excludeMatchers.stream().noneMatch(matcher -> matcher.matches(request));
+        return request -> actuatorMatcher.matches(request) && !excludeMatcher.matches(request);
     }
 }

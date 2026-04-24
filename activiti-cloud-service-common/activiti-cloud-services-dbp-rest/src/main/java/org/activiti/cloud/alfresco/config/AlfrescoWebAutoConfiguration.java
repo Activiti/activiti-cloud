@@ -16,32 +16,32 @@
 package org.activiti.cloud.alfresco.config;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageArgumentMethodResolver;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageParameterParser;
-import org.activiti.cloud.alfresco.converter.json.AlfrescoJackson2HttpMessageConverter;
+import org.activiti.cloud.alfresco.converter.json.AlfrescoJacksonHttpMessageConverter;
 import org.activiti.cloud.alfresco.converter.json.PageMetadataConverter;
 import org.activiti.cloud.alfresco.converter.json.PagedModelConverter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration
 @PropertySource("classpath:config/alfresco-rest-config.properties")
@@ -81,19 +81,19 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         //the property spring.hateoas.use-hal-as-default-json-media-type is not working
         //we need to manually remove application/json from supported mediaTypes
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter) {
+            if (converter instanceof TypeConstrainedJacksonJsonHttpMessageConverter) {
                 ArrayList<MediaType> mediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
                 mediaTypes.remove(MediaType.APPLICATION_JSON);
-                ((TypeConstrainedMappingJackson2HttpMessageConverter) converter).setSupportedMediaTypes(mediaTypes);
+                ((TypeConstrainedJacksonJsonHttpMessageConverter) converter).setSupportedMediaTypes(mediaTypes);
             }
         }
     }
 
     @Bean
-    public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-        return new AlfrescoJackson2HttpMessageConverter<>(
+    public <T> AlfrescoJacksonHttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(JsonMapper jsonMapper) {
+        return new AlfrescoJacksonHttpMessageConverter<>(
             new PagedModelConverter(new PageMetadataConverter()),
-            objectMapper
+            jsonMapper
         );
     }
 
@@ -112,7 +112,7 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public InitializingBean configureObjectMapperForBigDecimal(ObjectMapper objectMapper) {
+    public JsonMapperBuilderCustomizer configureJsonMapperForBigDecimal() {
         /*
         This will ensure that BigDecimals are serialized as String and not as a number, meaning
         that double quotes will be added around the value. Serializing it as a number it's problematic
@@ -122,7 +122,10 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         loose the information about the scale, so it can be easily converted back to BigDecimal.
          */
 
-        return () ->
-            objectMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
+        return builder ->
+            builder.withConfigOverride(
+                BigDecimal.class,
+                o -> o.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING))
+            );
     }
 }

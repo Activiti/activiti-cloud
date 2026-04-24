@@ -29,8 +29,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.env.Environment;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 @SpringBootTest(classes = { QueryConsumerApplication.class })
 @EnableCleanupLiquibaseAfterTest
@@ -42,7 +43,9 @@ public class QueryConsumerApplicationIT {
     static final RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.8.6-management-alpine").withReuse(true);
 
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
+        .withReuse(true)
+        .waitingFor(Wait.forListeningPort());
 
     @Autowired
     protected BinderFactoryListenerTestContext binderFactoryListenerTestContext;

@@ -20,11 +20,10 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
-import java.math.BigDecimal;
 import java.util.Map;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
-import org.activiti.cloud.services.query.model.AbstractVariableEntity_;
+import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 
 public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity>
     implements VariableSelectionExpression {
@@ -56,20 +55,12 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
 
     public Expression getExtractedValue() {
         String extractionFunctionName = CustomPostgreSQLDialect.getExtractionFunctionName(variableJavaType);
-        Class<?> extractionFunctionReturnType = variableJavaType == Boolean.class ||
-            variableJavaType == BigDecimal.class
-            ? variableJavaType
-            : String.class;
-        Expression<?> extractedValue = criteriaBuilder.function(
+        Class<?> extractionFunctionReturnType = CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType);
+        return criteriaBuilder.function(
             extractionFunctionName,
             extractionFunctionReturnType,
-            root.get(AbstractVariableEntity_.value)
+            root.get(TaskVariableEntity_.VALUE)
         );
-        if (variableJavaType != BigDecimal.class) {
-            Class<?> castType = variableJavaType == Boolean.class ? Integer.class : variableJavaType;
-            extractedValue = extractedValue.as(castType);
-        }
-        return extractedValue;
     }
 
     @Override
@@ -80,7 +71,11 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
                     (Expression) criteriaBuilder
                         .selectCase()
                         .when(selectionPredicate, getExtractedValue())
-                        .otherwise(criteriaBuilder.nullLiteral(variableJavaType))
+                        .otherwise(
+                            criteriaBuilder.nullLiteral(
+                                CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType)
+                            )
+                        )
                 );
         }
         return selectionExpression;

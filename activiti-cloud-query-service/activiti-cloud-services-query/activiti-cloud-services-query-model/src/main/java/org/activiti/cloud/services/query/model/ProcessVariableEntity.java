@@ -16,7 +16,11 @@
 package org.activiti.cloud.services.query.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,7 +35,9 @@ import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ParamDef;
+import org.hibernate.type.SqlTypes;
 
 @FilterDef(
     name = "variablesFilter",
@@ -59,6 +65,12 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
         allocationSize = 50
     )
     private Long id;
+
+    @Convert(converter = VariableValueJsonConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "`value`", columnDefinition = "jsonb")
+    @Basic(fetch = FetchType.LAZY)
+    private VariableValue<?> value;
 
     private String variableDefinitionId;
 
@@ -112,6 +124,17 @@ public class ProcessVariableEntity extends AbstractVariableEntity implements Que
     @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public <T> void setValue(T value) {
+        this.value = new VariableValue<>(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getValue() {
+        return (T) value.getValue();
     }
 
     @Override

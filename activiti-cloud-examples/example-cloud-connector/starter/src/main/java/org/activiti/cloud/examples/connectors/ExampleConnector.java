@@ -18,7 +18,6 @@ package org.activiti.cloud.examples.connectors;
 import static net.logstash.logback.marker.Markers.append;
 import static org.activiti.cloud.examples.connectors.ExampleConnector.EXAMPLE_CONNECTOR_CONSUMER;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 @ConnectorBinding(
     input = ExampleConnectorChannels.EXAMPLE_CONNECTOR,

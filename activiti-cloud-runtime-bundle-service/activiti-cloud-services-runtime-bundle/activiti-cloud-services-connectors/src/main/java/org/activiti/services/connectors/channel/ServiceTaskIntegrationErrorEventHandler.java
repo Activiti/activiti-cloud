@@ -34,8 +34,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -63,8 +62,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
     @Retryable(
         value = ActivitiOptimisticLockingException.class,
-        maxAttemptsExpression = "${activiti.cloud.integration.error.retry.max-attempts:3}",
-        backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:0}")
+        maxRetriesString = "${activiti.cloud.integration.error.retry.max-attempts:3}",
+        delayString = "${activiti.cloud.integration.error.retry.backoff.delay:0}"
     )
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
