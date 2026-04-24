@@ -62,6 +62,7 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.config.EnableIntegrationManagement;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.gateway.GatewayProxyFactoryBean;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.MessageProcessor;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
@@ -94,6 +95,7 @@ public class MessagesCoreAutoConfiguration {
     private static final String MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN = "messageConnectorAggregatorFactoryBean";
     private static final String CONTROL_BUS = "controlBus";
     private static final String CONTROL_BUS_FLOW = "controlBusFlow";
+    private static final String CONTROL_BUS_INPUT = "controlBusInput";
     private static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW = "messageConnectorIntegrationFlow";
     public static final String DISCARD_CHANNEL_INTEGRATION_FLOW = "discardChannelIntegrationFlow";
 
@@ -103,7 +105,15 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
-        return IntegrationFlow.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+        return IntegrationFlow.from(CONTROL_BUS_INPUT).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ControlBusGateway.class)
+    public GatewayProxyFactoryBean<ControlBusGateway> controlBusGateway() {
+        GatewayProxyFactoryBean<ControlBusGateway> factory = new GatewayProxyFactoryBean<>(ControlBusGateway.class);
+        factory.setDefaultRequestChannelName(CONTROL_BUS_INPUT);
+        return factory;
     }
 
     @Bean
