@@ -26,7 +26,6 @@ import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerA
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
-import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorSink;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
@@ -44,7 +43,6 @@ import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageCh
 import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -169,26 +167,30 @@ public class MessagesCoreAutoConfiguration {
         return IntegrationFlow.from(DISCARD_CHANNEL).log(LoggingHandler.Level.DEBUG).nullChannel();
     }
 
-    @Bean
+    @Bean(name = MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
     @ConditionalOnMissingBean(MessageConnectorAggregator.class)
-    public MessageConnectorAggregatorFactoryBean messageConnectorAggregatorFactoryBean(
+    public MessageConnectorAggregator messageConnectorAggregatorFactoryBean(
         CorrelationStrategy correlationStrategy,
         ReleaseStrategy releaseStrategy,
         MessageGroupProcessor processorBean,
         MessageGroupStore messageStore,
         LockRegistry lockRegistry,
-        BeanFactory beanFactory,
         MessageChannel discardChannel
     ) {
-        return new MessageConnectorAggregatorFactoryBean()
-            .discardChannel(discardChannel)
-            .groupTimeoutExpression(this.properties.getGroupTimeout())
-            .lockRegistry(lockRegistry)
-            .correlationStrategy(correlationStrategy)
-            .releaseStrategy(releaseStrategy)
-            .beanFactory(beanFactory)
-            .processorBean(processorBean)
-            .messageStore(messageStore);
+        MessageConnectorAggregator aggregator = new MessageConnectorAggregator(processorBean);
+        aggregator.setExpireGroupsUponCompletion(true);
+        aggregator.setSendPartialResultOnExpiry(true);
+        aggregator.setCompleteGroupsWhenEmpty(true);
+        aggregator.setPopSequence(false);
+        aggregator.setDiscardChannel(discardChannel);
+        if (this.properties.getGroupTimeout() != null) {
+            aggregator.setGroupTimeoutExpression(this.properties.getGroupTimeout());
+        }
+        aggregator.setLockRegistry(lockRegistry);
+        aggregator.setCorrelationStrategy(correlationStrategy);
+        aggregator.setReleaseStrategy(releaseStrategy);
+        aggregator.setMessageStore(messageStore);
+        return aggregator;
     }
 
     @Bean
