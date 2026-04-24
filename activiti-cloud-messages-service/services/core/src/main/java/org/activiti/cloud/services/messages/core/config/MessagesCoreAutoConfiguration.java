@@ -26,7 +26,6 @@ import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerA
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
-import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorSink;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
@@ -44,7 +43,6 @@ import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageCh
 import org.activiti.cloud.services.messages.core.router.CommandConsumerMessageRouter;
 import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,7 +50,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
@@ -60,10 +57,12 @@ import org.springframework.integration.aggregator.CorrelationStrategy;
 import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy;
 import org.springframework.integration.aggregator.MessageGroupProcessor;
 import org.springframework.integration.aggregator.ReleaseStrategy;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.config.EnableIntegrationManagement;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.gateway.GatewayProxyFactoryBean;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.MessageProcessor;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
@@ -93,8 +92,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @PropertySource("classpath:config/activiti-cloud-services-messages-core.properties")
 public class MessagesCoreAutoConfiguration {
 
-    private static final String MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN = "messageConnectorAggregatorFactoryBean";
     private static final String CONTROL_BUS = "controlBus";
+    private static final String CONTROL_BUS_INPUT = "controlBusInput";
     private static final String CONTROL_BUS_FLOW = "controlBusFlow";
     private static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW = "messageConnectorIntegrationFlow";
     public static final String DISCARD_CHANNEL_INTEGRATION_FLOW = "discardChannelIntegrationFlow";
@@ -102,14 +101,27 @@ public class MessagesCoreAutoConfiguration {
     @Autowired
     private MessageAggregatorProperties properties;
 
-    @Bean
-    @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
-    public IntegrationFlow controlBusFlow() {
-        return IntegrationFlow.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+    @Bean(CONTROL_BUS_INPUT)
+    @ConditionalOnMissingBean(name = CONTROL_BUS_INPUT)
+    public MessageChannel controlBusInput() {
+        return new DirectChannel();
     }
 
     @Bean
-    @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
+    @ConditionalOnMissingBean(ControlBusGateway.class)
+    public GatewayProxyFactoryBean<ControlBusGateway> controlBusGateway(MessageChannel controlBusInput) {
+        GatewayProxyFactoryBean<ControlBusGateway> factory = new GatewayProxyFactoryBean<>(ControlBusGateway.class);
+        factory.setDefaultRequestChannel(controlBusInput);
+        return factory;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
+    public IntegrationFlow controlBusFlow(MessageChannel controlBusInput) {
+        return IntegrationFlow.from(controlBusInput).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
     public IntegrationFlow messageConnectorIntegrationFlow(
         MessageConnectorProcessor processor,
@@ -170,25 +182,29 @@ public class MessagesCoreAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(MessageConnectorAggregator.class)
-    public MessageConnectorAggregatorFactoryBean messageConnectorAggregatorFactoryBean(
+    @ConditionalOnMissingBean
+    public MessageConnectorAggregator messageConnectorAggregator(
         CorrelationStrategy correlationStrategy,
         ReleaseStrategy releaseStrategy,
         MessageGroupProcessor processorBean,
         MessageGroupStore messageStore,
         LockRegistry lockRegistry,
-        BeanFactory beanFactory,
         MessageChannel discardChannel
     ) {
-        return new MessageConnectorAggregatorFactoryBean()
-            .discardChannel(discardChannel)
-            .groupTimeoutExpression(this.properties.getGroupTimeout())
-            .lockRegistry(lockRegistry)
-            .correlationStrategy(correlationStrategy)
-            .releaseStrategy(releaseStrategy)
-            .beanFactory(beanFactory)
-            .processorBean(processorBean)
-            .messageStore(messageStore);
+        MessageConnectorAggregator aggregator = new MessageConnectorAggregator(processorBean);
+        aggregator.setExpireGroupsUponCompletion(true);
+        aggregator.setCompleteGroupsWhenEmpty(true);
+        aggregator.setSendPartialResultOnExpiry(true);
+        aggregator.setPopSequence(false);
+        aggregator.setMessageStore(messageStore);
+        aggregator.setCorrelationStrategy(correlationStrategy);
+        aggregator.setReleaseStrategy(releaseStrategy);
+        aggregator.setLockRegistry(lockRegistry);
+        aggregator.setDiscardChannel(discardChannel);
+        if (this.properties.getGroupTimeout() != null) {
+            aggregator.setGroupTimeoutExpression(this.properties.getGroupTimeout());
+        }
+        return aggregator;
     }
 
     @Bean
