@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.api.model.shared.impl.conf;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Map;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -25,10 +23,8 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.core.Version;
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.jsontype.NamedType;
 import tools.jackson.databind.module.SimpleAbstractTypeResolver;
@@ -36,20 +32,6 @@ import tools.jackson.databind.module.SimpleModule;
 
 @AutoConfiguration
 public class CloudCommonModelAutoConfiguration {
-
-    @Bean
-    public JsonMapperBuilderCustomizer activitiJackson3CompatibilityCustomizer() {
-        return builder ->
-            builder
-                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-                .withConfigOverride(
-                    Map.class,
-                    override ->
-                        override.setInclude(
-                            JsonInclude.Value.construct(JsonInclude.Include.USE_DEFAULTS, JsonInclude.Include.ALWAYS)
-                        )
-                );
-    }
 
     //this bean will be automatically injected inside boot's ObjectMapper
     @Bean
