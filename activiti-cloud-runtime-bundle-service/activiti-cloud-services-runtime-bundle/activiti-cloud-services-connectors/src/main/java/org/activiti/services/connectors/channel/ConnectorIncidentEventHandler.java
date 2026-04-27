@@ -33,10 +33,12 @@ public class ConnectorIncidentEventHandler implements Consumer<ConnectorIncident
 
     @Override
     public void accept(ConnectorIncidentEvent event) {
-        LOGGER.debug(
-            "Received connector incident event for process instance: {}",
-            event.getIntegrationContext() != null ? event.getIntegrationContext().getProcessInstanceId() : "unknown"
-        );
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "Received connector incident event for process instance: {}",
+                event.getIntegrationContext() != null ? event.getIntegrationContext().getProcessInstanceId() : "unknown"
+            );
+        }
         incidentService.createAndSendIncidentEvent(
             event.getIntegrationContext(),
             event.getException(),
