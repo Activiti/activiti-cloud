@@ -162,7 +162,11 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
-    private void applyCandidateGroupFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+    private void applyCandidateGroupFilter(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         if (!CollectionUtils.isEmpty(searchRequest.candidateGroupId())) {
             Subquery<String> subquery = query.subquery(String.class);
             Root<TaskCandidateGroupEntity> tcgRoot = subquery.from(TaskCandidateGroupEntity.class);
@@ -176,7 +180,11 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
-    private void applyCandidateUserFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+    private void applyCandidateUserFilter(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         if (!CollectionUtils.isEmpty(searchRequest.candidateUserId())) {
             Subquery<String> subquery = query.subquery(String.class);
             Root<TaskCandidateUserEntity> tcuRoot = subquery.from(TaskCandidateUserEntity.class);
@@ -291,7 +299,11 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
-    private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+    private void applyUserRestrictionFilter(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         if (userId != null) {
             // EXISTS (SELECT 1 FROM task_candidate_user WHERE task_id = root.id AND user_id = userId)
             Subquery<String> candidateUserSubquery = query.subquery(String.class);
