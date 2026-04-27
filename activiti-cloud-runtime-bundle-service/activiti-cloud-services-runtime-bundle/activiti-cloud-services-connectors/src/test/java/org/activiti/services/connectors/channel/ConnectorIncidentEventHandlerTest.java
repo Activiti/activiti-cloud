@@ -16,7 +16,6 @@
 package org.activiti.services.connectors.channel;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.ConnectorIncidentEvent;
@@ -80,7 +79,6 @@ class ConnectorIncidentEventHandlerTest {
 
     @Test
     void should_logProcessInstanceId_when_integrationContextPresent() {
-        when(integrationContext.getProcessInstanceId()).thenReturn("process-123");
         Exception exception = new RuntimeException("test");
         ConnectorIncidentEvent event = new ConnectorIncidentEvent(
             integrationContext,
