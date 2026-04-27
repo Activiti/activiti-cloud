@@ -94,9 +94,6 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         if (!query.getResultType().equals(Long.class)) {
             applySorting(root, joinProcessVariables(root), query, criteriaBuilder);
         }
-        if (CollectionUtils.isEmpty(query.getGroupList())) {
-            query.distinct(true);
-        }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
