@@ -17,9 +17,11 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Set;
@@ -27,7 +29,9 @@ import org.activiti.cloud.services.query.app.repository.annotation.CountOverFull
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.util.CollectionUtils;
@@ -97,7 +101,7 @@ public class ProcessInstanceSpecification
         CriteriaBuilder criteriaBuilder
     ) {
         reset();
-        applyUserRestrictionFilter(root, criteriaBuilder);
+        applyUserRestrictionFilter(root, query, criteriaBuilder);
         applyIdFilter(root);
         applyParentIdFilter(root);
         applyNameFilter(root, criteriaBuilder);
@@ -269,22 +273,49 @@ public class ProcessInstanceSpecification
         }
     }
 
-    private void applyUserRestrictionFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+    private void applyUserRestrictionFilter(
+        Root<ProcessInstanceEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         if (userId != null) {
+            // EXISTS (SELECT t.id FROM task t WHERE t.process_instance_id = pi.id AND t.assignee = userId)
+            Subquery<String> assigneeSubquery = query.subquery(String.class);
+            Root<TaskEntity> assigneeTaskRoot = assigneeSubquery.from(TaskEntity.class);
+            assigneeSubquery
+                .select(assigneeTaskRoot.get(TaskEntity_.id))
+                .where(
+                    criteriaBuilder.equal(
+                        assigneeTaskRoot.get(TaskEntity_.processInstanceId),
+                        root.get(ProcessInstanceEntity_.id)
+                    ),
+                    criteriaBuilder.equal(assigneeTaskRoot.get(TaskEntity_.assignee), userId)
+                );
+
+            // EXISTS (SELECT tcu.taskId FROM task_candidate_user tcu
+            //         JOIN task t ON tcu.task_id = t.id
+            //         WHERE t.process_instance_id = pi.id AND tcu.user_id = userId)
+            Subquery<String> candidateUserSubquery = query.subquery(String.class);
+            Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
+            Join<TaskCandidateUserEntity, TaskEntity> tcuTaskJoin = tcuRoot.join(
+                TaskCandidateUserEntity_.task,
+                JoinType.INNER
+            );
+            candidateUserSubquery
+                .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
+                .where(
+                    criteriaBuilder.equal(
+                        tcuTaskJoin.get(TaskEntity_.processInstanceId),
+                        root.get(ProcessInstanceEntity_.id)
+                    ),
+                    criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
+                );
+
             predicates.add(
                 criteriaBuilder.or(
                     criteriaBuilder.equal(root.get(ProcessInstanceEntity_.initiator), userId),
-                    criteriaBuilder.equal(
-                        root.join(ProcessInstanceEntity_.tasks, JoinType.LEFT).get(TaskEntity_.assignee),
-                        userId
-                    ),
-                    criteriaBuilder.equal(
-                        root
-                            .join(ProcessInstanceEntity_.tasks, JoinType.LEFT)
-                            .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
-                            .get(TaskCandidateUserEntity_.userId),
-                        userId
-                    )
+                    criteriaBuilder.exists(assigneeSubquery),
+                    criteriaBuilder.exists(candidateUserSubquery)
                 )
             );
         }

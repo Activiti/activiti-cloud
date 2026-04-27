@@ -21,6 +21,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
+import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
@@ -28,7 +29,9 @@ import java.util.Map;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
@@ -84,7 +87,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         reset();
-        applyUserRestrictionFilter(root, criteriaBuilder);
+        applyUserRestrictionFilter(root, query, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyIdFilter(root);
         applyParentIdFilter(root);
@@ -102,8 +105,8 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         applyLastClaimedDateFilters(root, criteriaBuilder);
         applyCompletedDateFilters(root, criteriaBuilder);
         applyDueDateFilters(root, criteriaBuilder);
-        applyCandidateUserFilter(root);
-        applyCandidateGroupFilter(root);
+        applyCandidateUserFilter(root, query, criteriaBuilder);
+        applyCandidateGroupFilter(root, query, criteriaBuilder);
         if (!CollectionUtils.isEmpty(searchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> tvRoot = root.join(TaskEntity_.variables, JoinType.LEFT);
             filterConditions.addAll(
@@ -159,25 +162,31 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
-    private void applyCandidateGroupFilter(Root<TaskEntity> root) {
+    private void applyCandidateGroupFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(searchRequest.candidateGroupId())) {
-            predicates.add(
-                root
-                    .join(TaskEntity_.taskCandidateGroups)
-                    .get(TaskCandidateGroupEntity_.groupId)
-                    .in(searchRequest.candidateGroupId())
-            );
+            Subquery<String> subquery = query.subquery(String.class);
+            Root<TaskCandidateGroupEntity> tcgRoot = subquery.from(TaskCandidateGroupEntity.class);
+            subquery
+                .select(tcgRoot.get(TaskCandidateGroupEntity_.taskId))
+                .where(
+                    criteriaBuilder.equal(tcgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)),
+                    tcgRoot.get(TaskCandidateGroupEntity_.groupId).in(searchRequest.candidateGroupId())
+                );
+            predicates.add(criteriaBuilder.exists(subquery));
         }
     }
 
-    private void applyCandidateUserFilter(Root<TaskEntity> root) {
+    private void applyCandidateUserFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(searchRequest.candidateUserId())) {
-            predicates.add(
-                root
-                    .join(TaskEntity_.taskCandidateUsers)
-                    .get(TaskCandidateUserEntity_.userId)
-                    .in(searchRequest.candidateUserId())
-            );
+            Subquery<String> subquery = query.subquery(String.class);
+            Root<TaskCandidateUserEntity> tcuRoot = subquery.from(TaskCandidateUserEntity.class);
+            subquery
+                .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
+                .where(
+                    criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.taskId), root.get(TaskEntity_.id)),
+                    tcuRoot.get(TaskCandidateUserEntity_.userId).in(searchRequest.candidateUserId())
+                );
+            predicates.add(criteriaBuilder.exists(subquery));
         }
     }
 
@@ -282,8 +291,42 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         }
     }
 
-    private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+    private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         if (userId != null) {
+            // EXISTS (SELECT 1 FROM task_candidate_user WHERE task_id = root.id AND user_id = userId)
+            Subquery<String> candidateUserSubquery = query.subquery(String.class);
+            Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
+            candidateUserSubquery
+                .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
+                .where(
+                    criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.taskId), root.get(TaskEntity_.id)),
+                    criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
+                );
+
+            // EXISTS (SELECT 1 FROM task_candidate_group WHERE task_id = root.id AND group_id IN (userGroups))
+            Subquery<String> candidateGroupSubquery = query.subquery(String.class);
+            Root<TaskCandidateGroupEntity> tcgRoot = candidateGroupSubquery.from(TaskCandidateGroupEntity.class);
+            candidateGroupSubquery
+                .select(tcgRoot.get(TaskCandidateGroupEntity_.taskId))
+                .where(
+                    criteriaBuilder.equal(tcgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)),
+                    tcgRoot.get(TaskCandidateGroupEntity_.groupId).in(userGroups)
+                );
+
+            // NOT EXISTS (SELECT 1 FROM task_candidate_user WHERE task_id = root.id)
+            Subquery<String> noCandidateUserSubquery = query.subquery(String.class);
+            Root<TaskCandidateUserEntity> noCuRoot = noCandidateUserSubquery.from(TaskCandidateUserEntity.class);
+            noCandidateUserSubquery
+                .select(noCuRoot.get(TaskCandidateUserEntity_.taskId))
+                .where(criteriaBuilder.equal(noCuRoot.get(TaskCandidateUserEntity_.taskId), root.get(TaskEntity_.id)));
+
+            // NOT EXISTS (SELECT 1 FROM task_candidate_group WHERE task_id = root.id)
+            Subquery<String> noCandidateGroupSubquery = query.subquery(String.class);
+            Root<TaskCandidateGroupEntity> noCgRoot = noCandidateGroupSubquery.from(TaskCandidateGroupEntity.class);
+            noCandidateGroupSubquery
+                .select(noCgRoot.get(TaskCandidateGroupEntity_.taskId))
+                .where(criteriaBuilder.equal(noCgRoot.get(TaskCandidateGroupEntity_.taskId), root.get(TaskEntity_.id)));
+
             predicates.add(
                 criteriaBuilder.or(
                     criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
@@ -291,19 +334,11 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
                     criteriaBuilder.and(
                         criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
                         criteriaBuilder.or(
-                            criteriaBuilder.equal(
-                                root
-                                    .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
-                                    .get(TaskCandidateUserEntity_.userId),
-                                userId
-                            ),
-                            root
-                                .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
-                                .get(TaskCandidateGroupEntity_.groupId)
-                                .in(userGroups),
+                            criteriaBuilder.exists(candidateUserSubquery),
+                            criteriaBuilder.exists(candidateGroupSubquery),
                             criteriaBuilder.and(
-                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
-                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
+                                criteriaBuilder.not(criteriaBuilder.exists(noCandidateUserSubquery)),
+                                criteriaBuilder.not(criteriaBuilder.exists(noCandidateGroupSubquery))
                             )
                         )
                     )
