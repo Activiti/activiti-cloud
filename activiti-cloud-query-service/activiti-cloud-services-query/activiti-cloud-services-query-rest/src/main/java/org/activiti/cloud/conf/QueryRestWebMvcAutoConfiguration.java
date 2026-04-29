@@ -36,6 +36,7 @@ import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.BPMNActivityRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
@@ -103,6 +104,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ServiceTaskRepresentationModelAssembler serviceTaskRepresentationModelAssembler() {
         return new ServiceTaskRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BPMNActivityRepresentationModelAssembler bpmnActivityRepresentationModelAssembler() {
+        return new BPMNActivityRepresentationModelAssembler();
     }
 
     @Bean
