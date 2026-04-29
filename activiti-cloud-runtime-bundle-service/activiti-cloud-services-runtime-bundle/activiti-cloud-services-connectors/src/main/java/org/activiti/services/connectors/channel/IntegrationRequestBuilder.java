@@ -15,7 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.CONNECTOR_INCIDENT_CONSUMER;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
 import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
 
@@ -43,7 +42,6 @@ public class IntegrationRequestBuilder implements Serializable {
 
         integrationRequest.setErrorDestination(bindingResolver.getBindingDestination(INTEGRATION_ERRORS_CONSUMER));
         integrationRequest.setResultDestination(bindingResolver.getBindingDestination(INTEGRATION_RESULTS_CONSUMER));
-        integrationRequest.setIncidentDestination(bindingResolver.getBindingDestination(CONNECTOR_INCIDENT_CONSUMER));
 
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(integrationRequest);
         return integrationRequest;

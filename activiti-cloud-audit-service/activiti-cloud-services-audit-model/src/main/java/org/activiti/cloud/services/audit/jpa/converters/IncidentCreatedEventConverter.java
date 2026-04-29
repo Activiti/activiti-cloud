@@ -50,8 +50,7 @@ public class IncidentCreatedEventConverter extends BaseEventToEntityConverter {
             incidentCreatedEventEntity.getErrorClassName(),
             incidentCreatedEventEntity.getErrorCode(),
             incidentCreatedEventEntity.getErrorMessage(),
-            incidentCreatedEventEntity.getStackTraceElements(),
-            incidentCreatedEventEntity.getSeverity()
+            incidentCreatedEventEntity.getStackTraceElements()
         );
     }
 }

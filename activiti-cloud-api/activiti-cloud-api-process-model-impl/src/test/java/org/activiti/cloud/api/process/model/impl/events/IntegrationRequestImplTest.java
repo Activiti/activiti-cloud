@@ -37,19 +37,4 @@ public class IntegrationRequestImplTest {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
         assertThat(integrationRequest.getAppVersion()).isEqualTo("1");
     }
-
-    @Test
-    public void should_setAndGetIncidentDestination() {
-        given(integrationContext.getAppVersion()).willReturn("1");
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        integrationRequest.setIncidentDestination("connectorIncident_myApp");
-        assertThat(integrationRequest.getIncidentDestination()).isEqualTo("connectorIncident_myApp");
-    }
-
-    @Test
-    public void should_returnNullIncidentDestination_whenNotSet() {
-        given(integrationContext.getAppVersion()).willReturn("1");
-        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-        assertThat(integrationRequest.getIncidentDestination()).isNull();
-    }
 }
