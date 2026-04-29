@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -791,5 +792,88 @@ public class TasksIT {
         assertThat(assignResponseEntity).isNotNull();
         assertThat(assignResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(assignResponseEntity.getBody().getAssignee()).isEqualTo("testuser");
+    }
+
+    @Test
+    public void shouldPersistNullVariables() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS)
+        );
+
+        processInstanceRestTemplate.setVariables(
+            startProcessResponse.getBody().getId(),
+            Collections.singletonMap("numbertest", null)
+        );
+
+        //when
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
+            startProcessResponse
+        );
+        Optional<CloudVariableInstance> optionalVariableInstance =
+            this.getVariableInstance("numbertest", variablesResponse.getBody());
+
+        //then
+        assertThat(optionalVariableInstance).isPresent();
+        CloudVariableInstance cloudVariableInstance = optionalVariableInstance.get();
+        assertThat(cloudVariableInstance).isNotNull();
+        Object value = cloudVariableInstance.getValue();
+        assertThat(value).isNull();
+    }
+
+    @Test
+    public void shouldPersistNullVariablesWhenStartingProcess() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            Collections.singletonMap("numbertest", null)
+        );
+
+        //when
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
+            startProcessResponse
+        );
+        Optional<CloudVariableInstance> optionalVariableInstance =
+            this.getVariableInstance("numbertest", variablesResponse.getBody());
+
+        //then
+        assertThat(optionalVariableInstance).isPresent();
+        CloudVariableInstance cloudVariableInstance = optionalVariableInstance.get();
+        assertThat(cloudVariableInstance).isNotNull();
+        Object value = cloudVariableInstance.getValue();
+        assertThat(value).isNull();
+    }
+
+    @Test
+    public void shouldPersistNullVariablesWhenSavingTask() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS)
+        );
+        CloudTask task = processInstanceRestTemplate.getTasks(startProcessResponse).getBody().iterator().next();
+        String taskId = task.getId();
+        taskRestTemplate.claim(task);
+        taskRestTemplate.save(task, new SaveTaskPayload(taskId, Collections.singletonMap("numbertest", null)));
+
+        //when
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(
+            taskId
+        );
+        Optional<CloudVariableInstance> optionalVariableInstance =
+            this.getVariableInstance("numbertest", variablesResponse.getBody());
+
+        //then
+        assertThat(optionalVariableInstance).isPresent();
+        CloudVariableInstance cloudVariableInstance = optionalVariableInstance.get();
+        assertThat(cloudVariableInstance).isNotNull();
+        Object value = cloudVariableInstance.getValue();
+        assertThat(value).isNull();
+    }
+
+    private Optional<CloudVariableInstance> getVariableInstance(
+        String name,
+        CollectionModel<CloudVariableInstance> variables
+    ) {
+        return variables.getContent().stream().filter(v -> v.getName().equals(name)).findAny();
     }
 }

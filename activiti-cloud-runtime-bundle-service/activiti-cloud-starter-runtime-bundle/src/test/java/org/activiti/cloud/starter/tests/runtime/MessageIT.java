@@ -72,7 +72,7 @@ public class MessageIT {
             runtimeService
                 .createProcessInstanceQuery()
                 .includeProcessVariables()
-                .processDefinitionKey("shouldDeliverMessages")
+                .processInstanceId(startResponse.getBody().getId())
                 .list()
         )
             .hasSize(1)
@@ -96,7 +96,7 @@ public class MessageIT {
             runtimeService
                 .createProcessInstanceQuery()
                 .includeProcessVariables()
-                .processDefinitionKey("shouldDeliverMessages")
+                .processInstanceId(startResponse.getBody().getId())
                 .list()
         )
             .hasSize(1)
@@ -114,7 +114,9 @@ public class MessageIT {
 
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessages").list())
+        assertThat(
+            runtimeService.createProcessInstanceQuery().processInstanceId(startResponse.getBody().getId()).list()
+        )
             .isEmpty();
     }
 
@@ -131,5 +133,64 @@ public class MessageIT {
 
         //then
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void shouldPersistNullVariablesWhenStartingProcessViaMessage() {
+        //given
+        StartMessagePayload startMessage = MessagePayloadBuilder
+            .start("startMessage")
+            .withBusinessKey("nullVarBusiness")
+            .withVariable("correlationKey", "nullVarCorrelation")
+            .withVariable("numbertest", null)
+            .build();
+
+        //when
+        ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
+
+        //then
+        assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ProcessInstance processInstance = runtimeService
+            .createProcessInstanceQuery()
+            .includeProcessVariables()
+            .processInstanceId(startResponse.getBody().getId())
+            .singleResult();
+        assertThat(processInstance).isNotNull();
+        assertThat(processInstance.getProcessVariables()).containsKey("numbertest");
+        assertThat(processInstance.getProcessVariables().get("numbertest")).isNull();
+    }
+
+    @Test
+    public void shouldPersistNullVariablesWhenReceivingMessage() {
+        //given
+        StartMessagePayload startMessage = MessagePayloadBuilder
+            .start("startMessage")
+            .withBusinessKey("nullVarReceiveBusiness")
+            .withVariable("correlationKey", "nullVarReceiveCorrelation")
+            .build();
+        ResponseEntity<CloudProcessInstance> startResponse = messageRestTemplate.message(startMessage);
+        assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String processInstanceId = startResponse.getBody().getId();
+
+        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder
+            .receive("boundaryMessage")
+            .withCorrelationKey("nullVarReceiveCorrelation")
+            .withVariable("customerKey", "nullVarCustomerId")
+            .withVariable("numbertest", null)
+            .build();
+
+        //when
+        ResponseEntity<Void> boundaryResponse = messageRestTemplate.message(boundaryMessage);
+
+        //then
+        assertThat(boundaryResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ProcessInstance processInstance = runtimeService
+            .createProcessInstanceQuery()
+            .includeProcessVariables()
+            .processInstanceId(processInstanceId)
+            .singleResult();
+        assertThat(processInstance).isNotNull();
+        assertThat(processInstance.getProcessVariables()).containsKey("numbertest");
+        assertThat(processInstance.getProcessVariables().get("numbertest")).isNull();
     }
 }

@@ -85,6 +85,7 @@ import org.activiti.api.task.model.builders.CompleteTaskPayloadBuilder;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
@@ -1425,6 +1426,48 @@ public class AuditProducerIT {
         assertThat(cloudApplicationDeployedEvents)
             .extracting(event -> event.getEntity().getName())
             .containsOnly("SpringAutoDeployment");
+    }
+
+    @Test
+    void shouldPersistNullVariableValueWhenCompletingTask() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("numbertest_audit", 1)
+                .build()
+        );
+
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        Task task = tasks.getBody().iterator().next();
+
+        taskRestTemplate.claim(task);
+
+        //when
+        taskRestTemplate.complete(
+            task,
+            TaskPayloadBuilder
+                .complete()
+                .withTaskId(task.getId())
+                .withVariables(Collections.singletonMap("numbertest_audit", null))
+                .build()
+        );
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                List<CloudVariableUpdatedEvent> variableUpdatedEvents = streamHandler
+                    .getAllReceivedEvents(CloudVariableUpdatedEvent.class)
+                    .stream()
+                    .filter(event -> "numbertest_audit".equals(event.getEntity().getName()))
+                    .toList();
+
+                assertThat(variableUpdatedEvents)
+                    .extracting(event -> event.getEntity().getName(), event -> event.getEntity().getValue())
+                    .contains(tuple("numbertest_audit", null));
+            });
     }
 
     private String getProcessDefinitionId(String processDefinitionKey) {
