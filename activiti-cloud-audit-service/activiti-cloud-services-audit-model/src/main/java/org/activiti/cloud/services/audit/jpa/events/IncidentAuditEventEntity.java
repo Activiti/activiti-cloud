@@ -17,12 +17,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentEvent;
-import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.services.audit.jpa.converters.json.IncidentContextJpaJsonConverter;
 
 @MappedSuperclass
@@ -32,15 +29,11 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private IncidentContext incidentContext;
 
-    @Enumerated(EnumType.STRING)
-    private IncidentSeverity severity;
-
     public IncidentAuditEventEntity() {}
 
     public IncidentAuditEventEntity(IncidentEvent cloudEvent) {
         super(cloudEvent);
         setIncidentContext(cloudEvent.getEntity());
-        this.severity = cloudEvent.getSeverity();
     }
 
     public IncidentContext getIncidentContext() {
@@ -51,22 +44,12 @@ public abstract class IncidentAuditEventEntity extends AuditEventEntity {
         this.incidentContext = incidentContext;
     }
 
-    public IncidentSeverity getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(IncidentSeverity severity) {
-        this.severity = severity;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
             .append("IncidentAuditEventEntity [IncidentAuditEventEntity=")
             .append(incidentContext)
-            .append(", severity=")
-            .append(severity)
             .append(", toString()=")
             .append(super.toString())
             .append("]");

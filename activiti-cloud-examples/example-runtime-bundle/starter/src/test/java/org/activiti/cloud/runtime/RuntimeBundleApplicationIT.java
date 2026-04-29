@@ -136,8 +136,7 @@ public class RuntimeBundleApplicationIT {
                 "commandConsumer_default-app.my-runtime-bundle",
                 "asyncExecutorJobs_default-app.my-runtime-bundle",
                 "integrationResult_my-runtime-bundle.my-runtime-bundle",
-                "integrationError_my-runtime-bundle.my-runtime-bundle",
-                "connectorIncident.my-runtime-bundle"
+                "integrationError_my-runtime-bundle.my-runtime-bundle"
             );
     }
 
@@ -158,8 +157,7 @@ public class RuntimeBundleApplicationIT {
                 "messageEvents_default-app",
                 "signalEvent",
                 "integrationResult_my-runtime-bundle",
-                "integrationError_my-runtime-bundle",
-                "connectorIncident"
+                "integrationError_my-runtime-bundle"
             );
     }
 
