@@ -15,15 +15,7 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
-
-public interface IntegrationRequest extends CloudRuntimeEntity {
-    IntegrationContext getIntegrationContext();
-
-    String getResultDestination();
-
-    String getErrorDestination();
-
-    String getIncidentDestination();
+public enum IncidentSeverity {
+    ERROR,
+    WARNING,
 }
