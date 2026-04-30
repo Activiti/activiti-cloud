@@ -15,15 +15,10 @@
  */
 package org.activiti.cloud.api.process.model;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.Objects;
 import org.activiti.api.process.model.IntegrationContext;
 
-public class ConnectorIncidentEvent implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class ConnectorIncidentEvent {
 
     private IntegrationContext integrationContext;
     private Exception exception;
