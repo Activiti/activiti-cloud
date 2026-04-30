@@ -431,6 +431,8 @@ public class ActivitiCloudMessagingProperties {
 
         private final Map<String, Map<String, List<String>>> registrations = new LinkedCaseInsensitiveMap<>();
 
+        private final Map<String, String> registrationBindings = new LinkedCaseInsensitiveMap<>();
+
         @NotEmpty
         private String group = "function-router";
 
@@ -559,11 +561,12 @@ public class ActivitiCloudMessagingProperties {
                     Optional
                         .ofNullable(destinations.get(routingContext))
                         .map(it -> it.get(bindingName))
-                        .ifPresent(destination ->
+                        .ifPresent(destination -> {
                             registrations(routingContext)
                                 .computeIfAbsent(destination, key -> new ArrayList<>())
-                                .add(functionBeanName)
-                        )
+                                .add(functionBeanName);
+                            registrationBindings.put(functionBeanName, bindingName);
+                        })
                 );
         }
 
@@ -579,13 +582,18 @@ public class ActivitiCloudMessagingProperties {
                                 .of(destinations.split(","))
                                 .filter(connectorType::equals)
                                 .findFirst()
-                                .ifPresent(destination ->
+                                .ifPresent(destination -> {
                                     registrations(routingContext)
                                         .computeIfAbsent(destination, key -> new ArrayList<>())
-                                        .add(functionBeanName)
-                                )
+                                        .add(functionBeanName);
+                                    registrationBindings.put(functionBeanName, bindingName);
+                                })
                         )
                 );
+        }
+
+        public Optional<String> bindingNameFor(String functionBeanName) {
+            return Optional.ofNullable(registrationBindings.get(functionBeanName));
         }
 
         @Override

@@ -39,7 +39,6 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -124,7 +123,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
-        MessageContentTypeNormalizer messageContentTypeNormalizer
+        MessageContentTypeNormalizer messageContentTypeNormalizer,
+        BindingServiceProperties bindingServiceProperties
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -173,11 +173,15 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                     .channel(functionBinding.output());
                                 integrationFlowContext.registration(supplierFlowBuilder.get()).register();
                             } else {
+                                String expectedContentType = Optional
+                                    .ofNullable(bindingServiceProperties.getBindings().get(functionBinding.input()))
+                                    .map(BindingProperties::getContentType)
+                                    .orElse(null);
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                     function.setSkipOutputConversion(false);
                                     Object result = function.apply(
-                                        messageContentTypeNormalizer.normalizeToJsonFallback(message)
+                                        messageContentTypeNormalizer.normalizeToExpected(message, expectedContentType)
                                     );
                                     if (result instanceof Message<?> msg) {
                                         return msg;

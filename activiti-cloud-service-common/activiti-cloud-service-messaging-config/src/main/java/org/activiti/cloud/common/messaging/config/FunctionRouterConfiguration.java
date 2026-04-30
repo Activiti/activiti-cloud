@@ -52,6 +52,7 @@ import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -167,7 +168,8 @@ public class FunctionRouterConfiguration {
         ActivitiCloudMessagingProperties messagingProperties,
         FunctionCatalog functionCatalog,
         Function<Message<?>, ExecutorService> functionExecutorSelector,
-        MessageContentTypeNormalizer messageContentTypeNormalizer
+        MessageContentTypeNormalizer messageContentTypeNormalizer,
+        BindingServiceProperties bindingServiceProperties
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -194,13 +196,24 @@ public class FunctionRouterConfiguration {
                         Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
                             functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
                         BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
-                                functionMessage,
-                                functionRegistration
-                            ) ->
-                            MessageBuilder
-                                .fromMessage(messageContentTypeNormalizer.normalizeToJsonFallback(functionMessage))
+                            functionMessage,
+                            functionRegistration
+                        ) -> {
+                            String expectedContentType = functionRouter
+                                .bindingNameFor(functionRegistration)
+                                .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
+                                .map(BindingProperties::getContentType)
+                                .orElse(null);
+                            return MessageBuilder
+                                .fromMessage(
+                                    messageContentTypeNormalizer.normalizeToExpected(
+                                        functionMessage,
+                                        expectedContentType
+                                    )
+                                )
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
                                 .build();
+                        };
 
                         var functions = registrations
                             .stream()

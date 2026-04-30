@@ -29,51 +29,85 @@ class MessageContentTypeNormalizerTest {
     private final MessageContentTypeNormalizer normalizer = new MessageContentTypeNormalizer();
 
     @Test
-    void shouldSetJsonWhenContentTypeHeaderIsMissing() {
+    void shouldSetExpectedWhenContentTypeHeaderIsMissing() {
         Message<byte[]> message = new GenericMessage<>("payload".getBytes());
 
-        Message<?> normalized = normalizer.normalizeToJsonFallback(message);
+        Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
         assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
             .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
     }
 
     @Test
-    void shouldOverrideOctetStreamWithJson() {
+    void shouldOverrideOctetStreamWithExpected() {
         Message<byte[]> message = MessageBuilder
             .withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
             .build();
 
-        Message<?> normalized = normalizer.normalizeToJsonFallback(message);
+        Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
         assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
             .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
     }
 
     @Test
-    void shouldReturnSameInstanceWhenContentTypeIsJson() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
-            .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
-            .build();
-
-        Message<?> normalized = normalizer.normalizeToJsonFallback(message);
-
-        assertThat(normalized).isSameAs(message);
-    }
-
-    @Test
-    void shouldPreserveNonJsonContentType() {
+    void shouldOverrideMismatchedContentTypeWithExpected() {
         Message<byte[]> message = MessageBuilder
             .withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN_VALUE)
             .build();
 
-        Message<?> normalized = normalizer.normalizeToJsonFallback(message);
+        Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
+
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
+            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+    }
+
+    @Test
+    void shouldReturnSameInstanceWhenContentTypeMatchesExpected() {
+        Message<byte[]> message = MessageBuilder
+            .withPayload("payload".getBytes())
+            .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
+            .build();
+
+        Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
         assertThat(normalized).isSameAs(message);
+    }
+
+    @Test
+    void shouldReturnSameInstanceWhenContentTypeIsCompatibleWithExpected() {
+        Message<byte[]> message = MessageBuilder
+            .withPayload("payload".getBytes())
+            .setHeader(MessageHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
+            .build();
+
+        Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
+
+        assertThat(normalized).isSameAs(message);
+    }
+
+    @Test
+    void shouldDefaultToJsonWhenExpectedIsNull() {
+        Message<byte[]> message = MessageBuilder
+            .withPayload("payload".getBytes())
+            .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
+            .build();
+
+        Message<?> normalized = normalizer.normalizeToExpected(message, null);
+
         assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.TEXT_PLAIN_VALUE);
+            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+    }
+
+    @Test
+    void shouldDefaultToJsonWhenExpectedIsBlank() {
+        Message<byte[]> message = new GenericMessage<>("payload".getBytes());
+
+        Message<?> normalized = normalizer.normalizeToExpected(message, "   ");
+
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
+            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
     }
 }

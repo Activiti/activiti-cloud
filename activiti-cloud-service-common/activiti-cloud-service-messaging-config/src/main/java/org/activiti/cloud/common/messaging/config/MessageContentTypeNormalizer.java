@@ -23,22 +23,15 @@ import org.springframework.util.MimeTypeUtils;
 
 public class MessageContentTypeNormalizer {
 
-    public Message<?> normalizeToJsonFallback(Message<?> message) {
-        if (!requiresJsonFallback(message.getHeaders().get(MessageHeaders.CONTENT_TYPE))) {
+    public Message<?> normalizeToExpected(Message<?> message, String expectedContentType) {
+        String effectiveExpected = (expectedContentType == null || expectedContentType.isBlank())
+            ? MimeTypeUtils.APPLICATION_JSON_VALUE
+            : expectedContentType;
+        MimeType expected = MimeType.valueOf(effectiveExpected);
+        Object current = message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
+        if (current != null && expected.isCompatibleWith(MimeType.valueOf(current.toString()))) {
             return message;
         }
-        return MessageBuilder
-            .fromMessage(message)
-            .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
-            .build();
-    }
-
-    private boolean requiresJsonFallback(Object currentContentType) {
-        if (currentContentType == null) {
-            return true;
-        }
-        return MimeTypeUtils.APPLICATION_OCTET_STREAM.equalsTypeAndSubtype(
-            MimeType.valueOf(currentContentType.toString())
-        );
+        return MessageBuilder.fromMessage(message).setHeader(MessageHeaders.CONTENT_TYPE, effectiveExpected).build();
     }
 }
