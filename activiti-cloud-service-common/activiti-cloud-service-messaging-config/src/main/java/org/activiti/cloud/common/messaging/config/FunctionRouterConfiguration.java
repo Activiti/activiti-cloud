@@ -166,7 +166,8 @@ public class FunctionRouterConfiguration {
         RoutingFunction routingFunction,
         ActivitiCloudMessagingProperties messagingProperties,
         FunctionCatalog functionCatalog,
-        Function<Message<?>, ExecutorService> functionExecutorSelector
+        Function<Message<?>, ExecutorService> functionExecutorSelector,
+        MessageContentTypeNormalizer messageContentTypeNormalizer
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
@@ -197,7 +198,7 @@ public class FunctionRouterConfiguration {
                                 functionRegistration
                             ) ->
                             MessageBuilder
-                                .fromMessage(functionMessage)
+                                .fromMessage(messageContentTypeNormalizer.normalizeToJsonFallback(functionMessage))
                                 .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
                                 .build();
 

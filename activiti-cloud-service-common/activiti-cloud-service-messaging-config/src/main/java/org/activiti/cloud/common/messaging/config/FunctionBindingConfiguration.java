@@ -113,13 +113,18 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
             .get();
     }
 
+    @Bean
+    public MessageContentTypeNormalizer messageContentTypeNormalizer() {
+        return new MessageContentTypeNormalizer();
+    }
+
     @Bean(name = "functionBindingBeanPostProcessor")
     public BeanPostProcessor functionBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
-        GenericApplicationContext applicationContext
+        MessageContentTypeNormalizer messageContentTypeNormalizer
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -171,8 +176,9 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                     function.setSkipOutputConversion(false);
-                                    Message<?> messageToProcess = message;
-                                    Object result = function.apply(messageToProcess);
+                                    Object result = function.apply(
+                                        messageContentTypeNormalizer.normalizeToJsonFallback(message)
+                                    );
                                     if (result instanceof Message<?> msg) {
                                         return msg;
                                     }
