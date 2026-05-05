@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.api.model.shared.impl.conf;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -23,6 +25,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.core.Version;
 import tools.jackson.databind.JacksonModule;
@@ -56,5 +59,10 @@ public class CloudCommonModelAutoConfiguration {
 
         module.setMixInAnnotation(CloudRuntimeEvent.class, CloudRuntimeMixIn.class);
         return module;
+    }
+
+    @Bean
+    public JsonMapperBuilderCustomizer nullSkipCustomizer() {
+        return builder -> builder.changeDefaultNullHandling(v -> JsonSetter.Value.forValueNulls(Nulls.SKIP));
     }
 }

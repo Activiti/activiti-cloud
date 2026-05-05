@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -46,6 +47,8 @@ import org.springframework.messaging.support.MessageBuilder;
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     private static final String CHANNEL_NAME = "notifications";
+
+    public static final AtomicReference<IntegrationRequest> NULL_VARIABLES_RECEIVED_REQUEST = new AtomicReference<>();
 
     @Autowired
     private ProcessRuntimeChannels processRuntimeChannels;
@@ -172,6 +175,19 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
                     .buildMessage();
                 integrationErrorSender.send(message);
             }
+        };
+    }
+
+    @Bean
+    @ConditionalFunctionBinding(
+        input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER,
+        condition = "headers['type']=='NullVariables'"
+    )
+    public Consumer<IntegrationRequest> mockTypeNullVariablesConnector() {
+        return event -> {
+            NULL_VARIABLES_RECEIVED_REQUEST.set(event);
+            event.getIntegrationContext().getInBoundVariables().forEach((key, value) -> {});
+            event.getIntegrationContext().getOutBoundVariables().forEach((key, value) -> {});
         };
     }
 

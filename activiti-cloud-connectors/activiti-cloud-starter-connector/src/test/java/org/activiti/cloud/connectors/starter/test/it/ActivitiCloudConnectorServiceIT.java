@@ -17,20 +17,26 @@ package org.activiti.cloud.connectors.starter.test.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
 import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,11 +85,13 @@ public class ActivitiCloudConnectorServiceIT {
     @BeforeEach
     public void setUp() throws Exception {
         streamHandler.setIntegrationId(INTEGRATION_ID);
+        ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST.set(null);
     }
 
     @AfterEach
     public void tearDown() throws Exception {
         streamHandler.reset();
+        ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST.set(null);
     }
 
     @Test
@@ -307,6 +315,86 @@ public class ActivitiCloudConnectorServiceIT {
         var integrationError = streamHandler.getIntegrationError();
 
         assertThat(integrationError).isNotNull();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("variablesFragments")
+    void should_preserveNonNullVariables_whenDeserializingCloudIntegrationContext(
+        String label,
+        String variablesFragment
+    ) {
+        //given
+        String idpPayload =
+            """
+            {
+              "id": "da504fe5-479d-11f1-95ff-4afa9ca877cc",
+              %s
+              "processInstanceId": "d992cc3f-479d-11f1-95ff-4afa9ca877cc",
+              "processDefinitionId": "Process_1:2:e9a4af07",
+              "processDefinitionKey": "Process_1",
+              "processDefinitionVersion": 2,
+              "clientId": "hxpIdpConnector",
+              "clientType": "ServiceTask",
+              "connectorType": "my-classification.CLASSIFICATION"
+            }
+            """.formatted(
+                    variablesFragment
+                );
+
+        //when
+        CloudIntegrationContextImpl context = objectMapper.readValue(
+            idpPayload.getBytes(),
+            CloudIntegrationContextImpl.class
+        );
+
+        //then
+        assertThat(context.getInBoundVariables())
+            .as("inBoundVariables should be empty map after deserialization, not null")
+            .isNotNull()
+            .isEmpty();
+        assertThat(context.getOutBoundVariables())
+            .as("outBoundVariables should be empty map after deserialization, not null")
+            .isNotNull()
+            .isEmpty();
+    }
+
+    @Test
+    void should_receiveNonNullVariables_whenIntegrationRequestHasNullVariables() {
+        //given
+        String json = objectMapper.writeValueAsString(this.mockIntegrationRequest());
+        json =
+            json
+                .replace("\"inBoundVariables\":{}", "\"inBoundVariables\":null")
+                .replace("\"outBoundVariables\":{}", "\"outBoundVariables\":null");
+
+        // when
+        Message<byte[]> message = MessageBuilder
+            .withPayload(json.getBytes())
+            .setHeader("type", "NullVariables")
+            .setHeader("contentType", "application/json")
+            .build();
+        runtimeMockStreams.integrationEventsProducer().send(message);
+
+        //then
+        await("Connector should process the message with non-null variables")
+            .untilAtomic(ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST, notNullValue());
+
+        IntegrationRequest receivedRequest = ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST.get();
+        assertThat(receivedRequest.getIntegrationContext().getInBoundVariables())
+            .as("inBoundVariables should be non-null empty map, not null")
+            .isNotNull()
+            .isEmpty();
+        assertThat(receivedRequest.getIntegrationContext().getOutBoundVariables())
+            .as("outBoundVariables should be non-null empty map, not null")
+            .isNotNull()
+            .isEmpty();
+    }
+
+    static Stream<Arguments> variablesFragments() {
+        return Stream.of(
+            Arguments.of("null variables", "\"inBoundVariables\": null, \"outBoundVariables\": null,"),
+            Arguments.of("absent variables", "")
+        );
     }
 
     private IntegrationRequest mockIntegrationRequest() {

@@ -18,7 +18,7 @@ package org.activiti.cloud.api.model.shared.impl.conf;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
 
-public abstract class PayloadMixIn {
+public abstract class VariablesHolderMixIn {
 
     @JsonInclude(content = JsonInclude.Include.ALWAYS)
     public abstract Map<String, Object> getVariables();

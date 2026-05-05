@@ -36,7 +36,7 @@ import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
-import org.activiti.cloud.api.model.shared.impl.conf.PayloadMixIn;
+import org.activiti.cloud.api.model.shared.impl.conf.VariablesHolderMixIn;
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
@@ -337,10 +337,10 @@ public class CloudProcessModelAutoConfiguration {
     @Bean
     public JsonMapperBuilderCustomizer processPayloadNullVariablesMixinCustomizer() {
         return builder -> {
-            builder.addMixIn(StartProcessPayload.class, PayloadMixIn.class);
-            builder.addMixIn(StartMessagePayload.class, PayloadMixIn.class);
-            builder.addMixIn(ReceiveMessagePayload.class, PayloadMixIn.class);
-            builder.addMixIn(SignalPayload.class, PayloadMixIn.class);
+            builder.addMixIn(StartProcessPayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(StartMessagePayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(ReceiveMessagePayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(SignalPayload.class, VariablesHolderMixIn.class);
         };
     }
 }
