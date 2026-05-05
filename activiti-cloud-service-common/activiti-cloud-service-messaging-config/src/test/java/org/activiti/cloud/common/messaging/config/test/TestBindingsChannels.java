@@ -44,6 +44,8 @@ public interface TestBindingsChannels {
 
     String REST_CONSUMER = "restConsumer";
 
+    String INTEGRATION_RESULT_TYPED_CONSUMER = "integrationResultTypedConsumer";
+
     @InputBinding(value = COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
@@ -97,5 +99,10 @@ public interface TestBindingsChannels {
     @InputBinding(value = REST_CONSUMER)
     default SubscribableChannel restConsumer() {
         return MessageChannels.publishSubscribe(REST_CONSUMER).getObject();
+    }
+
+    @InputBinding(value = INTEGRATION_RESULT_TYPED_CONSUMER)
+    default SubscribableChannel integrationResultTypedConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_TYPED_CONSUMER).getObject();
     }
 }

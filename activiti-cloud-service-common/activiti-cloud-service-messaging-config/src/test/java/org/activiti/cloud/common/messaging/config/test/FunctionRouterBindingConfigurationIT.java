@@ -26,6 +26,7 @@ import static org.activiti.cloud.common.messaging.config.test.TestBindingsChanne
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.ENGINE_EVENTS_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_RESULT_TYPED_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.REST_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.SCRIPT_RUNTIME_CONSUMER;
@@ -81,7 +82,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.MimeTypeUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
     properties = {
@@ -105,6 +109,9 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.scriptRuntimeConsumer.group=${spring.application.name}",
         "spring.cloud.stream.bindings.restConsumer.destination=rest.GET,rest.POST",
         "spring.cloud.stream.bindings.restConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.integrationResultTypedConsumer.destination=integration-result-typed",
+        "spring.cloud.stream.bindings.integrationResultTypedConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.integrationResultTypedConsumer.contentType=application/json",
         "activiti.cloud.messaging.function-router.enabled=true",
         "activiti.cloud.messaging.function-router.max-retries=4",
         "activiti.cloud.messaging.function-router.retry-interval=100ms",
@@ -117,6 +124,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "activiti.cloud.messaging.function-router.routes.scriptRuntimeConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.engineEventsConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.restConsumer.enabled=true",
+        "activiti.cloud.messaging.function-router.routes.integrationResultTypedConsumer.enabled=true",
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.routes.auditProducerIncidents.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
@@ -143,6 +151,7 @@ public class FunctionRouterBindingConfigurationIT {
     private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
     private static final AtomicReference<String> getPayload = new AtomicReference<>();
     private static final AtomicReference<String> postPayload = new AtomicReference<>();
+    private static final AtomicReference<TypedPayload> receivedTypedPayload = new AtomicReference<>();
 
     @Autowired
     private TestBindingsChannels channels;
@@ -258,6 +267,41 @@ public class FunctionRouterBindingConfigurationIT {
                 postPayload.set(message);
             };
         }
+
+        @Bean
+        @FunctionBinding(input = INTEGRATION_RESULT_TYPED_CONSUMER)
+        public Consumer<Message<TypedPayload>> integrationResultTypedConsumerHandler() {
+            return message -> receivedTypedPayload.set(message.getPayload());
+        }
+    }
+
+    public static class TypedPayload {
+
+        private String name;
+        private int value;
+
+        public TypedPayload() {}
+
+        public TypedPayload(String name, int value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
     }
 
     @BeforeEach
@@ -267,6 +311,7 @@ public class FunctionRouterBindingConfigurationIT {
         connectorPayload.set(null);
         getPayload.set(null);
         postPayload.set(null);
+        receivedTypedPayload.set(null);
         auditRetries.set(0);
         output.clear();
     }
@@ -317,7 +362,8 @@ public class FunctionRouterBindingConfigurationIT {
                         "integration-requests",
                         "script.EXECUTE",
                         "rest.GET",
-                        "rest.POST"
+                        "rest.POST",
+                        "integration-result-typed"
                     )
             );
 
@@ -461,6 +507,34 @@ public class FunctionRouterBindingConfigurationIT {
             .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
             .matches(bindings -> bindings.size() == 1 && bindings.contains(AUDIT_PRODUCER_INCIDENTS));
+    }
+
+    @Test
+    void serializedPayloadWithOctetStreamContentTypeShouldBeDeserialized() throws Exception {
+        // given
+        TypedPayload expected = new TypedPayload("foo", 42);
+        byte[] jsonBytes = new ObjectMapper().writeValueAsBytes(expected);
+
+        Message<byte[]> message = MessageBuilder
+            .withPayload(jsonBytes)
+            .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
+            .setHeader(FUNCTION_DESTINATION, "integration-result-typed")
+            .build();
+
+        // when
+        input.send(message, "integration-result-typed");
+
+        // then
+        await()
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() -> {
+                assertThat(receivedTypedPayload.get())
+                    .isNotNull()
+                    .satisfies(p -> {
+                        assertThat(p.getName()).isEqualTo("foo");
+                        assertThat(p.getValue()).isEqualTo(42);
+                    });
+            });
     }
 
     @Test
@@ -647,7 +721,8 @@ public class FunctionRouterBindingConfigurationIT {
                 "integrationRequests",
                 "scriptRuntimeConsumer",
                 "engineEventsConsumer",
-                "restConsumer"
+                "restConsumer",
+                "integrationResultTypedConsumer"
             );
     }
 
@@ -667,7 +742,8 @@ public class FunctionRouterBindingConfigurationIT {
                 ),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
                 Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
-                Map.entry("rest.GET", List.of("restConsumerGetHandler_registration"))
+                Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
+                Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
             );
     }
 
@@ -683,7 +759,8 @@ public class FunctionRouterBindingConfigurationIT {
                 ),
                 Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
                 Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
-                Map.entry("rest.POST", List.of("restConsumerPostHandler_registration"))
+                Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
+                Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
             );
     }
 
@@ -693,7 +770,13 @@ public class FunctionRouterBindingConfigurationIT {
             .assertThat(bindingServiceProperties.getBindingDestination(FUNCTION_ROUTER_INPUT))
             .satisfies(destination ->
                 assertThat(destination.split(","))
-                    .containsOnlyOnce("command-consumer", "script.EXECUTE", "engine-events", "integration-requests")
+                    .containsOnlyOnce(
+                        "command-consumer",
+                        "script.EXECUTE",
+                        "engine-events",
+                        "integration-requests",
+                        "integration-result-typed"
+                    )
             );
     }
 
@@ -715,7 +798,8 @@ public class FunctionRouterBindingConfigurationIT {
                 Map.entry("queryConsumer", "engine-events"),
                 Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
                 Map.entry("engineEventsConsumer", "engine-events"),
-                Map.entry("restConsumer", "rest.GET,rest.POST")
+                Map.entry("restConsumer", "rest.GET,rest.POST"),
+                Map.entry("integrationResultTypedConsumer", "integration-result-typed")
             );
     }
 
