@@ -53,7 +53,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping(
     value = "/v1/process-instances",
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
 )
 public class ProcessInstanceController {
 

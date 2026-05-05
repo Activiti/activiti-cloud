@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(ApplicationEntity.class)
 @RequestMapping(
     value = "/admin/v1/applications",
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
 )
 public class ApplicationAdminController {
 

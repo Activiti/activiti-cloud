@@ -66,7 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 
 @RestController
-@RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
 public class ProcessDefinitionControllerImpl implements ProcessDefinitionController {
 
     private final RepositoryService repositoryService;

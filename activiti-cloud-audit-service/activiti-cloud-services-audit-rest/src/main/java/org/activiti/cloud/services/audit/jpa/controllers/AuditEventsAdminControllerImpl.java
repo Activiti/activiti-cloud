@@ -50,7 +50,7 @@ import tools.jackson.databind.ObjectMapper;
 @RestController
 @RequestMapping(
     value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
 )
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
 

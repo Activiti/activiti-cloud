@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
-@RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(value = "/admin/v1/tasks", produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
 public class TaskDeleteController {
 
     private final TaskRepository taskRepository;
