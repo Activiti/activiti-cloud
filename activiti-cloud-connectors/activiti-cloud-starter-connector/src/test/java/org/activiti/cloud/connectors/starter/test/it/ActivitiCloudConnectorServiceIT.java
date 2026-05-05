@@ -350,11 +350,9 @@ public class ActivitiCloudConnectorServiceIT {
         //then
         assertThat(context.getInBoundVariables())
             .as("inBoundVariables should be empty map after deserialization, not null")
-            .isNotNull()
             .isEmpty();
         assertThat(context.getOutBoundVariables())
             .as("outBoundVariables should be empty map after deserialization, not null")
-            .isNotNull()
             .isEmpty();
     }
 
@@ -382,11 +380,9 @@ public class ActivitiCloudConnectorServiceIT {
         IntegrationRequest receivedRequest = ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST.get();
         assertThat(receivedRequest.getIntegrationContext().getInBoundVariables())
             .as("inBoundVariables should be non-null empty map, not null")
-            .isNotNull()
             .isEmpty();
         assertThat(receivedRequest.getIntegrationContext().getOutBoundVariables())
             .as("outBoundVariables should be non-null empty map, not null")
-            .isNotNull()
             .isEmpty();
     }
 
