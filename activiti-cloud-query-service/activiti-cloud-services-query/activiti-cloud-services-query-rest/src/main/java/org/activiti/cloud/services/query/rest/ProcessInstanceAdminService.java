@@ -151,6 +151,10 @@ public class ProcessInstanceAdminService {
     public Page<ProcessInstanceEntity> searchSubProcesses(Page<ProcessInstanceEntity> processInstances) {
         List<ProcessInstanceEntity> content = processInstances.getContent();
 
+        if (content.isEmpty()) {
+            return processInstances;
+        }
+
         Set<String> ids = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
 
         // Single query: direct children via parentId, grandchildren+ via rootProcessInstanceId

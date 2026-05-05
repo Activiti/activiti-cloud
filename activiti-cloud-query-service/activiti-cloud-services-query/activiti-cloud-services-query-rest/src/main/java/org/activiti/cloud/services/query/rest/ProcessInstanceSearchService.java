@@ -107,6 +107,10 @@ public class ProcessInstanceSearchService {
         Set<String> linkedProcessInstanceIds,
         Pageable pageable
     ) {
+        if (linkedProcessInstanceIds == null || linkedProcessInstanceIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
             linkedProcessInstanceIds
         );
@@ -116,6 +120,10 @@ public class ProcessInstanceSearchService {
 
     @Transactional(readOnly = true)
     public List<ProcessInstanceEntity> unrestrictedLinkedProcesses(Set<String> linkedProcessInstanceIds) {
+        if (linkedProcessInstanceIds == null || linkedProcessInstanceIds.isEmpty()) {
+            return List.of();
+        }
+
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
             linkedProcessInstanceIds
         );
