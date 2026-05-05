@@ -23,7 +23,7 @@ import org.springframework.util.MimeTypeUtils;
 
 public class MessageContentTypeNormalizer {
 
-    public Message<?> normalizeToExpected(Message<?> message, String expectedContentType) {
+    public <T> Message<T> normalizeToExpected(Message<T> message, String expectedContentType) {
         String effectiveExpected = (expectedContentType == null || expectedContentType.isBlank())
             ? MimeTypeUtils.APPLICATION_JSON_VALUE
             : expectedContentType;
