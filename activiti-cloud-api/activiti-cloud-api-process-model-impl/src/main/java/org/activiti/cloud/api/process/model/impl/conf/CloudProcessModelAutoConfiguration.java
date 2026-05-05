@@ -31,7 +31,12 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
+import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
+import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.api.process.model.payloads.StartMessagePayload;
+import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
+import org.activiti.cloud.api.model.shared.impl.conf.VariablesHolderMixIn;
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
@@ -95,6 +100,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.core.Version;
 import tools.jackson.databind.JacksonModule;
@@ -326,5 +332,15 @@ public class CloudProcessModelAutoConfiguration {
         module.setAbstractTypes(resolver);
 
         return module;
+    }
+
+    @Bean
+    public JsonMapperBuilderCustomizer processPayloadNullVariablesMixinCustomizer() {
+        return builder -> {
+            builder.addMixIn(StartProcessPayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(StartMessagePayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(ReceiveMessagePayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(SignalPayload.class, VariablesHolderMixIn.class);
+        };
     }
 }
