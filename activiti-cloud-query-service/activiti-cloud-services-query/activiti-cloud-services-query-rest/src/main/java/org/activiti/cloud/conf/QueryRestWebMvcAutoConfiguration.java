@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -262,8 +261,7 @@ public class QueryRestWebMvcAutoConfiguration {
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        SecurityManager securityManager,
-        FeatureToggle featureToggle
+        SecurityManager securityManager
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -274,8 +272,7 @@ public class QueryRestWebMvcAutoConfiguration {
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
             taskLookupRestrictionService,
-            securityManager,
-            featureToggle
+            securityManager
         );
     }
 
@@ -305,15 +302,9 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceSearchService processInstanceSearchService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
-        SecurityManager securityManager,
-        FeatureToggle featureToggle
+        SecurityManager securityManager
     ) {
-        return new ProcessInstanceSearchService(
-            processInstanceRepository,
-            processVariableService,
-            securityManager,
-            featureToggle
-        );
+        return new ProcessInstanceSearchService(processInstanceRepository, processVariableService, securityManager);
     }
 
     @Bean
@@ -325,8 +316,7 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder,
-        FeatureToggle featureToggle
+        EntityFinder entityFinder
     ) {
         return new ProcessInstanceService(
             processInstanceRepository,
@@ -335,8 +325,7 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
-            entityFinder,
-            featureToggle
+            entityFinder
         );
     }
 
@@ -345,15 +334,13 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceAdminService processInstanceAdminService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceSearchService processInstanceSearchService,
-        EntityFinder entityFinder,
-        FeatureToggle featureToggle
+        EntityFinder entityFinder
     ) {
         return new ProcessInstanceAdminService(
             processInstanceRepository,
             processInstanceSearchService,
             entityFinder,
-            new QueryDslPredicateAggregator(),
-            featureToggle
+            new QueryDslPredicateAggregator()
         );
     }
 

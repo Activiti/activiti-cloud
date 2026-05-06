@@ -25,7 +25,6 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Set;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
@@ -43,111 +42,56 @@ public class ProcessInstanceSpecification
 
     private final String userId;
 
-    private ProcessInstanceSpecification(
-        ProcessInstanceSearchRequest searchRequest,
-        String userId,
-        FeatureToggle featureToggle
-    ) {
-        super(searchRequest, featureToggle);
+    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
+        super(searchRequest);
         this.userId = userId;
     }
 
     public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest) {
-        return unrestricted(searchRequest, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification unrestricted(
-        ProcessInstanceSearchRequest searchRequest,
-        FeatureToggle featureToggle
-    ) {
-        return new ProcessInstanceSpecification(searchRequest, null, featureToggle);
+        return new ProcessInstanceSpecification(searchRequest, null);
     }
 
     public static ProcessInstanceSpecification restricted(ProcessInstanceSearchRequest searchRequest, String userId) {
-        return restricted(searchRequest, userId, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification restricted(
-        ProcessInstanceSearchRequest searchRequest,
-        String userId,
-        FeatureToggle featureToggle
-    ) {
-        return new ProcessInstanceSpecification(searchRequest, userId, featureToggle);
+        return new ProcessInstanceSpecification(searchRequest, userId);
     }
 
     public static ProcessInstanceSpecification unrestrictedLinkedProcesses(Set<String> linkedProcessInstanceIds) {
-        return unrestrictedLinkedProcesses(linkedProcessInstanceIds, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification unrestrictedLinkedProcesses(
-        Set<String> linkedProcessInstanceIds,
-        FeatureToggle featureToggle
-    ) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, null, featureToggle);
+        return configureLinkedProcessSpecification(linkedProcessInstanceIds, null);
     }
 
     public static ProcessInstanceSpecification restrictedLinkedProcesses(
         Set<String> linkedProcessInstanceIds,
         String userId
     ) {
-        return restrictedLinkedProcesses(linkedProcessInstanceIds, userId, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification restrictedLinkedProcesses(
-        Set<String> linkedProcessInstanceIds,
-        String userId,
-        FeatureToggle featureToggle
-    ) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, userId, featureToggle);
+        return configureLinkedProcessSpecification(linkedProcessInstanceIds, userId);
     }
 
     private static ProcessInstanceSpecification configureLinkedProcessSpecification(
         Set<String> linkedProcessInstanceIds,
-        String userId,
-        FeatureToggle featureToggle
+        String userId
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
         searchRequest.setLinkedProcessInstanceId(linkedProcessInstanceIds);
 
-        return userId == null
-            ? unrestricted(searchRequest, featureToggle)
-            : restricted(searchRequest, userId, featureToggle);
+        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
     }
 
     public static ProcessInstanceSpecification unrestrictedSubprocesses(Set<String> parentIds) {
-        return unrestrictedSubprocesses(parentIds, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification unrestrictedSubprocesses(
-        Set<String> parentIds,
-        FeatureToggle featureToggle
-    ) {
-        return configureSubprocessesSpecification(parentIds, null, featureToggle);
+        return configureSubprocessesSpecification(parentIds, null);
     }
 
     public static ProcessInstanceSpecification restrictedSubprocesses(Set<String> parentIds, String userId) {
-        return restrictedSubprocesses(parentIds, userId, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static ProcessInstanceSpecification restrictedSubprocesses(
-        Set<String> parentIds,
-        String userId,
-        FeatureToggle featureToggle
-    ) {
-        return configureSubprocessesSpecification(parentIds, userId, featureToggle);
+        return configureSubprocessesSpecification(parentIds, userId);
     }
 
     private static ProcessInstanceSpecification configureSubprocessesSpecification(
         Set<String> parentIds,
-        String userId,
-        FeatureToggle featureToggle
+        String userId
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
         searchRequest.setSubprocessParentIds(parentIds);
 
-        return userId == null
-            ? unrestricted(searchRequest, featureToggle)
-            : restricted(searchRequest, userId, featureToggle);
+        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
     }
 
     @Override

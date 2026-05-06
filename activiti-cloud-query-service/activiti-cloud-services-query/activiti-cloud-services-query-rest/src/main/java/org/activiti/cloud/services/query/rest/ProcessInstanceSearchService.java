@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import java.util.List;
 import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
@@ -36,18 +35,14 @@ public class ProcessInstanceSearchService {
 
     private final SecurityManager securityManager;
 
-    private final FeatureToggle featureToggle;
-
     public ProcessInstanceSearchService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
-        SecurityManager securityManager,
-        FeatureToggle featureToggle
+        SecurityManager securityManager
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processVariableService = processVariableService;
         this.securityManager = securityManager;
-        this.featureToggle = featureToggle;
     }
 
     @Transactional(readOnly = true)
@@ -55,11 +50,7 @@ public class ProcessInstanceSearchService {
         return search(
             searchRequest.getProcessVariableKeys(),
             pageable,
-            ProcessInstanceSpecification.restricted(
-                searchRequest,
-                securityManager.getAuthenticatedUserId(),
-                featureToggle
-            )
+            ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
     }
 
@@ -71,7 +62,7 @@ public class ProcessInstanceSearchService {
         return search(
             searchRequest.getProcessVariableKeys(),
             pageable,
-            ProcessInstanceSpecification.unrestricted(searchRequest, featureToggle)
+            ProcessInstanceSpecification.unrestricted(searchRequest)
         );
     }
 
@@ -98,8 +89,7 @@ public class ProcessInstanceSearchService {
     public Long countRestricted(ProcessInstanceSearchRequest searchRequest) {
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restricted(
             searchRequest,
-            securityManager.getAuthenticatedUserId(),
-            featureToggle
+            securityManager.getAuthenticatedUserId()
         );
         return processInstanceRepository.count(restrictedSpecification);
     }
@@ -107,8 +97,7 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Long countUnrestricted(ProcessInstanceSearchRequest searchRequest) {
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestricted(
-            searchRequest,
-            featureToggle
+            searchRequest
         );
         return processInstanceRepository.count(unrestrictedSpecification);
     }
@@ -123,8 +112,7 @@ public class ProcessInstanceSearchService {
         }
 
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds,
-            featureToggle
+            linkedProcessInstanceIds
         );
 
         return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
@@ -137,8 +125,7 @@ public class ProcessInstanceSearchService {
         }
 
         ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds,
-            featureToggle
+            linkedProcessInstanceIds
         );
 
         return processInstanceRepository.findAll(unrestrictedSpecification);

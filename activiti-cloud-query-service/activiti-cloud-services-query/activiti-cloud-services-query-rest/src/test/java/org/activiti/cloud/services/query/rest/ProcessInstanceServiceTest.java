@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -78,8 +77,6 @@ class ProcessInstanceServiceTest {
     @Mock
     private EntityFinder entityFinder;
 
-    private final FeatureToggle featureToggle = name -> false;
-
     @BeforeEach
     void setUp() {
         processInstanceService =
@@ -90,8 +87,7 @@ class ProcessInstanceServiceTest {
                 processInstanceRestrictionService,
                 securityPoliciesApplicationService,
                 securityManager,
-                entityFinder,
-                featureToggle
+                entityFinder
             );
     }
 

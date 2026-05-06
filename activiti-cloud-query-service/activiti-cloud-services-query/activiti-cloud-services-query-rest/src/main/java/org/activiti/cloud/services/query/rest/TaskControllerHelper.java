@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -63,8 +62,6 @@ public class TaskControllerHelper {
 
     private final SecurityManager securityManager;
 
-    private final FeatureToggle featureToggle;
-
     public TaskControllerHelper(
         TaskRepository taskRepository,
         TaskCandidateUserRepository taskCandidateUserRepository,
@@ -74,8 +71,7 @@ public class TaskControllerHelper {
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        SecurityManager securityManager,
-        FeatureToggle featureToggle
+        SecurityManager securityManager
     ) {
         this.taskRepository = taskRepository;
         this.taskCandidateUserRepository = taskCandidateUserRepository;
@@ -86,7 +82,6 @@ public class TaskControllerHelper {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.securityManager = securityManager;
-        this.featureToggle = featureToggle;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
@@ -123,8 +118,7 @@ public class TaskControllerHelper {
             TaskSpecification.restricted(
                 taskSearchRequest,
                 securityManager.getAuthenticatedUserId(),
-                securityManager.getAuthenticatedUserGroups(),
-                featureToggle
+                securityManager.getAuthenticatedUserGroups()
             )
         );
     }
@@ -134,11 +128,7 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return searchTasks(
-            taskSearchRequest,
-            pageable,
-            TaskSpecification.unrestricted(taskSearchRequest, featureToggle)
-        );
+        return searchTasks(taskSearchRequest, pageable, TaskSpecification.unrestricted(taskSearchRequest));
     }
 
     private PagedModel<EntityModel<QueryCloudTask>> searchTasks(
@@ -257,10 +247,7 @@ public class TaskControllerHelper {
 
     @Transactional(readOnly = true)
     public Long countTasksUnrestricted(TaskSearchRequest taskSearchRequest) {
-        TaskSpecification unrestrictedTaskSpecification = TaskSpecification.unrestricted(
-            taskSearchRequest,
-            featureToggle
-        );
+        TaskSpecification unrestrictedTaskSpecification = TaskSpecification.unrestricted(taskSearchRequest);
         return taskRepository.count(unrestrictedTaskSpecification);
     }
 
@@ -269,8 +256,7 @@ public class TaskControllerHelper {
         TaskSpecification restrictedTaskSpecification = TaskSpecification.restricted(
             taskSearchRequest,
             securityManager.getAuthenticatedUserId(),
-            securityManager.getAuthenticatedUserGroups(),
-            featureToggle
+            securityManager.getAuthenticatedUserGroups()
         );
 
         return taskRepository.count(restrictedTaskSpecification);

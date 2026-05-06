@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -55,8 +54,6 @@ public class ProcessInstanceAdminService {
 
     private final QueryDslPredicateAggregator predicateAggregator;
 
-    private final FeatureToggle featureToggle;
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -64,14 +61,12 @@ public class ProcessInstanceAdminService {
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceSearchService processInstanceSearchService,
         EntityFinder entityFinder,
-        QueryDslPredicateAggregator queryDslPredicateAggregator,
-        FeatureToggle featureToggle
+        QueryDslPredicateAggregator queryDslPredicateAggregator
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceSearchService = processInstanceSearchService;
         this.entityFinder = entityFinder;
         this.predicateAggregator = queryDslPredicateAggregator;
-        this.featureToggle = featureToggle;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -164,7 +159,7 @@ public class ProcessInstanceAdminService {
 
         // Single query: direct children via parentId, grandchildren+ via rootProcessInstanceId
         List<ProcessInstanceEntity> allDescendants = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.unrestrictedSubprocesses(ids, featureToggle)
+            ProcessInstanceSpecification.unrestrictedSubprocesses(ids)
         );
 
         // RootProcessInstanceId → children map (covers all levels)

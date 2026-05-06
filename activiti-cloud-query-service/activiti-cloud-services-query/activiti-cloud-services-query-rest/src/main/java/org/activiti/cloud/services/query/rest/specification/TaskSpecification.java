@@ -26,7 +26,6 @@ import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Map;
-import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -47,13 +46,8 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
     private final String userId;
     private final Collection<String> userGroups;
 
-    private TaskSpecification(
-        TaskSearchRequest searchRequest,
-        String userId,
-        Collection<String> userGroups,
-        FeatureToggle featureToggle
-    ) {
-        super(searchRequest, featureToggle);
+    private TaskSpecification(TaskSearchRequest searchRequest, String userId, Collection<String> userGroups) {
+        super(searchRequest);
         this.userId = userId;
         this.userGroups = userGroups;
     }
@@ -65,11 +59,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
      * @return a specification that applies the filters in the request
      */
     public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest) {
-        return unrestricted(taskSearchRequest, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest, FeatureToggle featureToggle) {
-        return new TaskSpecification(taskSearchRequest, null, null, featureToggle);
+        return new TaskSpecification(taskSearchRequest, null, null);
     }
 
     /**
@@ -91,16 +81,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
         String userId,
         Collection<String> userGroups
     ) {
-        return restricted(taskSearchRequest, userId, userGroups, LEGACY_FEATURE_TOGGLE);
-    }
-
-    public static TaskSpecification restricted(
-        TaskSearchRequest taskSearchRequest,
-        String userId,
-        Collection<String> userGroups,
-        FeatureToggle featureToggle
-    ) {
-        return new TaskSpecification(taskSearchRequest, userId, userGroups, featureToggle);
+        return new TaskSpecification(taskSearchRequest, userId, userGroups);
     }
 
     @Override
