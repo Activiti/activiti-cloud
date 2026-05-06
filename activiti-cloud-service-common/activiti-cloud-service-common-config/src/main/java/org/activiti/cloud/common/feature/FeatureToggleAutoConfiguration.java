@@ -37,4 +37,19 @@ public class FeatureToggleAutoConfiguration {
     public FeatureToggle environmentFeatureToggle(Environment environment) {
         return new EnvironmentFeatureToggle(environment);
     }
+
+    /**
+     * Bridges the Spring-managed {@link FeatureToggle} bean into the static
+     * {@link FeatureToggleHolder} so non-Spring-managed components (e.g. JPA
+     * specifications instantiated on the fly) can query feature flags without being
+     * reworked to accept a {@link FeatureToggle} via constructor injection.
+     */
+    @Bean
+    public FeatureToggleHolderInitializer featureToggleHolderInitializer(FeatureToggle featureToggle) {
+        FeatureToggleHolder.initialize(featureToggle);
+        return new FeatureToggleHolderInitializer();
+    }
+
+    /** Marker bean used to expose the holder initialization lifecycle to Spring. */
+    public static class FeatureToggleHolderInitializer {}
 }

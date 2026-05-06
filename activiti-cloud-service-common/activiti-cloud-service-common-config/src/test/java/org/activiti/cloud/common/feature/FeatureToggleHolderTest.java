@@ -1,0 +1,60 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.common.feature;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+class FeatureToggleHolderTest {
+
+    @AfterEach
+    void tearDown() {
+        FeatureToggleHolder.reset();
+    }
+
+    @Test
+    void should_default_to_false_before_initialization() {
+        assertThat(FeatureToggleHolder.isEnabled("anything")).isFalse();
+    }
+
+    @Test
+    void should_delegate_to_initialized_toggle() {
+        FeatureToggleHolder.initialize(name -> "enabled".equals(name));
+
+        assertThat(FeatureToggleHolder.isEnabled("enabled")).isTrue();
+        assertThat(FeatureToggleHolder.isEnabled("disabled")).isFalse();
+    }
+
+    @Test
+    void should_reject_null_toggle() {
+        assertThatThrownBy(() -> FeatureToggleHolder.initialize(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("featureToggle");
+    }
+
+    @Test
+    void should_reset_to_default_no_op_toggle() {
+        FeatureToggleHolder.initialize(name -> true);
+        assertThat(FeatureToggleHolder.isEnabled("any")).isTrue();
+
+        FeatureToggleHolder.reset();
+
+        assertThat(FeatureToggleHolder.isEnabled("any")).isFalse();
+    }
+}

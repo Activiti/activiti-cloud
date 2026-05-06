@@ -17,6 +17,7 @@ package org.activiti.cloud.common.feature;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -28,6 +29,11 @@ class FeatureToggleAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withConfiguration(AutoConfigurations.of(FeatureToggleAutoConfiguration.class));
+
+    @AfterEach
+    void tearDown() {
+        FeatureToggleHolder.reset();
+    }
 
     @Test
     void should_register_default_environment_feature_toggle() {
@@ -58,6 +64,24 @@ class FeatureToggleAutoConfigurationTest {
                 assertThat(toggle).isNotInstanceOf(EnvironmentFeatureToggle.class);
                 assertThat(toggle.isEnabled("anything")).isTrue();
             });
+    }
+
+    @Test
+    void should_initialize_static_holder_with_application_feature_toggle() {
+        contextRunner
+            .withPropertyValues("activiti.features.holder-sample.enabled=true")
+            .run(context -> {
+                assertThat(context).hasSingleBean(FeatureToggleAutoConfiguration.FeatureToggleHolderInitializer.class);
+                assertThat(FeatureToggleHolder.isEnabled("holder-sample")).isTrue();
+                assertThat(FeatureToggleHolder.isEnabled("missing")).isFalse();
+            });
+    }
+
+    @Test
+    void should_initialize_static_holder_with_primary_override() {
+        contextRunner
+            .withUserConfiguration(PrimaryOverrideConfiguration.class)
+            .run(context -> assertThat(FeatureToggleHolder.isEnabled("anything")).isTrue());
     }
 
     @Configuration(proxyBeanMethods = false)
