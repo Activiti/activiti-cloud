@@ -48,15 +48,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilterRequest> implements Specification<T> {
 
-    /**
-     * Canonical {@link org.activiti.cloud.common.feature.FeatureToggle} flag name (without the
-     * {@code activiti.features.} prefix or {@code .enabled} suffix) that switches the
-     * {@link ProcessInstanceSpecification} and {@link TaskSpecification} between the legacy
-     * join-based queries (flag {@code false}, the default) and the {@code EXISTS}
-     * subquery-based queries (flag {@code true}).
-     */
-    public static final String FEATURE_EXISTS_SUBQUERIES = "query.specifications.exists-subqueries";
-
     protected final R searchRequest;
     protected List<Predicate> predicates;
     protected List<VariableValueFilterCondition> filterConditions;
@@ -81,14 +72,14 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
     }
 
     /**
-     * @return {@code true} when the {@link #FEATURE_EXISTS_SUBQUERIES} flag is enabled in the
-     *         application-wide {@link FeatureToggleHolder}, in which case subclasses must build
-     *         {@code EXISTS}-subquery based predicates and skip the {@code SELECT DISTINCT}
-     *         clause; {@code false} (the default) keeps the legacy join-based behavior including
-     *         {@code SELECT DISTINCT}.
+     * @return {@code true} when the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag is
+     *         enabled in the application-wide {@link FeatureToggleHolder}, in which case
+     *         subclasses must build {@code EXISTS}-subquery based predicates and skip the
+     *         {@code SELECT DISTINCT} clause; {@code false} (the default) keeps the legacy
+     *         join-based behavior including {@code SELECT DISTINCT}.
      */
     protected boolean useExistsSubqueries() {
-        return FeatureToggleHolder.isEnabled(FEATURE_EXISTS_SUBQUERIES);
+        return FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES);
     }
 
     protected abstract SingularAttribute<T, ?> getIdAttribute();

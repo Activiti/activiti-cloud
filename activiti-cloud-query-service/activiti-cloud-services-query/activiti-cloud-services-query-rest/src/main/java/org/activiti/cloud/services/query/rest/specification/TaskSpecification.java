@@ -337,7 +337,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
     /**
      * Legacy implementation that adds the user-restriction predicate using {@code LEFT JOIN}s on
      * {@code taskCandidateUsers} / {@code taskCandidateGroups} and {@code isEmpty} checks. Active
-     * when {@link #FEATURE_EXISTS_SUBQUERIES} is disabled (the default). Relies on
+     * when {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is disabled (the default). Relies on
      * {@link SpecificationSupport#useExistsSubqueries()} returning {@code false} so that the
      * outer query keeps {@code SELECT DISTINCT} to collapse duplicates produced by the joins.
      */
@@ -372,7 +372,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity, TaskSear
     /**
      * New implementation that adds the user-restriction predicate using correlated {@code EXISTS}
      * (and {@code NOT EXISTS}) subqueries against {@code task_candidate_user} and
-     * {@code task_candidate_group}. Activated when {@link #FEATURE_EXISTS_SUBQUERIES} is enabled.
+     * {@code task_candidate_group}. Activated when {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled.
      * Avoids duplicate rows so the outer query does not need {@code SELECT DISTINCT}, typically
      * yielding better execution plans.
      */
