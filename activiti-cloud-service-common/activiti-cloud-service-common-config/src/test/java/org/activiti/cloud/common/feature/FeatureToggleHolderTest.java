@@ -35,7 +35,7 @@ class FeatureToggleHolderTest {
 
     @Test
     void should_delegate_to_initialized_toggle() {
-        FeatureToggleHolder.initialize(name -> "enabled".equals(name));
+        FeatureToggleHolder.initialize("enabled"::equals);
 
         assertThat(FeatureToggleHolder.isEnabled("enabled")).isTrue();
         assertThat(FeatureToggleHolder.isEnabled("disabled")).isFalse();

@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.feature;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Static accessor for the application-wide {@link FeatureToggle} bean.
@@ -30,11 +31,13 @@ import java.util.Objects;
  */
 public final class FeatureToggleHolder {
 
+    private static final FeatureToggle DEFAULT_TOGGLE = name -> false;
+
     /**
      * Default no-op {@link FeatureToggle} that disables every flag. Used until the Spring-managed
      * {@link FeatureToggle} bean is wired in by {@link #initialize(FeatureToggle)}.
      */
-    private static volatile FeatureToggle instance = name -> false;
+    private static final AtomicReference<FeatureToggle> INSTANCE = new AtomicReference<>(DEFAULT_TOGGLE);
 
     private FeatureToggleHolder() {}
 
@@ -44,12 +47,12 @@ public final class FeatureToggleHolder {
      * {@link #reset()} in {@code @AfterEach}.
      */
     public static void initialize(FeatureToggle featureToggle) {
-        instance = Objects.requireNonNull(featureToggle, "featureToggle must not be null");
+        INSTANCE.set(Objects.requireNonNull(featureToggle, "featureToggle must not be null"));
     }
 
     /** Restores the default no-op toggle. Intended for test teardown. */
     public static void reset() {
-        instance = name -> false;
+        INSTANCE.set(DEFAULT_TOGGLE);
     }
 
     /**
@@ -59,6 +62,6 @@ public final class FeatureToggleHolder {
      *         when the holder has not yet been initialized).
      */
     public static boolean isEnabled(String name) {
-        return instance.isEnabled(name);
+        return INSTANCE.get().isEnabled(name);
     }
 }

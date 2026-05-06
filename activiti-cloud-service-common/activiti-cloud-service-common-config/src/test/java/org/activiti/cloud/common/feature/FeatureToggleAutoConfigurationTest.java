@@ -71,7 +71,7 @@ class FeatureToggleAutoConfigurationTest {
         contextRunner
             .withPropertyValues("activiti.features.holder-sample.enabled=true")
             .run(context -> {
-                assertThat(context).hasSingleBean(FeatureToggleAutoConfiguration.FeatureToggleHolderInitializer.class);
+                assertThat(context).hasSingleBean(FeatureToggleHolderInitializer.class);
                 assertThat(FeatureToggleHolder.isEnabled("holder-sample")).isTrue();
                 assertThat(FeatureToggleHolder.isEnabled("missing")).isFalse();
             });

@@ -46,10 +46,6 @@ public class FeatureToggleAutoConfiguration {
      */
     @Bean
     public FeatureToggleHolderInitializer featureToggleHolderInitializer(FeatureToggle featureToggle) {
-        FeatureToggleHolder.initialize(featureToggle);
-        return new FeatureToggleHolderInitializer();
+        return new FeatureToggleHolderInitializer(featureToggle);
     }
-
-    /** Marker bean used to expose the holder initialization lifecycle to Spring. */
-    public static class FeatureToggleHolderInitializer {}
 }
