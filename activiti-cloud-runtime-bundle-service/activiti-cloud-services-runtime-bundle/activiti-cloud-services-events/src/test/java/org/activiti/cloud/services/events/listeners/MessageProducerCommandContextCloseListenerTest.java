@@ -34,6 +34,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.IncidentContext;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -382,6 +383,7 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incident.getEntity().getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
         assertThat(incident.getEntity().getExecutionId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {

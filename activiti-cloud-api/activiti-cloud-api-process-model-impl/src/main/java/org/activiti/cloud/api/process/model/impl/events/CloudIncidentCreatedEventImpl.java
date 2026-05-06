@@ -24,6 +24,7 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentEvent;
 import org.activiti.cloud.api.process.model.IncidentEvent.IncidentEventType;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 
 public class CloudIncidentCreatedEventImpl
     extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
@@ -33,6 +34,7 @@ public class CloudIncidentCreatedEventImpl
     private String errorMessage;
     private List<StackTraceElement> stackTraceElements;
     private String errorClassName;
+    private IncidentSeverity severity = IncidentSeverity.ERROR;
 
     public CloudIncidentCreatedEventImpl() {}
 
@@ -53,6 +55,11 @@ public class CloudIncidentCreatedEventImpl
         setEntityId(incidentContext.getExecutionId());
     }
 
+    public CloudIncidentCreatedEventImpl(Throwable error, IncidentContext incidentContext, IncidentSeverity severity) {
+        this(error, incidentContext);
+        this.severity = Objects.requireNonNullElse(severity, IncidentSeverity.ERROR);
+    }
+
     public CloudIncidentCreatedEventImpl(
         String id,
         Long timestamp,
@@ -67,6 +74,20 @@ public class CloudIncidentCreatedEventImpl
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.stackTraceElements = stackTraceElements;
+    }
+
+    public CloudIncidentCreatedEventImpl(
+        String id,
+        Long timestamp,
+        IncidentContext entity,
+        String errorClassName,
+        String errorCode,
+        String errorMessage,
+        List<StackTraceElement> stackTraceElements,
+        IncidentSeverity severity
+    ) {
+        this(id, timestamp, entity, errorClassName, errorCode, errorMessage, stackTraceElements);
+        this.severity = Objects.requireNonNullElse(severity, IncidentSeverity.ERROR);
     }
 
     @Override
@@ -92,6 +113,16 @@ public class CloudIncidentCreatedEventImpl
     @Override
     public String getErrorCode() {
         return errorCode;
+    }
+
+    @Override
+    public IncidentSeverity getSeverity() {
+        return severity;
+    }
+
+    @Override
+    public void setSeverity(IncidentSeverity severity) {
+        this.severity = Objects.requireNonNullElse(severity, IncidentSeverity.ERROR);
     }
 
     protected Throwable findRootCause(Throwable throwable) {

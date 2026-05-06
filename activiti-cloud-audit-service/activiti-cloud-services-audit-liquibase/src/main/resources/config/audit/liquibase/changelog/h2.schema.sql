@@ -51,6 +51,7 @@ create table audit_event
     candidate_starter_user     text,
     candidate_starter_group    text,
     ephemeral_variable         boolean,
+    severity                   varchar(255),
     primary key (id)
 );
 

@@ -28,6 +28,10 @@ public interface IncidentEvent extends CloudRuntimeEvent<IncidentContext, Incide
 
     String getErrorClassName();
 
+    IncidentSeverity getSeverity();
+
+    void setSeverity(IncidentSeverity severity);
+
     enum IncidentEventType {
         INCIDENT_CREATED,
     }
