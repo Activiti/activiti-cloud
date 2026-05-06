@@ -16,14 +16,17 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.util.ProcessInstanceTestUtils.buildProcessInstanceEntity;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -41,6 +44,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessInstanceServiceTest {
@@ -213,5 +218,35 @@ class ProcessInstanceServiceTest {
 
     private static Stream<Arguments> provideInvalidProcessInstanceIds() {
         return Stream.of(Arguments.of((List<String>) null), Arguments.of(Collections.emptyList()));
+    }
+
+    @Test
+    void should_returnSamePage_when_searchSubProcesses_givenEmptyPage() {
+        // given
+        Page<ProcessInstanceEntity> emptyPage = new PageImpl<>(Collections.emptyList());
+
+        // when
+        Page<ProcessInstanceEntity> result = processInstanceService.searchSubProcesses(emptyPage);
+
+        // then
+        assertThat(result).isSameAs(emptyPage);
+        verifyNoInteractions(processInstanceRepository);
+        verifyNoInteractions(securityManager);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideEmptyLinkedProcessInstanceIds")
+    void should_returnEmptyList_when_searchLinkedProcesses_givenEmptyOrNullIds(Set<String> ids) {
+        // when
+        List<ProcessInstanceEntity> result = processInstanceService.searchLinkedProcesses(ids);
+
+        // then
+        assertThat(result).isEmpty();
+        verifyNoInteractions(processInstanceRepository);
+        verifyNoInteractions(securityManager);
+    }
+
+    private static Stream<Arguments> provideEmptyLinkedProcessInstanceIds() {
+        return Stream.of(Arguments.of((Set<String>) null), Arguments.of(Collections.emptySet()));
     }
 }

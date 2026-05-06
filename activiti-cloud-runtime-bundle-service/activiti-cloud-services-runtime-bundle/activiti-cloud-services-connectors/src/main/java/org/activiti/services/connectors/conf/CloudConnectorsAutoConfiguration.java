@@ -17,6 +17,7 @@ package org.activiti.services.connectors.conf;
 
 import java.util.Set;
 import java.util.function.Consumer;
+import org.activiti.cloud.api.process.model.ConnectorIncidentEvent;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration;
@@ -24,6 +25,7 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
@@ -35,6 +37,7 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
+import org.activiti.services.connectors.channel.ConnectorIncidentEventHandler;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
@@ -129,6 +132,18 @@ public class CloudConnectorsAutoConfiguration {
         ServiceTaskIntegrationErrorEventHandler handler
     ) {
         return message -> handler.receive(message.getPayload());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ConnectorIncidentEventHandler connectorIncidentEventHandler(IncidentService incidentService) {
+        return new ConnectorIncidentEventHandler(incidentService);
+    }
+
+    @FunctionBinding(input = ProcessEngineIntegrationChannels.CONNECTOR_INCIDENT_CONSUMER)
+    @Bean
+    public Consumer<ConnectorIncidentEvent> connectorIncidentEventConsumer(ConnectorIncidentEventHandler handler) {
+        return handler::accept;
     }
 
     @Bean

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -107,5 +108,34 @@ class CreateIncidentEventFromExecutionCmdTest {
                 entry("routingKey", "engineEvents.springAppName.appName"),
                 entry("messagePayloadType", "java.util.ArrayList")
             );
+    }
+
+    @Test
+    void shouldDefaultSeverityToError() {
+        Message<ArrayList<Object>> message = this.createIncidentEventFromExecutionCmd.execute(null);
+
+        var incident = (CloudIncidentCreatedEventImpl) ((List) message.getPayload()).get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Test
+    void shouldCreateIncidentEventWithWarningSeverity() {
+        var cmd = new CreateIncidentEventFromExecutionCmd(
+            this.executionContext,
+            testException,
+            this.messageBuilderChainIncidentFactory,
+            this.runtimeBundleInfoAppender,
+            IncidentSeverity.WARNING
+        );
+
+        Message<ArrayList<Object>> message = cmd.execute(null);
+
+        var payload = (List) message.getPayload();
+        assertThat(payload).hasSize(1);
+
+        var incident = (CloudIncidentCreatedEventImpl) payload.get(0);
+        assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.WARNING);
+        assertThat(incident.getErrorClassName()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(incident.getErrorMessage()).isEqualTo("Test exception");
     }
 }

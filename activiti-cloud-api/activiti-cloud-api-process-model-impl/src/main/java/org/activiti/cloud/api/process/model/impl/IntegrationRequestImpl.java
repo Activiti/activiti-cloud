@@ -27,6 +27,8 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     private String errorDestination;
 
+    private String incidentDestination;
+
     public IntegrationRequestImpl() {}
 
     public IntegrationRequestImpl(IntegrationContext integrationContext) {
@@ -57,5 +59,14 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     public void setErrorDestination(String errorDestination) {
         this.errorDestination = errorDestination;
+    }
+
+    @Override
+    public String getIncidentDestination() {
+        return incidentDestination;
+    }
+
+    public void setIncidentDestination(String incidentDestination) {
+        this.incidentDestination = incidentDestination;
     }
 }

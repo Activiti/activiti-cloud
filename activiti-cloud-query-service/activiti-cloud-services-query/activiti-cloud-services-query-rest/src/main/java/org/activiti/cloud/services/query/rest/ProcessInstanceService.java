@@ -240,6 +240,10 @@ public class ProcessInstanceService {
 
     @Transactional(readOnly = true)
     public List<ProcessInstanceEntity> searchLinkedProcesses(Set<String> linkedProcessInstanceIds) {
+        if (linkedProcessInstanceIds == null || linkedProcessInstanceIds.isEmpty()) {
+            return List.of();
+        }
+
         String userId = securityManager.getAuthenticatedUserId();
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
             linkedProcessInstanceIds,
@@ -298,6 +302,10 @@ public class ProcessInstanceService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchSubProcesses(Page<ProcessInstanceEntity> processInstances) {
         List<ProcessInstanceEntity> content = processInstances.getContent();
+
+        if (content.isEmpty()) {
+            return processInstances;
+        }
 
         Set<String> ids = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
 

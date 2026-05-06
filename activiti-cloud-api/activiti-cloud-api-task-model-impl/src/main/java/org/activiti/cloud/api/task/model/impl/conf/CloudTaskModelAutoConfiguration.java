@@ -18,6 +18,9 @@ package org.activiti.cloud.api.task.model.impl.conf;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.cloud.api.model.shared.impl.conf.VariablesHolderMixIn;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
@@ -34,6 +37,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.core.Version;
 import tools.jackson.databind.JacksonModule;
@@ -105,5 +109,13 @@ public class CloudTaskModelAutoConfiguration {
         module.setAbstractTypes(resolver);
 
         return module;
+    }
+
+    @Bean
+    public JsonMapperBuilderCustomizer taskPayloadNullVariablesMixinCustomizer() {
+        return builder -> {
+            builder.addMixIn(SaveTaskPayload.class, VariablesHolderMixIn.class);
+            builder.addMixIn(CompleteTaskPayload.class, VariablesHolderMixIn.class);
+        };
     }
 }

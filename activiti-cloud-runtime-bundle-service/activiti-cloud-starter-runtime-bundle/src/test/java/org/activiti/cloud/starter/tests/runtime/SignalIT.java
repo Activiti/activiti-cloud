@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -38,6 +39,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,21 +96,25 @@ public class SignalIT {
     @Test
     public void shouldBroadcastSignals() {
         //when
-        runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
-        runtimeService.startProcessInstanceByKey("broadcastSignalEventProcess");
+        ProcessInstance catchEventProcessInstance = runtimeService.startProcessInstanceByKey(
+            "broadcastSignalCatchEventProcess"
+        );
+        ProcessInstance signalEventProcessInstance = runtimeService.startProcessInstanceByKey(
+            "broadcastSignalEventProcess"
+        );
 
         await("Broadcast Signals")
             .untilAsserted(() -> {
                 List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
                     .createProcessInstanceQuery()
-                    .processDefinitionKey("broadcastSignalCatchEventProcess")
+                    .processInstanceId(catchEventProcessInstance.getId())
                     .list();
                 assertThat(processInstances).isEmpty();
 
                 processInstances =
                     runtimeService
                         .createProcessInstanceQuery()
-                        .processDefinitionKey("broadcastSignalEventProcess")
+                        .processInstanceId(signalEventProcessInstance.getId())
                         .list();
                 assertThat(processInstances).isEmpty();
             });
@@ -117,20 +123,19 @@ public class SignalIT {
     @Test
     public void shouldNotBroadcastSignalsWithProcessInstanceScope() throws InterruptedException {
         //when
-        runtimeService.startProcessInstanceByKey("signalThrowEventWithProcessInstanceScopeProcess");
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
+            "signalThrowEventWithProcessInstanceScopeProcess"
+        );
 
         //then
-        long count = runtimeService
-            .createProcessInstanceQuery()
-            .processDefinitionKey("signalThrowEventWithProcessInstanceScopeProcess")
-            .count();
+        long count = runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId()).count();
         assertThat(count).isEqualTo(0);
     }
 
     @Test
     public void shouldBroadcastSignalsWithProcessInstanceRest() {
         //when
-        runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("broadcastSignalCatchEventProcess");
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("Test").build();
         signalRestTemplate.signal(signalProcessInstancesCmd);
 
@@ -138,7 +143,7 @@ public class SignalIT {
             .untilAsserted(() -> {
                 List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
                     .createProcessInstanceQuery()
-                    .processDefinitionKey("broadcastSignalCatchEventProcess")
+                    .processInstanceId(processInstance.getId())
                     .list();
                 assertThat(processInstances).isEmpty();
             });
@@ -146,7 +151,7 @@ public class SignalIT {
         //then
         List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
             .createProcessInstanceQuery()
-            .processDefinitionKey("broadcastSignalCatchEventProcess")
+            .processInstanceId(processInstance.getId())
             .list();
         assertThat(processInstances).isEmpty();
     }
@@ -271,6 +276,41 @@ public class SignalIT {
                 VariableInstance variable = variableCollection.iterator().next();
                 assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
                 assertThat(variable.<Object>getValue()).isEqualTo("myContent");
+            });
+    }
+
+    @Test
+    public void shouldPersistNullVariablesWhenSendingSignal() {
+        //given
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIGNAL_PROCESS)
+        );
+        SignalPayload signalPayload = ProcessPayloadBuilder
+            .signal()
+            .withName("go")
+            .withVariables(Collections.singletonMap("numbertest", null))
+            .build();
+
+        //when
+        signalRestTemplate.signal(signalPayload);
+
+        //then
+        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
+
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(
+                    startProcessEntity
+                );
+                Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
+                Optional<CloudVariableInstance> nullVar = variableCollection
+                    .stream()
+                    .filter(v -> v.getName().equals("numbertest"))
+                    .findFirst();
+                assertThat(nullVar).isPresent();
+                Object value = nullVar.get().getValue();
+                assertThat(value).isNull();
             });
     }
 }

@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.api.process.model;
+package org.activiti.cloud.api.model.shared.impl.conf;
 
-import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Map;
 
-public interface IntegrationRequest extends CloudRuntimeEntity {
-    IntegrationContext getIntegrationContext();
+public abstract class VariablesHolderMixIn {
 
-    String getResultDestination();
-
-    String getErrorDestination();
-
-    default String getIncidentDestination() {
-        return null;
-    }
+    @JsonInclude(content = JsonInclude.Include.ALWAYS)
+    public abstract Map<String, Object> getVariables();
 }
