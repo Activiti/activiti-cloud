@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.events.services;
 
 import java.util.ArrayList;
-import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.IncidentContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.services.events.converter.ExecutionContextInfoAppender;
@@ -30,23 +29,13 @@ abstract class CreateIncidentEventCmd implements Command<Message> {
 
     private final MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private final IncidentSeverity severity;
 
     CreateIncidentEventCmd(
         MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
         RuntimeBundleInfoAppender runtimeBundleInfoAppender
     ) {
-        this(messageBuilderIncidentsChainFactory, runtimeBundleInfoAppender, IncidentSeverity.ERROR);
-    }
-
-    CreateIncidentEventCmd(
-        MessageBuilderChainFactory<ExecutionContext> messageBuilderIncidentsChainFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        IncidentSeverity severity
-    ) {
         this.messageBuilderIncidentsChainFactory = messageBuilderIncidentsChainFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.severity = severity;
     }
 
     Message<ArrayList<Object>> createMessage(ExecutionContext rootExecutionContext, Exception exception) {
@@ -62,7 +51,7 @@ abstract class CreateIncidentEventCmd implements Command<Message> {
     ) {
         var incidentContext = getIncidentContext(rootExecutionContext);
 
-        var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext, this.severity);
+        var incident = new CloudIncidentCreatedEventImpl(exception, incidentContext);
         getExecutionContextInfoAppender(rootExecutionContext).appendExecutionContextInfoTo(incident);
         this.runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(incident);
 

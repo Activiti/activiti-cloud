@@ -57,8 +57,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
                 "default-app.commandConsumer_default-app.my-runtime-bundle",
                 "default-app.asyncExecutorJobs_default-app.my-runtime-bundle",
                 "default-app.integrationResult_my-runtime-bundle.my-runtime-bundle",
-                "default-app.integrationError_my-runtime-bundle.my-runtime-bundle",
-                "default-app.connectorIncident.my-runtime-bundle"
+                "default-app.integrationError_my-runtime-bundle.my-runtime-bundle"
             );
     }
 
@@ -75,8 +74,7 @@ public class RuntimeBundleRabbitmqPrefixIT extends RuntimeBundleApplicationIT {
                 "default-app.messageEvents_default-app",
                 "default-app.signalEvent",
                 "default-app.integrationResult_my-runtime-bundle",
-                "default-app.integrationError_my-runtime-bundle",
-                "default-app.connectorIncident"
+                "default-app.integrationError_my-runtime-bundle"
             );
     }
 
