@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -70,6 +71,8 @@ public class ProcessInstanceService {
 
     private final EntityFinder entityFinder;
 
+    private final FeatureToggle featureToggle;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -80,7 +83,8 @@ public class ProcessInstanceService {
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
-        EntityFinder entityFinder
+        EntityFinder entityFinder,
+        FeatureToggle featureToggle
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
@@ -89,6 +93,7 @@ public class ProcessInstanceService {
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.securityManager = securityManager;
         this.entityFinder = entityFinder;
+        this.featureToggle = featureToggle;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -232,7 +237,8 @@ public class ProcessInstanceService {
         String userId = securityManager.getAuthenticatedUserId();
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
             Set.of(linkedProcessInstanceId),
-            userId
+            userId,
+            featureToggle
         );
 
         return processInstanceRepository.findAll(restrictedSpecification, pageable);
@@ -247,7 +253,8 @@ public class ProcessInstanceService {
         String userId = securityManager.getAuthenticatedUserId();
         ProcessInstanceSpecification restrictedSpecification = ProcessInstanceSpecification.restrictedLinkedProcesses(
             linkedProcessInstanceIds,
-            userId
+            userId,
+            featureToggle
         );
 
         return processInstanceRepository.findAll(restrictedSpecification);
@@ -270,7 +277,11 @@ public class ProcessInstanceService {
             request.setLinkedProcessInstanceType(Set.of(linkProcessInstanceType));
 
             var orphanProcesses = processInstanceRepository.findAll(
-                ProcessInstanceSpecification.restricted(request, securityManager.getAuthenticatedUserId())
+                ProcessInstanceSpecification.restricted(
+                    request,
+                    securityManager.getAuthenticatedUserId(),
+                    featureToggle
+                )
             );
 
             if (orphanProcesses.isEmpty()) {
@@ -312,7 +323,7 @@ public class ProcessInstanceService {
         String userId = securityManager.getAuthenticatedUserId();
         // Single query: direct children via parentId, grandchildren+ via rootProcessInstanceId
         List<ProcessInstanceEntity> allDescendants = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.restrictedSubprocesses(ids, userId)
+            ProcessInstanceSpecification.restrictedSubprocesses(ids, userId, featureToggle)
         );
 
         // parentId → children map (covers all levels)

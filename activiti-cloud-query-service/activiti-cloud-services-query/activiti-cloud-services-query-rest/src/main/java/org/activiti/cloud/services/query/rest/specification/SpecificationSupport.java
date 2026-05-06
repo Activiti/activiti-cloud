@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -47,7 +48,23 @@ import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilterRequest> implements Specification<T> {
 
+    /**
+     * Canonical {@link FeatureToggle} flag name (without the {@code activiti.features.} prefix or
+     * {@code .enabled} suffix) that switches the {@link ProcessInstanceSpecification} and
+     * {@link TaskSpecification} between the legacy join-based queries (flag {@code false},
+     * the default) and the {@code EXISTS} subquery-based queries (flag {@code true}).
+     */
+    public static final String FEATURE_EXISTS_SUBQUERIES = "query.specifications.exists-subqueries";
+
+    /**
+     * No-op {@link FeatureToggle} returning {@code false} for every flag, used as a safe
+     * default when callers (typically tests) do not provide one. This preserves the legacy
+     * pre-feature-toggle behavior.
+     */
+    public static final FeatureToggle LEGACY_FEATURE_TOGGLE = name -> false;
+
     protected final R searchRequest;
+    protected final FeatureToggle featureToggle;
     protected List<Predicate> predicates;
     protected List<VariableValueFilterCondition> filterConditions;
     private SetJoin<T, ProcessVariableEntity> pvJoin;
@@ -67,7 +84,22 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
     );
 
     protected SpecificationSupport(R searchRequest) {
+        this(searchRequest, LEGACY_FEATURE_TOGGLE);
+    }
+
+    protected SpecificationSupport(R searchRequest, FeatureToggle featureToggle) {
         this.searchRequest = searchRequest;
+        this.featureToggle = featureToggle != null ? featureToggle : LEGACY_FEATURE_TOGGLE;
+    }
+
+    /**
+     * @return {@code true} when the {@link #FEATURE_EXISTS_SUBQUERIES} flag is enabled, in
+     *         which case subclasses must build {@code EXISTS}-subquery based predicates and
+     *         skip the {@code SELECT DISTINCT} clause; {@code false} (the default) keeps the
+     *         legacy join-based behavior including {@code SELECT DISTINCT}.
+     */
+    protected boolean useExistsSubqueries() {
+        return featureToggle.isEnabled(FEATURE_EXISTS_SUBQUERIES);
     }
 
     protected abstract SingularAttribute<T, ?> getIdAttribute();
@@ -93,6 +125,12 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         }
         if (!query.getResultType().equals(Long.class)) {
             applySorting(root, joinProcessVariables(root), query, criteriaBuilder);
+        }
+        // The legacy join-based predicates produce duplicate rows that need DISTINCT to be
+        // collapsed. The EXISTS-subquery variant does not introduce duplicates, so DISTINCT
+        // is dropped to allow more efficient query plans.
+        if (!useExistsSubqueries() && CollectionUtils.isEmpty(query.getGroupList())) {
+            query.distinct(true);
         }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();

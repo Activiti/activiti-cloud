@@ -25,6 +25,7 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Set;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
@@ -42,56 +43,111 @@ public class ProcessInstanceSpecification
 
     private final String userId;
 
-    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
-        super(searchRequest);
+    private ProcessInstanceSpecification(
+        ProcessInstanceSearchRequest searchRequest,
+        String userId,
+        FeatureToggle featureToggle
+    ) {
+        super(searchRequest, featureToggle);
         this.userId = userId;
     }
 
     public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest) {
-        return new ProcessInstanceSpecification(searchRequest, null);
+        return unrestricted(searchRequest, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification unrestricted(
+        ProcessInstanceSearchRequest searchRequest,
+        FeatureToggle featureToggle
+    ) {
+        return new ProcessInstanceSpecification(searchRequest, null, featureToggle);
     }
 
     public static ProcessInstanceSpecification restricted(ProcessInstanceSearchRequest searchRequest, String userId) {
-        return new ProcessInstanceSpecification(searchRequest, userId);
+        return restricted(searchRequest, userId, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification restricted(
+        ProcessInstanceSearchRequest searchRequest,
+        String userId,
+        FeatureToggle featureToggle
+    ) {
+        return new ProcessInstanceSpecification(searchRequest, userId, featureToggle);
     }
 
     public static ProcessInstanceSpecification unrestrictedLinkedProcesses(Set<String> linkedProcessInstanceIds) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, null);
+        return unrestrictedLinkedProcesses(linkedProcessInstanceIds, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification unrestrictedLinkedProcesses(
+        Set<String> linkedProcessInstanceIds,
+        FeatureToggle featureToggle
+    ) {
+        return configureLinkedProcessSpecification(linkedProcessInstanceIds, null, featureToggle);
     }
 
     public static ProcessInstanceSpecification restrictedLinkedProcesses(
         Set<String> linkedProcessInstanceIds,
         String userId
     ) {
-        return configureLinkedProcessSpecification(linkedProcessInstanceIds, userId);
+        return restrictedLinkedProcesses(linkedProcessInstanceIds, userId, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification restrictedLinkedProcesses(
+        Set<String> linkedProcessInstanceIds,
+        String userId,
+        FeatureToggle featureToggle
+    ) {
+        return configureLinkedProcessSpecification(linkedProcessInstanceIds, userId, featureToggle);
     }
 
     private static ProcessInstanceSpecification configureLinkedProcessSpecification(
         Set<String> linkedProcessInstanceIds,
-        String userId
+        String userId,
+        FeatureToggle featureToggle
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
         searchRequest.setLinkedProcessInstanceId(linkedProcessInstanceIds);
 
-        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
+        return userId == null
+            ? unrestricted(searchRequest, featureToggle)
+            : restricted(searchRequest, userId, featureToggle);
     }
 
     public static ProcessInstanceSpecification unrestrictedSubprocesses(Set<String> parentIds) {
-        return configureSubprocessesSpecification(parentIds, null);
+        return unrestrictedSubprocesses(parentIds, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification unrestrictedSubprocesses(
+        Set<String> parentIds,
+        FeatureToggle featureToggle
+    ) {
+        return configureSubprocessesSpecification(parentIds, null, featureToggle);
     }
 
     public static ProcessInstanceSpecification restrictedSubprocesses(Set<String> parentIds, String userId) {
-        return configureSubprocessesSpecification(parentIds, userId);
+        return restrictedSubprocesses(parentIds, userId, LEGACY_FEATURE_TOGGLE);
+    }
+
+    public static ProcessInstanceSpecification restrictedSubprocesses(
+        Set<String> parentIds,
+        String userId,
+        FeatureToggle featureToggle
+    ) {
+        return configureSubprocessesSpecification(parentIds, userId, featureToggle);
     }
 
     private static ProcessInstanceSpecification configureSubprocessesSpecification(
         Set<String> parentIds,
-        String userId
+        String userId,
+        FeatureToggle featureToggle
     ) {
         ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
         searchRequest.setSubprocessParentIds(parentIds);
 
-        return userId == null ? unrestricted(searchRequest) : restricted(searchRequest, userId);
+        return userId == null
+            ? unrestricted(searchRequest, featureToggle)
+            : restricted(searchRequest, userId, featureToggle);
     }
 
     @Override
@@ -278,47 +334,93 @@ public class ProcessInstanceSpecification
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        if (userId != null) {
-            // EXISTS (SELECT t.id FROM task t WHERE t.process_instance_id = pi.id AND t.assignee = userId)
-            Subquery<String> assigneeSubquery = query.subquery(String.class);
-            Root<TaskEntity> assigneeTaskRoot = assigneeSubquery.from(TaskEntity.class);
-            assigneeSubquery
-                .select(assigneeTaskRoot.get(TaskEntity_.id))
-                .where(
-                    criteriaBuilder.equal(
-                        assigneeTaskRoot.get(TaskEntity_.processInstanceId),
-                        root.get(ProcessInstanceEntity_.id)
-                    ),
-                    criteriaBuilder.equal(assigneeTaskRoot.get(TaskEntity_.assignee), userId)
-                );
-
-            // EXISTS (SELECT tcu.taskId FROM task_candidate_user tcu
-            //         JOIN task t ON tcu.task_id = t.id
-            //         WHERE t.process_instance_id = pi.id AND tcu.user_id = userId)
-            Subquery<String> candidateUserSubquery = query.subquery(String.class);
-            Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
-            Join<TaskCandidateUserEntity, TaskEntity> tcuTaskJoin = tcuRoot.join(
-                TaskCandidateUserEntity_.task,
-                JoinType.INNER
-            );
-            candidateUserSubquery
-                .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
-                .where(
-                    criteriaBuilder.equal(
-                        tcuTaskJoin.get(TaskEntity_.processInstanceId),
-                        root.get(ProcessInstanceEntity_.id)
-                    ),
-                    criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
-                );
-
-            predicates.add(
-                criteriaBuilder.or(
-                    criteriaBuilder.equal(root.get(ProcessInstanceEntity_.initiator), userId),
-                    criteriaBuilder.exists(assigneeSubquery),
-                    criteriaBuilder.exists(candidateUserSubquery)
-                )
-            );
+        if (userId == null) {
+            return;
         }
+        if (useExistsSubqueries()) {
+            applyUserRestrictionFilterWithExistsSubqueries(root, query, criteriaBuilder);
+        } else {
+            applyUserRestrictionFilterLegacy(root, criteriaBuilder);
+        }
+    }
+
+    /**
+     * Legacy implementation that adds the user-restriction predicate using {@code LEFT JOIN}s on
+     * {@code tasks} and {@code taskCandidateUsers}. Kept for backwards compatibility and
+     * activated when {@link #FEATURE_EXISTS_SUBQUERIES} is disabled (the default). Relies on
+     * {@link SpecificationSupport#useExistsSubqueries()} returning {@code false} so that the
+     * outer query keeps {@code SELECT DISTINCT} to collapse the duplicate rows produced by the
+     * joins.
+     */
+    private void applyUserRestrictionFilterLegacy(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+        predicates.add(
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get(ProcessInstanceEntity_.initiator), userId),
+                criteriaBuilder.equal(
+                    root.join(ProcessInstanceEntity_.tasks, JoinType.LEFT).get(TaskEntity_.assignee),
+                    userId
+                ),
+                criteriaBuilder.equal(
+                    root
+                        .join(ProcessInstanceEntity_.tasks, JoinType.LEFT)
+                        .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
+                        .get(TaskCandidateUserEntity_.userId),
+                    userId
+                )
+            )
+        );
+    }
+
+    /**
+     * New implementation that adds the user-restriction predicate using correlated {@code EXISTS}
+     * subqueries against {@code task} and {@code task_candidate_user}. Activated when
+     * {@link #FEATURE_EXISTS_SUBQUERIES} is enabled. Avoids duplicate rows so the outer query
+     * does not need {@code SELECT DISTINCT}, which typically yields better execution plans.
+     */
+    private void applyUserRestrictionFilterWithExistsSubqueries(
+        Root<ProcessInstanceEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        // EXISTS (SELECT t.id FROM task t WHERE t.process_instance_id = pi.id AND t.assignee = userId)
+        Subquery<String> assigneeSubquery = query.subquery(String.class);
+        Root<TaskEntity> assigneeTaskRoot = assigneeSubquery.from(TaskEntity.class);
+        assigneeSubquery
+            .select(assigneeTaskRoot.get(TaskEntity_.id))
+            .where(
+                criteriaBuilder.equal(
+                    assigneeTaskRoot.get(TaskEntity_.processInstanceId),
+                    root.get(ProcessInstanceEntity_.id)
+                ),
+                criteriaBuilder.equal(assigneeTaskRoot.get(TaskEntity_.assignee), userId)
+            );
+
+        // EXISTS (SELECT tcu.taskId FROM task_candidate_user tcu
+        //         JOIN task t ON tcu.task_id = t.id
+        //         WHERE t.process_instance_id = pi.id AND tcu.user_id = userId)
+        Subquery<String> candidateUserSubquery = query.subquery(String.class);
+        Root<TaskCandidateUserEntity> tcuRoot = candidateUserSubquery.from(TaskCandidateUserEntity.class);
+        Join<TaskCandidateUserEntity, TaskEntity> tcuTaskJoin = tcuRoot.join(
+            TaskCandidateUserEntity_.task,
+            JoinType.INNER
+        );
+        candidateUserSubquery
+            .select(tcuRoot.get(TaskCandidateUserEntity_.taskId))
+            .where(
+                criteriaBuilder.equal(
+                    tcuTaskJoin.get(TaskEntity_.processInstanceId),
+                    root.get(ProcessInstanceEntity_.id)
+                ),
+                criteriaBuilder.equal(tcuRoot.get(TaskCandidateUserEntity_.userId), userId)
+            );
+
+        predicates.add(
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get(ProcessInstanceEntity_.initiator), userId),
+                criteriaBuilder.exists(assigneeSubquery),
+                criteriaBuilder.exists(candidateUserSubquery)
+            )
+        );
     }
 
     private void applyProcessRelatedTo(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
