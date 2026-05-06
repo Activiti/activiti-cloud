@@ -796,12 +796,12 @@
              splitStatements="false"
              stripComments="true"/>
     <rollback>
-      BEGIN
-        EXECUTE IMMEDIATE 'DROP INDEX idx_task_dueDate';
-      EXCEPTION
-        WHEN OTHERS THEN
-          IF SQLCODE != -1418 THEN RAISE; END IF;
-      END;
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/38-rollback.oracle.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="false"
+               stripComments="true"/>
     </rollback>
   </changeSet>
 
@@ -814,7 +814,12 @@
              splitStatements="true"
              stripComments="true"/>
     <rollback>
-      DROP INDEX IF EXISTS idx_task_dueDate;
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/38-rollback.pg.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
     </rollback>
   </changeSet>
 
@@ -827,12 +832,12 @@
              splitStatements="false"
              stripComments="true"/>
     <rollback>
-      BEGIN
-        EXECUTE IMMEDIATE 'DROP INDEX idx_proc_var_defKey_name';
-      EXCEPTION
-        WHEN OTHERS THEN
-          IF SQLCODE != -1418 THEN RAISE; END IF;
-      END;
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/39-rollback.oracle.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="false"
+               stripComments="true"/>
     </rollback>
   </changeSet>
 
@@ -845,7 +850,12 @@
              splitStatements="true"
              stripComments="true"/>
     <rollback>
-      DROP INDEX IF EXISTS idx_proc_var_defKey_name;
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/39-rollback.pg.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
     </rollback>
   </changeSet>
 
