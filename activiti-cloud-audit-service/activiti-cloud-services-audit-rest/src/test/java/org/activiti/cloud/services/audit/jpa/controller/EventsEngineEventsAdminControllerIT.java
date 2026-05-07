@@ -148,9 +148,7 @@ class EventsEngineEventsAdminControllerIT {
 
         given(eventsRepository.findAll(any(Pageable.class))).willReturn(eventsPage);
 
-        mockMvc
-            .perform(get("/admin/{version}/events", "v1").param("sort", "timestamp,asc"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/admin/{version}/events", "v1").param("sort", "timestamp,asc")).andExpect(status().isOk());
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(pageableCaptor.capture());
@@ -166,9 +164,7 @@ class EventsEngineEventsAdminControllerIT {
 
         given(eventsRepository.findAll(any(Pageable.class))).willReturn(eventsPage);
 
-        mockMvc
-            .perform(get("/admin/{version}/events", "v1").param("sort", "eventType,asc"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/admin/{version}/events", "v1").param("sort", "eventType,asc")).andExpect(status().isOk());
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(pageableCaptor.capture());

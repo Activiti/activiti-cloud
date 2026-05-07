@@ -122,7 +122,12 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         Pageable pageable
     ) {
         if (pageable.getSort().isUnsorted()) {
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "timestamp"));
+            pageable =
+                PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "timestamp")
+                );
         }
 
         Specification<AuditEventEntity> spec = createSearchSpec(searchParams);

@@ -88,7 +88,12 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "timestamp"));
+            pageable =
+                PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "timestamp")
+                );
         }
 
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
