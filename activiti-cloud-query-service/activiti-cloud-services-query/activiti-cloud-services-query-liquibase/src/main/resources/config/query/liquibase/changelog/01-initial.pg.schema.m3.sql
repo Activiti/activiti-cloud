@@ -210,5 +210,7 @@ create index task_var_processInstanceId_idx on task_variable (process_instance_i
 create index task_var_taskId_idx on task_variable (task_id);
 create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
+create index idx_process_instance_status_pdk_lastmodified on process_instance (process_definition_key, status, last_modified, id);
+create index idx_task_status_pdk_lastmodified on task (process_definition_key, status, last_modified, id);
 alter table if exists process_model
     add constraint FKmqdabtfsoy52f0585vkfj40b foreign key (process_definition_id) references process_definition;

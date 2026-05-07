@@ -787,4 +787,42 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter38-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/38-alter.oracle.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      BEGIN
+        EXECUTE IMMEDIATE 'DROP INDEX idx_process_instance_status_pdk_lastmodified';
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE != -1418 THEN RAISE; END IF;
+      END;
+      BEGIN
+        EXECUTE IMMEDIATE 'DROP INDEX idx_task_status_pdk_lastmodified';
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE != -1418 THEN RAISE; END IF;
+      END;
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter38-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/38-alter.pg.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      DROP INDEX IF EXISTS idx_process_instance_status_pdk_lastmodified;
+      DROP INDEX IF EXISTS idx_task_status_pdk_lastmodified;
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>

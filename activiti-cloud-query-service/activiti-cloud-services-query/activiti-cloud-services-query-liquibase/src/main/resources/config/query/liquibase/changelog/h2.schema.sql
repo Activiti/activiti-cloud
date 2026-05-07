@@ -328,3 +328,5 @@ ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_id VARCHAR(255);
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_type VARCHAR(255);
+create index idx_process_instance_status_pdk_lastmodified on process_instance (process_definition_key, status, last_modified, id);
+create index idx_task_status_pdk_lastmodified on task (process_definition_key, status, last_modified, id);
