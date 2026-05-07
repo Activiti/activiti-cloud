@@ -124,4 +124,61 @@ class TaskControllerIT extends AbstractTaskControllerIT {
             .statusCode(200)
             .body(IsEqual.equalTo("5"));
     }
+
+    @Test
+    void should_returnTasksAndCount_withoutDuplicates_whenTaskHasMultipleCandidateUsersOrGroups() {
+        String otherUser = "other-user";
+        String anotherUser = "another-user";
+        String testgroup1 = "testgroup1";
+        String testgroup2 = "testgroup2";
+        String otherGroup = "other-group";
+        Mockito
+            .when(securityManager.getAuthenticatedUserGroups())
+            .thenReturn(List.of(testgroup1, testgroup2));
+
+        //Task with multiple candidate users including current user: must be returned exactly once
+        TaskEntity taskMultipleCandidateUsers = queryTestUtils
+            .buildTask()
+            .withTaskCandidateUsers(CURRENT_USER, otherUser, anotherUser)
+            .buildAndSave();
+
+        //Task with multiple candidate groups, two of which the user belongs to: must be returned exactly once
+        TaskEntity taskMultipleCandidateGroups = queryTestUtils
+            .buildTask()
+            .withTaskCandidateGroups(testgroup1, testgroup2, otherGroup)
+            .buildAndSave();
+
+        //Task with both candidate users and candidate groups matching: must be returned exactly once
+        TaskEntity taskMixedCandidates = queryTestUtils
+            .buildTask()
+            .withTaskCandidateUsers(CURRENT_USER, otherUser)
+            .withTaskCandidateGroups(testgroup1, otherGroup)
+            .buildAndSave();
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(3))
+            .body(
+                TASK_IDS_JSON_PATH,
+                containsInAnyOrder(
+                    taskMultipleCandidateUsers.getId(),
+                    taskMultipleCandidateGroups.getId(),
+                    taskMixedCandidates.getId()
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getCountEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(IsEqual.equalTo("3"));
+    }
 }
