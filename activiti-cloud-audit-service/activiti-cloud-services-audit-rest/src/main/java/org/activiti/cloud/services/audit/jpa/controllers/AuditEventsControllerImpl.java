@@ -133,8 +133,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
                         PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
                     );
             } else {
-                pageable =
-                    PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
             }
         }
 

@@ -99,8 +99,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
                         PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
                     );
             } else {
-                pageable =
-                    PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
             }
         }
 
