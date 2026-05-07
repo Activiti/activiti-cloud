@@ -16,9 +16,11 @@
 package org.activiti.cloud.services.audit.jpa.controller;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
@@ -62,6 +64,7 @@ import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAut
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -69,6 +72,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -119,6 +125,59 @@ class AuditEventsControllerImpWebMvcTest {
         mockMvc
             .perform(get("/{version}/events", "v1").param("page", "1").param("size", "10").param("sort", "asc"))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldDefaultSortToTimestampDescWhenNoSortProvided() throws Exception {
+        PageRequest pageable = PageRequest.of(0, 20);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
+
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
+
+        mockMvc.perform(get("/{version}/events", "v1")).andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
+
+        Sort sort = pageableCaptor.getValue().getSort();
+        assertThat(sort.isSorted()).isTrue();
+        assertThat(sort).containsExactly(new Sort.Order(Sort.Direction.DESC, "timestamp"));
+    }
+
+    @Test
+    void shouldPreserveExplicitTimestampAscSort() throws Exception {
+        PageRequest pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "timestamp"));
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
+
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
+
+        mockMvc
+            .perform(get("/{version}/events", "v1").param("sort", "timestamp,asc"))
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
+
+        assertThat(pageableCaptor.getValue().getSort())
+            .containsExactly(new Sort.Order(Sort.Direction.ASC, "timestamp"));
+    }
+
+    @Test
+    void shouldPreserveExplicitNonTimestampSort() throws Exception {
+        PageRequest pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "eventType"));
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 1);
+
+        given(eventsRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(eventsPage);
+
+        mockMvc
+            .perform(get("/{version}/events", "v1").param("sort", "eventType,asc"))
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
+
+        assertThat(pageableCaptor.getValue().getSort())
+            .containsExactly(new Sort.Order(Sort.Direction.ASC, "eventType"));
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
