@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
@@ -88,12 +89,19 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         if (pageable.getSort().isUnsorted()) {
-            pageable =
-                PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "timestamp")
-                );
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                pageable =
+                    new AlfrescoPageRequest(
+                        alfrescoPageRequest.getOffset(),
+                        alfrescoPageRequest.getPageSize(),
+                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                    );
+            } else {
+                pageable =
+                    PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            }
         }
 
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);

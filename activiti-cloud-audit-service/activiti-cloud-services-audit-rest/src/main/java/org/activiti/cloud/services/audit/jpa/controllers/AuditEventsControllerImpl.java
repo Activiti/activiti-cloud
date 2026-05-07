@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.activiti.api.runtime.shared.NotFoundException;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
@@ -122,12 +123,19 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         Pageable pageable
     ) {
         if (pageable.getSort().isUnsorted()) {
-            pageable =
-                PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    Sort.by(Sort.Direction.DESC, "timestamp")
-                );
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                pageable =
+                    new AlfrescoPageRequest(
+                        alfrescoPageRequest.getOffset(),
+                        alfrescoPageRequest.getPageSize(),
+                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                    );
+            } else {
+                pageable =
+                    PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            }
         }
 
         Specification<AuditEventEntity> spec = createSearchSpec(searchParams);
