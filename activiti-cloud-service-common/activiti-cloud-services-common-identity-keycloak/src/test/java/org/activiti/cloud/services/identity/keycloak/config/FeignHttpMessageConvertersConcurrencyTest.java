@@ -23,6 +23,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ class FeignHttpMessageConvertersConcurrencyTest {
                 );
             }
             for (Future<List<HttpMessageConverter<?>>> future : futures) {
-                assertThat(future.get().isEmpty()).isFalse();
+                assertThat(future.get(5, TimeUnit.SECONDS).isEmpty()).isFalse();
             }
         }
     }
