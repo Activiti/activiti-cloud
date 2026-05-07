@@ -27,6 +27,7 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -108,6 +109,19 @@ public class ActivitiKeycloakAutoConfiguration {
         ObjectProvider<HttpMessageConverterCustomizer> cloudCustomizers
     ) {
         return new FeignHttpMessageConverters(customizers, cloudCustomizers);
+    }
+
+    /**
+     * Eagerly initializes FeignHttpMessageConverters after all singletons are ready.
+     * Works around a thread-safety bug in FeignHttpMessageConverters.initConvertersIfRequired()
+     * (Spring Cloud OpenFeign 5.0.x) where concurrent first-time access can return an empty
+     * converter list, causing DecodeException "'messageConverters' must not be empty".
+     *
+     * @see <a href="https://github.com/spring-cloud/spring-cloud-openfeign/issues/1371">spring-cloud-openfeign#1371</a>
+     */
+    @Bean
+    SmartInitializingSingleton feignConvertersEagerInit(FeignHttpMessageConverters converters) {
+        return converters::getConverters;
     }
 
     @Bean
