@@ -393,4 +393,31 @@
       splitStatements="true"
       stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter21-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/21-alter.pg.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter21-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+      encoding="utf8"
+      path="changelog/21-alter.oracle.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="false"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit"
+    id="h2-schema-alter21" dbms="h2">
+    <sqlFile dbms="h2"
+      encoding="utf8"
+      path="changelog/21-alter.h2.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
