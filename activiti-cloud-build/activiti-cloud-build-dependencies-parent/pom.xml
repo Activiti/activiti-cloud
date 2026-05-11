@@ -72,6 +72,11 @@
         <artifactId>commons-fileupload</artifactId>
         <version>${commons-fileupload.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
+      </dependency>
 
       <!-- Security fix: CVE in BouncyCastle 1.81 https://hyland.atlassian.net/browse/AAE-44983 -->
       <dependency>
