@@ -17,18 +17,19 @@ package org.activiti.cloud.common.swagger.springdoc.modelconverter;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springdoc.core.annotations.ParameterObject;
 
 @ParameterObject
 public class PageableMixin {
 
-    @Parameter(style = ParameterStyle.FORM)
+    @Parameter(style = ParameterStyle.FORM, schema = @Schema(type = "integer", format = "int32"))
     private Integer maxItems;
 
-    @Parameter(style = ParameterStyle.FORM)
+    @Parameter(style = ParameterStyle.FORM, schema = @Schema(type = "integer", format = "int32"))
     private Integer skipCount;
 
-    @Parameter(style = ParameterStyle.FORM)
+    @Parameter(style = ParameterStyle.FORM, schema = @Schema(type = "string"))
     private String sort;
 
     public Integer getSkipCount() {
