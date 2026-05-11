@@ -232,6 +232,7 @@
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <!-- End Temporary Dependency -->
     <classgraph.version>4.8.179</classgraph.version>
+    <postgresql.version>42.7.11</postgresql.version>
 
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
