@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.activiti.api.runtime.shared.NotFoundException;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsController;
@@ -45,7 +46,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -119,6 +122,21 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         SearchParams searchParams,
         Pageable pageable
     ) {
+        if (pageable.getSort().isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                pageable =
+                    new AlfrescoPageRequest(
+                        alfrescoPageRequest.getOffset(),
+                        alfrescoPageRequest.getPageSize(),
+                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                    );
+            } else {
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            }
+        }
+
         Specification<AuditEventEntity> spec = createSearchSpec(searchParams);
 
         spec = securityPoliciesApplicationService.createSpecWithSecurity(spec, SecurityPolicyAccess.READ);

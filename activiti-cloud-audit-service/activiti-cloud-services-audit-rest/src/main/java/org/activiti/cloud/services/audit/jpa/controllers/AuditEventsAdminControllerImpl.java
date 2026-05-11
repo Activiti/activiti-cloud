@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
@@ -33,7 +34,9 @@ import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -85,6 +88,21 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
+            if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
+                Pageable inner = alfrescoPageRequest.getPageable();
+                pageable =
+                    new AlfrescoPageRequest(
+                        alfrescoPageRequest.getOffset(),
+                        alfrescoPageRequest.getPageSize(),
+                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                    );
+            } else {
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+            }
+        }
+
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage.getContent());

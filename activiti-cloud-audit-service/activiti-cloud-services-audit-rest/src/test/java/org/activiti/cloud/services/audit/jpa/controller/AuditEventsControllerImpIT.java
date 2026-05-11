@@ -101,7 +101,7 @@ class AuditEventsControllerImpIT {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath(ENTRIES_ROOT, hasSize(2)))
-            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit2.getId().toString(), audit3.getId().toString())));
+            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit3.getId().toString(), audit2.getId().toString())));
 
         eventsRepository.deleteAll();
     }
@@ -130,6 +130,6 @@ class AuditEventsControllerImpIT {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath(ENTRIES_ROOT, hasSize(2)))
-            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit1.getId().toString(), audit2.getId().toString())));
+            .andExpect(jsonPath(EVENTS_ID_ROOT, contains(audit2.getId().toString(), audit1.getId().toString())));
     }
 }
