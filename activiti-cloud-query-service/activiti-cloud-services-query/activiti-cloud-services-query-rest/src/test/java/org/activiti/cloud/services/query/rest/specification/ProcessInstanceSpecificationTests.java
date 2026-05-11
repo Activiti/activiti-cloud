@@ -49,7 +49,7 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
         spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
 
         verify(ctx.query()).distinct(true);
-        verify(ctx.root(), atLeastOnce()).join(eq(ProcessInstanceEntity_.tasks), eq(JoinType.LEFT));
+        verify(ctx.root(), atLeastOnce()).join(ProcessInstanceEntity_.tasks, JoinType.LEFT);
         verify(ctx.query(), never()).subquery(any(Class.class));
     }
 

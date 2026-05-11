@@ -52,8 +52,8 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
 
             verify(ctx.query()).distinct(true);
-            verify(ctx.root(), atLeastOnce()).join(eq(TaskEntity_.taskCandidateUsers), eq(JoinType.LEFT));
-            verify(ctx.root(), atLeastOnce()).join(eq(TaskEntity_.taskCandidateGroups), eq(JoinType.LEFT));
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers, JoinType.LEFT);
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateGroups, JoinType.LEFT);
             verify(ctx.query(), never()).subquery(any(Class.class));
         }
 
@@ -86,7 +86,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
 
-            verify(ctx.root(), atLeastOnce()).join(eq(TaskEntity_.taskCandidateUsers));
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers);
             verify(ctx.query(), never()).subquery(any(Class.class));
         }
 
@@ -100,7 +100,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
 
             verify(ctx.query(), atLeastOnce()).subquery(any(Class.class));
-            verify(ctx.root(), never()).join(eq(TaskEntity_.taskCandidateUsers));
+            verify(ctx.root(), never()).join(TaskEntity_.taskCandidateUsers);
         }
     }
 }
