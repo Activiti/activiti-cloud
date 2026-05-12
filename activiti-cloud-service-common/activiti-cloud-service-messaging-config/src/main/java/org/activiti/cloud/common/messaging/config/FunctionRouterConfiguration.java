@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -256,49 +257,58 @@ public class FunctionRouterConfiguration {
                             .allOf(functions)
                             .thenApply(v -> Stream.of(functions).map(CompletableFuture::join).toList());
 
-                        completed.thenAccept(results -> {
-                            var errors = results
-                                .stream()
-                                .map(Map.Entry.class::cast)
-                                .filter(entry ->
-                                    Optional.class.cast(entry.getValue())
-                                        .filter(Exception.class::isInstance)
-                                        .isPresent()
-                                )
-                                .map(entry -> Optional.class.cast(entry.getValue()).get())
-                                .toList();
+                        List<?> results;
+                        try {
+                            results = completed.get();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new MessagingException(message, e);
+                        } catch (ExecutionException e) {
+                            Throwable cause = e.getCause();
+                            throw cause instanceof RuntimeException re ? re : new MessagingException(message, cause);
+                        }
 
-                            if (!errors.isEmpty()) {
-                                log.debug("Errors handling function route message request {}", errors);
+                        var errors = results
+                            .stream()
+                            .map(Map.Entry.class::cast)
+                            .filter(entry ->
+                                Optional.class.cast(entry.getValue()).filter(Exception.class::isInstance).isPresent()
+                            )
+                            .map(entry -> Optional.class.cast(entry.getValue()).get())
+                            .toList();
 
-                                Optional
-                                    .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
-                                    .filter(StringUtils::hasText)
-                                    .map(functionCatalog::lookup)
-                                    .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                    .ifPresent(errorHandlerDefinition -> {
-                                        errors
-                                            .stream()
-                                            .map(CompletionException.class::cast)
-                                            .map(CompletionException::getCause)
-                                            .map(exception -> {
-                                                if (exception instanceof MessagingException messagingException) {
-                                                    return new ErrorMessage(messagingException, message);
-                                                } else {
-                                                    return new ErrorMessage(
-                                                        new MessagingException(message, exception),
-                                                        message
-                                                    );
-                                                }
-                                            })
-                                            .forEach(errorMessage -> {
-                                                errorHandlerDefinition.accept(errorMessage);
-                                            });
-                                    });
-                            } else {
-                                log.debug("Successfully completed function route message request {}", message);
-                            }
-                        });
+                        if (!errors.isEmpty()) {
+                            log.debug("Errors handling function route message request {}", errors);
+
+                            Optional
+                                .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
+                                .filter(StringUtils::hasText)
+                                .map(functionCatalog::lookup)
+                                .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
+                                .ifPresent(errorHandlerDefinition -> {
+                                    errors
+                                        .stream()
+                                        .map(Throwable.class::cast)
+                                        .map(throwable ->
+                                            throwable instanceof CompletionException ce ? ce.getCause() : throwable
+                                        )
+                                        .map(exception -> {
+                                            if (exception instanceof MessagingException messagingException) {
+                                                return new ErrorMessage(messagingException, message);
+                                            } else {
+                                                return new ErrorMessage(
+                                                    new MessagingException(message, exception),
+                                                    message
+                                                );
+                                            }
+                                        })
+                                        .forEach(errorMessage -> {
+                                            errorHandlerDefinition.accept(errorMessage);
+                                        });
+                                });
+                        } else {
+                            log.debug("Successfully completed function route message request {}", message);
+                        }
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);

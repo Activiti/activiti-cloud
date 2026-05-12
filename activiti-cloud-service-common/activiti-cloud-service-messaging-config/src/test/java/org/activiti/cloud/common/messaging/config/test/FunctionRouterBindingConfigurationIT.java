@@ -150,6 +150,8 @@ public class FunctionRouterBindingConfigurationIT {
     private static final AtomicReference<Message<?>> engineEventsMessage = new AtomicReference<>();
     private static final AtomicReference<Integer> auditRetries = new AtomicReference<>();
     private static final AtomicReference<String> connectorPayload = new AtomicReference<>();
+    private static final AtomicReference<Long> connectorProcessingEndNanos = new AtomicReference<>();
+    private static final AtomicReference<CountDownLatch> connectorBlockingLatch = new AtomicReference<>();
     private static final AtomicReference<String> getPayload = new AtomicReference<>();
     private static final AtomicReference<String> postPayload = new AtomicReference<>();
     private static final AtomicReference<TypedPayload> receivedTypedPayload = new AtomicReference<>();
@@ -238,6 +240,22 @@ public class FunctionRouterBindingConfigurationIT {
         public ConsumerConnector<String> scriptRuntimeExecutor() {
             return message -> {
                 connectorPayload.set(message);
+                CountDownLatch latch = connectorBlockingLatch.get();
+                if (latch != null) {
+                    try {
+                        boolean released = latch.await(
+                            Duration.ofSeconds(5).toMillis(),
+                            java.util.concurrent.TimeUnit.MILLISECONDS
+                        );
+                        assertThat(released)
+                            .as("Timed out waiting for scriptRuntimeExecutor latch to be released")
+                            .isTrue();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        Assertions.fail("Interrupted while waiting for scriptRuntimeExecutor latch", e);
+                    }
+                }
+                connectorProcessingEndNanos.set(System.nanoTime());
             };
         }
 
@@ -310,6 +328,8 @@ public class FunctionRouterBindingConfigurationIT {
         queryMessage.set(null);
         auditMessage.set(null);
         connectorPayload.set(null);
+        connectorProcessingEndNanos.set(null);
+        connectorBlockingLatch.set(null);
         getPayload.set(null);
         postPayload.set(null);
         receivedTypedPayload.set(null);
@@ -954,6 +974,49 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionRouterExecutorFactoryTimeout() {
         assertThat(functionRouterExecutorFactory.getTimeout()).isEqualTo(Duration.ofSeconds(1));
+    }
+
+    @Test
+    void callerThreadShouldBlockUntilFunctionRouterCompletesProcessing() {
+        final CountDownLatch processingLatch = new CountDownLatch(1);
+        connectorBlockingLatch.set(processingLatch);
+
+        final AtomicReference<Long> callerReturnTime = new AtomicReference<>();
+
+        Message<String> message = MessageBuilder
+            .withPayload("run_test();")
+            .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
+            .build();
+
+        CompletableFuture<Void> senderFuture = CompletableFuture.runAsync(() -> {
+            input.send(message, "script.EXECUTE");
+            callerReturnTime.set(System.nanoTime());
+        });
+
+        try {
+            await().atMost(Duration.ofSeconds(5)).until(() -> connectorPayload.get() != null);
+
+            assertThat(senderFuture)
+                .as("sender future must not complete before the connector latch is released")
+                .isNotDone();
+            assertThat(callerReturnTime.get())
+                .as("caller thread must not return before the connector latch is released")
+                .isNull();
+        } finally {
+            processingLatch.countDown();
+        }
+
+        await()
+            .atMost(Duration.ofSeconds(5))
+            .untilAsserted(() -> {
+                assertThat(callerReturnTime.get()).isNotNull();
+                assertThat(connectorProcessingEndNanos.get()).isNotNull();
+                assertThat(callerReturnTime.get())
+                    .as("caller thread must not return before processing completes")
+                    .isGreaterThanOrEqualTo(connectorProcessingEndNanos.get());
+            });
+
+        assertThat(senderFuture).succeedsWithin(Duration.ofSeconds(5));
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {
