@@ -864,7 +864,7 @@ public class FunctionRouterBindingConfigurationIT {
                 Boolean.class
             )
         )
-            .isTrue();
+            .isFalse();
     }
 
     @Test
