@@ -44,7 +44,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
     class UserRestriction {
 
         @Test
-        void legacyPath_addsDistinct_andJoinsCandidateUsersAndGroups() {
+        void shouldAddDistinctAndJoinCandidateUsersAndGroups_whenExistsSubqueriesToggleIsOff() {
             TaskSearchRequest request = new TaskSearchRequestBuilder().build();
             TaskSpecification spec = TaskSpecification.restricted(request, USER, List.of("group1"));
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
@@ -58,7 +58,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
         }
 
         @Test
-        void existsSubqueryPath_skipsDistinct_andCreatesSubqueries() {
+        void shouldSkipDistinctAndCreateSubqueries_whenExistsSubqueriesToggleIsOn() {
             enableExistsSubqueriesToggle();
             TaskSearchRequest request = new TaskSearchRequestBuilder().build();
             TaskSpecification spec = TaskSpecification.restricted(request, USER, List.of("group1"));
@@ -79,7 +79,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
     class CandidateUserFilter {
 
         @Test
-        void legacyPath_usesJoin() {
+        void shouldUseJoin_whenExistsSubqueriesToggleIsOff() {
             TaskSearchRequest request = new TaskSearchRequestBuilder().withCandidateUserId(USER).build();
             TaskSpecification spec = TaskSpecification.unrestricted(request);
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
@@ -91,7 +91,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
         }
 
         @Test
-        void existsSubqueryPath_usesSubquery() {
+        void shouldUseSubquery_whenExistsSubqueriesToggleIsOn() {
             enableExistsSubqueriesToggle();
             TaskSearchRequest request = new TaskSearchRequestBuilder().withCandidateUserId(USER).build();
             TaskSpecification spec = TaskSpecification.unrestricted(request);

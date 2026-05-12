@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
     @Test
-    void legacyPath_addsDistinct_andJoinsTasks() {
+    void shouldAddDistinctAndJoinTasks_whenExistsSubqueriesToggleIsOff() {
         // toggle OFF (default)
         ProcessInstanceSpecification spec = ProcessInstanceSpecification.restricted(
             new ProcessInstanceSearchRequest(),
@@ -54,7 +54,7 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
     }
 
     @Test
-    void existsSubqueryPath_skipsDistinct_andCreatesSubqueries() {
+    void shouldSkipDistinctAndCreateSubqueries_whenExistsSubqueriesToggleIsOn() {
         enableExistsSubqueriesToggle();
         ProcessInstanceSpecification spec = ProcessInstanceSpecification.restricted(
             new ProcessInstanceSearchRequest(),
