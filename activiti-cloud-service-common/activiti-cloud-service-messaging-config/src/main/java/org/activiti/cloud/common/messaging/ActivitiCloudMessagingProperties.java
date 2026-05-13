@@ -110,6 +110,14 @@ public class ActivitiCloudMessagingProperties {
     private String destinationIllegalCharsReplacement = "-";
 
     /**
+     * Enable migration mode: stops producing messages by blocking all output (producer) bindings while
+     * keeping input (consumer) bindings active so that existing RabbitMQ queue messages are drained
+     * before a cluster migration. A {@code rabbitMqDrain} health indicator reports drain progress.
+     * Default is {@code false}.
+     */
+    private boolean migrationMode = false;
+
+    /**
      * Configure functionRouter destinations for a single binding
      */
     @NestedConfigurationProperty
@@ -186,6 +194,14 @@ public class ActivitiCloudMessagingProperties {
 
     public void setRabbitmq(RabbitMqProperties rabbitmq) {
         this.rabbitmq = rabbitmq;
+    }
+
+    public boolean isMigrationMode() {
+        return migrationMode;
+    }
+
+    public void setMigrationMode(boolean migrationMode) {
+        this.migrationMode = migrationMode;
     }
 
     public Boolean isPartitioned() {

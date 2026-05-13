@@ -5,3 +5,4 @@ org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration
 org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration
 org.activiti.cloud.common.messaging.config.InputBindingConfiguration
 org.activiti.cloud.common.messaging.config.OutputBindingConfiguration
+org.activiti.cloud.common.messaging.config.MigrationModeMessagingAutoConfiguration
