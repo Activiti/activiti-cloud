@@ -27,10 +27,15 @@ import java.util.List;
 import java.util.Map;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.specification.QueryFeatureToggles;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
@@ -69,8 +74,20 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
         return "/v1/process-instances/count";
     }
 
-    @Test
-    void should_return_RestrictedProcessInstances() {
+    @AfterEach
+    void resetFeatureToggle() {
+        FeatureToggleHolder.reset();
+    }
+
+    @ParameterizedTest(name = "existsSubqueries={0}")
+    @ValueSource(booleans = { false, true })
+    void should_return_RestrictedProcessInstances(boolean existsSubqueriesEnabled) {
+        if (existsSubqueriesEnabled) {
+            FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES::equals);
+        } else {
+            FeatureToggleHolder.reset();
+        }
+
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
