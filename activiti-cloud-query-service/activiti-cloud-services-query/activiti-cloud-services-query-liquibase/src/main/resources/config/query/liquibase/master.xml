@@ -787,4 +787,76 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter38-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/38-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/38-rollback.oracle.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="false"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter38-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/38-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/38-rollback.pg.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter39-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/39-alter.oracle.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/39-rollback.oracle.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="false"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter39-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/39-alter.pg.schema.8.8.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/39-rollback.pg.schema.8.8.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>

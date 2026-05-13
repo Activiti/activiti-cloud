@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -70,6 +71,17 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         this.searchRequest = searchRequest;
     }
 
+    /**
+     * @return {@code true} when the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag is
+     *         enabled in the application-wide {@link FeatureToggleHolder}, in which case
+     *         subclasses must build {@code EXISTS}-subquery based predicates and skip the
+     *         {@code SELECT DISTINCT} clause; {@code false} (the default) keeps the legacy
+     *         join-based behavior including {@code SELECT DISTINCT}.
+     */
+    protected boolean useExistsSubqueries() {
+        return FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES);
+    }
+
     protected abstract SingularAttribute<T, ?> getIdAttribute();
 
     protected void reset() {
@@ -94,7 +106,10 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
         if (!query.getResultType().equals(Long.class)) {
             applySorting(root, joinProcessVariables(root), query, criteriaBuilder);
         }
-        if (CollectionUtils.isEmpty(query.getGroupList())) {
+        // The legacy join-based predicates produce duplicate rows that need DISTINCT to be
+        // collapsed. The EXISTS-subquery variant does not introduce duplicates, so DISTINCT
+        // is dropped to allow more efficient query plans.
+        if (!useExistsSubqueries() && CollectionUtils.isEmpty(query.getGroupList())) {
             query.distinct(true);
         }
         if (predicates.isEmpty()) {

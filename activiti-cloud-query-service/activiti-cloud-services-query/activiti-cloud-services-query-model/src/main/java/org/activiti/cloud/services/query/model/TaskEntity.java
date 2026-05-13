@@ -52,6 +52,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
@@ -204,6 +205,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 200)
     private Set<TaskCandidateUserEntity> taskCandidateUsers = new LinkedHashSet<>();
 
     @JsonIgnore
@@ -216,6 +218,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 200)
     private Set<TaskCandidateGroupEntity> taskCandidateGroups = new LinkedHashSet<>();
 
     @JsonIgnore
