@@ -17,8 +17,7 @@
     <graphql-java.version>25.0</graphql-java.version>
     <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
-    <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
-    <netty.version>4.1.132.Final</netty.version>
+    <netty.version>4.2.13.Final</netty.version>
     <jackson.version>3.0.4</jackson.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
@@ -28,6 +27,14 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- Security fix AAE-45579: netty BOM update -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
