@@ -15,7 +15,7 @@
     <spring-cloud.version>2025.1.1</spring-cloud.version>
     <testcontainers.version>2.0.3</testcontainers.version>
     <graphql-java.version>25.0</graphql-java.version>
-    <postgresql.version>42.7.10</postgresql.version>
+    <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <!-- Replacement for older netty dependency util a newer one will be used in Spring -->
     <netty.version>4.1.132.Final</netty.version>
@@ -71,6 +71,11 @@
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>${commons-fileupload.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
       </dependency>
 
       <!-- Security fix: CVE in BouncyCastle 1.81 https://hyland.atlassian.net/browse/AAE-44983 -->
