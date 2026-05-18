@@ -444,6 +444,8 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration requestTimeout = Duration.ofSeconds(15);
 
+        private Duration processingTimeout = Duration.ofSeconds(120);
+
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
@@ -556,6 +558,14 @@ public class ActivitiCloudMessagingProperties {
             this.retryInterval = retryInterval;
         }
 
+        public Duration getProcessingTimeout() {
+            return processingTimeout;
+        }
+
+        public void setProcessingTimeout(Duration processingTimeout) {
+            this.processingTimeout = processingTimeout;
+        }
+
         public void register(String bindingName, String functionBeanName) {
             destinations
                 .keySet()
@@ -609,6 +619,7 @@ public class ActivitiCloudMessagingProperties {
                 Objects.equals(registrations, that.registrations) &&
                 Objects.equals(group, that.group) &&
                 Objects.equals(retryInterval, that.retryInterval) &&
+                Objects.equals(processingTimeout, that.processingTimeout) &&
                 Objects.equals(consumer, that.consumer) &&
                 Objects.equals(anonymous, that.anonymous)
             );
@@ -624,6 +635,7 @@ public class ActivitiCloudMessagingProperties {
                 group,
                 maxRetries,
                 retryInterval,
+                processingTimeout,
                 consumer,
                 anonymous,
                 errorHandlerDefinition,
@@ -641,6 +653,7 @@ public class ActivitiCloudMessagingProperties {
                 .add("group='" + group + "'")
                 .add("maxRetries=" + maxRetries)
                 .add("retryInterval=" + retryInterval)
+                .add("processingTimeout=" + processingTimeout)
                 .add("consumer=" + consumer)
                 .add("anonymous=" + anonymous)
                 .add("errorHandlerDefinition=" + errorHandlerDefinition)

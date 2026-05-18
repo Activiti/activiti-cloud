@@ -25,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -259,13 +261,21 @@ public class FunctionRouterConfiguration {
 
                         List<?> results;
                         try {
-                            results = completed.get();
+                            results =
+                                completed.get(functionRouter.getProcessingTimeout().toMillis(), TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw new MessagingException(message, e);
                         } catch (ExecutionException e) {
                             Throwable cause = e.getCause();
                             throw cause instanceof RuntimeException re ? re : new MessagingException(message, cause);
+                        } catch (TimeoutException e) {
+                            log.error(
+                                "Processing timeout ({}) exceeded waiting for function router to handle message {}",
+                                functionRouter.getProcessingTimeout(),
+                                message
+                            );
+                            throw new MessagingException(message, e);
                         }
 
                         var errors = results
