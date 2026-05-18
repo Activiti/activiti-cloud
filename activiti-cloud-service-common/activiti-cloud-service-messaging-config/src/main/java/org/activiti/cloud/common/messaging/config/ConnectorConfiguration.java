@@ -19,6 +19,7 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -286,8 +287,11 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
                 if (retryCount < maxRetry - 1) {
-                    safeSleep(retryDelay);
-                    getStreamBridge().send(destination, newMessage);
+                    final var streamBridge = getStreamBridge();
+                    CompletableFuture.runAsync(() -> {
+                        safeSleep(retryDelay);
+                        streamBridge.send(destination, newMessage);
+                    });
                 } else {
                     LOGGER.error("Cannot retry message because retry limited exceeded: {}", maxRetry);
                 }
