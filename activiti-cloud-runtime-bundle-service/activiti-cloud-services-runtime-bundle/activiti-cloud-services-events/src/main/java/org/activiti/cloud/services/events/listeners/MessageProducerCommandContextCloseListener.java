@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -28,12 +29,16 @@ import org.activiti.cloud.services.events.services.IncidentService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 @Transactional
 public class MessageProducerCommandContextCloseListener implements CommandContextCloseListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageProducerCommandContextCloseListener.class);
 
     public static final String ROOT_EXECUTION_CONTEXT = "rootExecutionContext";
     public static final String PROCESS_ENGINE_EVENTS = "processEngineEvents";
@@ -127,6 +132,15 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
     private void sendChunk(ExecutionContext rootExecutionContext, List<CloudRuntimeEventImpl<?, ?>> chunk) {
         var eventArray = chunk.toArray(CloudRuntimeEvent<?, ?>[]::new);
         var message = this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(eventArray).build();
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                "RB - sending chunk of {} events, types={}, messageId={}",
+                chunk.size(),
+                Arrays.stream(eventArray).map(e -> e.getEventType().name()).toList(),
+                message.getHeaders().getId()
+            );
+        }
 
         this.producer.auditProducer().send(message);
     }

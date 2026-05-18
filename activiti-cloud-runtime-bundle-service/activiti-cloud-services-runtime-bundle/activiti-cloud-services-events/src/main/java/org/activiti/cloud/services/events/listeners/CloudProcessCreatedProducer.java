@@ -18,8 +18,12 @@ package org.activiti.cloud.services.events.listeners;
 import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CloudProcessCreatedProducer implements ProcessEventListener<ProcessCreatedEvent> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProcessCreatedProducer.class);
 
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
@@ -34,6 +38,11 @@ public class CloudProcessCreatedProducer implements ProcessEventListener<Process
 
     @Override
     public void onEvent(ProcessCreatedEvent event) {
+        LOGGER.info(
+            "RB - PROCESS_CREATED fired for processInstanceId={} processDefinitionKey={}",
+            event.getEntity().getId(),
+            event.getEntity().getProcessDefinitionKey()
+        );
         eventsAggregator.add(eventConverter.from(event));
     }
 }

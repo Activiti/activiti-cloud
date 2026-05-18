@@ -20,6 +20,8 @@ import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -27,6 +29,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerChannelHandler.class);
 
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
@@ -43,16 +47,31 @@ public class QueryConsumerChannelHandler {
     }
 
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        afterCompletion(entityManager::clear);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                "QUERY handler - begin tx with {} events, types={}",
+                events == null ? 0 : events.size(),
+                events == null ? List.of() : events.stream().map(e -> e.getEventType().name()).toList()
+            );
+        }
+        registerAfterCompletionLogger();
+        try {
+            eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+            LOGGER.info("QUERY handler - end tx ok (will commit on return)");
+        } catch (RuntimeException ex) {
+            LOGGER.error("QUERY handler - tx will rollback due to: {}", ex.toString(), ex);
+            throw ex;
+        }
     }
 
-    private static void afterCompletion(Runnable action) {
+    private void registerAfterCompletionLogger() {
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-                    action.run();
+                    // 0 = COMMITTED, 1 = ROLLED_BACK, 2 = UNKNOWN
+                    LOGGER.info("QUERY handler - tx afterCompletion status={}", status);
+                    entityManager.clear();
                 }
             }
         );
