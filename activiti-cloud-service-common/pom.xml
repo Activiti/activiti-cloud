@@ -37,8 +37,7 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>0.0.1-PR-5353-2876-SNAPSHOT</activiti.version>
-    <commons-lang3.version>3.20.0</commons-lang3.version>
+    <activiti.version>9.1.0-alpha.23</activiti.version>
     <java-semver.version>0.10.2</java-semver.version>
     <resteasy.version>7.0.2.Final</resteasy.version>
     <logstash.version>9.0</logstash.version>
