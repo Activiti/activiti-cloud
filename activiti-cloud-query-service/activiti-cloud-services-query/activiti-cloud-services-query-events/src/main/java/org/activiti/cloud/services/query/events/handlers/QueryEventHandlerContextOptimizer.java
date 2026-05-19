@@ -133,19 +133,6 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Optimizer - input {} events, piIds={}, types={}",
-                events.size(),
-                events
-                    .stream()
-                    .map(CloudRuntimeEvent::getProcessInstanceId)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .toList(),
-                events.stream().map(e -> e.getEventType().name()).toList()
-            );
-        }
         try {
             resolveProcessInstanceId(events)
                 .ifPresent(processInstanceId -> {

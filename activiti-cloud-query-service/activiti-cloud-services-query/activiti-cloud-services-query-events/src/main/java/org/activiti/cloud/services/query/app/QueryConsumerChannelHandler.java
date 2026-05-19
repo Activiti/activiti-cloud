@@ -47,30 +47,27 @@ public class QueryConsumerChannelHandler {
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
                 "QUERY handler - begin tx with {} events, types={}",
                 events == null ? 0 : events.size(),
                 events == null ? List.of() : events.stream().map(e -> e.getEventType().name()).toList()
             );
         }
-        registerAfterCompletionLogger();
+        registerEntityManagerCleanup();
         try {
             eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
-            LOGGER.info("QUERY handler - end tx ok (will commit on return)");
         } catch (RuntimeException ex) {
             LOGGER.error("QUERY handler - tx will rollback due to: {}", ex.toString(), ex);
             throw ex;
         }
     }
 
-    private void registerAfterCompletionLogger() {
+    private void registerEntityManagerCleanup() {
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-                    // 0 = COMMITTED, 1 = ROLLED_BACK, 2 = UNKNOWN
-                    LOGGER.info("QUERY handler - tx afterCompletion status={}", status);
                     entityManager.clear();
                 }
             }

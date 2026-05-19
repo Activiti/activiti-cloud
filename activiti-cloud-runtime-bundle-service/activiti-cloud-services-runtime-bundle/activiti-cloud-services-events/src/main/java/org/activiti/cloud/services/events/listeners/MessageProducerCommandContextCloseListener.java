@@ -133,8 +133,8 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
         var eventArray = chunk.toArray(CloudRuntimeEvent<?, ?>[]::new);
         var message = this.messageBuilderChainFactory.create(rootExecutionContext).withPayload(eventArray).build();
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
                 "RB - sending chunk of {} events, types={}, messageId={}",
                 chunk.size(),
                 Arrays.stream(eventArray).map(e -> e.getEventType().name()).toList(),

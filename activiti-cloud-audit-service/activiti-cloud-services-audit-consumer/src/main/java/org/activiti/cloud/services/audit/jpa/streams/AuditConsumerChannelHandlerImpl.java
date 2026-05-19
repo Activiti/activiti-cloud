@@ -55,8 +55,8 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
     @Override
     public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
                     "AUDIT - received message id={} with {} events, types={}",
                     headers.get(MessageHeaders.ID),
                     events.length,

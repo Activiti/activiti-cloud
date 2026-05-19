@@ -38,11 +38,13 @@ public class CloudProcessCreatedProducer implements ProcessEventListener<Process
 
     @Override
     public void onEvent(ProcessCreatedEvent event) {
-        LOGGER.info(
-            "RB - PROCESS_CREATED fired for processInstanceId={} processDefinitionKey={}",
-            event.getEntity().getId(),
-            event.getEntity().getProcessDefinitionKey()
-        );
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "RB - PROCESS_CREATED fired for processInstanceId={} processDefinitionKey={}",
+                event.getEntity().getId(),
+                event.getEntity().getProcessDefinitionKey()
+            );
+        }
         eventsAggregator.add(eventConverter.from(event));
     }
 }

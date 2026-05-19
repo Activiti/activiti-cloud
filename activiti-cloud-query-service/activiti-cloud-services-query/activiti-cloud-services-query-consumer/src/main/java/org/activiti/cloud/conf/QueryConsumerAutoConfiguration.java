@@ -40,19 +40,14 @@ public class QueryConsumerAutoConfiguration {
     public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        LOGGER.info(
-            "QUERY - binding queryConsumerFunction on input channel '{}'",
-            QueryConsumerChannels.QUERY_CONSUMER
-        );
         return message -> {
             List<CloudRuntimeEvent<?, ?>> payload = message.getPayload();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
-                    "QUERY - received message id={} with {} events, types={}, headers={}",
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                    "QUERY - received message id={} with {} events, types={}",
                     message.getHeaders().getId(),
                     payload != null ? payload.size() : 0,
-                    payload != null ? payload.stream().map(e -> e.getEventType().name()).toList() : List.of(),
-                    message.getHeaders()
+                    payload != null ? payload.stream().map(e -> e.getEventType().name()).toList() : List.of()
                 );
             }
             queryConsumerChannelHandler.receive(payload != null ? payload : Collections.emptyList());
