@@ -46,7 +46,7 @@ public class QueryConsumerChannelHandler {
         this.entityManager = entityManager;
     }
 
-    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+    public void receive(List<CloudRuntimeEvent<?, ?>> events) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "QUERY handler - begin tx with {} events, types={}",
