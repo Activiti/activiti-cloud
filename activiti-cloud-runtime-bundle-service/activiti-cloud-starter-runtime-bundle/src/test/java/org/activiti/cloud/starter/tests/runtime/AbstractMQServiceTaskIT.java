@@ -51,12 +51,14 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.services.connectors.conf.ConnectorImplementationsProvider;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
@@ -67,6 +69,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @TestPropertySource("classpath:application-test.properties")
@@ -82,6 +85,9 @@ import org.springframework.test.context.TestPropertySource;
 public abstract class AbstractMQServiceTaskIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMQServiceTaskIT.class);
+
+    @MockitoBean
+    private BuildProperties buildProperties;
 
     @Autowired
     protected RuntimeService runtimeService;
@@ -502,6 +508,79 @@ public abstract class AbstractMQServiceTaskIT {
                         tuple(multiInstanceProcess.getId(), multiInstanceProcess.getProcessDefinitionKey())
                     )
             );
+    }
+
+    @Test
+    public void should_map_output_variables_from_multi_instance_document_batch_process() {
+        //given
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder.start().withProcessDefinitionKey("Process_1770387614252").build()
+        );
+
+        waitForTaskOnProcessInstance(processInstance, "Wait");
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
+                    processInstance
+                );
+
+                //then
+                Collection<CloudVariableInstance> variables = variablesResponse.getBody().getContent();
+                assertThat(variables)
+                    .filteredOn(it -> "response".equals(it.getName()))
+                    .singleElement()
+                    .extracting(VariableInstance::getValue)
+                    .asInstanceOf(InstanceOfAssertFactories.list(Map.class))
+                    .containsExactlyInAnyOrder(
+                        Map.of(
+                            "document",
+                            Map.of(
+                                "id",
+                                "55",
+                                "fields",
+                                List.of(Map.of("id", "test", "value", "555")),
+                                "updated",
+                                true
+                            ),
+                            "index",
+                            4,
+                            "documentVar",
+                            "test 4"
+                        ),
+                        Map.of(
+                            "document",
+                            Map.of(
+                                "id",
+                                "44",
+                                "fields",
+                                List.of(Map.of("id", "test", "value", "444")),
+                                "updated",
+                                true
+                            ),
+                            "index",
+                            3,
+                            "documentVar",
+                            "test 3"
+                        ),
+                        Map.of(
+                            "document",
+                            Map.of(
+                                "id",
+                                "33",
+                                "fields",
+                                List.of(Map.of("id", "test", "value", "333")),
+                                "updated",
+                                true
+                            ),
+                            "index",
+                            2,
+                            "documentVar",
+                            "test 2"
+                        )
+                    );
+            });
     }
 
     private void resumeExecutionOfSingleInstance() {
