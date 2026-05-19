@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.stream.binder.test.EnableTestBinder;
-import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
@@ -55,7 +55,7 @@ class FunctionRouterProcessingTimeoutIT {
     private static final AtomicReference<CountDownLatch> blockingLatch = new AtomicReference<>();
 
     @Autowired
-    private InputDestination input;
+    private BiConsumer<Message<?>, String> functionRouterMessageHandler;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -98,7 +98,7 @@ class FunctionRouterProcessingTimeoutIT {
 
         CompletableFuture<Void> senderFuture = CompletableFuture.runAsync(() -> {
             try {
-                input.send(message, "rest.GET");
+                functionRouterMessageHandler.accept(message, FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT);
             } catch (Exception ignored) {}
         });
 
