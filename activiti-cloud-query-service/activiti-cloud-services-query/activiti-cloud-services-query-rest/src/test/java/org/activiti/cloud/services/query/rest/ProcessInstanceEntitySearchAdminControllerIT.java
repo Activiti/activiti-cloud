@@ -19,6 +19,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.activiti.cloud.services.query.util.QueryTestUtils.linkedProcessesPath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -666,5 +667,116 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(mainProcess.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(orphanProcess.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, not(hasItem(linkedProcess.getId())));
+    }
+
+    @Test
+    void should_return_LinkedProcessesOfSubprocess_inRootLinkedProcessesList() {
+        ProcessInstanceEntity rootProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity subProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .subprocessOf(rootProcess)
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedToSub = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-to-sub")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceId(subProcess.getId())
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var response = given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpoint())
+            .thenReturn();
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
+            .contains(Map.of("id", linkedToSub.getId()));
+        assertThat(response.body().jsonPath().getList(linkedProcessesPath("linked-to-sub"))).isEmpty();
+    }
+
+    @Test
+    void should_mergeLinkedProcessesOfRootAndSubprocess_inRootLinkedProcessesList() {
+        ProcessInstanceEntity rootProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        ProcessInstanceEntity subProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .subprocessOf(rootProcess)
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedToRoot = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-to-root")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceId(rootProcess.getId())
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        ProcessInstanceEntity linkedToSub = queryTestUtils
+            .buildProcessInstance()
+            .withName("linked-to-sub")
+            .withInitiator(USER)
+            .withLinkedProcessInstanceId(subProcess.getId())
+            .withLinkedProcessInstanceType("task-form")
+            .buildAndSave();
+
+        var response = given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
+            .when()
+            .post(getSearchEndpoint())
+            .thenReturn();
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body().jsonPath().getList(linkedProcessesPath("root-process")))
+            .contains(Map.of("id", linkedToRoot.getId()))
+            .contains(Map.of("id", linkedToSub.getId()));
+    }
+
+    @Test
+    void should_return_EmptyLinkedProcesses_whenSubprocessHasNoLinkedProcesses() {
+        ProcessInstanceEntity rootProcess = queryTestUtils
+            .buildProcessInstance()
+            .withName("root-process")
+            .withInitiator(USER)
+            .buildAndSave();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withName("sub-process")
+            .withInitiator(USER)
+            .subprocessOf(rootProcess)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withIncludeSubprocesses(false)
+            .withIncludeLinkedProcesses(false);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(rootProcess.getId()))
+            .body(linkedProcessesPath("root-process"), empty());
     }
 }
