@@ -173,7 +173,7 @@ public class ProcessInstanceAdminService {
                 )
             );
 
-        // For each page entity, collect only its direct children (grandchildren are nested inside them)
+        // For each page entity, collect all descendants for each root
 
         content.forEach(pi -> pi.setSubprocesses(childrenByRootProcessInstanceId.getOrDefault(pi.getId(), Set.of())));
 
