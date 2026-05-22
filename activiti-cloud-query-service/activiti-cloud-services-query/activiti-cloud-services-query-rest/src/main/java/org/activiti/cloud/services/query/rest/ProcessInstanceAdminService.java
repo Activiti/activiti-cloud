@@ -148,7 +148,7 @@ public class ProcessInstanceAdminService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProcessInstanceEntity> searchSubProcesses(Page<ProcessInstanceEntity> processInstances) {
+    public Page<ProcessInstanceEntity> searchAndMapSubProcesses(Page<ProcessInstanceEntity> processInstances) {
         List<ProcessInstanceEntity> content = processInstances.getContent();
 
         if (content.isEmpty()) {
@@ -174,6 +174,7 @@ public class ProcessInstanceAdminService {
             );
 
         // For each page entity, collect only its direct children (grandchildren are nested inside them)
+
         content.forEach(pi -> pi.setSubprocesses(childrenByRootProcessInstanceId.getOrDefault(pi.getId(), Set.of())));
 
         return processInstances;
