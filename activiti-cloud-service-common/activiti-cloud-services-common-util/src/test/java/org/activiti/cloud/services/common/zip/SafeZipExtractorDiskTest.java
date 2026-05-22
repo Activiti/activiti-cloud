@@ -62,7 +62,7 @@ class SafeZipExtractorDiskTest {
     }
 
     @Test
-    void extractToDirectory_shouldSkipDirectoryEntries_whenNotAllowed() throws IOException {
+    void extractToDirectory_shouldThrow_whenDirectoryEntriesNotAllowed() throws IOException {
         Path zipPath = ZipTestFixtures.writeZipFile(
             tempDir,
             "dirs.zip",
@@ -79,10 +79,10 @@ class SafeZipExtractorDiskTest {
             .allowDirectories(false)
             .build();
 
-        SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, limits);
-
-        assertThat(Files.exists(target.resolve("ignored"))).isFalse();
-        assertThat(Files.readString(target.resolve("file.txt"))).isEqualTo("only-file");
+        assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, limits))
+            .isInstanceOf(IOException.class)
+            .hasMessageContaining("must not contain folders or empty entries")
+            .hasCauseInstanceOf(SafeZipException.class);
     }
 
     @Test
@@ -166,7 +166,7 @@ class SafeZipExtractorDiskTest {
         Path trap = target.resolve("trap");
         try {
             Files.createSymbolicLink(trap, outside);
-        } catch (UnsupportedOperationException | IOException e) {
+        } catch (UnsupportedOperationException | IOException ignored) {
             org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
         }
 

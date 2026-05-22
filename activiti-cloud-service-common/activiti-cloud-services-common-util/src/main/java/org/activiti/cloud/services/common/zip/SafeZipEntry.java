@@ -15,8 +15,21 @@
  */
 package org.activiti.cloud.services.common.zip;
 
+import java.util.Arrays;
+
 public record SafeZipEntry(String name, byte[] content, boolean directory) {
+    public SafeZipEntry {
+        if (content != null) {
+            content = Arrays.copyOf(content, content.length);
+        }
+    }
+
     public SafeZipEntry(String name, byte[] content) {
         this(name, content, false);
+    }
+
+    @Override
+    public byte[] content() {
+        return content == null ? null : Arrays.copyOf(content, content.length);
     }
 }

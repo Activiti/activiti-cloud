@@ -74,6 +74,11 @@ class ZipEntryPathsTest {
     }
 
     @Test
+    void hasUnsafeHierarchicalPath_shouldRejectMalformedPath() {
+        assertThat(ZipEntryPaths.hasUnsafeHierarchicalPath("bad\u0000name.txt")).isTrue();
+    }
+
+    @Test
     void hasUnsafeHierarchicalPath_shouldRejectWindowsDriveAndUncPaths() {
         assertThat(ZipEntryPaths.hasUnsafeHierarchicalPath("C:/Windows/win.ini")).isTrue();
         assertThat(ZipEntryPaths.hasUnsafeHierarchicalPath("C:\\Windows\\win.ini")).isTrue();

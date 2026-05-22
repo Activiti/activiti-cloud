@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -117,10 +118,17 @@ public final class SafeZipExtractor {
                 Path entryPath = ZipEntryPaths.resolveEntryPath(targetRoot, entry.getName());
 
                 if (entry.isDirectory()) {
-                    if (limits.allowDirectories()) {
-                        Files.createDirectories(entryPath);
-                        ZipEntryPaths.ensurePathWithinTarget(entryPath, targetRoot);
+                    if (!limits.allowDirectories()) {
+                        throw new SafeZipException(
+                            MessageFormat.format(
+                                "The archive must not contain folders or empty entries: {0}",
+                                entry.getName()
+                            )
+                        );
                     }
+                    validateEntryPath(entry.getName(), limits, targetRoot);
+                    Files.createDirectories(entryPath);
+                    ZipEntryPaths.ensurePathWithinTarget(entryPath, targetRoot);
                     continue;
                 }
 
@@ -159,7 +167,7 @@ public final class SafeZipExtractor {
             return;
         }
         String extension = fileExtension(name);
-        if (extension.isEmpty() || !limits.allowedExtensions().contains(extension.toLowerCase())) {
+        if (extension.isEmpty() || !limits.allowedExtensions().contains(extension)) {
             throw new SafeZipException(MessageFormat.format("File extension not allowed in the archive: {0}", name));
         }
     }
@@ -311,7 +319,7 @@ public final class SafeZipExtractor {
         int lastDot = name.lastIndexOf('.');
         int lastSeparator = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
         if (lastDot > lastSeparator && lastDot >= 0 && lastDot < name.length() - 1) {
-            return name.substring(lastDot + 1).toLowerCase();
+            return name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
         }
         return "";
     }

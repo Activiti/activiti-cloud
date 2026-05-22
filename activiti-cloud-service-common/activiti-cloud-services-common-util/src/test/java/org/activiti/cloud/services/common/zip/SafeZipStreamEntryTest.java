@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.zip;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -23,12 +24,12 @@ class SafeZipStreamEntryTest {
 
     @Test
     void shouldExposeFileAndFolderMetadata_forNestedFileEntry() {
-        SafeZipStreamEntry entry = new SafeZipStreamEntry("folder/file.txt", "data".getBytes(), false);
+        SafeZipStreamEntry entry = new SafeZipStreamEntry("folder/file.txt", "data".getBytes(UTF_8), false);
 
         assertThat(entry.getName()).isEqualTo("folder/file.txt");
         assertThat(entry.getFileName()).isEqualTo("file.txt");
         assertThat(entry.getFolderName(0)).contains("folder");
-        assertThat(entry.getContent()).contains("data".getBytes());
+        assertThat(entry.getContent()).contains("data".getBytes(UTF_8));
         assertThat(entry.isDirectory()).isFalse();
         assertThat(entry.isAtRoot()).isFalse();
     }

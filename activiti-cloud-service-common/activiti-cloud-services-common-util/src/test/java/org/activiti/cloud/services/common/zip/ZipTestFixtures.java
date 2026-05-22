@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.common.zip;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,7 +56,7 @@ final class ZipTestFixtures {
     }
 
     static ZipEntrySpec entry(String name, String content) {
-        return new ZipEntrySpec(name, content.getBytes());
+        return new ZipEntrySpec(name, content.getBytes(UTF_8));
     }
 
     static ZipEntrySpec entry(String name, byte[] content) {

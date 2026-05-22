@@ -17,6 +17,7 @@ package org.activiti.cloud.services.common.zip;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -71,7 +72,11 @@ final class ZipEntryPaths {
         if (normalized.length() >= 2 && normalized.charAt(1) == ':' && Character.isLetter(normalized.charAt(0))) {
             return true;
         }
-        return Path.of(normalized).normalize().toString().startsWith("..");
+        try {
+            return Path.of(normalized).normalize().toString().startsWith("..");
+        } catch (InvalidPathException e) {
+            return true;
+        }
     }
 
     static Path resolveTargetRoot(Path targetDirectory) throws IOException {

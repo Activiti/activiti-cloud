@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.common.zip;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
 
 public final class SafeZipStreamEntry {
@@ -26,7 +27,7 @@ public final class SafeZipStreamEntry {
 
     SafeZipStreamEntry(String name, byte[] content, boolean directory) {
         this.name = name;
-        this.content = content;
+        this.content = content == null ? null : Arrays.copyOf(content, content.length);
         this.directory = directory;
     }
 
@@ -46,7 +47,7 @@ public final class SafeZipStreamEntry {
         if (directory) {
             return Optional.empty();
         }
-        return Optional.ofNullable(content);
+        return Optional.of(Arrays.copyOf(content, content.length));
     }
 
     public boolean isDirectory() {

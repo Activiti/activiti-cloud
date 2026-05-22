@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.common.zip;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -38,7 +39,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenArchiveIsEmpty() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes();
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("archive is empty");
     }
@@ -61,7 +62,7 @@ class SafeZipExtractorTest {
             ZipTestFixtures.entry("c.json", "{}")
         );
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("at most 2 entries");
     }
@@ -70,7 +71,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenArchiveContainsDirectory() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.directory("folder/"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("must not contain folders or empty entries");
     }
@@ -101,7 +102,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenEntryContainsForwardSlash() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("folder/file.json", "{}"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("unsafe path");
     }
@@ -118,7 +119,7 @@ class SafeZipExtractorTest {
             .allowedExtensions(Set.of("json"))
             .build();
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits))
+        assertThatThrownBy(() -> extractEntries(zip, limits))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("unsafe path");
     }
@@ -135,7 +136,7 @@ class SafeZipExtractorTest {
             .allowedExtensions(Set.of("json"))
             .build();
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits))
+        assertThatThrownBy(() -> extractEntries(zip, limits))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("unsafe path");
     }
@@ -160,7 +161,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenEntryContainsBackslash() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("folder\\file.json", "{}"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("unsafe path");
     }
@@ -169,7 +170,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenEntryContainsParentTraversal() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("..file.json", "{}"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("unsafe path");
     }
@@ -178,7 +179,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenEntryIsNotJson() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("malware.exe", "{}"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("File extension not allowed");
     }
@@ -204,7 +205,7 @@ class SafeZipExtractorTest {
         SafeZipLimits limits = modelImportLimits(bytes -> true);
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("my-connector.json", "{}"));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits))
+        assertThatThrownBy(() -> extractEntries(zip, limits))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("executable file");
     }
@@ -225,7 +226,7 @@ class SafeZipExtractorTest {
             }
         };
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(failingStream, modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(failingStream, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("Cannot read archive")
             .hasCauseInstanceOf(IOException.class);
@@ -236,7 +237,7 @@ class SafeZipExtractorTest {
         byte[] oversized = ZipTestFixtures.incompressibleBytes(10 * 1024 * 1024 + 1);
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("big.json", oversized));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("archive entry is too large");
     }
@@ -246,8 +247,8 @@ class SafeZipExtractorTest {
         byte[] payload = new byte[1024 * 1024];
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("bomb.json", payload));
 
-        assertThat(zip.length).isLessThan(10 * 1024);
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThat(zip).hasSizeLessThan(10 * 1024);
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("suspiciously high compression ratio");
     }
@@ -256,7 +257,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenEntryIsEmpty() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("empty.json", ""));
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("must not contain folders or empty entries");
     }
@@ -269,7 +270,7 @@ class SafeZipExtractorTest {
             ZipTestFixtures.entry("b.json", halfLimitPlusOne)
         );
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits()))
+        assertThatThrownBy(() -> extractEntries(zip, modelImportLimits()))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("decompresses to too much data");
     }
@@ -287,7 +288,7 @@ class SafeZipExtractorTest {
             .rejectNestedZipEntries(true)
             .build();
 
-        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits))
+        assertThatThrownBy(() -> extractEntries(zip, limits))
             .isInstanceOf(SafeZipException.class)
             .hasMessageContaining("nested zip file");
     }
@@ -319,7 +320,7 @@ class SafeZipExtractorTest {
 
         assertThat(entries).hasSize(1);
         assertThat(entries.getFirst().name()).isEqualTo("my-connector.json");
-        assertThat(entries.getFirst().content()).containsExactly("{\"name\":\"x\"}".getBytes());
+        assertThat(entries.getFirst().content()).containsExactly("{\"name\":\"x\"}".getBytes(UTF_8));
         assertThat(entries.getFirst().directory()).isFalse();
     }
 
@@ -329,14 +330,14 @@ class SafeZipExtractorTest {
 
         var entries = SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), modelImportLimits());
 
-        assertThat(new String(entries.getFirst().content())).isEqualTo("stored-content");
+        assertThat(new String(entries.getFirst().content(), UTF_8)).isEqualTo("stored-content");
     }
 
     private static byte[] zipWithStoredEntry(String name, String content) throws IOException {
         java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(bos)) {
             ZipEntry entry = new ZipEntry(name);
-            byte[] bytes = content.getBytes();
+            byte[] bytes = content.getBytes(UTF_8);
             entry.setMethod(ZipEntry.STORED);
             entry.setSize(bytes.length);
             entry.setCompressedSize(bytes.length);
@@ -352,6 +353,14 @@ class SafeZipExtractorTest {
         java.util.zip.CRC32 crc = new java.util.zip.CRC32();
         crc.update(bytes);
         return crc.getValue();
+    }
+
+    private static void extractEntries(byte[] zip, SafeZipLimits limits) throws IOException {
+        SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits);
+    }
+
+    private static void extractEntries(InputStream stream, SafeZipLimits limits) throws IOException {
+        SafeZipExtractor.extractEntries(stream, limits);
     }
 
     private static SafeZipLimits modelImportLimits() {

@@ -56,7 +56,7 @@ public class ZipStream {
     }
 
     /**
-     * Create thg {@link ZipStream} corresponding to a {@link MultipartFile}.
+     * Create the {@link ZipStream} corresponding to a {@link MultipartFile}.
      * @param multipartFile the multipart file
      * @return the zip stream
      * @throws IOException in case of multipart file input stream access error
@@ -68,7 +68,7 @@ public class ZipStream {
     }
 
     /**
-     * Create thg {@link ZipStream} corresponding to an {@link InputStream}.
+     * Create the {@link ZipStream} corresponding to an {@link InputStream}.
      * @param inputStream the inputStream
      * @return the zip stream
      * @throws IOException in case of input stream access error
