@@ -92,7 +92,7 @@ public class ProcessInstanceAdminControllerHelper {
     public Page<ProcessInstanceEntity> mapAllSubAndLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
         processInstanceAdminService.searchAndMapSubProcesses(processInstances);
 
-        List<String> rootIds = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
+        List<String> processInstanceIds = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
         Map<String, String> subsToRootMap = new HashMap<>();
         processInstances
             .getContent()
@@ -100,7 +100,7 @@ public class ProcessInstanceAdminControllerHelper {
             );
 
         List<ProcessInstanceEntity> linkedToRoot = processInstanceAdminService.searchLinkedProcesses(
-            new HashSet<>(rootIds)
+            new HashSet<>(processInstanceIds)
         );
 
         List<ProcessInstanceEntity> linkedToSubs = processInstanceAdminService.searchLinkedProcesses(
