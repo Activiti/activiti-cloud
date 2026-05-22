@@ -176,6 +176,10 @@ class ProcessInstanceAdminControllerHelperIT {
         subprocessInstance.setProcessDefinitionName("subprocess");
         subprocessInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         subprocessInstance.setParentId(parentProcessInstance.getId());
+        String rootId = parentProcessInstance.getRootProcessInstanceId() != null
+            ? parentProcessInstance.getRootProcessInstanceId()
+            : parentProcessInstance.getId();
+        subprocessInstance.setRootProcessInstanceId(rootId);
         return subprocessInstance;
     }
 
