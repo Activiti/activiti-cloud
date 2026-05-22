@@ -15,42 +15,25 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.messaging.Message;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
-
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     @Bean
-    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
+    public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        return message -> {
-            List<CloudRuntimeEvent<?, ?>> payload = message.getPayload();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(
-                    "QUERY - received message id={} with {} events, types={}",
-                    message.getHeaders().getId(),
-                    payload != null ? payload.size() : 0,
-                    payload != null ? payload.stream().map(e -> e.getEventType().name()).toList() : List.of()
-                );
-            }
-            queryConsumerChannelHandler.receive(payload != null ? payload : Collections.emptyList());
-        };
+        return queryConsumerChannelHandler::receive;
     }
 }

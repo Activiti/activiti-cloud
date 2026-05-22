@@ -20,8 +20,6 @@ import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -29,8 +27,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerChannelHandler.class);
 
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
@@ -46,29 +42,17 @@ public class QueryConsumerChannelHandler {
         this.entityManager = entityManager;
     }
 
-    public void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                "QUERY handler - begin tx with {} events, types={}",
-                events == null ? 0 : events.size(),
-                events == null ? List.of() : events.stream().map(e -> e.getEventType().name()).toList()
-            );
-        }
-        registerEntityManagerCleanup();
-        try {
-            eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
-        } catch (RuntimeException ex) {
-            LOGGER.error("QUERY handler - tx will rollback due to: {}", ex.toString(), ex);
-            throw ex;
-        }
+    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+        afterCompletion(entityManager::clear);
+        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
     }
 
-    private void registerEntityManagerCleanup() {
+    private static void afterCompletion(Runnable action) {
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-                    entityManager.clear();
+                    action.run();
                 }
             }
         );

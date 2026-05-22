@@ -42,17 +42,10 @@ public class QueryEventHandlerContext {
                 .forEach(event -> {
                     QueryEventHandler handler = handlers.get(event.getEventType().name());
                     if (handler != null) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug(
-                                "QUERY dispatch -> {} for entityId={} piId={}",
-                                handler.getHandledEvent(),
-                                event.getEntityId(),
-                                event.getProcessInstanceId()
-                            );
-                        }
+                        LOGGER.debug("Handling event: " + handler.getHandledEvent());
                         handler.handle(event);
                     } else {
-                        LOGGER.debug("No handler found for event: {}. Ignoring event", event.getEventType().name());
+                        LOGGER.debug("No handler found for event: " + event.getEventType().name() + ". Ignoring event");
                     }
                 });
         }

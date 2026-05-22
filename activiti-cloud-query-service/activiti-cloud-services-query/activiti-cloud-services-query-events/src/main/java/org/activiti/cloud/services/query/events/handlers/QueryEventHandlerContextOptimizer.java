@@ -133,82 +133,75 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     public List<CloudRuntimeEvent<?, ?>> optimize(List<CloudRuntimeEvent<?, ?>> events) {
-        try {
-            resolveProcessInstanceId(events)
-                .ifPresent(processInstanceId -> {
-                    LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
-                    var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+        resolveProcessInstanceId(events)
+            .ifPresent(processInstanceId -> {
+                LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
+                var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
-                    var criteriaBuilder = entityManager.getCriteriaBuilder();
-                    var criteriaQuery = criteriaBuilder.createQuery(ProcessInstanceEntity.class);
-                    var fromProcessInstance = criteriaQuery.from(ProcessInstanceEntity.class);
-                    var whereProcessInstance = criteriaBuilder.equal(fromProcessInstance.get("id"), processInstanceId);
+                var criteriaBuilder = entityManager.getCriteriaBuilder();
+                var criteriaQuery = criteriaBuilder.createQuery(ProcessInstanceEntity.class);
+                var fromProcessInstance = criteriaQuery.from(ProcessInstanceEntity.class);
+                var whereProcessInstance = criteriaBuilder.equal(fromProcessInstance.get("id"), processInstanceId);
 
-                    criteriaQuery.select(fromProcessInstance).where(whereProcessInstance);
+                criteriaQuery.select(fromProcessInstance).where(whereProcessInstance);
 
-                    findRuntimeEvents(events, CloudVariableEvent.class, entity -> true, VariableInstance::getName)
-                        .ifPresent(variableNames -> {
-                            fetch(fromProcessInstance, entityGraph, VARIABLES, "name", variableNames);
-                        });
+                findRuntimeEvents(events, CloudVariableEvent.class, entity -> true, VariableInstance::getName)
+                    .ifPresent(variableNames -> {
+                        fetch(fromProcessInstance, entityGraph, VARIABLES, "name", variableNames);
+                    });
 
-                    findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true, Task::getId)
-                        .ifPresent(taskIds -> {
-                            fetch(fromProcessInstance, entityGraph, TASKS, "id", taskIds);
-                        });
+                findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true, Task::getId)
+                    .ifPresent(taskIds -> {
+                        fetch(fromProcessInstance, entityGraph, TASKS, "id", taskIds);
+                    });
 
-                    findRuntimeEvents(
-                        events,
-                        CloudBPMNActivityEvent.class,
-                        entity -> true,
-                        BPMNActivityEntity.IdBuilderHelper::from
-                    )
-                        .ifPresent(activityIds -> {
-                            fetch(fromProcessInstance, entityGraph, ACTIVITIES, "id", activityIds);
-                        });
+                findRuntimeEvents(
+                    events,
+                    CloudBPMNActivityEvent.class,
+                    entity -> true,
+                    BPMNActivityEntity.IdBuilderHelper::from
+                )
+                    .ifPresent(activityIds -> {
+                        fetch(fromProcessInstance, entityGraph, ACTIVITIES, "id", activityIds);
+                    });
 
-                    findRuntimeEvents(
-                        events,
-                        CloudBPMNActivityEvent.class,
-                        entity -> SERVICE_TASKS.equals(entity.getActivityType()),
-                        BPMNActivityEntity.IdBuilderHelper::from
-                    )
-                        .ifPresent(serviceTaskIds -> {
-                            fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
-                        });
+                findRuntimeEvents(
+                    events,
+                    CloudBPMNActivityEvent.class,
+                    entity -> SERVICE_TASKS.equals(entity.getActivityType()),
+                    BPMNActivityEntity.IdBuilderHelper::from
+                )
+                    .ifPresent(serviceTaskIds -> {
+                        fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
+                    });
 
-                    findRuntimeEvents(events, CloudIntegrationEvent.class, entity -> true, IntegrationContext::getId)
-                        .ifPresent(integrationContextIds -> {
-                            fetch(fromProcessInstance, entityGraph, INTEGRATION_CONTEXTS, "id", integrationContextIds);
-                        });
+                findRuntimeEvents(events, CloudIntegrationEvent.class, entity -> true, IntegrationContext::getId)
+                    .ifPresent(integrationContextIds -> {
+                        fetch(fromProcessInstance, entityGraph, INTEGRATION_CONTEXTS, "id", integrationContextIds);
+                    });
 
-                    entityManager
-                        .createQuery(criteriaQuery)
-                        .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
-                        .getResultList()
-                        .stream()
-                        .findFirst()
-                        .ifPresent(rootProcessInstance -> {
-                            if (LOGGER.isDebugEnabled()) {
-                                LOGGER.debug(
-                                    "Fetched entity graph attributes {} for process instance: {}",
-                                    entityGraph
-                                        .getAttributeNodes()
-                                        .stream()
-                                        .map(AttributeNode::getAttributeName)
-                                        .collect(Collectors.toList()),
-                                    processInstanceId
-                                );
-                            }
-                        });
-                });
+                entityManager
+                    .createQuery(criteriaQuery)
+                    .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
+                    .getResultList()
+                    .stream()
+                    .findFirst()
+                    .ifPresent(rootProcessInstance -> {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug(
+                                "Fetched entity graph attributes {} for process instance: {}",
+                                entityGraph
+                                    .getAttributeNodes()
+                                    .stream()
+                                    .map(AttributeNode::getAttributeName)
+                                    .collect(Collectors.toList()),
+                                processInstanceId
+                            );
+                        }
+                    });
+            });
 
-            var sorted = events.stream().sorted(byEventClass.thenComparing(byTimestamp)).collect(Collectors.toList());
-            LOGGER.info("Optimizer - output {} events", sorted.size());
-            return sorted;
-        } catch (RuntimeException ex) {
-            LOGGER.error("Optimizer failed: {}", ex.toString(), ex);
-            throw ex;
-        }
+        return events.stream().sorted(byEventClass.thenComparing(byTimestamp)).collect(Collectors.toList());
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
