@@ -20,7 +20,6 @@ import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -33,11 +32,16 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -47,6 +51,7 @@ import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
@@ -78,6 +83,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
+        Function<ConnectorBinding, Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>> connectorErrorHandlerDefinitionResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -89,8 +95,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     ConsumerConnector.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)
                 ) {
-                    final AtomicReference<String> responseDestination = new AtomicReference<>();
-
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
@@ -106,28 +110,49 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             registerFunctionRegistration(functionDefinition, functionRegistration);
 
-                            responseDestination.set(connectorBinding.outputHeader());
-
                             GenericHandler<Message> handler = (message, headers) -> {
                                 FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                                 function.setSkipOutputConversion(true);
-                                Message<?> messageToProcess = message;
-
-                                Object result = function.apply(messageToProcess);
-
-                                if (result instanceof Message<?> msg) {
-                                    result = msg.getPayload();
-                                }
 
                                 Message<?> response = null;
-                                if (result != null) {
-                                    response = MessageBuilder.withPayload(result).build();
-                                    String destination = headers.get(responseDestination.get(), String.class);
 
-                                    if (StringUtils.hasText(destination)) {
-                                        getStreamBridge().send(destination, response);
-                                        return null;
+                                try {
+                                    Object result = function.apply(message);
+
+                                    if (result != null) {
+                                        if (result instanceof Message<?> msg) {
+                                            result = msg.getPayload();
+                                        }
+
+                                        response = MessageBuilder.withPayload(result).build();
+
+                                        String destination = headers.get(connectorBinding.outputHeader(), String.class);
+
+                                        if (StringUtils.hasText(destination)) {
+                                            getStreamBridge().send(destination, response);
+                                            return null;
+                                        }
                                     }
+                                } catch (Exception connectorError) {
+                                    connectorErrorHandlerDefinitionResolver
+                                        .apply(connectorBinding)
+                                        .ifPresentOrElse(
+                                            errorHandlerDefinition -> {
+                                                final var errorMessage = (
+                                                        connectorError instanceof MessagingException messagingException
+                                                    )
+                                                    ? new ErrorMessage(messagingException, message)
+                                                    : new ErrorMessage(
+                                                        new MessagingException(message, connectorError),
+                                                        message
+                                                    );
+
+                                                errorHandlerDefinition.accept(errorMessage);
+                                            },
+                                            () -> {
+                                                throw connectorError;
+                                            }
+                                        );
                                 }
 
                                 return response;
@@ -228,6 +253,29 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 return bean;
             }
         };
+    }
+
+    @Bean
+    Function<ConnectorBinding, Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>> connectorErrorHandlerDefinitionResolver(
+        ActivitiCloudMessagingProperties messagingProperties,
+        BindingServiceProperties bindingServiceProperties,
+        @Lazy FunctionCatalog functionCatalog
+    ) {
+        return connectorBinding ->
+            Optional
+                .of(messagingProperties.getFunctionRouter())
+                .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
+                .map(ActivitiCloudMessagingProperties.FunctionRouterProperties::getErrorHandlerDefinition)
+                .filter(StringUtils::hasText)
+                .or(() ->
+                    Optional
+                        .of(bindingServiceProperties.getBindings())
+                        .map(bindings -> bindings.get(connectorBinding.input()))
+                        .map(BindingProperties::getErrorHandlerDefinition)
+                        .filter(StringUtils::hasText)
+                )
+                .map(functionCatalog::lookup)
+                .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast);
     }
 
     private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
