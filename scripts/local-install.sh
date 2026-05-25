@@ -735,8 +735,29 @@ ACTIVITI_CLOUD_APPLICATION_NAME=default-app
 
 # DEBUG=pw:api
 
-# User Credentials - CONFIGURE THESE IN A SEPARATE .env.local FILE
-# Copy from root .env or configure with your test user credentials
+# User Credentials (from realm-secret / realm.json - all use password 'password')
+HRUSER_USERNAME=hruser
+HRUSER_PASSWORD=password
+HRADMIN_USERNAME=hradmin
+HRADMIN_PASSWORD=password
+PROCESSADMINUSER_USERNAME=processadminuser
+PROCESSADMINUSER_PASSWORD=password
+MODELER_USERNAME=hruser
+MODELER_PASSWORD=password
+MODELERQA_USERNAME=hruser
+MODELERQA_PASSWORD=password
+DEVOPSUSER_USERNAME=hruser
+DEVOPSUSER_PASSWORD=password
+SUPERADMINUSER_USERNAME=superadminuser
+SUPERADMINUSER_PASSWORD=password
+ALFRESCO_ADMINISTRATOR_USERNAME=superadminuser
+ALFRESCO_ADMINISTRATOR_PASSWORD=password
+SALESUSER_USERNAME=salesuser
+SALESUSER_PASSWORD=password
+TESTADMIN_USERNAME=testadmin
+TESTADMIN_PASSWORD=password
+TESTUSER_USERNAME=testuser
+TESTUSER_PASSWORD=password
 
 EOF
 
