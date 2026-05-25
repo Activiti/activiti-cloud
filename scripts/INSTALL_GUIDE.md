@@ -29,6 +29,10 @@ Update kubeconfig:
 ```
 
 ```bash
+# Install npm dependencies and Playwright browsers (one-time setup)
+npm install
+npx playwright install --with-deps
+
 # Complete automated setup - handles everything
 ./scripts/local-install.sh -n 123
 
@@ -36,7 +40,6 @@ Update kubeconfig:
 open http://localhost:8080
 
 # Run Playwright tests
-cd activiti-cloud-acceptance-tests-playwright
 npm test
 ```
 
@@ -127,7 +130,7 @@ The script performs these operations:
 4. **Local Access Configuration**
 
    - Automatically adds entries to /etc/hosts (requires sudo password)
-   - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
+   - Sets up port forwarding: localhost:8080 → traefik
    - Configures DNS resolution for `pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com`
 
 5. **Authentication Setup**
@@ -216,7 +219,7 @@ After successful installation, you'll have:
 ### Local Configuration
 
 - **DNS Resolution**: /etc/hosts entries for `*.{cluster}.envalfresco.com`
-- **Port Forwarding**: localhost:8080 → ingress-nginx-controller:80
+- **Port Forwarding**: localhost:8080 → traefik:80
 - **Environment Files**: .env for Playwright tests
 - **Working Images**: local-values.yaml with 8.8.0-alpha.108 tags
 
@@ -286,7 +289,8 @@ pkill -f "kubectl.*port-forward"
    # Check for processes using port 8080
    lsof -i :8080
 
-   # The script will recreate port forwarding automatically
+   # Start port forwarding manually to Traefik
+   kubectl port-forward -n traefik svc/traefik 8080:80
    ```
 
 4. **DNS resolution not working**

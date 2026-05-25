@@ -75,6 +75,7 @@ PREREQUISITES:
     - yq installed (for YAML processing)
     - python3 available (for version parsing)
     - Keycloak client secret for 'activiti-keycloak' client
+    - Keycloak admin login from Kubernetes secret 'keycloak-admin-credentials'
 
 ENVIRONMENT VARIABLES:
     KEYCLOAK_CLIENT_SECRET    Set to avoid interactive prompt for client secret
@@ -90,6 +91,7 @@ WORKFLOW:
 NOTES:
     - Uses local-values.yaml by default for reliable deployments
     - Auto-detects cluster or helps configure it
+    - Keycloak admin username/password come from the Kubernetes secret 'keycloak-admin-credentials' in the same namespace as the Keycloak pod
     - Generates complete .env configuration at the end
 EOF
 }
@@ -160,6 +162,21 @@ execute_command() {
     fi
 }
 
+# Function to read a secret from the terminal without echoing it.
+# Supports pasting and falls back to stdin when no TTY is available.
+prompt_for_secret() {
+    local prompt="$1"
+
+    if [[ -t 0 ]]; then
+        printf "%b" "$prompt"
+        IFS= read -r -s REPLY
+        printf "\n"
+    else
+        printf "%b" "$prompt"
+        IFS= read -r REPLY
+    fi
+}
+
 # Function to configure Keycloak settings
 configure_keycloak() {
     echo -e "${BLUE}=== Configuring Keycloak Settings ===${NC}"
@@ -182,20 +199,25 @@ configure_keycloak() {
         echo ""
         echo -e "${YELLOW}🔑 Keycloak Client Secret Required${NC}"
         echo ""
-        echo -e "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
-        echo -e "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
-        echo -e "  ${CYAN}1. Open: $KEYCLOAK_URL/auth/admin/master/console/#/alfresco/clients"
-        echo -e "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
-        echo -e "  ${CYAN}3. Go to Credentials tab${NC}"
-        echo -e "  ${CYAN}4. Copy the Client Secret${NC}"
+        printf "%b\n" "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
+        printf "%b\n" "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
+        printf "%b\n" "${CYAN}To log in, use the admin credentials stored in the Kubernetes secret 'keycloak-admin-credentials' for the Keycloak pod/namespace.${NC}"
+        printf "%b\n" "  ${CYAN}Example username: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.username}' | base64 --decode && echo${NC}"
+        printf "%b\n" "  ${CYAN}Example password: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.password}' | base64 --decode && echo${NC}"
+        printf "%b\n" "  ${CYAN}1. Open: $KEYCLOAK_URL/admin/master/console/#/alfresco/clients${NC}"
+        printf "%b\n" "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
+        printf "%b\n" "  ${CYAN}3. Go to Credentials tab${NC}"
+        printf "%b\n" "  ${CYAN}4. Copy the Client Secret${NC}"
         echo ""
 
         if [[ "$DRY_RUN" == "true" ]]; then
             echo -e "${CYAN}[DRY-RUN] Would prompt for client secret${NC}"
             KEYCLOAK_CLIENT_SECRET="<WOULD_PROMPT_FOR_SECRET>"
         else
-            echo -n -e "${YELLOW}Enter the Keycloak client secret for '$KEYCLOAK_CLIENT_ID': ${NC}"
-            read -r KEYCLOAK_CLIENT_SECRET
+            printf "%b\n" "${CYAN}Paste the client secret and press Enter. Input will be hidden.${NC}"
+            prompt_for_secret "${YELLOW}Enter the Keycloak client secret for '$KEYCLOAK_CLIENT_ID': ${NC}"
+            KEYCLOAK_CLIENT_SECRET="$REPLY"
+            unset REPLY
 
             if [[ -z "$KEYCLOAK_CLIENT_SECRET" ]]; then
                 echo -e "${RED}Error: Client secret is required${NC}" >&2
@@ -727,8 +749,8 @@ EOF
     echo -e "${CYAN}   127.0.0.1 $GATEWAY_HOST${NC}"
     echo -e "${CYAN}   127.0.0.1 $SSO_HOST${NC}"
     echo ""
-    echo -e "${YELLOW}2. Start port forwarding to the ingress controller:${NC}"
-    echo -e "${CYAN}   kubectl port-forward svc/ingress-nginx-controller $local_port:80 -n default${NC}"
+    echo -e "${YELLOW}2. Start port forwarding to Traefik:${NC}"
+    echo -e "${CYAN}   kubectl port-forward svc/traefik $local_port:80 -n traefik${NC}"
     echo ""
     echo -e "${YELLOW}3. Configure user credentials in the .env file:${NC}"
     echo -e "${CYAN}   # Add your test user credentials to the .env file${NC}"
@@ -782,6 +804,6 @@ echo -e "${BLUE}Next steps for local development:${NC}"
 echo -e "${CYAN}1. Port forwarding will be automatically started by Playwright tests${NC}"
 echo -e "${CYAN}2. Run tests: cd activiti-cloud-acceptance-tests-playwright && npm test${NC}"
 echo -e "${CYAN}3. Or start port forwarding manually:${NC}"
-echo -e "${CYAN}   kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8080:80${NC}"
+echo -e "${CYAN}   kubectl port-forward -n traefik svc/traefik 8080:80${NC}"
 echo -e "${CYAN}4. Access services via the configured /etc/hosts entries on localhost:8080${NC}"
 echo ""
