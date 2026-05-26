@@ -66,10 +66,10 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
 import org.assertj.core.util.Arrays;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.resttestclient.TestRestTemplate;
@@ -80,7 +80,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
-import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -110,9 +109,6 @@ import tools.jackson.databind.ObjectMapper;
 @Import(TestChannelBinderConfiguration.class)
 class ActivitiGraphQLWsNativeStarterIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActivitiGraphQLWsNativeStarterIT.class);
-    private static final String LOG_BPMN_MESSAGE_EVENTS = "[BPMNMessageEvents]";
-
     static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
     private static final String HRUSER = "hruser";
@@ -121,7 +117,8 @@ class ActivitiGraphQLWsNativeStarterIT {
     private static final String TESTDEVOPS = "testdevops";
     private static final String TASK_NAME = "task1";
     private static final String GRAPHQL_URL = "/graphql";
-    private static final Duration TIMEOUT = Duration.ofMillis(20000);
+    private static final Duration TIMEOUT = Duration.ofSeconds(20);
+    private static final Duration WEB_SOCKET_STOP_TIMEOUT = Duration.ofSeconds(5);
 
     private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec
         .builder()
@@ -148,19 +145,11 @@ class ActivitiGraphQLWsNativeStarterIT {
 
     private HttpHeaders authHeaders;
 
-    private GraphQlTester graphQlTester;
-
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         identityTokenProducer.withTestUser(TESTADMIN);
         authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        URI url = getUrl(WS_GRAPHQL_URI);
-        this.graphQlTester =
-            WebSocketGraphQlTester
-                .builder(url, new ReactorNettyWebSocketClient())
-                .interceptor(new JwtGraphQlClientInterceptor(identityTokenProducer.withTestUser(TESTADMIN)))
-                .build();
     }
 
     protected URI getUrl(String path) throws URISyntaxException {
@@ -254,83 +243,6 @@ class ActivitiGraphQLWsNativeStarterIT {
         StepVerifier.create(output).expectComplete().verify(); //TODO add timeout
     }
 
-    @Test
-    void testGraphqlSubscription_PROCESS_CREATED_and_PROCESS_STARTED() {
-        Map<String, Object> variables = mapBuilder()
-            .put("appName", "default-app")
-            .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
-            .get();
-
-        var document =
-            """
-            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-              engineEvents(appName: [$appName], eventType: $eventTypes) {
-                processInstanceId
-                eventType
-              }
-            }""";
-
-        CloudProcessCreatedEvent event1 = new CloudProcessCreatedEventImpl() {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessInstanceId("processInstanceId");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudProcessStartedEvent event2 = new CloudProcessStartedEventImpl() {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceType("runtime-bundle");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessInstanceId("processInstanceId");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        var messages = List.of(
-            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_CREATED"),
-            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_STARTED")
-        );
-
-        Flux<List> flux =
-            this.graphQlTester.document(document)
-                .variables(variables)
-                .executeSubscription()
-                .toFlux("engineEvents", List.class);
-
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1, event2))
-            .expectNext(messages)
-            .thenCancel()
-            .verify(TIMEOUT);
-    }
-
-    private Runnable sendEvents(CloudRuntimeEvent... events) {
-        return () ->
-            producerChannel
-                .output()
-                .send(
-                    MessageBuilder.withPayload(Arrays.array(events)).setHeader("routingKey", "eventProducer").build()
-                );
-    }
-
     private void closeWebSocketAnCompleteDataProcessor(
         ReplayProcessor<String> data,
         WebsocketOutbound webSocketOutbound
@@ -338,525 +250,729 @@ class ActivitiGraphQLWsNativeStarterIT {
         webSocketOutbound.sendClose().doOnTerminate(data::onComplete).subscribe();
     }
 
-    @Test
-    void testGraphqlSubscriptionPROCESS_DEPLOYED() {
-        Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
+    @Nested
+    class EngineEventsSubscriptionTests {
 
-        var document =
-            """
-            subscription($appName: String!) {
-              engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
-                processDefinitionKey
-                eventType
-              }
-            }""";
+        private WebSocketGraphQlTester graphQlTester;
 
-        CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl(
-            "id",
-            new Date().getTime(),
-            new ProcessDefinitionEntity()
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setProcessModelContent("processModelContent");
-                setBusinessKey("businessKey");
+        @BeforeEach
+        void setUpGraphQlTester() throws Exception {
+            URI url = getUrl(WS_GRAPHQL_URI);
+            graphQlTester =
+                WebSocketGraphQlTester
+                    .builder(url, new ReactorNettyWebSocketClient())
+                    .interceptor(new JwtGraphQlClientInterceptor(identityTokenProducer.withTestUser(TESTADMIN)))
+                    .build();
+            graphQlTester.start().block(TIMEOUT);
+        }
+
+        @AfterEach
+        void tearDownGraphQlTester() {
+            if (graphQlTester != null) {
+                graphQlTester.stop().block(WEB_SOCKET_STOP_TIMEOUT);
             }
-        };
+        }
 
-        Flux<List> flux =
-            this.graphQlTester.document(document)
+        @Test
+        void testGraphqlSubscription_PROCESS_CREATED_and_PROCESS_STARTED() {
+            Map<String, Object> variables = mapBuilder()
+                .put("appName", "default-app")
+                .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
+                .get();
+
+            var document =
+                """
+                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+                  engineEvents(appName: [$appName], eventType: $eventTypes) {
+                    processInstanceId
+                    eventType
+                  }
+                }""";
+
+            CloudProcessCreatedEvent event1 = new CloudProcessCreatedEventImpl() {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessInstanceId("processInstanceId");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudProcessStartedEvent event2 = new CloudProcessStartedEventImpl() {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceType("runtime-bundle");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessInstanceId("processInstanceId");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            var messages = List.of(
+                Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_CREATED"),
+                Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_STARTED")
+            );
+
+            Flux<List> flux = graphQlTester
+                .document(document)
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
 
-        var messages = List.of(Map.of("processDefinitionKey", "processDefinitionKey", "eventType", "PROCESS_DEPLOYED"));
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1))
-            .expectNext(messages)
-            .thenCancel()
-            .verify(TIMEOUT);
-    }
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1, event2))
+                .expectNext(messages)
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
 
-    @Test
-    void testGraphqlSubscriptionSIGNAL_RECEIVED() {
-        Map<String, Object> variables = new StringObjectMapBuilder()
-            .put("appName", "default-app")
-            .put("eventType", "SIGNAL_RECEIVED")
-            .get();
+        private Runnable sendEvents(CloudRuntimeEvent... events) {
+            return () ->
+                producerChannel
+                    .output()
+                    .send(
+                        MessageBuilder
+                            .withPayload(Arrays.array(events))
+                            .setHeader("routingKey", "eventProducer")
+                            .build()
+                    );
+        }
 
-        var document =
-            """
-            subscription($appName: String!, $eventType: EngineEventType!) {
-              engineEvents(appName: [$appName], eventType: [$eventType]) {
-                processInstanceId
-                processDefinitionId
-                eventType
-              }
-            }""";
+        @Test
+        void testGraphqlSubscriptionPROCESS_DEPLOYED() {
+            Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
 
-        CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
-            "id",
-            new Date().getTime(),
-            new BPMNSignalImpl("elementId"),
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-        Flux<List> flux =
-            this.graphQlTester.document(document)
+            var document =
+                """
+                subscription($appName: String!) {
+                  engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
+                    processDefinitionKey
+                    eventType
+                  }
+                }""";
+
+            CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl(
+                "id",
+                new Date().getTime(),
+                new ProcessDefinitionEntity()
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setProcessModelContent("processModelContent");
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            Flux<List> flux = graphQlTester
+                .document(document)
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
 
-        var messages = List.of(
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
+            var messages = List.of(
+                Map.of("processDefinitionKey", "processDefinitionKey", "eventType", "PROCESS_DEPLOYED")
+            );
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1))
+                .expectNext(messages)
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
+
+        @Test
+        void testGraphqlSubscriptionSIGNAL_RECEIVED() {
+            Map<String, Object> variables = new StringObjectMapBuilder()
+                .put("appName", "default-app")
+                .put("eventType", "SIGNAL_RECEIVED")
+                .get();
+
+            var document =
+                """
+                subscription($appName: String!, $eventType: EngineEventType!) {
+                  engineEvents(appName: [$appName], eventType: [$eventType]) {
+                    processInstanceId
+                    processDefinitionId
+                    eventType
+                  }
+                }""";
+
+            CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
+                "id",
+                new Date().getTime(),
+                new BPMNSignalImpl("elementId"),
                 "processDefinitionId",
-                "processDefinitionId",
-                "eventType",
-                "SIGNAL_RECEIVED"
-            )
-        );
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1))
-            .expectNext(messages)
-            .thenCancel()
-            .verify(TIMEOUT);
-    }
-
-    @Test
-    void testGraphqlSubscriptionShouldFilterEmptyResults() {
-        Map<String, Object> variables = new StringObjectMapBuilder()
-            .put("appName", "default-app")
-            .put("eventType", "PROCESS_STARTED")
-            .get();
-
-        var document =
-            """
-            subscription($appName: String!, $eventType: EngineEventType!) {
-              engineEvents(appName: [$appName], eventType: [$eventType]) {
-                processInstanceId
-                processDefinitionId
-                eventType
-              }
-            }""";
-
-        CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
-            "id",
-            new Date().getTime(),
-            new BPMNSignalImpl("elementId"),
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        Flux<List> flux =
-            this.graphQlTester.document(document)
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+            Flux<List> flux = graphQlTester
+                .document(document)
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1))
-            .expectNoEvent(Duration.ofSeconds(2))
-            .thenCancel()
-            .verify(TIMEOUT);
-    }
 
-    @Test
-    void testGraphqlSubscriptionCloudBPMNTimerEvents() {
-        Map<String, Object> variables = new StringObjectMapBuilder()
-            .put("appName", "default-app")
-            .put(
-                "eventTypes",
-                Arrays.array(
-                    "TIMER_SCHEDULED",
-                    "TIMER_FIRED",
-                    "TIMER_EXECUTED",
-                    "TIMER_CANCELLED",
-                    "TIMER_FAILED",
+            var messages = List.of(
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "eventType",
+                    "SIGNAL_RECEIVED"
+                )
+            );
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1))
+                .expectNext(messages)
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
+
+        @Test
+        void testGraphqlSubscriptionShouldFilterEmptyResults() {
+            Map<String, Object> variables = new StringObjectMapBuilder()
+                .put("appName", "default-app")
+                .put("eventType", "PROCESS_STARTED")
+                .get();
+
+            var document =
+                """
+                subscription($appName: String!, $eventType: EngineEventType!) {
+                  engineEvents(appName: [$appName], eventType: [$eventType]) {
+                    processInstanceId
+                    processDefinitionId
+                    eventType
+                  }
+                }""";
+
+            CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
+                "id",
+                new Date().getTime(),
+                new BPMNSignalImpl("elementId"),
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            Flux<List> flux = graphQlTester
+                .document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1))
+                .expectNoEvent(Duration.ofSeconds(2))
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
+
+        @Test
+        void testGraphqlSubscriptionCloudBPMNTimerEvents() {
+            Map<String, Object> variables = new StringObjectMapBuilder()
+                .put("appName", "default-app")
+                .put(
+                    "eventTypes",
+                    Arrays.array(
+                        "TIMER_SCHEDULED",
+                        "TIMER_FIRED",
+                        "TIMER_EXECUTED",
+                        "TIMER_CANCELLED",
+                        "TIMER_FAILED",
+                        "TIMER_RETRIES_DECREMENTED"
+                    )
+                )
+                .get();
+
+            var document =
+                """
+                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+                  engineEvents(appName: [$appName], eventType: $eventTypes) {
+                    processInstanceId
+                    processDefinitionId
+                    entity
+                    eventType
+                  }
+                }""";
+
+            var bpmnTimer = new BPMNTimerImpl("timerId");
+            bpmnTimer.setTimerPayload(new TimerPayload());
+            CloudBPMNTimerScheduledEvent event1 = new CloudBPMNTimerScheduledEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNTimerFiredEvent event2 = new CloudBPMNTimerFiredEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNTimerExecutedEvent event3 = new CloudBPMNTimerExecutedEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNTimerCancelledEvent event4 = new CloudBPMNTimerCancelledEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNTimerFailedEvent event5 = new CloudBPMNTimerFailedEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNTimerRetriesDecrementedEvent event6 = new CloudBPMNTimerRetriesDecrementedEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnTimer,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            var messages = List.of(
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
+                    "TIMER_SCHEDULED"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
+                    "TIMER_FIRED"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
+                    "TIMER_EXECUTED"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
+                    "TIMER_CANCELLED"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
+                    "TIMER_FAILED"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "entity",
+                    bpmnTimer,
+                    "eventType",
                     "TIMER_RETRIES_DECREMENTED"
                 )
-            )
-            .get();
+            );
 
-        var document =
-            """
-            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-              engineEvents(appName: [$appName], eventType: $eventTypes) {
-                processInstanceId
-                processDefinitionId
-                entity
-                eventType
-              }
-            }""";
-
-        var bpmnTimer = new BPMNTimerImpl("timerId");
-        bpmnTimer.setTimerPayload(new TimerPayload());
-        CloudBPMNTimerScheduledEvent event1 = new CloudBPMNTimerScheduledEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNTimerFiredEvent event2 = new CloudBPMNTimerFiredEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNTimerExecutedEvent event3 = new CloudBPMNTimerExecutedEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNTimerCancelledEvent event4 = new CloudBPMNTimerCancelledEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNTimerFailedEvent event5 = new CloudBPMNTimerFailedEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNTimerRetriesDecrementedEvent event6 = new CloudBPMNTimerRetriesDecrementedEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnTimer,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        var messages = List.of(
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_SCHEDULED"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_FIRED"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_EXECUTED"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_CANCELLED"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_FAILED"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "entity",
-                bpmnTimer,
-                "eventType",
-                "TIMER_RETRIES_DECREMENTED"
-            )
-        );
-
-        Flux<List> flux =
-            this.graphQlTester.document(document)
+            Flux<List> flux = graphQlTester
+                .document(document)
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1, event2, event3, event4, event5, event6))
-            .expectNextMatches(messageMatches(messages))
-            .thenCancel()
-            .verify(TIMEOUT);
-    }
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1, event2, event3, event4, event5, event6))
+                .expectNextMatches(messageMatches(messages))
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
 
-    @Test
-    void testGraphqlSubscriptionCloudBPMNMessageEvents() {
-        Map<String, Object> variables = new StringObjectMapBuilder()
-            .put("appName", "default-app")
-            .put("eventTypes", Arrays.array("MESSAGE_SENT", "MESSAGE_WAITING", "MESSAGE_RECEIVED"))
-            .get();
+        @Test
+        void testGraphqlSubscriptionCloudBPMNMessageEvents() {
+            Map<String, Object> variables = new StringObjectMapBuilder()
+                .put("appName", "default-app")
+                .put("eventTypes", Arrays.array("MESSAGE_SENT", "MESSAGE_WAITING", "MESSAGE_RECEIVED"))
+                .get();
 
-        var document =
-            """
-            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
-              engineEvents(appName: [$appName], eventType: $eventTypes) {
-                processInstanceId
-                processDefinitionId
-                eventType
-              }
-            }""";
+            var document =
+                """
+                subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+                  engineEvents(appName: [$appName], eventType: $eventTypes) {
+                    processInstanceId
+                    processDefinitionId
+                    eventType
+                  }
+                }""";
 
-        var bpmnMessage = new BPMNMessageImpl("messageId");
-        CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnMessage,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNMessageEvent event2 = new CloudBPMNMessageWaitingEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnMessage,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        CloudBPMNMessageEvent event3 = new CloudBPMNMessageReceivedEventImpl(
-            "id",
-            new Date().getTime(),
-            bpmnMessage,
-            "processDefinitionId",
-            "processInstanceId"
-        ) {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-            }
-        };
-
-        var messages = List.of(
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
+            var bpmnMessage = new BPMNMessageImpl("messageId");
+            CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnMessage,
                 "processDefinitionId",
-                "processDefinitionId",
-                "eventType",
-                "MESSAGE_SENT"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "eventType",
-                "MESSAGE_WAITING"
-            ),
-            Map.of(
-                "processInstanceId",
-                "processInstanceId",
-                "processDefinitionId",
-                "processDefinitionId",
-                "eventType",
-                "MESSAGE_RECEIVED"
-            )
-        );
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
 
-        Flux<List> flux =
-            this.graphQlTester.document(document)
+            CloudBPMNMessageEvent event2 = new CloudBPMNMessageWaitingEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnMessage,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            CloudBPMNMessageEvent event3 = new CloudBPMNMessageReceivedEventImpl(
+                "id",
+                new Date().getTime(),
+                bpmnMessage,
+                "processDefinitionId",
+                "processInstanceId"
+            ) {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                }
+            };
+
+            var messages = List.of(
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "eventType",
+                    "MESSAGE_SENT"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "eventType",
+                    "MESSAGE_WAITING"
+                ),
+                Map.of(
+                    "processInstanceId",
+                    "processInstanceId",
+                    "processDefinitionId",
+                    "processDefinitionId",
+                    "eventType",
+                    "MESSAGE_RECEIVED"
+                )
+            );
+
+            Flux<List> flux = graphQlTester
+                .document(document)
                 .variables(variables)
                 .executeSubscription()
-                .toFlux("engineEvents", List.class)
-                .doOnSubscribe(s -> LOGGER.warn("{} message subscription flux subscribed", LOG_BPMN_MESSAGE_EVENTS))
-                .doOnNext(batch -> logMessageSubscriptionBatch("flux onNext", batch))
-                .doOnError(e -> LOGGER.warn("{} message subscription flux onError", LOG_BPMN_MESSAGE_EVENTS, e))
-                .doOnComplete(() -> LOGGER.warn("{} message subscription flux onComplete", LOG_BPMN_MESSAGE_EVENTS))
-                .doOnCancel(() -> LOGGER.warn("{} message subscription flux onCancel", LOG_BPMN_MESSAGE_EVENTS));
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .expectNoEvent(Duration.ofMillis(100))
-            .then(() -> {
-                LOGGER.warn("{} publishing MESSAGE_SENT, MESSAGE_WAITING, MESSAGE_RECEIVED", LOG_BPMN_MESSAGE_EVENTS);
-                sendEvents(event1, event2, event3).run();
-                LOGGER.warn("{} publish completed", LOG_BPMN_MESSAGE_EVENTS);
-            })
-            .expectNext(messages)
-            .thenCancel()
-            .verify(TIMEOUT);
+                .toFlux("engineEvents", List.class);
+
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(500))
+                .then(sendEvents(event1, event2, event3))
+                .expectNext(messages)
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
+
+        private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
+            return m ->
+                messages
+                    .stream()
+                    .allMatch(message ->
+                        m
+                            .stream()
+                            .anyMatch(o -> {
+                                var map = ((Map) o);
+                                return (
+                                    map.get("processInstanceId").equals(message.get("processInstanceId")) &&
+                                    map.get("processDefinitionId").equals(message.get("processDefinitionId")) &&
+                                    map.get("eventType").equals(message.get("eventType"))
+                                );
+                            })
+                    );
+        }
+
+        @Test
+        void testGraphqlSubscription_PROCESS_COMPLETED_withActor() {
+            Map<String, Object> variables = mapBuilder()
+                .put("appName", "default-app")
+                .put("eventTypes", Arrays.array("PROCESS_COMPLETED"))
+                .put("actor", "bob")
+                .get();
+
+            var document =
+                """
+                subscription($appName: String!, $eventTypes: [EngineEventType!], $actor: String!) {
+                  engineEvents(appName: [$appName], eventType: $eventTypes, actor: [$actor]) {
+                    processInstanceId
+                    eventType
+                    actor
+                  }
+                }""";
+
+            CloudProcessCompletedEvent event1 = new CloudProcessCompletedEventImpl() {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessInstanceId("processInstanceId");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                    setActor("bob");
+                }
+            };
+
+            CloudProcessCompletedEvent event2 = new CloudProcessCompletedEventImpl() {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceType("runtime-bundle");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessInstanceId("processInstanceId");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                    setActor("bob");
+                }
+            };
+
+            CloudProcessCompletedEvent event3 = new CloudProcessCompletedEventImpl() {
+                {
+                    setAppName("default-app");
+                    setServiceName("rb-my-app");
+                    setServiceType("runtime-bundle");
+                    setServiceFullName("serviceFullName");
+                    setServiceType("runtime-bundle");
+                    setServiceVersion("");
+                    setProcessInstanceId("processInstanceId");
+                    setProcessDefinitionId("processDefinitionId");
+                    setProcessDefinitionKey("processDefinitionKey");
+                    setProcessDefinitionVersion(1);
+                    setBusinessKey("businessKey");
+                    setActor("fred");
+                }
+            };
+
+            var messages = List.of(
+                Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_COMPLETED", "actor", "bob"),
+                Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_COMPLETED", "actor", "bob")
+            );
+
+            Flux<List> flux = graphQlTester
+                .document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+
+            StepVerifier
+                .create(flux)
+                .expectSubscription()
+                .thenAwait(Duration.ofMillis(300))
+                .then(sendEvents(event1, event2, event3))
+                .expectNext(messages)
+                .thenCancel()
+                .verify(TIMEOUT);
+        }
     }
 
     @Test
@@ -1358,124 +1474,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
 
-    private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
-        return m ->
-            messages
-                .stream()
-                .allMatch(message ->
-                    m
-                        .stream()
-                        .anyMatch(o -> {
-                            var map = ((Map) o);
-                            return (
-                                map.get("processInstanceId").equals(message.get("processInstanceId")) &&
-                                map.get("processDefinitionId").equals(message.get("processDefinitionId")) &&
-                                map.get("eventType").equals(message.get("eventType"))
-                            );
-                        })
-                );
-    }
-
-    private static void logMessageSubscriptionBatch(String stage, List<?> batch) {
-        if (batch == null) {
-            LOGGER.warn("{} {} batch=null", LOG_BPMN_MESSAGE_EVENTS, stage);
-            return;
-        }
-        var eventTypes = batch.stream().map(event -> String.valueOf(((Map<?, ?>) event).get("eventType"))).toList();
-        LOGGER.warn("{} {} batchSize={} eventTypes={}", LOG_BPMN_MESSAGE_EVENTS, stage, batch.size(), eventTypes);
-        LOGGER.warn("{} {} fullBatch={}", LOG_BPMN_MESSAGE_EVENTS, stage, batch);
-    }
-
     static StringObjectMapBuilder mapBuilder() {
         return new StringObjectMapBuilder();
-    }
-
-    @Test
-    void testGraphqlSubscription_PROCESS_COMPLETED_withActor() {
-        Map<String, Object> variables = mapBuilder()
-            .put("appName", "default-app")
-            .put("eventTypes", Arrays.array("PROCESS_COMPLETED"))
-            .put("actor", "bob")
-            .get();
-
-        var document =
-            """
-            subscription($appName: String!, $eventTypes: [EngineEventType!], $actor: String!) {
-              engineEvents(appName: [$appName], eventType: $eventTypes, actor: [$actor]) {
-                processInstanceId
-                eventType
-                actor
-              }
-            }""";
-
-        CloudProcessCompletedEvent event1 = new CloudProcessCompletedEventImpl() {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessInstanceId("processInstanceId");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-                setActor("bob");
-            }
-        };
-
-        CloudProcessCompletedEvent event2 = new CloudProcessCompletedEventImpl() {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceType("runtime-bundle");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessInstanceId("processInstanceId");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-                setActor("bob");
-            }
-        };
-
-        CloudProcessCompletedEvent event3 = new CloudProcessCompletedEventImpl() {
-            {
-                setAppName("default-app");
-                setServiceName("rb-my-app");
-                setServiceType("runtime-bundle");
-                setServiceFullName("serviceFullName");
-                setServiceType("runtime-bundle");
-                setServiceVersion("");
-                setProcessInstanceId("processInstanceId");
-                setProcessDefinitionId("processDefinitionId");
-                setProcessDefinitionKey("processDefinitionKey");
-                setProcessDefinitionVersion(1);
-                setBusinessKey("businessKey");
-                setActor("fred");
-            }
-        };
-
-        var messages = List.of(
-            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_COMPLETED", "actor", "bob"),
-            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_COMPLETED", "actor", "bob")
-        );
-
-        Flux<List> flux =
-            this.graphQlTester.document(document)
-                .variables(variables)
-                .executeSubscription()
-                .toFlux("engineEvents", List.class);
-
-        StepVerifier
-            .create(flux)
-            .expectSubscription()
-            .thenAwait(Duration.ofMillis(300))
-            .then(sendEvents(event1, event2, event3))
-            .expectNext(messages)
-            .thenCancel()
-            .verify(TIMEOUT);
     }
 }
