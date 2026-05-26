@@ -2,4 +2,11 @@
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml" />
   <root level="OFF" />
+  <logger
+    name="org.activiti.cloud.notifications.graphql.starter.ActivitiGraphQLWsNativeStarterIT"
+    level="WARN"
+    additivity="false"
+  >
+    <appender-ref ref="CONSOLE" />
+  </logger>
 </configuration>
