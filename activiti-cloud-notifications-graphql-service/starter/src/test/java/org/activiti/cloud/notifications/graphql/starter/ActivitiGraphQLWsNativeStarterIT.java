@@ -68,6 +68,8 @@ import org.activiti.cloud.services.test.identity.JwtGraphQlClientInterceptor;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.resttestclient.TestRestTemplate;
@@ -107,6 +109,9 @@ import tools.jackson.databind.ObjectMapper;
 )
 @Import(TestChannelBinderConfiguration.class)
 class ActivitiGraphQLWsNativeStarterIT {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivitiGraphQLWsNativeStarterIT.class);
+    private static final String LOG_BPMN_MESSAGE_EVENTS = "[BPMNMessageEvents]";
 
     static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
@@ -833,13 +838,22 @@ class ActivitiGraphQLWsNativeStarterIT {
             this.graphQlTester.document(document)
                 .variables(variables)
                 .executeSubscription()
-                .toFlux("engineEvents", List.class);
+                .toFlux("engineEvents", List.class)
+                .doOnSubscribe(s -> LOGGER.warn("{} message subscription flux subscribed", LOG_BPMN_MESSAGE_EVENTS))
+                .doOnNext(batch -> logMessageSubscriptionBatch("flux onNext", batch))
+                .doOnError(e -> LOGGER.warn("{} message subscription flux onError", LOG_BPMN_MESSAGE_EVENTS, e))
+                .doOnComplete(() -> LOGGER.warn("{} message subscription flux onComplete", LOG_BPMN_MESSAGE_EVENTS))
+                .doOnCancel(() -> LOGGER.warn("{} message subscription flux onCancel", LOG_BPMN_MESSAGE_EVENTS));
         StepVerifier
             .create(flux)
             .expectSubscription()
             .thenAwait(Duration.ofMillis(300))
             .expectNoEvent(Duration.ofMillis(100))
-            .then(sendEvents(event1, event2, event3))
+            .then(() -> {
+                LOGGER.warn("{} publishing MESSAGE_SENT, MESSAGE_WAITING, MESSAGE_RECEIVED", LOG_BPMN_MESSAGE_EVENTS);
+                sendEvents(event1, event2, event3).run();
+                LOGGER.warn("{} publish completed", LOG_BPMN_MESSAGE_EVENTS);
+            })
             .expectNext(messages)
             .thenCancel()
             .verify(TIMEOUT);
@@ -1360,6 +1374,16 @@ class ActivitiGraphQLWsNativeStarterIT {
                             );
                         })
                 );
+    }
+
+    private static void logMessageSubscriptionBatch(String stage, List<?> batch) {
+        if (batch == null) {
+            LOGGER.warn("{} {} batch=null", LOG_BPMN_MESSAGE_EVENTS, stage);
+            return;
+        }
+        var eventTypes = batch.stream().map(event -> String.valueOf(((Map<?, ?>) event).get("eventType"))).toList();
+        LOGGER.warn("{} {} batchSize={} eventTypes={}", LOG_BPMN_MESSAGE_EVENTS, stage, batch.size(), eventTypes);
+        LOGGER.warn("{} {} fullBatch={}", LOG_BPMN_MESSAGE_EVENTS, stage, batch);
     }
 
     static StringObjectMapBuilder mapBuilder() {
