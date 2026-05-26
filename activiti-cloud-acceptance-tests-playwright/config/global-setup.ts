@@ -25,9 +25,9 @@ const execAsync = promisify(exec);
 
 // Store the port-forward process PID for cleanup
 const PID_FILE = path.join(__dirname, '..', 'port-forward.pid');
-const PORT_FORWARD_SERVICE = 'svc/traefik';
-const PORT_FORWARD_NAMESPACE = 'traefik';
 const PORT_FORWARD_SERVICE_NAME = 'traefik';
+const PORT_FORWARD_NAMESPACE = 'traefik';
+const PORT_FORWARD_SERVICE = `svc/${PORT_FORWARD_SERVICE_NAME}`;
 
 async function globalSetup() {
     console.log('🔧 Starting Playwright Global Setup...');
