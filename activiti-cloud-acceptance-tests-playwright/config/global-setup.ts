@@ -25,6 +25,9 @@ const execAsync = promisify(exec);
 
 // Store the port-forward process PID for cleanup
 const PID_FILE = path.join(__dirname, '..', 'port-forward.pid');
+const PORT_FORWARD_SERVICE = 'svc/traefik';
+const PORT_FORWARD_NAMESPACE = 'traefik';
+const PORT_FORWARD_SERVICE_NAME = 'traefik';
 
 async function globalSetup() {
     console.log('🔧 Starting Playwright Global Setup...');
@@ -90,10 +93,10 @@ async function startPortForwarding(localPort: string): Promise<void> {
         // Use spawn to start port-forwarding in background
         const portForwardProcess = spawn('kubectl', [
             'port-forward',
-            'svc/ingress-nginx-controller',
+            PORT_FORWARD_SERVICE,
             `${localPort}:80`,
             '-n',
-            'default'
+            PORT_FORWARD_NAMESPACE
         ], {
             detached: true,
             stdio: ['ignore', 'pipe', 'pipe']
@@ -148,10 +151,10 @@ async function startPortForwarding(localPort: string): Promise<void> {
         throw new Error(`❌ Failed to start port-forwarding automatically:
 
 🔧 Manual setup required:
-   kubectl port-forward svc/ingress-nginx-controller ${localPort}:80 -n default
+   kubectl port-forward ${PORT_FORWARD_SERVICE} ${localPort}:80 -n ${PORT_FORWARD_NAMESPACE}
 
 🔍 Troubleshooting:
-   1. Check if the service exists: kubectl get svc ingress-nginx-controller -n default
+   1. Check if the service exists: kubectl get svc ${PORT_FORWARD_SERVICE_NAME} -n ${PORT_FORWARD_NAMESPACE}
    2. Verify cluster access: kubectl cluster-info
    3. Check if port ${localPort} is already in use: lsof -i :${localPort}
 
@@ -204,7 +207,7 @@ async function checkPortForwardingActive(localPort: string, throwOnError: boolea
         const errorMessage = `❌ Local port ${localPort} is not accessible. Please ensure port-forwarding is active:
 
 🔧 Run this command in a separate terminal:
-   kubectl port-forward svc/ingress-nginx-controller ${localPort}:80 -n default
+   kubectl port-forward ${PORT_FORWARD_SERVICE} ${localPort}:80 -n ${PORT_FORWARD_NAMESPACE}
 
 ⚠️  Make sure the command is running in the background before starting tests.
 
@@ -245,10 +248,10 @@ async function checkGatewayConnectivity(localPort: string, expectedGatewayHost: 
 
 🔧 Troubleshooting steps:
    1. Ensure port-forwarding is running:
-      kubectl port-forward svc/ingress-nginx-controller 8080:80 -n default
+      kubectl port-forward ${PORT_FORWARD_SERVICE} 8080:80 -n ${PORT_FORWARD_NAMESPACE}
 
    2. Check if the service exists:
-      kubectl get svc ingress-nginx-controller -n default
+      kubectl get svc ${PORT_FORWARD_SERVICE_NAME} -n ${PORT_FORWARD_NAMESPACE}
 
    3. Verify the gateway service is healthy:
       kubectl get pods -n default

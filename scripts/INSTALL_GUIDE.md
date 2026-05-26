@@ -157,8 +157,7 @@ curl http://localhost:8080/rb/actuator/health
 curl -H "Host: pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com" \
      http://localhost:8080/rb/actuator/health
 
-# Run Playwright tests
-cd activiti-cloud-acceptance-tests-playwright
+# Run Playwright tests from the repository root
 npm test
 ```
 
