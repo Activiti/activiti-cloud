@@ -57,6 +57,7 @@ class FunctionRouterProcessingTimeoutIT {
 
     private static final AtomicReference<CountDownLatch> handlerStartedLatch = new AtomicReference<>();
     private static final AtomicReference<CountDownLatch> blockingLatch = new AtomicReference<>();
+    private static final AtomicReference<CountDownLatch> interruptSignalLatch = new AtomicReference<>();
 
     @Autowired
     private BiConsumer<Message<?>, String> functionRouterMessageHandler;
@@ -78,6 +79,10 @@ class FunctionRouterProcessingTimeoutIT {
                         latch.await();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        CountDownLatch signal = interruptSignalLatch.get();
+                        if (signal != null) {
+                            signal.countDown();
+                        }
                     }
                 }
             };
@@ -98,6 +103,7 @@ class FunctionRouterProcessingTimeoutIT {
                 latch.countDown();
             }
         }
+        interruptSignalLatch.set(null);
     }
 
     @Test
@@ -157,6 +163,32 @@ class FunctionRouterProcessingTimeoutIT {
             .isInstanceOf(InterruptedException.class);
         assertThat(interruptFlagPreserved)
             .as("interrupt flag must be re-set on the caller thread after InterruptedException is caught")
+            .isTrue();
+    }
+
+    @Test
+    void shouldInterruptHandlerThreadAfterProcessingTimeout() throws InterruptedException {
+        handlerStartedLatch.set(new CountDownLatch(1));
+        interruptSignalLatch.set(new CountDownLatch(1));
+        blockingLatch.set(new CountDownLatch(1));
+
+        Message<String> message = MessageBuilder
+            .withPayload("GET http://localhost:8080")
+            .setHeader(FunctionRouterConfiguration.CONNECTOR_TYPE, "rest.GET")
+            .build();
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                functionRouterMessageHandler.accept(message, FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT);
+            } catch (Exception ignored) {}
+        });
+
+        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS))
+            .as("handler must start within 5s")
+            .isTrue();
+
+        assertThat(interruptSignalLatch.get().await(10, TimeUnit.SECONDS))
+            .as("handler thread must be interrupted after processing timeout expires")
             .isTrue();
     }
 }

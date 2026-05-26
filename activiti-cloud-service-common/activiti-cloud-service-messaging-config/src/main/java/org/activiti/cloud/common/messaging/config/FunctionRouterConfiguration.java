@@ -17,6 +17,7 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.activiti.cloud.common.messaging.config.CompletableFutureRetry.supplyAsyncWithRetry;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -220,16 +223,27 @@ public class FunctionRouterConfiguration {
                                 .build();
                         };
 
+                        List<AtomicReference<Future<?>>> cancellableFutures = new ArrayList<>();
+
                         var functions = registrations
                             .stream()
                             .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
-                            .map(functionRequest ->
-                                supplyAsyncWithRetry(
-                                        () ->
-                                            CompletableFuture.supplyAsync(
-                                                () -> routingFunction.apply(functionRequest),
-                                                functionExecutorSelector.apply(functionRequest)
-                                            ),
+                            .map(functionRequest -> {
+                                AtomicReference<Future<?>> currentRawFuture = new AtomicReference<>();
+                                cancellableFutures.add(currentRawFuture);
+                                ExecutorService executor = functionExecutorSelector.apply(functionRequest);
+                                return supplyAsyncWithRetry(
+                                        () -> {
+                                            CompletableFuture<Object> cf = new CompletableFuture<>();
+                                            currentRawFuture.set(executor.submit(() -> {
+                                                try {
+                                                    cf.complete(routingFunction.apply(functionRequest));
+                                                } catch (Throwable t) {
+                                                    cf.completeExceptionally(t);
+                                                }
+                                            }));
+                                            return cf;
+                                        },
                                         functionRouter.getMaxRetries(),
                                         functionRouter.getRetryInterval()
                                     )
@@ -251,8 +265,8 @@ public class FunctionRouterConfiguration {
                                             error
                                         );
                                         return Map.entry(functionDefinition, Optional.of(error));
-                                    })
-                            )
+                                    });
+                            })
                             .toArray(CompletableFuture[]::new);
 
                         var completed = CompletableFuture
@@ -265,6 +279,7 @@ public class FunctionRouterConfiguration {
                                 completed.get(functionRouter.getProcessingTimeout().toMillis(), TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
+                            cancellableFutures.forEach(ref -> Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true)));
                             throw new MessagingException(message, e);
                         } catch (ExecutionException e) {
                             Throwable cause = e.getCause();
@@ -275,6 +290,7 @@ public class FunctionRouterConfiguration {
                                 functionRouter.getProcessingTimeout(),
                                 message
                             );
+                            cancellableFutures.forEach(ref -> Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true)));
                             throw new MessagingException(message, e);
                         }
 
