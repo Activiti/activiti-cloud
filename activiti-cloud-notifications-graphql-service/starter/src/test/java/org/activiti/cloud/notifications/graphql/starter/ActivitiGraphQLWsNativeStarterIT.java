@@ -737,15 +737,15 @@ class ActivitiGraphQLWsNativeStarterIT {
               engineEvents(appName: [$appName], eventType: $eventTypes) {
                 processInstanceId
                 processDefinitionId
-                entity
                 eventType
               }
             }""";
 
+        var bpmnMessage = new BPMNMessageImpl("messageId");
         CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNMessageImpl("messageId"),
+            bpmnMessage,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -765,7 +765,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         CloudBPMNMessageEvent event2 = new CloudBPMNMessageWaitingEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNMessageImpl("messageId"),
+            bpmnMessage,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -785,7 +785,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         CloudBPMNMessageEvent event3 = new CloudBPMNMessageReceivedEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNMessageImpl("messageId"),
+            bpmnMessage,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -808,8 +808,6 @@ class ActivitiGraphQLWsNativeStarterIT {
                 "processInstanceId",
                 "processDefinitionId",
                 "processDefinitionId",
-                "entity",
-                new BPMNTimerImpl("messageId"),
                 "eventType",
                 "MESSAGE_SENT"
             ),
@@ -818,8 +816,6 @@ class ActivitiGraphQLWsNativeStarterIT {
                 "processInstanceId",
                 "processDefinitionId",
                 "processDefinitionId",
-                "entity",
-                new BPMNTimerImpl("messageId"),
                 "eventType",
                 "MESSAGE_WAITING"
             ),
@@ -828,8 +824,6 @@ class ActivitiGraphQLWsNativeStarterIT {
                 "processInstanceId",
                 "processDefinitionId",
                 "processDefinitionId",
-                "entity",
-                new BPMNTimerImpl("messageId"),
                 "eventType",
                 "MESSAGE_RECEIVED"
             )
@@ -843,9 +837,10 @@ class ActivitiGraphQLWsNativeStarterIT {
         StepVerifier
             .create(flux)
             .expectSubscription()
-            .thenAwait(Duration.ofMillis(1000))
+            .thenAwait(Duration.ofMillis(300))
+            .expectNoEvent(Duration.ofMillis(100))
             .then(sendEvents(event1, event2, event3))
-            .expectNextMatches(messageMatches(messages))
+            .expectNext(messages)
             .thenCancel()
             .verify(TIMEOUT);
     }
