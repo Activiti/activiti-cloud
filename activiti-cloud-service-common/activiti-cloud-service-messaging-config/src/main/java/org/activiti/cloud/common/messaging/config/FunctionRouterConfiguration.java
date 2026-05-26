@@ -235,13 +235,15 @@ public class FunctionRouterConfiguration {
                                 return supplyAsyncWithRetry(
                                         () -> {
                                             CompletableFuture<Object> cf = new CompletableFuture<>();
-                                            currentRawFuture.set(executor.submit(() -> {
-                                                try {
-                                                    cf.complete(routingFunction.apply(functionRequest));
-                                                } catch (Throwable t) {
-                                                    cf.completeExceptionally(t);
-                                                }
-                                            }));
+                                            currentRawFuture.set(
+                                                executor.submit(() -> {
+                                                    try {
+                                                        cf.complete(routingFunction.apply(functionRequest));
+                                                    } catch (Throwable t) {
+                                                        cf.completeExceptionally(t);
+                                                    }
+                                                })
+                                            );
                                             return cf;
                                         },
                                         functionRouter.getMaxRetries(),
@@ -279,7 +281,9 @@ public class FunctionRouterConfiguration {
                                 completed.get(functionRouter.getProcessingTimeout().toMillis(), TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-                            cancellableFutures.forEach(ref -> Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true)));
+                            cancellableFutures.forEach(ref ->
+                                Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true))
+                            );
                             throw new MessagingException(message, e);
                         } catch (ExecutionException e) {
                             Throwable cause = e.getCause();
@@ -290,7 +294,9 @@ public class FunctionRouterConfiguration {
                                 functionRouter.getProcessingTimeout(),
                                 message
                             );
-                            cancellableFutures.forEach(ref -> Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true)));
+                            cancellableFutures.forEach(ref ->
+                                Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true))
+                            );
                             throw new MessagingException(message, e);
                         }
 

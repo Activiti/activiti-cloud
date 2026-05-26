@@ -151,9 +151,7 @@ class FunctionRouterProcessingTimeoutIT {
         });
         callerThread.start();
 
-        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS))
-            .as("handler must start within 5s")
-            .isTrue();
+        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS)).as("handler must start within 5s").isTrue();
         callerThread.interrupt();
         callerThread.join(5_000);
 
@@ -183,9 +181,7 @@ class FunctionRouterProcessingTimeoutIT {
             } catch (Exception ignored) {}
         });
 
-        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS))
-            .as("handler must start within 5s")
-            .isTrue();
+        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS)).as("handler must start within 5s").isTrue();
 
         assertThat(interruptSignalLatch.get().await(10, TimeUnit.SECONDS))
             .as("handler thread must be interrupted after processing timeout expires")
