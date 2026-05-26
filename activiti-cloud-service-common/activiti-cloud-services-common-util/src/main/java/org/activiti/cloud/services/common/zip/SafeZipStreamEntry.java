@@ -36,7 +36,7 @@ public final class SafeZipStreamEntry {
         return new SafeZipStreamEntry(entry.name(), entry.content(), false, true);
     }
 
-    private SafeZipStreamEntry(String name, byte[] content, boolean directory, boolean trustedContent) {
+    private SafeZipStreamEntry(String name, byte[] content, boolean directory, boolean contentAlreadyCopied) {
         this.name = name;
         this.directory = directory;
         if (directory) {
@@ -44,7 +44,7 @@ public final class SafeZipStreamEntry {
         } else if (content == null) {
             this.content = new byte[0];
         } else {
-            this.content = trustedContent ? content : Arrays.copyOf(content, content.length);
+            this.content = contentAlreadyCopied ? content : Arrays.copyOf(content, content.length);
         }
     }
 

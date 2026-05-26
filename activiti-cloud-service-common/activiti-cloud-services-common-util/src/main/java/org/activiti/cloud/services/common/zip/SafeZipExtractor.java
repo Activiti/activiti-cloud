@@ -35,23 +35,28 @@ public final class SafeZipExtractor {
 
     private static final int READ_BUFFER_SIZE = 8 * 1024;
     private static final byte[] ZIP_MAGIC = new byte[] { 0x50, 0x4B, 0x03, 0x04 };
+    private static final String FOLDERS_OR_EMPTY_ENTRIES_MESSAGE =
+        "The archive must not contain folders or empty entries: {0}";
 
     private SafeZipExtractor() {}
 
-    public static List<SafeZipEntry> extractEntries(InputStream zipInputStream, SafeZipLimits limits) {
+    public static List<SafeZipEntry> extractEntries(InputStream zipInputStream, SafeZipLimits limits)
+        throws IOException {
         List<SafeZipEntry> entries = new ArrayList<>();
         forEachStreamEntry(zipInputStream, limits, entries::add);
         if (entries.isEmpty()) {
-            throw new SafeZipException("The archive is empty");
+            throw new IOException("The archive is empty");
         }
         return entries;
     }
 
-    public static void forEachEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer) {
+    public static void forEachEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer)
+        throws IOException {
         forEachStreamEntry(zipInputStream, limits, consumer);
     }
 
-    static void forEachStreamEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer) {
+    static void forEachStreamEntry(InputStream zipInputStream, SafeZipLimits limits, Consumer<SafeZipEntry> consumer)
+        throws IOException {
         long totalDecompressedSize = 0L;
         int entryCount = 0;
 
@@ -64,12 +69,10 @@ public final class SafeZipExtractor {
                 boolean directory = ZipEntryPaths.isDirectoryEntry(name, zipEntry.isDirectory());
 
                 if (directory && !limits.allowDirectories()) {
-                    throw new SafeZipException(
-                        MessageFormat.format("The archive must not contain folders or empty entries: {0}", name)
-                    );
+                    throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, name));
                 }
 
-                validateEntryPath(name, limits, null);
+                validateEntryPath(name, limits, directory);
 
                 if (directory) {
                     totalDecompressedSize += drainEntryWithLimits(zis, counting, name, totalDecompressedSize, limits);
@@ -81,25 +84,17 @@ public final class SafeZipExtractor {
 
                 byte[] entryBytes = readEntryWithLimits(zis, counting, name, totalDecompressedSize, limits);
                 if (entryBytes.length == 0) {
-                    throw new SafeZipException(
-                        MessageFormat.format("The archive must not contain folders or empty entries: {0}", name)
-                    );
+                    throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, name));
                 }
                 totalDecompressedSize += entryBytes.length;
                 validateEntryContent(name, entryBytes, limits);
                 consumer.accept(new SafeZipEntry(name, entryBytes, false));
             }
-        } catch (IOException e) {
-            throw new SafeZipException(MessageFormat.format("Cannot read archive: {0}", e.getMessage()), e);
         }
     }
 
     public static void extractToDirectory(File zipFile, Path targetDirectory, SafeZipLimits limits) throws IOException {
-        try {
-            extractToDirectoryInternal(zipFile, targetDirectory, limits);
-        } catch (SafeZipException e) {
-            throw new IOException(e.getMessage(), e);
-        }
+        extractToDirectoryInternal(zipFile, targetDirectory, limits);
     }
 
     private static void extractToDirectoryInternal(File zipFile, Path targetDirectory, SafeZipLimits limits)
@@ -115,14 +110,13 @@ public final class SafeZipExtractor {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
                 entryCount = incrementAndValidateEntryCountForDisk(entryCount, limits.maxEntries());
-                validateEntryPath(name, limits, targetRoot);
+                boolean directory = ZipEntryPaths.isDirectoryEntry(name, entry.isDirectory());
+                validateEntryPath(name, limits, directory);
                 Path entryPath = ZipEntryPaths.resolveEntryPath(targetRoot, name);
 
-                if (entry.isDirectory()) {
+                if (directory) {
                     if (!limits.allowDirectories()) {
-                        throw new SafeZipException(
-                            MessageFormat.format("The archive must not contain folders or empty entries: {0}", name)
-                        );
+                        throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, name));
                     }
                     Files.createDirectories(entryPath);
                     ZipEntryPaths.ensurePathWithinTarget(entryPath, targetRoot);
@@ -143,39 +137,39 @@ public final class SafeZipExtractor {
         }
     }
 
-    private static void validateEntryPath(String name, SafeZipLimits limits, Path targetDirectory) {
+    private static void validateEntryPath(String name, SafeZipLimits limits, boolean directory) throws IOException {
         if (limits.flatEntryPaths()) {
-            if (ZipEntryPaths.hasUnsafeFlatPath(name)) {
-                throw new SafeZipException(MessageFormat.format("The archive contains an unsafe path: {0}", name));
+            String pathToCheck = directory
+                ? ZipEntryPaths.stripTrailingSeparator(ZipEntryPaths.normalizeEntryName(name))
+                : name;
+            if (pathToCheck.isEmpty() || ZipEntryPaths.hasUnsafeFlatPath(pathToCheck)) {
+                throw new IOException(MessageFormat.format("The archive contains an unsafe path: {0}", name));
             }
             return;
         }
         if (ZipEntryPaths.hasUnsafeHierarchicalPath(name)) {
-            throw new SafeZipException(MessageFormat.format("The archive contains an unsafe path: {0}", name));
-        }
-        if (targetDirectory != null) {
-            ZipEntryPaths.resolveEntryPath(targetDirectory, name);
+            throw new IOException(MessageFormat.format("The archive contains an unsafe path: {0}", name));
         }
     }
 
-    private static void validateExtension(String name, SafeZipLimits limits) {
+    private static void validateExtension(String name, SafeZipLimits limits) throws IOException {
         if (limits.allowedExtensions().isEmpty()) {
             return;
         }
         String extension = fileExtension(name);
         if (extension.isEmpty() || !limits.allowedExtensions().contains(extension)) {
-            throw new SafeZipException(MessageFormat.format("File extension not allowed in the archive: {0}", name));
+            throw new IOException(MessageFormat.format("File extension not allowed in the archive: {0}", name));
         }
     }
 
-    private static void validateEntryContent(String name, byte[] entryBytes, SafeZipLimits limits) {
+    private static void validateEntryContent(String name, byte[] entryBytes, SafeZipLimits limits) throws IOException {
         if (limits.executableContentCheck().test(entryBytes)) {
-            throw new SafeZipException(MessageFormat.format("The archive contains an executable file: {0}", name));
+            throw new IOException(MessageFormat.format("The archive contains an executable file: {0}", name));
         }
         if (limits.rejectNestedZipEntries() && looksLikeZip(entryBytes)) {
             String extension = fileExtension(name);
             if (!limits.nestedZipAllowedExtensions().contains(extension)) {
-                throw new SafeZipException(MessageFormat.format("The archive contains a nested zip file: {0}", name));
+                throw new IOException(MessageFormat.format("The archive contains a nested zip file: {0}", name));
             }
         }
     }
@@ -192,12 +186,10 @@ public final class SafeZipExtractor {
         return true;
     }
 
-    private static int incrementAndValidateEntryCount(int currentCount, int maxEntries) {
+    private static int incrementAndValidateEntryCount(int currentCount, int maxEntries) throws IOException {
         int newCount = currentCount + 1;
         if (newCount > maxEntries) {
-            throw new SafeZipException(
-                MessageFormat.format("The archive must contain at most {0} entries", maxEntries)
-            );
+            throw new IOException(MessageFormat.format("The archive must contain at most {0} entries", maxEntries));
         }
         return newCount;
     }
@@ -275,12 +267,12 @@ public final class SafeZipExtractor {
         long entryDecompressedSize,
         long totalDecompressedSize,
         SafeZipLimits limits
-    ) {
+    ) throws IOException {
         if (entryDecompressedSize > limits.maxEntryDecompressedBytes()) {
-            throw new SafeZipException(MessageFormat.format("The archive entry is too large: {0}", name));
+            throw new IOException(MessageFormat.format("The archive entry is too large: {0}", name));
         }
         if (totalDecompressedSize + entryDecompressedSize > limits.maxTotalDecompressedBytes()) {
-            throw new SafeZipException("The archive decompresses to too much data");
+            throw new IOException("The archive decompresses to too much data");
         }
     }
 
@@ -293,7 +285,7 @@ public final class SafeZipExtractor {
         SafeZipLimits limits
     ) throws IOException {
         if (Files.isSymbolicLink(entryPath)) {
-            throw new SafeZipException("Symlink entries are not allowed: " + entry.getName());
+            throw new IOException("Symlink entries are not allowed: " + entry.getName());
         }
         Path parent = entryPath.getParent();
         if (parent != null) {
@@ -315,19 +307,17 @@ public final class SafeZipExtractor {
     ) throws IOException {
         long compressedSize = entry.getCompressedSize();
         try (InputStream inputStream = zip.getInputStream(entry)) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream(initialBufferSize(entry, limits));
             byte[] buffer = new byte[READ_BUFFER_SIZE];
             long entryDecompressedSize = 0L;
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 entryDecompressedSize += bytesRead;
                 if (entryDecompressedSize > limits.maxEntryDecompressedBytes()) {
-                    throw new SafeZipException(
-                        MessageFormat.format("The archive entry is too large: {0}", entry.getName())
-                    );
+                    throw new IOException(MessageFormat.format("The archive entry is too large: {0}", entry.getName()));
                 }
                 if (totalDecompressedSize + entryDecompressedSize > limits.maxTotalDecompressedBytes()) {
-                    throw new SafeZipException("The archive decompresses to too much data");
+                    throw new IOException("The archive decompresses to too much data");
                 }
                 if (compressedSize > 0) {
                     validateCompressionRatio(
@@ -340,12 +330,18 @@ public final class SafeZipExtractor {
                 out.write(buffer, 0, bytesRead);
             }
             if (out.size() == 0) {
-                throw new SafeZipException(
-                    MessageFormat.format("The archive must not contain folders or empty entries: {0}", entry.getName())
-                );
+                throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, entry.getName()));
             }
             return out.toByteArray();
         }
+    }
+
+    private static int initialBufferSize(ZipEntry entry, SafeZipLimits limits) {
+        long knownSize = entry.getSize();
+        if (knownSize <= 0 || knownSize > limits.maxEntryDecompressedBytes() || knownSize > Integer.MAX_VALUE) {
+            return READ_BUFFER_SIZE;
+        }
+        return (int) knownSize;
     }
 
     private static String fileExtension(String name) {
@@ -357,19 +353,14 @@ public final class SafeZipExtractor {
         return "";
     }
 
-    private static final long MIN_COMPRESSED_BYTES_FOR_RATIO_CHECK = 512;
-
     private static void validateCompressionRatio(
         long decompressedSize,
         long compressedSize,
         long maxCompressionRatio,
         String entryName
-    ) {
-        if (
-            compressedSize >= MIN_COMPRESSED_BYTES_FOR_RATIO_CHECK &&
-            decompressedSize > compressedSize * maxCompressionRatio
-        ) {
-            throw new SafeZipException(
+    ) throws IOException {
+        if (compressedSize > 0 && decompressedSize > compressedSize * maxCompressionRatio) {
+            throw new IOException(
                 MessageFormat.format(
                     "The archive entry has a suspiciously high compression ratio (possible ZIP bomb): {0}",
                     entryName

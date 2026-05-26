@@ -81,8 +81,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("must not contain folders or empty entries")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("must not contain folders or empty entries");
     }
 
     @Test
@@ -96,8 +95,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, permissiveLimits()))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("unsafe path")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("unsafe path");
     }
 
     @Test
@@ -154,8 +152,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("decompresses to too much data")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("decompresses to too much data");
     }
 
     @Test
@@ -201,8 +198,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("unsafe path")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("unsafe path");
     }
 
     @Test
@@ -222,8 +218,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("executable file")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("executable file");
     }
 
     @Test
@@ -243,8 +238,53 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("nested zip file")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("nested zip file");
+    }
+
+    @Test
+    void extractToDirectory_shouldThrow_whenEntryPathIsSymbolicLink(@TempDir Path tempDir) throws IOException {
+        Path target = tempDir.resolve("out");
+        Files.createDirectories(target);
+        Path outside = tempDir.resolve("outside.txt");
+        Files.writeString(outside, "secret");
+        Path link = target.resolve("linked.txt");
+        try {
+            Files.createSymbolicLink(link, outside);
+        } catch (UnsupportedOperationException | IOException ignored) {
+            org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
+        }
+
+        Path zipPath = ZipTestFixtures.writeZipFile(
+            tempDir,
+            "linked.zip",
+            ZipTestFixtures.entry("linked.txt", "payload")
+        );
+
+        assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, permissiveLimits()))
+            .isInstanceOf(IOException.class)
+            .hasMessageContaining("Symlink entries are not allowed");
+    }
+
+    @Test
+    void extractToDirectory_shouldThrow_whenFileEntryIsEmpty() throws IOException {
+        Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "empty.zip", ZipTestFixtures.entry("empty.txt", ""));
+
+        assertThatThrownBy(() ->
+                SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), permissiveLimits())
+            )
+            .isInstanceOf(IOException.class)
+            .hasMessageContaining("must not contain folders or empty entries");
+    }
+
+    @Test
+    void extractToDirectory_shouldExtractStoredEntry_whenSizeIsKnown() throws IOException {
+        Path zipPath = tempDir.resolve("stored.zip");
+        Files.write(zipPath, SafeZipExtractorTest.zipWithStoredEntry("stored.txt", "known-size-content"));
+        Path target = tempDir.resolve("out");
+
+        SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, permissiveLimits());
+
+        assertThat(Files.readString(target.resolve("stored.txt"))).isEqualTo("known-size-content");
     }
 
     @Test
@@ -260,8 +300,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("unsafe path")
-            .hasCauseInstanceOf(SafeZipException.class);
+            .hasMessageContaining("unsafe path");
     }
 
     private static SafeZipLimits permissiveLimits() {

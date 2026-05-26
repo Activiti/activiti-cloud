@@ -49,9 +49,4 @@ public record SafeZipEntry(String name, byte[] content, boolean directory) {
     public int hashCode() {
         return Objects.hash(name, Arrays.hashCode(content), directory);
     }
-
-    @Override
-    public String toString() {
-        return "SafeZipEntry[name=" + name + ", content=" + Arrays.toString(content) + ", directory=" + directory + "]";
-    }
 }

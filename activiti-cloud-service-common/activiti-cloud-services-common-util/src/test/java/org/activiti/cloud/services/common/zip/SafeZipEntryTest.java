@@ -23,25 +23,91 @@ import org.junit.jupiter.api.Test;
 class SafeZipEntryTest {
 
     @Test
-    void toString_shouldIncludeContentBytes() {
-        SafeZipEntry entry = new SafeZipEntry("file.json", "{\"a\":1}".getBytes(UTF_8));
-
-        assertThat(entry.toString()).contains("file.json").contains("123, 34, 97, 34, 58, 49, 125");
-    }
-
-    @Test
-    void toString_shouldRepresentDirectoryWithoutContent() {
-        SafeZipEntry entry = new SafeZipEntry("folder/", null, true);
-
-        assertThat(entry.toString()).contains("folder/").contains("directory=true").contains("null");
-    }
-
-    @Test
     void equals_shouldCompareContentByValue() {
         SafeZipEntry first = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
         SafeZipEntry second = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
 
-        assertThat(first).isEqualTo(second);
-        assertThat(first.hashCode()).isEqualTo(second.hashCode());
+        assertThat(first).isEqualTo(second).hasSameHashCodeAs(second);
+    }
+
+    @Test
+    void equals_shouldReturnTrueForSameInstance() {
+        SafeZipEntry entry = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
+
+        assertThat(entry.equals(entry)).isTrue();
+    }
+
+    @Test
+    void equals_shouldReturnFalseForDifferentType() {
+        SafeZipEntry entry = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
+
+        assertThat(entry.equals("a.json")).isFalse();
+    }
+
+    @Test
+    void equals_shouldReturnFalseWhenNameDiffers() {
+        SafeZipEntry first = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
+        SafeZipEntry second = new SafeZipEntry("b.json", "x".getBytes(UTF_8));
+
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
+    void equals_shouldReturnFalseWhenContentDiffers() {
+        SafeZipEntry first = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
+        SafeZipEntry second = new SafeZipEntry("a.json", "y".getBytes(UTF_8));
+
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
+    void equals_shouldReturnFalseWhenDirectoryFlagDiffers() {
+        SafeZipEntry file = new SafeZipEntry("folder/", null, false);
+        SafeZipEntry directory = new SafeZipEntry("folder/", null, true);
+
+        assertThat(file).isNotEqualTo(directory);
+    }
+
+    @Test
+    void twoArgConstructor_shouldDefaultDirectoryToFalse() {
+        SafeZipEntry entry = new SafeZipEntry("a.json", "x".getBytes(UTF_8));
+
+        assertThat(entry.directory()).isFalse();
+    }
+
+    @Test
+    void content_shouldReturnNullForDirectoryEntry() {
+        SafeZipEntry directory = new SafeZipEntry("folder/", null, true);
+
+        assertThat(directory.content()).isNull();
+    }
+
+    @Test
+    void content_shouldReturnDefensiveCopy() {
+        byte[] original = "payload".getBytes(UTF_8);
+        SafeZipEntry entry = new SafeZipEntry("a.json", original);
+
+        byte[] returned = entry.content();
+        original[0] = 'X';
+        returned[0] = 'Y';
+
+        assertThat(entry.content()).isEqualTo("payload".getBytes(UTF_8));
+    }
+
+    @Test
+    void constructor_shouldCopyContentOnCreation() {
+        byte[] original = "payload".getBytes(UTF_8);
+        SafeZipEntry entry = new SafeZipEntry("a.json", original);
+        original[0] = 'X';
+
+        assertThat(entry.content()).isEqualTo("payload".getBytes(UTF_8));
+    }
+
+    @Test
+    void hashCode_shouldBeConsistentForDirectoryEntry() {
+        SafeZipEntry first = new SafeZipEntry("folder/", null, true);
+        SafeZipEntry second = new SafeZipEntry("folder/", null, true);
+
+        assertThat(first).hasSameHashCodeAs(second);
     }
 }

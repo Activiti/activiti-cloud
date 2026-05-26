@@ -56,23 +56,45 @@ class SafeZipLimitsTest {
 
     @Test
     void build_shouldRejectZeroMaxEntries() {
-        assertThatThrownBy(() -> minimalBuilder().maxEntries(0).build())
+        SafeZipLimits.Builder builder = minimalBuilder().maxEntries(0);
+
+        assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxEntries must be positive");
     }
 
     @Test
     void build_shouldRejectNegativeMaxEntries() {
-        assertThatThrownBy(() -> minimalBuilder().maxEntries(-1).build())
+        SafeZipLimits.Builder builder = minimalBuilder().maxEntries(-1);
+
+        assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxEntries must be positive");
     }
 
     @Test
     void build_shouldRejectZeroSizeLimits() {
-        assertThatThrownBy(() -> minimalBuilder().maxEntryDecompressedBytes(0).maxTotalDecompressedBytes(1024).build())
+        SafeZipLimits.Builder builder = minimalBuilder().maxEntryDecompressedBytes(0).maxTotalDecompressedBytes(1024);
+
+        assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("size limits must be positive");
+    }
+
+    @Test
+    void build_shouldRejectZeroMaxTotalDecompressedBytes() {
+        SafeZipLimits.Builder builder = minimalBuilder().maxEntryDecompressedBytes(1024).maxTotalDecompressedBytes(0);
+
+        assertThatThrownBy(builder::build)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("size limits must be positive");
+    }
+
+    @Test
+    void build_shouldUseNoOpExecutableCheck_whenExecutableContentCheckIsNull() {
+        SafeZipLimits limits = minimalBuilder().executableContentCheck(null).build();
+
+        assertThat(limits.executableContentCheck().test(new byte[] { 0x7f })).isFalse();
     }
 
     @Test
@@ -88,9 +110,20 @@ class SafeZipLimitsTest {
 
     @Test
     void build_shouldRejectInvalidCompressionRatio() {
-        assertThatThrownBy(() -> minimalBuilder().maxCompressionRatio(0).build())
+        SafeZipLimits.Builder builder = minimalBuilder().maxCompressionRatio(0);
+
+        assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxCompressionRatio must be positive");
+    }
+
+    @Test
+    void build_shouldRejectFlatEntryPathsWithAllowDirectories() {
+        SafeZipLimits.Builder builder = minimalBuilder().allowDirectories(true).flatEntryPaths(true);
+
+        assertThatThrownBy(builder::build)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("allowDirectories cannot be combined with flatEntryPaths");
     }
 
     private static SafeZipLimits.Builder minimalBuilder() {

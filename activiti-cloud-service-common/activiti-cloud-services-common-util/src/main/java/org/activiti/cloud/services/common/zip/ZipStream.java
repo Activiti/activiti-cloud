@@ -27,12 +27,8 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Zip stream based on a {@link ZipInputStream}.
- *
- * @deprecated since 9.1.0 Unbounded extraction ({@link StreamUtils#copyToByteArray(InputStream)}) has no zip-bomb or
- *     path protections. Use {@link SafeZipStream} or {@link SafeZipExtractor} with {@link SafeZipLimits} instead.
+ * Zip stream based on a {@link ZipInputStream}
  */
-@Deprecated(since = "9.1.0", forRemoval = true)
 public class ZipStream {
 
     private final InputStream inputStream;
@@ -56,25 +52,21 @@ public class ZipStream {
     }
 
     /**
-     * Create the {@link ZipStream} corresponding to a {@link MultipartFile}.
+     * Create thg {@link ZipStream} corresponding to a {@link MultipartFile}.
      * @param multipartFile the multipart file
      * @return the zip stream
      * @throws IOException in case of multipart file input stream access error
-     * @deprecated since 9.1.0 Use {@link SafeZipStream#of(MultipartFile, SafeZipLimits)} instead.
      */
-    @Deprecated(since = "9.1.0", forRemoval = true)
     public static ZipStream of(MultipartFile multipartFile) throws IOException {
         return new ZipStream(multipartFile.getInputStream());
     }
 
     /**
-     * Create the {@link ZipStream} corresponding to an {@link InputStream}.
+     * Create thg {@link ZipStream} corresponding to an {@link InputStream}.
      * @param inputStream the inputStream
      * @return the zip stream
      * @throws IOException in case of input stream access error
-     * @deprecated since 9.1.0 Use {@link SafeZipStream#of(InputStream, SafeZipLimits)} instead.
      */
-    @Deprecated(since = "9.1.0", forRemoval = true)
     public static ZipStream of(InputStream inputStream) throws IOException {
         return new ZipStream(inputStream);
     }

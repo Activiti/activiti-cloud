@@ -29,7 +29,7 @@ class SafeZipStreamEntryTest {
         assertThat(entry.getName()).isEqualTo("folder/file.txt");
         assertThat(entry.getFileName()).isEqualTo("file.txt");
         assertThat(entry.getFolderName(0)).contains("folder");
-        assertThat(entry.getContent()).contains("data".getBytes(UTF_8));
+        assertThat(entry.getContent()).hasValueSatisfying(bytes -> assertThat(bytes).isEqualTo("data".getBytes(UTF_8)));
         assertThat(entry.isDirectory()).isFalse();
         assertThat(entry.isAtRoot()).isFalse();
     }
@@ -47,15 +47,33 @@ class SafeZipStreamEntryTest {
     void getContent_shouldReturnEmptyBytes_whenFileEntryHasNullContent() {
         SafeZipStreamEntry entry = new SafeZipStreamEntry("file.txt", null, false);
 
-        assertThat(entry.getContent()).contains(new byte[0]);
+        assertThat(entry.getContent()).hasValueSatisfying(bytes -> assertThat(bytes).isEmpty());
     }
 
     @Test
-    void from_shouldReuseSafeZipEntryContentWithoutExtraCopy() {
+    void from_shouldPreserveSafeZipEntryContent() {
         SafeZipEntry zipEntry = new SafeZipEntry("file.txt", "payload".getBytes(UTF_8));
 
         SafeZipStreamEntry streamEntry = SafeZipStreamEntry.from(zipEntry);
 
-        assertThat(streamEntry.getContent()).contains("payload".getBytes(UTF_8));
+        assertThat(streamEntry.getContent())
+            .hasValueSatisfying(bytes -> assertThat(bytes).isEqualTo("payload".getBytes(UTF_8)));
+    }
+
+    @Test
+    void from_shouldExposeDirectoryMetadata() {
+        SafeZipEntry zipEntry = new SafeZipEntry("folder/", null, true);
+
+        SafeZipStreamEntry streamEntry = SafeZipStreamEntry.from(zipEntry);
+
+        assertThat(streamEntry.isDirectory()).isTrue();
+        assertThat(streamEntry.getContent()).isEmpty();
+    }
+
+    @Test
+    void isAtRoot_shouldReturnTrue_forRootLevelFile() {
+        SafeZipStreamEntry entry = new SafeZipStreamEntry("file.txt", "data".getBytes(UTF_8), false);
+
+        assertThat(entry.isAtRoot()).isTrue();
     }
 }

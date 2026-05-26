@@ -42,6 +42,9 @@ public record SafeZipLimits(
         if (maxCompressionRatio <= 0) {
             throw new IllegalArgumentException("maxCompressionRatio must be positive");
         }
+        if (allowDirectories && flatEntryPaths) {
+            throw new IllegalArgumentException("allowDirectories cannot be combined with flatEntryPaths");
+        }
         allowedExtensions = normalizeExtensions(allowedExtensions);
         nestedZipAllowedExtensions = normalizeExtensions(nestedZipAllowedExtensions);
         executableContentCheck = executableContentCheck == null ? bytes -> false : executableContentCheck;

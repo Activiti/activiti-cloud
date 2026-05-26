@@ -39,14 +39,10 @@ public final class SafeZipStream {
     }
 
     public void forEach(Consumer<SafeZipStreamEntry> consumer) throws IOException {
-        try {
-            SafeZipExtractor.forEachStreamEntry(
-                inputStream,
-                limits,
-                entry -> consumer.accept(SafeZipStreamEntry.from(entry))
-            );
-        } catch (SafeZipException e) {
-            throw new IOException(e.getMessage(), e);
-        }
+        SafeZipExtractor.forEachStreamEntry(
+            inputStream,
+            limits,
+            entry -> consumer.accept(SafeZipStreamEntry.from(entry))
+        );
     }
 }
