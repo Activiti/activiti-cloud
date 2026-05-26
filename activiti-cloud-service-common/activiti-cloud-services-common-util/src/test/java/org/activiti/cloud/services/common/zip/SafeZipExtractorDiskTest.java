@@ -96,7 +96,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, permissiveLimits()))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("Zip slip detected")
+            .hasMessageContaining("unsafe path")
             .hasCauseInstanceOf(SafeZipException.class);
     }
 
@@ -154,7 +154,8 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("Total extraction size exceeds maximum allowed");
+            .hasMessageContaining("decompresses to too much data")
+            .hasCauseInstanceOf(SafeZipException.class);
     }
 
     @Test
@@ -205,6 +206,48 @@ class SafeZipExtractorDiskTest {
     }
 
     @Test
+    void extractToDirectory_shouldThrow_whenEntryIsExecutable() throws IOException {
+        Path zipPath = ZipTestFixtures.writeZipFile(
+            tempDir,
+            "executable.zip",
+            ZipTestFixtures.entry("payload.txt", "data")
+        );
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(1024 * KB)
+            .maxTotalDecompressedBytes(1024 * KB)
+            .executableContentCheck(bytes -> true)
+            .build();
+
+        assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
+            .isInstanceOf(IOException.class)
+            .hasMessageContaining("executable file")
+            .hasCauseInstanceOf(SafeZipException.class);
+    }
+
+    @Test
+    void extractToDirectory_shouldThrow_whenNestedZipDetected() throws IOException {
+        Path zipPath = ZipTestFixtures.writeZipFile(
+            tempDir,
+            "nested.zip",
+            ZipTestFixtures.entry("inner.zip", ZipTestFixtures.zipLocalFileHeaderBytes())
+        );
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(1024 * KB)
+            .maxTotalDecompressedBytes(1024 * KB)
+            .rejectNestedZipEntries(true)
+            .build();
+
+        assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
+            .isInstanceOf(IOException.class)
+            .hasMessageContaining("nested zip file")
+            .hasCauseInstanceOf(SafeZipException.class);
+    }
+
+    @Test
     void extractToDirectory_shouldThrow_whenHierarchicalPathIsUnsafe() throws IOException {
         Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "unsafe.zip", ZipTestFixtures.entry("../evil.txt", "x"));
         SafeZipLimits limits = SafeZipLimits
@@ -217,7 +260,7 @@ class SafeZipExtractorDiskTest {
 
         assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
-            .hasMessageContaining("Zip slip detected")
+            .hasMessageContaining("unsafe path")
             .hasCauseInstanceOf(SafeZipException.class);
     }
 

@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.common.zip;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public record SafeZipEntry(String name, byte[] content, boolean directory) {
     public SafeZipEntry {
@@ -31,5 +32,26 @@ public record SafeZipEntry(String name, byte[] content, boolean directory) {
     @Override
     public byte[] content() {
         return content == null ? null : Arrays.copyOf(content, content.length);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SafeZipEntry that)) {
+            return false;
+        }
+        return directory == that.directory && Objects.equals(name, that.name) && Arrays.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, Arrays.hashCode(content), directory);
+    }
+
+    @Override
+    public String toString() {
+        return "SafeZipEntry[name=" + name + ", content=" + Arrays.toString(content) + ", directory=" + directory + "]";
     }
 }

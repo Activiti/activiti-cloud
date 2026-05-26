@@ -26,9 +26,26 @@ public final class SafeZipStreamEntry {
     private final boolean directory;
 
     SafeZipStreamEntry(String name, byte[] content, boolean directory) {
+        this(name, content, directory, false);
+    }
+
+    static SafeZipStreamEntry from(SafeZipEntry entry) {
+        if (entry.directory()) {
+            return new SafeZipStreamEntry(entry.name(), null, true, true);
+        }
+        return new SafeZipStreamEntry(entry.name(), entry.content(), false, true);
+    }
+
+    private SafeZipStreamEntry(String name, byte[] content, boolean directory, boolean trustedContent) {
         this.name = name;
-        this.content = content == null ? null : Arrays.copyOf(content, content.length);
         this.directory = directory;
+        if (directory) {
+            this.content = null;
+        } else if (content == null) {
+            this.content = new byte[0];
+        } else {
+            this.content = trustedContent ? content : Arrays.copyOf(content, content.length);
+        }
     }
 
     public String getName() {

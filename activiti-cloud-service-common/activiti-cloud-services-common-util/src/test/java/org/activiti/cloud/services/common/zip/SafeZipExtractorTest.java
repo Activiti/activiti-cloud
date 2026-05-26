@@ -77,6 +77,24 @@ class SafeZipExtractorTest {
     }
 
     @Test
+    void extractEntries_shouldRejectDirectoryWithHiddenPayload() throws IOException {
+        byte[] payload = ZipTestFixtures.incompressibleBytes(1024 * 1024);
+        byte[] zip = ZipTestFixtures.zipBytesWithDirectoryPayload("trap/", payload);
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(512 * 1024)
+            .maxTotalDecompressedBytes(MB)
+            .allowDirectories(true)
+            .flatEntryPaths(false)
+            .build();
+
+        assertThatThrownBy(() -> SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits))
+            .isInstanceOf(SafeZipException.class)
+            .hasMessageContaining("archive entry is too large");
+    }
+
+    @Test
     void extractEntries_shouldAllowDirectory_whenConfigured() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(
             ZipTestFixtures.directory("folder/"),

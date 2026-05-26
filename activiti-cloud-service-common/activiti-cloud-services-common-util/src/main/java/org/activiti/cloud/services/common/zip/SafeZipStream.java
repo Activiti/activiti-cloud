@@ -43,7 +43,7 @@ public final class SafeZipStream {
             SafeZipExtractor.forEachStreamEntry(
                 inputStream,
                 limits,
-                entry -> consumer.accept(new SafeZipStreamEntry(entry.name(), entry.content(), entry.directory()))
+                entry -> consumer.accept(SafeZipStreamEntry.from(entry))
             );
         } catch (SafeZipException e) {
             throw new IOException(e.getMessage(), e);

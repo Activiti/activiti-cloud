@@ -30,7 +30,7 @@ final class ZipEntryPaths {
     }
 
     static boolean isDirectoryEntry(String name, boolean zipDirectoryFlag) {
-        return zipDirectoryFlag || name.endsWith("/");
+        return zipDirectoryFlag || normalizeEntryName(name).endsWith("/");
     }
 
     static String getFileName(String entryName, boolean directory) {
@@ -58,7 +58,19 @@ final class ZipEntryPaths {
     }
 
     static boolean hasUnsafeFlatPath(String name) {
-        return name.contains("/") || name.contains("\\") || name.contains("..");
+        if (name.contains("/") || name.contains("\\") || name.contains("..")) {
+            return true;
+        }
+        String normalized = normalizeEntryName(name);
+        if (normalized.length() >= 2 && normalized.charAt(1) == ':' && Character.isLetter(normalized.charAt(0))) {
+            return true;
+        }
+        try {
+            Path.of(normalized);
+            return false;
+        } catch (InvalidPathException e) {
+            return true;
+        }
     }
 
     static boolean hasUnsafeHierarchicalPath(String name) {
@@ -86,18 +98,22 @@ final class ZipEntryPaths {
     }
 
     static Path resolveEntryPath(Path targetRoot, String entryName) {
-        String normalized = normalizeEntryName(entryName);
-        while (normalized.startsWith("/")) {
-            normalized = normalized.substring(1);
-        }
-        if (normalized.endsWith("/")) {
-            normalized = normalized.substring(0, normalized.length() - 1);
-        }
-        Path entryPath = targetRoot.resolve(normalized).normalize();
-        if (!entryPath.startsWith(targetRoot)) {
+        try {
+            String normalized = normalizeEntryName(entryName);
+            while (normalized.startsWith("/")) {
+                normalized = normalized.substring(1);
+            }
+            if (normalized.endsWith("/")) {
+                normalized = normalized.substring(0, normalized.length() - 1);
+            }
+            Path entryPath = targetRoot.resolve(normalized).normalize();
+            if (!entryPath.startsWith(targetRoot)) {
+                throw new SafeZipException("Zip slip detected: invalid entry path");
+            }
+            return entryPath;
+        } catch (InvalidPathException e) {
             throw new SafeZipException("Zip slip detected: invalid entry path");
         }
-        return entryPath;
     }
 
     static void ensurePathWithinTarget(Path path, Path targetRoot) throws IOException {

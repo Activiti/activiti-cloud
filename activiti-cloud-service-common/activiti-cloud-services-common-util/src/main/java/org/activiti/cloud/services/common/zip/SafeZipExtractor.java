@@ -17,10 +17,8 @@ package org.activiti.cloud.services.common.zip;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -74,6 +72,7 @@ public final class SafeZipExtractor {
                 validateEntryPath(name, limits, null);
 
                 if (directory) {
+                    totalDecompressedSize += drainEntryWithLimits(zis, counting, name, totalDecompressedSize, limits);
                     consumer.accept(new SafeZipEntry(name, null, true));
                     continue;
                 }
@@ -114,26 +113,23 @@ public final class SafeZipExtractor {
 
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
                 entryCount = incrementAndValidateEntryCountForDisk(entryCount, limits.maxEntries());
-                Path entryPath = ZipEntryPaths.resolveEntryPath(targetRoot, entry.getName());
+                validateEntryPath(name, limits, targetRoot);
+                Path entryPath = ZipEntryPaths.resolveEntryPath(targetRoot, name);
 
                 if (entry.isDirectory()) {
                     if (!limits.allowDirectories()) {
                         throw new SafeZipException(
-                            MessageFormat.format(
-                                "The archive must not contain folders or empty entries: {0}",
-                                entry.getName()
-                            )
+                            MessageFormat.format("The archive must not contain folders or empty entries: {0}", name)
                         );
                     }
-                    validateEntryPath(entry.getName(), limits, targetRoot);
                     Files.createDirectories(entryPath);
                     ZipEntryPaths.ensurePathWithinTarget(entryPath, targetRoot);
                     continue;
                 }
 
-                validateEntryPath(entry.getName(), limits, targetRoot);
-                validateExtension(entry.getName(), limits);
+                validateExtension(name, limits);
                 validateEntrySizeMetadata(entry, limits);
 
                 Path parentDir = entryPath.getParent();
@@ -223,6 +219,30 @@ public final class SafeZipExtractor {
         }
     }
 
+    private static long drainEntryWithLimits(
+        ZipInputStream zis,
+        CountingInputStream counting,
+        String name,
+        long totalDecompressedSize,
+        SafeZipLimits limits
+    ) throws IOException {
+        long entryCompressedStart = counting.getCount();
+        byte[] buffer = new byte[READ_BUFFER_SIZE];
+        long entryDecompressedSize = 0L;
+        int read;
+        while ((read = zis.read(buffer)) != -1) {
+            entryDecompressedSize += read;
+            validateDecompressedSizeLimits(name, entryDecompressedSize, totalDecompressedSize, limits);
+            validateCompressionRatio(
+                entryDecompressedSize,
+                counting.getCount() - entryCompressedStart,
+                limits.maxCompressionRatio(),
+                name
+            );
+        }
+        return entryDecompressedSize;
+    }
+
     private static byte[] readEntryWithLimits(
         ZipInputStream zis,
         CountingInputStream counting,
@@ -238,12 +258,7 @@ public final class SafeZipExtractor {
         int read;
         while ((read = zis.read(buffer)) != -1) {
             entryDecompressedSize += read;
-            if (entryDecompressedSize > limits.maxEntryDecompressedBytes()) {
-                throw new SafeZipException(MessageFormat.format("The archive entry is too large: {0}", name));
-            }
-            if (totalDecompressedSize + entryDecompressedSize > limits.maxTotalDecompressedBytes()) {
-                throw new SafeZipException("The archive decompresses to too much data");
-            }
+            validateDecompressedSizeLimits(name, entryDecompressedSize, totalDecompressedSize, limits);
             validateCompressionRatio(
                 entryDecompressedSize,
                 counting.getCount() - entryCompressedStart,
@@ -253,6 +268,20 @@ public final class SafeZipExtractor {
             out.write(buffer, 0, read);
         }
         return out.toByteArray();
+    }
+
+    private static void validateDecompressedSizeLimits(
+        String name,
+        long entryDecompressedSize,
+        long totalDecompressedSize,
+        SafeZipLimits limits
+    ) {
+        if (entryDecompressedSize > limits.maxEntryDecompressedBytes()) {
+            throw new SafeZipException(MessageFormat.format("The archive entry is too large: {0}", name));
+        }
+        if (totalDecompressedSize + entryDecompressedSize > limits.maxTotalDecompressedBytes()) {
+            throw new SafeZipException("The archive decompresses to too much data");
+        }
     }
 
     private static long extractFileEntry(
@@ -271,48 +300,52 @@ public final class SafeZipExtractor {
             ZipEntryPaths.ensurePathWithinTarget(parent, targetRoot);
         }
 
+        byte[] entryBytes = readZipFileEntryBytes(zip, entry, totalSize, limits);
+        validateEntryContent(entry.getName(), entryBytes, limits);
+        ZipEntryPaths.ensurePathWithinTarget(entryPath, targetRoot);
+        Files.write(entryPath, entryBytes);
+        return totalSize + entryBytes.length;
+    }
+
+    private static byte[] readZipFileEntryBytes(
+        ZipFile zip,
+        ZipEntry entry,
+        long totalDecompressedSize,
+        SafeZipLimits limits
+    ) throws IOException {
         long compressedSize = entry.getCompressedSize();
-        try (
-            InputStream inputStream = zip.getInputStream(entry);
-            OutputStream outputStream = new FileOutputStream(entryPath.toFile())
-        ) {
+        try (InputStream inputStream = zip.getInputStream(entry)) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[READ_BUFFER_SIZE];
-            long entryBytesRead = 0L;
+            long entryDecompressedSize = 0L;
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
-                totalSize = accumulateTotalSize(totalSize, bytesRead, limits.maxTotalDecompressedBytes());
-                entryBytesRead =
-                    accumulateEntrySize(entry.getName(), entryBytesRead, bytesRead, limits.maxEntryDecompressedBytes());
+                entryDecompressedSize += bytesRead;
+                if (entryDecompressedSize > limits.maxEntryDecompressedBytes()) {
+                    throw new SafeZipException(
+                        MessageFormat.format("The archive entry is too large: {0}", entry.getName())
+                    );
+                }
+                if (totalDecompressedSize + entryDecompressedSize > limits.maxTotalDecompressedBytes()) {
+                    throw new SafeZipException("The archive decompresses to too much data");
+                }
                 if (compressedSize > 0) {
                     validateCompressionRatio(
-                        entryBytesRead,
+                        entryDecompressedSize,
                         compressedSize,
                         limits.maxCompressionRatio(),
                         entry.getName()
                     );
                 }
-                outputStream.write(buffer, 0, bytesRead);
+                out.write(buffer, 0, bytesRead);
             }
-            return totalSize;
+            if (out.size() == 0) {
+                throw new SafeZipException(
+                    MessageFormat.format("The archive must not contain folders or empty entries: {0}", entry.getName())
+                );
+            }
+            return out.toByteArray();
         }
-    }
-
-    private static long accumulateTotalSize(long currentTotalSize, int bytesRead, long maxTotalSize)
-        throws IOException {
-        long newTotalSize = currentTotalSize + bytesRead;
-        if (newTotalSize > maxTotalSize) {
-            throw new IOException("Total extraction size exceeds maximum allowed");
-        }
-        return newTotalSize;
-    }
-
-    private static long accumulateEntrySize(String entryName, long currentEntryBytes, int bytesRead, long maxEntrySize)
-        throws IOException {
-        long newEntryBytes = currentEntryBytes + bytesRead;
-        if (newEntryBytes > maxEntrySize) {
-            throw new IOException("Entry size exceeds maximum allowed during extraction: " + entryName);
-        }
-        return newEntryBytes;
     }
 
     private static String fileExtension(String name) {

@@ -42,4 +42,20 @@ class SafeZipStreamEntryTest {
         assertThat(entry.getContent()).isEmpty();
         assertThat(entry.isDirectory()).isTrue();
     }
+
+    @Test
+    void getContent_shouldReturnEmptyBytes_whenFileEntryHasNullContent() {
+        SafeZipStreamEntry entry = new SafeZipStreamEntry("file.txt", null, false);
+
+        assertThat(entry.getContent()).contains(new byte[0]);
+    }
+
+    @Test
+    void from_shouldReuseSafeZipEntryContentWithoutExtraCopy() {
+        SafeZipEntry zipEntry = new SafeZipEntry("file.txt", "payload".getBytes(UTF_8));
+
+        SafeZipStreamEntry streamEntry = SafeZipStreamEntry.from(zipEntry);
+
+        assertThat(streamEntry.getContent()).contains("payload".getBytes(UTF_8));
+    }
 }

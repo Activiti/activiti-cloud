@@ -34,6 +34,11 @@ class ZipEntryPathsTest {
     }
 
     @Test
+    void isDirectoryEntry_shouldDetectTrailingBackslash() {
+        assertThat(ZipEntryPaths.isDirectoryEntry("folder\\", false)).isTrue();
+    }
+
+    @Test
     void isDirectoryEntry_shouldDetectZipDirectoryFlag() {
         assertThat(ZipEntryPaths.isDirectoryEntry("entry", true)).isTrue();
     }
@@ -64,6 +69,12 @@ class ZipEntryPathsTest {
         assertThat(ZipEntryPaths.hasUnsafeFlatPath("folder/file.json")).isTrue();
         assertThat(ZipEntryPaths.hasUnsafeFlatPath("folder\\file.json")).isTrue();
         assertThat(ZipEntryPaths.hasUnsafeFlatPath("..file.json")).isTrue();
+    }
+
+    @Test
+    void hasUnsafeFlatPath_shouldRejectDriveLetterAndMalformedPaths() {
+        assertThat(ZipEntryPaths.hasUnsafeFlatPath("C:evil.json")).isTrue();
+        assertThat(ZipEntryPaths.hasUnsafeFlatPath("bad\u0000name.json")).isTrue();
     }
 
     @Test

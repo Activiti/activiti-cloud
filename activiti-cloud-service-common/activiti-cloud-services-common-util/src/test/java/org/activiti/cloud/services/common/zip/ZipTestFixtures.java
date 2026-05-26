@@ -67,6 +67,18 @@ final class ZipTestFixtures {
         return new ZipEntrySpec(name.endsWith("/") ? name : name + "/", null);
     }
 
+    static byte[] zipBytesWithDirectoryPayload(String directoryName, byte[] payload) throws IOException {
+        String dirName = directoryName.endsWith("/") ? directoryName : directoryName + "/";
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+            ZipEntry entry = new ZipEntry(dirName);
+            zos.putNextEntry(entry);
+            zos.write(payload);
+            zos.closeEntry();
+        }
+        return bos.toByteArray();
+    }
+
     static byte[] zipLocalFileHeaderBytes() {
         return new byte[] { 0x50, 0x4B, 0x03, 0x04 };
     }
