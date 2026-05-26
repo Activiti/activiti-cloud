@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration;
@@ -34,6 +36,7 @@ import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
@@ -52,6 +55,7 @@ import org.springframework.messaging.support.MessageBuilder;
 @Import({ TestBindingsChannelsConfiguration.class })
 class FunctionRouterProcessingTimeoutIT {
 
+    private static final AtomicReference<CountDownLatch> handlerStartedLatch = new AtomicReference<>();
     private static final AtomicReference<CountDownLatch> blockingLatch = new AtomicReference<>();
 
     @Autowired
@@ -64,6 +68,10 @@ class FunctionRouterProcessingTimeoutIT {
         @ConnectorBinding(input = TestBindingsChannels.REST_CONSUMER, connectorType = "rest.GET", condition = "true")
         ConsumerConnector<String> restGetHandler() {
             return payload -> {
+                CountDownLatch started = handlerStartedLatch.get();
+                if (started != null) {
+                    started.countDown();
+                }
                 CountDownLatch latch = blockingLatch.get();
                 if (latch != null) {
                     try {
@@ -78,6 +86,12 @@ class FunctionRouterProcessingTimeoutIT {
 
     @AfterEach
     void tearDown() {
+        CountDownLatch started = handlerStartedLatch.getAndSet(null);
+        if (started != null) {
+            while (started.getCount() > 0) {
+                started.countDown();
+            }
+        }
         CountDownLatch latch = blockingLatch.getAndSet(null);
         if (latch != null) {
             while (latch.getCount() > 0) {
@@ -106,5 +120,43 @@ class FunctionRouterProcessingTimeoutIT {
         assertThat(neverReleasedLatch.getCount())
             .as("latch must not have been released by the router — unblocking was caused by the timeout")
             .isEqualTo(1);
+    }
+
+    @Test
+    void shouldThrowMessagingExceptionAndPreserveInterruptFlagWhenCallerIsInterrupted() throws InterruptedException {
+        handlerStartedLatch.set(new CountDownLatch(1));
+        blockingLatch.set(new CountDownLatch(1));
+
+        Message<String> message = MessageBuilder
+            .withPayload("test")
+            .setHeader(FunctionRouterConfiguration.CONNECTOR_TYPE, "rest.GET")
+            .build();
+
+        AtomicReference<Throwable> thrownException = new AtomicReference<>();
+        AtomicBoolean interruptFlagPreserved = new AtomicBoolean(false);
+
+        Thread callerThread = new Thread(() -> {
+            try {
+                functionRouterMessageHandler.accept(message, FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT);
+            } catch (MessagingException e) {
+                thrownException.set(e);
+                interruptFlagPreserved.set(Thread.currentThread().isInterrupted());
+            }
+        });
+        callerThread.start();
+
+        assertThat(handlerStartedLatch.get().await(5, TimeUnit.SECONDS))
+            .as("handler must start within 5s")
+            .isTrue();
+        callerThread.interrupt();
+        callerThread.join(5_000);
+
+        assertThat(thrownException.get())
+            .isInstanceOf(MessagingException.class)
+            .extracting(Throwable::getCause)
+            .isInstanceOf(InterruptedException.class);
+        assertThat(interruptFlagPreserved)
+            .as("interrupt flag must be re-set on the caller thread after InterruptedException is caught")
+            .isTrue();
     }
 }
