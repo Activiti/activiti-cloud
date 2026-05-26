@@ -735,19 +735,31 @@ ACTIVITI_CLOUD_APPLICATION_NAME=default-app
 
 # DEBUG=pw:api
 
-# User Credentials - CONFIGURE THESE IN A SEPARATE .env.local FILE
-# Copy from root .env or configure with your test user credentials, provide username and password for users:
-HRUSER
-HRADMIN
-PROCESSADMINUSER
-MODELER
-MODELERQA
-DEVOPSUSER
-SUPERADMINUSER
-ALFRESCO_ADMINISTRATOR
-SALESUSER
-TESTADMIN
-TESTUSER
+# User Credentials
+# Uncomment and populate the required *_USERNAME / *_PASSWORD entries below.
+# Copy values from your root .env or another secure local source if needed.
+# HRUSER_USERNAME=
+# HRUSER_PASSWORD=
+# HRADMIN_USERNAME=
+# HRADMIN_PASSWORD=
+# PROCESSADMINUSER_USERNAME=
+# PROCESSADMINUSER_PASSWORD=
+# MODELER_USERNAME=
+# MODELER_PASSWORD=
+# MODELERQA_USERNAME=
+# MODELERQA_PASSWORD=
+# DEVOPSUSER_USERNAME=
+# DEVOPSUSER_PASSWORD=
+# SUPERADMINUSER_USERNAME=
+# SUPERADMINUSER_PASSWORD=
+# ALFRESCO_ADMINISTRATOR_USERNAME=
+# ALFRESCO_ADMINISTRATOR_PASSWORD=
+# SALESUSER_USERNAME=
+# SALESUSER_PASSWORD=
+# TESTADMIN_USERNAME=
+# TESTADMIN_PASSWORD=
+# TESTUSER_USERNAME=
+# TESTUSER_PASSWORD=
 
 EOF
 
@@ -763,14 +775,14 @@ EOF
     echo -e "${YELLOW}2. Start port forwarding to Traefik:${NC}"
     echo -e "${CYAN}   kubectl port-forward svc/traefik $local_port:80 -n traefik${NC}"
     echo ""
-    echo -e "${YELLOW}3. Review the generated .env file if you need credential overrides:${NC}"
-    echo -e "${CYAN}   # Default test users have already been written to the .env file${NC}"
-    echo -e "${CYAN}   # Update any values only if you want to use different credentials${NC}"
+    echo -e "${YELLOW}3. Add the required user credentials to the generated .env file:${NC}"
+    echo -e "${CYAN}   # Uncomment the *_USERNAME / *_PASSWORD entries listed at the end of the file${NC}"
+    echo -e "${CYAN}   # Copy the values from your root .env or another secure local source${NC}"
     echo ""
     echo -e "${YELLOW}4. Run the Playwright tests from the repository root:${NC}"
     echo -e "${CYAN}   npm test${NC}"
     echo ""
-    echo -e "${GREEN}The .env file has been automatically configured with the correct values!${NC}"
+    echo -e "${GREEN}The .env file has been generated with the environment-specific values and credential placeholders.${NC}"
 }
 
 # Validation
