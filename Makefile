@@ -76,7 +76,7 @@ release: update-chart
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
     helm dep up && \
-    helm lint && \
+    helm lint . && \
     cat Chart.yaml && \
 	  cat values.yaml && \
 	  ls -la charts
