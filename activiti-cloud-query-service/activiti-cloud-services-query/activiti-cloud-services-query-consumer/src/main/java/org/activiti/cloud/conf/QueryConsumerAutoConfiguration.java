@@ -140,4 +140,12 @@ public class QueryConsumerAutoConfiguration {
             return null;
         };
     }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "projectedEngineEventsPublisher")
+    public Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher(
+        MessageChannel projectedEngineEventsProducer
+    ) {
+        return events -> projectedEngineEventsProducer.send(MessageBuilder.withPayload(events).build());
+    }
 }
