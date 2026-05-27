@@ -80,6 +80,18 @@ TRAEFIK_IP="$(kubectl get svc "${PF_SVC}" -n "${PF_NS}" -o jsonpath='{.spec.clus
 prereqs_log "Traefik clusterIP: ${TRAEFIK_IP}"
 ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
 
+read_runtime_bundle_tag_from_values() {
+  local values_file=$1
+  if [[ ! -f "${values_file}" ]]; then
+    return 1
+  fi
+  if command -v yq &>/dev/null; then
+    yq e '.runtime-bundle.image.tag' "${values_file}" 2>/dev/null || true
+    return 0
+  fi
+  grep -A3 '^runtime-bundle:' "${values_file}" | grep 'tag:' | head -1 | sed 's/.*tag:[[:space:]]*\"\\?\\([^\"]*\\)\"\\?.*/\\1/'
+}
+
 resolve_runtime_bundle_image() {
   prereqs_set_actor registry
   if [[ -n "${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE:-}" ]]; then
@@ -87,7 +99,18 @@ resolve_runtime_bundle_image() {
     return
   fi
   local resolved_tag=""
-  if [[ "${ACCEPTANCE_RUNTIME_BUNDLE_USE_RESOLVED_TAG:-true}" == "true" && -f "${ROOT_DIR}/scripts/resolve-docker-images.sh" ]]; then
+  if [[ "${ACCEPTANCE_SKIP_IMAGE_RESOLVE:-}" == "true" ]]; then
+    local values_file=""
+    if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]]; then
+      values_file="${ROOT_DIR}/local-values.local.yaml"
+    elif [[ -f "${ROOT_DIR}/local-values.yaml" ]]; then
+      values_file="${ROOT_DIR}/local-values.yaml"
+    fi
+    if [[ -n "${values_file}" ]]; then
+      resolved_tag="$(read_runtime_bundle_tag_from_values "${values_file}")"
+      prereqs_log "using tag from ${values_file} (fresh Helm install — skip registry resolve)"
+    fi
+  elif [[ "${ACCEPTANCE_RUNTIME_BUNDLE_USE_RESOLVED_TAG:-true}" == "true" && -f "${ROOT_DIR}/scripts/resolve-docker-images.sh" ]]; then
     prereqs_step "resolving latest activiti/example-runtime-bundle tag (registry; may take 1–2 min)"
     run_with_heartbeat registry "resolve-docker-images" bash -c "cd '${ROOT_DIR}' && bash scripts/resolve-docker-images.sh" || true
     local values_file=""
@@ -520,9 +543,14 @@ if [[ ${#POLICY_ROLLOUTS[@]} -gt 0 ]]; then
   CHANGED=1
 fi
 
-if [[ "${POLICY_CM_CHANGED}" -eq 1 || "${POLICY_RESTART_NEEDED}" -eq 1 || "${SUPPLEMENTAL_CM_CHANGED}" -eq 1 ]]; then
-  prereqs_phase_actor policies "Reload policy consumers"
-  restart_deployments_parallel "${POLICY_DEPLOYMENTS[@]}"
+# ConfigMap-only changes need a restart; mount/env patches already triggered rollout above.
+if [[ "${POLICY_CM_CHANGED}" -eq 1 || "${SUPPLEMENTAL_CM_CHANGED}" -eq 1 ]]; then
+  if [[ ${#POLICY_ROLLOUTS[@]} -eq 0 ]]; then
+    prereqs_phase_actor policies "Reload policy consumers"
+    restart_deployments_parallel "${POLICY_DEPLOYMENTS[@]}"
+  else
+    prereqs_log "skip extra policy restart — rollout already completed after mount patches"
+  fi
 fi
 
 # --- hradmin: remove ACTIVITI_ADMIN so user-level policies apply (admin tests use processadminuser) ---

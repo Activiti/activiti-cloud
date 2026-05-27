@@ -121,11 +121,22 @@ if [[ "${needs_install}" -eq 1 ]]; then
 
   echo "📦 Installing Activiti Cloud preview (namespace ${PREVIEW_NAME})..."
   echo "   Helm installs Keycloak inside the preview namespace (no shared cluster Keycloak)."
-  echo "   This uses scripts/local-install.sh and may take several minutes."
+  echo "   Resolves latest Docker tags once, then Helm + acceptance prereqs (no duplicate redeploys)."
   echo ""
 
+  export REFRESH_LOCAL_IMAGE_TAGS=true
+  export ACCEPTANCE_FRESH_HELM_INSTALL=true
   (cd "${ROOT_DIR}" && ./scripts/local-install.sh -n "${ENV_NAME}" -c "${CLUSTER_NAME}")
   PREVIEW_NAME="$(preview_name_from_env_name "${ENV_NAME}")"
+
+  # Prereqs use the same tags Helm just deployed — skip slow registry resolve + RB image bump.
+  export ACCEPTANCE_SKIP_IMAGE_RESOLVE=true
+  if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]] && command -v yq &>/dev/null; then
+    _rb_tag="$(yq e '.runtime-bundle.image.tag' "${ROOT_DIR}/local-values.local.yaml" 2>/dev/null || true)"
+    if [[ -n "${_rb_tag}" && "${_rb_tag}" != "null" ]]; then
+      export ACCEPTANCE_RUNTIME_BUNDLE_IMAGE="activiti/example-runtime-bundle:${_rb_tag}"
+    fi
+  fi
 else
   PREVIEW_NAME="${DISCOVERED_NS}"
   echo "✓ Using existing preview namespace: ${PREVIEW_NAME}"

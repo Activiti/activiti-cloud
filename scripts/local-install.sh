@@ -316,6 +316,36 @@ configure_cluster() {
     fi
 }
 
+# Refresh local-values.local.yaml from Docker Hub (once per install — avoids Helm on :47 then prereqs bump to :48).
+refresh_local_image_tags() {
+    if [[ "${REFRESH_LOCAL_IMAGE_TAGS:-false}" != "true" ]]; then
+        return 0
+    fi
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
+        return 0
+    fi
+    echo -e "${YELLOW}Refreshing image tags from registry (resolve-docker-images.sh)...${NC}"
+    if "$SCRIPT_DIR/resolve-docker-images.sh"; then
+        echo -e "${GREEN}✓ local-values.local.yaml updated with latest tags${NC}"
+        return 0
+    fi
+    echo -e "${RED}✗ Failed to refresh local-values.local.yaml${NC}" >&2
+    return 1
+}
+
+read_local_image_version_from_values() {
+    local values_file=$1
+    if [[ ! -f "${values_file}" ]] || ! command -v yq >/dev/null 2>&1; then
+        return 0
+    fi
+    LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "${values_file}" 2>/dev/null || echo "")
+    if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
+        echo -e "${YELLOW}Using image version: ${LOCAL_IMAGE_VERSION}${NC}"
+        export LOCAL_IMAGE_VERSION
+    fi
+}
+
 # Function to ensure local-values.local.yaml exists (gitignored)
 ensure_local_values() {
     echo -e "${BLUE}=== Ensuring Local Docker Images Configuration ===${NC}"
@@ -329,44 +359,24 @@ ensure_local_values() {
     local legacy_local_values_file="$ROOT_DIR/local-values.yaml"
 
     if [[ -f "$local_values_file" ]]; then
-        echo -e "${GREEN}✓ local-values.local.yaml already exists${NC}"
-        echo -e "${YELLOW}Using working image tags from local-values.local.yaml${NC}"
-
-        # Extract version from local-values.local.yaml for use as main VERSION
-        if command -v yq >/dev/null 2>&1; then
-            LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
-            if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
-                echo -e "${YELLOW}Detected working image version: $LOCAL_IMAGE_VERSION${NC}"
-                export LOCAL_IMAGE_VERSION
-            fi
+        if [[ "${REFRESH_LOCAL_IMAGE_TAGS:-false}" == "true" ]]; then
+            refresh_local_image_tags || true
+        else
+            echo -e "${GREEN}✓ local-values.local.yaml already exists (use REFRESH_LOCAL_IMAGE_TAGS=true to update tags)${NC}"
         fi
+        read_local_image_version_from_values "${local_values_file}"
     elif [[ -f "$legacy_local_values_file" ]]; then
         echo -e "${YELLOW}⚠ Found legacy local-values.yaml — please migrate to local-values.local.yaml${NC}"
-        echo -e "${YELLOW}Using working image tags from local-values.yaml${NC}"
         local_values_file="$legacy_local_values_file"
+        read_local_image_version_from_values "${local_values_file}"
     else
         echo -e "${YELLOW}local-values.local.yaml not found, creating it...${NC}"
-
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
-        else
-            if "$SCRIPT_DIR/resolve-docker-images.sh"; then
-                echo -e "${GREEN}✓ local-values.local.yaml created with working image tags${NC}"
-
-                # Extract version from newly created local-values.local.yaml
-                if command -v yq >/dev/null 2>&1; then
-                    LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
-                    if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
-                        echo -e "${YELLOW}Using working image version: $LOCAL_IMAGE_VERSION${NC}"
-                        export LOCAL_IMAGE_VERSION
-                    fi
-                fi
-            else
-                echo -e "${RED}✗ Failed to create local-values.local.yaml${NC}" >&2
-                echo -e "${YELLOW}Will proceed without local image overrides${NC}"
-                USE_LOCAL_IMAGES=false
-            fi
-        fi
+        REFRESH_LOCAL_IMAGE_TAGS=true refresh_local_image_tags || {
+            echo -e "${YELLOW}Will proceed without local image overrides${NC}"
+            USE_LOCAL_IMAGES=false
+            return 0
+        }
+        read_local_image_version_from_values "${local_values_file}"
     fi
 }
 
@@ -604,50 +614,10 @@ perform_installation() {
 
     execute_command "$make_cmd" "Running make install"
 
-    # Configure Keycloak on runtime services (discover deployment names — Helm may truncate long release names)
+    # Keycloak URL, hostAliases, policies: apply-cluster-prereqs.sh (single pass — avoids duplicate rollouts here).
     if [[ "$DRY_RUN" == "false" ]]; then
-        echo -e "${BLUE}=== Configuring Keycloak on Activiti services ===${NC}"
-
-        local identity_deployment
-        identity_deployment="$(find_deployment_in_namespace "${PREVIEW_NAME}" "activiti-cloud-identity-adapter" || true)"
-
-        if [[ -n "${identity_deployment}" ]]; then
-            echo -e "${YELLOW}Waiting for identity adapter (${identity_deployment})...${NC}"
-            kubectl wait --for=condition=available --timeout=300s "deployment/${identity_deployment}" -n "${PREVIEW_NAME}" || true
-        else
-            echo -e "${YELLOW}⚠ Identity adapter deployment not found (optional). Keycloak env will be patched on RB/query/connector only.${NC}"
-        fi
-
-        configure_preview_keycloak_post_install "${PREVIEW_NAME}" || exit 1
-
-        echo -e "${YELLOW}Updating Keycloak URL and realm configuration (parallel)...${NC}"
-        local patch_patterns=(
-            runtime-bundle
-            activiti-cloud-connector
-            activiti-cloud-query
-            activiti-cloud-identity-adapter
-        )
-        local patch_pids=()
-        local pattern deployment
-
-        for pattern in "${patch_patterns[@]}"; do
-            deployment="$(find_deployment_in_namespace "${PREVIEW_NAME}" "${pattern}" || true)"
-            if [[ -n "${deployment}" ]]; then
-                echo -e "${CYAN}  Updating ${deployment}...${NC}"
-                patch_deployment_keycloak_env "${deployment}" "${PREVIEW_NAME}" "${KEYCLOAK_URL}" "${KEYCLOAK_REALM}" &
-                patch_pids+=($!)
-            fi
-        done
-        local pid
-        for pid in "${patch_pids[@]}"; do
-            wait "${pid}" || true
-        done
-
-        if [[ -n "${identity_deployment}" ]]; then
-            echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
-            kubectl rollout restart "deployment/${identity_deployment}" -n "${PREVIEW_NAME}"
-            kubectl rollout status "deployment/${identity_deployment}" -n "${PREVIEW_NAME}"
-        fi
+        echo -e "${GREEN}=== Helm install completed ===${NC}"
+        echo -e "${YELLOW}Run npm run cluster:prereqs (or npm run test:setup) to apply acceptance config once.${NC}"
 
         echo -e "${GREEN}=== Installation Completed Successfully! ===${NC}"
         echo -e "${YELLOW}Your Activiti Cloud instance is available at:${NC}"
@@ -674,6 +644,10 @@ generate_env_file() {
     local realm="${KEYCLOAK_REALM:-activiti}"
     local sso_host
     sso_host="$(preview_sso_token_url "${PREVIEW_NAME}" "${realm}")"
+
+    if [[ -z "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+        configure_preview_keycloak_post_install "${PREVIEW_NAME}" 2>/dev/null || true
+    fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
         echo -e "${CYAN}[DRY-RUN] Would create .env file at: $env_file${NC}"
