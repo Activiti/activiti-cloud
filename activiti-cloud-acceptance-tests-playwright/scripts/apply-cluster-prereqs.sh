@@ -41,7 +41,9 @@ if [[ -z "${NAMESPACE}" ]]; then
 fi
 
 prereqs_step "discovering Activiti deployments in ${NAMESPACE}"
-if ! discover_acceptance_deployments "${NAMESPACE}"; then
+if [[ "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" ]]; then
+  wait_for_acceptance_deployments "${NAMESPACE}" || exit 1
+elif ! discover_acceptance_deployments "${NAMESPACE}"; then
   echo "ERROR: Activiti Cloud is not installed in namespace ${NAMESPACE}"
   echo "  (missing runtime-bundle / query / connector deployments)"
   echo ""

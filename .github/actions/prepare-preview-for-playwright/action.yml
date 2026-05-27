@@ -1,0 +1,51 @@
+name: Prepare preview for Playwright (CI)
+description: >-
+  Waits for Helm workloads, loads Keycloak secret, and applies acceptance overlay
+  (policies + example-runtime-bundle). Playwright global-setup skips this in CI.
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare cluster for acceptance tests
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -z "${PREVIEW_NAME:-}" ]]; then
+          echo "PREVIEW_NAME is not set"
+          exit 1
+        fi
+
+        export CI=true
+        export GITHUB_ACTIONS=true
+        export GATEWAY_PROTOCOL="${GATEWAY_PROTOCOL:-https}"
+        export CLUSTER_DOMAIN="${CLUSTER_DOMAIN:-envalfresco.com}"
+
+        if [[ -z "${GATEWAY_HOST:-}" && -n "${CLUSTER_NAME:-}" ]]; then
+          export GATEWAY_HOST="gateway-${PREVIEW_NAME}.${CLUSTER_NAME}.${CLUSTER_DOMAIN}"
+        fi
+        if [[ -z "${SSO_HOST:-}" && -n "${CLUSTER_NAME:-}" ]]; then
+          export SSO_HOST="identity-${PREVIEW_NAME}.${CLUSTER_NAME}.${CLUSTER_DOMAIN}"
+        fi
+
+        # shellcheck source=scripts/lib/keycloak-preview.sh
+        source "${GITHUB_WORKSPACE}/scripts/lib/keycloak-preview.sh"
+
+        echo "Waiting for Activiti deployments in ${PREVIEW_NAME}..."
+        # shellcheck source=activiti-cloud-acceptance-tests-playwright/scripts/lib/cluster-discovery.sh
+        source "${GITHUB_WORKSPACE}/activiti-cloud-acceptance-tests-playwright/scripts/lib/cluster-discovery.sh"
+        wait_for_acceptance_deployments "${PREVIEW_NAME}"
+
+        if [[ -z "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+          echo "Waiting for activiti-keycloak-client secret in ${PREVIEW_NAME}..."
+          KEYCLOAK_CLIENT_SECRET="$(wait_for_preview_keycloak_client_secret "${PREVIEW_NAME}")"
+          echo "::add-mask::${KEYCLOAK_CLIENT_SECRET}"
+          echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" >> "${GITHUB_ENV}"
+          echo "✓ KEYCLOAK_CLIENT_SECRET loaded from ${PREVIEW_NAME}/activiti-keycloak-client"
+        fi
+
+        echo "Applying acceptance overlay (runtime-bundle image + security policies)..."
+        bash "${GITHUB_WORKSPACE}/activiti-cloud-acceptance-tests-playwright/scripts/apply-cluster-prereqs.sh" "${PREVIEW_NAME}"
+
+        echo "ACCEPTANCE_CI_OVERLAY_APPLIED=true" >> "${GITHUB_ENV}"
+        echo "✓ Preview ${PREVIEW_NAME} ready for Playwright"

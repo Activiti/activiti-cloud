@@ -109,3 +109,21 @@ discover_acceptance_deployments() {
 
   [[ -n "${RB_DEP}" && -n "${QUERY_DEP}" && -n "${CONNECTOR_DEP}" ]]
 }
+
+# CI: Helm --wait can finish before Deployment objects are visible to kubectl.
+wait_for_acceptance_deployments() {
+  local namespace=$1
+  local attempt
+
+  for attempt in $(seq 1 60); do
+    if discover_acceptance_deployments "${namespace}"; then
+      return 0
+    fi
+    echo "  Waiting for runtime-bundle, query, and connector in ${namespace} (${attempt}/60)..."
+    sleep 10
+  done
+
+  echo "ERROR: Activiti workloads not found in ${namespace} after 10 minutes" >&2
+  kubectl get deployments -n "${namespace}" 2>/dev/null || true
+  return 1
+}

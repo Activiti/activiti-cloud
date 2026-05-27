@@ -313,7 +313,7 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - uses: ./.github/actions/load-preview-keycloak-secret
+      - uses: ./.github/actions/prepare-preview-for-playwright
 
       - name: Run Playwright Acceptance Tests
         # Run Playwright for every messaging configuration in the matrix
@@ -342,7 +342,8 @@ jobs:
           TESTADMIN_USERNAME: testadmin
           TESTADMIN_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
           PLAYWRIGHT_WORKERS: '4'
-          AUTO_CLUSTER_PREREQS: 'true'
+          AUTO_CLUSTER_PREREQS: 'false'
+          ACCEPTANCE_CI_OVERLAY_APPLIED: 'true'
         with:
           script-command: "npm run test:all"
 

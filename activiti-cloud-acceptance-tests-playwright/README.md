@@ -188,7 +188,8 @@ Do not run prereqs twice in parallel on the same namespace.
 
 ## CI/CD
 
-- Workflow: `.github/workflows/main.yml` → Playwright via `.github/actions/playwright-run`
+- Workflow: `.github/workflows/main.yml` → `make install`, then `.github/actions/prepare-preview-for-playwright` (wait for workloads, Keycloak secret, acceptance overlay), then Playwright via `.github/actions/playwright-run`
+- **CI vs local:** cluster patching runs in the workflow (bash + kubectl), not in Playwright global-setup (`AUTO_CLUSTER_PREREQS=false`, `ACCEPTANCE_CI_OVERLAY_APPLIED=true`). Local runs still use `npm run test:setup` / `cluster:prereqs` from global-setup.
 - Playwright `test:all` runs on each messaging matrix cell ([retirement plan](docs/SERENITY_RETIREMENT.md))
 - Retries: `2` on CI; artifacts: JUnit, JSON, HTML; trace on first retry
 
