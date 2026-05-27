@@ -37,7 +37,9 @@ npm run test:all            # full suite
 
 ## Configuration (`.env`)
 
-Copy [`.env.example`](.env.example) → `.env`. Minimum:
+`.env` is **generated automatically** by `npm run test:setup` and is **always overwritten** (single source of truth).
+
+Use [`.env.example`](.env.example) only as a reference for variables.
 
 | Variable                          | Purpose                                             |
 | --------------------------------- | --------------------------------------------------- |
