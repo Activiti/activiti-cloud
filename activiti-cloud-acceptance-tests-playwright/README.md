@@ -4,174 +4,223 @@ API acceptance tests for Activiti Cloud preview installs. **Playwright-only** ta
 
 ## Requirements
 
-| Tool                      | Version                        |
-| ------------------------- | ------------------------------ |
-| Node.js                   | **22 LTS** (CI uses 22)        |
-| npm                       | with Node                      |
-| kubectl                   | access to your preview cluster |
-| Helm / `local-install.sh` | first-time preview only        |
+| Tool        | Version                        |
+| ----------- | ------------------------------ |
+| Node.js     | **22 LTS** (CI uses 22)        |
+| npm         | with Node                      |
+| kubectl     | access to your preview cluster |
+| Helm / `yq` | first-time preview only        |
 
 Browsers: `npm run install:browsers` (Chromium is enough for API tests).
 
 ## Quick start
 
+Run everything from the **repository root**.
+
+### 1. Install dependencies
+
 ```bash
-# repo root
 npm install
 npm run install:browsers
+```
 
-export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml   # your kubeconfig
+### 2. Point kubectl at Activiti (important)
 
-# First time: resolve Docker tags once → Helm install → acceptance prereqs (single rollout pass)
-# Env name defaults to short $USER-<random> (e.g. pr-jane-a3f2b1-rabbit-n-d, max ~29 chars) — not a shared PR namespace
+`kubectl` uses **`KUBECONFIG`**, not `ACTIVITI_KUBECONFIG`. Either:
+
+```bash
+export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml
+npm run kube:use
+kubectl config current-context    # should show activiti, not another cluster
+```
+
+or:
+
+```bash
+export KUBECONFIG=~/Downloads/activiti.yaml
+```
+
+`npm run test:setup` runs `kube:use` for you; **manual** `kubectl` commands need one of the options above.
+
+### 3. First-time preview + `.env`
+
+```bash
 npm run test:setup -- --install
-# Or pick a name: npm run test:setup -- --install --name my-feature
-# New random name (ignores old .env): npm run test:setup -- --install --new-env
+```
 
-# Verify + run (port-forward starts automatically in global-setup — no second terminal)
+This does, in order:
+
+1. Resolve latest Docker image tags → `local-values.local.yaml` (once)
+2. Helm install into a **new** namespace (`pr-<user>-<random>-rabbit-n-d` by default)
+3. Write `activiti-cloud-acceptance-tests-playwright/.env`
+4. Apply acceptance cluster prerequisites (hostAliases, policies, RB image) — **one** rollout pass
+
+| Flag                | When to use                                                                |
+| ------------------- | -------------------------------------------------------------------------- |
+| `--install`         | Create preview if missing (required first time)                            |
+| `--new-env`         | New random env name; ignore existing `.env`                                |
+| `--name alice`      | Fixed env name → `pr-alice-rabbit-n-d` (keep under ~13 chars for env name) |
+| `--no-install`      | Only refresh `.env` / prereqs on an existing preview                       |
+| `--kubeconfig PATH` | Override kubeconfig for this run                                           |
+
+Examples:
+
+```bash
+npm run test:setup -- --install                    # default: michal-a3f2b1 → pr-michal-a3f2b1-rabbit-n-d
+npm run test:setup -- --install --name my-feature  # stable name you choose
+npm run test:setup -- --install --new-env          # new namespace + new .env
+```
+
+**Shared cluster:** each developer gets their own namespace. Old names like `activiti-tests` in `.env` are ignored on the next setup.
+
+**Namespace length:** preview name must be ≤ 29 characters (Kubernetes limit for identity-adapter). Default `$USER-<random>` fits; long `--name` values are rejected with a clear error.
+
+### 4. Run tests
+
+Port-forward starts automatically in Playwright global-setup (no second terminal).
+
+```bash
 npm run check:env
-npm run test:smoke          # @smoke tag
+npm run test:smoke          # @smoke
 npm run test:all            # full suite
 ```
 
-`npm run port-forward` is only for manual debugging without Playwright (e.g. `curl` against `localhost:8080`).
+`npm run port-forward` is only for manual `curl` debugging.
 
-After local test runs, Playwright **global teardown** prints a reminder to delete the preview namespace. You can also run:
+### 5. Cleanup
 
 ```bash
 npm run preview:delete
-# or from repo root:
-PREVIEW_NAME=pr-<your-env>-rabbit-n-d make delete
+# uses PREVIEW_NAME from .env
 ```
 
-**Shared cluster?** Each developer gets their own namespace (`$USER-<random>` by default, or `--name alice`). Legacy `.env` with `activiti-tests` is ignored. See [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
-
-## Configuration (`.env`)
-
-`.env` is **generated automatically** by `npm run test:setup` and is **always overwritten** (single source of truth).
-
-Use [`.env.example`](.env.example) only as a reference for variables.
-
-| Variable                          | Purpose                                             |
-| --------------------------------- | --------------------------------------------------- |
-| `PREVIEW_NAME`                    | K8s namespace (e.g. `pr-jane-a3f2b1-rabbit-n-d`) |
-| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Gateway hostnames                                   |
-| `SSO_HOST`                        | Keycloak token URL (preview realm `activiti`)       |
-| `KEYCLOAK_CLIENT_ID`              | `activiti`                                          |
-| `KEYCLOAK_CLIENT_SECRET`          | From secret `activiti-keycloak-client`              |
-| `GATEWAY_HOST`                    | `gateway-{preview}.{cluster}.{domain}:8080`         |
-| `TESTUSER_*`, `HRUSER_*`, …       | Seeded users (password `password`)                  |
-
-Optional:
-
-| Variable               | Default | Purpose                                   |
-| ---------------------- | ------- | ----------------------------------------- |
-| `AUTO_CLUSTER_PREREQS` | `true`  | Patch cluster in global-setup when needed |
-| `PLAYWRIGHT_WORKERS`   | `4`     | Parallel workers                          |
-| `LOCAL_PORT`           | `8080`  | Port-forward local port                   |
-| `ACTIVITI_KUBECONFIG`  | —       | Kubeconfig path                           |
-
-## Run tests
+Or:
 
 ```bash
-npm run test:smoke              # fast subset
+PREVIEW_NAME=pr-my-env-rabbit-n-d make delete
+```
+
+List your previews:
+
+```bash
+npm run kube:use
+kubectl get ns | grep '^pr-'
+```
+
+## Command reference
+
+| Command                           | Purpose                                                |
+| --------------------------------- | ------------------------------------------------------ |
+| `npm run kube:use`                | Set `KUBECONFIG` from `ACTIVITI_KUBECONFIG`            |
+| `npm run test:setup -- --install` | Helm preview + `.env` + cluster prereqs                |
+| `npm run test:setup`              | Refresh `.env` / prereqs only (existing preview)       |
+| `npm run cluster:prereqs`         | Host aliases, security policies, RB image (idempotent) |
+| `npm run preview:delete`          | `helm uninstall` + delete namespace from `.env`        |
+| `npm run check:env`               | Validate `.env` and connectivity                       |
+| `npm run verify:process-catalog`  | BPMN keys on runtime-bundle                            |
+| `npm run test:smoke` / `test:all` | Playwright suites                                      |
+| `npm run report`                  | Open last HTML report                                  |
+
+### Run tests by area
+
+```bash
 npm run test:identity
 npm run test:security
-npm run test:runtime            # all tests/runtime/
+npm run test:runtime
 npm run test:runtime:tasks
 npm run test:all
 
-npm run test:debug              # Playwright inspector
-npx playwright test tests/runtime/task.spec.ts --headed   # single file
-
-PLAYWRIGHT_WORKERS=6 npm run test:runtime   # more parallelism
-npm run report                  # HTML report
+npm run test:debug
+PLAYWRIGHT_WORKERS=6 npm run test:runtime
 ```
+
+### CI matrix locally (optional)
+
+Same combinations as GitHub Actions — install + test in one npm script:
+
+```bash
+npm run matrix:rabbitmq:non-partitioned:default --name=my-matrix-dev
+npm run matrix:kafka:partitioned:override --name=kafka-ovr
+```
+
+Or install manually, then Playwright:
+
+```bash
+export KUBECONFIG=~/Downloads/activiti.yaml
+./scripts/local-install.sh -n local-dev -b rabbitmq -p non-partitioned --destinations-option default-destinations
+npm run test:setup          # .env + prereqs only
+npm run test:all
+```
+
+To refresh Docker tags without full setup: `REFRESH_LOCAL_IMAGE_TAGS=true ./scripts/local-install.sh -n ...`
+
+## Configuration (`.env`)
+
+Generated by `npm run test:setup` (overwritten each run). See [`.env.example`](.env.example) for all variables.
+
+| Variable                          | Purpose                                          |
+| --------------------------------- | ------------------------------------------------ |
+| `PREVIEW_NAME`                    | K8s namespace (e.g. `pr-jane-a3f2b1-rabbit-n-d`) |
+| `ACCEPTANCE_ENV_NAME`             | Short env id passed to Helm (`jane-a3f2b1`)      |
+| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | DNS segment for gateway / identity               |
+| `GATEWAY_HOST`                    | Gateway via port-forward                         |
+| `SSO_HOST`                        | Keycloak token URL (realm `activiti`)            |
+| `KEYCLOAK_CLIENT_SECRET`          | From secret `activiti-keycloak-client`           |
+| `TESTUSER_*`, `HRUSER_*`, …       | Seeded users (password `password`)               |
+
+| Optional               | Default | Purpose                                   |
+| ---------------------- | ------- | ----------------------------------------- |
+| `AUTO_CLUSTER_PREREQS` | `true`  | Patch cluster in global-setup when needed |
+| `PLAYWRIGHT_WORKERS`   | `4`     | Parallel workers                          |
+| `ACTIVITI_KUBECONFIG`  | —       | Path for `npm run kube:use`               |
 
 ## Cluster prerequisites
 
-Some previews need hostAliases, security policies, and `example-runtime-bundle` image:
+Some previews need hostAliases, security policies, and the `example-runtime-bundle` image. Applied by `test:setup` and again in global-setup when `AUTO_CLUSTER_PREREQS=true` (skips work already done).
 
 ```bash
 npm run cluster:prereqs
 ```
 
-Applied automatically in global-setup when `AUTO_CLUSTER_PREREQS=true` (idempotent). Live, colored progress logs per service persona.
-
-**Do not** run prereqs twice in parallel on the same namespace.
+Do not run prereqs twice in parallel on the same namespace.
 
 ## CI/CD
 
 - Workflow: `.github/workflows/main.yml` → Playwright via `.github/actions/playwright-run`
-- Serenity `make test/runtime-acceptance-tests` removed from CI; Playwright `test:all` is the gate ([retirement plan](docs/SERENITY_RETIREMENT.md))
-- Retries: `2` on CI
-- Artifacts: JUnit, JSON, HTML report; trace on first retry; screenshot/video on failure
+- Playwright `test:all` runs on each messaging matrix cell ([retirement plan](docs/SERENITY_RETIREMENT.md))
+- Retries: `2` on CI; artifacts: JUnit, JSON, HTML; trace on first retry
 
-## CI matrix (messaging configurations)
+### CI matrix (messaging)
 
-CI runs the same Playwright suite against multiple preview installs (Helm values combinations). Each job name encodes:
-
-- **broker**: `rabbitmq` / `kafka`
-- **partitioning**: `non-partitioned` / `partitioned` / `prefix`
-- **destinations**: `default-destinations` / `override-destinations` / `pdb`
-
-| Job (matrix)                                      | What changes                                    | Notes                                        |
-| ------------------------------------------------- | ----------------------------------------------- | -------------------------------------------- |
-| `rabbitmq, non-partitioned, default-destinations` | Default RabbitMQ configuration                  | Baseline                                     |
-| `rabbitmq, partitioned, default-destinations`     | Partitioned consumers enabled                   | Extra coverage                               |
-| `kafka, non-partitioned, default-destinations`    | Kafka broker                                    |                                              |
-| `kafka, partitioned, default-destinations`        | Kafka + partitions (default `partitionCount=4`) | CI also checks topic partitions vs consumers |
-| `kafka, partitioned, override-destinations`       | Kafka + explicit destination naming overrides   |                                              |
-| `rabbitmq, non-partitioned, pdb`                  | PodDisruptionBudgets enabled (minAvailable)     | Deployment resilience                        |
-| `rabbitmq, prefix, pdb`                           | RabbitMQ queue prefix + PDB                     | Prefix isolates queue names                  |
-
-### Run the same matrix locally
-
-You can reproduce any CI cell by installing the preview with the same options, then running Playwright against that namespace.
-
-Examples:
-
-```bash
-# repo root: install preview like CI (RabbitMQ / non-partitioned / default-destinations)
-./scripts/local-install.sh -n local-dev -b rabbitmq -p non-partitioned --destinations-option default-destinations
-
-# Kafka / partitioned / override-destinations
-./scripts/local-install.sh -n kafka-ovr -b kafka -p partitioned --destinations-option override-destinations
-
-# RabbitMQ / non-partitioned / pdb
-./scripts/local-install.sh -n rabbit-pdb -b rabbitmq -p non-partitioned --destinations-option pdb
-
-# RabbitMQ / prefix / pdb
-./scripts/local-install.sh -n rabbit-prefix -b rabbitmq -p prefix --destinations-option pdb
-
-# then run Playwright (reads .env generated by local-install.sh)
-cd activiti-cloud-acceptance-tests-playwright
-npm run test:all
-```
+| Job                | Broker   | Partitioning    | Destinations |
+| ------------------ | -------- | --------------- | ------------ |
+| baseline           | rabbitmq | non-partitioned | default      |
+| rabbit partitioned | rabbitmq | partitioned     | default      |
+| kafka              | kafka    | non-partitioned | default      |
+| kafka partitioned  | kafka    | partitioned     | default      |
+| kafka override     | kafka    | partitioned     | override     |
+| rabbit pdb         | rabbitmq | non-partitioned | pdb          |
+| rabbit prefix pdb  | rabbitmq | prefix          | pdb          |
 
 ## Project structure
 
 ```text
 activiti-cloud-acceptance-tests-playwright/
 ├── tests/                 # Specs (*.spec.ts)
-│   ├── runtime/           # Migrated Serenity runtime stories
-│   └── *security*.spec.ts
-├── fixtures/              # Playwright fixtures (users, services, cleanup)
-├── services/              # API clients (runtime, query, audit, …)
-├── helpers/               # dirty-context, test-isolation, deployment
-├── config/                # connection, runtime, validation, lifecycle (see config/README.md)
-├── models/                # TypeScript API models
-├── scripts/               # setup, prereqs, port-forward
+├── fixtures/              # Playwright fixtures
+├── services/              # API clients
+├── config/                # connection, lifecycle (see config/README.md)
+├── scripts/               # setup, prereqs, port-forward, matrix
 └── docs/                  # PARALLEL_SAFE, SERENITY_RETIREMENT
 ```
 
 ## Writing tests (parallel-safe)
 
-1. Use `activiti` from `fixtures/services.fixture.ts` (includes `testScope` + `dirtyRegistry`).
-2. Start processes with `runtimeBundleService.startProcess()` — unique name/businessKey + auto cleanup.
-3. For fixed names (LIKE queries): `scopedName(testScope, 'my-label')`.
-4. Wait with `expect.poll()` — no `sleep()` / hardcoded delays.
-5. Do not depend on execution order or shared global state.
+1. Use `activiti` from `fixtures/services.fixture.ts`.
+2. Start processes with `runtimeBundleService.startProcess()` — unique names + auto cleanup.
+3. For fixed names: `scopedName(testScope, 'my-label')`.
+4. Use `expect.poll()` — no `sleep()`.
+5. Do not depend on execution order.
 
 Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
@@ -187,5 +236,5 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 ## Related docs
 
 - [MIGRATION_PLAN.md](MIGRATION_PLAN.md) — story-by-story migration tracker
-- [docs/SERENITY_RETIREMENT.md](docs/SERENITY_RETIREMENT.md) — what can be deleted vs blocked
+- [docs/SERENITY_RETIREMENT.md](docs/SERENITY_RETIREMENT.md) — Serenity vs Playwright status
 - [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md) — isolation rules
