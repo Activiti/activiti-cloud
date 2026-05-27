@@ -104,7 +104,7 @@ Before running the tests, ensure you have the following:
    **Option B - Manual setup:**
 
    ```bash
-   kubectl port-forward svc/ingress-nginx-controller 8080:80 -n default
+   kubectl port-forward svc/traefik 8080:80 -n traefik
    ```
 
 ## Running Tests
@@ -228,7 +228,7 @@ If tests fail with connection errors:
 2. **Verify the service exists:**
 
    ```bash
-   kubectl get svc ingress-nginx-controller -n default
+   kubectl get svc traefik -n traefik
    ```
 
 3. **Test connectivity manually:**
