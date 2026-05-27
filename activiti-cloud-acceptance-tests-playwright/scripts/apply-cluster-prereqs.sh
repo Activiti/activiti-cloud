@@ -19,6 +19,10 @@ source "${SCRIPT_DIR}/lib/prereqs-progress.sh"
 
 # shellcheck source=/dev/null
 set -a && source "${PKG_DIR}/.env" 2>/dev/null || true && set +a
+# Re-pin paths after .env (must not override SCRIPT_DIR / PKG_DIR / ROOT_DIR).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ROOT_DIR="$(cd "${PKG_DIR}/.." && pwd)"
 
 prereqs_phase_actor coordinator "Cluster prerequisites"
 prereqs_step "discovering preview namespace"
@@ -55,8 +59,11 @@ HOST_ALIAS_DEPLOYMENTS=(
 POLICY_DEPLOYMENTS=(
   "${RB_DEP}"
   "${QUERY_DEP}"
-  "${AUDIT_DEP}"
 )
+# Audit is optional in some chart profiles.
+if [[ -n "${AUDIT_DEP:-}" ]]; then
+  POLICY_DEPLOYMENTS+=("${AUDIT_DEP}")
+fi
 
 GATEWAY_HOST="${GATEWAY_HOST:-}"
 if [[ -z "${GATEWAY_HOST}" && -n "${PREVIEW_NAME:-}" && -n "${CLUSTER_NAME:-}" ]]; then
@@ -205,11 +212,21 @@ deployment_env_value() {
 
 deployment_has_host_alias() {
   local dep=$1
-  local ip host1 host2
-  ip=$(kubectl get deployment "${dep}" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.hostAliases[0].ip}' 2>/dev/null || true)
-  host1=$(kubectl get deployment "${dep}" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.hostAliases[0].hostnames[0]}' 2>/dev/null || true)
-  host2=$(kubectl get deployment "${dep}" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.hostAliases[0].hostnames[1]}' 2>/dev/null || true)
-  [[ "${ip}" == "${TRAEFIK_IP}" && "${host1}" == "${IDENTITY_HOST}" && "${host2}" == "${GATEWAY_HOST}" ]]
+  kubectl get deployment "${dep}" -n "${NAMESPACE}" -o json \
+    | TRAEFIK_IP="${TRAEFIK_IP}" IDENTITY_HOST="${IDENTITY_HOST}" GATEWAY_HOST="${GATEWAY_HOST}" \
+      python3 -c "
+import json, os, sys
+d = json.load(sys.stdin)
+aliases = d.get('spec', {}).get('template', {}).get('spec', {}).get('hostAliases') or []
+if not aliases:
+    sys.exit(1)
+entry = aliases[0]
+if entry.get('ip') != os.environ['TRAEFIK_IP']:
+    sys.exit(1)
+hosts = set(entry.get('hostnames') or [])
+needed = {os.environ['IDENTITY_HOST'], os.environ['GATEWAY_HOST']}
+sys.exit(0 if needed <= hosts else 1)
+" 2>/dev/null
 }
 
 deployment_has_policy_mount() {
@@ -224,16 +241,71 @@ deployment_has_supplemental_process_mount() {
     | python3 -c "import json,sys; d=json.load(sys.stdin); mounts=d['spec']['template']['spec']['containers'][0].get('volumeMounts',[]); sys.exit(0 if any(m.get('name')=='acceptance-supplemental-processes' for m in mounts) else 1)" 2>/dev/null
 }
 
-apply_host_alias_patches_for_dep() {
+deployment_needs_host_patch() {
   local dep=$1
   if ! deployment_has_host_alias "${dep}"; then
-    kubectl patch deployment "${dep}" -n "${NAMESPACE}" --type=json -p="${HOST_ALIASES_JSON}" 2>/dev/null || true
+    return 0
   fi
-  local current_kc_url
+  local current_kc_url current_kc_realm
   current_kc_url="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_URL")"
-  if [[ "${current_kc_url}" != "${ACT_KEYCLOAK_URL}" ]]; then
-    kubectl set env deployment/"${dep}" -n "${NAMESPACE}" "ACT_KEYCLOAK_URL=${ACT_KEYCLOAK_URL}"
+  current_kc_realm="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_REALM")"
+  [[ "${current_kc_url}" != "${ACT_KEYCLOAK_URL}" ]] && return 0
+  [[ "${current_kc_realm}" != "${KEYCLOAK_REALM:-activiti}" ]]
+}
+
+apply_acceptance_deployment_patch() {
+  local dep=$1
+  local include_policy=$2
+  local include_host=$3
+  local patch_json result
+  export NAMESPACE RB_DEP ACT_KEYCLOAK_URL POLICY_CONFIG NEEDS_SUPPLEMENTAL_PROCESSES
+  export PROCESS_LOCATION_CLASSPATH PROCESS_LOCATION_SUPPLEMENTAL
+  export DEP_NAME="${dep}" KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
+  export INCLUDE_POLICY="${include_policy}" INCLUDE_HOST="${include_host}"
+  export HOST_ALIASES="[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]"
+  patch_json="$(
+    python3 -c "
+import json, os
+patch = {'namespace': os.environ['NAMESPACE'], 'deployment': os.environ['DEP_NAME']}
+if os.environ.get('INCLUDE_HOST') == '1':
+    patch['hostAliases'] = json.loads(os.environ['HOST_ALIASES'])
+    patch['keycloakUrl'] = os.environ['ACT_KEYCLOAK_URL']
+    patch['keycloakRealm'] = os.environ['KEYCLOAK_REALM']
+if os.environ.get('INCLUDE_POLICY') == '1':
+    patch['policyConfig'] = os.environ['POLICY_CONFIG']
+    if os.environ['DEP_NAME'] == os.environ['RB_DEP']:
+        patch['runtimeBundle'] = True
+        patch['processClasspath'] = os.environ['PROCESS_LOCATION_CLASSPATH']
+        patch['processSupplemental'] = os.environ['PROCESS_LOCATION_SUPPLEMENTAL']
+        if os.environ.get('NEEDS_SUPPLEMENTAL_PROCESSES') == '1':
+            patch['supplementalProcesses'] = True
+print(json.dumps(patch))
+" 2>/dev/null
+  )" || return 1
+  result="$(python3 "${SCRIPT_DIR}/lib/patch-acceptance-deployment.py" "${patch_json}" 2>&1)" || return 1
+  if [[ "${result}" == UNCHANGED:* ]]; then
+    prereqs_log "✓ ${dep} — pod template already matches (no rollout)"
+    return 2
   fi
+  if [[ "${result}" == CHANGED:* ]]; then
+    return 0
+  fi
+  echo "${result}" >&2
+  return 1
+}
+
+dep_in_list() {
+  local dep=$1
+  shift
+  local item
+  # With set -u, "${arr[@]}" on an empty arr errors on older bash (macOS default).
+  if [[ $# -eq 0 ]]; then
+    return 1
+  fi
+  for item in "$@"; do
+    [[ "${item}" == "${dep}" ]] && return 0
+  done
+  return 1
 }
 
 CHANGED=0
@@ -259,46 +331,6 @@ if ! deployment_exists "${CONNECTOR_DEP}"; then
   exit 1
 fi
 echo "✓ ${CONNECTOR_DEP} present"
-
-# --- hostAliases + ACT_KEYCLOAK_URL (parallel patch, parallel rollout wait) ---
-prereqs_phase_actor traefik "Host aliases and Keycloak URL"
-HOST_ALIASES_JSON="[{\"op\":\"add\",\"path\":\"/spec/template/spec/hostAliases\",\"value\":[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]}]"
-
-HOST_ALIAS_ROLLOUTS=()
-HOST_ALIAS_PIDS=()
-for dep in "${HOST_ALIAS_DEPLOYMENTS[@]}"; do
-  prereqs_set_actor "$(prereqs_actor_for_dep "${dep}")"
-  prereqs_step "checking hostAliases + ACT_KEYCLOAK_URL on ${dep}"
-  if ! deployment_exists "${dep}"; then
-    echo "Skip missing deployment: ${dep}"
-    continue
-  fi
-
-  NEEDS_HOST_PATCH=0
-  if ! deployment_has_host_alias "${dep}"; then
-    NEEDS_HOST_PATCH=1
-  fi
-  CURRENT_KC_URL="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_URL")"
-  if [[ "${CURRENT_KC_URL}" != "${ACT_KEYCLOAK_URL}" ]]; then
-    NEEDS_HOST_PATCH=1
-  fi
-
-  if [[ "${NEEDS_HOST_PATCH}" -eq 1 ]]; then
-    prereqs_log "queueing ${dep} hostAliases + ACT_KEYCLOAK_URL"
-    apply_host_alias_patches_for_dep "${dep}" &
-    HOST_ALIAS_PIDS+=($!)
-    HOST_ALIAS_ROLLOUTS+=("${dep}")
-  else
-    echo "✓ ${dep} hostAliases and ACT_KEYCLOAK_URL already configured"
-  fi
-done
-for pid in "${HOST_ALIAS_PIDS[@]:-}"; do
-  wait "${pid}" || true
-done
-if [[ ${#HOST_ALIAS_ROLLOUTS[@]} -gt 0 ]]; then
-  wait_rollouts_parallel "${HOST_ALIAS_ROLLOUTS[@]}"
-  CHANGED=1
-fi
 
 # --- acceptance security policies ConfigMap ---
 prereqs_phase_actor policies "Security policies ConfigMaps"
@@ -502,54 +534,78 @@ policy_dep_needs_patch() {
   return 1
 }
 
-prereqs_phase_actor policies "Policy mounts and runtime env"
-POLICY_RESTART_NEEDED=0
-POLICY_ROLLOUTS=()
-POLICY_PIDS=()
-for dep in "${POLICY_DEPLOYMENTS[@]}"; do
+# --- hostAliases + Keycloak + policy mounts (one kubectl apply per deployment → one rollout) ---
+prereqs_phase_actor coordinator "Acceptance workload configuration"
+WORKLOAD_ROLLOUTS=()
+WORKLOAD_PIDS=()
+WORKLOAD_DEP_NAMES=()
+WORKLOAD_DEPS=()
+for dep in "${HOST_ALIAS_DEPLOYMENTS[@]}" "${POLICY_DEPLOYMENTS[@]}"; do
+  [[ -n "${dep}" ]] || continue
+  if ((${#WORKLOAD_DEPS[@]} > 0)) && dep_in_list "${dep}" "${WORKLOAD_DEPS[@]}"; then
+    continue
+  fi
+  WORKLOAD_DEPS+=("${dep}")
+done
+
+for dep in "${WORKLOAD_DEPS[@]}"; do
+  [[ -n "${dep}" ]] || continue
   prereqs_set_actor "$(prereqs_actor_for_dep "${dep}")"
   if ! deployment_exists "${dep}"; then
-    prereqs_log "skip missing policy deployment: ${dep} (ghost ship)"
+    prereqs_log "skip missing deployment: ${dep}"
     continue
   fi
 
-  prereqs_step "checking policy mounts on ${dep}"
-  if policy_dep_needs_patch "${dep}"; then
-    if [[ "${dep}" == "${RB_DEP}" ]]; then
-      if [[ "${NEEDS_SUPPLEMENTAL_PROCESSES}" -eq 1 ]]; then
-        echo "Queueing ${dep} acceptance policies + supplemental processes..."
-      else
-        echo "Queueing ${dep} acceptance policies (classpath catalog only)..."
-        if deployment_has_supplemental_process_mount "${dep}"; then
-          strip_supplemental_mount_from_rb
-        fi
-      fi
-    else
-      echo "Queueing security policies on ${dep}..."
-    fi
-    apply_policy_patches_for_dep "${dep}" &
-    POLICY_PIDS+=($!)
-    POLICY_ROLLOUTS+=("${dep}")
-    POLICY_RESTART_NEEDED=1
-  else
-    echo "✓ ${dep} acceptance mounts and env already configured"
+  include_host=0
+  include_policy=0
+  needs_patch=0
+  dep_in_list "${dep}" "${HOST_ALIAS_DEPLOYMENTS[@]}" && include_host=1
+  dep_in_list "${dep}" "${POLICY_DEPLOYMENTS[@]}" && include_policy=1
+
+  if [[ "${include_host}" -eq 1 ]] && deployment_needs_host_patch "${dep}"; then
+    needs_patch=1
   fi
+  if [[ "${include_policy}" -eq 1 ]] && policy_dep_needs_patch "${dep}"; then
+    needs_patch=1
+  fi
+
+  if [[ "${needs_patch}" -eq 0 ]]; then
+    echo "✓ ${dep} acceptance workload config already up to date"
+    continue
+  fi
+
+  prereqs_step "patching ${dep} (single apply: hostAliases + Keycloak + policies)"
+  apply_acceptance_deployment_patch "${dep}" "${include_policy}" "${include_host}" &
+  WORKLOAD_PIDS+=($!)
+  WORKLOAD_DEP_NAMES+=("${dep}")
 done
-for pid in "${POLICY_PIDS[@]:-}"; do
-  wait "${pid}" || true
-done
-if [[ ${#POLICY_ROLLOUTS[@]} -gt 0 ]]; then
-  wait_rollouts_parallel "${POLICY_ROLLOUTS[@]}"
+if ((${#WORKLOAD_PIDS[@]} > 0)); then
+  for i in "${!WORKLOAD_PIDS[@]}"; do
+    pid="${WORKLOAD_PIDS[$i]}"
+    dep="${WORKLOAD_DEP_NAMES[$i]}"
+    patch_status=0
+    wait "${pid}" || patch_status=$?
+    if [[ "${patch_status}" -eq 0 ]]; then
+      WORKLOAD_ROLLOUTS+=("${dep}")
+    elif [[ "${patch_status}" -ne 2 ]]; then
+      echo "ERROR: failed to patch ${dep}" >&2
+      exit 1
+    fi
+  done
+fi
+if [[ ${#WORKLOAD_ROLLOUTS[@]} -gt 0 ]]; then
+  wait_rollouts_parallel "${WORKLOAD_ROLLOUTS[@]}"
   CHANGED=1
 fi
 
-# ConfigMap-only changes need a restart; mount/env patches already triggered rollout above.
+# ConfigMap-only changes need a restart when workload spec did not change.
 if [[ "${POLICY_CM_CHANGED}" -eq 1 || "${SUPPLEMENTAL_CM_CHANGED}" -eq 1 ]]; then
-  if [[ ${#POLICY_ROLLOUTS[@]} -eq 0 ]]; then
+  if [[ ${#WORKLOAD_ROLLOUTS[@]} -eq 0 ]]; then
     prereqs_phase_actor policies "Reload policy consumers"
     restart_deployments_parallel "${POLICY_DEPLOYMENTS[@]}"
+    CHANGED=1
   else
-    prereqs_log "skip extra policy restart — rollout already completed after mount patches"
+    prereqs_log "skip extra policy restart — rollout already completed after combined patch"
   fi
 fi
 
