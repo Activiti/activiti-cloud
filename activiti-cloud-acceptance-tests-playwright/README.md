@@ -4,12 +4,12 @@ API acceptance tests for Activiti Cloud preview installs. **Playwright-only** ta
 
 ## Requirements
 
-| Tool | Version |
-|------|---------|
-| Node.js | ≥ 18 (CI uses 20) |
-| npm | with Node |
-| kubectl | access to your preview cluster |
-| Helm / `local-install.sh` | first-time preview only |
+| Tool                      | Version                        |
+| ------------------------- | ------------------------------ |
+| Node.js                   | ≥ 18 (CI uses 20)              |
+| npm                       | with Node                      |
+| kubectl                   | access to your preview cluster |
+| Helm / `local-install.sh` | first-time preview only        |
 
 Browsers: `npm run install:browsers` (Chromium is enough for API tests).
 
@@ -39,24 +39,24 @@ npm run test:all            # full suite
 
 Copy [`.env.example`](.env.example) → `.env`. Minimum:
 
-| Variable | Purpose |
-|----------|---------|
-| `PREVIEW_NAME` | K8s namespace (e.g. `pr-activiti-tests-rabbit-n-d`) |
-| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Gateway hostnames |
-| `SSO_HOST` | Keycloak token URL (preview realm `activiti`) |
-| `KEYCLOAK_CLIENT_ID` | `activiti` |
-| `KEYCLOAK_CLIENT_SECRET` | From secret `activiti-keycloak-client` |
-| `GATEWAY_HOST` | `gateway-{preview}.{cluster}.{domain}:8080` |
-| `TESTUSER_*`, `HRUSER_*`, … | Seeded users (password `password`) |
+| Variable                          | Purpose                                             |
+| --------------------------------- | --------------------------------------------------- |
+| `PREVIEW_NAME`                    | K8s namespace (e.g. `pr-activiti-tests-rabbit-n-d`) |
+| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Gateway hostnames                                   |
+| `SSO_HOST`                        | Keycloak token URL (preview realm `activiti`)       |
+| `KEYCLOAK_CLIENT_ID`              | `activiti`                                          |
+| `KEYCLOAK_CLIENT_SECRET`          | From secret `activiti-keycloak-client`              |
+| `GATEWAY_HOST`                    | `gateway-{preview}.{cluster}.{domain}:8080`         |
+| `TESTUSER_*`, `HRUSER_*`, …       | Seeded users (password `password`)                  |
 
 Optional:
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `AUTO_CLUSTER_PREREQS` | `true` | Patch cluster in global-setup when needed |
-| `PLAYWRIGHT_WORKERS` | `4` | Parallel workers |
-| `LOCAL_PORT` | `8080` | Port-forward local port |
-| `ACTIVITI_KUBECONFIG` | — | Kubeconfig path |
+| Variable               | Default | Purpose                                   |
+| ---------------------- | ------- | ----------------------------------------- |
+| `AUTO_CLUSTER_PREREQS` | `true`  | Patch cluster in global-setup when needed |
+| `PLAYWRIGHT_WORKERS`   | `4`     | Parallel workers                          |
+| `LOCAL_PORT`           | `8080`  | Port-forward local port                   |
+| `ACTIVITI_KUBECONFIG`  | —       | Kubeconfig path                           |
 
 ## Run tests
 
@@ -122,12 +122,12 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Diagnostics
 
-| Feature | When |
-|---------|------|
-| Trace | CI: first retry; local: on failure |
-| Screenshot / video | On failure |
-| `npm run check:env` | Before first run |
-| `npm run verify:process-catalog` | BPMN keys on runtime-bundle |
+| Feature                          | When                               |
+| -------------------------------- | ---------------------------------- |
+| Trace                            | CI: first retry; local: on failure |
+| Screenshot / video               | On failure                         |
+| `npm run check:env`              | Before first run                   |
+| `npm run verify:process-catalog` | BPMN keys on runtime-bundle        |
 
 ## Related docs
 

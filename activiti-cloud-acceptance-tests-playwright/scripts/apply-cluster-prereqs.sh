@@ -90,11 +90,17 @@ resolve_runtime_bundle_image() {
   if [[ "${ACCEPTANCE_RUNTIME_BUNDLE_USE_RESOLVED_TAG:-true}" == "true" && -f "${ROOT_DIR}/scripts/resolve-docker-images.sh" ]]; then
     prereqs_step "resolving latest activiti/example-runtime-bundle tag (registry; may take 1–2 min)"
     run_with_heartbeat registry "resolve-docker-images" bash -c "cd '${ROOT_DIR}' && bash scripts/resolve-docker-images.sh" || true
-    if [[ -f "${ROOT_DIR}/local-values.yaml" ]]; then
+    local values_file=""
+    if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]]; then
+      values_file="${ROOT_DIR}/local-values.local.yaml"
+    elif [[ -f "${ROOT_DIR}/local-values.yaml" ]]; then
+      values_file="${ROOT_DIR}/local-values.yaml"
+    fi
+    if [[ -n "${values_file}" ]]; then
       if command -v yq &>/dev/null; then
-        resolved_tag="$(yq e '.runtime-bundle.image.tag' "${ROOT_DIR}/local-values.yaml" 2>/dev/null || true)"
+        resolved_tag="$(yq e '.runtime-bundle.image.tag' "${values_file}" 2>/dev/null || true)"
       else
-        resolved_tag="$(grep -A3 '^runtime-bundle:' "${ROOT_DIR}/local-values.yaml" | grep 'tag:' | head -1 | sed 's/.*tag:[[:space:]]*"\?\([^"]*\)"\?.*/\1/')"
+        resolved_tag="$(grep -A3 '^runtime-bundle:' "${values_file}" | grep 'tag:' | head -1 | sed 's/.*tag:[[:space:]]*\"\\?\\([^\"]*\\)\"\\?.*/\\1/')"
       fi
     fi
   fi

@@ -2,11 +2,11 @@
 
 ## Isolation model
 
-| Layer | Mechanism |
-|-------|-----------|
-| **Kubernetes** | One preview namespace per env (`pr-{ACCEPTANCE_ENV_NAME}-rabbit-n-d`) |
-| **Worker** | `testScope.prefix` = `pw-w{worker}p{slot}-{time}-` on names / business keys |
-| **Test** | `dirtyRegistry` DELETE after each test (Serenity `@AfterScenario` parity) |
+| Layer              | Mechanism                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **Kubernetes**     | One preview namespace per env (`pr-{ACCEPTANCE_ENV_NAME}-rabbit-n-d`)                |
+| **Worker**         | `testScope.prefix` = `pw-w{worker}p{slot}-{time}-` on names / business keys          |
+| **Test**           | `dirtyRegistry` DELETE after each test (Serenity `@AfterScenario` parity)            |
 | **Cluster config** | `cluster:prereqs` is idempotent but not concurrent — one run per namespace at a time |
 
 ## Do

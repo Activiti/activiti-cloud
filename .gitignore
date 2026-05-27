@@ -73,6 +73,10 @@ VERSION
 activiti-cloud-acceptance-tests-playwright/.env
 activiti-cloud-acceptance-tests-playwright/.env.develop
 
+# Local Helm image overrides (generated; do not commit)
+local-values.yaml
+local-values.local.yaml
+
 # IDE / hackathon (not part of product PRs)
 .vscode/
 HACKATHON_PRESENTATION_SCRIPT.md

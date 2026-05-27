@@ -8,7 +8,7 @@ This guide helps you set up and install Activiti Cloud locally with complete aut
 
 - ✅ **DNS Resolution** - Port forwarding + /etc/hosts automation (no VPN needed)
 - ✅ **Authentication** - External Keycloak with proper JWT configuration
-- ✅ **Docker Images** - Working tags via local-values.yaml integration
+- ✅ **Docker Images** - Working tags via local-values.local.yaml integration
 - ✅ **Playwright Tests** - Automated .env generation and test configuration
 - ✅ **Multi-Cluster** - Parameterized for any Rancher-managed cluster
 
@@ -118,13 +118,13 @@ The script performs these operations:
 2. **Environment Setup**
 
    - Generates PREVIEW_NAME: `pr-123-rabbit-n-d`
-   - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
+   - Creates local-values.local.yaml with working Docker image tags (gitignored)
    - Sets up all required environment variables
 
 3. **Kubernetes Deployment**
 
    - Creates namespace with proper labels
-   - Deploys Activiti Cloud using Helm with local-values.yaml
+   - Deploys Activiti Cloud using Helm with local-values.local.yaml
    - Patches all deployments with external Keycloak configuration
 
 4. **Local Access Configuration**
@@ -220,7 +220,7 @@ After successful installation, you'll have:
 - **DNS Resolution**: /etc/hosts entries for `*.{cluster}.envalfresco.com`
 - **Port Forwarding**: localhost:8080 → traefik:80
 - **Environment Files**: .env for Playwright tests
-- **Working Images**: local-values.yaml with 8.8.0-alpha.108 tags
+- **Working Images**: local-values.local.yaml with tested tags
 
 ### Authentication Setup
 
@@ -359,7 +359,7 @@ make delete
 The local environment mirrors the GitHub Actions setup:
 
 - Same PREVIEW_NAME format
-- Same Docker image tags (via local-values.yaml)
+- Same Docker image tags (via local-values.local.yaml)
 - Same authentication configuration
 - Same service endpoints and routing
 

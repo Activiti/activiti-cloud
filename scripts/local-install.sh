@@ -62,7 +62,7 @@ OPTIONS:
     -pt, --partitioned <bool>   Partitioned: true|false (default: false)
     -d, --destinations <type>   Destinations: default|override (default: default)
     -v, --version <version>     Version to use (default: auto-generated)
-    --no-local-images           Don't use local-values.yaml (uses generated versions)
+    --no-local-images           Don't use local-values.local.yaml (uses generated versions)
     --dry-run                   Show what would be executed without running
     -h, --help                  Show this help message
 
@@ -81,13 +81,13 @@ PREREQUISITES:
 
 WORKFLOW:
     1. Checks/configures cluster connection
-    2. Ensures local-values.yaml exists with working image tags
+    2. Ensures local-values.local.yaml exists with working image tags
     4. Deploys Activiti Cloud with reliable configuration
     5. Configures identity adapter with correct Keycloak settings
     6. Generates .env file for Playwright tests
 
 NOTES:
-    - Uses local-values.yaml by default for reliable deployments
+    - Uses local-values.local.yaml by default for reliable deployments (gitignored)
     - Auto-detects cluster or helps configure it
     - Keycloak admin username/password come from the Kubernetes secret 'keycloak-admin-credentials' in the same namespace as the Keycloak pod
     - Generates complete .env configuration at the end
@@ -295,22 +295,23 @@ configure_cluster() {
     fi
 }
 
-# Function to ensure local-values.yaml exists
+# Function to ensure local-values.local.yaml exists (gitignored)
 ensure_local_values() {
     echo -e "${BLUE}=== Ensuring Local Docker Images Configuration ===${NC}"
 
     if [[ "$USE_LOCAL_IMAGES" == "false" ]]; then
-        echo -e "${YELLOW}Skipping local-values.yaml (--no-local-images specified)${NC}"
+        echo -e "${YELLOW}Skipping local-values.local.yaml (--no-local-images specified)${NC}"
         return 0
     fi
 
-    local local_values_file="$ROOT_DIR/local-values.yaml"
+    local local_values_file="$ROOT_DIR/local-values.local.yaml"
+    local legacy_local_values_file="$ROOT_DIR/local-values.yaml"
 
     if [[ -f "$local_values_file" ]]; then
-        echo -e "${GREEN}✓ local-values.yaml already exists${NC}"
-        echo -e "${YELLOW}Using working image tags from local-values.yaml${NC}"
+        echo -e "${GREEN}✓ local-values.local.yaml already exists${NC}"
+        echo -e "${YELLOW}Using working image tags from local-values.local.yaml${NC}"
 
-        # Extract version from local-values.yaml for use as main VERSION
+        # Extract version from local-values.local.yaml for use as main VERSION
         if command -v yq >/dev/null 2>&1; then
             LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
             if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
@@ -318,16 +319,20 @@ ensure_local_values() {
                 export LOCAL_IMAGE_VERSION
             fi
         fi
+    elif [[ -f "$legacy_local_values_file" ]]; then
+        echo -e "${YELLOW}⚠ Found legacy local-values.yaml — please migrate to local-values.local.yaml${NC}"
+        echo -e "${YELLOW}Using working image tags from local-values.yaml${NC}"
+        local_values_file="$legacy_local_values_file"
     else
-        echo -e "${YELLOW}local-values.yaml not found, creating it...${NC}"
+        echo -e "${YELLOW}local-values.local.yaml not found, creating it...${NC}"
 
         if [[ "$DRY_RUN" == "true" ]]; then
             echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
         else
             if "$SCRIPT_DIR/resolve-docker-images.sh"; then
-                echo -e "${GREEN}✓ local-values.yaml created with working image tags${NC}"
+                echo -e "${GREEN}✓ local-values.local.yaml created with working image tags${NC}"
 
-                # Extract version from newly created local-values.yaml
+                # Extract version from newly created local-values.local.yaml
                 if command -v yq >/dev/null 2>&1; then
                     LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
                     if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
@@ -336,7 +341,7 @@ ensure_local_values() {
                     fi
                 fi
             else
-                echo -e "${RED}✗ Failed to create local-values.yaml${NC}" >&2
+                echo -e "${RED}✗ Failed to create local-values.local.yaml${NC}" >&2
                 echo -e "${YELLOW}Will proceed without local image overrides${NC}"
                 USE_LOCAL_IMAGES=false
             fi
@@ -496,9 +501,9 @@ generate_environment() {
     # Generate version if not provided
     if [[ -z "$VERSION" ]]; then
         if [[ "$USE_LOCAL_IMAGES" == "true" && -n "$LOCAL_IMAGE_VERSION" ]]; then
-            # When using local images, use the version from local-values.yaml
+            # When using local images, use the version from local-values.local.yaml
             VERSION="$LOCAL_IMAGE_VERSION"
-            echo -e "${YELLOW}Using version from local-values.yaml: $VERSION${NC}"
+            echo -e "${YELLOW}Using version from local-values.local.yaml: $VERSION${NC}"
         else
             # When not using local images, generate custom version
             VERSION="0.0.1-${ENVIRONMENT_NAME}-SNAPSHOT"
@@ -541,13 +546,17 @@ perform_installation() {
 
     # Add local values file if requested
     if [[ "$USE_LOCAL_IMAGES" == "true" ]]; then
-        if [[ -f "$ROOT_DIR/local-values.yaml" ]]; then
+        if [[ -f "$ROOT_DIR/local-values.local.yaml" ]]; then
             # Use absolute path to avoid relative path issues
+            local_values_file="$ROOT_DIR/local-values.local.yaml"
+            make_cmd="$make_cmd LOCAL_VALUES_FILE='$local_values_file'"
+            echo -e "${YELLOW}Using local image overrides from local-values.local.yaml${NC}"
+        elif [[ -f "$ROOT_DIR/local-values.yaml" ]]; then
             local_values_file="$ROOT_DIR/local-values.yaml"
             make_cmd="$make_cmd LOCAL_VALUES_FILE='$local_values_file'"
-            echo -e "${YELLOW}Using local image overrides from local-values.yaml${NC}"
+            echo -e "${YELLOW}Using legacy local image overrides from local-values.yaml${NC}"
         else
-            echo -e "${YELLOW}Warning: --use-local-images specified but local-values.yaml not found${NC}"
+            echo -e "${YELLOW}Warning: --use-local-images specified but local-values.local.yaml not found${NC}"
             echo -e "${YELLOW}Run './scripts/resolve-docker-images.sh' first to create it${NC}"
         fi
     fi

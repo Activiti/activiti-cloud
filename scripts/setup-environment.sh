@@ -403,7 +403,7 @@ EOF
 run_installation() {
     echo -e "${MAGENTA}=== 🚀 Running Installation ===${NC}"
 
-    # Resolve Docker images and create local-values.yaml with working tags
+    # Resolve Docker images and create local-values.local.yaml with working tags
     echo -e "${BLUE}Resolving Docker image versions...${NC}"
     local use_local_images=false
 
@@ -416,15 +416,21 @@ run_installation() {
             echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh $VERSION${NC}"
         fi
 
-        # If local-values.yaml exists, use it for reliable image tags
-        if [[ -f "local-values.yaml" ]]; then
-            echo -e "${GREEN}✓ Using local-values.yaml with verified working image tags${NC}"
+        # If local-values.local.yaml exists, use it for reliable image tags
+        if [[ -f "local-values.local.yaml" ]]; then
+            echo -e "${GREEN}✓ Using local-values.local.yaml with verified working image tags${NC}"
+            use_local_images=true
+        elif [[ -f "local-values.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using legacy local-values.yaml (please migrate to local-values.local.yaml)${NC}"
             use_local_images=true
         fi
     else
-        # If resolve script doesn't exist, check for existing local-values.yaml
-        if [[ -f "local-values.yaml" ]]; then
-            echo -e "${YELLOW}⚠ Using existing local-values.yaml (resolve script not found)${NC}"
+        # If resolve script doesn't exist, check for existing local-values.local.yaml
+        if [[ -f "local-values.local.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using existing local-values.local.yaml (resolve script not found)${NC}"
+            use_local_images=true
+        elif [[ -f "local-values.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using legacy local-values.yaml (resolve script not found)${NC}"
             use_local_images=true
         else
             echo -e "${YELLOW}⚠ No image resolution available - using default tags${NC}"
