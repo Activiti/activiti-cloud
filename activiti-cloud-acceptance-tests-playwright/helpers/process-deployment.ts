@@ -71,6 +71,55 @@ export async function getMissingRequiredProcessDefinitionKeys(
     return requiredKeys.filter((key) => !deployedKeys.has(key));
 }
 
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function processCatalogPollTimeoutMs(): number {
+    const configured = Number(process.env.ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS);
+    if (Number.isFinite(configured) && configured > 0) {
+        return configured;
+    }
+    return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true' ? 300_000 : 120_000;
+}
+
+/**
+ * After runtime-bundle rollout, BPMN auto-deployment can lag behind pod Ready.
+ * Poll until required keys are visible on /rb/v1/process-definitions (or timeout).
+ */
+export async function waitForRequiredProcessDefinitions(
+    runtimeBundleService: RuntimeBundleService,
+    requiredKeys: readonly string[] = RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS,
+    options?: { timeoutMs?: number; intervalMs?: number }
+): Promise<void> {
+    const timeoutMs = options?.timeoutMs ?? processCatalogPollTimeoutMs();
+    const intervalMs = options?.intervalMs ?? 10_000;
+    const deadline = Date.now() + timeoutMs;
+    let attempt = 0;
+
+    while (Date.now() < deadline) {
+        attempt += 1;
+        const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
+        if (missing.length === 0) {
+            if (attempt > 1) {
+                console.log(`✓ Process catalog ready after ${attempt} attempt(s)`);
+            }
+            return;
+        }
+
+        const remainingSec = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        console.log(
+            `Waiting for runtime-bundle BPMN catalog (${missing.length} missing, ~${remainingSec}s left): ${missing.join(', ')}`
+        );
+        await sleep(intervalMs);
+    }
+
+    const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
+    if (missing.length > 0) {
+        throw new Error(formatMissingProcessCatalogMessage(missing));
+    }
+}
+
 export async function assertRequiredProcessDefinitionsDeployed(
     runtimeBundleService: RuntimeBundleService,
     requiredKeys: readonly string[] = RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS

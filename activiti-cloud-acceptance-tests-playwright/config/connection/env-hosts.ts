@@ -4,6 +4,10 @@ function isCiEnv(): boolean {
     return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 }
 
+function stripPort(host: string): string {
+    return host.replace(/:\d+$/, '');
+}
+
 function localPortSuffix(): string | undefined {
     if (isCiEnv()) {
         return undefined;
@@ -61,9 +65,11 @@ export function resolveGatewayHostEnv(): string {
 export function applyResolvedHostsToEnv(): void {
     process.env.GATEWAY_HOST = resolveGatewayHostEnv();
 
-    if (!process.env.GATEWAY_URL?.trim()) {
-        const protocol = process.env.GATEWAY_PROTOCOL || 'http';
-        process.env.GATEWAY_URL = `${protocol}://${process.env.GATEWAY_HOST}`;
+    const protocol = process.env.GATEWAY_PROTOCOL || (isCiEnv() ? 'https' : 'http');
+    const gatewayUrl = process.env.GATEWAY_URL?.trim();
+    if (!gatewayUrl || !gatewayUrl.startsWith('http')) {
+        const host = stripPort(process.env.GATEWAY_HOST);
+        process.env.GATEWAY_URL = `${protocol}://${host}`;
     }
 
     if (!process.env.IDENTITY_HOST?.trim() && process.env.PREVIEW_NAME && process.env.CLUSTER_NAME) {
