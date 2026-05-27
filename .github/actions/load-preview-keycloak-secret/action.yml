@@ -1,0 +1,39 @@
+name: Load preview Keycloak client secret
+description: Reads activiti-keycloak-client from the preview namespace into GITHUB_ENV for Playwright.
+
+runs:
+  using: composite
+  steps:
+    - name: Load KEYCLOAK_CLIENT_SECRET from cluster
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -n "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+          echo "KEYCLOAK_CLIENT_SECRET already set — skipping cluster lookup"
+          exit 0
+        fi
+
+        if [[ -z "${PREVIEW_NAME:-}" ]]; then
+          echo "PREVIEW_NAME not set — skipping Keycloak secret lookup"
+          exit 0
+        fi
+
+        if [[ "${CLUSTER_PROFILE:-}" == "develop" || "${CLUSTER_NAME:-}" == "develop" ]]; then
+          echo "Develop cluster — KEYCLOAK_CLIENT_SECRET must be provided explicitly"
+          exit 0
+        fi
+
+        # shellcheck source=scripts/lib/keycloak-preview.sh
+        source "${GITHUB_WORKSPACE}/scripts/lib/keycloak-preview.sh"
+
+        secret="$(read_preview_keycloak_client_secret "${PREVIEW_NAME}" || true)"
+        if [[ -z "${secret}" ]]; then
+          echo "::error::activiti-keycloak-client secret not found in namespace ${PREVIEW_NAME}"
+          kubectl get secrets -n "${PREVIEW_NAME}" 2>/dev/null | grep -i keycloak || kubectl get secrets -n "${PREVIEW_NAME}" || true
+          exit 1
+        fi
+
+        echo "::add-mask::${secret}"
+        echo "KEYCLOAK_CLIENT_SECRET=${secret}" >> "${GITHUB_ENV}"
+        echo "✓ KEYCLOAK_CLIENT_SECRET loaded from ${PREVIEW_NAME}/activiti-keycloak-client"

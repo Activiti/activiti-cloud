@@ -15,6 +15,7 @@ export async function ensureKubeconfig(): Promise<void> {
 
     const candidates = [
         process.env.ACTIVITI_KUBECONFIG?.trim(),
+        path.join(process.env.HOME || '', '.kube', 'config'),
         path.join(process.env.HOME || '', 'Downloads', 'activiti.yaml'),
         path.join(process.env.HOME || '', 'Downloads', 'develop.yaml'),
     ].filter((value): value is string => Boolean(value));

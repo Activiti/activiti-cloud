@@ -313,6 +313,8 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
+      - uses: ./.github/actions/load-preview-keycloak-secret
+
       - name: Run Playwright Acceptance Tests
         # Run Playwright for every messaging configuration in the matrix
         uses: ./.github/actions/playwright-run
