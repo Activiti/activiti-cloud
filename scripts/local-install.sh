@@ -46,6 +46,8 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # shellcheck source=lib/keycloak-preview.sh
 source "${SCRIPT_DIR}/lib/keycloak-preview.sh"
+# shellcheck source=lib/k8s-deployments.sh
+source "${SCRIPT_DIR}/lib/k8s-deployments.sh"
 
 # Help function
 show_help() {
@@ -517,6 +519,8 @@ generate_environment() {
     # Add broker and configuration suffixes (same logic as GitHub Actions)
     PREVIEW_NAME="$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED_SUFFIX:0:1}-${MESSAGING_DESTINATIONS_SUFFIX:0:1}"
 
+    validate_preview_release_name_length "${PREVIEW_NAME}" || exit 1
+
     # Generate host URLs
     GATEWAY_HOST="gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
     SSO_HOST="identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
@@ -600,32 +604,37 @@ perform_installation() {
 
     execute_command "$make_cmd" "Running make install"
 
-    # Configure Keycloak settings in the deployed identity adapter
+    # Configure Keycloak on runtime services (discover deployment names — Helm may truncate long release names)
     if [[ "$DRY_RUN" == "false" ]]; then
-        echo -e "${BLUE}=== Configuring Identity Adapter ===${NC}"
+        echo -e "${BLUE}=== Configuring Keycloak on Activiti services ===${NC}"
 
-        # Dynamic deployment name based on preview name
-        local identity_deployment="${PREVIEW_NAME}-activiti-cloud-identity-adapter"
+        local identity_deployment
+        identity_deployment="$(find_deployment_in_namespace "${PREVIEW_NAME}" "activiti-cloud-identity-adapter" || true)"
 
-        # Wait for deployment to be ready
-        echo -e "${YELLOW}Waiting for identity adapter deployment...${NC}"
-        kubectl wait --for=condition=available --timeout=300s deployment/$identity_deployment -n $PREVIEW_NAME || true
+        if [[ -n "${identity_deployment}" ]]; then
+            echo -e "${YELLOW}Waiting for identity adapter (${identity_deployment})...${NC}"
+            kubectl wait --for=condition=available --timeout=300s "deployment/${identity_deployment}" -n "${PREVIEW_NAME}" || true
+        else
+            echo -e "${YELLOW}⚠ Identity adapter deployment not found (optional). Keycloak env will be patched on RB/query/connector only.${NC}"
+        fi
 
         configure_preview_keycloak_post_install "${PREVIEW_NAME}" || exit 1
 
         echo -e "${YELLOW}Updating Keycloak URL and realm configuration (parallel)...${NC}"
-        local deployments=(
-            "${PREVIEW_NAME}-activiti-cloud-connector"
-            "${PREVIEW_NAME}-activiti-cloud-identity-adapter"
-            "${PREVIEW_NAME}-activiti-cloud-query"
-            "${PREVIEW_NAME}-runtime-bundle"
+        local patch_patterns=(
+            runtime-bundle
+            activiti-cloud-connector
+            activiti-cloud-query
+            activiti-cloud-identity-adapter
         )
         local patch_pids=()
+        local pattern deployment
 
-        for deployment in "${deployments[@]}"; do
-            if kubectl get deployment "$deployment" -n "${PREVIEW_NAME}" &>/dev/null; then
+        for pattern in "${patch_patterns[@]}"; do
+            deployment="$(find_deployment_in_namespace "${PREVIEW_NAME}" "${pattern}" || true)"
+            if [[ -n "${deployment}" ]]; then
                 echo -e "${CYAN}  Updating ${deployment}...${NC}"
-                kubectl patch deployment "$deployment" -n "${PREVIEW_NAME}" -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${deployment#${PREVIEW_NAME}-}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"${KEYCLOAK_URL}\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"${KEYCLOAK_REALM}\"}]}]}}}}" &
+                patch_deployment_keycloak_env "${deployment}" "${PREVIEW_NAME}" "${KEYCLOAK_URL}" "${KEYCLOAK_REALM}" &
                 patch_pids+=($!)
             fi
         done
@@ -633,10 +642,12 @@ perform_installation() {
         for pid in "${patch_pids[@]}"; do
             wait "${pid}" || true
         done
-        # Restart the deployment to pick up the new secret
-        echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
-        kubectl rollout restart deployment/$identity_deployment -n $PREVIEW_NAME
-        kubectl rollout status deployment/$identity_deployment -n $PREVIEW_NAME
+
+        if [[ -n "${identity_deployment}" ]]; then
+            echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
+            kubectl rollout restart "deployment/${identity_deployment}" -n "${PREVIEW_NAME}"
+            kubectl rollout status "deployment/${identity_deployment}" -n "${PREVIEW_NAME}"
+        fi
 
         echo -e "${GREEN}=== Installation Completed Successfully! ===${NC}"
         echo -e "${YELLOW}Your Activiti Cloud instance is available at:${NC}"

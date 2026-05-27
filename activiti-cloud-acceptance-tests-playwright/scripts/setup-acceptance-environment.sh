@@ -104,6 +104,7 @@ echo ""
 
 PREVIEW_NAME="$(preview_name_from_env_name "${ENV_NAME}")"
 export PREVIEW_NAME
+validate_preview_release_name_length "${PREVIEW_NAME}" || exit 1
 DISCOVERED_NS="$(discover_preview_namespace "${PREVIEW_NAME}" || true)"
 
 needs_install=0

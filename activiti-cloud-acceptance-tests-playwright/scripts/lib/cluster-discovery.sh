@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Discover preview namespace and Activiti deployment names (Helm release prefix varies).
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+# shellcheck source=../../../scripts/lib/k8s-deployments.sh
+source "${ROOT_DIR}/scripts/lib/k8s-deployments.sh"
+
 preview_name_from_env_name() {
   local env_name=$1
   local broker="${MESSAGING_BROKER:-rabbitmq}"
@@ -35,11 +40,12 @@ random_env_suffix() {
   fi
 }
 
-# Default local env name: per-user + random (e.g. jane-a3f2b1 → pr-jane-a3f2b1-rabbit-n-d).
+# Default local env name: short user + random (fits K8s 63-char deployment limit).
 default_acceptance_env_name() {
   local user="${USER:-${USERNAME:-dev}}"
   user="$(echo "${user}" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
   [[ -z "${user}" ]] && user="dev"
+  user="${user:0:6}"
   echo "${user}-$(random_env_suffix)"
 }
 
@@ -62,23 +68,6 @@ read_acceptance_env_name_from_dotenv() {
     return 0
   fi
   echo "${existing}"
-}
-
-find_deployment_in_namespace() {
-  local namespace=$1
-  local pattern=$2
-  local candidate
-
-  for candidate in "${namespace}-${pattern}" "${pattern}"; do
-    if kubectl get deployment "${candidate}" -n "${namespace}" &>/dev/null; then
-      echo "${candidate}"
-      return 0
-    fi
-  done
-
-  kubectl get deployment -n "${namespace}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null \
-    | grep -i "${pattern}" \
-    | head -1
 }
 
 namespace_has_runtime_bundle() {

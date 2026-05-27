@@ -23,7 +23,7 @@ npm run install:browsers
 export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml   # your kubeconfig
 
 # First time: install preview + generate .env (Helm chart includes Keycloak in the namespace)
-# Env name defaults to $USER-<random> (e.g. pr-jane-a3f2b1-rabbit-n-d) — not a shared PR namespace
+# Env name defaults to short $USER-<random> (e.g. pr-jane-a3f2b1-rabbit-n-d, max ~29 chars) — not a shared PR namespace
 npm run test:setup -- --install
 # Or pick a name: npm run test:setup -- --install --name my-feature
 # New random name (ignores old .env): npm run test:setup -- --install --new-env
