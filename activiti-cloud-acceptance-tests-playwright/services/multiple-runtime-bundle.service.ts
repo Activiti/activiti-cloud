@@ -30,6 +30,12 @@ import { CustomAPIRequest } from '../fixtures/context.models';
  */
 const SECONDARY_RUNTIME_BASE_PATH = process.env.SECONDARY_RUNTIME_BASE_PATH?.trim() || '/rb';
 
+/**
+ * Serenity uses /rb-other-app for a second runtime. Preview installs often expose only /rb;
+ * both processes still complete on one engine (signals via RabbitMQ). Set SECONDARY_RUNTIME_BASE_PATH=/rb-other-app when deployed.
+ */
+const SECONDARY_RUNTIME_BASE_PATH = process.env.SECONDARY_RUNTIME_BASE_PATH?.trim() || '/rb';
+
 export class MultipleRuntimeBundleService extends BaseService {
     private readonly primaryRuntimeService: RuntimeBundleService;
     private readonly secondaryRuntimeService: RuntimeBundleService;

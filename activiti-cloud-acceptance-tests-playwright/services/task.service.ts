@@ -42,6 +42,30 @@ function buildCreateTaskPayload(
     ) as Record<string, string | number>;
 }
 
+export interface CreateTaskPayload {
+    payloadType: 'CreateTaskPayload';
+    name: string;
+    description?: string;
+    assignee?: string;
+    parentTaskId?: string;
+    /** Required by RB Jackson (primitive int — must not be null in JSON). */
+    priority?: number;
+}
+
+/** Matches Serenity TaskPayloadBuilder defaults; strips nulls so Jackson never sees null for int fields. */
+function buildCreateTaskPayload(
+    fields: Omit<CreateTaskPayload, 'payloadType'>
+): Record<string, string | number> {
+    const raw: Record<string, unknown> = {
+        payloadType: 'CreateTaskPayload',
+        priority: 50,
+        ...fields,
+    };
+    return Object.fromEntries(
+        Object.entries(raw).filter(([, value]) => value !== null && value !== undefined)
+    ) as Record<string, string | number>;
+}
+
 export class TaskService extends BaseService {
     private readonly basePath = '/rb/v1';
 
