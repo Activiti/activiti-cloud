@@ -19,7 +19,7 @@ import { CloudProcessDefinition } from '../models/process-definition.models';
 import { CloudVariableInstance } from '../models/process-variable.models';
 import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class QueryService extends BaseService {
     private readonly basePath = '/query/v1';

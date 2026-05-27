@@ -2,56 +2,50 @@
 
 Last updated: 2026-05-27
 
-## Playwright infrastructure (this change)
+## Playwright today
 
-| Item                                            | Status                         |
-| ----------------------------------------------- | ------------------------------ |
-| Dirty-context cleanup (`DirtyContextRegistry`)  | **Done** — after each test     |
-| Worker-scoped names / business keys             | **Done** — `testScope` fixture |
-| Default `PLAYWRIGHT_WORKERS=4`                  | **Done**                       |
-| Trace on retry (CI) / retain on failure (local) | **Done**                       |
-| `docs/PARALLEL_SAFE.md`                         | **Done**                       |
+| Metric                       | Value                                                              |
+| ---------------------------- | ------------------------------------------------------------------ |
+| Spec files                   | 8                                                                  |
+| Tests (`npm run test:all`)   | **58**                                                             |
+| Smoke (`npm run test:smoke`) | **18**                                                             |
+| CI                           | Playwright on full messaging matrix (`.github/workflows/main.yml`) |
+| Workers                      | 4 (CI) / 2 (local default); override with `PLAYWRIGHT_WORKERS`     |
 
 ## Serenity vs Playwright coverage
 
-| Area                     | Serenity  | Playwright        | Remove Serenity?                          |
-| ------------------------ | --------- | ----------------- | ----------------------------------------- |
-| Identity adapter         | —         | 9 tests           | N/A                                       |
-| Security hruser          | 6 scen.   | 7 tests           | **Removed**                               |
-| Security hradmin         | 4 scen.   | 2 tests           | **Removed**                               |
-| Multi-runtime signal     | 1 scen.   | 1 test            | **Removed**                               |
-| process-instance-actions | 23 scen.  | 21 tests          | **Removed**                               |
-| task-actions wave 1      | 10 scen.  | 10 tests          | **Removed**                               |
-| task-actions wave 2      | 19 scen.  | 8 tests (partial) | **Partial** — 13 scen. remain in `.story` |
-| Runtime bundle (rest)    | ~54 scen. | partial           | **Blocked** — remainder not migrated      |
+| Area                      | Serenity (approx.) | Playwright | Serenity module status              |
+| ------------------------- | ------------------ | ---------- | ----------------------------------- |
+| Identity adapter          | —                  | 9 tests    | N/A (Playwright-only)               |
+| Security hruser / hradmin | 10 scen.           | 9 tests    | Modules removed from scenarios      |
+| Multi-runtime signal      | 1 scen.            | 1 test     | Module removed                      |
+| process-instance-actions  | 23 scen.           | 21+ tests  | **Removed** from scenarios          |
+| task-actions wave 1       | 10 scen.           | 10 tests   | **Removed**                         |
+| task-actions wave 2       | 19 scen.           | partial    | **Partial**                         |
+| Runtime bundle (rest)     | ~54 scen.          | partial    | **Blocked** — remainder in `.story` |
 
-## What was NOT removed (and why)
+## What remains in the repo (Serenity)
 
-| Asset                                              | Reason                                                                    |
-| -------------------------------------------------- | ------------------------------------------------------------------------- |
-| `activiti-cloud-acceptance-scenarios/`             | `runtime-acceptance-tests` only; security + multi-runtime modules removed |
-| `activiti-cloud-acceptance-tests/` (Serenity libs) | Shared by scenarios + Maven reactor                                       |
-| `serenity-*` Maven deps                            | Required until CI gate switches to Playwright-only                        |
+| Asset                                  | Reason                                    |
+| -------------------------------------- | ----------------------------------------- |
+| `activiti-cloud-acceptance-scenarios/` | Legacy `runtime-acceptance-tests` stories |
+| `activiti-cloud-acceptance-tests/`     | Shared Serenity libraries + Maven reactor |
 
-**Do not delete Serenity modules until:**
+Do **not** delete until remaining runtime stories are migrated or waived and CI no longer depends on Serenity.
 
-1. Remaining ~73 runtime scenarios are migrated or explicitly waived.
-2. `main.yml` `acceptance-tests` job runs Playwright as **required** and Serenity is removed or `continue-on-error`.
-3. `grep serenity` in CI/docs is intentional zero.
+## Recommended next steps
 
-## Recommended next steps (priority order)
-
-1. ~~Stabilize PW with `dirtyRegistry` + 4 workers on CI~~ — done (`PLAYWRIGHT_WORKERS=4`).
-2. Finish `task-actions` wave 2 (remaining ~11 scenarios) + service-tasks stories.
-3. ~~Switch CI gate: Playwright required, Serenity off~~ — done in `main.yml`.
-4. Delete `activiti-cloud-acceptance-scenarios/` and trim `activiti-cloud-acceptance-tests/pom.xml`.
-5. Remove Serenity from Maven reactor when no longer referenced.
+1. Finish `task-actions` wave 2 + service-tasks / connectors / timers stories.
+2. Delete `activiti-cloud-acceptance-scenarios/` when runtime gate is Playwright-only.
+3. Trim Maven reactor / root `pom.xml` Serenity modules.
 
 ## Environment isolation (developers)
 
-| Risk              | Mitigation                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------ |
-| Same namespace    | Unique `ACCEPTANCE_ENV_NAME` per person (`npm run test:setup -- --name alice`)                   |
-| Same port-forward | Playwright starts port-forward in global-setup; manual `npm run port-forward` only for debugging |
-| Prereqs race      | Don't run `cluster:prereqs` twice in parallel on same namespace                                  |
-| Leftover data     | Mitigated by `dirtyRegistry`; not a substitute for unique preview per team                       |
+| Risk               | Mitigation                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| Same namespace     | Unique `ACCEPTANCE_ENV_NAME` (`npm run test:setup -- --new-env`)                      |
+| Port-forward clash | Playwright global-setup owns `8080`; manual `npm run port-forward` for debugging only |
+| Prereqs race       | One `cluster:prereqs` at a time per namespace                                         |
+| Leftover data      | `dirtyRegistry` cleanup; use own preview on shared clusters                           |
+
+See [PARALLEL_SAFE.md](PARALLEL_SAFE.md).

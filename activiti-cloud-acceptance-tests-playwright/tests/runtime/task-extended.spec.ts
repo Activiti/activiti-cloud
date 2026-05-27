@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { activiti } from '../../fixtures/services.fixture';
-import { expect } from '../../fixtures/context.fixture';
-import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
 import { scopedName } from '../../helpers/test-isolation';
@@ -40,12 +40,11 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         await activiti.step(
             'When the user starts PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES and claims the task',
             async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                    processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
-                        'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES'
-                    ),
-                });
-                const task = await getFirstProcessTask(taskServiceTestUser, processInstance.id);
+                const { task } = await startCatalogProcessWithFirstTask(
+                    runtimeBundleServiceTestUser,
+                    taskServiceTestUser,
+                    'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES'
+                );
                 taskId = task.id;
                 await expectTaskStatusInRbAndQuery(
                     taskServiceTestUser,
@@ -79,14 +78,15 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
             queryServiceTestUser,
             queryServiceHrUser,
         }) => {
-            const processKey = ProcessDefinitionRegistry.getProcessDefinitionKey(
+            const processKey = catalogProcessKey(
                 'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP'
             );
 
             await activiti.step('When testuser completes the process task', async () => {
-                const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                    processDefinitionKey: processKey,
-                });
+                const processInstance = await startCatalogProcess(
+                    runtimeBundleServiceTestUser,
+                    'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP'
+                );
                 const task = await getFirstProcessTask(taskServiceTestUser, processInstance.id);
                 await taskServiceTestUser.claimTask(task.id);
                 await taskServiceTestUser.completeTask(task.id);
@@ -205,13 +205,12 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         let taskId: string;
 
         await activiti.step('When testadmin starts PROCESS_INSTANCE_WITH_VARIABLES', async () => {
-            const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
-                    'PROCESS_INSTANCE_WITH_VARIABLES'
-                ),
-            });
+            const { processInstance, task } = await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestAdmin,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_VARIABLES'
+            );
             processInstanceId = processInstance.id;
-            const task = await getFirstProcessTask(taskServiceTestUser, processInstanceId);
             taskId = task.id;
         });
 
@@ -237,12 +236,11 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         let standaloneTaskId: string;
 
         await activiti.step('When the user starts a process, claims its task, and creates a standalone task', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
-                    'PROCESS_INSTANCE_WITH_VARIABLES'
-                ),
-            });
-            const processTask = await getFirstProcessTask(taskServiceTestUser, processInstance.id);
+            const { task: processTask } = await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_VARIABLES'
+            );
             await taskServiceTestUser.claimTask(processTask.id);
 
             const standalone = await taskServiceTestUser.createStandaloneTask();
@@ -268,12 +266,11 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         taskServiceTestUser,
     }) => {
         await activiti.step('When the user starts a process and creates a standalone task', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
-                    'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                ),
-            });
-            await getFirstProcessTask(taskServiceTestUser, processInstance.id);
+            await startCatalogProcessWithFirstTask(
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
+                'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+            );
             await taskServiceTestUser.createStandaloneTask();
         });
 

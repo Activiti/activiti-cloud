@@ -160,7 +160,7 @@ fi
 POLICY_FILE="${PKG_DIR}/config/cluster/acceptance-security-policies.properties"
 POLICY_CONFIG="optional:file:/config/acceptance/acceptance-security-policies.properties"
 CONFIGMAP_NAME="acceptance-security-policies"
-SUPPLEMENTAL_PROCESSES_DIR="${PKG_DIR}/config/cluster/supplemental-processes"
+SUPPLEMENTAL_PROCESSES_DIR="${PKG_DIR}/resources/modeling-projects/acceptance"
 SUPPLEMENTAL_CONFIGMAP="acceptance-supplemental-processes"
 PROCESS_LOCATION_CLASSPATH="classpath*:/processes/"
 PROCESS_LOCATION_SUPPLEMENTAL="file:/config/acceptance-supplemental-processes/"

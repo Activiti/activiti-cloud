@@ -16,7 +16,7 @@
 
 import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 function buildAuditSearch(params?: EventQueryParams): string | undefined {
     const parts: string[] = [];

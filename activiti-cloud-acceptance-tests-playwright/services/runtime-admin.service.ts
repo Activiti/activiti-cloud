@@ -16,7 +16,7 @@
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class RuntimeAdminService extends BaseService {
     private readonly basePath = '/rb/admin/v1';

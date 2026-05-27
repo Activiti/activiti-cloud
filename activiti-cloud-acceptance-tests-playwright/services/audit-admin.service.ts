@@ -16,7 +16,7 @@
 
 import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class AuditAdminService extends BaseService {
     private readonly basePath = '/audit/admin/v1';

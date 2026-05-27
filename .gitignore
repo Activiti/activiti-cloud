@@ -100,3 +100,7 @@ dist/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Python (cluster prereqs scripts)
+**/__pycache__/
+*.py[cod]

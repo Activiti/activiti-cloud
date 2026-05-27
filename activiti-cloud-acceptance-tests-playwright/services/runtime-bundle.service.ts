@@ -22,7 +22,7 @@ import {
 } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class RuntimeBundleService extends BaseService {
     private readonly basePath: string;

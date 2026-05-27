@@ -17,13 +17,14 @@
 import './config/load-env';
 import { defineConfig } from '@playwright/test';
 import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
-import { paths } from './paths';
+import { paths } from './config/paths';
 import { getTestConfiguration } from './config/runtime/test-configuration';
 import { timeouts } from './config/runtime/timeouts';
 applyResolvedHostsToEnv();
 
 const testConfig = getTestConfiguration();
-const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '4'));
+const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
+const isCi = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: './tests',
@@ -32,9 +33,7 @@ export default defineConfig({
     timeout: timeouts.expect,
   },
 
-  // Test configuration
   fullyParallel: true,
-  //forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   forbidOnly: !!process.env.CI,
   workers,
@@ -52,43 +51,14 @@ export default defineConfig({
 
   use: {
     baseURL: testConfig.baseURL,
-    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    trace: isCi ? 'on-first-retry' : 'retain-on-failure',
+    screenshot: isCi ? 'off' : 'only-on-failure',
+    video: isCi ? 'off' : 'retain-on-failure',
     actionTimeout: timeouts.action,
     navigationTimeout: timeouts.navigation,
   },
 
-  projects: [
-    {
-      name: 'identity-adapter',
-      testMatch: 'tests/identity-adapter.spec.ts',
-    },
-    {
-      name: 'security-policies',
-      testMatch: 'tests/*security-policies.spec.ts',
-    },
-    {
-      name: 'process-instance-actions',
-      testMatch: 'tests/process-instance-actions.spec.ts',
-    },
-    {
-      name: 'runtime-process-instance',
-      testMatch: 'tests/runtime/process-instance*.spec.ts',
-    },
-    {
-      name: 'runtime-tasks',
-      testMatch: 'tests/runtime/task*.spec.ts',
-    },
-    {
-      name: 'runtime',
-      testMatch: 'tests/runtime/**/*.spec.ts',
-    },
-    {
-      name: 'all-tests',
-      testMatch: 'tests/**/*.spec.ts',
-    }
-  ],
+  // No overlapping projects — use npm scripts with explicit paths for slices (see docs/IMPROVEMENTS.md Phase 1).
 
   globalSetup: './config/lifecycle/global-setup.ts',
   globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,

@@ -6,11 +6,11 @@
  */
 
 import { APIResponse } from '@playwright/test';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { scopedBusinessKey, scopedName, TestScope } from '../helpers/test-isolation';
 import { Options } from '../models/base-service.models';
-import { Logger } from '../logger';
+import { Logger } from '../helpers/logging/logger';
 
 export interface RequestResponse {
     [key: string]: any;

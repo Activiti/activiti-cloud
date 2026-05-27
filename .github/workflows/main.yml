@@ -177,7 +177,7 @@ jobs:
       ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
     strategy:
       # One namespace per matrix cell (unique PREVIEW_NAME); run all cells in parallel
-      max-parallel: 7
+      max-parallel: 2
       fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]

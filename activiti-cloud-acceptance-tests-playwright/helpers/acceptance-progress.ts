@@ -138,7 +138,7 @@ export function acceptanceLog(actor: AcceptanceActor, message: string): void {
         const line =
             chalk.dim(`[${time} +${elapsedLabel}]`) +
             ' ' +
-            color.bold(`[${tag}]`) +
+            chalk.bold(color(`[${tag}]`)) +
             ' ' +
             message;
         console.log(line);

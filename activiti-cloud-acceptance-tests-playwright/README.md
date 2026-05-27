@@ -81,8 +81,9 @@ Port-forward starts automatically in Playwright global-setup (no second terminal
 
 ```bash
 npm run check:env
-npm run test:smoke          # @smoke
-npm run test:all            # full suite
+npm run typecheck           # TypeScript (strict)
+npm run test:smoke          # 18 tests (@smoke)
+npm run test:all            # 58 tests (full suite)
 ```
 
 `npm run port-forward` is only for manual `curl` debugging.
@@ -118,7 +119,8 @@ kubectl get ns | grep '^pr-'
 | `npm run preview:delete`          | `helm uninstall` + delete namespace from `.env`        |
 | `npm run check:env`               | Validate `.env` and connectivity                       |
 | `npm run verify:process-catalog`  | BPMN keys on runtime-bundle                            |
-| `npm run test:smoke` / `test:all` | Playwright suites                                      |
+| `npm run typecheck`               | TypeScript check (`strict`)                            |
+| `npm run test:smoke` / `test:all` | Playwright (18 smoke / 58 full)                        |
 | `npm run report`                  | Open last HTML report                                  |
 
 ### Run tests by area
@@ -204,23 +206,16 @@ Do not run prereqs twice in parallel on the same namespace.
 
 ## Project structure
 
-```text
-activiti-cloud-acceptance-tests-playwright/
-├── tests/                 # Specs (*.spec.ts)
-├── fixtures/              # Playwright fixtures
-├── services/              # API clients
-├── config/                # connection, lifecycle (see config/README.md)
-├── scripts/               # setup, prereqs, port-forward, matrix
-└── docs/                  # PARALLEL_SAFE, SERENITY_RETIREMENT
-```
+See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md). BPMN assets: [docs/MODELING_PROJECTS.md](docs/MODELING_PROJECTS.md).
 
 ## Writing tests (parallel-safe)
 
-1. Use `activiti` from `fixtures/services.fixture.ts`.
-2. Start processes with `runtimeBundleService.startProcess()` — unique names + auto cleanup.
-3. For fixed names: `scopedName(testScope, 'my-label')`.
-4. Use `expect.poll()` — no `sleep()`.
-5. Do not depend on execution order.
+1. `import { activiti, expect } from '.../fixtures/services.fixture'`.
+2. Start catalog processes with `startCatalogProcess()` / `startCatalogProcessWithFirstTask()` from `flows/`.
+3. Or `runtimeBundleService.startProcess()` — unique names + auto cleanup via `dirtyRegistry`.
+4. For fixed names: `scopedName(testScope, 'my-label')`.
+5. Use `expect.poll()` — no `sleep()`.
+6. Do not depend on execution order.
 
 Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
@@ -229,12 +224,10 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 | Feature                          | When                               |
 | -------------------------------- | ---------------------------------- |
 | Trace                            | CI: first retry; local: on failure |
-| Screenshot / video               | On failure                         |
+| Screenshot / video               | On failure locally; off in CI      |
 | `npm run check:env`              | Before first run                   |
 | `npm run verify:process-catalog` | BPMN keys on runtime-bundle        |
 
-## Related docs
+## Documentation
 
-- [MIGRATION_PLAN.md](MIGRATION_PLAN.md) — story-by-story migration tracker
-- [docs/SERENITY_RETIREMENT.md](docs/SERENITY_RETIREMENT.md) — Serenity vs Playwright status
-- [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md) — isolation rules
+All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, migration tracker, Serenity retirement, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).

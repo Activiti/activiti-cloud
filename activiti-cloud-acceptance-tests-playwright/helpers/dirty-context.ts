@@ -3,8 +3,8 @@
  * Registered after each test via fixture teardown (see fixtures/services.fixture.ts).
  */
 
-import { CustomAPIRequest } from '../context.models';
-import { Logger } from '../logger';
+import { CustomAPIRequest } from '../fixtures/context.models';
+import { Logger } from '../helpers/logging/logger';
 
 export interface DirtyResource {
     context: CustomAPIRequest;

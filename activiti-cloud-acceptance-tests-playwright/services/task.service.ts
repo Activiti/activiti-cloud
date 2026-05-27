@@ -16,7 +16,7 @@
 
 import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
 import { BaseService, RequestResponse } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export interface CreateTaskPayload {
     payloadType: 'CreateTaskPayload';

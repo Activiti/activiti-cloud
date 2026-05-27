@@ -11,25 +11,29 @@ import {
     RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS,
 } from '../helpers/process-deployment';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
-import { ContextFactory } from '../context-factory';
+import { ContextFactory } from '../fixtures/context-factory';
 applyResolvedHostsToEnv();
 
 async function main(): Promise<void> {
     const context = await ContextFactory.getContextByUserName('testUser');
-    const runtimeBundle = new RuntimeBundleService(context);
-    const missing = await getMissingRequiredProcessDefinitionKeys(
-        runtimeBundle,
-        RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS
-    );
+    try {
+        const runtimeBundle = new RuntimeBundleService(context);
+        const missing = await getMissingRequiredProcessDefinitionKeys(
+            runtimeBundle,
+            RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS
+        );
 
-    if (missing.length > 0) {
-        console.error(`\n❌ ${formatMissingProcessCatalogMessage(missing)}\n`);
-        process.exit(1);
+        if (missing.length > 0) {
+            console.error(`\n❌ ${formatMissingProcessCatalogMessage(missing)}\n`);
+            process.exit(1);
+        }
+
+        console.log(
+            `✅ Runtime process catalog OK (${RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS.length} required keys present)`
+        );
+    } finally {
+        await context.dispose();
     }
-
-    console.log(
-        `✅ Runtime process catalog OK (${RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS.length} required keys present)`
-    );
 }
 
 main().catch((error) => {

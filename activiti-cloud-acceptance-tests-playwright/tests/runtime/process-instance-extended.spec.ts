@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { activiti } from '../../fixtures/services.fixture';
-import { expect } from '../../fixtures/context.fixture';
+import { activiti, expect } from '../../fixtures/services.fixture';
 import { scopedName } from '../../helpers/test-isolation';
-import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
+import {
+    expectEventsAdminForKey,
+    expectProcessInstancesAdminForKey,
+    expectQueryProcessInstancesAdminForKey,
+} from '../../helpers/security-policies.assertions';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { pollOptions } from '../../config/runtime/timeouts';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
@@ -45,9 +49,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts an instance of the process called CONNECTOR_PROCESS_INSTANCE', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('CONNECTOR_PROCESS_INSTANCE'),
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestUser,
+                'CONNECTOR_PROCESS_INSTANCE'
+            );
             processInstanceId = processInstance.id;
         });
 
@@ -64,9 +69,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts a process with variables called CONNECTOR_PROCESS_INSTANCE', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcessWithVariables(
-                ProcessDefinitionRegistry.getProcessDefinitionKey('CONNECTOR_PROCESS_INSTANCE'),
-                buildConnectorStartVariables()
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestUser,
+                'CONNECTOR_PROCESS_INSTANCE',
+                { variables: buildConnectorStartVariables() }
             );
             processInstanceId = processInstance.id;
         });
@@ -130,14 +136,16 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the user can get process with variables instances in admin endpoint', async () => {
-            await securityPoliciesServiceProcessAdmin.expectProcessInstancesAdminForKey(
+            await expectProcessInstancesAdminForKey(
+                securityPoliciesServiceProcessAdmin,
                 'PROCESS_INSTANCE_WITH_VARIABLES',
                 true
             );
         });
 
         await activiti.step('And the user can query process with variables instances in admin endpoints', async () => {
-            const queryInstances = await securityPoliciesServiceProcessAdmin.expectQueryProcessInstancesAdminForKey(
+            const queryInstances = await expectQueryProcessInstancesAdminForKey(
+                securityPoliciesServiceProcessAdmin,
                 'PROCESS_INSTANCE_WITH_VARIABLES',
                 true
             );
@@ -145,7 +153,8 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the user can get events for process with variables instances in admin endpoint', async () => {
-            await securityPoliciesServiceProcessAdmin.expectEventsAdminForKey(
+            await expectEventsAdminForKey(
+                securityPoliciesServiceProcessAdmin,
                 processInstanceId,
                 'PROCESS_INSTANCE_WITH_VARIABLES',
                 true
@@ -158,7 +167,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
     }) => {
         await activiti.step('Then the PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED definition has the formKey field with value startForm', async () => {
             const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(
-                ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED')
+                catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED')
             );
             expect(definition.formKey).toBe('startForm');
         });
@@ -172,11 +181,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey(
-                    'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                ),
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestUser,
+                'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+            );
             processInstanceId = processInstance.id;
         });
 
@@ -207,10 +215,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         const processInstanceName = scopedName(testScope, 'my_process_instance_name');
 
         await activiti.step('When the user set a process instance name my_process_instance_name and starts the process SIMPLE_PROCESS_INSTANCE', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('SIMPLE_PROCESS_INSTANCE'),
-                name: processInstanceName,
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestUser,
+                'SIMPLE_PROCESS_INSTANCE',
+                { name: processInstanceName }
+            );
             const runtimeInstance = await runtimeBundleServiceTestUser.getProcessInstance(processInstance.id);
             expect(runtimeInstance.name).toBe(processInstanceName);
 
@@ -235,9 +244,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES', async () => {
-            const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_VARIABLES'),
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestAdmin,
+                'PROCESS_INSTANCE_WITH_VARIABLES'
+            );
             processInstanceId = processInstance.id;
         });
 
@@ -260,9 +270,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES', async () => {
-            const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_VARIABLES'),
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestAdmin,
+                'PROCESS_INSTANCE_WITH_VARIABLES'
+            );
             processInstanceId = processInstance.id;
         });
 
@@ -288,10 +299,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         let processInstanceId: string;
 
         await activiti.step('When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('SIMPLE_PROCESS_INSTANCE'),
-                name: 'process-instance-name',
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceTestUser,
+                'SIMPLE_PROCESS_INSTANCE',
+                { name: 'process-instance-name' }
+            );
             processInstanceId = processInstance.id;
         });
 
@@ -337,8 +349,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         const processInstanceName = scopedName(testScope, 'like-query-process-name');
 
         await activiti.step('When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE', async () => {
-            await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('SIMPLE_PROCESS_INSTANCE'),
+            await startCatalogProcess(runtimeBundleServiceTestUser, 'SIMPLE_PROCESS_INSTANCE', {
                 name: processInstanceName,
             });
         });
@@ -367,9 +378,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         ] as const;
 
         await activiti.step('When the user starts an instance of the process called PROCESS_WITH_HEADERS_CONNECTOR', async () => {
-            const processInstance = await runtimeBundleServiceHrUser.startProcess({
-                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_WITH_HEADERS_CONNECTOR'),
-            });
+            const processInstance = await startCatalogProcess(
+                runtimeBundleServiceHrUser,
+                'PROCESS_WITH_HEADERS_CONNECTOR'
+            );
             processInstanceId = processInstance.id;
         });
 

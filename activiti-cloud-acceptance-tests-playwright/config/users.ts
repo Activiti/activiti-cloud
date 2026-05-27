@@ -5,7 +5,7 @@
  * agreement is prohibited.
  */
 
-import './config/load-env';
+import './load-env';
 
 const { env } = process;
 
@@ -55,3 +55,5 @@ export const users = {
         password: env.TESTUSER_PASSWORD || 'no-TESTUSER_PASSWORD-data',
     }
 };
+
+export type UserKey = keyof typeof users;

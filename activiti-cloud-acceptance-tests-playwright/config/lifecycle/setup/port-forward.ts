@@ -15,7 +15,7 @@ import {
 } from '../../connection/port-forward-target';
 import { getTestConfiguration } from '../../runtime/test-configuration';
 import { timeouts } from '../../runtime/timeouts';
-import { paths } from '../../../paths';
+import { paths } from '../../paths';
 
 const execAsync = promisify(exec);
 

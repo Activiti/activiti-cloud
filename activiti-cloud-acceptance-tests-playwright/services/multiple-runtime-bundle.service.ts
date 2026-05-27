@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import { expect } from '@playwright/test';
-import { pollOptions, timeouts } from '../config/runtime/timeouts';
+import { timeouts } from '../config/runtime/timeouts';
+import { waitForProcessInstanceStatus } from '../helpers/multiple-runtime.assertions';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { TestScope } from '../helpers/test-isolation';
 import { RuntimeBundleService } from './runtime-bundle.service';
 import { QueryService } from './query.service';
-import {
-    CloudProcessInstance,
-    ProcessInstanceStatus
-} from '../models/runtime-bundle.models';
+import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 /**
  * Serenity uses /rb-other-app for a second runtime. Preview installs often expose only /rb;
@@ -76,12 +73,7 @@ export class MultipleRuntimeBundleService extends BaseService {
         expectedStatus: ProcessInstanceStatus,
         timeoutMs: number = timeouts.poll.signalProcess
     ): Promise<CloudProcessInstance> {
-        return this.waitForProcessInstanceStatus(
-            processInstanceId,
-            expectedStatus,
-            timeoutMs,
-            this.primaryRuntimeService
-        );
+        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
     }
 
     async waitForProcessInstanceStatusOnSecondary(
@@ -89,32 +81,6 @@ export class MultipleRuntimeBundleService extends BaseService {
         expectedStatus: ProcessInstanceStatus,
         timeoutMs: number = timeouts.poll.signalProcess
     ): Promise<CloudProcessInstance> {
-        return this.waitForProcessInstanceStatus(
-            processInstanceId,
-            expectedStatus,
-            timeoutMs,
-            this.secondaryRuntimeService
-        );
-    }
-
-    private async waitForProcessInstanceStatus(
-        processInstanceId: string,
-        expectedStatus: ProcessInstanceStatus,
-        timeoutMs: number,
-        _runtime: RuntimeBundleService
-    ): Promise<CloudProcessInstance> {
-        let lastInstance: CloudProcessInstance | undefined;
-
-        await expect
-            .poll(
-                async () => {
-                    lastInstance = await this.queryService.getProcessInstance(processInstanceId);
-                    return lastInstance?.status;
-                },
-                { ...pollOptions('processStatus', timeouts.intervals.fast), timeout: timeoutMs }
-            )
-            .toBe(expectedStatus);
-
-        return lastInstance!;
+        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
     }
 }

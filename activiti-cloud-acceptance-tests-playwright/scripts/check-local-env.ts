@@ -26,7 +26,7 @@ async function main(): Promise<void> {
     for (const e of result.errors) {
       console.error(`   • ${e}`);
     }
-    console.error('\nSee MIGRATION_PLAN.md (Faza 0) and .env.example\n');
+    console.error('\nSee README.md and .env.example\n');
     process.exit(1);
   }
 

@@ -2,7 +2,7 @@
  * Factory helpers — attach dirty-context + test scope to services consistently.
  */
 
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 import { DirtyContextRegistry } from './dirty-context';
 import { TestScope } from './test-isolation';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
@@ -14,6 +14,7 @@ import { QueryAdminService } from '../services/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit.service';
+import { IdentityManagementService } from '../services/identity-management.service';
 
 export interface ServiceIsolationOptions {
     dirtyRegistry?: DirtyContextRegistry;
@@ -75,4 +76,8 @@ export function createTaskAdminService(context: CustomAPIRequest): TaskAdminServ
 
 export function createAuditService(context: CustomAPIRequest): AuditService {
     return new AuditService(context);
+}
+
+export function createIdentityManagementService(context: CustomAPIRequest): IdentityManagementService {
+    return new IdentityManagementService(context);
 }

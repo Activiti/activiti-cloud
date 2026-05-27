@@ -18,6 +18,7 @@ import { test as playwrightTest } from '@playwright/test';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import {
     createAuditService,
+    createIdentityManagementService,
     createMultipleRuntimeBundleService,
     createQueryAdminService,
     createQueryService,
@@ -38,7 +39,7 @@ import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
-import { contexts } from './context.fixture';
+import { contexts, expect } from './context.fixture';
 
 interface ServicesFixture {
     testScope: TestScope;
@@ -143,8 +144,8 @@ const activiti = contexts.extend<ServicesFixture>({
         await use(createSecurityPoliciesService(processAdminContext, isolationOpts(dirtyRegistry, testScope)));
     },
     identityManagementServiceTestUser: async ({ testUserContext }, use) => {
-        await use(new IdentityManagementService(testUserContext));
+        await use(createIdentityManagementService(testUserContext));
     },
 });
 
-export { activiti };
+export { activiti, expect };

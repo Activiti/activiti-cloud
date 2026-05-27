@@ -7,7 +7,7 @@ import * as path from 'path';
  */
 
 /** Package root (activiti-cloud-acceptance-tests-playwright/), independent of process.cwd(). */
-const packageRoot = path.resolve(__dirname);
+const packageRoot = path.resolve(__dirname, '..');
 
 const rootFolder = 'test-results';
 
@@ -16,12 +16,15 @@ export const paths = {
     rootFolder,
     reporter: path.join(packageRoot, 'reporter'),
     resources: path.join(packageRoot, 'resources'),
+    modelingProjects: {
+        /** BPMN + extensions mounted when chart RB image lacks a process (see docs/MODELING_PROJECTS.md). */
+        acceptance: path.join(packageRoot, 'resources', 'modeling-projects', 'acceptance'),
+    },
     testResults: path.resolve(process.cwd(), rootFolder),
     portForwardPidFile: path.join(packageRoot, 'port-forward.pid'),
     cluster: {
         dir: path.join(packageRoot, 'config', 'cluster'),
         securityPoliciesFile: path.join(packageRoot, 'config', 'cluster', 'acceptance-security-policies.properties'),
-        supplementalProcessesDir: path.join(packageRoot, 'config', 'cluster', 'supplemental-processes'),
     },
     /**
      * Prefer a local `.env`; fall back to `.env.example` for a fresh checkout (copy to `.env` after setup).

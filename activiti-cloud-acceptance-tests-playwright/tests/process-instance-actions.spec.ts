@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import { activiti } from '../fixtures/services.fixture';
+import { activiti, expect } from '../fixtures/services.fixture';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
-import { expect } from '@playwright/test';
 import { timeouts } from '../config/runtime/timeouts';
 
-activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services', () => {
-    let processInstanceCatchSignal: CloudProcessInstance;
-    let processInstanceThrowSignal: CloudProcessInstance;
-
+activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services', { tag: '@slow' }, () => {
     activiti.describe('Signal Between Multiple Runtime Bundles', () => {
         activiti('should handle signal communication between primary and secondary runtime bundles', async ({ multipleRuntimeServiceTestUser }) => {
+            let processInstanceCatchSignal: CloudProcessInstance;
+            let processInstanceThrowSignal: CloudProcessInstance;
+
             await activiti.step('When the user starts signal catch process on primary runtime', async () => {
                 processInstanceCatchSignal = await multipleRuntimeServiceTestUser.startProcessOnPrimary('SignalCatchEventProcess');
                 expect(processInstanceCatchSignal).toBeDefined();

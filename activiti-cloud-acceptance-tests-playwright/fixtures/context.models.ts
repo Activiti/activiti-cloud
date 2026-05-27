@@ -29,11 +29,12 @@ export interface TokenDetails {
     expires_in: string;
 }
 
-export interface CustomAPIRequest extends APIRequestContext {
+/** Playwright API context plus OAuth metadata (see wrapAuthenticatedApiContext). */
+export type CustomAPIRequest = APIRequestContext & {
     token: string;
     expires_in: Date;
-    username?: string;
-}
+    username: string;
+};
 
 export interface ExtendedJwtPayload extends JwtPayload {
     idp: string;

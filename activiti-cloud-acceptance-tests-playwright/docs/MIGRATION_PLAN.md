@@ -2,12 +2,12 @@
 
 Dokument opisuje **konkretną kolejność prac** z priorytetem na **lokalne uruchomienie** testów z komputera dewelopera/QA, a następnie na przejęcie gate’a CI.
 
-**Stan wyjściowy (2026-05):**
+**Stan (2026-05-27):**
 
-| Stack              | Scenariusze / testy                 | Gate CI                                 |
-| ------------------ | ----------------------------------- | --------------------------------------- |
-| Serenity (JBehave) | ~117 scenariuszy w 3 modułach Maven | `runtime-acceptance-tests` (~106 scen.) |
-| Playwright         | 19 testów API w 4 specach           | tylko `test:identity` (9 testów)        |
+| Stack              | Scenariusze / testy                 | Gate CI                                        |
+| ------------------ | ----------------------------------- | ---------------------------------------------- |
+| Serenity (JBehave) | ~117 scenariuszy w 3 modułach Maven | Legacy `runtime-acceptance-tests` (wycofywane) |
+| Playwright         | **58** testów w 8 specach           | Pełna macierz messaging w `main.yml`           |
 
 ---
 
@@ -20,127 +20,37 @@ Dokument opisuje **konkretną kolejność prac** z priorytetem na **lokalne uruc
 
 ---
 
-## Faza 0 — Lokalne uruchomienie (TERAZ)
+## Faza 0 — Lokalne uruchomienie
 
-**Cel:** Każdy w zespole może uruchomić istniejące 19 testów bez zgadywania konfiguracji.
+**Źródło prawdy:** [../README.md](../README.md) (nie duplikuj kroków tutaj).
 
-### Wymagania wstępne
+Skrót:
 
-| Narzędzie   | Wersja                                                             |
-| ----------- | ------------------------------------------------------------------ |
-| Node.js     | ≥ 18                                                               |
-| npm         | z Node                                                             |
-| kubectl     | dostęp do klastra z preview                                        |
-| Helm / make | do instalacji środowiska (opcjonalnie, jeśli preview już istnieje) |
+```bash
+npm install && npm run install:browsers
+export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml && npm run kube:use
+npm run test:setup -- --install
+npm run check:env && npm run test:all   # 58 testów
+```
 
-### Kroki jednorazowe (środowisko)
-
-1. **Zainstaluj preview** (jeśli nie masz namespace):
-
-   ```bash
-   # z root repozytorium — dostosuj PREVIEW_NAME / CLUSTER_NAME
-   make install PREVIEW_NAME=<twoj-preview> ...
-   ```
-
-   Alternatywa: `./scripts/setup-environment.sh -n <preview> -c <cluster> --mode playwright`
-
-2. **Wygeneruj `.env`:**
-
-   ```bash
-   cp activiti-cloud-acceptance-tests-playwright/.env.example \
-      activiti-cloud-acceptance-tests-playwright/.env
-   # uzupełnij PREVIEW_NAME, CLUSTER_NAME, SSO_HOST, credentiale użytkowników
-   ```
-
-3. **Preview musi być zainstalowany** (użytkownicy Keycloak są seedowani przez Helm — `local-install.sh`):
-
-   ```bash
-   KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-local -c aae-19758
-   ```
-
-4. **Port-forward do ingress** (osobny terminal; na klastrze `aae` to zwykle ingress-nginx, nie traefik):
-
-   ```bash
-   npm run port-forward
-   # lub: kubectl port-forward svc/ingress-nginx-controller 8080:80 -n default
-   ```
-
-5. **Keycloak w `.env`** (jak po `local-install`):
-
-   ```env
-   SSO_HOST=https://identity-pr-<env>-rabbit-n-d.<cluster>.envalfresco.com/auth/realms/activiti/protocol/openid-connect/token
-   KEYCLOAK_CLIENT_ID=activiti
-   KEYCLOAK_CLIENT_SECRET=<z secret activiti-keycloak-client / npm run test:setup>
-   # Użytkownicy: testuser, hruser, hradmin — hasło domyślnie "password"
-   ```
-
-6. **Sprawdź konfigurację przed testami:**
-
-   ```bash
-   npm run check:env
-   ```
-
-7. **Uruchom testy:**
-
-   ```bash
-   npm run test:identity    # 9 testów — najszybsza weryfikacja
-   npm run test:security    # 9 testów — wymaga HRUSER + HRADMIN
-   npm run test:process     # 1 test — multi-runtime signal
-   npm run test:all         # wszystkie 19
-   ```
-
-8. **(Jeśli trzeba) zastosuj prerekwizyty na klastrze:**
-
-   Na części instalacji preview (zwłaszcza na develop z Traefik) runtime/query mogą mieć problem z walidacją JWT wewnątrz klastra (JWK fetch), a security policies nie są domyślnie załadowane. Wtedy uruchom:
-
-   ```bash
-   npm run cluster:prereqs
-   ```
-
-   Skrypt ustawia `hostAliases`, `ACT_KEYCLOAK_URL` oraz montuje `acceptance-security-policies.properties` na runtime-bundle i query.
-
-### Zmienne środowiskowe (minimum)
-
-| Zmienna                           | Opis                                                   |
-| --------------------------------- | ------------------------------------------------------ |
-| `PREVIEW_NAME`                    | Namespace preview (np. `pr-michal-local-rabbit-n-d`)   |
-| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Budowa hostname gateway                                |
-| `LOCAL_PORT`                      | Port lokalny port-forward (domyślnie `8080`)           |
-| `GATEWAY_HOST`                    | Host gateway **bez** `http://` (może zawierać `:port`) |
-| `GATEWAY_PROTOCOL`                | `http` lokalnie, `https` w CI                          |
-| `SSO_HOST`                        | Pełny URL token endpoint Keycloak                      |
-| `REALM`                           | Client ID OAuth (np. `alfresco`)                       |
-| `TESTUSER_*`                      | Identity tests                                         |
-| `HRUSER_*`, `HRADMIN_*`           | Security tests                                         |
-| `CI` / `GITHUB_ACTIONS`           | `false` lokalnie — włącza port-forward w global-setup  |
-
-### Tryb lokalny API (port-forward)
-
-Lokalnie requesty idą przez `http://localhost:<LOCAL_PORT>` z nagłówkiem `Host: <gateway-host>`.
-Ustaw `LOCAL_USE_PORT_FORWARD=false`, jeśli używasz `/etc/hosts` i wolisz bezpośredni URL z `GATEWAY_HOST`.
-
-### Definition of Done — Faza 0
-
-- [x] `.env.example` w repozytorium
-- [x] `npm run check:env` — walidacja + test auth/gateway
-- [x] `MIGRATION_PLAN.md` (ten plik)
-- [ ] README zaktualizowany (link do tego planu)
-- [ ] Każdy członek zespołu potwierdził `npm run test:all` lokalnie
+- Node **22 LTS**, preview Keycloak w namespace (`realm activiti`, client `activiti`).
+- Port-forward: Traefik (`PORT_FORWARD_NAMESPACE=traefik`) — ustawiane w global-setup; `npm run port-forward` tylko do debugowania.
+- Prereqs: `hostAliases`, polityki, opcjonalny mount BPMN z `resources/modeling-projects/acceptance/` — [MODELING_PROJECTS.md](MODELING_PROJECTS.md).
 
 ---
 
 ## Faza 1 — Stabilizacja i smoke (tydzień 1–2)
 
-| #   | Zadanie                                                                                     | Priorytet |
-| --- | ------------------------------------------------------------------------------------------- | --------- |
-| 1.1 | Tag `@smoke` na identity + security (~16 testów)                                            | P0        |
-| 1.2 | `npm run test:smoke`                                                                        | P0        |
-| 1.3 | Refactor polling: `expect.poll` zamiast `setTimeout` w `multiple-runtime-bundle.service.ts` | P0        |
-| 1.4 | Usunąć `devices['Desktop Chrome']` — API-only config                                        | P1        |
-| 1.5 | `forbidOnly` + `retries: 2` w CI                                                            | P1        |
-| 1.6 | CI: dodać `test:security` + `test:process` obok identity                                    | P1        |
-| 1.7 | `upload-artifact` dla JUnit + HTML report                                                   | P1        |
-| 1.8 | Macierz story → spec (CSV/Confluence)                                                       | P1        |
+| #   | Zadanie                                                  | Priorytet |
+| --- | -------------------------------------------------------- | --------- |
+| 1.1 | Tag `@smoke` na identity + security (18 testów)          | ✅        |
+| 1.2 | `npm run test:smoke`                                     | ✅        |
+| 1.3 | Polling w `helpers/multiple-runtime.assertions.ts`       | ✅        |
+| 1.4 | Usunąć `devices['Desktop Chrome']` — API-only config     | P1        |
+| 1.5 | `forbidOnly` + `retries: 2` w CI                         | P1        |
+| 1.6 | CI: dodać `test:security` + `test:process` obok identity | P1        |
+| 1.7 | `upload-artifact` dla JUnit + HTML report                | P1        |
+| 1.8 | Macierz story → spec (CSV/Confluence)                    | P1        |
 
 ---
 
@@ -209,33 +119,9 @@ Checklist:
 
 ---
 
-## Docelowa struktura katalogów Playwright
+## Struktura katalogów
 
-```
-activiti-cloud-acceptance-tests-playwright/
-├── MIGRATION_PLAN.md          # ten plik
-├── .env.example
-├── playwright.config.ts
-├── config/                    # see config/README.md
-│   ├── load-env.ts
-│   ├── connection/            # gateway, SSO, port-forward target
-│   ├── runtime/               # timeouts, test-configuration
-│   ├── validation/
-│   ├── lifecycle/             # global-setup, global-teardown, setup/*
-│   └── cluster/               # security policies + supplemental BPMN
-├── fixtures/
-├── api/                       # (obecnie services/) — klienty REST
-├── flows/                     # reużywalne scenariusze biznesowe
-├── models/
-├── tests/
-│   ├── smoke/
-│   ├── identity/
-│   ├── security/
-│   ├── runtime/               # migracja z runtime-acceptance-tests
-│   └── multi-runtime/
-└── scripts/
-    └── check-local-env.ts
-```
+Zobacz [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) i [MODELING_PROJECTS.md](MODELING_PROJECTS.md).
 
 ---
 

@@ -45,7 +45,7 @@ async function globalSetup(): Promise<void> {
         }
         throw new Error(
             `Environment configuration invalid:\n${envCheck.errors.map((e) => `  • ${e}`).join('\n')}\n` +
-                'Fix activiti-cloud-acceptance-tests-playwright/.env — see .env.example and MIGRATION_PLAN.md'
+                'Fix activiti-cloud-acceptance-tests-playwright/.env — see .env.example and README.md'
         );
     }
     acceptanceLog('discovery', '✓ Environment variables validated');

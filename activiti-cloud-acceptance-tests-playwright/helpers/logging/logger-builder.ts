@@ -8,8 +8,8 @@
 import * as path from 'path';
 import * as winston from 'winston';
 import { createLogger, format } from 'winston';
-import './config/load-env';
-import { paths } from './paths';
+import '../../config/load-env';
+import { paths } from '../../config/paths';
 
 const level = process.env.LOG_LEVEL || 'debug';
 const logDir = paths.testResults;

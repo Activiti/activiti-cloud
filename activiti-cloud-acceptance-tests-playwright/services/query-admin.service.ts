@@ -17,7 +17,7 @@
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class QueryAdminService extends BaseService {
     private readonly basePath = '/query/admin/v1';

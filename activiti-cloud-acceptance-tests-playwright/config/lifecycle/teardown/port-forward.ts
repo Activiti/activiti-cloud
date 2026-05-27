@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { promisify } from 'util';
 import { cleanupLog, cleanupPhase, cleanupStep, cleanupVibe } from '../../../helpers/acceptance-progress';
-import { paths } from '../../../paths';
+import { paths } from '../../paths';
 
 const execAsync = promisify(exec);
 

@@ -8,45 +8,51 @@
 import { APIRequestContext, request } from '@playwright/test';
 import { fromUnixTime } from 'date-fns';
 import { jwtDecode } from 'jwt-decode';
+import { resolveGatewayConnection } from '../config/connection/gateway-url';
+import { getKeycloakOAuthConfig } from '../config/connection/keycloak-config';
+import { users } from '../config/users';
 import { AuthFormData, CustomAPIRequest, TokenDetails, UserData } from './context.models';
-import { resolveGatewayConnection } from './config/connection/gateway-url';
-import { getKeycloakOAuthConfig } from './config/connection/keycloak-config';
-import { users } from './users';
 
 export class ContextFactory {
 
-    static async getContextByUserName(username: string): Promise<CustomAPIRequest> {
-        if (!(username in users)) {
-            throw new Error(`Unknown user: ${username}. Available users: ${Object.keys(users).join(', ')}`);
+    static async getContextByUserName(userKey: keyof typeof users): Promise<CustomAPIRequest> {
+        if (!(userKey in users)) {
+            throw new Error(`Unknown user: ${userKey}. Available users: ${Object.keys(users).join(', ')}`);
         }
-        const { access_token } = await ContextFactory.getAuthTokenForUser(ContextFactory.getFormData(users[username as keyof typeof users]));
-        return this.getContextByParameters(access_token, 'GATEWAY_HOST', username);
+        const { access_token } = await ContextFactory.getAuthTokenForUser(
+            ContextFactory.getFormData(users[userKey])
+        );
+        return this.getContextByParameters(access_token, 'GATEWAY_HOST', userKey);
     }
 
     static async getAuthTokenForUser(authFormData: AuthFormData): Promise<TokenDetails> {
         const { tokenUrl, hostHeader } = getKeycloakOAuthConfig();
 
         const requestContext = await request.newContext();
-        const headers: Record<string, string> = {};
-        if (hostHeader) {
-            headers.Host = hostHeader;
-        }
+        try {
+            const headers: Record<string, string> = {};
+            if (hostHeader) {
+                headers.Host = hostHeader;
+            }
 
-        const resp = await requestContext.post(tokenUrl, {
-            ...authFormData,
-            headers: Object.keys(headers).length ? headers : undefined,
-        });
+            const resp = await requestContext.post(tokenUrl, {
+                ...authFormData,
+                headers: Object.keys(headers).length ? headers : undefined,
+            });
 
-        if (!/20\d/.exec(resp.status().toString())) {
-            const errorMessage = `Error during sending a POST request: \n
+            if (!/20\d/.exec(resp.status().toString())) {
+                const errorMessage = `Error during sending a POST request: \n
             Endpoint: ${tokenUrl} \n
             Params: ${JSON.stringify(ContextFactory.cleanSensitiveAuthFromData(authFormData), null, 2)}\n
             Error: ${JSON.stringify(resp, null, 2)}
             Response body: ${await resp.text()}`;
-            throw new Error(errorMessage);
-        } else {
+                throw new Error(errorMessage);
+            }
+
             const { access_token, expires_in } = await resp.json();
             return { access_token, expires_in };
+        } finally {
+            await requestContext.dispose();
         }
     }
     static getFormData(userData: UserData): AuthFormData {
@@ -90,7 +96,8 @@ export class ContextFactory {
             extraHTTPHeaders: extraHeaders
         });
 
-        return this.getCustomContextObject(context, accessToken, expires_in!.toString(), username);
+        const expiresAt = fromUnixTime(parseInt(expires_in!.toString(), 10));
+        return wrapAuthenticatedApiContext(context, accessToken, expiresAt, username);
     }
 
     private static cleanSensitiveAuthFromData(authFormData: AuthFormData): AuthFormData {
@@ -104,14 +111,28 @@ export class ContextFactory {
         return data;
     }
 
-    private static getCustomContextObject(context: APIRequestContext, token: string, expires_in: string, username: string): CustomAPIRequest {
-        const newContext = {
-            token,
-            expires_in: fromUnixTime(parseInt(expires_in)),
-            username,
-            ...context
-        };
+}
 
-        return Object.setPrototypeOf(newContext, Object.getPrototypeOf(context));
-    }
+/** Exposes token metadata on a Playwright APIRequestContext without prototype mutation. */
+export function wrapAuthenticatedApiContext(
+    api: APIRequestContext,
+    token: string,
+    expires_in: Date,
+    username: string
+): CustomAPIRequest {
+    return new Proxy(api, {
+        get(target, prop, receiver) {
+            if (prop === 'token') {
+                return token;
+            }
+            if (prop === 'expires_in') {
+                return expires_in;
+            }
+            if (prop === 'username') {
+                return username;
+            }
+            const value = Reflect.get(target, prop, receiver);
+            return typeof value === 'function' ? value.bind(target) : value;
+        },
+    }) as CustomAPIRequest;
 }
