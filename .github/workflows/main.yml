@@ -176,9 +176,9 @@ jobs:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
       ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
     strategy:
-      # avoid overloading test cluster
-      max-parallel: 2
-      fail-fast: true
+      # One namespace per matrix cell (unique PREVIEW_NAME); run all cells in parallel
+      max-parallel: 7
+      fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]
         messaging-partitioned: [partitioned, non-partitioned]
