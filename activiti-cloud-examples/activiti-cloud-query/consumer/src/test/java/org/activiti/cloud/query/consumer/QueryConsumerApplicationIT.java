@@ -106,6 +106,6 @@ public class QueryConsumerApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "projectedEngineEventsProducer");
+            .containsOnlyKeys("engineEvents", "projectedEngineEvents");
     }
 }
