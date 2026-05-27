@@ -108,6 +108,13 @@ export class RuntimeBundleService extends BaseService {
 
     async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
         const response = await this.get(`${this.basePath}/process-definitions`);
+        const status = response.httpStatus;
+        if (status === 401 || status === 403) {
+            throw new Error(
+                `Cannot list process definitions (HTTP ${status}). ` +
+                    'Preview installs use seeded users (testuser/password) and client activiti with KEYCLOAK_CLIENT_SECRET from the namespace — not vars.KEYCLOAK_USERNAME / secrets.KEYCLOAK_PASSWORD.'
+            );
+        }
         return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
     }
 

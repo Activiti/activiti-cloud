@@ -190,6 +190,8 @@ Do not run prereqs twice in parallel on the same namespace.
 
 - Workflow: `.github/workflows/main.yml` → `make install`, then `.github/actions/prepare-preview-for-playwright` (wait for workloads, Keycloak secret, acceptance overlay), then Playwright via `.github/actions/playwright-run`
 - **CI vs local:** cluster patching runs in the workflow (bash + kubectl), not in Playwright global-setup (`AUTO_CLUSTER_PREREQS=false`, `ACCEPTANCE_CI_OVERLAY_APPLIED=true`). Local runs still use `npm run test:setup` / `cluster:prereqs` from global-setup.
+- **CI gateway URL:** direct `https://gateway-{PREVIEW_NAME}.…` (no port-forward). Local uses `localhost:8080` + `Host` header via Traefik port-forward.
+- **CI users:** `testuser` / `password` (chart seed users). Do not use `vars.KEYCLOAK_USERNAME` — that targets other environments and causes HTTP 401 on runtime-bundle APIs.
 - Playwright `test:all` runs on each messaging matrix cell ([retirement plan](docs/SERENITY_RETIREMENT.md))
 - Retries: `2` on CI; artifacts: JUnit, JSON, HTML; trace on first retry
 
