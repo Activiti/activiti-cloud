@@ -16,11 +16,14 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -48,8 +51,11 @@ public class QueryConsumerChannelHandlerTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher;
+
     @Test
-    public void receiveShouldHandleReceivedEvent() {
+    public void receiveShouldHandleReceivedEventAndPublishAfterCommit() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
@@ -65,5 +71,31 @@ public class QueryConsumerChannelHandlerTest {
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
         verify(entityManager).clear();
+        verify(projectedEngineEventsPublisher).accept(events);
+    }
+
+    @Test
+    public void receiveShouldNotPublishWhenTransactionRollsBack() {
+        //given
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
+
+        when(optimizer.optimize(events)).thenReturn(events);
+
+        //when
+        TransactionTemplate transactionTemplate = new TransactionTemplate(new PseudoTransactionManager());
+        assertThatThrownBy(() ->
+                transactionTemplate.executeWithoutResult(tx -> {
+                    consumer.receive(events);
+                    throw new IllegalStateException("boom");
+                })
+            )
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("boom");
+
+        //then
+        verify(eventHandlerContext).handle(processCreatedEvent);
+        verify(entityManager).clear();
+        verify(projectedEngineEventsPublisher, never()).accept(events);
     }
 }

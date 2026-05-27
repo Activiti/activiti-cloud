@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
@@ -31,20 +32,25 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
+    private final Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
-        EntityManager entityManager
+        EntityManager entityManager,
+        Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher
     ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
         this.entityManager = entityManager;
+        this.projectedEngineEventsPublisher = projectedEngineEventsPublisher;
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events) {
         afterCompletion(entityManager::clear);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+        List<CloudRuntimeEvent<?, ?>> optimizedEvents = optimizer.optimize(events);
+        afterCommit(() -> projectedEngineEventsPublisher.accept(optimizedEvents));
+        eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
     }
 
     private static void afterCompletion(Runnable action) {
@@ -52,6 +58,17 @@ public class QueryConsumerChannelHandler {
             new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
+                    action.run();
+                }
+            }
+        );
+    }
+
+    private static void afterCommit(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
                     action.run();
                 }
             }

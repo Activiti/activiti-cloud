@@ -16,14 +16,23 @@
 package org.activiti.cloud.services.query.app;
 
 import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface QueryConsumerChannels {
     String QUERY_CONSUMER = "queryConsumer";
 
+    String PROJECTED_ENGINE_EVENTS_PRODUCER = "projectedEngineEventsProducer";
+
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
+    }
+
+    @OutputBinding(PROJECTED_ENGINE_EVENTS_PRODUCER)
+    default MessageChannel projectedEngineEventsProducer() {
+        return MessageChannels.direct(PROJECTED_ENGINE_EVENTS_PRODUCER).getObject();
     }
 }

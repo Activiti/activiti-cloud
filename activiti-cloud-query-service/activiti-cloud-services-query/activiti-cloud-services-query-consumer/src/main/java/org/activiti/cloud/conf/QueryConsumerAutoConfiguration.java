@@ -35,6 +35,8 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
@@ -139,5 +141,13 @@ public class QueryConsumerAutoConfiguration {
 
             return null;
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "projectedEngineEventsPublisher")
+    public Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher(
+        MessageChannel projectedEngineEventsProducer
+    ) {
+        return events -> projectedEngineEventsProducer.send(MessageBuilder.withPayload(events).build());
     }
 }

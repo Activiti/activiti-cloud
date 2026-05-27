@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
@@ -78,9 +81,15 @@ public class EventHandlersAutoConfiguration {
     public QueryConsumerChannelHandler queryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer fetchingOptimizer,
-        EntityManager entityManager
+        EntityManager entityManager,
+        Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher
     ) {
-        return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer, entityManager);
+        return new QueryConsumerChannelHandler(
+            eventHandlerContext,
+            fetchingOptimizer,
+            entityManager,
+            projectedEngineEventsPublisher
+        );
     }
 
     @Bean
