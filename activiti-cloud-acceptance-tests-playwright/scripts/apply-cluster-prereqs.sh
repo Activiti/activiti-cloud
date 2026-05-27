@@ -17,17 +17,21 @@ source "${SCRIPT_DIR}/lib/cluster-discovery.sh"
 # shellcheck source=lib/prereqs-progress.sh
 source "${SCRIPT_DIR}/lib/prereqs-progress.sh"
 
-# shellcheck source=/dev/null
-set -a && source "${PKG_DIR}/.env" 2>/dev/null || true && set +a
-# Re-pin paths after .env (must not override SCRIPT_DIR / PKG_DIR / ROOT_DIR).
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-ROOT_DIR="$(cd "${PKG_DIR}/.." && pwd)"
+REQUESTED_NAMESPACE="${1:-${PREVIEW_NAME:-}}"
+
+# Local only: .env must not override CI workflow env (PREVIEW_NAME, GATEWAY_HOST, …).
+if [[ "${GITHUB_ACTIONS:-}" != "true" && "${CI:-}" != "true" && -f "${PKG_DIR}/.env" ]]; then
+  # shellcheck source=/dev/null
+  set -a && source "${PKG_DIR}/.env" && set +a
+  # Re-apply CLI / parent env namespace after sourcing .env
+  if [[ -n "${1:-}" ]]; then
+    PREVIEW_NAME="${1}"
+    export PREVIEW_NAME
+  fi
+fi
 
 prereqs_phase_actor coordinator "Cluster prerequisites"
 prereqs_step "discovering preview namespace"
-
-REQUESTED_NAMESPACE="${1:-${PREVIEW_NAME:-}}"
 NAMESPACE="$(discover_preview_namespace "${REQUESTED_NAMESPACE}" || true)"
 if [[ -z "${NAMESPACE}" ]]; then
   echo "Usage: $0 [kubernetes-namespace]"

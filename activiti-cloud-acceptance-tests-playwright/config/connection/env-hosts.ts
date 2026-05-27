@@ -1,5 +1,16 @@
 import { getDevelopGatewayHost, isDevelopProfile } from './cluster-profile';
 
+function isCiEnv(): boolean {
+    return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+}
+
+function localPortSuffix(): string | undefined {
+    if (isCiEnv()) {
+        return undefined;
+    }
+    return process.env.LOCAL_PORT || '8080';
+}
+
 export function buildGatewayHost(previewName: string, clusterName: string, clusterDomain: string, port?: string): string {
     const host = `gateway-${previewName}.${clusterName}.${clusterDomain}`;
     return port ? `${host}:${port}` : host;
@@ -19,7 +30,7 @@ export function resolveGatewayHostEnv(): string {
     const preview = process.env.PREVIEW_NAME;
     const cluster = process.env.CLUSTER_NAME;
     const domain = process.env.CLUSTER_DOMAIN || 'envalfresco.com';
-    const port = process.env.LOCAL_PORT || '8080';
+    const port = localPortSuffix();
     const explicit = process.env.GATEWAY_HOST?.trim();
 
     if (!preview || !cluster) {
@@ -37,10 +48,11 @@ export function resolveGatewayHostEnv(): string {
 
     const hostWithoutPort = explicit.replace(/:\d+$/, '');
     if (!hostWithoutPort.includes(`${preview}.${cluster}`)) {
+        const resolved = buildGatewayHost(preview, cluster, domain, port);
         console.warn(
-            `⚠️  GATEWAY_HOST "${explicit}" does not match PREVIEW_NAME/CLUSTER_NAME — using ${expectedCore}:${port}`
+            `⚠️  GATEWAY_HOST "${explicit}" does not match PREVIEW_NAME/CLUSTER_NAME — using ${resolved}`
         );
-        return buildGatewayHost(preview, cluster, domain, port);
+        return resolved;
     }
 
     return explicit;
@@ -55,7 +67,7 @@ export function applyResolvedHostsToEnv(): void {
     }
 
     if (!process.env.IDENTITY_HOST?.trim() && process.env.PREVIEW_NAME && process.env.CLUSTER_NAME) {
-        const port = process.env.LOCAL_PORT || '8080';
+        const port = localPortSuffix();
         process.env.IDENTITY_HOST = buildIdentityHost(
             process.env.PREVIEW_NAME,
             process.env.CLUSTER_NAME,

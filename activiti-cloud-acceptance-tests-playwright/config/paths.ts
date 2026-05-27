@@ -26,13 +26,7 @@ export const paths = {
         dir: path.join(packageRoot, 'config', 'cluster'),
         securityPoliciesFile: path.join(packageRoot, 'config', 'cluster', 'acceptance-security-policies.properties'),
     },
-    /**
-     * Prefer a local `.env`; fall back to `.env.example` for a fresh checkout (copy to `.env` after setup).
-     */
-    dotEnvPath: (() => {
-        const candidates = ['.env', '.env.example'].map((f) => path.join(packageRoot, f));
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fs = require('fs') as typeof import('fs');
-        return candidates.find((p) => fs.existsSync(p)) || candidates[0];
-    })(),
+    /** Local secrets and preview settings (gitignored). Never load .env.example at runtime. */
+    dotEnvFile: path.join(packageRoot, '.env'),
+    dotEnvExampleFile: path.join(packageRoot, '.env.example'),
 };
