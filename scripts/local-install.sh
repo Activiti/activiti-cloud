@@ -87,6 +87,9 @@ PREREQUISITES:
     - python3 available (for version parsing)
     - Preview namespace with bundled Keycloak (realm activiti, client activiti)
 
+ENVIRONMENT VARIABLES:
+    KEYCLOAK_CLIENT_SECRET    Optional; read from activiti-keycloak-client secret after Helm install
+
 WORKFLOW:
     1. Checks/configures cluster connection
     2. Ensures local-values.local.yaml exists with working image tags
