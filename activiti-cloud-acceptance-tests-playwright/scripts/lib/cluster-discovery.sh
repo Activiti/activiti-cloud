@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Discover preview namespace and Activiti deployment names (Helm release prefix varies).
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_ROOT_DIR="$(cd "${_LIB_DIR}/../../.." && pwd)"
 # shellcheck source=../../../scripts/lib/k8s-deployments.sh
-source "${ROOT_DIR}/scripts/lib/k8s-deployments.sh"
+source "${_ROOT_DIR}/scripts/lib/k8s-deployments.sh"
 
 preview_name_from_env_name() {
   local env_name=$1
