@@ -8,8 +8,10 @@
 # Options:
 #   -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
 #   -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
-#   -pt, --partitioned <bool>   Partitioned: true|false (default: false)
-#   -d, --destinations <type>   Destinations: default|override (default: default)
+#   -pt, --partitioned <bool>   Partitioned: true|false (default: false) [legacy]
+#   -p, --partitioning <mode>   Partitioning: partitioned|non-partitioned|prefix (default: non-partitioned)
+#   -d, --destinations <mode>   Destinations: default|override|pdb (default: default)
+#   --destinations-option <opt> Destinations option: default-destinations|override-destinations|pdb (same as CI)
 #   -v, --version <version>     Version to use (default: auto-generated)
 #   --dry-run                   Show what would be executed without running
 #   -h, --help                  Show this help message
@@ -33,7 +35,7 @@ NC='\033[0m' # No Color
 # Default values
 ENVIRONMENT_NAME=""
 MESSAGING_BROKER="rabbitmq"
-MESSAGING_PARTITIONED="false"
+MESSAGING_PARTITIONED="non-partitioned"
 MESSAGING_DESTINATIONS="default"
 VERSION=""
 DRY_RUN=false
@@ -59,8 +61,10 @@ OPTIONS:
     -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
     -c, --cluster <name>        Cluster name (auto-detected if not specified)
     -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
-    -pt, --partitioned <bool>   Partitioned: true|false (default: false)
-    -d, --destinations <type>   Destinations: default|override (default: default)
+    -pt, --partitioned <bool>   Partitioned: true|false (default: false) [legacy]
+    -p, --partitioning <mode>   Partitioning: partitioned|non-partitioned|prefix (default: non-partitioned)
+    -d, --destinations <mode>   Destinations: default|override|pdb (default: default)
+    --destinations-option <opt> Destinations option: default-destinations|override-destinations|pdb (same as CI)
     -v, --version <version>     Version to use (default: auto-generated)
     --no-local-images           Don't use local-values.local.yaml (uses generated versions)
     --dry-run                   Show what would be executed without running
@@ -69,6 +73,8 @@ OPTIONS:
 EXAMPLES:
     $0 -n michal-test                           # Basic environment with working image tags
     $0 -n feature-xyz -b kafka -pt true        # Kafka with partitioning
+    $0 -n rabbit-pdb -b rabbitmq -d pdb        # RabbitMQ with PDB enabled
+    $0 -n rabbit-prefix -b rabbitmq -p prefix --destinations-option pdb
     $0 --dry-run -n test-env                    # See what would happen
     $0 -n my-env -c activiti-hackathon         # Specify cluster explicitly
 
@@ -110,10 +116,23 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -pt|--partitioned)
+            # legacy boolean flag (true|false)
+            if [[ "$2" == "true" ]]; then
+                MESSAGING_PARTITIONED="partitioned"
+            else
+                MESSAGING_PARTITIONED="non-partitioned"
+            fi
+            shift 2
+            ;;
+        -p|--partitioning)
             MESSAGING_PARTITIONED="$2"
             shift 2
             ;;
         -d|--destinations)
+            MESSAGING_DESTINATIONS="$2"
+            shift 2
+            ;;
+        --destinations-option)
             MESSAGING_DESTINATIONS="$2"
             shift 2
             ;;
@@ -461,22 +480,38 @@ generate_environment() {
         exit 1
     fi
 
-    # Convert boolean partitioned to expected format
-    if [[ "$MESSAGING_PARTITIONED" == "true" ]]; then
+    # Normalize partitioning option to match Helm values filenames used by Makefile:
+    # - partitioned-values.yaml
+    # - non-partitioned-values.yaml
+    # - prefix-values.yaml
+    if [[ "$MESSAGING_PARTITIONED" == "true" || "$MESSAGING_PARTITIONED" == "partitioned" ]]; then
         MESSAGING_PARTITIONED_SUFFIX="partitioned"
         MESSAGING_PARTITIONED_MAKE="partitioned"
+    elif [[ "$MESSAGING_PARTITIONED" == "prefix" ]]; then
+        MESSAGING_PARTITIONED_SUFFIX="prefix"
+        MESSAGING_PARTITIONED_MAKE="prefix"
     else
         MESSAGING_PARTITIONED_SUFFIX="non-partitioned"
         MESSAGING_PARTITIONED_MAKE="non-partitioned"
     fi
 
-    # Convert destinations to expected format
-    if [[ "$MESSAGING_DESTINATIONS" == "default" ]]; then
+    # Normalize destinations option to match Helm values filenames used by Makefile:
+    # - default-destinations-values.yaml
+    # - override-destinations-values.yaml
+    # - pdb-values.yaml
+    if [[ "$MESSAGING_DESTINATIONS" == "default" || "$MESSAGING_DESTINATIONS" == "default-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="default-destinations"
         MESSAGING_DESTINATIONS_MAKE="default-destinations"
-    else
+    elif [[ "$MESSAGING_DESTINATIONS" == "override" || "$MESSAGING_DESTINATIONS" == "override-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="override-destinations"
         MESSAGING_DESTINATIONS_MAKE="override-destinations"
+    elif [[ "$MESSAGING_DESTINATIONS" == "pdb" ]]; then
+        MESSAGING_DESTINATIONS_SUFFIX="pdb"
+        MESSAGING_DESTINATIONS_MAKE="pdb"
+    else
+        echo -e "${RED}Error: Unknown destinations option: '${MESSAGING_DESTINATIONS}'${NC}" >&2
+        echo -e "${YELLOW}Expected: default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
     fi
 
     # Add broker and configuration suffixes (same logic as GitHub Actions)

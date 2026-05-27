@@ -223,22 +223,38 @@ generate_environment() {
     # Generate base PREVIEW_NAME from environment name
     PREVIEW_NAME="$ENVIRONMENT_NAME"
 
-    # Convert boolean partitioned to expected format
-    if [[ "$MESSAGING_PARTITIONED" == "true" ]]; then
+    # Normalize partitioning option to match Helm values filenames used by Makefile:
+    # - partitioned-values.yaml
+    # - non-partitioned-values.yaml
+    # - prefix-values.yaml
+    if [[ "$MESSAGING_PARTITIONED" == "true" || "$MESSAGING_PARTITIONED" == "partitioned" ]]; then
         MESSAGING_PARTITIONED_SUFFIX="partitioned"
         MESSAGING_PARTITIONED_MAKE="partitioned"
+    elif [[ "$MESSAGING_PARTITIONED" == "prefix" ]]; then
+        MESSAGING_PARTITIONED_SUFFIX="prefix"
+        MESSAGING_PARTITIONED_MAKE="prefix"
     else
         MESSAGING_PARTITIONED_SUFFIX="non-partitioned"
         MESSAGING_PARTITIONED_MAKE="non-partitioned"
     fi
 
-    # Convert destinations to expected format
-    if [[ "$MESSAGING_DESTINATIONS" == "default" ]]; then
+    # Normalize destinations option to match Helm values filenames used by Makefile:
+    # - default-destinations-values.yaml
+    # - override-destinations-values.yaml
+    # - pdb-values.yaml
+    if [[ "$MESSAGING_DESTINATIONS" == "default" || "$MESSAGING_DESTINATIONS" == "default-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="default-destinations"
         MESSAGING_DESTINATIONS_MAKE="default-destinations"
-    else
+    elif [[ "$MESSAGING_DESTINATIONS" == "override" || "$MESSAGING_DESTINATIONS" == "override-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="override-destinations"
         MESSAGING_DESTINATIONS_MAKE="override-destinations"
+    elif [[ "$MESSAGING_DESTINATIONS" == "pdb" ]]; then
+        MESSAGING_DESTINATIONS_SUFFIX="pdb"
+        MESSAGING_DESTINATIONS_MAKE="pdb"
+    else
+        echo -e "${RED}Error: Unknown destinations option: '${MESSAGING_DESTINATIONS}'${NC}" >&2
+        echo -e "${YELLOW}Expected: default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
     fi
 
     # Add broker and configuration suffixes (same logic as GitHub Actions)

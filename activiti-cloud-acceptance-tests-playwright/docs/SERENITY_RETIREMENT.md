@@ -14,25 +14,24 @@ Last updated: 2026-05-27
 
 ## Serenity vs Playwright coverage
 
-| Area                     | Serenity  | Playwright        | Remove Serenity?                      |
-| ------------------------ | --------- | ----------------- | ------------------------------------- |
-| Identity adapter         | —         | 9 tests           | N/A                                   |
-| Security hruser          | 6 scen.   | 7 tests           | **Ready** (PW is source of truth)     |
-| Security hradmin         | 4 scen.   | 2 tests           | **Ready** (consolidated)              |
-| Multi-runtime signal     | 1 scen.   | 1 test            | **Ready** (verify 2 RB when deployed) |
-| process-instance-actions | 23 scen.  | 21 tests          | **Ready**                             |
-| task-actions wave 1      | 10 scen.  | 10 tests          | **Ready**                             |
-| task-actions wave 2      | 19 scen.  | 8 tests (partial) | **In progress**                       |
-| Runtime bundle (rest)    | ~54 scen. | partial           | **Blocked** — remainder not migrated  |
-| multiple-runtime module  | few       | partial           | **Blocked**                           |
+| Area                     | Serenity  | Playwright        | Remove Serenity?                          |
+| ------------------------ | --------- | ----------------- | ----------------------------------------- |
+| Identity adapter         | —         | 9 tests           | N/A                                       |
+| Security hruser          | 6 scen.   | 7 tests           | **Removed**                               |
+| Security hradmin         | 4 scen.   | 2 tests           | **Removed**                               |
+| Multi-runtime signal     | 1 scen.   | 1 test            | **Removed**                               |
+| process-instance-actions | 23 scen.  | 21 tests          | **Removed**                               |
+| task-actions wave 1      | 10 scen.  | 10 tests          | **Removed**                               |
+| task-actions wave 2      | 19 scen.  | 8 tests (partial) | **Partial** — 13 scen. remain in `.story` |
+| Runtime bundle (rest)    | ~54 scen. | partial           | **Blocked** — remainder not migrated      |
 
 ## What was NOT removed (and why)
 
-| Asset                                              | Reason                                                          |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| `activiti-cloud-acceptance-scenarios/`             | Serenity removed from CI gate; module kept until full migration |
-| `activiti-cloud-acceptance-tests/` (Serenity libs) | Shared by scenarios + Maven reactor                             |
-| `serenity-*` Maven deps                            | Required until CI gate switches to Playwright-only              |
+| Asset                                              | Reason                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------- |
+| `activiti-cloud-acceptance-scenarios/`             | `runtime-acceptance-tests` only; security + multi-runtime modules removed |
+| `activiti-cloud-acceptance-tests/` (Serenity libs) | Shared by scenarios + Maven reactor                                       |
+| `serenity-*` Maven deps                            | Required until CI gate switches to Playwright-only                        |
 
 **Do not delete Serenity modules until:**
 

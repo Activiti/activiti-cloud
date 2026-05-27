@@ -5,15 +5,11 @@
   "main": "index.js",
   "scripts": {
     "check:env": "tsx activiti-cloud-acceptance-tests-playwright/scripts/check-local-env.ts",
-    "check:env:identity": "tsx activiti-cloud-acceptance-tests-playwright/scripts/check-local-env.ts identity",
-    "check:env:security": "tsx activiti-cloud-acceptance-tests-playwright/scripts/check-local-env.ts security",
-    "check:env:process": "tsx activiti-cloud-acceptance-tests-playwright/scripts/check-local-env.ts process",
     "port-forward": "activiti-cloud-acceptance-tests-playwright/scripts/start-port-forward.sh",
     "cluster:prereqs": "bash activiti-cloud-acceptance-tests-playwright/scripts/apply-cluster-prereqs.sh",
     "test:setup": "bash activiti-cloud-acceptance-tests-playwright/scripts/setup-acceptance-environment.sh",
     "kube:use": "bash activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh",
     "verify:process-catalog": "tsx activiti-cloud-acceptance-tests-playwright/scripts/verify-acceptance-process-catalog.ts",
-    "kube:develop": "bash -c 'source activiti-cloud-acceptance-tests-playwright/scripts/use-develop-kubeconfig.sh && exec \"$SHELL\"'",
     "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
     "test:identity": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
     "test:security": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
@@ -29,7 +25,14 @@
     "test:process:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
     "report": "playwright show-report",
     "install:browsers": "playwright install",
-    "install:deps": "playwright install-deps"
+    "install:deps": "playwright install-deps",
+    "matrix:rabbitmq:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d default-destinations",
+    "matrix:rabbitmq:partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p partitioned -d default-destinations",
+    "matrix:kafka:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p non-partitioned -d default-destinations",
+    "matrix:kafka:partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p partitioned -d default-destinations",
+    "matrix:kafka:partitioned:override": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p partitioned -d override-destinations",
+    "matrix:rabbitmq:non-partitioned:pdb": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d pdb",
+    "matrix:rabbitmq:prefix:pdb": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p prefix -d pdb"
   },
   "keywords": [
     "playwright",

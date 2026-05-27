@@ -314,8 +314,7 @@ jobs:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
       - name: Run Playwright Acceptance Tests
-        # Playwright suite does not depend on messaging matrix — run once on default rabbitmq install
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+        # Run Playwright for every messaging configuration in the matrix
         uses: ./.github/actions/playwright-run
         env:
           CI: 'true'
