@@ -117,7 +117,7 @@ public class ProcessInstanceSpecification
         applyLinkedProcessInstanceId(root);
         applyLinkedProcessInstanceType(root);
         applySubprocessParentIdsFilter(root, criteriaBuilder);
-        applyProcessRelatedTo(root, criteriaBuilder);
+        applyProcessRelatedTo(root, query, criteriaBuilder);
         applyLinkedAndOrphanProcessesFilter(root, criteriaBuilder);
         return super.toPredicate(root, query, criteriaBuilder);
     }
@@ -367,14 +367,36 @@ public class ProcessInstanceSpecification
         );
     }
 
-    private void applyProcessRelatedTo(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
+    private void applyProcessRelatedTo(
+        Root<ProcessInstanceEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
         if (!CollectionUtils.isEmpty(searchRequest.getProcessRelatedTo())) {
-            predicates.add(
-                criteriaBuilder.or(
-                    root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(searchRequest.getProcessRelatedTo()),
-                    root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(searchRequest.getProcessRelatedTo())
-                )
+            Set<String> relatedTo = searchRequest.getProcessRelatedTo();
+
+            // Direct match: linkedProcessInstanceId or rootProcessInstanceId IN relatedTo
+            Predicate directMatch = criteriaBuilder.or(
+                root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(relatedTo),
+                root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(relatedTo)
             );
+
+            // Subquery: find IDs of processes that match the direct criteria
+            Subquery<String> subquery = query.subquery(String.class);
+            Root<ProcessInstanceEntity> subRoot = subquery.from(ProcessInstanceEntity.class);
+            subquery
+                .select(subRoot.get(ProcessInstanceEntity_.id))
+                .where(
+                    criteriaBuilder.or(
+                        subRoot.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(relatedTo),
+                        subRoot.get(ProcessInstanceEntity_.rootProcessInstanceId).in(relatedTo)
+                    )
+                );
+
+            // Indirect match: linkedProcessInstanceId IN (IDs from subquery)
+            Predicate indirectMatch = root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(subquery);
+
+            predicates.add(criteriaBuilder.or(directMatch, indirectMatch));
         }
     }
 
