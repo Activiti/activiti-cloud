@@ -8,6 +8,7 @@
     "port-forward": "activiti-cloud-acceptance-tests-playwright/scripts/start-port-forward.sh",
     "cluster:prereqs": "bash activiti-cloud-acceptance-tests-playwright/scripts/apply-cluster-prereqs.sh",
     "test:setup": "bash activiti-cloud-acceptance-tests-playwright/scripts/setup-acceptance-environment.sh",
+    "preview:delete": "bash activiti-cloud-acceptance-tests-playwright/scripts/delete-preview-namespace.sh",
     "kube:use": "bash activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh",
     "verify:process-catalog": "tsx activiti-cloud-acceptance-tests-playwright/scripts/verify-acceptance-process-catalog.ts",
     "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",

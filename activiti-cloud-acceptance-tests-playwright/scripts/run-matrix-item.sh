@@ -100,3 +100,19 @@ echo "==> Installing preview: broker=${BROKER} partitioning=${PARTITIONING} dest
 
 echo "==> Running Playwright"
 npm run test:all
+
+ENV_FILE="${ROOT_DIR}/activiti-cloud-acceptance-tests-playwright/.env"
+if [[ -f "${ENV_FILE}" ]]; then
+  # shellcheck disable=SC1090
+  set -a
+  source "${ENV_FILE}"
+  set +a
+fi
+
+# global-teardown also prints this; repeat here after matrix install+test
+if [[ -n "${PREVIEW_NAME:-}" ]]; then
+  echo ""
+  echo "Preview still installed: PREVIEW_NAME=${PREVIEW_NAME}"
+  echo "  cd ${ROOT_DIR} && PREVIEW_NAME=${PREVIEW_NAME} make delete"
+  echo "  npm run preview:delete"
+fi

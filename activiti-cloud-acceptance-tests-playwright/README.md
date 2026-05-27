@@ -33,6 +33,14 @@ npm run test:all            # full suite
 
 `npm run port-forward` is only for manual debugging without Playwright (e.g. `curl` against `localhost:8080`).
 
+After local test runs, Playwright **global teardown** prints a reminder to delete the preview namespace. You can also run:
+
+```bash
+npm run preview:delete
+# or from repo root:
+PREVIEW_NAME=pr-<your-env>-rabbit-n-d make delete
+```
+
 **Shared cluster?** Use a **unique** env name per developer: `--name alice` → namespace `pr-alice-rabbit-n-d`. See [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Configuration (`.env`)

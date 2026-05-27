@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import '../load-env';
 import { cleanupLog, cleanupPhase } from '../../helpers/acceptance-progress';
+import { printNamespaceCleanupHint } from './teardown/namespace-cleanup-hint';
 import { cleanupPortForwarding } from './teardown/port-forward';
 
 async function globalTeardown(): Promise<void> {
@@ -27,6 +29,7 @@ async function globalTeardown(): Promise<void> {
     }
 
     await cleanupPortForwarding();
+    printNamespaceCleanupHint();
     cleanupLog('coordinator', '✓ Global teardown completed');
 }
 
