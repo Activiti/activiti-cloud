@@ -26,19 +26,42 @@ preview_name_from_env_name() {
   echo "pr-${env_name}-${broker:0:6}-${partitioned_suffix}-${destinations_suffix}"
 }
 
-# Default local env name: per-user, not a shared PR number (e.g. jane-local).
+# Short random suffix for unique namespaces on shared clusters (e.g. a3f2b1).
+random_env_suffix() {
+  if command -v openssl &>/dev/null; then
+    openssl rand -hex 3
+  else
+    printf '%06x' $((RANDOM * 65536 + RANDOM))
+  fi
+}
+
+# Default local env name: per-user + random (e.g. jane-a3f2b1 → pr-jane-a3f2b1-rabbit-n-d).
 default_acceptance_env_name() {
   local user="${USER:-${USERNAME:-dev}}"
   user="$(echo "${user}" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
   [[ -z "${user}" ]] && user="dev"
-  echo "${user}-local"
+  echo "${user}-$(random_env_suffix)"
+}
+
+# Skip shared/legacy names so an old .env does not keep pr-activiti-tests-rabbit-n-d.
+is_legacy_acceptance_env_name() {
+  local name=$1
+  [[ "${name}" == "activiti-tests" || "${name}" == "your-user-local" ]] && return 0
+  [[ "${name}" =~ -local$ ]] && return 0
+  return 1
 }
 
 read_acceptance_env_name_from_dotenv() {
   local env_file=$1
-  if [[ -f "${env_file}" ]]; then
-    grep -E '^ACCEPTANCE_ENV_NAME=' "${env_file}" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"
+  local existing
+  if [[ ! -f "${env_file}" ]]; then
+    return 0
   fi
+  existing="$(grep -E '^ACCEPTANCE_ENV_NAME=' "${env_file}" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" || true)"
+  if [[ -z "${existing}" ]] || is_legacy_acceptance_env_name "${existing}"; then
+    return 0
+  fi
+  echo "${existing}"
 }
 
 find_deployment_in_namespace() {

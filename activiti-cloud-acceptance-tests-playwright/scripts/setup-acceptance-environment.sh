@@ -16,7 +16,8 @@
 #   --install          Run scripts/local-install.sh when preview is missing
 #   --no-install       Fail instead of installing (only patch existing preview)
 #   --kubeconfig PATH  Override kubeconfig file
-#   --name NAME        Environment name → namespace pr-NAME-rabbit-n-d (default: $USER-local, or reuse .env)
+#   --name NAME        Environment name → namespace pr-NAME-rabbit-n-d
+#   --new-env          Ignore .env and generate a new $USER-<random> name
 #   --cluster NAME     Cluster DNS segment (default: activiti) → *.NAME.envalfresco.com
 
 set -euo pipefail
@@ -32,6 +33,7 @@ INSTALL_MODE="auto"
 KUBECONFIG_ARG=""
 ENV_NAME=""
 ENV_NAME_EXPLICIT=false
+FORCE_NEW_ENV=false
 CLUSTER_NAME="${CLUSTER_NAME:-activiti}"
 ENV_FILE="${PKG_DIR}/.env"
 
@@ -54,6 +56,10 @@ while [[ $# -gt 0 ]]; do
       ENV_NAME_EXPLICIT=true
       shift 2
       ;;
+    --new-env)
+      FORCE_NEW_ENV=true
+      shift
+      ;;
     --cluster)
       CLUSTER_NAME="${2:-}"
       shift 2
@@ -69,12 +75,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "${ENV_NAME}" ]]; then
-  if [[ "${ENV_NAME_EXPLICIT}" == "false" ]]; then
-    existing="$(read_acceptance_env_name_from_dotenv "${ENV_FILE}" || true)"
-    if [[ -n "${existing}" ]]; then
-      ENV_NAME="${existing}"
-    fi
+if [[ -z "${ENV_NAME}" && "${FORCE_NEW_ENV}" == "false" ]]; then
+  existing="$(read_acceptance_env_name_from_dotenv "${ENV_FILE}" || true)"
+  if [[ -n "${existing}" ]]; then
+    ENV_NAME="${existing}"
   fi
 fi
 if [[ -z "${ENV_NAME}" ]]; then
@@ -94,7 +98,7 @@ source "${SCRIPT_DIR}/use-kubeconfig.sh" "${KUBECONFIG_ARG}"
 echo ""
 echo "=== Activiti Cloud acceptance test setup ==="
 echo "Kubeconfig:     ${KUBECONFIG}"
-echo "Env name:       ${ENV_NAME}  (namespace will be pr-${ENV_NAME}-rabbit-n-d)"
+echo "Env name:       ${ENV_NAME}  (namespace: $(preview_name_from_env_name "${ENV_NAME}"))"
 echo "Cluster:        ${CLUSTER_NAME}.${CLUSTER_DOMAIN}"
 echo ""
 
