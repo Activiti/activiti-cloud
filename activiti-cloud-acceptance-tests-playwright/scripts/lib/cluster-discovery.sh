@@ -4,7 +4,7 @@
 preview_name_from_env_name() {
   local env_name=$1
   local broker="${MESSAGING_BROKER:-rabbitmq}"
-  local partitioned="${MESSAGING_PARTITIONED:-false}"
+  local partitioned="${MESSAGING_PARTITIONED:-non-partitioned}"
   local destinations="${MESSAGING_DESTINATIONS:-default}"
 
   local partitioned_suffix="n"
@@ -15,9 +15,30 @@ preview_name_from_env_name() {
   local destinations_suffix="d"
   if [[ "${destinations}" == "override" || "${destinations}" == "override-destinations" ]]; then
     destinations_suffix="o"
+  elif [[ "${destinations}" == "pdb" ]]; then
+    destinations_suffix="p"
+  fi
+
+  if [[ "${partitioned}" == "prefix" ]]; then
+    partitioned_suffix="p"
   fi
 
   echo "pr-${env_name}-${broker:0:6}-${partitioned_suffix}-${destinations_suffix}"
+}
+
+# Default local env name: per-user, not a shared PR number (e.g. jane-local).
+default_acceptance_env_name() {
+  local user="${USER:-${USERNAME:-dev}}"
+  user="$(echo "${user}" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')"
+  [[ -z "${user}" ]] && user="dev"
+  echo "${user}-local"
+}
+
+read_acceptance_env_name_from_dotenv() {
+  local env_file=$1
+  if [[ -f "${env_file}" ]]; then
+    grep -E '^ACCEPTANCE_ENV_NAME=' "${env_file}" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"
+  fi
 }
 
 find_deployment_in_namespace() {
@@ -45,35 +66,12 @@ namespace_has_runtime_bundle() {
 discover_preview_namespace() {
   local preferred="${1:-}"
 
+  # Never scan the cluster for "any" pr-* namespace — that steals CI previews (e.g. pr-2303-rabbit-n-d).
   if [[ -n "${preferred}" ]] && kubectl get namespace "${preferred}" &>/dev/null; then
     if namespace_has_runtime_bundle "${preferred}"; then
       echo "${preferred}"
       return 0
     fi
-  fi
-
-  if [[ -n "${ACCEPTANCE_ENV_NAME:-}" ]]; then
-    local generated
-    generated="$(preview_name_from_env_name "${ACCEPTANCE_ENV_NAME}")"
-    if kubectl get namespace "${generated}" &>/dev/null && namespace_has_runtime_bundle "${generated}"; then
-      echo "${generated}"
-      return 0
-    fi
-  fi
-
-  local match
-  match="$(kubectl get ns -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null \
-    | grep -E '^pr-.*-rabbit-n-d$' || true)"
-
-  while IFS= read -r ns; do
-    [[ -z "${ns}" ]] && continue
-    if namespace_has_runtime_bundle "${ns}"; then
-      echo "${ns}"
-      return 0
-    fi
-  done <<< "${match}"
-
-  if [[ -n "${preferred}" ]] && kubectl get namespace "${preferred}" &>/dev/null; then
     echo "${preferred}"
     return 0
   fi

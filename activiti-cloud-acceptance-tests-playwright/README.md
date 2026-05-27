@@ -23,7 +23,9 @@ npm run install:browsers
 export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml   # your kubeconfig
 
 # First time: install preview + generate .env (Helm chart includes Keycloak in the namespace)
-npm run test:setup -- --install --name activiti-tests
+# Env name defaults to $USER-local (e.g. pr-jane-local-rabbit-n-d) — not a shared PR namespace
+npm run test:setup -- --install
+# Or pick a name: npm run test:setup -- --install --name my-feature
 
 # Verify + run (port-forward starts automatically in global-setup — no second terminal)
 npm run check:env
@@ -41,7 +43,7 @@ npm run preview:delete
 PREVIEW_NAME=pr-<your-env>-rabbit-n-d make delete
 ```
 
-**Shared cluster?** Use a **unique** env name per developer: `--name alice` → namespace `pr-alice-rabbit-n-d`. See [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
+**Shared cluster?** Each developer gets their own namespace (`$USER-local` by default, or `--name alice`). Playwright no longer auto-attaches to someone else's `pr-2303-rabbit-n-d`. See [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Configuration (`.env`)
 
@@ -51,7 +53,7 @@ Use [`.env.example`](.env.example) only as a reference for variables.
 
 | Variable                          | Purpose                                             |
 | --------------------------------- | --------------------------------------------------- |
-| `PREVIEW_NAME`                    | K8s namespace (e.g. `pr-activiti-tests-rabbit-n-d`) |
+| `PREVIEW_NAME`                    | K8s namespace (e.g. `pr-jane-local-rabbit-n-d`) |
 | `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Gateway hostnames                                   |
 | `SSO_HOST`                        | Keycloak token URL (preview realm `activiti`)       |
 | `KEYCLOAK_CLIENT_ID`              | `activiti`                                          |

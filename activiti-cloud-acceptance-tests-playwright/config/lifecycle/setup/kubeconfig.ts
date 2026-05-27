@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import { existsSync } from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
+import { previewNameFromEnvName } from '../../connection/preview-name';
 import { acceptanceLog } from '../../../helpers/acceptance-progress';
 
 const execAsync = promisify(exec);
@@ -32,28 +33,15 @@ export async function resolvePreviewNamespace(): Promise<void> {
         return;
     }
 
-    try {
-        const { stdout } = await execAsync('kubectl get ns -o json');
-        const ns = JSON.parse(stdout) as {
-            items: Array<{ metadata: { name: string; creationTimestamp?: string } }>;
-        };
-        const candidates = ns.items
-            .map((i) => i.metadata)
-            .filter((m) => /^pr-.*-rabbit-n-d$/.test(m.name))
-            .sort((a, b) => (b.creationTimestamp || '').localeCompare(a.creationTimestamp || ''));
-
-        for (const c of candidates) {
-            const name = c.name;
-            const check = await execAsync(
-                `kubectl get deployment "${name}-runtime-bundle" -n "${name}" --ignore-not-found -o name`
-            );
-            if (check.stdout.trim()) {
-                process.env.PREVIEW_NAME = name;
-                acceptanceLog('discovery', `✓ Auto-detected PREVIEW_NAME: ${name}`);
-                return;
-            }
-        }
-    } catch {
-        // fall back to env validation errors
+    const envName = process.env.ACCEPTANCE_ENV_NAME?.trim();
+    if (envName) {
+        process.env.PREVIEW_NAME = previewNameFromEnvName(envName);
+        acceptanceLog('discovery', `✓ PREVIEW_NAME from ACCEPTANCE_ENV_NAME: ${process.env.PREVIEW_NAME}`);
+        return;
     }
+
+    acceptanceLog(
+        'discovery',
+        '⚠ PREVIEW_NAME not set — run npm run test:setup -- --install (writes .env with your env name)'
+    );
 }

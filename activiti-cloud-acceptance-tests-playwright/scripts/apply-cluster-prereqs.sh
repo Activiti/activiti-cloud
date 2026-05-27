@@ -41,7 +41,7 @@ if ! discover_acceptance_deployments "${NAMESPACE}"; then
   echo "  npm run test:setup -- --install"
   echo ""
   echo "Or manually:"
-  echo "  ./scripts/local-install.sh -n \${ACCEPTANCE_ENV_NAME:-activiti-tests} -c \${CLUSTER_NAME:-activiti}"
+  echo "  ./scripts/local-install.sh -n \${ACCEPTANCE_ENV_NAME:-\$(whoami)-local} -c \${CLUSTER_NAME:-activiti}"
   exit 1
 fi
 
