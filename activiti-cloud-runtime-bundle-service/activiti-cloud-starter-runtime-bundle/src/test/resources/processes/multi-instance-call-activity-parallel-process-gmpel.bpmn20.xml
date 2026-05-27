@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:activiti="http://activiti.org/bpmn" id="model-0bf74e1a-7e06-439a-8163-4b29451a87db" name="parallel-process" targetNamespace="" exporter="Activiti Modeler" exporterVersion="3.0.0-beta.7" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_1770387614252" name="parallel-process" isExecutable="true">
+    <bpmn2:documentation />
+    <bpmn2:startEvent id="Event_1">
+      <bpmn2:outgoing>Flow_1gqkjdt</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:endEvent id="Event_0vvdh4i">
+      <bpmn2:incoming>SequenceFlow_14vqsnn</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_1gqkjdt" sourceRef="Event_1" targetRef="Activity_03t1ziz" />
+    <bpmn2:callActivity id="Activity_03t1ziz" name="Execute in Parallel" calledElement="Process_1770387490219" activiti:inheritBusinessKey="true">
+      <bpmn2:incoming>Flow_1gqkjdt</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_1npon2t</bpmn2:outgoing>
+      <bpmn2:multiInstanceLoopCharacteristics activiti:collection="${batchState.documents}" activiti:elementVariable="document" activiti:elementIndexVariable="documentIndex">
+        <bpmn2:loopDataOutputRef>response</bpmn2:loopDataOutputRef>
+        <bpmn2:completionCondition>${nrOfCompletedInstances &gt;= nrOfActiveInstances}</bpmn2:completionCondition>
+      </bpmn2:multiInstanceLoopCharacteristics>
+    </bpmn2:callActivity>
+    <bpmn2:sequenceFlow id="Flow_1npon2t" sourceRef="Activity_03t1ziz" targetRef="Task_176uabb" />
+    <bpmn2:sequenceFlow id="SequenceFlow_14vqsnn" sourceRef="Task_176uabb" targetRef="Event_0vvdh4i" />
+    <bpmn2:userTask id="Task_176uabb" name="Wait" activiti:assignee="hruser">
+      <bpmn2:incoming>Flow_1npon2t</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_14vqsnn</bpmn2:outgoing>
+    </bpmn2:userTask>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1770387614252">
+      <bpmndi:BPMNShape id="_BPMNShape_Event_2" bpmnElement="Event_1">
+        <dc:Bounds x="156" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0vvdh4i_di" bpmnElement="Event_0vvdh4i">
+        <dc:Bounds x="539" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_03t1ziz_di" bpmnElement="Activity_03t1ziz">
+        <dc:Bounds x="254" y="81" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1gqkjdt_di" bpmnElement="Flow_1gqkjdt">
+        <di:waypoint x="192" y="121" />
+        <di:waypoint x="254" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1npon2t_di" bpmnElement="Flow_1npon2t">
+        <di:waypoint x="354" y="121" />
+        <di:waypoint x="397" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_14vqsnn_di" bpmnElement="SequenceFlow_14vqsnn">
+        <di:waypoint x="497" y="121" />
+        <di:waypoint x="539" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0xe7el9_di" bpmnElement="Task_176uabb">
+        <dc:Bounds x="397" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

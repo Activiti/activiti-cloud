@@ -37,17 +37,17 @@
   </modules>
   <properties>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
-    <activiti.version>9.1.0-alpha.21</activiti.version>
+    <activiti.version>9.1.0-alpha.25</activiti.version>
     <java-semver.version>0.10.2</java-semver.version>
-    <resteasy.version>7.0.0.Final</resteasy.version>
+    <resteasy.version>7.0.2.Final</resteasy.version>
     <logstash.version>9.0</logstash.version>
     <springdoc.version>3.0.2</springdoc.version>
     <xstream.version>1.4.21</xstream.version>
-    <java-jwt.version>4.5.0</java-jwt.version>
+    <java-jwt.version>4.5.2</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.13</james.apache-mime4j.version>
     <!-- Replacement for older LZ4 dependency util a newer one will be used in Spring -->
-    <lz4-java.version>1.10.2</lz4-java.version>
+    <lz4-java.version>1.11.0</lz4-java.version>
     <batik.version>1.19</batik.version>
   </properties>
   <dependencyManagement>

@@ -28,6 +28,12 @@ public interface ConnectorIntegrationChannels {
     String VALUE_PROCESSOR_CONSUMER = "valueProcessorConsumer";
     String RACE_CONDITIONS_MULTI_INSTANCE_CONSUMER = "raceConditionsMultiInstanceConsumer";
     String RACE_CONDITION_SINGLE_INSTANCE_CONSUMER = "raceConditionsSingleInstanceConsumer";
+    String SCRIPT_RUNTIME_CONSUMER = "scriptRuntimeConsumer";
+
+    @InputBinding(SCRIPT_RUNTIME_CONSUMER)
+    default SubscribableChannel scriptRuntimeConsumer() {
+        return MessageChannels.publishSubscribe(SCRIPT_RUNTIME_CONSUMER).getObject();
+    }
 
     @InputBinding(INTEGRATION_EVENTS_CONSUMER)
     default SubscribableChannel integrationEventsConsumer() {

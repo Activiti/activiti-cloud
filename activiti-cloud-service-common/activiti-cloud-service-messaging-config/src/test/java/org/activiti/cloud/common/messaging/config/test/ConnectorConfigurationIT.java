@@ -31,6 +31,7 @@ import static org.springframework.cloud.function.context.FunctionRegistration.RE
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
@@ -105,6 +106,7 @@ public class ConnectorConfigurationIT {
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
+    private static final AtomicInteger connectorTestMyErrorHandlerCounter = new AtomicInteger(0);
 
     @Autowired
     private StandardEvaluationContext evaluationContext;
@@ -188,6 +190,7 @@ public class ConnectorConfigurationIT {
         )
         public Connector<?, ?> connectorTestMyErrorHandler() {
             return payload -> {
+                connectorTestMyErrorHandlerCounter.incrementAndGet();
                 throw new IllegalArgumentException("Test Audit Consumer Error");
             };
         }
@@ -448,6 +451,8 @@ public class ConnectorConfigurationIT {
 
     @Test
     public void testConnectorMyErrorHandler() {
+        connectorTestMyErrorHandlerCounter.set(0);
+
         // given
         Message<String> message = MessageBuilder
             .withPayload("TestC")
@@ -467,6 +472,8 @@ public class ConnectorConfigurationIT {
         Assertions
             .assertThat(myErrorHandler.getReference().get().getPayload())
             .hasRootCauseMessage("Test Audit Consumer Error");
+
+        assertThat(connectorTestMyErrorHandlerCounter.get()).isEqualTo(1);
     }
 
     @Test
