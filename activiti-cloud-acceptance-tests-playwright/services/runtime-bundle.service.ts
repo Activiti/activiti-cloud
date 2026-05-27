@@ -17,27 +17,50 @@
 import {
     CloudProcessInstance,
     StartProcessPayload,
-    ProcessInstanceResponse,
-    ProcessQueryParams
+    ProcessQueryParams,
+    UpdateProcessPayload,
 } from '../models/runtime-bundle.models';
+import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
 
 export class RuntimeBundleService extends BaseService {
-    private readonly basePath = '/rb/v1';
+    private readonly basePath: string;
 
-    constructor(context: CustomAPIRequest) {
+    constructor(context: CustomAPIRequest, runtimeBasePath: string = '/rb') {
         super(context);
+        this.basePath = `${runtimeBasePath.replace(/\/$/, '')}/v1`;
     }
 
-    async startProcess(payload: StartProcessPayload): Promise<CloudProcessInstance> {
-        const response = await this.post(
-            `${this.basePath}/process-instances`,
-            { data: payload }
-        );
+    async startProcess(payload: Omit<StartProcessPayload, 'payloadType'>): Promise<CloudProcessInstance> {
+        const { name, businessKey, ...rest } = payload;
+        const body = {
+            payloadType: 'StartProcessPayload' as const,
+            ...rest,
+            name: name ?? this.defaultProcessInstanceName(),
+            businessKey: businessKey ?? this.defaultBusinessKey(),
+        };
 
-        const result = response as ProcessInstanceResponse;
-        return result.content;
+        const response = await this.post(`${this.basePath}/process-instances`, { data: body });
+
+        const processInstance = this.unwrapEntity<CloudProcessInstance>(response);
+        if (processInstance.id) {
+            this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
+        }
+        return processInstance;
+    }
+
+    async startProcessWithVariables(
+        processDefinitionKey: string,
+        variables: Record<string, unknown>,
+        options?: { name?: string; businessKey?: string }
+    ): Promise<CloudProcessInstance> {
+        return this.startProcess({
+            processDefinitionKey,
+            variables,
+            name: options?.name,
+            businessKey: options?.businessKey,
+        });
     }
 
     async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
@@ -45,8 +68,7 @@ export class RuntimeBundleService extends BaseService {
             `${this.basePath}/process-instances/${processInstanceId}`
         );
 
-        const result = response as ProcessInstanceResponse;
-        return result.content;
+        return this.unwrapEntity<CloudProcessInstance>(response);
     }
 
     async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -61,7 +83,55 @@ export class RuntimeBundleService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async deleteProcessInstance(processInstanceId: string): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}`);
+    }
+
+    async suspendProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.post(
+            `${this.basePath}/process-instances/${processInstanceId}/suspend`,
+            { data: {} }
+        );
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async resumeProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.post(
+            `${this.basePath}/process-instances/${processInstanceId}/resume`,
+            { data: {} }
+        );
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
+        const response = await this.get(`${this.basePath}/process-definitions`);
+        return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
+    }
+
+    async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
+        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionKey}`);
+        return this.unwrapEntity<CloudProcessDefinition>(response);
+    }
+
+    async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-instances/${processInstanceId}/model`, {
+            Accept: 'image/svg+xml',
+        });
+    }
+
+    async updateProcessInstance(
+        processInstanceId: string,
+        payload: Omit<UpdateProcessPayload, 'payloadType'>
+    ): Promise<CloudProcessInstance> {
+        const response = await this.put(`${this.basePath}/process-instances/${processInstanceId}`, {
+            data: {
+                payloadType: 'UpdateProcessPayload',
+                ...payload,
+            },
+        });
+        return this.unwrapEntity<CloudProcessInstance>(response);
     }
 }

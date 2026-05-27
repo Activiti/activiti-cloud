@@ -27,8 +27,7 @@ export class RuntimeAdminService extends BaseService {
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -43,7 +42,14 @@ export class RuntimeAdminService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async deleteProcessInstance(processInstanceId: string): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}`);
+    }
+
+    async destroyProcessInstance(processInstanceId: string, force = true): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}/destroy?force=${force}`);
     }
 }

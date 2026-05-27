@@ -313,30 +313,36 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
+      - name: Run Playwright Acceptance Tests
+        # Playwright suite does not depend on messaging matrix — run once on default rabbitmq install
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         uses: ./.github/actions/playwright-run
         env:
-          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
-          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          CI: 'true'
+          GITHUB_ACTIONS: 'true'
+          PREVIEW_NAME: ${{ env.PREVIEW_NAME }}
+          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+          CLUSTER_DOMAIN: ${{ env.CLUSTER_DOMAIN }}
+          GATEWAY_PROTOCOL: https
+          GATEWAY_HOST: ${{ env.GATEWAY_HOST }}
           GATEWAY_URL: ${{ env.GATEWAY_HOST }}
           SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
+          KEYCLOAK_CLIENT_ID: activiti
           REALM: activiti
+          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
+          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          HRUSER_USERNAME: hruser
+          HRUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          HRADMIN_USERNAME: hradmin
+          HRADMIN_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          PROCESSADMINUSER_USERNAME: processadminuser
+          PROCESSADMINUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          TESTADMIN_USERNAME: testadmin
+          TESTADMIN_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
+          PLAYWRIGHT_WORKERS: '4'
+          AUTO_CLUSTER_PREREQS: 'true'
         with:
-          script-command: "npm run test:identity"
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
-
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        run: |
-          make test/runtime-acceptance-tests
+          script-command: "npm run test:all"
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()

@@ -17,7 +17,7 @@
 import { activiti } from '../fixtures/services.fixture';
 import { expect } from '../fixtures/context.fixture';
 
-activiti.describe('Identity Management', () => {
+activiti.describe('Identity Management @smoke', () => {
     activiti.describe('Group Search', () => {
         activiti('should search groups by name containing "sa"', async ({ identityManagementServiceTestUser }) => {
             await activiti.step('When searching for groups by name containing "sa"', async () => {

@@ -5,11 +5,9 @@
  * agreement is prohibited.
  */
 
-import dotenv from 'dotenv';
-import { paths } from './paths';
-const { env } = process;
+import './config/load-env';
 
-dotenv.config({ path: paths.dotEnvPath });
+const { env } = process;
 
 export const users = {
     hruser: {

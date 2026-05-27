@@ -8,7 +8,9 @@
 import { APIRequestContext, request } from '@playwright/test';
 import { fromUnixTime } from 'date-fns';
 import { jwtDecode } from 'jwt-decode';
-import { AuthFormData, CustomAPIRequest, ExtendedJwtPayload, TokenDetails, UserData } from './context.models';
+import { AuthFormData, CustomAPIRequest, TokenDetails, UserData } from './context.models';
+import { resolveGatewayConnection } from './config/connection/gateway-url';
+import { getKeycloakOAuthConfig } from './config/connection/keycloak-config';
 import { users } from './users';
 
 export class ContextFactory {
@@ -22,14 +24,22 @@ export class ContextFactory {
     }
 
     static async getAuthTokenForUser(authFormData: AuthFormData): Promise<TokenDetails> {
-        const ssoUrl = process.env['SSO_HOST']!;
+        const { tokenUrl, hostHeader } = getKeycloakOAuthConfig();
 
         const requestContext = await request.newContext();
-        const resp = await requestContext.post(ssoUrl, authFormData);
+        const headers: Record<string, string> = {};
+        if (hostHeader) {
+            headers.Host = hostHeader;
+        }
+
+        const resp = await requestContext.post(tokenUrl, {
+            ...authFormData,
+            headers: Object.keys(headers).length ? headers : undefined,
+        });
 
         if (!/20\d/.exec(resp.status().toString())) {
             const errorMessage = `Error during sending a POST request: \n
-            Endpoint: ${ssoUrl} \n
+            Endpoint: ${tokenUrl} \n
             Params: ${JSON.stringify(ContextFactory.cleanSensitiveAuthFromData(authFormData), null, 2)}\n
             Error: ${JSON.stringify(resp, null, 2)}
             Response body: ${await resp.text()}`;
@@ -44,39 +54,39 @@ export class ContextFactory {
             throw new Error('User data must contain username and password');
         }
 
-        return {
-          form: {
+        const { clientId, clientSecret } = getKeycloakOAuthConfig();
+
+        const form: AuthFormData['form'] = {
             username: userData.username,
             password: userData.password,
             grant_type: 'password',
-            client_id: process.env.REALM
-          }
+            client_id: clientId,
+        };
+
+        if (clientSecret) {
+            form.client_secret = clientSecret;
         }
+
+        return { form };
     }
 
-    private static async getContextByParameters(accessToken: string, contextBaseUrl: 'GATEWAY_HOST', username: string): Promise<CustomAPIRequest> {
+    private static async getContextByParameters(accessToken: string, _contextBaseUrl: 'GATEWAY_HOST', username: string): Promise<CustomAPIRequest> {
         const tokenData = jwtDecode(accessToken);
         const { exp: expires_in } = tokenData;
 
-        // Determine protocol and construct baseURL
-        const protocol = process.env.GATEWAY_PROTOCOL || 'https';
-        const host = process.env[contextBaseUrl];
-        const baseURL = `${protocol}://${host}`;
+        const { baseURL, hostHeader } = resolveGatewayConnection();
 
-        // For localhost port forwarding, we need to set the proper Host header
         const extraHeaders: Record<string, string> = {
             Authorization: `Bearer ${accessToken}`,
             accept: 'application/json, text/plain, */*'
         };
 
-        // If using localhost port forwarding, set the Host header to the original domain
-        if (host?.includes('localhost')) {
-            const originalHost = `gateway-${process.env.PREVIEW_NAME}.${process.env.CLUSTER_NAME}.${process.env.CLUSTER_DOMAIN}`;
-            extraHeaders.Host = originalHost;
+        if (hostHeader) {
+            extraHeaders.Host = hostHeader;
         }
 
         const context = await request.newContext({
-            baseURL: baseURL,
+            baseURL,
             extraHTTPHeaders: extraHeaders
         });
 

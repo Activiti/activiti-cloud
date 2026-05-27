@@ -27,8 +27,7 @@ export class RuntimeAdminService extends BaseService {
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -43,8 +42,7 @@ export class RuntimeAdminService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 }
 
@@ -57,8 +55,7 @@ export class QueryAdminService extends BaseService {
 
     async getAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -73,7 +70,6 @@ export class QueryAdminService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 }

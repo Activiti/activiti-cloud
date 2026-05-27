@@ -17,6 +17,7 @@
 import { activiti } from '../fixtures/services.fixture';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { expect } from '@playwright/test';
+import { timeouts } from '../config/runtime/timeouts';
 
 activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services', () => {
     let processInstanceCatchSignal: CloudProcessInstance;
@@ -42,13 +43,13 @@ activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services',
                 await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnPrimary(
                     processInstanceCatchSignal.id,
                     ProcessInstanceStatus.COMPLETED,
-                    30000
+                    timeouts.poll.signalProcess
                 );
 
                 await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnSecondary(
                     processInstanceThrowSignal.id,
                     ProcessInstanceStatus.COMPLETED,
-                    30000
+                    timeouts.poll.signalProcess
                 );
 
                 const finalCatchProcess = await multipleRuntimeServiceTestUser.getProcessInstanceFromPrimary(processInstanceCatchSignal.id);

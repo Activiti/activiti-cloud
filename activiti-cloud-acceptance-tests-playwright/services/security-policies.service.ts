@@ -25,8 +25,12 @@ import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudTask } from '../models/task.models';
 import { CloudRuntimeEvent } from '../models/audit.models';
 import { ProcessDefinitionRegistry } from '../models/process-definition-registry';
+import { expect } from '@playwright/test';
+import { pollOptions } from '../config/runtime/timeouts';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
+import { DirtyContextRegistry } from '../helpers/dirty-context';
+import { TestScope } from '../helpers/test-isolation';
 
 export class SecurityPoliciesService extends BaseService {
     private readonly runtimeBundleService: RuntimeBundleService;
@@ -48,29 +52,58 @@ export class SecurityPoliciesService extends BaseService {
         this.queryAdminService = new QueryAdminService(context);
     }
 
+    attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
+        super.attachIsolation(dirtyRegistry, testScope);
+        this.runtimeBundleService.attachIsolation(dirtyRegistry, testScope);
+        this.taskService.attachIsolation(dirtyRegistry, testScope);
+    }
+
     // Process Instance Operations
     async startProcess(processName: string): Promise<CloudProcessInstance> {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        const startPath =
+            this.context.username === 'hradmin' || this.context.username === 'processadmin'
+                ? '/rb/admin/v1/process-instances'
+                : '/rb/v1/process-instances';
 
         const response = await this.post(
-            '/rb/v1/process-instances',
-            { data: { processDefinitionKey } }
+            startPath,
+            {
+                data: {
+                    payloadType: 'StartProcessPayload',
+                    processDefinitionKey
+                }
+            }
         );
 
-        // Check if response indicates an error (4xx status code)
-        if (response.status && response.status >= 400 && response.status < 500) {
-            // For client errors, throw an exception to match test expectations
-            const errorMessage = (response as any).message || response.body || `Unable to find process definition for the given id:'${processDefinitionKey}'`;
+        if (response.httpStatus && response.httpStatus >= 400 && response.httpStatus < 500) {
+            const entry = (response as any).entry;
+            const errorMessage =
+                entry?.message ||
+                (response as any).message ||
+                response.body ||
+                `Unable to find process definition for the given id:'${processDefinitionKey}'`;
             throw new Error(errorMessage);
         }
 
-        // If successful, parse the response
-        const result = response as any;
-        return result.content;
+        const entry = (response as any).entry;
+        if (entry?.code && entry?.message) {
+            throw new Error(entry.message);
+        }
+
+        const processInstance = this.unwrapEntity<CloudProcessInstance>(response);
+        if (processInstance.id) {
+            this.dirtyRegistry?.register(this.context, `${startPath}/${processInstance.id}`);
+        }
+        return processInstance;
     }
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
         return await this.runtimeBundleService.getProcessInstances();
+    }
+
+    async getRuntimeProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        return this.runtimeBundleService.getProcessInstance(processInstanceId);
     }
 
     async getProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
@@ -111,18 +144,63 @@ export class SecurityPoliciesService extends BaseService {
     // Helper methods for filtering by process definition key
     filterProcessInstancesByKey(processInstances: CloudProcessInstance[], processName: string): CloudProcessInstance[] {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        return processInstances.filter(pi => pi.processDefinitionKey === processDefinitionKey);
+        return processInstances.filter(
+            (pi) =>
+                pi.processDefinitionKey === processDefinitionKey ||
+                (pi.processDefinitionId?.startsWith(`${processDefinitionKey}:`) ?? false)
+        );
+    }
+
+    private async getRuntimeInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        return this.runtimeBundleService.getProcessInstances({ processDefinitionKey });
+    }
+
+    private async getQueryInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        return this.queryService.getProcessInstances({ processDefinitionKey });
     }
 
     filterEventsByProcessKey(events: CloudRuntimeEvent[], processName: string): CloudRuntimeEvent[] {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
-        return events.filter(event => event.processDefinitionKey === processDefinitionKey);
+        return events.filter((event) => {
+            const entity = event.entity as { processDefinitionKey?: string; id?: string } | undefined;
+            const entityKey = entity?.processDefinitionKey ?? event.processDefinitionKey;
+            return entityKey === processDefinitionKey;
+        });
+    }
+
+
+    filterEventsByProcessInstance(events: CloudRuntimeEvent[], processInstanceId: string, processName: string): CloudRuntimeEvent[] {
+        const byKey = this.filterEventsByProcessKey(events, processName);
+        if (byKey.length > 0) {
+            return byKey;
+        }
+        return events.filter(
+            (event) =>
+                event.processInstanceId === processInstanceId ||
+                (event.entity as { id?: string } | undefined)?.id === processInstanceId
+        );
+    }
+
+    private async getEventsByProcessName(processName: string): Promise<CloudRuntimeEvent[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        return this.auditService.getEvents({ processDefinitionKey });
+    }
+
+    /** Preview query may list legacy PWV rows for hradmin; assert the given instance is not visible. */
+    async expectQueryDoesNotIncludeProcessInstance(processInstanceId: string, processName: string): Promise<void> {
+        const instances = await this.getQueryInstancesByProcessName(processName);
+        if (instances.some((pi) => pi.id === processInstanceId)) {
+            throw new Error(`Expected query not to include process instance ${processInstanceId}`);
+        }
     }
 
     // Security assertion helpers
     async expectProcessInstancesForKey(processName: string, shouldExist: boolean = true): Promise<CloudProcessInstance[]> {
-        const allInstances = await this.getAllProcessInstances();
-        const filtered = this.filterProcessInstancesByKey(allInstances, processName);
+        const filtered = shouldExist
+            ? await this.getRuntimeInstancesByProcessName(processName)
+            : this.filterProcessInstancesByKey(await this.getAllProcessInstances(), processName);
 
         if (shouldExist && filtered.length === 0) {
             throw new Error(`Expected to find process instances for ${processName}, but found none`);
@@ -134,8 +212,9 @@ export class SecurityPoliciesService extends BaseService {
     }
 
     async expectQueryProcessInstancesForKey(processName: string, shouldExist: boolean = true): Promise<CloudProcessInstance[]> {
-        const allInstances = await this.queryAllProcessInstances();
-        const filtered = this.filterProcessInstancesByKey(allInstances, processName);
+        const filtered = shouldExist
+            ? await this.getQueryInstancesByProcessName(processName)
+            : this.filterProcessInstancesByKey(await this.queryAllProcessInstances(), processName);
 
         if (shouldExist && filtered.length === 0) {
             throw new Error(`Expected to find process instances in query for ${processName}, but found none`);
@@ -147,8 +226,8 @@ export class SecurityPoliciesService extends BaseService {
     }
 
     async expectEventsForKey(processName: string, shouldExist: boolean = true): Promise<CloudRuntimeEvent[]> {
-        const allEvents = await this.getAllEvents();
-        const filtered = this.filterEventsByProcessKey(allEvents, processName);
+        const fromApi = await this.getEventsByProcessName(processName);
+        const filtered = this.filterEventsByProcessKey(fromApi, processName);
 
         if (shouldExist && filtered.length === 0) {
             throw new Error(`Expected to find events for ${processName}, but found none`);
@@ -159,41 +238,97 @@ export class SecurityPoliciesService extends BaseService {
         return filtered;
     }
 
+    async expectNoAuditEventsForProcessInstance(processInstanceId: string): Promise<void> {
+        const events = await this.auditService.getEvents({ processInstanceId });
+        const forInstance = events.filter(
+            (event) =>
+                event.processInstanceId === processInstanceId ||
+                (event.entity as { id?: string } | undefined)?.id === processInstanceId
+        );
+        if (forInstance.length > 0) {
+            throw new Error(
+                `Expected no audit events for process instance ${processInstanceId}, but found ${forInstance.length}`
+            );
+        }
+    }
+
     // Admin-specific operations
     async expectProcessInstancesAdminForKey(processName: string, shouldExist: boolean = true): Promise<CloudProcessInstance[]> {
-        const allInstances = await this.getProcessInstancesAdmin();
-        const filtered = this.filterProcessInstancesByKey(allInstances, processName);
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        let filtered: CloudProcessInstance[] = [];
 
-        if (shouldExist && filtered.length === 0) {
-            throw new Error(`Expected to find admin process instances for ${processName}, but found none`);
-        } else if (!shouldExist && filtered.length > 0) {
-            throw new Error(`Expected no admin process instances for ${processName}, but found ${filtered.length}`);
+        if (shouldExist) {
+            await expect
+                .poll(
+                    async () => {
+                        const allInstances =
+                            await this.runtimeAdminService.getProcessInstancesWithParams({ processDefinitionKey });
+                        filtered = this.filterProcessInstancesByKey(allInstances, processName);
+                        return filtered.length;
+                    },
+                    pollOptions('querySync')
+                )
+                .toBeGreaterThan(0);
+        } else {
+            const allInstances =
+                await this.runtimeAdminService.getProcessInstancesWithParams({ processDefinitionKey });
+            filtered = this.filterProcessInstancesByKey(allInstances, processName);
+            if (filtered.length > 0) {
+                throw new Error(`Expected no admin process instances for ${processName}, but found ${filtered.length}`);
+            }
         }
 
         return filtered;
     }
 
     async expectQueryProcessInstancesAdminForKey(processName: string, shouldExist: boolean = true): Promise<CloudProcessInstance[]> {
-        const allInstances = await this.queryAllProcessInstancesAdmin();
-        const filtered = this.filterProcessInstancesByKey(allInstances, processName);
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        let filtered: CloudProcessInstance[] = [];
 
-        if (shouldExist && filtered.length === 0) {
-            throw new Error(`Expected to find admin query process instances for ${processName}, but found none`);
-        } else if (!shouldExist && filtered.length > 0) {
-            throw new Error(`Expected no admin query process instances for ${processName}, but found ${filtered.length}`);
+        if (shouldExist) {
+            await expect
+                .poll(
+                    async () => {
+                        const allInstances =
+                            await this.queryAdminService.getProcessInstancesAdminWithParams({ processDefinitionKey });
+                        filtered = this.filterProcessInstancesByKey(allInstances, processName);
+                        return filtered.length;
+                    },
+                    pollOptions('querySync')
+                )
+                .toBeGreaterThan(0);
+        } else {
+            const allInstances =
+                await this.queryAdminService.getProcessInstancesAdminWithParams({ processDefinitionKey });
+            filtered = this.filterProcessInstancesByKey(allInstances, processName);
+            if (filtered.length > 0) {
+                throw new Error(`Expected no admin query process instances for ${processName}, but found ${filtered.length}`);
+            }
         }
 
         return filtered;
     }
 
     async expectEventsAdminForKey(processInstanceId: string, processName: string, shouldExist: boolean = true): Promise<CloudRuntimeEvent[]> {
-        const allEvents = await this.getEventsByEntityIdAdmin(processInstanceId);
-        const filtered = this.filterEventsByProcessKey(allEvents, processName);
+        let filtered: CloudRuntimeEvent[] = [];
 
-        if (shouldExist && filtered.length === 0) {
-            throw new Error(`Expected to find admin events for ${processName}, but found none`);
-        } else if (!shouldExist && filtered.length > 0) {
-            throw new Error(`Expected no admin events for ${processName}, but found ${filtered.length}`);
+        if (shouldExist) {
+            await expect
+                .poll(
+                    async () => {
+                        const allEvents = await this.getEventsByEntityIdAdmin(processInstanceId);
+                        filtered = this.filterEventsByProcessInstance(allEvents, processInstanceId, processName);
+                        return filtered.length;
+                    },
+                    pollOptions('auditEvents')
+                )
+                .toBeGreaterThan(0);
+        } else {
+            const allEvents = await this.getEventsByEntityIdAdmin(processInstanceId);
+            filtered = this.filterEventsByProcessInstance(allEvents, processInstanceId, processName);
+            if (filtered.length > 0) {
+                throw new Error(`Expected no admin events for ${processName}, but found ${filtered.length}`);
+            }
         }
 
         return filtered;

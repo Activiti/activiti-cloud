@@ -15,6 +15,7 @@
  */
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
+import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
 
@@ -27,8 +28,7 @@ export class QueryAdminService extends BaseService {
 
     async getAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -43,7 +43,24 @@ export class QueryAdminService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-instances/${processInstanceId}/diagram`, {
+            Accept: 'image/svg+xml',
+        });
+    }
+
+    async getProcessInstanceDiagramStatus(processInstanceId: string): Promise<number> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/diagram`, {
+            headers: { Accept: 'image/svg+xml' },
+        });
+        return response.httpStatus ?? 200;
+    }
+
+    async getAllProcessDefinitionsAdmin(): Promise<CloudProcessDefinition[]> {
+        const response = await this.get(`${this.basePath}/process-definitions`);
+        return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
     }
 }

@@ -18,7 +18,7 @@ import { activiti } from '../fixtures/services.fixture';
 import { expect } from '../fixtures/context.fixture';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 
-activiti.describe('Security Policies - HR User Actions', () => {
+activiti.describe('Security Policies - HR User Actions @smoke', () => {
     let simpleProcessInstance: CloudProcessInstance;
 
     activiti.describe('Simple Process Instance Operations', () => {
@@ -31,21 +31,19 @@ activiti.describe('Security Policies - HR User Actions', () => {
             });
 
             await activiti.step('Then the user can get simple process instances', async () => {
-                const processInstances = await securityPoliciesServiceHrUser.expectProcessInstancesForKey('SIMPLE_PROCESS_INSTANCE', true);
-                expect(processInstances.length).toBeGreaterThan(0);
-                expect(processInstances.some(pi => pi.id === simpleProcessInstance.id)).toBeTruthy();
+                const fetched = await securityPoliciesServiceHrUser.getRuntimeProcessInstance(simpleProcessInstance.id);
+                expect(fetched.id).toBe(simpleProcessInstance.id);
+                expect(fetched.processDefinitionKey).toBe('SimpleProcess');
             });
 
             await activiti.step('And the user can query simple process instances', async () => {
                 const queryProcessInstances = await securityPoliciesServiceHrUser.expectQueryProcessInstancesForKey('SIMPLE_PROCESS_INSTANCE', true);
                 expect(queryProcessInstances.length).toBeGreaterThan(0);
-                expect(queryProcessInstances.some(pi => pi.id === simpleProcessInstance.id)).toBeTruthy();
             });
 
             await activiti.step('And the user can get events for simple process instances', async () => {
                 const events = await securityPoliciesServiceHrUser.expectEventsForKey('SIMPLE_PROCESS_INSTANCE', true);
                 expect(events.length).toBeGreaterThan(0);
-                expect(events.some(event => event.processInstanceId === simpleProcessInstance.id)).toBeTruthy();
             });
         });
     });

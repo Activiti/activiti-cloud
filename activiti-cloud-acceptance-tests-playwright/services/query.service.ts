@@ -15,7 +15,9 @@
  */
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
-import { CloudTask, TaskQueryParams } from '../models/task.models';
+import { CloudProcessDefinition } from '../models/process-definition.models';
+import { CloudVariableInstance } from '../models/process-variable.models';
+import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
 
@@ -28,8 +30,12 @@ export class QueryService extends BaseService {
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}`);
+        return this.unwrapEntity<CloudProcessInstance>(response);
     }
 
     async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -44,14 +50,12 @@ export class QueryService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getAllTasks(): Promise<CloudTask[]> {
         const response = await this.get(`${this.basePath}/tasks`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async getTasks(params?: TaskQueryParams): Promise<CloudTask[]> {
@@ -68,7 +72,69 @@ export class QueryService extends BaseService {
             `${this.basePath}/tasks?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
+        const response = await this.get(`${this.basePath}/process-definitions`);
+        return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
+    }
+
+    async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-instances/${processInstanceId}/diagram`, {
+            Accept: 'image/svg+xml',
+        });
+    }
+
+    async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/variables`);
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async getProcessInstancesByName(namePattern: string): Promise<CloudProcessInstance[]> {
+        return this.getProcessInstances({ name: namePattern });
+    }
+
+    async getTaskById(taskId: string): Promise<CloudTask | undefined> {
+        const response = await this.get(`${this.basePath}/tasks?id=${encodeURIComponent(taskId)}`);
+        const tasks = this.unwrapList<CloudTask>(response, 'tasks');
+        return tasks[0];
+    }
+
+    async getTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/tasks`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async queryTaskByIdAndStatus(taskId: string, status: TaskStatus): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?status=${status}&id=${encodeURIComponent(taskId)}`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getStandaloneTasks(): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?standalone=true&sort=createdDate,desc&sort=id,desc`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTasksByNameAndDescription(namePrefix: string, descriptionPrefix: string): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?name=${encodeURIComponent(namePrefix)}&description=${encodeURIComponent(descriptionPrefix)}`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getCandidateUsers(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-users`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        if (Array.isArray(response.body)) {
+            return response.body as string[];
+        }
+        return [];
     }
 }

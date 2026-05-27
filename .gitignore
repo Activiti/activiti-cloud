@@ -65,7 +65,17 @@ videos/
 traces/
 reporter/
 port-forward.pid
+combined.log
+websocket.log
 VERSION
+
+# Playwright acceptance tests — local only
+activiti-cloud-acceptance-tests-playwright/.env
+activiti-cloud-acceptance-tests-playwright/.env.develop
+
+# IDE / hackathon (not part of product PRs)
+.vscode/
+HACKATHON_PRESENTATION_SCRIPT.md
 
 # TypeScript
 *.tsbuildinfo

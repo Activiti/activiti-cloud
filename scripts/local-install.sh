@@ -42,6 +42,9 @@ CLUSTER_NAME=""        # Will be auto-detected or specified
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# shellcheck source=lib/keycloak-preview.sh
+source "${SCRIPT_DIR}/lib/keycloak-preview.sh"
+
 # Help function
 show_help() {
     cat << EOF
@@ -74,16 +77,11 @@ PREREQUISITES:
     - helm installed (version 3+)
     - yq installed (for YAML processing)
     - python3 available (for version parsing)
-    - Keycloak client secret for 'activiti-keycloak' client
-    - Keycloak admin login from Kubernetes secret 'keycloak-admin-credentials'
-
-ENVIRONMENT VARIABLES:
-    KEYCLOAK_CLIENT_SECRET    Set to avoid interactive prompt for client secret
+    - Preview namespace with bundled Keycloak (realm activiti, client activiti)
 
 WORKFLOW:
     1. Checks/configures cluster connection
-    2. Prompts for Keycloak client secret (if not set via env var)
-    3. Ensures local-values.yaml exists with working image tags
+    2. Ensures local-values.yaml exists with working image tags
     4. Deploys Activiti Cloud with reliable configuration
     5. Configures identity adapter with correct Keycloak settings
     6. Generates .env file for Playwright tests
@@ -162,96 +160,15 @@ execute_command() {
     fi
 }
 
-# Function to read a secret from the terminal without echoing it.
-# Supports pasting and falls back to stdin when no TTY is available.
-prompt_for_secret() {
-    local prompt="$1"
-
-    if [[ -t 0 ]]; then
-        printf "%b" "$prompt"
-        IFS= read -r -s REPLY
-        printf "\n"
-    else
-        printf "%b" "$prompt"
-        IFS= read -r REPLY
-    fi
-}
-
-# Function to configure Keycloak settings
+# Function to configure Keycloak settings (bundled with Helm preview chart)
 configure_keycloak() {
     echo -e "${BLUE}=== Configuring Keycloak Settings ===${NC}"
-
-    # Determine correct Keycloak URL - use configured cluster domain
-    CLUSTER_DOMAIN="envalfresco.com"
-    KEYCLOAK_URL="https://$CLUSTER_NAME.$CLUSTER_DOMAIN/auth"
-    KEYCLOAK_REALM="alfresco"
-    KEYCLOAK_CLIENT_ID="activiti-keycloak"
-
-    echo -e "${YELLOW}Detected Keycloak configuration:${NC}"
-    echo -e "  ${CYAN}URL: $KEYCLOAK_URL${NC}"
-    echo -e "  ${CYAN}Realm: $KEYCLOAK_REALM${NC}"
-    echo -e "  ${CYAN}Client ID: $KEYCLOAK_CLIENT_ID${NC}"
-
-    # Check if client secret is provided as environment variable
-    if [[ -n "$KEYCLOAK_CLIENT_SECRET" ]]; then
-        echo -e "${GREEN}✓ Using Keycloak client secret from environment variable${NC}"
-    else
-        echo ""
-        echo -e "${YELLOW}🔑 Keycloak Client Secret Required${NC}"
-        echo ""
-        printf "%b\n" "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
-        printf "%b\n" "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
-        printf "%b\n" "${CYAN}To log in, use the admin credentials stored in the Kubernetes secret 'keycloak-admin-credentials' for the Keycloak pod/namespace.${NC}"
-        printf "%b\n" "  ${CYAN}Example username: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.username}' | base64 --decode && echo${NC}"
-        printf "%b\n" "  ${CYAN}Example password: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.password}' | base64 --decode && echo${NC}"
-        printf "%b\n" "  ${CYAN}1. Open: $KEYCLOAK_URL/admin/master/console/#/alfresco/clients${NC}"
-        printf "%b\n" "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
-        printf "%b\n" "  ${CYAN}3. Go to Credentials tab${NC}"
-        printf "%b\n" "  ${CYAN}4. Copy the Client Secret${NC}"
-        echo ""
-
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${CYAN}[DRY-RUN] Would prompt for client secret${NC}"
-            KEYCLOAK_CLIENT_SECRET="<WOULD_PROMPT_FOR_SECRET>"
-        else
-            printf "%b\n" "${CYAN}Paste the client secret and press Enter. Input will be hidden.${NC}"
-            prompt_for_secret "${YELLOW}Enter the Keycloak client secret for '$KEYCLOAK_CLIENT_ID': ${NC}"
-            KEYCLOAK_CLIENT_SECRET="$REPLY"
-            unset REPLY
-
-            if [[ -z "$KEYCLOAK_CLIENT_SECRET" ]]; then
-                echo -e "${RED}Error: Client secret is required${NC}" >&2
-                exit 1
-            fi
-        fi
-    fi
-
-    # Test the client credentials if not in dry-run mode
-    if [[ "$DRY_RUN" == "false" ]]; then
-        echo -e "${YELLOW}Testing client credentials...${NC}"
-        local test_response
-        test_response=$(curl -s -X POST "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=$KEYCLOAK_CLIENT_ID&client_secret=$KEYCLOAK_CLIENT_SECRET" \
-            2>/dev/null || echo '{"error":"connection_failed"}')
-
-        if echo "$test_response" | grep -q '"access_token"'; then
-            echo -e "${GREEN}✓ Client credentials are valid${NC}"
-        else
-            echo -e "${RED}✗ Client credentials test failed${NC}" >&2
-            echo -e "${YELLOW}Response: $test_response${NC}" >&2
-            echo -e "${YELLOW}Please verify the client secret is correct${NC}" >&2
-            exit 1
-        fi
-    fi
-
-    # Export for use in deployment
-    export KEYCLOAK_URL
-    export KEYCLOAK_REALM
-    export KEYCLOAK_CLIENT_ID
-    export KEYCLOAK_CLIENT_SECRET
-
-    echo -e "${GREEN}✓ Keycloak configuration ready${NC}"
+    echo -e "${GREEN}Keycloak: bundled in preview namespace (realm activiti, client activiti)${NC}"
+    echo -e "${CYAN}Client secret is created by Helm in activiti-keycloak-client.${NC}"
+    KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
+    KEYCLOAK_CLIENT_ID="${KEYCLOAK_CLIENT_ID:-activiti}"
+    KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
+    export KEYCLOAK_REALM KEYCLOAK_CLIENT_ID KEYCLOAK_CLIENT_SECRET
     echo ""
 }
 
@@ -650,25 +567,29 @@ perform_installation() {
         echo -e "${YELLOW}Waiting for identity adapter deployment...${NC}"
         kubectl wait --for=condition=available --timeout=300s deployment/$identity_deployment -n $PREVIEW_NAME || true
 
-        # Update the identity adapter with correct Keycloak configuration
-        echo -e "${YELLOW}Updating Keycloak client secret...${NC}"
-        kubectl patch secret activiti-keycloak-client -n $PREVIEW_NAME -p "{\"data\":{\"clientSecret\":\"$(echo -n "$KEYCLOAK_CLIENT_SECRET" | base64)\"}}"
+        configure_preview_keycloak_post_install "${PREVIEW_NAME}" || exit 1
 
-        # Update all deployments with correct Keycloak URL and realm
-        echo -e "${YELLOW}Updating Keycloak URL and realm configuration...${NC}"
+        echo -e "${YELLOW}Updating Keycloak URL and realm configuration (parallel)...${NC}"
         local deployments=(
-            "$PREVIEW_NAME-activiti-cloud-connector"
-            "$PREVIEW_NAME-activiti-cloud-identity-adapter"
-            "$PREVIEW_NAME-activiti-cloud-query"
-            "$PREVIEW_NAME-runtime-bundle"
+            "${PREVIEW_NAME}-activiti-cloud-connector"
+            "${PREVIEW_NAME}-activiti-cloud-identity-adapter"
+            "${PREVIEW_NAME}-activiti-cloud-query"
+            "${PREVIEW_NAME}-runtime-bundle"
         )
+        local patch_pids=()
 
         for deployment in "${deployments[@]}"; do
-            if kubectl get deployment "$deployment" -n $PREVIEW_NAME &>/dev/null; then
-                echo -e "${CYAN}  Updating $deployment...${NC}"
-                kubectl patch deployment "$deployment" -n $PREVIEW_NAME -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${deployment#$PREVIEW_NAME-}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"$KEYCLOAK_URL\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"$KEYCLOAK_REALM\"}]}]}}}}"
+            if kubectl get deployment "$deployment" -n "${PREVIEW_NAME}" &>/dev/null; then
+                echo -e "${CYAN}  Updating ${deployment}...${NC}"
+                kubectl patch deployment "$deployment" -n "${PREVIEW_NAME}" -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${deployment#${PREVIEW_NAME}-}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"${KEYCLOAK_URL}\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"${KEYCLOAK_REALM}\"}]}]}}}}" &
+                patch_pids+=($!)
             fi
-        done        # Restart the deployment to pick up the new secret
+        done
+        local pid
+        for pid in "${patch_pids[@]}"; do
+            wait "${pid}" || true
+        done
+        # Restart the deployment to pick up the new secret
         echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
         kubectl rollout restart deployment/$identity_deployment -n $PREVIEW_NAME
         kubectl rollout status deployment/$identity_deployment -n $PREVIEW_NAME
@@ -695,8 +616,9 @@ generate_env_file() {
     local env_file="$ROOT_DIR/activiti-cloud-acceptance-tests-playwright/.env"
     local local_port="8080"
 
-    # Use the configured Keycloak realm
-    local realm="${KEYCLOAK_REALM:-alfresco}"
+    local realm="${KEYCLOAK_REALM:-activiti}"
+    local sso_host
+    sso_host="$(preview_sso_token_url "${PREVIEW_NAME}" "${realm}")"
 
     if [[ "$DRY_RUN" == "true" ]]; then
         echo -e "${CYAN}[DRY-RUN] Would create .env file at: $env_file${NC}"
@@ -722,12 +644,12 @@ GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
 GATEWAY_URL=http://gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
 SSO_PROTOCOL=http
 IDENTITY_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
-SSO_HOST=$KEYCLOAK_URL/realms/$realm/protocol/openid-connect/token
+SSO_HOST=$sso_host
 REALM=$realm
 
 # Keycloak Configuration
 KEYCLOAK_REALM=$realm
-KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
+KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-activiti}
 KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
 
 # Application Configuration

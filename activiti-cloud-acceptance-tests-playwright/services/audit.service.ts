@@ -14,9 +14,26 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams, EventsResponse } from '../models/audit.models';
+import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../context.models';
+
+function buildAuditSearch(params?: EventQueryParams): string | undefined {
+    const parts: string[] = [];
+    if (params?.entityId) {
+        parts.push(`entityId:${params.entityId}`);
+    }
+    if (params?.processInstanceId) {
+        parts.push(`processInstanceId:${params.processInstanceId}`);
+    }
+    if (params?.processDefinitionKey) {
+        parts.push(`processDefinitionKey:${params.processDefinitionKey}`);
+    }
+    if (params?.eventType) {
+        parts.push(`eventType:${params.eventType}`);
+    }
+    return parts.length > 0 ? parts.join(',') : undefined;
+}
 
 export class AuditService extends BaseService {
     private readonly basePath = '/audit/v1';
@@ -26,25 +43,23 @@ export class AuditService extends BaseService {
     }
 
     async getAllEvents(): Promise<CloudRuntimeEvent[]> {
-        const response = await this.get(`${this.basePath}/events`);
-        const result = response as EventsResponse;
-        return result.content || [];
+        const response = await this.get(`${this.basePath}/events?sort=timestamp,desc&sort=id,desc`);
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
     async getEvents(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
         const searchParams = new URLSearchParams();
+        searchParams.append('sort', 'timestamp,desc');
+        searchParams.append('sort', 'id,desc');
 
-        if (params?.entityId) searchParams.append('entityId', params.entityId);
-        if (params?.processInstanceId) searchParams.append('processInstanceId', params.processInstanceId);
-        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
-        if (params?.eventType) searchParams.append('eventType', params.eventType);
+        const search = buildAuditSearch(params);
+        if (search) {
+            searchParams.append('search', search);
+        }
 
-        const response = await this.get(
-            `${this.basePath}/events?${searchParams.toString()}`
-        );
+        const response = await this.get(`${this.basePath}/events?${searchParams.toString()}`);
 
-        const result = response as EventsResponse;
-        return result.content || [];
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
