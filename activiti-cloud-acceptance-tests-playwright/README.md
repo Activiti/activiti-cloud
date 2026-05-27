@@ -6,7 +6,7 @@ API acceptance tests for Activiti Cloud preview installs. **Playwright-only** ta
 
 | Tool                      | Version                        |
 | ------------------------- | ------------------------------ |
-| Node.js                   | ≥ 18 (CI uses 20)              |
+| Node.js                   | **22 LTS** (CI uses 22)        |
 | npm                       | with Node                      |
 | kubectl                   | access to your preview cluster |
 | Helm / `local-install.sh` | first-time preview only        |
