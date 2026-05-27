@@ -75,6 +75,17 @@ function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function isTransientProcessCatalogError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+        return false;
+    }
+    const message = error.message;
+    return (
+        message.includes('Cannot list process definitions (HTTP 401)') ||
+        message.includes('Cannot list process definitions (HTTP 403)')
+    );
+}
+
 function processCatalogPollTimeoutMs(): number {
     const configured = Number(process.env.ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS);
     if (Number.isFinite(configured) && configured > 0) {
@@ -99,24 +110,50 @@ export async function waitForRequiredProcessDefinitions(
 
     while (Date.now() < deadline) {
         attempt += 1;
-        const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
-        if (missing.length === 0) {
-            if (attempt > 1) {
-                console.log(`✓ Process catalog ready after ${attempt} attempt(s)`);
+        try {
+            const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
+            if (missing.length === 0) {
+                if (attempt > 1) {
+                    console.log(`✓ Process catalog ready after ${attempt} attempt(s)`);
+                }
+                return;
             }
-            return;
-        }
 
-        const remainingSec = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-        console.log(
-            `Waiting for runtime-bundle BPMN catalog (${missing.length} missing, ~${remainingSec}s left): ${missing.join(', ')}`
-        );
+            const remainingSec = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+            console.log(
+                `Waiting for runtime-bundle BPMN catalog (${missing.length} missing, ~${remainingSec}s left): ${missing.join(', ')}`
+            );
+        } catch (error) {
+            if (!isTransientProcessCatalogError(error)) {
+                throw error;
+            }
+            const remainingSec = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+            console.log(
+                `Waiting for runtime-bundle auth (~${remainingSec}s left): ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`
+            );
+        }
         await sleep(intervalMs);
     }
 
     const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
     if (missing.length > 0) {
         throw new Error(formatMissingProcessCatalogMessage(missing));
+    }
+}
+
+export async function verifyAcceptanceProcessCatalog(): Promise<void> {
+    const { applyResolvedHostsToEnv } = await import('../config/connection/env-hosts');
+    const { ensureKeycloakClientSecretFromCluster } = await import('../config/lifecycle/setup/keycloak-secret');
+    const { ContextFactory } = await import('../fixtures/context-factory');
+
+    await ensureKeycloakClientSecretFromCluster();
+    applyResolvedHostsToEnv();
+
+    const context = await ContextFactory.getContextByUserName('testUser');
+    try {
+        await waitForRequiredProcessDefinitions(new RuntimeBundleService(context));
+    } finally {
+        await context.dispose();
     }
 }
 
