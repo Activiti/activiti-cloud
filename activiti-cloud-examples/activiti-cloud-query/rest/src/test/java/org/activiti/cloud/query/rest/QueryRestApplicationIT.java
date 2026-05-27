@@ -297,12 +297,16 @@ public class QueryRestApplicationIT {
     @Test
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
-            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous.")));
+            .satisfies(map ->
+                assertThat(map.keySet()).allMatch(key -> key.startsWith("projectedEngineEvents.anonymous."))
+            );
     }
 
     @Test
     void rabbitExchanges() {
-        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("engineEvents", "projectedEngineEvents");
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {
