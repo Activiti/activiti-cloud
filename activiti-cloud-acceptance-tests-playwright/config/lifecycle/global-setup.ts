@@ -20,6 +20,7 @@ import { validateEnvironmentVariables } from '../validation/environment-validato
 import { getTestConfiguration } from '../runtime/test-configuration';
 import { acceptanceLog, acceptancePhase, acceptanceStep } from '../../helpers/acceptance-progress';
 import { applyClusterPrereqsIfNeeded } from './setup/cluster-prereqs';
+import { ensureKeycloakClientSecretFromCluster } from './setup/keycloak-secret';
 import { ensureKubeconfig, resolvePreviewNamespace } from './setup/kubeconfig';
 import { verifyProcessCatalogIfEnabled } from './setup/process-catalog';
 import { setupPortForwarding } from './setup/port-forward';
@@ -29,6 +30,7 @@ async function globalSetup(): Promise<void> {
 
     await ensureKubeconfig();
     await resolvePreviewNamespace();
+    await ensureKeycloakClientSecretFromCluster();
 
     applyResolvedHostsToEnv();
     acceptanceStep('traefik', `Gateway host: ${process.env.GATEWAY_HOST ?? '(unset)'}`);
