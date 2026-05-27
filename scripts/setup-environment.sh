@@ -168,15 +168,21 @@ if [[ "$MESSAGING_BROKER" != "rabbitmq" && "$MESSAGING_BROKER" != "kafka" ]]; th
     exit 1
 fi
 
-if [[ "$MESSAGING_PARTITIONED" != "true" && "$MESSAGING_PARTITIONED" != "false" ]]; then
-    echo -e "${RED}Error: Partitioned must be 'true' or 'false'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_PARTITIONED" in
+    true|false|partitioned|non-partitioned|prefix) ;;
+    *)
+        echo -e "${RED}Error: Partitioning must be true|false (legacy) or partitioned|non-partitioned|prefix${NC}" >&2
+        exit 1
+        ;;
+esac
 
-if [[ "$MESSAGING_DESTINATIONS" != "default" && "$MESSAGING_DESTINATIONS" != "override" ]]; then
-    echo -e "${RED}Error: Destinations must be 'default' or 'override'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_DESTINATIONS" in
+    default|override|pdb|default-destinations|override-destinations) ;;
+    *)
+        echo -e "${RED}Error: Destinations must be default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
+        ;;
+esac
 
 if [[ "$MODE" != "full" && "$MODE" != "env-only" && "$MODE" != "test-only" && "$MODE" != "playwright" ]]; then
     echo -e "${RED}Error: Mode must be 'full', 'env-only', 'test-only', or 'playwright'${NC}" >&2
