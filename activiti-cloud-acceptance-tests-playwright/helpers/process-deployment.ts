@@ -143,10 +143,8 @@ export async function waitForRequiredProcessDefinitions(
 
 export async function verifyAcceptanceProcessCatalog(): Promise<void> {
     const { applyResolvedHostsToEnv } = await import('../config/connection/env-hosts');
-    const { ensureKeycloakClientSecretFromCluster } = await import('../config/lifecycle/setup/keycloak-secret');
     const { ContextFactory } = await import('../fixtures/context-factory');
 
-    await ensureKeycloakClientSecretFromCluster();
     applyResolvedHostsToEnv();
 
     const context = await ContextFactory.getContextByUserName('testUser');

@@ -100,7 +100,11 @@ discover_acceptance_deployments() {
   local namespace=$1
 
   RB_DEP="$(find_deployment_in_namespace "${namespace}" "runtime-bundle")"
+  [[ -z "${RB_DEP}" ]] && RB_DEP="$(find_deployment_in_namespace "${namespace}" "rb")"
+
   QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-query")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "query")"
+
   AUDIT_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-audit")"
   CONNECTOR_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-connector")"
   IDENTITY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-identity-adapter")"
