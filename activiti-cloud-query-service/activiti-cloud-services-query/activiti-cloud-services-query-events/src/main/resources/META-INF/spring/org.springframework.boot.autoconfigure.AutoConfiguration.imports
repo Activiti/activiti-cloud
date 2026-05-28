@@ -1,1 +1,2 @@
+org.activiti.cloud.services.query.events.config.QueryServiceAutoConfiguration
 org.activiti.cloud.services.query.events.config.EventHandlersAutoConfiguration

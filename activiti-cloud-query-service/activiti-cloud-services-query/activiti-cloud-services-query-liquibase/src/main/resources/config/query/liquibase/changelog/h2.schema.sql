@@ -347,3 +347,15 @@ CREATE TABLE QUERY_INT_CHANNEL_MESSAGE (
 CREATE INDEX QUERY_INT_CHANNEL_MSG_DELETE_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_ID);
 -- This is only needed if the message group store property 'priorityEnabled' is true
 CREATE UNIQUE INDEX QUERY_INT_CHANNEL_MSG_PRIORITY_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_PRIORITY DESC, CREATED_DATE, MESSAGE_SEQUENCE);
+
+create table process_instance_hierarchy
+(
+    ancestor_id   varchar(255) not null,
+    descendant_id varchar(255) not null,
+    depth         int          not null default 0,
+    relation_type varchar(20)  not null,
+    primary key (ancestor_id, descendant_id)
+);
+create index idx_pih_ancestor      on process_instance_hierarchy (ancestor_id);
+create index idx_pih_descendant    on process_instance_hierarchy (descendant_id);
+create index idx_pih_relation_type on process_instance_hierarchy (relation_type);

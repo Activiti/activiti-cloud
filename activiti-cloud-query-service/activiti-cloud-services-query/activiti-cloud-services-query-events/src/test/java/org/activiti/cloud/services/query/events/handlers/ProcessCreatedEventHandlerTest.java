@@ -41,6 +41,9 @@ public class ProcessCreatedEventHandlerTest {
     @Mock
     EntityManager entityManager;
 
+    @Mock
+    ProcessInstanceHierarchyService hierarchyService;
+
     @Test
     public void handleShouldCreateAndStoreProcessInstanceEntity() {
         //given

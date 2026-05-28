@@ -25,12 +25,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,10 +174,6 @@ class ProcessInstanceAdminControllerHelperIT {
         subprocessInstance.setProcessDefinitionName("subprocess");
         subprocessInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         subprocessInstance.setParentId(parentProcessInstance.getId());
-        String rootId = parentProcessInstance.getRootProcessInstanceId() != null
-            ? parentProcessInstance.getRootProcessInstanceId()
-            : parentProcessInstance.getId();
-        subprocessInstance.setRootProcessInstanceId(rootId);
         return subprocessInstance;
     }
 
@@ -250,112 +244,5 @@ class ProcessInstanceAdminControllerHelperIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-    }
-
-    @Test
-    @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldReturnLinkedProcessesOfSubprocess_inRootLinkedProcesses() {
-        // root process
-        ProcessInstanceEntity rootProcess = buildProcessInstanceEntity();
-        processInstanceRepository.save(rootProcess);
-
-        // subprocess of root
-        ProcessInstanceEntity subProcess = buildSubprocessInstance(rootProcess);
-        processInstanceRepository.save(subProcess);
-
-        // process linked to the subprocess
-        ProcessInstanceEntity linkedToSub = buildProcessInstanceEntityWithLinkedProcess(subProcess.getId());
-        processInstanceRepository.save(linkedToSub);
-
-        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchProcessInstances(
-            searchRequest,
-            pageable
-        );
-
-        ProcessInstanceEntity returnedRoot = result
-            .getContent()
-            .stream()
-            .filter(pi -> pi.getId().equals(rootProcess.getId()))
-            .findFirst()
-            .orElse(null);
-
-        assertThat(returnedRoot).isNotNull();
-        assertThat(returnedRoot.getLinkedProcesses())
-            .extracting(QueryCloudSubprocessInstance::getId)
-            .containsExactly(linkedToSub.getId());
-    }
-
-    @Test
-    @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldMergeLinkedProcessesOfRootAndSubprocess_inRootLinkedProcesses() {
-        // root process
-        ProcessInstanceEntity rootProcess = buildProcessInstanceEntity();
-        processInstanceRepository.save(rootProcess);
-
-        // subprocess of root
-        ProcessInstanceEntity subProcess = buildSubprocessInstance(rootProcess);
-        processInstanceRepository.save(subProcess);
-
-        // process linked directly to root
-        ProcessInstanceEntity linkedToRoot = buildProcessInstanceEntityWithLinkedProcess(rootProcess.getId());
-        processInstanceRepository.save(linkedToRoot);
-
-        // process linked to the subprocess
-        ProcessInstanceEntity linkedToSub = buildProcessInstanceEntityWithLinkedProcess(subProcess.getId());
-        processInstanceRepository.save(linkedToSub);
-
-        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchProcessInstances(
-            searchRequest,
-            pageable
-        );
-
-        ProcessInstanceEntity returnedRoot = result
-            .getContent()
-            .stream()
-            .filter(pi -> pi.getId().equals(rootProcess.getId()))
-            .findFirst()
-            .orElse(null);
-
-        assertThat(returnedRoot).isNotNull();
-        assertThat(returnedRoot.getLinkedProcesses())
-            .extracting(QueryCloudSubprocessInstance::getId)
-            .containsExactlyInAnyOrder(linkedToRoot.getId(), linkedToSub.getId());
-    }
-
-    @Test
-    @WithMockUser(roles = "ACTIVITI_ADMIN")
-    void shouldReturnEmptyLinkedProcesses_whenNoLinkedProcessesExistForRootOrSubprocess() {
-        ProcessInstanceEntity rootProcess = buildProcessInstanceEntity();
-        processInstanceRepository.save(rootProcess);
-
-        ProcessInstanceEntity subProcess = buildSubprocessInstance(rootProcess);
-        processInstanceRepository.save(subProcess);
-
-        ProcessInstanceSearchRequest searchRequest = new ProcessInstanceSearchRequest();
-        int pageSize = 30;
-        Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
-
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.searchProcessInstances(
-            searchRequest,
-            pageable
-        );
-
-        ProcessInstanceEntity returnedRoot = result
-            .getContent()
-            .stream()
-            .filter(pi -> pi.getId().equals(rootProcess.getId()))
-            .findFirst()
-            .orElse(null);
-
-        assertThat(returnedRoot).isNotNull();
-        assertThat(returnedRoot.getLinkedProcesses()).isEmpty();
     }
 }

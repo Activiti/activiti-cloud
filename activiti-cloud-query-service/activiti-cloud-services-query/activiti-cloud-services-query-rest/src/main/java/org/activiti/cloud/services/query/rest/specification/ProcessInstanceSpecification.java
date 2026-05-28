@@ -28,6 +28,8 @@ import java.util.Set;
 import org.activiti.cloud.services.query.app.repository.annotation.CountOverFullWindow;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
@@ -367,36 +369,65 @@ public class ProcessInstanceSpecification
         );
     }
 
+    /**
+     * Finds all processes that are related to any of the given IDs at any depth in
+     * the hierarchy (subprocesses, linked processes, or any combination thereof).
+     *
+     * <p>Uses the {@code process_instance_hierarchy} closure table via two correlated
+     * EXISTS subqueries:
+     * <ol>
+     *   <li><em>Descendant direction</em>: the current process is a descendant of one
+     *       of the given IDs ({@code ancestor_id IN ids}).</li>
+     *   <li><em>Ancestor direction</em>: the current process is an ancestor of one of
+     *       the given IDs ({@code descendant_id IN ids}).</li>
+     * </ol>
+     * Both directions exclude self-references ({@code depth > 0}).
+     */
     private void applyProcessRelatedTo(
         Root<ProcessInstanceEntity> root,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
         if (!CollectionUtils.isEmpty(searchRequest.getProcessRelatedTo())) {
-            Set<String> relatedTo = searchRequest.getProcessRelatedTo();
+            Set<String> ids = searchRequest.getProcessRelatedTo();
 
-            // Direct match: linkedProcessInstanceId or rootProcessInstanceId IN relatedTo
-            Predicate directMatch = criteriaBuilder.or(
-                root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(relatedTo),
-                root.get(ProcessInstanceEntity_.rootProcessInstanceId).in(relatedTo)
+            // EXISTS (SELECT 1 FROM process_instance_hierarchy h
+            //         WHERE h.descendant_id = pi.id AND h.ancestor_id IN :ids AND h.depth > 0)
+            Subquery<Integer> descendantSubquery = query.subquery(Integer.class);
+            Root<ProcessInstanceHierarchyEntity> descHierarchy = descendantSubquery.from(
+                ProcessInstanceHierarchyEntity.class
             );
-
-            // Subquery: find IDs of processes that match the direct criteria
-            Subquery<String> subquery = query.subquery(String.class);
-            Root<ProcessInstanceEntity> subRoot = subquery.from(ProcessInstanceEntity.class);
-            subquery
-                .select(subRoot.get(ProcessInstanceEntity_.id))
+            descendantSubquery
+                .select(criteriaBuilder.literal(1))
                 .where(
-                    criteriaBuilder.or(
-                        subRoot.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(relatedTo),
-                        subRoot.get(ProcessInstanceEntity_.rootProcessInstanceId).in(relatedTo)
-                    )
+                    criteriaBuilder.equal(
+                        descHierarchy.get(ProcessInstanceHierarchyEntity_.descendantId),
+                        root.get(ProcessInstanceEntity_.id)
+                    ),
+                    descHierarchy.get(ProcessInstanceHierarchyEntity_.ancestorId).in(ids),
+                    criteriaBuilder.greaterThan(descHierarchy.get(ProcessInstanceHierarchyEntity_.depth), 0)
                 );
 
-            // Indirect match: linkedProcessInstanceId IN (IDs from subquery)
-            Predicate indirectMatch = root.get(ProcessInstanceEntity_.linkedProcessInstanceId).in(subquery);
+            // EXISTS (SELECT 1 FROM process_instance_hierarchy h
+            //         WHERE h.ancestor_id = pi.id AND h.descendant_id IN :ids AND h.depth > 0)
+            Subquery<Integer> ancestorSubquery = query.subquery(Integer.class);
+            Root<ProcessInstanceHierarchyEntity> ancHierarchy = ancestorSubquery.from(
+                ProcessInstanceHierarchyEntity.class
+            );
+            ancestorSubquery
+                .select(criteriaBuilder.literal(1))
+                .where(
+                    criteriaBuilder.equal(
+                        ancHierarchy.get(ProcessInstanceHierarchyEntity_.ancestorId),
+                        root.get(ProcessInstanceEntity_.id)
+                    ),
+                    ancHierarchy.get(ProcessInstanceHierarchyEntity_.descendantId).in(ids),
+                    criteriaBuilder.greaterThan(ancHierarchy.get(ProcessInstanceHierarchyEntity_.depth), 0)
+                );
 
-            predicates.add(criteriaBuilder.or(directMatch, indirectMatch));
+            predicates.add(
+                criteriaBuilder.or(criteriaBuilder.exists(descendantSubquery), criteriaBuilder.exists(ancestorSubquery))
+            );
         }
     }
 

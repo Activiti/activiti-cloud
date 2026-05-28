@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.rest.helper;
 
 import com.querydsl.core.types.Predicate;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,12 @@ public class ProcessInstanceAdminControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
-        return mapAllSubAndLinkedProcesses(processInstances);
+        processInstances = mapAllSubprocesses(processInstances);
+        return mapAllLinkedProcesses(processInstances);
+    }
+
+    public Page<ProcessInstanceEntity> mapAllSubprocesses(Page<ProcessInstanceEntity> processInstances) {
+        return processInstanceAdminService.searchSubProcesses(processInstances);
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -89,29 +93,12 @@ public class ProcessInstanceAdminControllerHelper {
         return processInstanceAdminService.searchLinkedProcesses(Set.of(linkedProcessInstanceId), pageable);
     }
 
-    public Page<ProcessInstanceEntity> mapAllSubAndLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
-        processInstanceAdminService.searchAndMapSubProcesses(processInstances);
+    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        List<String> ids = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
 
-        List<String> processInstanceIds = processInstances
-            .getContent()
-            .stream()
-            .map(ProcessInstanceEntity::getId)
-            .toList();
-        Map<String, String> subsToRootMap = new HashMap<>();
-        processInstances
-            .getContent()
-            .forEach(pi -> pi.getSubprocesses().forEach(subprocess -> subsToRootMap.put(subprocess.getId(), pi.getId()))
-            );
+        List<ProcessInstanceEntity> allLinked = processInstanceAdminService.searchLinkedProcesses(new HashSet<>(ids));
 
-        List<ProcessInstanceEntity> linkedToRoot = processInstanceAdminService.searchLinkedProcesses(
-            new HashSet<>(processInstanceIds)
-        );
-
-        List<ProcessInstanceEntity> linkedToSubs = processInstanceAdminService.searchLinkedProcesses(
-            subsToRootMap.keySet()
-        );
-
-        Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = linkedToRoot
+        Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = allLinked
             .stream()
             .filter(lp -> lp.getLinkedProcessInstanceId() != null)
             .collect(
@@ -120,19 +107,6 @@ public class ProcessInstanceAdminControllerHelper {
                     Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
                 )
             );
-
-        linkedToSubs.forEach(lp ->
-            linkedMap.compute(
-                subsToRootMap.get(lp.getLinkedProcessInstanceId()),
-                (rootId, linkedSet) -> {
-                    if (linkedSet == null) {
-                        linkedSet = new HashSet<>();
-                    }
-                    linkedSet.add(this.getQueryCloudSubprocessInstance(lp));
-                    return linkedSet;
-                }
-            )
-        );
 
         processInstances
             .getContent()
