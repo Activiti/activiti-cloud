@@ -70,7 +70,7 @@ public class ProcessInstanceControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
-        processInstanceSearchService.enrichWithRelatedProcesses(processInstances);
+        processInstanceSearchService.enrichWithRelatedProcessesRestricted(processInstances);
         return processInstances;
     }
 

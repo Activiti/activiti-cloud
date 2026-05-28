@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.util;
 
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -39,6 +40,9 @@ public class QueryTestUtils {
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
+
+    @Autowired
     private VariableRepository variableRepository;
 
     @Autowired
@@ -56,12 +60,17 @@ public class QueryTestUtils {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         serviceTaskRepository.deleteAll();
+        processInstanceHierarchyRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
     }
 
     public ProcessInstanceBuilder buildProcessInstance() {
-        return new ProcessInstanceBuilder(variableRepository, processInstanceRepository);
+        return new ProcessInstanceBuilder(
+            variableRepository,
+            processInstanceRepository,
+            processInstanceHierarchyRepository
+        );
     }
 
     public TaskBuilder buildTask() {

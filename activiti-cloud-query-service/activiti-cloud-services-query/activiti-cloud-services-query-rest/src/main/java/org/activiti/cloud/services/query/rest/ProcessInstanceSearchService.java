@@ -137,10 +137,23 @@ public class ProcessInstanceSearchService {
 
     /**
      * Populates {@code subprocesses} and {@code linkedProcesses} on every entity in the page
-     * with a single closure-table query covering all hierarchy depths.
+     * with a single closure-table query covering all hierarchy depths (unrestricted — admin use).
      */
     @Transactional(readOnly = true)
     public void enrichWithRelatedProcesses(Page<ProcessInstanceEntity> processInstances) {
+        doEnrich(processInstances, null);
+    }
+
+    /**
+     * Same as {@link #enrichWithRelatedProcesses} but restricts the descendant batch-fetch
+     * to processes visible to the currently authenticated user (user-facing endpoint use).
+     */
+    @Transactional(readOnly = true)
+    public void enrichWithRelatedProcessesRestricted(Page<ProcessInstanceEntity> processInstances) {
+        doEnrich(processInstances, securityManager.getAuthenticatedUserId());
+    }
+
+    private void doEnrich(Page<ProcessInstanceEntity> processInstances, String userId) {
         List<ProcessInstanceEntity> content = processInstances.getContent();
         if (content.isEmpty()) {
             return;
@@ -159,9 +172,7 @@ public class ProcessInstanceSearchService {
             .map(ProcessInstanceHierarchyEntity::getDescendantId)
             .collect(Collectors.toSet());
 
-        Map<String, ProcessInstanceEntity> descendantById = StreamSupport
-            .stream(processInstanceRepository.findAllById(descendantIds).spliterator(), false)
-            .collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
+        Map<String, ProcessInstanceEntity> descendantById = fetchDescendants(descendantIds, userId);
 
         // ancestorId → relationType → set of DTOs
         Map<String, Map<String, Set<QueryCloudSubprocessInstance>>> grouped = hierarchyRows
@@ -185,6 +196,25 @@ public class ProcessInstanceSearchService {
             pi.setSubprocesses(byType.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, Set.of()));
             pi.setLinkedProcesses(byType.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_LINKED, Set.of()));
         });
+    }
+
+    private Map<String, ProcessInstanceEntity> fetchDescendants(Set<String> descendantIds, String userId) {
+        if (descendantIds.isEmpty()) {
+            return Map.of();
+        }
+        if (userId == null) {
+            // Admin: unrestricted batch-fetch
+            return StreamSupport
+                .stream(processInstanceRepository.findAllById(descendantIds).spliterator(), false)
+                .collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
+        }
+        // User: only descendants visible to the requesting user
+        ProcessInstanceSearchRequest descendantsRequest = new ProcessInstanceSearchRequest();
+        descendantsRequest.setId(descendantIds);
+        return processInstanceRepository
+            .findAll(ProcessInstanceSpecification.restricted(descendantsRequest, userId))
+            .stream()
+            .collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
     }
 
     private static QueryCloudSubprocessInstance toSubprocessInstance(ProcessInstanceEntity entity) {

@@ -381,7 +381,8 @@ public class ProcessInstanceSpecification
      *   <li><em>Ancestor direction</em>: the current process is an ancestor of one of
      *       the given IDs ({@code descendant_id IN ids}).</li>
      * </ol>
-     * Both directions exclude self-references ({@code depth > 0}).
+     * Both subqueries exclude self-references ({@code depth > 0}). The queried
+     * process itself is also always included via a direct {@code pi.id IN ids} predicate.
      */
     private void applyProcessRelatedTo(
         Root<ProcessInstanceEntity> root,
@@ -425,8 +426,13 @@ public class ProcessInstanceSpecification
                     criteriaBuilder.greaterThan(ancHierarchy.get(ProcessInstanceHierarchyEntity_.depth), 0)
                 );
 
+            // Also include the queried process itself (pi.id IN :ids)
             predicates.add(
-                criteriaBuilder.or(criteriaBuilder.exists(descendantSubquery), criteriaBuilder.exists(ancestorSubquery))
+                criteriaBuilder.or(
+                    root.get(ProcessInstanceEntity_.id).in(ids),
+                    criteriaBuilder.exists(descendantSubquery),
+                    criteriaBuilder.exists(ancestorSubquery)
+                )
             );
         }
     }

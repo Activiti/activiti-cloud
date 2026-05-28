@@ -50,9 +50,13 @@ public class ProcessInstanceHierarchyServiceImpl implements ProcessInstanceHiera
     public void registerSubprocess(String processId, String parentId) {
         insertIfAbsent(processId, processId, 0, ProcessInstanceHierarchyEntity.RELATION_SELF);
 
-        // Propagate: for every ancestor of parentId (including self-ref), create a new row pointing to processId
         for (ProcessInstanceHierarchyEntity ancestor : findByDescendantId(parentId)) {
-            insertIfAbsent(ancestor.getAncestorId(), processId, ancestor.getDepth() + 1, ancestor.getRelationType());
+            insertIfAbsent(
+                ancestor.getAncestorId(),
+                processId,
+                ancestor.getDepth() + 1,
+                ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS
+            );
         }
     }
 

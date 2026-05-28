@@ -42,6 +42,7 @@ import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitize
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -120,6 +121,9 @@ class ProcessInstanceControllerTest {
 
     @MockitoBean
     private VariableRepository processVariableRepository;
+
+    @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;
