@@ -51,6 +51,9 @@ class ProcessInstanceAdminControllerHelperTest {
     @Mock
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
 
+    @Mock
+    private ProcessInstanceSearchService processInstanceSearchService;
+
     @Test
     void findAllProcessInstanceAdmin_shouldReturnProcessInstances() {
         //given

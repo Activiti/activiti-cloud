@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyId;
@@ -23,6 +24,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProcessInstanceHierarchyRepository
     extends JpaRepository<ProcessInstanceHierarchyEntity, ProcessInstanceHierarchyId> {
     List<ProcessInstanceHierarchyEntity> findByDescendantId(String descendantId);
+
+    List<ProcessInstanceHierarchyEntity> findByAncestorIdInAndDepthGreaterThan(
+        Collection<String> ancestorIds,
+        int depth
+    );
 
     void deleteByAncestorIdOrDescendantId(String ancestorId, String descendantId);
 }

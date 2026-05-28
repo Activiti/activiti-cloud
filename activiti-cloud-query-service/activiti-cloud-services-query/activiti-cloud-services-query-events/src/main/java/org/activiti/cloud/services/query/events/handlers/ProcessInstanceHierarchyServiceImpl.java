@@ -58,7 +58,8 @@ public class ProcessInstanceHierarchyServiceImpl implements ProcessInstanceHiera
 
     @Override
     public void registerLinkedProcess(String processId, String linkedProcessInstanceId) {
-        // Propagate: for every ancestor of linkedProcessInstanceId (including self-ref), create a linked row
+        insertIfAbsent(processId, processId, 0, ProcessInstanceHierarchyEntity.RELATION_SELF);
+
         for (ProcessInstanceHierarchyEntity ancestor : findByDescendantId(linkedProcessInstanceId)) {
             insertIfAbsent(
                 ancestor.getAncestorId(),
