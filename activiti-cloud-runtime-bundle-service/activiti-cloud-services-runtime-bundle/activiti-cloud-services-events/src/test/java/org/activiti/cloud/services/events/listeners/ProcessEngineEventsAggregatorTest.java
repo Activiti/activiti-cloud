@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,8 +27,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -144,5 +149,104 @@ public class ProcessEngineEventsAggregatorTest {
 
         //then
         verify(commandContext, never()).addCloseListener(closeListener);
+    }
+
+    @Nested
+    class MayBeAddRootExecutionContext {
+
+        private static final String ROOT_PROCESS_INSTANCE_ID = "root-pi-id";
+
+        @Mock
+        private ExecutionEntityManager executionEntityManager;
+
+        @Mock
+        private ExecutionEntity executionEntity;
+
+        @Mock
+        private ExecutionEntity rootProcessInstance;
+
+        @Captor
+        private ArgumentCaptor<ExecutionContext> executionContextCaptor;
+
+        @BeforeEach
+        public void setUpExecutionEntityManager() {
+            when(commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
+        }
+
+        @Test
+        void shouldUseExecutionsOwnProcessInstanceWhenRootProcessInstanceIdIsNull() {
+            // given — root process: getRootProcessInstanceId() is null, getProcessInstance() returns self
+            when(executionEntity.getRootProcessInstanceId()).thenReturn(null);
+            when(executionEntity.getProcessInstance()).thenReturn(executionEntity);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+                .willReturn(null);
+
+            // when
+            eventsAggregator.mayBeAddRootExecutionContext(commandContext, executionEntity);
+
+            // then — ROOT_EXECUTION_CONTEXT must be populated with the execution's own process instance,
+            // otherwise the rootProcessInstanceId header is missing and PROCESS_CREATED ends up on a
+            // different partition than its children.
+            verify(commandContext)
+                .addAttribute(
+                    eq(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT),
+                    executionContextCaptor.capture()
+                );
+            assertThat(executionContextCaptor.getValue()).isNotNull();
+            assertThat(executionContextCaptor.getValue().getExecution()).isSameAs(executionEntity);
+            verify(executionEntityManager, never()).findById(any());
+        }
+
+        @Test
+        void shouldLookUpRootByIdWhenRootProcessInstanceIdIsNotNull() {
+            // given — child execution: getRootProcessInstanceId() returns the root id
+            when(executionEntity.getRootProcessInstanceId()).thenReturn(ROOT_PROCESS_INSTANCE_ID);
+            when(executionEntityManager.findById(ROOT_PROCESS_INSTANCE_ID)).thenReturn(rootProcessInstance);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+                .willReturn(null);
+
+            // when
+            eventsAggregator.mayBeAddRootExecutionContext(commandContext, executionEntity);
+
+            // then — ROOT_EXECUTION_CONTEXT is created from the looked-up root process instance
+            verify(commandContext)
+                .addAttribute(
+                    eq(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT),
+                    executionContextCaptor.capture()
+                );
+            assertThat(executionContextCaptor.getValue()).isNotNull();
+            assertThat(executionContextCaptor.getValue().getExecution()).isSameAs(rootProcessInstance);
+        }
+
+        @Test
+        void shouldNotOverwriteWhenRootExecutionContextIsAlreadySet() {
+            // given
+            ExecutionContext existing = mock(ExecutionContext.class);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+                .willReturn(existing);
+
+            // when
+            eventsAggregator.mayBeAddRootExecutionContext(commandContext, executionEntity);
+
+            // then
+            verify(commandContext, never())
+                .addAttribute(eq(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT), any());
+        }
+
+        @Test
+        void shouldNotSetRootExecutionContextWhenRootProcessInstanceCannotBeResolved() {
+            // given — child execution but root id no longer findable (defensive guard)
+            when(executionEntity.getRootProcessInstanceId()).thenReturn(ROOT_PROCESS_INSTANCE_ID);
+            when(executionEntityManager.findById(ROOT_PROCESS_INSTANCE_ID)).thenReturn(null);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+                .willReturn(null);
+
+            // when
+            eventsAggregator.mayBeAddRootExecutionContext(commandContext, executionEntity);
+
+            // then
+            verify(commandContext, never())
+                .addAttribute(eq(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT), any());
+        }
     }
 }

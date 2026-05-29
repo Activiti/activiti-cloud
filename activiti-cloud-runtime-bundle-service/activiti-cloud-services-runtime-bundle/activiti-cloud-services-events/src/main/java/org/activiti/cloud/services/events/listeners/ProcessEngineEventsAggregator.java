@@ -110,16 +110,24 @@ public class ProcessEngineEventsAggregator
             MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT
         );
 
-        if (rootExecutionContext == null && executionEntity.getRootProcessInstanceId() != null) {
-            ExecutionEntity rootProcessInstance = commandContext
-                .getExecutionEntityManager()
-                .findById(executionEntity.getRootProcessInstanceId());
+        if (rootExecutionContext != null) {
+            return;
+        }
 
-            rootExecutionContext = createExecutionContext(rootProcessInstance);
+        // For non-root executions, look up the root process instance.
+        // For the root process itself getRootProcessInstanceId() is null, so fall back to
+        // the execution's own process instance — otherwise the rootProcessInstanceId header
+        // is not propagated and PROCESS_CREATED ends up on a different partition than its
+        // children (TASK_CREATED, VARIABLE_CREATED, ...), breaking FIFO ordering on the consumer.
+        String rootProcessInstanceId = executionEntity.getRootProcessInstanceId();
+        ExecutionEntity rootProcessInstance = rootProcessInstanceId != null
+            ? commandContext.getExecutionEntityManager().findById(rootProcessInstanceId)
+            : executionEntity.getProcessInstance();
 
+        if (rootProcessInstance != null) {
             commandContext.addAttribute(
                 MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT,
-                rootExecutionContext
+                createExecutionContext(rootProcessInstance)
             );
         }
     }

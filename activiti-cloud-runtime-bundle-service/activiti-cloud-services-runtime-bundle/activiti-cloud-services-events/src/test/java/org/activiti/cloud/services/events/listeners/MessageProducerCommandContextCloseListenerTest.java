@@ -31,12 +31,16 @@ import java.util.Collections;
 import java.util.List;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.IncidentContext;
 import org.activiti.cloud.api.process.model.IncidentSeverity;
 import org.activiti.cloud.api.process.model.impl.events.CloudIncidentCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
+import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.common.feature.FeatureToggleHolder;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.TestUtils;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -49,7 +53,9 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -170,6 +176,11 @@ class MessageProducerCommandContextCloseListenerTest {
         given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
             .willReturn(executionContext);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        FeatureToggleHolder.reset();
     }
 
     @Test
@@ -384,6 +395,129 @@ class MessageProducerCommandContextCloseListenerTest {
         assertThat(incident.getEntity().getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
         assertThat(incident.getEntity().getExecutionId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);
+    }
+
+    @Nested
+    class SplitProcessCreatedEventFeature {
+
+        @Test
+        void shouldSendRootProcessCreatedAsStandaloneMessageWhenFeatureEnabled() {
+            // given
+            FeatureToggleHolder.initialize(
+                featureNamed(MessageProducerCommandContextCloseListener.SPLIT_PROCESS_CREATED_EVENT_FEATURE)
+            );
+
+            ProcessInstanceImpl rootProcessInstance = new ProcessInstanceImpl();
+            rootProcessInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+            CloudProcessCreatedEventImpl rootProcessCreated = new CloudProcessCreatedEventImpl(rootProcessInstance);
+
+            TaskImpl task = new TaskImpl("task-1", "name", TaskImpl.TaskStatus.CREATED);
+            task.setProcessInstanceId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+            CloudTaskCreatedEventImpl taskCreated = new CloudTaskCreatedEventImpl(task);
+
+            List<CloudRuntimeEventImpl<?, ?>> events = List.of(rootProcessCreated, taskCreated);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+                .willReturn(events);
+
+            // when
+            closeListener.closed(commandContext);
+
+            // then
+            verify(auditChannel, times(2)).send(messageArgumentCaptor.capture());
+            List<Message<CloudRuntimeEvent<?, ?>[]>> sent = messageArgumentCaptor.getAllValues();
+
+            // first message: ONLY the root PROCESS_CREATED event
+            assertThat(sent.get(0).getPayload()).hasSize(1);
+            assertThat(sent.get(0).getPayload()[0]).isInstanceOf(CloudProcessCreatedEventImpl.class);
+            assertThat(sent.get(0).getPayload()[0].getEntityId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+
+            // second message: the rest of the events (the TASK_CREATED)
+            assertThat(sent.get(1).getPayload()).hasSize(1);
+            assertThat(sent.get(1).getPayload()[0]).isInstanceOf(CloudTaskCreatedEventImpl.class);
+        }
+
+        @Test
+        void shouldSendAllEventsInSingleMessageWhenFeatureDisabled() {
+            // given (feature toggle is off by default — FeatureToggleHolder.reset() in @AfterEach)
+
+            ProcessInstanceImpl rootProcessInstance = new ProcessInstanceImpl();
+            rootProcessInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+            CloudProcessCreatedEventImpl rootProcessCreated = new CloudProcessCreatedEventImpl(rootProcessInstance);
+
+            TaskImpl task = new TaskImpl("task-1", "name", TaskImpl.TaskStatus.CREATED);
+            task.setProcessInstanceId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+            CloudTaskCreatedEventImpl taskCreated = new CloudTaskCreatedEventImpl(task);
+
+            List<CloudRuntimeEventImpl<?, ?>> events = List.of(rootProcessCreated, taskCreated);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+                .willReturn(events);
+
+            // when
+            closeListener.closed(commandContext);
+
+            // then
+            verify(auditChannel, times(1)).send(messageArgumentCaptor.capture());
+            assertThat(messageArgumentCaptor.getValue().getPayload()).hasSize(2);
+        }
+
+        @Test
+        void shouldNotSplitWhenProcessCreatedIsNotForRoot() {
+            // given
+            FeatureToggleHolder.initialize(
+                featureNamed(MessageProducerCommandContextCloseListener.SPLIT_PROCESS_CREATED_EVENT_FEATURE)
+            );
+
+            // root execution context points at MOCK_PROCESS_INSTANCE_ID, but the PROCESS_CREATED
+            // here is for a sub-process (different id) — must stay in the regular chunk.
+            ProcessInstanceImpl subProcessInstance = new ProcessInstanceImpl();
+            subProcessInstance.setId("sub-process-id");
+            CloudProcessCreatedEventImpl subProcessCreated = new CloudProcessCreatedEventImpl(subProcessInstance);
+
+            TaskImpl task = new TaskImpl("task-1", "name", TaskImpl.TaskStatus.CREATED);
+            task.setProcessInstanceId("sub-process-id");
+            CloudTaskCreatedEventImpl taskCreated = new CloudTaskCreatedEventImpl(task);
+
+            List<CloudRuntimeEventImpl<?, ?>> events = List.of(subProcessCreated, taskCreated);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+                .willReturn(events);
+
+            // when
+            closeListener.closed(commandContext);
+
+            // then
+            verify(auditChannel, times(1)).send(messageArgumentCaptor.capture());
+            assertThat(messageArgumentCaptor.getValue().getPayload()).hasSize(2);
+        }
+
+        @Test
+        void shouldNotSplitWhenRootExecutionContextIsMissing() {
+            // given
+            FeatureToggleHolder.initialize(
+                featureNamed(MessageProducerCommandContextCloseListener.SPLIT_PROCESS_CREATED_EVENT_FEATURE)
+            );
+
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
+                .willReturn(null);
+
+            ProcessInstanceImpl rootProcessInstance = new ProcessInstanceImpl();
+            rootProcessInstance.setId(TestUtils.MOCK_PROCESS_INSTANCE_ID);
+            CloudProcessCreatedEventImpl rootProcessCreated = new CloudProcessCreatedEventImpl(rootProcessInstance);
+
+            List<CloudRuntimeEventImpl<?, ?>> events = List.of(rootProcessCreated);
+            given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+                .willReturn(events);
+
+            // when
+            closeListener.closed(commandContext);
+
+            // then — falls back to single-message behaviour
+            verify(auditChannel, times(1)).send(messageArgumentCaptor.capture());
+            assertThat(messageArgumentCaptor.getValue().getPayload()).hasSize(1);
+        }
+
+        private FeatureToggle featureNamed(String enabledFeature) {
+            return name -> enabledFeature.equals(name);
+        }
     }
 
     private MessageProducerCommandContextCloseListener getMessageProducerCloseListenerWithDisabledChunker() {

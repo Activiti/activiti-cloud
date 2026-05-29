@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.services.audit;
 import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ public class AuditConsumerStreamHandler {
 
     private volatile List<CloudRuntimeEvent<?, ?>> latestReceivedEvents = new ArrayList<>();
     private volatile List<CloudRuntimeEvent<?, ?>> allReceivedEvents = new ArrayList<>();
+    private final List<List<CloudRuntimeEvent<?, ?>>> receivedBatches = Collections.synchronizedList(new ArrayList<>());
 
     @FunctionBinding(input = AuditConsumer.AUDIT_CONSUMER)
     @Bean
@@ -49,8 +51,15 @@ public class AuditConsumerStreamHandler {
             latestReceivedEvents = new ArrayList<>(message.getPayload());
             allReceivedEvents = new ArrayList<>(allReceivedEvents);
             allReceivedEvents.addAll(latestReceivedEvents);
+            receivedBatches.add(new ArrayList<>(message.getPayload()));
             receivedHeaders = new LinkedHashMap<>(message.getHeaders());
         };
+    }
+
+    public List<List<CloudRuntimeEvent<?, ?>>> getReceivedBatches() {
+        synchronized (receivedBatches) {
+            return new ArrayList<>(receivedBatches);
+        }
     }
 
     public List<CloudRuntimeEvent<?, ?>> getLatestReceivedEvents() {
@@ -77,5 +86,6 @@ public class AuditConsumerStreamHandler {
         allReceivedEvents.clear();
         latestReceivedEvents.clear();
         receivedHeaders.clear();
+        receivedBatches.clear();
     }
 }

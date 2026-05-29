@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 class EnvironmentFeatureToggleTest {
 
@@ -77,5 +78,22 @@ class EnvironmentFeatureToggleTest {
     @Test
     void should_reject_null_environment() {
         assertThatNullPointerException().isThrownBy(() -> new EnvironmentFeatureToggle(null));
+    }
+
+    @Test
+    void should_resolve_via_relaxed_binding_for_env_var_style() {
+        StandardEnvironment env = new StandardEnvironment();
+        Map<String, Object> envVars = new HashMap<>();
+        envVars.put("ACTIVITI_FEATURES_MY_FEATURE_ENABLED", "true");
+        env
+            .getPropertySources()
+            .addFirst(
+                new SystemEnvironmentPropertySource(
+                    StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                    envVars
+                )
+            );
+
+        assertThat(new EnvironmentFeatureToggle(env).isEnabled("my-feature")).isTrue();
     }
 }
