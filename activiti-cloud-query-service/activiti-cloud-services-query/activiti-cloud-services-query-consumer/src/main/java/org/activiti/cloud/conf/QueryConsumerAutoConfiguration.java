@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.activiti.cloud.services.query.events.config.EventHandlersAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +39,7 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
-@AutoConfiguration
+@AutoConfiguration(before = EventHandlersAutoConfiguration.class)
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 

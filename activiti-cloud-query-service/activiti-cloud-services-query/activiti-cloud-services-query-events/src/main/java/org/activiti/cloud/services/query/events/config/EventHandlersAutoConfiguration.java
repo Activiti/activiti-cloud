@@ -93,6 +93,12 @@ public class EventHandlersAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "projectedEngineEventsPublisher")
+    public Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher() {
+        return events -> {};
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public QueryEventHandlerContextOptimizer queryEntityGraphFetchingOptimizer(EntityManager entityManager) {
         return new QueryEventHandlerContextOptimizer(entityManager);
