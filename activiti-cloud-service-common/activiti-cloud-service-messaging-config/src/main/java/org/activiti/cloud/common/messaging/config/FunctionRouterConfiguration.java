@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -179,10 +178,56 @@ public class FunctionRouterConfiguration {
         MessageContentTypeNormalizer messageContentTypeNormalizer,
         BindingServiceProperties bindingServiceProperties
     ) {
-        final var functionRouter = messagingProperties.getFunctionRouter();
+        return new FunctionRouterHandler(
+            messagingProperties,
+            routingFunction,
+            functionCatalog,
+            functionExecutorSelector,
+            messageContentTypeNormalizer,
+            bindingServiceProperties
+        );
+    }
 
-        return (message, routingContext) -> {
-            Optional
+    private static class FunctionRouterHandler implements BiConsumer<Message<?>, String> {
+
+        private static final Logger log = LoggerFactory.getLogger(FunctionRouterHandler.class);
+
+        private final ActivitiCloudMessagingProperties messagingProperties;
+        private final RoutingFunction routingFunction;
+        private final FunctionCatalog functionCatalog;
+        private final Function<Message<?>, ExecutorService> functionExecutorSelector;
+        private final MessageContentTypeNormalizer messageContentTypeNormalizer;
+        private final BindingServiceProperties bindingServiceProperties;
+
+        FunctionRouterHandler(
+            ActivitiCloudMessagingProperties messagingProperties,
+            RoutingFunction routingFunction,
+            FunctionCatalog functionCatalog,
+            Function<Message<?>, ExecutorService> functionExecutorSelector,
+            MessageContentTypeNormalizer messageContentTypeNormalizer,
+            BindingServiceProperties bindingServiceProperties
+        ) {
+            this.messagingProperties = messagingProperties;
+            this.routingFunction = routingFunction;
+            this.functionCatalog = functionCatalog;
+            this.functionExecutorSelector = functionExecutorSelector;
+            this.messageContentTypeNormalizer = messageContentTypeNormalizer;
+            this.bindingServiceProperties = bindingServiceProperties;
+        }
+
+        @Override
+        public void accept(Message<?> message, String routingContext) {
+            resolveRoutingKey(message)
+                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
+                .filter(Predicate.not(Collection::isEmpty))
+                .ifPresentOrElse(
+                    registrations -> dispatchToRegistrations(message, registrations),
+                    () -> logUnroutableMessage(message, routingContext)
+                );
+        }
+
+        private Optional<String> resolveRoutingKey(Message<?> message) {
+            return Optional
                 .ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
@@ -196,169 +241,180 @@ public class FunctionRouterConfiguration {
                                 .map(exchange -> exchange.substring(prefix.length()))
                         )
                 )
-                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)))
-                .map(messagingProperties.getFunctionRouter().registrations(routingContext)::get)
-                .filter(Predicate.not(Collection::isEmpty))
-                .ifPresentOrElse(
-                    registrations -> {
-                        Function<Message<?>, String> resolveFunctionDefinition = functionMessage ->
-                            functionMessage.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class);
-                        BiFunction<Message<?>, String, Message<?>> toFunctionRequest = (
-                            functionMessage,
-                            functionRegistration
-                        ) -> {
-                            String expectedContentType = functionRouter
-                                .bindingNameFor(functionRegistration)
-                                .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
-                                .map(BindingProperties::getContentType)
-                                .orElse(null);
-                            return MessageBuilder
-                                .fromMessage(
-                                    messageContentTypeNormalizer.normalizeToExpected(
-                                        functionMessage,
-                                        expectedContentType
-                                    )
-                                )
-                                .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
-                                .build();
-                        };
+                .or(() -> Optional.ofNullable(message.getHeaders().get(AmqpHeaders.RECEIVED_EXCHANGE, String.class)));
+        }
 
-                        List<AtomicReference<Future<?>>> cancellableFutures = new ArrayList<>();
+        private void dispatchToRegistrations(Message<?> message, Collection<String> registrations) {
+            List<AtomicReference<Future<?>>> cancellableFutures = new ArrayList<>();
+            CompletableFuture<List<?>> allCompleted = submitAll(message, registrations, cancellableFutures);
+            List<?> results = waitForCompletion(message, allCompleted, cancellableFutures);
+            handleErrors(message, results);
+        }
 
-                        var functions = registrations
-                            .stream()
-                            .map(functionRegistration -> toFunctionRequest.apply(message, functionRegistration))
-                            .map(functionRequest -> {
-                                AtomicReference<Future<?>> currentRawFuture = new AtomicReference<>();
-                                cancellableFutures.add(currentRawFuture);
-                                ExecutorService executor = functionExecutorSelector.apply(functionRequest);
-                                return supplyAsyncWithRetry(
-                                        () -> {
-                                            CompletableFuture<Object> cf = new CompletableFuture<>();
-                                            currentRawFuture.set(
-                                                executor.submit(() -> {
-                                                    try {
-                                                        cf.complete(routingFunction.apply(functionRequest));
-                                                    } catch (Throwable t) {
-                                                        cf.completeExceptionally(t);
-                                                    }
-                                                })
-                                            );
-                                            return cf;
-                                        },
-                                        functionRouter.getMaxRetries(),
-                                        functionRouter.getRetryInterval()
-                                    )
-                                    .thenApply(result -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.debug(
-                                            "Function message request {} successfully routed to {}",
-                                            functionRequest,
-                                            functionDefinition
-                                        );
-                                        return Map.entry(functionDefinition, Optional.ofNullable(result));
-                                    })
-                                    .exceptionally(error -> {
-                                        var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.error(
-                                            "Error routing message request {} to function registration {}",
-                                            functionRequest,
-                                            functionDefinition,
-                                            error
-                                        );
-                                        return Map.entry(functionDefinition, Optional.of(error));
-                                    });
-                            })
-                            .toArray(CompletableFuture[]::new);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private CompletableFuture<List<?>> submitAll(
+            Message<?> message,
+            Collection<String> registrations,
+            List<AtomicReference<Future<?>>> cancellableFutures
+        ) {
+            CompletableFuture[] futures = registrations
+                .stream()
+                .map(functionRegistration -> buildFunctionRequest(message, functionRegistration))
+                .map(functionRequest -> submitFunctionWithRetry(functionRequest, cancellableFutures))
+                .toArray(CompletableFuture[]::new);
 
-                        var completed = CompletableFuture
-                            .allOf(functions)
-                            .thenApply(v -> Stream.of(functions).map(CompletableFuture::join).toList());
+            return CompletableFuture
+                .allOf(futures)
+                .thenApply(v -> Stream.of(futures).map(CompletableFuture::join).toList());
+        }
 
-                        List<?> results;
-                        try {
-                            results =
-                                completed.get(functionRouter.getProcessingTimeout().toMillis(), TimeUnit.MILLISECONDS);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            cancellableFutures.forEach(ref ->
-                                Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true))
-                            );
-                            throw new MessagingException(message, e);
-                        } catch (ExecutionException e) {
-                            Throwable cause = e.getCause();
-                            throw cause instanceof RuntimeException re ? re : new MessagingException(message, cause);
-                        } catch (TimeoutException e) {
-                            log.error(
-                                "Processing timeout ({}) exceeded waiting for function router to handle message {}",
-                                functionRouter.getProcessingTimeout(),
-                                message
-                            );
-                            cancellableFutures.forEach(ref ->
-                                Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true))
-                            );
-                            throw new MessagingException(message, e);
-                        }
+        private Message<?> buildFunctionRequest(Message<?> message, String functionRegistration) {
+            String expectedContentType = messagingProperties.getFunctionRouter()
+                .bindingNameFor(functionRegistration)
+                .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
+                .map(BindingProperties::getContentType)
+                .orElse(null);
+            return MessageBuilder
+                .fromMessage(messageContentTypeNormalizer.normalizeToExpected(message, expectedContentType))
+                .setHeader(FunctionProperties.FUNCTION_DEFINITION, functionRegistration)
+                .build();
+        }
 
-                        var errors = results
-                            .stream()
-                            .map(Map.Entry.class::cast)
-                            .filter(entry ->
-                                Optional.class.cast(entry.getValue()).filter(Exception.class::isInstance).isPresent()
-                            )
-                            .map(entry -> Optional.class.cast(entry.getValue()).get())
-                            .toList();
+        private CompletableFuture<Map.Entry<String, Optional<Object>>> submitFunctionWithRetry(
+            Message<?> functionRequest,
+            List<AtomicReference<Future<?>>> cancellableFutures
+        ) {
+            final var functionRouter = messagingProperties.getFunctionRouter();
+            AtomicReference<Future<?>> currentRawFuture = new AtomicReference<>();
+            cancellableFutures.add(currentRawFuture);
+            ExecutorService executor = functionExecutorSelector.apply(functionRequest);
 
-                        if (!errors.isEmpty()) {
-                            log.debug("Errors handling function route message request {}", errors);
-
-                            Optional
-                                .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
-                                .filter(StringUtils::hasText)
-                                .map(functionCatalog::lookup)
-                                .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
-                                .ifPresent(errorHandlerDefinition -> {
-                                    errors
-                                        .stream()
-                                        .map(Throwable.class::cast)
-                                        .map(throwable ->
-                                            throwable instanceof CompletionException ce ? ce.getCause() : throwable
-                                        )
-                                        .map(exception -> {
-                                            if (exception instanceof MessagingException messagingException) {
-                                                return new ErrorMessage(messagingException, message);
-                                            } else {
-                                                return new ErrorMessage(
-                                                    new MessagingException(message, exception),
-                                                    message
-                                                );
-                                            }
-                                        })
-                                        .forEach(errorMessage -> {
-                                            errorHandlerDefinition.accept(errorMessage);
-                                        });
-                                });
-                        } else {
-                            log.debug("Successfully completed function route message request {}", message);
-                        }
-                    },
+            return supplyAsyncWithRetry(
                     () -> {
-                        final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
-
-                        final var registration = Optional
-                            .ofNullable(destination)
-                            .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
-                            .orElse(List.of());
-
-                        log.warn(
-                            "Unable to route message {} to destination '{}' for function registration '{}'",
-                            message,
-                            destination,
-                            registration
+                        CompletableFuture<Object> cf = new CompletableFuture<>();
+                        currentRawFuture.set(
+                            executor.submit(() -> {
+                                try {
+                                    cf.complete(routingFunction.apply(functionRequest));
+                                } catch (Exception t) {
+                                    cf.completeExceptionally(t);
+                                }
+                            })
                         );
-                    }
+                        return cf;
+                    },
+                    functionRouter.getMaxRetries(),
+                    functionRouter.getRetryInterval()
+                )
+                .thenApply(result -> {
+                    var functionDefinition = functionRequest
+                        .getHeaders()
+                        .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+                    log.debug(
+                        "Function message request {} successfully routed to {}",
+                        functionRequest,
+                        functionDefinition
+                    );
+                    return Map.entry(functionDefinition, Optional.ofNullable(result));
+                })
+                .exceptionally(error -> {
+                    var functionDefinition = functionRequest
+                        .getHeaders()
+                        .get(FunctionProperties.FUNCTION_DEFINITION, String.class);
+                    log.error(
+                        "Error routing message request {} to function registration {}",
+                        functionRequest,
+                        functionDefinition,
+                        error
+                    );
+                    return Map.entry(functionDefinition, Optional.of(error));
+                });
+        }
+
+        private List<?> waitForCompletion(
+            Message<?> message,
+            CompletableFuture<List<?>> completed,
+            List<AtomicReference<Future<?>>> cancellableFutures
+        ) {
+            final var functionRouter = messagingProperties.getFunctionRouter();
+            try {
+                return completed.get(functionRouter.getProcessingTimeout().toMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                cancelAll(cancellableFutures);
+                throw new MessagingException(message, e);
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                throw cause instanceof RuntimeException re ? re : new MessagingException(message, cause);
+            } catch (TimeoutException e) {
+                log.error(
+                    "Processing timeout ({}) exceeded waiting for function router to handle message {}",
+                    functionRouter.getProcessingTimeout(),
+                    message
                 );
-        };
+                cancelAll(cancellableFutures);
+                throw new MessagingException(message, e);
+            }
+        }
+
+        private void cancelAll(List<AtomicReference<Future<?>>> cancellableFutures) {
+            cancellableFutures.forEach(ref -> Optional.ofNullable(ref.get()).ifPresent(f -> f.cancel(true)));
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private void handleErrors(Message<?> message, List<?> results) {
+            var errors = results
+                .stream()
+                .map(Map.Entry.class::cast)
+                .filter(entry ->
+                    Optional.class.cast(entry.getValue()).filter(Exception.class::isInstance).isPresent()
+                )
+                .map(entry -> Optional.class.cast(entry.getValue()).get())
+                .toList();
+
+            if (errors.isEmpty()) {
+                log.debug("Successfully completed function route message request {}", message);
+                return;
+            }
+
+            log.debug("Errors handling function route message request {}", errors);
+
+            Optional
+                .ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
+                .filter(StringUtils::hasText)
+                .map(functionCatalog::lookup)
+                .map(SimpleFunctionRegistry.FunctionInvocationWrapper.class::cast)
+                .ifPresent(errorHandlerDefinition ->
+                    errors
+                        .stream()
+                        .map(Throwable.class::cast)
+                        .map(throwable ->
+                            throwable instanceof CompletionException ce ? ce.getCause() : throwable
+                        )
+                        .map(exception -> {
+                            if (exception instanceof MessagingException messagingException) {
+                                return new ErrorMessage(messagingException, message);
+                            } else {
+                                return new ErrorMessage(new MessagingException(message, exception), message);
+                            }
+                        })
+                        .forEach(errorHandlerDefinition::accept)
+                );
+        }
+
+        private void logUnroutableMessage(Message<?> message, String routingContext) {
+            final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
+            final var registration = Optional
+                .ofNullable(destination)
+                .map(it -> messagingProperties.getFunctionRouter().registrations(routingContext).get(it))
+                .orElse(List.of());
+            log.warn(
+                "Unable to route message {} to destination '{}' for function registration '{}'",
+                message,
+                destination,
+                registration
+            );
+        }
     }
 
     @Bean
