@@ -31,12 +31,8 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
-import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -47,29 +43,26 @@ import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesPr
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@WebMvcTest(ProcessInstanceDiagramAdminController.class)
+@WebMvcTest(ProcessInstanceBpmnActivitiesController.class)
 @EnableSpringDataWebSupport
-@AutoConfigureMockMvc
 @Import(
     { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
 )
 @WithMockUser
-@TestPropertySource("classpath:application-test.properties")
-public class ProcessInstanceDiagramAdminControllerIT {
+class ProcessInstanceBpmnActivitiesControllerIT {
 
     private static final String PROCESS_INSTANCE_ID = "process-instance-1";
 
@@ -81,18 +74,6 @@ public class ProcessInstanceDiagramAdminControllerIT {
 
     @MockitoBean
     private ProcessInstanceRepository processInstanceRepository;
-
-    @MockitoBean
-    private ProcessModelRepository processModelRepository;
-
-    @MockitoBean
-    private BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
-
-    @MockitoBean
-    private ProcessDiagramGeneratorWrapper processDiagramGenerator;
-
-    @MockitoBean
-    private EntityFinder entityFinder;
 
     @MockitoBean
     private TaskRepository taskRepository;
@@ -132,7 +113,7 @@ public class ProcessInstanceDiagramAdminControllerIT {
     }
 
     @Test
-    public void shouldReturnActivitiesJsonWhenAcceptIsApplicationJson() throws Exception {
+    void shouldReturnActivitiesJsonWhenAcceptIsApplicationJson() throws Exception {
         BPMNActivityEntity activity = buildActivity("start-event-1", "startEvent", BPMNActivityStatus.COMPLETED);
 
         given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
@@ -146,7 +127,7 @@ public class ProcessInstanceDiagramAdminControllerIT {
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/diagram", PROCESS_INSTANCE_ID)
+                get("/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID)
                     .accept(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
@@ -161,7 +142,35 @@ public class ProcessInstanceDiagramAdminControllerIT {
     }
 
     @Test
-    public void shouldReturnEmptyActivitiesListWhenNoneExist() throws Exception {
+    void shouldReturnActivitiesHalJsonWhenAcceptIsHalJson() throws Exception {
+        BPMNActivityEntity activity = buildActivity("user-task-1", "userTask", BPMNActivityStatus.STARTED);
+
+        given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(activity),
+                    new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
+                    1
+                )
+            );
+
+        MvcResult result = mockMvc
+            .perform(
+                get("/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID)
+                    .accept(MediaTypes.HAL_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String body = result.getResponse().getContentAsString();
+
+        assertThatJson(body).inPath("_embedded.bPMNActivityEntities[0].elementId").isEqualTo("user-task-1");
+        assertThatJson(body).inPath("_embedded.bPMNActivityEntities[0].activityType").isEqualTo("userTask");
+        assertThatJson(body).inPath("_embedded.bPMNActivityEntities[0].status").isEqualTo("STARTED");
+    }
+
+    @Test
+    void shouldReturnEmptyActivitiesListWhenNoneExist() throws Exception {
         given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
                 new PageImpl<>(
@@ -173,7 +182,7 @@ public class ProcessInstanceDiagramAdminControllerIT {
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/diagram", PROCESS_INSTANCE_ID)
+                get("/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID)
                     .accept(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isOk())
