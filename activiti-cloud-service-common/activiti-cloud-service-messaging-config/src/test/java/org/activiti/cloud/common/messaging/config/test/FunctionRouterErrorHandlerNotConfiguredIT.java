@@ -85,7 +85,8 @@ class FunctionRouterErrorHandlerNotConfiguredIT {
             .build();
 
         assertThatCode(() ->
-            functionRouterMessageHandler.accept(message, FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT)
-        ).doesNotThrowAnyException();
+                functionRouterMessageHandler.accept(message, FunctionRouterConfiguration.FUNCTION_ROUTER_INPUT)
+            )
+            .doesNotThrowAnyException();
     }
 }

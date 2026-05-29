@@ -269,7 +269,8 @@ public class FunctionRouterConfiguration {
         }
 
         private Message<?> buildFunctionRequest(Message<?> message, String functionRegistration) {
-            String expectedContentType = messagingProperties.getFunctionRouter()
+            String expectedContentType = messagingProperties
+                .getFunctionRouter()
                 .bindingNameFor(functionRegistration)
                 .map(bindingName -> bindingServiceProperties.getBindings().get(bindingName))
                 .map(BindingProperties::getContentType)
@@ -366,9 +367,7 @@ public class FunctionRouterConfiguration {
             var errors = results
                 .stream()
                 .map(Map.Entry.class::cast)
-                .filter(entry ->
-                    Optional.class.cast(entry.getValue()).filter(Exception.class::isInstance).isPresent()
-                )
+                .filter(entry -> Optional.class.cast(entry.getValue()).filter(Exception.class::isInstance).isPresent())
                 .map(entry -> Optional.class.cast(entry.getValue()).get())
                 .toList();
 
@@ -388,9 +387,7 @@ public class FunctionRouterConfiguration {
                     errors
                         .stream()
                         .map(Throwable.class::cast)
-                        .map(throwable ->
-                            throwable instanceof CompletionException ce ? ce.getCause() : throwable
-                        )
+                        .map(throwable -> throwable instanceof CompletionException ce ? ce.getCause() : throwable)
                         .map(exception -> {
                             if (exception instanceof MessagingException messagingException) {
                                 return new ErrorMessage(messagingException, message);

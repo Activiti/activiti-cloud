@@ -109,7 +109,10 @@ class FunctionRouterErrorHandlerIT {
     @Test
     void shouldCallErrorHandlerWithOriginalMessagingExceptionWhenFunctionThrowsMessagingException() {
         Message<String> dummyMessage = MessageBuilder.withPayload("dummy").build();
-        MessagingException originalException = new MessagingException(dummyMessage, new RuntimeException("inner error"));
+        MessagingException originalException = new MessagingException(
+            dummyMessage,
+            new RuntimeException("inner error")
+        );
         exceptionSupplier.set(() -> originalException);
 
         Message<String> message = MessageBuilder

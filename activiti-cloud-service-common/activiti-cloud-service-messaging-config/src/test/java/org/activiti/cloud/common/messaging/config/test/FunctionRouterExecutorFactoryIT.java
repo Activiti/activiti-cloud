@@ -58,7 +58,7 @@ import org.springframework.messaging.support.MessageBuilder;
 )
 @EnableTestBinder
 @Import({ TestBindingsChannelsConfiguration.class })
-public class FunctionRouterExecutorFactoryIT {
+class FunctionRouterExecutorFactoryIT {
 
     private static final String REST_GET_HANDLER = "restGetHandler";
     private static final String EXPECTED_REGISTRATION_KEY = REST_GET_HANDLER + REGISTRATION_NAME_SUFFIX;
@@ -78,7 +78,7 @@ public class FunctionRouterExecutorFactoryIT {
         @Bean(REST_GET_HANDLER)
         @ConnectorBinding(input = TestBindingsChannels.REST_CONSUMER, connectorType = "rest.GET", condition = "true")
         ConsumerConnector<String> restGetHandler() {
-            return payload -> receivedPayload.set(payload);
+            return receivedPayload::set;
         }
 
         @Bean

@@ -77,7 +77,7 @@ class FunctionRouterProcessingTimeoutIT {
                 if (latch != null) {
                     try {
                         latch.await();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                         Thread.currentThread().interrupt();
                         CountDownLatch signal = interruptSignalLatch.get();
                         if (signal != null) {
