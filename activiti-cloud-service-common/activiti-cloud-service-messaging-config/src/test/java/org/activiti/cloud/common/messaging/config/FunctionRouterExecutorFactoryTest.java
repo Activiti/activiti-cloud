@@ -85,7 +85,8 @@ class FunctionRouterExecutorFactoryTest {
     }
 
     @Test
-    void shouldRestoreInterruptStatusWhenInterruptedWhileWaitingForQueueCapacity() throws InterruptedException {
+    void shouldRejectTaskAndRestoreInterruptStatusWhenInterruptedWhileWaitingForQueueCapacity()
+        throws InterruptedException {
         factory.setTimeout(Duration.ofSeconds(1));
 
         final var executor = factory.apply("foo-registration");
@@ -111,6 +112,8 @@ class FunctionRouterExecutorFactoryTest {
                     executor.submit(() -> {});
                     interrupted.set(Thread.currentThread().isInterrupted());
                 } catch (Throwable throwable) {
+                    // Interrupt flag must still be set even when the exception is thrown.
+                    interrupted.set(Thread.currentThread().isInterrupted());
                     thrown.set(throwable);
                 }
             });
@@ -119,8 +122,13 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
 
         assertThat(submitter.isAlive()).isFalse();
-        assertThat(thrown.get()).isNull();
-        assertThat(interrupted.get()).isTrue();
+        assertThat(thrown.get())
+            .as("A RejectedExecutionException must be thrown so the task is not silently dropped")
+            .isInstanceOf(RejectedExecutionException.class)
+            .hasMessageContaining("Interrupted");
+        assertThat(interrupted.get())
+            .as("Interrupt flag must be restored on the submitting thread")
+            .isTrue();
     }
 
     private static void await(CountDownLatch latch) {

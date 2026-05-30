@@ -142,6 +142,7 @@ public class FunctionRouterConfiguration {
     ) {
         final var factory = new FunctionRouterExecutorFactory();
         factory.setConcurrency(messagingProperties.getFunctionRouter().getConcurrency());
+        factory.setQueueCapacity(messagingProperties.getFunctionRouter().getQueueCapacity());
         return factory;
     }
 

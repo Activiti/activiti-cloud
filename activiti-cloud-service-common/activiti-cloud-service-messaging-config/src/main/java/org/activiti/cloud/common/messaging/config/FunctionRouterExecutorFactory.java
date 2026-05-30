@@ -33,6 +33,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private Duration timeout = Duration.ofSeconds(5);
     private int concurrency = 1;
+    // Queue capacity controls the number of tasks that can be buffered beyond the pool threads.
+    // The default of 1 provides tight backpressure: the submitting thread blocks as soon as
+    // all pool threads are busy and one task is already waiting.
+    private int queueCapacity = 1;
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown()) {
@@ -42,11 +46,18 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         try {
             // This forces the submitting thread to block and wait
             // until the queue can accept the task.
-            if (!executor.getQueue().offer(runnable, timeout.getSeconds(), TimeUnit.SECONDS)) {
-                throw new RejectedExecutionException("Timeout after %s because queue is full".formatted(timeout));
+            // Fix #2: use toMillis()/MILLISECONDS so sub-second timeouts are honoured.
+            if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                // Fix #4: human-readable duration in the error message.
+                throw new RejectedExecutionException(
+                    "Timeout after %dms because queue is full".formatted(timeout.toMillis())
+                );
             }
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
+            // Fix #1: restore interrupt flag AND surface the failure to the caller so that
+            // the task is not silently dropped.
             Thread.currentThread().interrupt();
+            throw new RejectedExecutionException("Interrupted while waiting to enqueue task", e);
         }
     };
 
@@ -56,8 +67,11 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             concurrency,
             0L,
             TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1),
-            Thread.ofPlatform().name(registration).factory(),
+            // Fix #5: honour configurable queue capacity.
+            new LinkedBlockingQueue<>(queueCapacity),
+            // Fix #3: append a sequential index so each thread in the pool has a unique name,
+            // e.g. "audit-consumer-0", "audit-consumer-1", making thread dumps readable.
+            Thread.ofPlatform().name(registration + "-", 0).factory(),
             taskExecutionHandler
         );
 
@@ -91,25 +105,28 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
     }
 
     public boolean awaitTermination(final long timeout, TimeUnit timeUnit) throws InterruptedException {
-        final var cfs = executors
+        // Fix #6: use virtual threads for the blocking awaitTermination calls so that the
+        // common ForkJoinPool is not polluted with blocking work.
+        final var futures = executors
             .values()
             .stream()
-            .map(executor ->
-                CompletableFuture.supplyAsync(() -> {
+            .map(executor -> {
+                final var future = new CompletableFuture<Boolean>();
+                Thread.ofVirtual().start(() -> {
                     try {
-                        return executor.awaitTermination(timeout, timeUnit);
-                    } catch (InterruptedException ignored) {
+                        future.complete(executor.awaitTermination(timeout, timeUnit));
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        future.complete(false);
                     }
-
-                    return false;
-                })
-            )
+                });
+                return future;
+            })
             .toList();
 
         return CompletableFuture
-            .allOf(cfs.toArray(CompletableFuture[]::new))
-            .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
+            .allOf(futures.toArray(CompletableFuture[]::new))
+            .thenApply(v -> futures.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
             .join();
     }
 
@@ -119,5 +136,9 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     public void setConcurrency(int concurrency) {
         this.concurrency = concurrency;
+    }
+
+    public void setQueueCapacity(int queueCapacity) {
+        this.queueCapacity = queueCapacity;
     }
 }
