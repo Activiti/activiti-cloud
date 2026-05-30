@@ -281,7 +281,9 @@ class FunctionRouterConcurrencyPressureTest {
             .as("No task should fail with an error (concurrency=%d)", concurrency)
             .isEqualTo(0);
 
-        // Report timing so the scaling behaviour is visible in the test output
+        // Report timing so the scaling behaviour is visible in the test output.
+        // Field widths keep rows aligned across all concurrency levels:
+        //   concurrency: max 3 chars (100), elapsed: max 6 chars (~1050ms), throughput: max 7 chars.
         log.info(
             "[ingestion] concurrency={} | tasks={} | elapsed={}ms | throughput={} tasks/s",
             String.format("%3d", concurrency),
