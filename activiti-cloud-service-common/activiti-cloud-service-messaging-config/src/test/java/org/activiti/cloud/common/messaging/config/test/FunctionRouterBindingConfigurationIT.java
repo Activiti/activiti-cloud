@@ -885,7 +885,11 @@ public class FunctionRouterBindingConfigurationIT {
         //then
         await()
             .untilAsserted(() -> {
-                assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).asString().startsWith("foo_registration");
+                assertThat(threadHolder.get())
+                    .isNotNull()
+                    .extracting(Thread::getName)
+                    .asString()
+                    .startsWith("foo_registration");
             });
     }
 
