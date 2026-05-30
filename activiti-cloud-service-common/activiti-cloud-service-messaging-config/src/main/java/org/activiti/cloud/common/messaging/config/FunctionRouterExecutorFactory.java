@@ -32,6 +32,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private Duration timeout = Duration.ofSeconds(5);
+    private final int concurrency = 1;
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown()) {
@@ -41,18 +42,18 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         try {
             // This forces the submitting thread to block and wait
             // until the queue can accept the task.
-            if (!executor.getQueue().offer(runnable, 15, TimeUnit.SECONDS)) {
-                throw new RejectedExecutionException("Queue is full");
+            if (!executor.getQueue().offer(runnable, timeout.getSeconds(), TimeUnit.SECONDS)) {
+                throw new RejectedExecutionException("Timeout after %s because queue is full".formatted(timeout));
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
         }
     };
 
     private final Function<String, ExecutorService> executorServiceFactory = registration ->
         new ThreadPoolExecutor(
-            1,
-            1,
+            concurrency,
+            concurrency,
             0L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1),
