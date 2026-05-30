@@ -190,4 +190,23 @@ public class RuntimeBundleApplicationIT {
         assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
             .isNullOrEmpty();
     }
+
+    @Test
+    void transactedProducerBindings() {
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.auditProducer.producer.transacted",
+                Boolean.class
+            )
+        )
+            .isTrue();
+
+        assertThat(
+            environment.getProperty(
+                "spring.cloud.stream.rabbit.bindings.asyncExecutorJobsOutput.producer.transacted",
+                Boolean.class
+            )
+        )
+            .isTrue();
+    }
 }
