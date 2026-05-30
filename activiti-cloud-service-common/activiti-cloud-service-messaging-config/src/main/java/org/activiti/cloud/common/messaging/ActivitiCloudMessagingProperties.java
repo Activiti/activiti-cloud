@@ -442,6 +442,9 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration retryInterval = Duration.ofMillis(10);
 
+        @Positive
+        private int concurrency = 1;
+
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
@@ -554,6 +557,14 @@ public class ActivitiCloudMessagingProperties {
             this.retryInterval = retryInterval;
         }
 
+        public int getConcurrency() {
+            return concurrency;
+        }
+
+        public void setConcurrency(int concurrency) {
+            this.concurrency = concurrency;
+        }
+
         public void register(String bindingName, String functionBeanName) {
             destinations
                 .keySet()
@@ -602,6 +613,7 @@ public class ActivitiCloudMessagingProperties {
             return (
                 enabled == that.enabled &&
                 maxRetries == that.maxRetries &&
+                concurrency == that.concurrency &&
                 Objects.equals(routes, that.routes) &&
                 Objects.equals(destinations, that.destinations) &&
                 Objects.equals(registrations, that.registrations) &&
@@ -622,6 +634,7 @@ public class ActivitiCloudMessagingProperties {
                 group,
                 maxRetries,
                 retryInterval,
+                concurrency,
                 consumer,
                 anonymous,
                 errorHandlerDefinition
@@ -638,6 +651,7 @@ public class ActivitiCloudMessagingProperties {
                 .add("group='" + group + "'")
                 .add("maxRetries=" + maxRetries)
                 .add("retryInterval=" + retryInterval)
+                .add("concurrency=" + concurrency)
                 .add("consumer=" + consumer)
                 .add("anonymous=" + anonymous)
                 .add("errorHandlerDefinition=" + errorHandlerDefinition)
