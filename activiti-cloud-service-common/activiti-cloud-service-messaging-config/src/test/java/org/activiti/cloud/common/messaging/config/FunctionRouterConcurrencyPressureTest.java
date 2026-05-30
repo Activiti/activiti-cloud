@@ -22,10 +22,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Pressure tests that validate {@link FunctionRouterExecutorFactory} behaviour under load for
@@ -40,8 +44,18 @@ import org.junit.jupiter.params.provider.CsvSource;
  *
  * <p>The second parameterised test additionally verifies that each registration key receives its
  * own isolated thread pool and that threads are never shared between keys.
+ *
+ * <p>The third test ({@code shouldReportThroughputGrowthWith10kTasksAtVariousConcurrencyLevels})
+ * fixes the ingestion volume at {@value #INGESTION_TOTAL_TASKS} tasks and varies the concurrency
+ * level. It logs elapsed time and throughput for each run so the scaling behaviour can be
+ * analysed without asserting specific timing values.
  */
 class FunctionRouterConcurrencyPressureTest {
+
+    private static final Logger log = LoggerFactory.getLogger(FunctionRouterConcurrencyPressureTest.class);
+
+    /** Fixed task count used by the ingestion quantity test. */
+    private static final int INGESTION_TOTAL_TASKS = 10_000;
 
     private FunctionRouterExecutorFactory factory;
 
@@ -200,5 +214,80 @@ class FunctionRouterConcurrencyPressureTest {
                 numRegistrationKeys * concurrency
             )
             .isEqualTo((long) numRegistrationKeys * concurrency);
+    }
+
+    /**
+     * Ingestion quantity test: always submits exactly {@value #INGESTION_TOTAL_TASKS} tasks and
+     * measures how wall-clock time changes as concurrency grows.
+     *
+     * <p>Each task parks for ~0.1 ms ({@code LockSupport.parkNanos(100_000)}) to simulate a
+     * realistic unit of work and to make thread-level parallelism visible in the measurements.
+     * Results are printed via the logger so they appear in the test report; the only hard
+     * assertions are correctness checks (all tasks complete, zero errors).
+     *
+     * <p>Example output (results vary by hardware):
+     * <pre>
+     * [ingestion] concurrency=  1 | tasks=10000 | elapsed= 1050ms | throughput=  9523 tasks/s
+     * [ingestion] concurrency=  5 | tasks=10000 | elapsed=  215ms | throughput= 46511 tasks/s
+     * [ingestion] concurrency= 10 | tasks=10000 | elapsed=  113ms | throughput= 88495 tasks/s
+     * [ingestion] concurrency= 25 | tasks=10000 | elapsed=   52ms | throughput=192307 tasks/s
+     * [ingestion] concurrency= 50 | tasks=10000 | elapsed=   31ms | throughput=322580 tasks/s
+     * [ingestion] concurrency=100 | tasks=10000 | elapsed=   22ms | throughput=454545 tasks/s
+     * </pre>
+     */
+    @ParameterizedTest(name = "concurrency={0}")
+    @ValueSource(ints = { 1, 5, 10, 25, 50, 100 })
+    void shouldReportThroughputGrowthWith10kTasksAtVariousConcurrencyLevels(int concurrency)
+        throws InterruptedException {
+        // Given
+        factory = new FunctionRouterExecutorFactory();
+        factory.setConcurrency(concurrency);
+        factory.setTimeout(Duration.ofSeconds(120));
+
+        final var executor = factory.apply("ingestion-test-key");
+        final var completedCount = new AtomicInteger(0);
+        final var errorCount = new AtomicInteger(0);
+
+        final long startNanos = System.nanoTime();
+
+        // When – submit all 10 000 tasks; the calling thread blocks under backpressure
+        // whenever all pool threads are busy and the single-slot queue is full.
+        for (int i = 0; i < INGESTION_TOTAL_TASKS; i++) {
+            executor.submit(() -> {
+                try {
+                    // ~0.1 ms synthetic workload so that parallelism is the dominant factor.
+                    LockSupport.parkNanos(100_000L);
+                    completedCount.incrementAndGet();
+                } catch (Exception e) {
+                    errorCount.incrementAndGet();
+                }
+            });
+        }
+
+        executor.shutdown();
+        assertThat(executor.awaitTermination(120, TimeUnit.SECONDS))
+            .as("All %d tasks should complete within the 120 s timeout (concurrency=%d)", INGESTION_TOTAL_TASKS, concurrency)
+            .isTrue();
+
+        final long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+        final long throughput = INGESTION_TOTAL_TASKS * 1000L / Math.max(elapsedMs, 1);
+
+        // Then – correctness: every task must have finished without error
+        assertThat(completedCount.get())
+            .as("All %d tasks must complete successfully (concurrency=%d)", INGESTION_TOTAL_TASKS, concurrency)
+            .isEqualTo(INGESTION_TOTAL_TASKS);
+
+        assertThat(errorCount.get())
+            .as("No task should fail with an error (concurrency=%d)", concurrency)
+            .isEqualTo(0);
+
+        // Report timing so the scaling behaviour is visible in the test output
+        log.info(
+            "[ingestion] concurrency={} | tasks={} | elapsed={}ms | throughput={} tasks/s",
+            String.format("%3d", concurrency),
+            INGESTION_TOTAL_TASKS,
+            String.format("%6d", elapsedMs),
+            String.format("%7d", throughput)
+        );
     }
 }
