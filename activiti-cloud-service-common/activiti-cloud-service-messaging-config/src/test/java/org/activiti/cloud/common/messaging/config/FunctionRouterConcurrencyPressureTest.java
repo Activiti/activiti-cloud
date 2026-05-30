@@ -72,11 +72,7 @@ class FunctionRouterConcurrencyPressureTest {
      * beats the single-threaded time estimate.
      */
     @ParameterizedTest(name = "concurrency={0}, totalTasks={1}")
-    @CsvSource({
-        "2,  100",
-        "5,  200",
-        "10, 500",
-    })
+    @CsvSource({ "2,  100", "5,  200", "10, 500" })
     void shouldProcessTasksConcurrentlyWithConfiguredThreadCount(int concurrency, int totalTasks)
         throws InterruptedException {
         // Given
@@ -120,9 +116,7 @@ class FunctionRouterConcurrencyPressureTest {
             .as("All %d tasks must complete successfully", totalTasks)
             .isEqualTo(totalTasks);
 
-        assertThat(errorCount.get())
-            .as("No task should fail with an error")
-            .isEqualTo(0);
+        assertThat(errorCount.get()).as("No task should fail with an error").isEqualTo(0);
 
         assertThat(observedThreads.size())
             .as("Exactly %d thread(s) should be used when concurrency=%d", concurrency, concurrency)
@@ -147,11 +141,7 @@ class FunctionRouterConcurrencyPressureTest {
      * no thread is shared between different registration keys.
      */
     @ParameterizedTest(name = "concurrency={0}, totalTasks={1}, keys={2}")
-    @CsvSource({
-        "2,  100, 3",
-        "5,  200, 5",
-        "10, 500, 10",
-    })
+    @CsvSource({ "2,  100, 3", "5,  200, 5", "10, 500, 10" })
     void shouldIsolateThreadPoolsPerRegistrationKey(int concurrency, int totalTasks, int numRegistrationKeys)
         throws InterruptedException {
         // Given
@@ -188,7 +178,12 @@ class FunctionRouterConcurrencyPressureTest {
 
         // Then – every task completed
         assertThat(completedCount.get())
-            .as("%d keys x %d tasks = %d total tasks must all complete", numRegistrationKeys, totalTasks, numRegistrationKeys * totalTasks)
+            .as(
+                "%d keys x %d tasks = %d total tasks must all complete",
+                numRegistrationKeys,
+                totalTasks,
+                numRegistrationKeys * totalTasks
+            )
             .isEqualTo(numRegistrationKeys * totalTasks);
 
         // Each key's pool uses exactly concurrency threads
@@ -266,7 +261,11 @@ class FunctionRouterConcurrencyPressureTest {
 
         executor.shutdown();
         assertThat(executor.awaitTermination(120, TimeUnit.SECONDS))
-            .as("All %d tasks should complete within the 120 s timeout (concurrency=%d)", INGESTION_TOTAL_TASKS, concurrency)
+            .as(
+                "All %d tasks should complete within the 120 s timeout (concurrency=%d)",
+                INGESTION_TOTAL_TASKS,
+                concurrency
+            )
             .isTrue();
 
         final long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
@@ -277,9 +276,7 @@ class FunctionRouterConcurrencyPressureTest {
             .as("All %d tasks must complete successfully (concurrency=%d)", INGESTION_TOTAL_TASKS, concurrency)
             .isEqualTo(INGESTION_TOTAL_TASKS);
 
-        assertThat(errorCount.get())
-            .as("No task should fail with an error (concurrency=%d)", concurrency)
-            .isEqualTo(0);
+        assertThat(errorCount.get()).as("No task should fail with an error (concurrency=%d)", concurrency).isEqualTo(0);
 
         // Report timing so the scaling behaviour is visible in the test output.
         // Field widths keep rows aligned across all concurrency levels:

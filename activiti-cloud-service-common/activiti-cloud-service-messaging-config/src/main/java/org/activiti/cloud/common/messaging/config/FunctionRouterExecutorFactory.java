@@ -112,14 +112,16 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             .stream()
             .map(executor -> {
                 final var future = new CompletableFuture<Boolean>();
-                Thread.ofVirtual().start(() -> {
-                    try {
-                        future.complete(executor.awaitTermination(timeout, timeUnit));
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        future.complete(false);
-                    }
-                });
+                Thread
+                    .ofVirtual()
+                    .start(() -> {
+                        try {
+                            future.complete(executor.awaitTermination(timeout, timeUnit));
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            future.complete(false);
+                        }
+                    });
                 return future;
             })
             .toList();

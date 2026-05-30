@@ -126,9 +126,7 @@ class FunctionRouterExecutorFactoryTest {
             .as("A RejectedExecutionException must be thrown so the task is not silently dropped")
             .isInstanceOf(RejectedExecutionException.class)
             .hasMessageContaining("Interrupted");
-        assertThat(interrupted.get())
-            .as("Interrupt flag must be restored on the submitting thread")
-            .isTrue();
+        assertThat(interrupted.get()).as("Interrupt flag must be restored on the submitting thread").isTrue();
     }
 
     private static void await(CountDownLatch latch) {
