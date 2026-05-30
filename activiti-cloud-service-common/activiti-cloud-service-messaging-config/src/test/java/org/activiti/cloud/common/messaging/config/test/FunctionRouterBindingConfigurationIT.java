@@ -914,7 +914,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         //then
         assertThat(executionThreadMap.values().stream().distinct().count()).isEqualTo(1);
-        assertThat(IntStream.range(0, 100).boxed().toList()).isEqualTo(executionOrder);
+        assertThat(executionOrder).isEqualTo(IntStream.range(0, 100).boxed().toList());
     }
 
     @Test

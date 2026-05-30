@@ -21,7 +21,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -29,14 +32,34 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private Duration timeout = Duration.ofSeconds(5);
+    private int concurrency = 1;
+
+    private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
+        if (executor.isShutdown()) {
+            throw new RejectedExecutionException("Executor has been shutdown");
+        }
+
+        try {
+            // This forces the submitting thread to block and wait
+            // until the queue can accept the task.
+            if (!executor.getQueue().offer(runnable, timeout.getSeconds(), TimeUnit.SECONDS)) {
+                throw new RejectedExecutionException("Timeout after %s because queue is full".formatted(timeout));
+            }
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
+    };
 
     private final Function<String, ExecutorService> executorServiceFactory = registration ->
-        Executors.newSingleThreadScheduledExecutor(runnable -> {
-            final var thread = new Thread(runnable);
-            thread.setName(registration);
-
-            return thread;
-        });
+        new ThreadPoolExecutor(
+            concurrency,
+            concurrency,
+            0L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1),
+            Thread.ofPlatform().name(registration).factory(),
+            taskExecutionHandler
+        );
 
     @Override
     public ExecutorService apply(String key) {
@@ -92,5 +115,9 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     public void setTimeout(Duration timeout) {
         this.timeout = timeout;
+    }
+
+    public void setConcurrency(int concurrency) {
+        this.concurrency = concurrency;
     }
 }

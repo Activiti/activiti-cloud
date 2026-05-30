@@ -137,8 +137,12 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    Function<String, ExecutorService> functionRouterExecutorFactory() {
-        return new FunctionRouterExecutorFactory();
+    Function<String, ExecutorService> functionRouterExecutorFactory(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        final var factory = new FunctionRouterExecutorFactory();
+        factory.setConcurrency(messagingProperties.getFunctionRouter().getConcurrency());
+        return factory;
     }
 
     @Bean
