@@ -71,7 +71,7 @@ class FunctionRouterExecutorFactoryTest {
             await(releaseTask);
         });
 
-        assertThat(taskStarted.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         executor.submit(queuedTaskExecuted::countDown);
 
@@ -81,12 +81,12 @@ class FunctionRouterExecutorFactoryTest {
 
         releaseTask.countDown();
 
-        assertThat(queuedTaskExecuted.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(queuedTaskExecuted.await(200, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
     void shouldRestoreInterruptStatusWhenInterruptedWhileWaitingForQueueCapacity() throws InterruptedException {
-        factory.setTimeout(Duration.ofSeconds(1));
+        factory.setTimeout(Duration.ofMillis(200));
 
         final var executor = factory.apply("foo-registration");
         final var taskStarted = new CountDownLatch(1);
@@ -99,7 +99,7 @@ class FunctionRouterExecutorFactoryTest {
             await(releaseTask);
         });
 
-        assertThat(taskStarted.await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(taskStarted.await(200, TimeUnit.MILLISECONDS)).isTrue();
 
         executor.submit(() -> {});
 
@@ -115,7 +115,7 @@ class FunctionRouterExecutorFactoryTest {
                 }
             });
 
-        submitter.join(TimeUnit.SECONDS.toMillis(5));
+        submitter.join(TimeUnit.MILLISECONDS.toMillis(200));
         releaseTask.countDown();
 
         assertThat(submitter.isAlive()).isFalse();
