@@ -42,8 +42,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         try {
             // This forces the submitting thread to block and wait
             // until the queue can accept the task.
-            if (!executor.getQueue().offer(runnable, timeout.getSeconds(), TimeUnit.SECONDS)) {
-                throw new RejectedExecutionException("Timeout after %s because queue is full".formatted(timeout));
+            if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                throw new RejectedExecutionException(
+                    "Timeout after %s duration because the queue is full".formatted(timeout)
+                );
             }
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
