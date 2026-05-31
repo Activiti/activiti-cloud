@@ -35,7 +35,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
-        if (executor.isShutdown()) {
+        if (executor.isShutdown() || executor.isTerminating()) {
             throw new RejectedExecutionException("Executor has been shutdown");
         }
 
