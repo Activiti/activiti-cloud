@@ -32,7 +32,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private Duration timeout = Duration.ofSeconds(5);
-    private final int concurrency = 1;
+    private static final int SINGLE_THREAD_POOL_SIZE = 1;
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown()) {
@@ -47,15 +47,17 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
                     "Timeout after %s duration because the queue is full".formatted(timeout)
                 );
             }
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+
+            throw new RejectedExecutionException("Interrupted while waiting for queue capacity", e);
         }
     };
 
     private final Function<String, ExecutorService> executorServiceFactory = registration ->
         new ThreadPoolExecutor(
-            concurrency,
-            concurrency,
+            SINGLE_THREAD_POOL_SIZE,
+            SINGLE_THREAD_POOL_SIZE,
             0L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1),

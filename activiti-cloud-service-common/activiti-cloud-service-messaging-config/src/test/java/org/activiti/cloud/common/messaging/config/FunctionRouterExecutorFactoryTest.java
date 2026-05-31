@@ -112,6 +112,8 @@ class FunctionRouterExecutorFactoryTest {
                     interrupted.set(Thread.currentThread().isInterrupted());
                 } catch (Throwable throwable) {
                     thrown.set(throwable);
+                } finally {
+                    interrupted.set(Thread.currentThread().isInterrupted());
                 }
             });
 
@@ -119,7 +121,7 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
 
         assertThat(submitter.isAlive()).isFalse();
-        assertThat(thrown.get()).isNull();
+        assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
         assertThat(interrupted.get()).isTrue();
     }
 
