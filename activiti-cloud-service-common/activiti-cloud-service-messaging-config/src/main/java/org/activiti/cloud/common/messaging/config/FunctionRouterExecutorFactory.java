@@ -18,10 +18,10 @@ package org.activiti.cloud.common.messaging.config;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -60,7 +60,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             SINGLE_THREAD_POOL_SIZE,
             0L,
             TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1),
+            new ArrayBlockingQueue<>(1, true),
             Thread.ofPlatform().name(registration).factory(),
             taskExecutionHandler
         );
