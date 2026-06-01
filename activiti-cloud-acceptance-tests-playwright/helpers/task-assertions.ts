@@ -22,6 +22,7 @@ import { QueryService } from '../services/query.service';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
 import { RequestResponse } from '../services/base.service';
 import { TaskService } from '../services/task.service';
+import { getQueryProcessInstanceWhenSynced } from './query-sync';
 
 export function expectClientError(response: RequestResponse, messageFragment?: string): void {
     expect(response.httpStatus).toBeGreaterThanOrEqual(400);
@@ -68,8 +69,8 @@ export async function expectProcessAndTaskCompleted(
 ): Promise<void> {
     await expect
         .poll(async () => {
-            const instance = await queryService.getProcessInstance(processInstanceId);
-            return instance.status;
+            const instance = await getQueryProcessInstanceWhenSynced(queryService, processInstanceId);
+            return instance?.status;
         }, pollOptions('querySync'))
         .toBe(ProcessInstanceStatus.COMPLETED);
 

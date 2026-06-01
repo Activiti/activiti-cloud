@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 import { pollOptions, timeouts } from '../config/runtime/timeouts';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { QueryService } from '../services/query.service';
+import { getQueryProcessInstanceWhenSynced } from './query-sync';
 
 export async function waitForProcessInstanceStatus(
     queryService: QueryService,
@@ -18,7 +19,7 @@ export async function waitForProcessInstanceStatus(
     await expect
         .poll(
             async () => {
-                lastInstance = await queryService.getProcessInstance(processInstanceId);
+                lastInstance = await getQueryProcessInstanceWhenSynced(queryService, processInstanceId);
                 return lastInstance?.status;
             },
             { ...pollOptions('processStatus', timeouts.intervals.fast), timeout: timeoutMs }

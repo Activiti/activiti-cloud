@@ -33,15 +33,23 @@ export async function expectQueryProcessInstancesForKey(
     processName: string,
     shouldExist: boolean = true
 ): Promise<CloudProcessInstance[]> {
-    const filtered = shouldExist
-        ? await service.getQueryInstancesByProcessName(processName)
-        : service.filterProcessInstancesByKey(await service.queryAllProcessInstances(), processName);
+    let filtered: CloudProcessInstance[] = [];
 
-    if (shouldExist && filtered.length === 0) {
-        throw new Error(`Expected to find process instances in query for ${processName}, but found none`);
-    }
-    if (!shouldExist && filtered.length > 0) {
-        throw new Error(`Expected no process instances in query for ${processName}, but found ${filtered.length}`);
+    if (shouldExist) {
+        await expect
+            .poll(
+                async () => {
+                    filtered = await service.getQueryInstancesByProcessName(processName);
+                    return filtered.length;
+                },
+                pollOptions('querySync')
+            )
+            .toBeGreaterThan(0);
+    } else {
+        filtered = service.filterProcessInstancesByKey(await service.queryAllProcessInstances(), processName);
+        if (filtered.length > 0) {
+            throw new Error(`Expected no process instances in query for ${processName}, but found ${filtered.length}`);
+        }
     }
 
     return filtered;

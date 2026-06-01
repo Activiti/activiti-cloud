@@ -24,6 +24,7 @@ import {
 } from '../../helpers/security-policies.assertions';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
 import {
     expectProcessVariable,
@@ -80,18 +81,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         await activiti.step('Then the status of the process is changed to completed', async () => {
             await expect
                 .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status === ProcessInstanceStatus.COMPLETED
-                            ? ProcessInstanceStatus.COMPLETED
-                            : instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
+                    const instance = await getQueryProcessInstanceWhenSynced(
+                        queryServiceTestUser,
+                        processInstanceId
+                    );
+                    return instance?.status;
                 }, pollOptions('querySync'))
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
@@ -200,8 +194,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         await activiti.step('And the process has the name new-process-name', async () => {
             await expect
                 .poll(async () => {
-                    const queryInstance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                    return queryInstance.name;
+                    const queryInstance = await getQueryProcessInstanceWhenSynced(
+                        queryServiceTestUser,
+                        processInstanceId
+                    );
+                    return queryInstance?.name;
                 }, pollOptions('querySync'))
                 .toBe(newName);
         });
@@ -225,8 +222,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
 
             await expect
                 .poll(async () => {
-                    const queryInstance = await queryServiceTestUser.getProcessInstance(processInstance.id);
-                    return queryInstance.name;
+                    const queryInstance = await getQueryProcessInstanceWhenSynced(
+                        queryServiceTestUser,
+                        processInstance.id
+                    );
+                    return queryInstance?.name;
                 }, pollOptions('querySync'))
                 .toBe(processInstanceName);
         });
