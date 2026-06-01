@@ -128,6 +128,7 @@ import tools.jackson.databind.ObjectMapper;
         "activiti.cloud.messaging.function-router.routes.auditProducer.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.routes.auditProducerIncidents.override-required-producer-groups=consumer",
         "activiti.cloud.messaging.function-router.anonymous.consumer.concurrency=2",
+        "activiti.cloud.messaging.function-router.request-timeout=1s",
     }
 )
 @EnableTestBinder
@@ -708,6 +709,7 @@ public class FunctionRouterBindingConfigurationIT {
     void messagingProperties() {
         assertThat(messagingProperties.getFunctionRouter().getMaxRetries()).isEqualTo(4);
         assertThat(messagingProperties.getFunctionRouter().getRetryInterval()).isEqualTo(Duration.ofMillis(100));
+        assertThat(messagingProperties.getFunctionRouter().getRequestTimeout()).isEqualTo(Duration.ofSeconds(1));
     }
 
     @Test
@@ -920,7 +922,6 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException, ExecutionException {
         //given
-        functionRouterExecutorFactory.setTimeout(Duration.ofMillis(1000));
         final Message<String> message = MessageBuilder
             .withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
@@ -948,6 +949,11 @@ public class FunctionRouterBindingConfigurationIT {
         //then
         assertThat(futureResult.get()).isNull();
         assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
+    }
+
+    @Test
+    void functionRouterExecutorFactoryTimeout() {
+        assertThat(functionRouterExecutorFactory.getTimeout()).isEqualTo(Duration.ofSeconds(1));
     }
 
     void withRabbitMqPrefix(String prefix, Consumer<String> runnable) {

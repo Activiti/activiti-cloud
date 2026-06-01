@@ -442,6 +442,8 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration retryInterval = Duration.ofMillis(10);
 
+        private Duration requestTimeout = Duration.ofSeconds(15);
+
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
@@ -624,7 +626,8 @@ public class ActivitiCloudMessagingProperties {
                 retryInterval,
                 consumer,
                 anonymous,
-                errorHandlerDefinition
+                errorHandlerDefinition,
+                requestTimeout
             );
         }
 
@@ -641,6 +644,7 @@ public class ActivitiCloudMessagingProperties {
                 .add("consumer=" + consumer)
                 .add("anonymous=" + anonymous)
                 .add("errorHandlerDefinition=" + errorHandlerDefinition)
+                .add("requestTimeout=" + requestTimeout)
                 .toString();
         }
 
@@ -654,6 +658,14 @@ public class ActivitiCloudMessagingProperties {
 
         public void setErrorHandlerDefinition(String errorHandlerDefinition) {
             this.errorHandlerDefinition = errorHandlerDefinition;
+        }
+
+        public Duration getRequestTimeout() {
+            return requestTimeout;
+        }
+
+        public void setRequestTimeout(Duration requestTimeout) {
+            this.requestTimeout = requestTimeout;
         }
     }
 

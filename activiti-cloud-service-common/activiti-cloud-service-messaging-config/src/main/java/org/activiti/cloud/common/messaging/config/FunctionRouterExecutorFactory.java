@@ -34,6 +34,12 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
     private Duration timeout = Duration.ofSeconds(5);
     private static final int SINGLE_THREAD_POOL_SIZE = 1;
 
+    public FunctionRouterExecutorFactory() {}
+
+    public FunctionRouterExecutorFactory(Duration timeout) {
+        this.timeout = timeout;
+    }
+
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown() || executor.isTerminating()) {
             throw new RejectedExecutionException("Executor has been shutdown");
@@ -115,6 +121,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             .allOf(cfs.toArray(CompletableFuture[]::new))
             .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
             .join();
+    }
+
+    public Duration getTimeout() {
+        return this.timeout;
     }
 
     public void setTimeout(Duration timeout) {
