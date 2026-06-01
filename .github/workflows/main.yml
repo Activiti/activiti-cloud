@@ -190,7 +190,7 @@ jobs:
       TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
     strategy:
       # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
-      max-parallel: 3
+      max-parallel: 4
       fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]
