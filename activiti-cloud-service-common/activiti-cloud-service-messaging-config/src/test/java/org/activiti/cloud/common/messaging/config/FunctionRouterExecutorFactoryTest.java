@@ -117,8 +117,9 @@ class FunctionRouterExecutorFactoryTest {
                 }
             });
 
-        submitter.join(TimeUnit.MILLISECONDS.toMillis(200));
+        submitter.join(TimeUnit.MILLISECONDS.toMillis(2));
         releaseTask.countDown();
+        submitter.join(TimeUnit.MILLISECONDS.toMillis(2));
 
         assertThat(submitter.isAlive()).isFalse();
         assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
