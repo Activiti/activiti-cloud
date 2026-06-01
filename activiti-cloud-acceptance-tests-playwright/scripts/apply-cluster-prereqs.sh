@@ -150,6 +150,12 @@ resolve_runtime_bundle_image() {
     fi
   fi
 
+  if [[ -n "${VERSION:-}" && ( "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" ) ]]; then
+    ACCEPTANCE_RUNTIME_BUNDLE_IMAGE="activiti/example-runtime-bundle:${VERSION}"
+    prereqs_log "CI build VERSION — runtime-bundle image ${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE} (no registry resolve)"
+    return
+  fi
+
   if [[ "${ACCEPTANCE_SKIP_IMAGE_RESOLVE:-}" == "true" ]]; then
     local values_file=""
     if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]]; then

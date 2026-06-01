@@ -57,11 +57,10 @@ jobs:
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
 
-  # PR CI: build skipped (acceptance uses chart image tags). Re-enable on PR by adding: || github.event_name == 'pull_request'
   build:
     runs-on: ubuntu-latest
     needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && github.event_name == 'push' }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
@@ -170,16 +169,14 @@ jobs:
   acceptance-tests:
     runs-on: ubuntu-latest
     if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
-    # Per matrix cell: unique namespace (PREVIEW_NAME), Helm profile, overlay, Playwright.
-    # Shared via cache: Helm chart checkout (~once per workflow). Docker images: chart tags only (no build/push per cell).
+    # Per matrix cell: unique namespace + Helm profile. Images: build job → VERSION → update-chart → Helm (Serenity flow).
     needs:
       - pre-checks
+      - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
       ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
-      ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS: 'true'
-      # Chart default tags on develop (see activiti-cloud-full-chart values.yaml); not PR-SNAPSHOT.
-      ACCEPTANCE_CHART_IMAGE_VERSION: '9.1.0-alpha.51'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
       TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
       TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
@@ -249,13 +246,13 @@ jobs:
           messaging-broker: ${{ matrix.messaging-broker }}
           messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}
+          version: ${{ needs.build.outputs.version }}
 
       - name: Cache Helm chart checkout
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .git/activiti-cloud-full-chart
-          key: activiti-full-chart-${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}
+          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ needs.build.outputs.version }}
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
@@ -305,7 +302,8 @@ jobs:
       - name: Check build and acceptance-tests results
         if: >-
           ${{
-              (github.event_name == 'push' && (contains(needs.build.result, 'failure') || contains(needs.build.result, 'cancelled')))
+              contains(needs.build.result, 'failure')
+           || contains(needs.build.result, 'cancelled')
            || contains(needs.acceptance-tests.result, 'failure')
            || contains(needs.acceptance-tests.result, 'cancelled')
           }}
