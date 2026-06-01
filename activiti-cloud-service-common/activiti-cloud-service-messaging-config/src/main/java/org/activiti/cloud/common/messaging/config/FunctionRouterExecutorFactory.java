@@ -18,10 +18,13 @@ package org.activiti.cloud.common.messaging.config;
 import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -29,14 +32,44 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private Duration timeout = Duration.ofSeconds(5);
+    private static final int SINGLE_THREAD_POOL_SIZE = 1;
+
+    public FunctionRouterExecutorFactory() {}
+
+    public FunctionRouterExecutorFactory(Duration timeout) {
+        this.timeout = timeout;
+    }
+
+    private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
+        if (executor.isShutdown() || executor.isTerminating()) {
+            throw new RejectedExecutionException("Executor has been shutdown");
+        }
+
+        try {
+            // This forces the submitting thread to block and wait
+            // until the queue can accept the task.
+            if (!executor.getQueue().offer(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                throw new RejectedExecutionException(
+                    "Timeout after %s duration because the queue is full".formatted(timeout)
+                );
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+
+            throw new RejectedExecutionException("Interrupted while waiting for queue capacity", e);
+        }
+    };
 
     private final Function<String, ExecutorService> executorServiceFactory = registration ->
-        Executors.newSingleThreadScheduledExecutor(runnable -> {
-            final var thread = new Thread(runnable);
-            thread.setName(registration);
-
-            return thread;
-        });
+        new ThreadPoolExecutor(
+            SINGLE_THREAD_POOL_SIZE,
+            SINGLE_THREAD_POOL_SIZE,
+            0L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(1, true),
+            Thread.ofPlatform().name(registration).factory(),
+            taskExecutionHandler
+        );
 
     @Override
     public ExecutorService apply(String key) {
@@ -88,6 +121,10 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             .allOf(cfs.toArray(CompletableFuture[]::new))
             .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
             .join();
+    }
+
+    public Duration getTimeout() {
+        return this.timeout;
     }
 
     public void setTimeout(Duration timeout) {
