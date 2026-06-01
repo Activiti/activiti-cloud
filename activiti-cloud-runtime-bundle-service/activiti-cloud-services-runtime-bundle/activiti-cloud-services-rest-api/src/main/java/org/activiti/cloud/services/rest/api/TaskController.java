@@ -42,14 +42,14 @@ public interface TaskController {
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
-    @GetMapping(value = "/v1/tasks/{taskId}")
-    EntityModel<CloudTask> getTaskById(
-        @Parameter(description = "Enter the taskId to get task") @PathVariable(value = "taskId") String taskId
-    );
-
     @PostMapping(value = "/v1/tasks/next")
     EntityModel<CloudTask> nextTask(
         @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
+    );
+
+    @GetMapping(value = "/v1/tasks/{taskId}")
+    EntityModel<CloudTask> getTaskById(
+        @Parameter(description = "Enter the taskId to get task") @PathVariable(value = "taskId") String taskId
     );
 
     @PostMapping(value = "/v1/tasks/{taskId}/claim")
