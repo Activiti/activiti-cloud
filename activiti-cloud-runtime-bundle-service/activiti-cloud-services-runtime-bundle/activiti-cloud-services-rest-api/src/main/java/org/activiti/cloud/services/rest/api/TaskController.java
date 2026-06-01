@@ -23,6 +23,7 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.runtime.TaskIdentificationStrategy;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public interface TaskController {
     @GetMapping("/v1/tasks")
@@ -43,6 +45,11 @@ public interface TaskController {
     @GetMapping(value = "/v1/tasks/{taskId}")
     EntityModel<CloudTask> getTaskById(
         @Parameter(description = "Enter the taskId to get task") @PathVariable(value = "taskId") String taskId
+    );
+
+    @PostMapping(value = "/v1/tasks/next")
+    EntityModel<CloudTask> nextTask(
+        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
     );
 
     @PostMapping(value = "/v1/tasks/{taskId}/claim")

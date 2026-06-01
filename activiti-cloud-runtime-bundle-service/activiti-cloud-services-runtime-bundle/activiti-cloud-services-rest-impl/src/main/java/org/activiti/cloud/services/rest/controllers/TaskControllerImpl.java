@@ -38,6 +38,7 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.runtime.TaskIdentificationStrategy;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
@@ -54,6 +55,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -98,6 +100,14 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public EntityModel<CloudTask> getTaskById(@PathVariable String taskId) {
         Task task = taskRuntime.task(taskId);
+        return taskRepresentationModelAssembler.toModel(task);
+    }
+
+    @Override
+    public EntityModel<CloudTask> nextTask(
+        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
+    ) {
+        Task task = taskRuntime.nextTask(taskIdentificationStrategy);
         return taskRepresentationModelAssembler.toModel(task);
     }
 
