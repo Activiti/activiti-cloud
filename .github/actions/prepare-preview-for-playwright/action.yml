@@ -20,6 +20,9 @@ runs:
         export GITHUB_ACTIONS=true
         export GATEWAY_PROTOCOL="${GATEWAY_PROTOCOL:-https}"
         export CLUSTER_DOMAIN="${CLUSTER_DOMAIN:-envalfresco.com}"
+        # Partitioned query/runtime StatefulSets roll two pods sequentially after overlay patches.
+        export ACCEPTANCE_ROLLOUT_TIMEOUT_SEC="${ACCEPTANCE_ROLLOUT_TIMEOUT_SEC:-300}"
+        export ACCEPTANCE_STATEFULSET_ROLLOUT_TIMEOUT_SEC="${ACCEPTANCE_STATEFULSET_ROLLOUT_TIMEOUT_SEC:-420}"
 
         if [[ -z "${GATEWAY_HOST:-}" && -n "${CLUSTER_NAME:-}" ]]; then
           export GATEWAY_HOST="gateway-${PREVIEW_NAME}.${CLUSTER_NAME}.${CLUSTER_DOMAIN}"

@@ -222,7 +222,7 @@ run_with_heartbeat() {
 
 wait_rollout_one() {
   local dep=$1
-  local timeout=${2:-180}
+  local timeout=${2:-${ACCEPTANCE_ROLLOUT_TIMEOUT_SEC:-180}}
   local kind="deployment"
   if declare -f workload_kind &>/dev/null; then
     kind="$(workload_kind "${dep}")"
@@ -245,7 +245,15 @@ wait_rollouts_parallel() {
   prereqs_vibe "${PREREQS_ACTOR}"
   local pids=() pid failed=0
   for dep in "${deps[@]}"; do
-    wait_rollout_one "${dep}" &
+    local rollout_timeout="${ACCEPTANCE_ROLLOUT_TIMEOUT_SEC:-180}"
+    if declare -f workload_kind &>/dev/null; then
+      local kind
+      kind="$(workload_kind "${dep}")"
+      if [[ "${kind}" == "statefulset" ]]; then
+        rollout_timeout="${ACCEPTANCE_STATEFULSET_ROLLOUT_TIMEOUT_SEC:-${ACCEPTANCE_ROLLOUT_TIMEOUT_SEC:-420}}"
+      fi
+    fi
+    wait_rollout_one "${dep}" "${rollout_timeout}" &
     pids+=($!)
   done
   for pid in "${pids[@]}"; do

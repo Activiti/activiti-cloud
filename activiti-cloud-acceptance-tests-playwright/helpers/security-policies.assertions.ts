@@ -52,14 +52,25 @@ export async function expectEventsForKey(
     processName: string,
     shouldExist: boolean = true
 ): Promise<CloudRuntimeEvent[]> {
-    const fromApi = await service.getEventsByProcessName(processName);
-    const filtered = service.filterEventsByProcessKey(fromApi, processName);
+    let filtered: CloudRuntimeEvent[] = [];
 
-    if (shouldExist && filtered.length === 0) {
-        throw new Error(`Expected to find events for ${processName}, but found none`);
-    }
-    if (!shouldExist && filtered.length > 0) {
-        throw new Error(`Expected no events for ${processName}, but found ${filtered.length}`);
+    if (shouldExist) {
+        await expect
+            .poll(
+                async () => {
+                    const fromApi = await service.getEventsByProcessName(processName);
+                    filtered = service.filterEventsByProcessKey(fromApi, processName);
+                    return filtered.length;
+                },
+                pollOptions('auditEvents')
+            )
+            .toBeGreaterThan(0);
+    } else {
+        const fromApi = await service.getEventsByProcessName(processName);
+        filtered = service.filterEventsByProcessKey(fromApi, processName);
+        if (filtered.length > 0) {
+            throw new Error(`Expected no events for ${processName}, but found ${filtered.length}`);
+        }
     }
 
     return filtered;

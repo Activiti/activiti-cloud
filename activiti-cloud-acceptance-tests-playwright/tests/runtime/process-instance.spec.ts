@@ -215,7 +215,15 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram', async () => {
-            diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+            await expect
+                .poll(
+                    async () => {
+                        diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+                        return isDiagramShown(diagram);
+                    },
+                    pollOptions('querySync')
+                )
+                .toBe(true);
         });
 
         await activiti.step('Then the diagram is shown', async () => {
@@ -239,7 +247,15 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram admin endpoint', async () => {
-            diagram = await queryAdminServiceProcessAdmin.getProcessInstanceDiagram(processInstanceId);
+            await expect
+                .poll(
+                    async () => {
+                        diagram = await queryAdminServiceProcessAdmin.getProcessInstanceDiagram(processInstanceId);
+                        return isDiagramShown(diagram);
+                    },
+                    pollOptions('querySync')
+                )
+                .toBe(true);
         });
 
         await activiti.step('Then the query diagram is shown in admin endpoint', async () => {

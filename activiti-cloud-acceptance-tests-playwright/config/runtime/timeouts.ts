@@ -30,7 +30,10 @@ export const timeouts = {
     poll: {
         default: envMs('PLAYWRIGHT_POLL_DEFAULT_MS', 30_000),
         querySync: envMs('PLAYWRIGHT_POLL_QUERY_SYNC_MS', 60_000),
-        auditEvents: envMs('PLAYWRIGHT_POLL_AUDIT_EVENTS_MS', 20_000),
+        auditEvents: envMs(
+            'PLAYWRIGHT_POLL_AUDIT_EVENTS_MS',
+            process.env.CI || process.env.GITHUB_ACTIONS ? 60_000 : 20_000
+        ),
         processStatus: envMs('PLAYWRIGHT_POLL_PROCESS_STATUS_MS', 30_000),
         signalProcess: envMs('PLAYWRIGHT_POLL_SIGNAL_PROCESS_MS', 60_000),
     },
