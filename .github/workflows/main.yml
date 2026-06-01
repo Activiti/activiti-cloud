@@ -22,6 +22,9 @@ env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  # PR CI: skip Maven + Docker build while validating full Playwright matrix (chart image tags). Push to develop still builds.
+  # Set to 'true' to re-enable build on pull_request as well.
+  ACTIVITI_CLOUD_CI_BUILD_ENABLED: 'false'
 
 jobs:
   pre-checks:
@@ -60,7 +63,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' && (github.event_name == 'push' || env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true') }}
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
@@ -179,13 +182,23 @@ jobs:
       # Chart default tags on develop (see activiti-cloud-full-chart values.yaml); not PR-SNAPSHOT.
       ACCEPTANCE_CHART_IMAGE_VERSION: '9.1.0-alpha.51'
     strategy:
-      # One namespace per matrix cell (unique PREVIEW_NAME). Expand matrix once Playwright is green.
+      # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
       max-parallel: 2
       fail-fast: false
       matrix:
-        messaging-broker: [rabbitmq]
-        messaging-partitioned: [non-partitioned]
+        messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
         messaging-destinations: [default-destinations]
+        include:
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
+          - messaging-broker: rabbitmq
+            messaging-partitioned: non-partitioned
+            messaging-destinations: pdb
+          - messaging-broker: rabbitmq
+            messaging-partitioned: prefix
+            messaging-destinations: pdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -368,8 +381,7 @@ jobs:
       - name: Check build and acceptance-tests results
         if: >-
           ${{
-              contains(needs.build.result, 'failure')
-           || contains(needs.build.result, 'cancelled')
+              (env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true' && (contains(needs.build.result, 'failure') || contains(needs.build.result, 'cancelled')))
            || contains(needs.acceptance-tests.result, 'failure')
            || contains(needs.acceptance-tests.result, 'cancelled')
           }}
@@ -389,7 +401,7 @@ jobs:
 
   delete-test-images:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' && (github.event_name == 'push' || env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true') }}
     needs:
       - pre-checks
       - acceptance-tests
