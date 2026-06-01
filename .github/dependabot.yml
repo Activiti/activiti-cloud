@@ -39,3 +39,28 @@ updates:
     ignore:
       # Managed by gh aw add. Version-locked to the gh-aw compiler; do not bump.
       - dependency-name: "github/gh-aw-actions"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/.github/actions/force-full-model-cleanup"
+      - "/.github/actions/project-models-cleanup"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    cooldown:
+      default-days: 3
+    groups:
+      framework:
+        patterns:
+          - "@playwright/test"
+        update-types:
+          - "minor"
+          - "patch"
+      tools:
+        patterns:
+          - "dotenv*"
+          - "winston"
+        update-types:
+          - "minor"
+          - "patch"
