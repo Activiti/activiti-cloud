@@ -16,7 +16,6 @@
 package org.activiti.cloud.conf;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -66,9 +65,7 @@ public class QueryConsumerAutoConfiguration {
             .channel(
                 MessageChannels
                     .partitioned(Runtime.getRuntime().availableProcessors() * 2)
-                    .partitionKey(message ->
-                        message.getHeaders().getOrDefault("rootProcessInstanceId", UUID.randomUUID())
-                    )
+                    .partitionKey(message -> message.getHeaders().getOrDefault("rootProcessInstanceId", 0))
             )
             .handle(genericHandlerAdapter)
             .get();

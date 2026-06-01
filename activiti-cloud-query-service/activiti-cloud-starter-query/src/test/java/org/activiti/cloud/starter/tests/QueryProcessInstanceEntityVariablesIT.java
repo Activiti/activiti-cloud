@@ -255,21 +255,27 @@ public class QueryProcessInstanceEntityVariablesIT {
         var sentEvents = eventsAggregator.sendAll();
 
         // then
-        assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
-            .isNotEmpty()
-            .get()
-            .extracting(ProcessInstanceEntity::getStatus)
-            .isEqualTo(RUNNING);
+        await()
+            .untilAsserted(() -> {
+                assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+                    .isNotEmpty()
+                    .get()
+                    .extracting(ProcessInstanceEntity::getStatus)
+                    .isEqualTo(RUNNING);
 
-        assertThat(variableRepository.findAll())
-            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-            .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
-            .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
+                assertThat(variableRepository.findAll())
+                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                    .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                    .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
+            });
 
         // and when duplicates are sent
         eventsAggregator.addEvents(sentEvents).sendAll();
 
         // and then
-        assertThat(eventsAggregator.getException()).isNull();
+        await()
+            .untilAsserted(() -> {
+                assertThat(eventsAggregator.getException()).isNull();
+            });
     }
 }

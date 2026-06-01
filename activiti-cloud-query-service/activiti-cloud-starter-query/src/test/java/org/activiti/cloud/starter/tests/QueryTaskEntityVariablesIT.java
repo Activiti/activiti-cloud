@@ -476,18 +476,20 @@ public class QueryTaskEntityVariablesIT {
         var sentEvents = eventsAggregator.sendAll();
 
         // then
-        assertThat(eventsAggregator.getException()).isNull();
-        assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
-            .isNotEmpty()
-            .get()
-            .extracting(ProcessInstanceEntity::getStatus)
-            .isEqualTo(RUNNING);
+        await()
+            .untilAsserted(() -> {
+                assertThat(eventsAggregator.getException()).isNull();
+                assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+                    .isNotEmpty()
+                    .get()
+                    .extracting(ProcessInstanceEntity::getStatus)
+                    .isEqualTo(RUNNING);
 
-        assertThat(variableRepository.findAll())
-            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-            .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
-            .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
-
+                assertThat(variableRepository.findAll())
+                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                    .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
+                    .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
+            });
         // and when
         eventsAggregator.addEvents(sentEvents).sendAll();
 
