@@ -43,6 +43,11 @@ public interface TaskController {
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @PostMapping(value = "/v1/tasks/next")
+    EntityModel<CloudTask> nextTasks(
+        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
+    );
+
+    @PostMapping(value = "/v1/task/next")
     EntityModel<CloudTask> nextTask(
         @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
     );

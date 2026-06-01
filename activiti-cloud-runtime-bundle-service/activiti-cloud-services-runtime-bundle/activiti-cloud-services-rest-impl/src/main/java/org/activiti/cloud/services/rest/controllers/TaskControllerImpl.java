@@ -104,6 +104,14 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
+    public EntityModel<CloudTask> nextTasks(
+        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
+    ) {
+        Task task = taskRuntime.nextTask(taskIdentificationStrategy);
+        return taskRepresentationModelAssembler.toModel(task);
+    }
+
+    @Override
     public EntityModel<CloudTask> nextTask(
         @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
     ) {
