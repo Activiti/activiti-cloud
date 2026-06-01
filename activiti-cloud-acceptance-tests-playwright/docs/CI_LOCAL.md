@@ -35,13 +35,13 @@ flowchart TD
 
 ## Key variables
 
-| Variable | CI | Local |
-|----------|----|-------|
-| `PREVIEW_NAME` | Matrix cell (`pr-123-rabbit-n-d`, …) | From `.env` |
-| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Workflow | `.env` |
-| `GATEWAY_HOST` | Derived or explicit | Derived + `LOCAL_PORT` |
-| `GATEWAY_URL` | `https://…` | `http://…:8080` |
-| Test users | GitHub vars/secrets `ACCEPTANCE_*` | `.env` |
+| Variable                          | CI                                   | Local                  |
+| --------------------------------- | ------------------------------------ | ---------------------- |
+| `PREVIEW_NAME`                    | Matrix cell (`pr-123-rabbit-n-d`, …) | From `.env`            |
+| `CLUSTER_NAME` / `CLUSTER_DOMAIN` | Workflow                             | `.env`                 |
+| `GATEWAY_HOST`                    | Derived or explicit                  | Derived + `LOCAL_PORT` |
+| `GATEWAY_URL`                     | `https://…`                          | `http://…:8080`        |
+| Test users                        | GitHub vars/secrets `ACCEPTANCE_*`   | `.env`                 |
 
 ## Override polling in slow clusters
 
