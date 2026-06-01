@@ -75,6 +75,12 @@ def main() -> int:
         upsert_env(container, "ACT_KEYCLOAK_URL", patch["keycloakUrl"])
     if patch.get("keycloakRealm"):
         upsert_env(container, "ACT_KEYCLOAK_REALM", patch["keycloakRealm"])
+    if patch.get("jwtIssuerUri"):
+        upsert_env(
+            container,
+            "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI",
+            patch["jwtIssuerUri"],
+        )
     if patch.get("jwtJwkSetUri"):
         upsert_env(
             container,

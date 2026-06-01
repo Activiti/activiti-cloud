@@ -261,21 +261,42 @@ deployment_has_supplemental_process_mount() {
     | python3 -c "import json,sys; d=json.load(sys.stdin); mounts=d['spec']['template']['spec']['containers'][0].get('volumeMounts',[]); sys.exit(0 if any(m.get('name')=='acceptance-supplemental-processes' for m in mounts) else 1)" 2>/dev/null
 }
 
+# Per-deployment Keycloak env for CI (hostAliases + in-cluster HTTP).
+# Identity-adapter Feign admin client uses keycloak.auth-server-url (=ACT_KEYCLOAK_URL); HTTPS from pods times out.
+resolve_keycloak_patch_for_deployment() {
+  local dep=$1
+  PATCH_KEYCLOAK_URL="${ACT_KEYCLOAK_URL}"
+  PATCH_JWT_ISSUER_URI=""
+  PATCH_JWT_JWK_SET_URI="${JWT_JWK_SET_URI}"
+  PATCH_KEYCLOAK_CLIENT_TOKEN_URI="${KEYCLOAK_CLIENT_TOKEN_URI}"
+
+  if [[ -n "${JWT_JWK_SET_URI}" && "${dep}" == "${IDENTITY_DEP}" ]]; then
+    PATCH_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
+    PATCH_JWT_ISSUER_URI="https://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}"
+  fi
+  export PATCH_KEYCLOAK_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
+}
+
 deployment_needs_host_patch() {
   local dep=$1
   if ! deployment_has_host_alias "${dep}"; then
     return 0
   fi
-  local current_kc_url current_kc_realm current_issuer current_jwks
+  resolve_keycloak_patch_for_deployment "${dep}"
+  local current_kc_url current_kc_realm current_issuer current_jwks current_client_token
   current_kc_url="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_URL")"
   current_kc_realm="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_REALM")"
-  [[ "${current_kc_url}" != "${ACT_KEYCLOAK_URL}" ]] && return 0
+  [[ "${current_kc_url}" != "${PATCH_KEYCLOAK_URL}" ]] && return 0
   [[ "${current_kc_realm}" != "${KEYCLOAK_REALM:-activiti}" ]] && return 0
-  if [[ -n "${JWT_JWK_SET_URI}" ]]; then
+  if [[ -n "${PATCH_JWT_JWK_SET_URI}" ]]; then
     current_jwks="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI")"
     current_client_token="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI")"
-    [[ "${current_jwks}" != "${JWT_JWK_SET_URI}" ]] && return 0
-    [[ "${current_client_token}" != "${KEYCLOAK_CLIENT_TOKEN_URI}" ]] && return 0
+    [[ "${current_jwks}" != "${PATCH_JWT_JWK_SET_URI}" ]] && return 0
+    [[ "${current_client_token}" != "${PATCH_KEYCLOAK_CLIENT_TOKEN_URI}" ]] && return 0
+  fi
+  if [[ -n "${PATCH_JWT_ISSUER_URI}" ]]; then
+    current_issuer="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI")"
+    [[ "${current_issuer}" != "${PATCH_JWT_ISSUER_URI}" ]] && return 0
   fi
   return 1
 }
@@ -285,24 +306,27 @@ apply_acceptance_deployment_patch() {
   local include_policy=$2
   local include_host=$3
   local patch_json result
+  resolve_keycloak_patch_for_deployment "${dep}"
   export NAMESPACE RB_DEP ACT_KEYCLOAK_URL POLICY_CONFIG NEEDS_SUPPLEMENTAL_PROCESSES
   export PROCESS_LOCATION_CLASSPATH PROCESS_LOCATION_SUPPLEMENTAL
   export DEP_NAME="${dep}" KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
   export INCLUDE_POLICY="${include_policy}" INCLUDE_HOST="${include_host}"
   export HOST_ALIASES="[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]"
-  export JWT_JWK_SET_URI KEYCLOAK_CLIENT_TOKEN_URI
+  export PATCH_KEYCLOAK_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
   patch_json="$(
     python3 -c "
 import json, os
 patch = {'namespace': os.environ['NAMESPACE'], 'deployment': os.environ['DEP_NAME']}
 if os.environ.get('INCLUDE_HOST') == '1':
     patch['hostAliases'] = json.loads(os.environ['HOST_ALIASES'])
-    patch['keycloakUrl'] = os.environ['ACT_KEYCLOAK_URL']
+    patch['keycloakUrl'] = os.environ['PATCH_KEYCLOAK_URL']
     patch['keycloakRealm'] = os.environ['KEYCLOAK_REALM']
-    if os.environ.get('JWT_JWK_SET_URI'):
-        patch['jwtJwkSetUri'] = os.environ['JWT_JWK_SET_URI']
-    if os.environ.get('KEYCLOAK_CLIENT_TOKEN_URI'):
-        patch['keycloakClientTokenUri'] = os.environ['KEYCLOAK_CLIENT_TOKEN_URI']
+    if os.environ.get('PATCH_JWT_ISSUER_URI'):
+        patch['jwtIssuerUri'] = os.environ['PATCH_JWT_ISSUER_URI']
+    if os.environ.get('PATCH_JWT_JWK_SET_URI'):
+        patch['jwtJwkSetUri'] = os.environ['PATCH_JWT_JWK_SET_URI']
+    if os.environ.get('PATCH_KEYCLOAK_CLIENT_TOKEN_URI'):
+        patch['keycloakClientTokenUri'] = os.environ['PATCH_KEYCLOAK_CLIENT_TOKEN_URI']
 if os.environ.get('INCLUDE_POLICY') == '1':
     patch['policyConfig'] = os.environ['POLICY_CONFIG']
     if os.environ['DEP_NAME'] == os.environ['RB_DEP']:

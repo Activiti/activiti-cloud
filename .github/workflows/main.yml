@@ -343,6 +343,8 @@ jobs:
           TESTADMIN_USERNAME: testadmin
           TESTADMIN_PASSWORD: password
           PLAYWRIGHT_WORKERS: '4'
+          PLAYWRIGHT_ACTION_TIMEOUT_MS: '30000'
+          PLAYWRIGHT_HTTP_TIMEOUT_MS: '30000'
           AUTO_CLUSTER_PREREQS: 'false'
           ACCEPTANCE_CI_OVERLAY_APPLIED: 'true'
         with:

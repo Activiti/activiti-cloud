@@ -61,5 +61,19 @@ runs:
         fi
         echo "✓ Keycloak token OK for testuser (client activiti, secret from namespace)"
 
+        ACCESS_TOKEN="$(python3 -c "import json; print(json.load(open('/tmp/acceptance-token-check.json'))['access_token'])" 2>/dev/null || true)"
+        if [[ -n "${ACCESS_TOKEN}" && -n "${GATEWAY_HOST:-}" ]]; then
+          IDENTITY_SEARCH_HTTP="$(curl -sS -o /tmp/acceptance-identity-groups.json -w '%{http_code}' \
+            --max-time 30 \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "https://${GATEWAY_HOST}/identity-adapter-service/v1/groups?search=sa" || echo "000")"
+          if [[ "${IDENTITY_SEARCH_HTTP}" != "200" ]]; then
+            echo "::error::identity-adapter group search check failed (HTTP ${IDENTITY_SEARCH_HTTP})"
+            cat /tmp/acceptance-identity-groups.json 2>/dev/null || true
+            exit 1
+          fi
+          echo "✓ identity-adapter group search OK (testuser bearer)"
+        fi
+
         echo "ACCEPTANCE_CI_OVERLAY_APPLIED=true" >> "${GITHUB_ENV}"
         echo "✓ Preview ${PREVIEW_NAME} ready for Playwright"
