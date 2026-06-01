@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
+import { toProcessQueryString } from './query-params';
 
 export class RuntimeAdminService extends BaseService {
     private readonly basePath = '/rb/admin/v1';
@@ -31,15 +32,9 @@ export class RuntimeAdminService extends BaseService {
     }
 
     async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        const searchParams = new URLSearchParams();
-
-        if (params?.status) searchParams.append('status', params.status);
-        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
-        if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
-        if (params?.name) searchParams.append('name', params.name);
-
+        const query = toProcessQueryString(params);
         const response = await this.get(
-            `${this.basePath}/process-instances?${searchParams.toString()}`
+            `${this.basePath}/process-instances${query ? `?${query}` : ''}`
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');

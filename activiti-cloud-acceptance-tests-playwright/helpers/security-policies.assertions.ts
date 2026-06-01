@@ -1,13 +1,12 @@
 /*
- * Security policy assertions — Playwright expect/poll only; no HTTP in this module.
+ * Security policy assertions — orchestrates SecurityPoliciesService HTTP calls with expectPoll.
  */
 
-import { expect } from '@playwright/test';
-import { pollOptions } from '../config/runtime/timeouts';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudRuntimeEvent } from '../models/audit.models';
 import { ProcessDefinitionRegistry } from '../models/process-definition-registry';
 import { SecurityPoliciesService } from '../services/security-policies.service';
+import { expectPoll } from './expect-poll';
 
 export async function expectProcessInstancesForKey(
     service: SecurityPoliciesService,
@@ -36,15 +35,10 @@ export async function expectQueryProcessInstancesForKey(
     let filtered: CloudProcessInstance[] = [];
 
     if (shouldExist) {
-        await expect
-            .poll(
-                async () => {
-                    filtered = await service.getQueryInstancesByProcessName(processName);
-                    return filtered.length;
-                },
-                pollOptions('querySync')
-            )
-            .toBeGreaterThan(0);
+        await expectPoll(async () => {
+            filtered = await service.getQueryInstancesByProcessName(processName);
+            return filtered.length;
+        }, 'querySync').toBeGreaterThan(0);
     } else {
         filtered = service.filterProcessInstancesByKey(await service.queryAllProcessInstances(), processName);
         if (filtered.length > 0) {
@@ -63,16 +57,11 @@ export async function expectEventsForKey(
     let filtered: CloudRuntimeEvent[] = [];
 
     if (shouldExist) {
-        await expect
-            .poll(
-                async () => {
-                    const fromApi = await service.getEventsByProcessName(processName);
-                    filtered = service.filterEventsByProcessKey(fromApi, processName);
-                    return filtered.length;
-                },
-                pollOptions('auditEvents')
-            )
-            .toBeGreaterThan(0);
+        await expectPoll(async () => {
+            const fromApi = await service.getEventsByProcessName(processName);
+            filtered = service.filterEventsByProcessKey(fromApi, processName);
+            return filtered.length;
+        }, 'auditEvents').toBeGreaterThan(0);
     } else {
         const fromApi = await service.getEventsByProcessName(processName);
         filtered = service.filterEventsByProcessKey(fromApi, processName);
@@ -121,16 +110,11 @@ export async function expectProcessInstancesAdminForKey(
     let filtered: CloudProcessInstance[] = [];
 
     if (shouldExist) {
-        await expect
-            .poll(
-                async () => {
-                    const allInstances = await service.getRuntimeAdminProcessInstances({ processDefinitionKey });
-                    filtered = service.filterProcessInstancesByKey(allInstances, processName);
-                    return filtered.length;
-                },
-                pollOptions('querySync')
-            )
-            .toBeGreaterThan(0);
+        await expectPoll(async () => {
+            const allInstances = await service.getRuntimeAdminProcessInstances({ processDefinitionKey });
+            filtered = service.filterProcessInstancesByKey(allInstances, processName);
+            return filtered.length;
+        }, 'querySync').toBeGreaterThan(0);
     } else {
         const allInstances = await service.getRuntimeAdminProcessInstances({ processDefinitionKey });
         filtered = service.filterProcessInstancesByKey(allInstances, processName);
@@ -151,16 +135,11 @@ export async function expectQueryProcessInstancesAdminForKey(
     let filtered: CloudProcessInstance[] = [];
 
     if (shouldExist) {
-        await expect
-            .poll(
-                async () => {
-                    const allInstances = await service.getQueryAdminProcessInstances({ processDefinitionKey });
-                    filtered = service.filterProcessInstancesByKey(allInstances, processName);
-                    return filtered.length;
-                },
-                pollOptions('querySync')
-            )
-            .toBeGreaterThan(0);
+        await expectPoll(async () => {
+            const allInstances = await service.getQueryAdminProcessInstances({ processDefinitionKey });
+            filtered = service.filterProcessInstancesByKey(allInstances, processName);
+            return filtered.length;
+        }, 'querySync').toBeGreaterThan(0);
     } else {
         const allInstances = await service.getQueryAdminProcessInstances({ processDefinitionKey });
         filtered = service.filterProcessInstancesByKey(allInstances, processName);
@@ -181,16 +160,11 @@ export async function expectEventsAdminForKey(
     let filtered: CloudRuntimeEvent[] = [];
 
     if (shouldExist) {
-        await expect
-            .poll(
-                async () => {
-                    const allEvents = await service.getEventsByEntityIdAdmin(processInstanceId);
-                    filtered = service.filterEventsByProcessInstance(allEvents, processInstanceId, processName);
-                    return filtered.length;
-                },
-                pollOptions('auditEvents')
-            )
-            .toBeGreaterThan(0);
+        await expectPoll(async () => {
+            const allEvents = await service.getEventsByEntityIdAdmin(processInstanceId);
+            filtered = service.filterEventsByProcessInstance(allEvents, processInstanceId, processName);
+            return filtered.length;
+        }, 'auditEvents').toBeGreaterThan(0);
     } else {
         const allEvents = await service.getEventsByEntityIdAdmin(processInstanceId);
         filtered = service.filterEventsByProcessInstance(allEvents, processInstanceId, processName);

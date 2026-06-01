@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { CloudVariableInstance } from '../models/process-variable.models';
 import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
+import { toProcessQueryString, toTaskQueryString } from './query-params';
 
 export class QueryService extends BaseService {
     private readonly basePath = '/query/v1';
@@ -39,15 +40,9 @@ export class QueryService extends BaseService {
     }
 
     async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        const searchParams = new URLSearchParams();
-
-        if (params?.status) searchParams.append('status', params.status);
-        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
-        if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
-        if (params?.name) searchParams.append('name', params.name);
-
+        const query = toProcessQueryString(params);
         const response = await this.get(
-            `${this.basePath}/process-instances?${searchParams.toString()}`
+            `${this.basePath}/process-instances${query ? `?${query}` : ''}`
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
@@ -59,17 +54,9 @@ export class QueryService extends BaseService {
     }
 
     async getTasks(params?: TaskQueryParams): Promise<CloudTask[]> {
-        const searchParams = new URLSearchParams();
-
-        if (params?.status) searchParams.append('status', params.status);
-        if (params?.assignee) searchParams.append('assignee', params.assignee);
-        if (params?.owner) searchParams.append('owner', params.owner);
-        if (params?.processInstanceId) searchParams.append('processInstanceId', params.processInstanceId);
-        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
-        if (params?.name) searchParams.append('name', params.name);
-
+        const query = toTaskQueryString(params);
         const response = await this.get(
-            `${this.basePath}/tasks?${searchParams.toString()}`
+            `${this.basePath}/tasks${query ? `?${query}` : ''}`
         );
 
         return this.unwrapList<CloudTask>(response, 'tasks');
@@ -127,8 +114,31 @@ export class QueryService extends BaseService {
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
+    async getRootTasksByProcessInstance(processInstanceId: string): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?rootTasksOnly=true&processInstanceId=${encodeURIComponent(processInstanceId)}&sort=createdDate,desc&sort=id,desc`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`);
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
     async getCandidateUsers(taskId: string): Promise<string[]> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-users`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        if (Array.isArray(response.body)) {
+            return response.body as string[];
+        }
+        return [];
+    }
+
+    async getCandidateGroups(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-groups`);
         if (Array.isArray(response)) {
             return response as string[];
         }

@@ -3,7 +3,7 @@
  */
 
 import { request } from '@playwright/test';
-import { ContextFactory } from '../../fixtures/context-factory';
+import { withAuthenticatedContext } from '../../fixtures/auth-context';
 import { resolveGatewayConnection } from '../connection/gateway-url';
 import { isDevelopProfile } from '../connection/cluster-profile';
 import { users } from '../users';
@@ -119,8 +119,7 @@ export async function checkGatewayReachable(): Promise<{ warnings: string[] }> {
 }
 
 export async function checkAuthentication(userKey: keyof typeof users): Promise<void> {
-    const context = await ContextFactory.getContextByUserName(userKey);
-    await context.dispose();
+    await withAuthenticatedContext(userKey, async () => undefined);
 }
 
 export async function runPreflightChecks(project: string = 'all'): Promise<EnvCheckResult> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import {
     createRuntimeAdminService,
     createRuntimeBundleService,
     createSecurityPoliciesService,
+    createServiceTasksAdminService,
     createTaskService,
     createTaskAdminService,
 } from '../helpers/service-factory';
@@ -39,6 +40,7 @@ import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
+import { ServiceTasksAdminService } from '../services/service-tasks-admin.service';
 import { contexts, expect } from './context.fixture';
 
 interface ServicesFixture {
@@ -49,6 +51,7 @@ interface ServicesFixture {
     queryServiceTestUser: QueryService;
     queryServiceHrUser: QueryService;
     queryAdminServiceProcessAdmin: QueryAdminService;
+    queryAdminServiceTestAdmin: QueryAdminService;
     queryAdminServiceHrUser: QueryAdminService;
     queryServiceTestAdmin: QueryService;
     runtimeAdminServiceTestAdmin: RuntimeAdminService;
@@ -59,6 +62,8 @@ interface ServicesFixture {
     taskServiceTestAdmin: TaskService;
     taskAdminServiceTestAdmin: TaskAdminService;
     auditServiceTestUser: AuditService;
+    auditServiceTestAdmin: AuditService;
+    serviceTasksAdminServiceTestAdmin: ServiceTasksAdminService;
     securityPoliciesServiceTestUser: SecurityPoliciesService;
     securityPoliciesServiceHrUser: SecurityPoliciesService;
     securityPoliciesServiceHradmin: SecurityPoliciesService;
@@ -101,6 +106,9 @@ const activiti = contexts.extend<ServicesFixture>({
     queryAdminServiceProcessAdmin: async ({ processAdminContext }, use) => {
         await use(createQueryAdminService(processAdminContext));
     },
+    queryAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createQueryAdminService(testAdminUserContext));
+    },
     queryAdminServiceHrUser: async ({ hrUserContext }, use) => {
         await use(createQueryAdminService(hrUserContext));
     },
@@ -130,6 +138,12 @@ const activiti = contexts.extend<ServicesFixture>({
     },
     auditServiceTestUser: async ({ testUserContext }, use) => {
         await use(createAuditService(testUserContext));
+    },
+    auditServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createAuditService(testAdminUserContext));
+    },
+    serviceTasksAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createServiceTasksAdminService(testAdminUserContext));
     },
     securityPoliciesServiceTestUser: async ({ testUserContext, dirtyRegistry, testScope }, use) => {
         await use(createSecurityPoliciesService(testUserContext, isolationOpts(dirtyRegistry, testScope)));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 Alfresco Software, Ltd.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {
     expectQueryProcessInstancesAdminForKey,
 } from '../../helpers/security-policies.assertions';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { pollOptions } from '../../config/runtime/timeouts';
+import { expectPoll } from '../../helpers/expect-poll';
 import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
 import {
@@ -79,15 +79,13 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstanceId
-                    );
-                    return instance?.status;
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            await expectPoll(async () => {
+                const instance = await getQueryProcessInstanceWhenSynced(
+                    queryServiceTestUser,
+                    processInstanceId
+                );
+                return instance?.status;
+            }, 'querySync').toBe(ProcessInstanceStatus.COMPLETED);
         });
 
         for (const variableName of CONNECTOR_RESULT_VARIABLES) {
@@ -192,15 +190,13 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the process has the name new-process-name', async () => {
-            await expect
-                .poll(async () => {
-                    const queryInstance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstanceId
-                    );
-                    return queryInstance?.name;
-                }, pollOptions('querySync'))
-                .toBe(newName);
+            await expectPoll(async () => {
+                const queryInstance = await getQueryProcessInstanceWhenSynced(
+                    queryServiceTestUser,
+                    processInstanceId
+                );
+                return queryInstance?.name;
+            }, 'querySync').toBe(newName);
         });
     });
 
@@ -220,15 +216,13 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
             const runtimeInstance = await runtimeBundleServiceTestUser.getProcessInstance(processInstance.id);
             expect(runtimeInstance.name).toBe(processInstanceName);
 
-            await expect
-                .poll(async () => {
-                    const queryInstance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstance.id
-                    );
-                    return queryInstance?.name;
-                }, pollOptions('querySync'))
-                .toBe(processInstanceName);
+            await expectPoll(async () => {
+                const queryInstance = await getQueryProcessInstanceWhenSynced(
+                    queryServiceTestUser,
+                    processInstance.id
+                );
+                return queryInstance?.name;
+            }, 'querySync').toBe(processInstanceName);
         });
 
         await activiti.step('Then verify the process instance name is my_process_instance_name', async () => {
@@ -308,36 +302,32 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the generated events have sequence number set', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByEntityId(processInstanceId);
-                    if (events.length === 0) {
+            await expectPoll(async () => {
+                const events = await auditServiceTestUser.getEventsByEntityId(processInstanceId);
+                if (events.length === 0) {
+                    return false;
+                }
+                const sequenceNumbers = events
+                    .map((event) => event.sequenceNumber)
+                    .filter((value): value is number => value !== undefined);
+                for (let index = 0; index < events.length; index++) {
+                    if (!sequenceNumbers.includes(index)) {
                         return false;
                     }
-                    const sequenceNumbers = events
-                        .map((event) => event.sequenceNumber)
-                        .filter((value): value is number => value !== undefined);
-                    for (let index = 0; index < events.length; index++) {
-                        if (!sequenceNumbers.includes(index)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }, pollOptions('auditEvents'))
-                .toBe(true);
+                }
+                return true;
+            }, 'auditEvents').toBe(true);
         });
 
         await activiti.step('And the generated events have the same message id', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-                    if (events.length === 0) {
-                        return false;
-                    }
-                    const messageId = events[0].messageId;
-                    return events.every((event) => event.messageId === messageId && Boolean(messageId));
-                }, pollOptions('auditEvents'))
-                .toBe(true);
+            await expectPoll(async () => {
+                const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
+                if (events.length === 0) {
+                    return false;
+                }
+                const messageId = events[0].messageId;
+                return events.every((event) => event.messageId === messageId && Boolean(messageId));
+            }, 'auditEvents').toBe(true);
         });
     });
 
@@ -356,12 +346,10 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
 
         await activiti.step('Then the process instance can be queried using LIKE operator', async () => {
             const namePrefix = testScope.prefix;
-            await expect
-                .poll(async () => {
-                    const instances = await queryServiceTestUser.getProcessInstancesByName(namePrefix);
-                    return instances.some((instance) => instance.name?.includes(namePrefix));
-                }, pollOptions('querySync'))
-                .toBe(true);
+            await expectPoll(async () => {
+                const instances = await queryServiceTestUser.getProcessInstancesByName(namePrefix);
+                return instances.some((instance) => instance.name?.includes(namePrefix));
+            }, 'querySync').toBe(true);
         });
     });
 

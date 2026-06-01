@@ -1,6 +1,6 @@
 /**
- * Test configuration helper for Playwright tests
- * Handles environment detection and URL configuration for both CI and local development
+ * Test configuration helper for Playwright tests.
+ * URLs come from env-hosts (GATEWAY_URL / IDENTITY_HOST) — call bootstrapAcceptanceEnv() first.
  */
 
 export interface TestConfiguration {
@@ -13,42 +13,29 @@ export interface TestConfiguration {
 
 export function getTestConfiguration(): TestConfiguration {
     const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-    const previewName = process.env.PREVIEW_NAME || 'pr-123-rabbit-n-d';
+    const localPort = process.env.LOCAL_PORT || '8080';
+    const protocol = process.env.GATEWAY_PROTOCOL || (isCI ? 'https' : 'http');
 
-    if (isCI) {
-        const clusterName = process.env.CLUSTER_NAME || 'activiti';
-        const clusterDomain = process.env.CLUSTER_DOMAIN || 'envalfresco.com';
-        const globalGatewayDomain = `${clusterName}.${clusterDomain}`;
+    const baseURL =
+        process.env.GATEWAY_URL?.trim() ??
+        (process.env.GATEWAY_HOST?.trim() ? `${protocol}://${process.env.GATEWAY_HOST.trim()}` : '');
 
-        return {
-            baseURL: `https://gateway-${previewName}.${globalGatewayDomain}`,
-            identityURL: `https://identity-${previewName}.${globalGatewayDomain}`,
-            isCI: true,
-            usePortForwarding: false,
-        };
+    if (!baseURL || baseURL === `${protocol}://`) {
+        throw new Error('GATEWAY_URL or GATEWAY_HOST must be set — call bootstrapAcceptanceEnv() first');
     }
 
-    const localPort = process.env.LOCAL_PORT || '8080';
-    const clusterName = process.env.CLUSTER_NAME || 'activiti-hackathon';
-    const clusterDomain = process.env.CLUSTER_DOMAIN || 'envalfresco.com';
-    const globalGatewayDomain = `${clusterName}.${clusterDomain}`;
+    const identityHost = process.env.IDENTITY_HOST?.trim();
+    const identityURL = identityHost
+        ? identityHost.startsWith('http')
+            ? identityHost
+            : `${protocol}://${identityHost}`
+        : baseURL.replace('://gateway-', '://identity-');
 
     return {
-        baseURL: `http://gateway-${previewName}.${globalGatewayDomain}:${localPort}`,
-        identityURL: `http://identity-${previewName}.${globalGatewayDomain}:${localPort}`,
-        isCI: false,
-        usePortForwarding: true,
-        localPort,
+        baseURL,
+        identityURL,
+        isCI,
+        usePortForwarding: !isCI,
+        localPort: isCI ? undefined : localPort,
     };
-}
-
-export function getRequiredHosts(): string[] {
-    const previewName = process.env.PREVIEW_NAME || 'pr-123-rabbit-n-d';
-    const clusterName = process.env.CLUSTER_NAME || 'activiti-hackathon';
-    const clusterDomain = process.env.CLUSTER_DOMAIN || 'envalfresco.com';
-
-    return [
-        `gateway-${previewName}.${clusterName}.${clusterDomain}`,
-        `identity-${previewName}.${clusterName}.${clusterDomain}`,
-    ];
 }

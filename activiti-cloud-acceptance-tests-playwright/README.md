@@ -82,8 +82,9 @@ Port-forward starts automatically in Playwright global-setup (no second terminal
 ```bash
 npm run check:env
 npm run typecheck           # TypeScript (strict)
+npm run lint                # expectPoll rule — no raw expect.poll()
 npm run test:smoke          # 18 tests (@smoke)
-npm run test:all            # 58 tests (full suite)
+npm run test:all            # ~71 tests (full suite)
 ```
 
 `npm run port-forward` is only for manual `curl` debugging.
@@ -120,7 +121,8 @@ kubectl get ns | grep '^pr-'
 | `npm run check:env`               | Validate `.env` and connectivity                       |
 | `npm run verify:process-catalog`  | BPMN keys on runtime-bundle                            |
 | `npm run typecheck`               | TypeScript check (`strict`)                            |
-| `npm run test:smoke` / `test:all` | Playwright (18 smoke / 58 full)                        |
+| `npm run lint`                    | ESLint (e.g. enforce `expectPoll` over `expect.poll`)  |
+| `npm run test:smoke` / `test:all` | Playwright (18 smoke / ~71 full)                       |
 | `npm run report`                  | Open last HTML report                                  |
 
 ### Run tests by area
@@ -217,7 +219,7 @@ See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md). BPMN assets: [docs/M
 2. Start catalog processes with `startCatalogProcess()` / `startCatalogProcessWithFirstTask()` from `flows/`.
 3. Or `runtimeBundleService.startProcess()` — unique names + auto cleanup via `dirtyRegistry`.
 4. For fixed names: `scopedName(testScope, 'my-label')`.
-5. Use `expect.poll()` — no `sleep()`.
+5. Use `expectPoll()` from `helpers/expect-poll.ts` — no raw `expect.poll()` or `sleep()`.
 6. Do not depend on execution order.
 
 Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
@@ -233,4 +235,4 @@ Details: [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md).
 
 ## Documentation
 
-All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, migration tracker, Serenity retirement, completed [IMPROVEMENTS](docs/IMPROVEMENTS.md) plan).
+All extended docs: **[docs/README.md](docs/README.md)** (structure, modeling projects, parallel rules, migration tracker, Serenity retirement).

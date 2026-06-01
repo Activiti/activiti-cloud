@@ -14,15 +14,16 @@ Last updated: 2026-05-27
 
 ## Serenity vs Playwright coverage
 
-| Area                      | Serenity (approx.) | Playwright | Serenity module status              |
-| ------------------------- | ------------------ | ---------- | ----------------------------------- |
-| Identity adapter          | —                  | 9 tests    | N/A (Playwright-only)               |
-| Security hruser / hradmin | 10 scen.           | 9 tests    | Modules removed from scenarios      |
-| Multi-runtime signal      | 1 scen.            | 1 test     | Module removed                      |
-| process-instance-actions  | 23 scen.           | 21+ tests  | **Removed** from scenarios          |
-| task-actions wave 1       | 10 scen.           | 10 tests   | **Removed**                         |
-| task-actions wave 2       | 19 scen.           | partial    | **Partial**                         |
-| Runtime bundle (rest)     | ~54 scen.          | partial    | **Blocked** — remainder in `.story` |
+| Area                      | Serenity (approx.) | Playwright   | Serenity module status                                |
+| ------------------------- | ------------------ | ------------ | ----------------------------------------------------- |
+| Identity adapter          | —                  | 9 tests      | N/A (Playwright-only)                                 |
+| Security hruser / hradmin | 10 scen.           | 9 tests      | Modules removed from scenarios                        |
+| Multi-runtime signal      | 1 scen.            | 1 test       | Module removed                                        |
+| process-instance-actions  | 23 scen.           | 21+ tests    | **Removed** from scenarios                            |
+| task-actions wave 1       | 10 scen.           | 10 tests     | **Removed**                                           |
+| task-actions wave 2       | 19 scen.           | **20 tests** | **Partial** (story parity in `task-extended.spec.ts`) |
+| service-tasks             | 10 scen.           | **10 tests** | **Migrated** → `service-tasks.spec.ts`                |
+| Runtime bundle (rest)     | ~54 scen.          | partial      | **Blocked** — remainder in `.story`                   |
 
 ## What remains in the repo (Serenity)
 
@@ -35,7 +36,7 @@ Do **not** delete until remaining runtime stories are migrated or waived and CI 
 
 ## Recommended next steps
 
-1. Finish `task-actions` wave 2 + service-tasks / connectors / timers stories.
+1. Migrate connectors / timers / messages stories.
 2. Delete `activiti-cloud-acceptance-scenarios/` when runtime gate is Playwright-only.
 3. Trim Maven reactor / root `pom.xml` Serenity modules.
 

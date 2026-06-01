@@ -5,6 +5,7 @@
  * agreement is prohibited.
  */
 
+import { mkdirSync } from 'fs';
 import * as path from 'path';
 import * as winston from 'winston';
 import { createLogger, format } from 'winston';
@@ -13,11 +14,10 @@ import { paths } from '../../config/paths';
 
 const level = process.env.LOG_LEVEL || 'debug';
 const logDir = paths.testResults;
+mkdirSync(logDir, { recursive: true });
 const combinedLogPath = path.join(logDir, 'combined.log');
-const websocketLogPath = path.join(logDir, 'websocket.log');
 const colorizer = winston.format.colorize();
 const myFormat = format.printf((info) => colorizer.colorize(info.level, `${info.timestamp} [${info.level}]: `) + info.message);
-const wsFormat = format.printf((info) => colorizer.colorize(info.level, `${info.timestamp} [WebSocket]: `) + info.message);
 
 export const logger = createLogger({
     level,
@@ -30,22 +30,6 @@ export const logger = createLogger({
                 }),
                 format.simple(),
                 myFormat
-            )
-        })
-    ]
-});
-
-export const webSocketLogger = createLogger({
-    level,
-    transports: [
-        new winston.transports.File({ filename: websocketLogPath, level: 'debug' }),
-        new winston.transports.Console({
-            format: format.combine(
-                format.timestamp({
-                    format: 'YYYY-MM-DD HH:mm:ss'
-                }),
-                format.simple(),
-                wsFormat
             )
         })
     ]
