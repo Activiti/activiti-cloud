@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { applyResolvedHostsToEnv } from '../config/connection/env-hosts';
+import { ContextFactory } from '../fixtures/context-factory';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
 
 /**
@@ -142,9 +144,6 @@ export async function waitForRequiredProcessDefinitions(
 }
 
 export async function verifyAcceptanceProcessCatalog(): Promise<void> {
-    const { applyResolvedHostsToEnv } = await import('../config/connection/env-hosts');
-    const { ContextFactory } = await import('../fixtures/context-factory');
-
     applyResolvedHostsToEnv();
 
     const context = await ContextFactory.getContextByUserName('testUser');

@@ -104,6 +104,8 @@ discover_acceptance_deployments() {
 
   QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-query")"
   [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "query")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-consumer")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "consumer")"
 
   AUDIT_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-audit")"
   CONNECTOR_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-connector")"
@@ -119,15 +121,16 @@ wait_for_acceptance_deployments() {
   local namespace=$1
   local attempt
 
-  for attempt in $(seq 1 60); do
+  for attempt in $(seq 1 90); do
     if discover_acceptance_deployments "${namespace}"; then
       return 0
     fi
-    echo "  Waiting for runtime-bundle, query, and connector in ${namespace} (${attempt}/60)..."
+    echo "  Waiting for runtime-bundle, query (or consumer), and connector in ${namespace} (${attempt}/90)..."
     sleep 10
   done
 
-  echo "ERROR: Activiti workloads not found in ${namespace} after 10 minutes" >&2
+  echo "ERROR: Activiti workloads not found in ${namespace} after 15 minutes" >&2
   kubectl get deployments -n "${namespace}" 2>/dev/null || true
+  kubectl get pods -n "${namespace}" 2>/dev/null | head -40 || true
   return 1
 }

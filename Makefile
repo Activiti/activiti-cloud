@@ -44,7 +44,7 @@ install: release
 			--create-namespace \
 			--atomic \
 			--wait \
-			--timeout 8m
+			--timeout $(or $(HELM_INSTALL_TIMEOUT),15m)
 
 delete:
 	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
@@ -72,7 +72,17 @@ update-chart: clone-chart
 		env VERSION=$(RELEASE_VERSION) make version && \
 		env BACKEND_VERSION=$(RELEASE_VERSION) make update-docker-images
 
+# CI fast path: chart default image tags (no PR-SNAPSHOT); acceptance does not need the build job.
+ifeq ($(ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS),true)
+release: clone-chart
+else
 release: update-chart
+endif
+
+release:
+ifeq ($(ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS),true)
+	@echo "ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS=true — using chart default image tags (not $(RELEASE_VERSION))"
+endif
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
     helm dep up && \
