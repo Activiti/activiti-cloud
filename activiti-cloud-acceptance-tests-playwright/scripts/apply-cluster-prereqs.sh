@@ -217,22 +217,38 @@ dir_sha256() {
 }
 
 deployment_exists() {
-  kubectl get deployment "$1" -n "${NAMESPACE}" &>/dev/null
+  workload_exists "$1"
+}
+
+workload_kind() {
+  workload_kind_in_namespace "${NAMESPACE}" "$1"
+}
+
+workload_exists() {
+  [[ -n "$(workload_kind "$1")" ]]
 }
 
 deployment_container_name() {
-  kubectl get deployment "$1" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.containers[0].name}'
+  local dep=$1
+  local kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 1
+  kubectl get "${kind}" "$1" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.containers[0].name}'
 }
 
 deployment_env_value() {
-  local dep=$1 env_name=$2
-  kubectl get deployment "${dep}" -n "${NAMESPACE}" -o json \
+  local dep=$1 env_name=$2 kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 0
+  kubectl get "${kind}" "${dep}" -n "${NAMESPACE}" -o json \
     | python3 -c "import json,sys; d=json.load(sys.stdin); env=d['spec']['template']['spec']['containers'][0].get('env',[]); print(next((e.get('value','') for e in env if e.get('name')=='${env_name}'), ''))" 2>/dev/null || true
 }
 
 deployment_has_host_alias() {
-  local dep=$1
-  kubectl get deployment "${dep}" -n "${NAMESPACE}" -o json \
+  local dep=$1 kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 1
+  kubectl get "${kind}" "${dep}" -n "${NAMESPACE}" -o json \
     | TRAEFIK_IP="${TRAEFIK_IP}" IDENTITY_HOST="${IDENTITY_HOST}" GATEWAY_HOST="${GATEWAY_HOST}" \
       python3 -c "
 import json, os, sys
@@ -250,14 +266,18 @@ sys.exit(0 if needed <= hosts else 1)
 }
 
 deployment_has_policy_mount() {
-  local dep=$1
-  kubectl get deployment "${dep}" -n "${NAMESPACE}" -o json \
+  local dep=$1 kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 1
+  kubectl get "${kind}" "${dep}" -n "${NAMESPACE}" -o json \
     | python3 -c "import json,sys; d=json.load(sys.stdin); mounts=d['spec']['template']['spec']['containers'][0].get('volumeMounts',[]); sys.exit(0 if any(m.get('name')=='acceptance-security-policies' for m in mounts) else 1)" 2>/dev/null
 }
 
 deployment_has_supplemental_process_mount() {
-  local dep=$1
-  kubectl get deployment "${dep}" -n "${NAMESPACE}" -o json \
+  local dep=$1 kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 1
+  kubectl get "${kind}" "${dep}" -n "${NAMESPACE}" -o json \
     | python3 -c "import json,sys; d=json.load(sys.stdin); mounts=d['spec']['template']['spec']['containers'][0].get('volumeMounts',[]); sys.exit(0 if any(m.get('name')=='acceptance-supplemental-processes' for m in mounts) else 1)" 2>/dev/null
 }
 
@@ -310,13 +330,18 @@ apply_acceptance_deployment_patch() {
   export NAMESPACE RB_DEP ACT_KEYCLOAK_URL POLICY_CONFIG NEEDS_SUPPLEMENTAL_PROCESSES
   export PROCESS_LOCATION_CLASSPATH PROCESS_LOCATION_SUPPLEMENTAL
   export DEP_NAME="${dep}" KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
+  export DEP_KIND="$(workload_kind "${dep}")"
   export INCLUDE_POLICY="${include_policy}" INCLUDE_HOST="${include_host}"
   export HOST_ALIASES="[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]"
   export PATCH_KEYCLOAK_URL PATCH_JWT_ISSUER_URI PATCH_JWT_JWK_SET_URI PATCH_KEYCLOAK_CLIENT_TOKEN_URI
   patch_json="$(
     python3 -c "
 import json, os
-patch = {'namespace': os.environ['NAMESPACE'], 'deployment': os.environ['DEP_NAME']}
+patch = {
+    'namespace': os.environ['NAMESPACE'],
+    'deployment': os.environ['DEP_NAME'],
+    'workloadKind': os.environ.get('DEP_KIND', 'deployment'),
+}
 if os.environ.get('INCLUDE_HOST') == '1':
     patch['hostAliases'] = json.loads(os.environ['HOST_ALIASES'])
     patch['keycloakUrl'] = os.environ['PATCH_KEYCLOAK_URL']
@@ -368,13 +393,14 @@ CHANGED=0
 
 # --- example-runtime-bundle image (full BPMN catalog from Serenity parity chart) ---
 prereqs_phase_actor runtime-bundle "Runtime bundle image"
-if deployment_exists "${RB_DEP}"; then
+if workload_exists "${RB_DEP}"; then
   prereqs_step "checking ${RB_DEP} container image"
-  CURRENT_IMAGE="$(kubectl get deployment "${RB_DEP}" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.containers[0].image}')"
+  RB_KIND="$(workload_kind "${RB_DEP}")"
+  CURRENT_IMAGE="$(kubectl get "${RB_KIND}" "${RB_DEP}" -n "${NAMESPACE}" -o jsonpath='{.spec.template.spec.containers[0].image}')"
   if [[ "${CURRENT_IMAGE}" != "${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE}" ]]; then
     prereqs_log "updating ${RB_DEP} image to ${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE} (was: ${CURRENT_IMAGE})"
     CONTAINER="$(deployment_container_name "${RB_DEP}")"
-    kubectl set image deployment/"${RB_DEP}" -n "${NAMESPACE}" "${CONTAINER}=${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE}"
+    kubectl set image "${RB_KIND}/${RB_DEP}" -n "${NAMESPACE}" "${CONTAINER}=${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE}"
     wait_rollout_one "${RB_DEP}" 300 || exit 1
     CHANGED=1
   else
@@ -382,8 +408,8 @@ if deployment_exists "${RB_DEP}"; then
   fi
 fi
 
-if ! deployment_exists "${CONNECTOR_DEP}"; then
-  echo "ERROR: Missing deployment ${CONNECTOR_DEP} — install chart with example-cloud-connector"
+if ! workload_exists "${CONNECTOR_DEP}"; then
+  echo "ERROR: Missing workload ${CONNECTOR_DEP} — install chart with example-cloud-connector"
   exit 1
 fi
 echo "✓ ${CONNECTOR_DEP} present"
@@ -431,8 +457,10 @@ if [[ -d "${SUPPLEMENTAL_PROCESSES_DIR}" ]]; then
 fi
 
 patch_policy_mount_strategic() {
-  local dep=$1
-  kubectl patch deployment "${dep}" -n "${NAMESPACE}" --type=strategic -p "
+  local dep=$1 kind
+  kind="$(workload_kind "${dep}")"
+  [[ -z "${kind}" ]] && return 1
+  kubectl patch "${kind}" "${dep}" -n "${NAMESPACE}" --type=strategic -p "
 spec:
   template:
     spec:
@@ -450,9 +478,11 @@ spec:
 }
 
 patch_runtime_bundle_policy_mount() {
-  local container
+  local container rb_kind
+  rb_kind="$(workload_kind "${RB_DEP}")"
+  [[ -z "${rb_kind}" ]] && return 1
   container="$(deployment_container_name "${RB_DEP}")"
-  kubectl patch deployment "${RB_DEP}" -n "${NAMESPACE}" --type=strategic -p "
+  kubectl patch "${rb_kind}" "${RB_DEP}" -n "${NAMESPACE}" --type=strategic -p "
 spec:
   template:
     spec:
@@ -472,9 +502,11 @@ spec:
 patch_runtime_bundle_acceptance_mounts() {
   patch_runtime_bundle_policy_mount
   if [[ "${NEEDS_SUPPLEMENTAL_PROCESSES}" -eq 1 ]]; then
-    local container
+    local container rb_kind
+    rb_kind="$(workload_kind "${RB_DEP}")"
+    [[ -z "${rb_kind}" ]] && return 1
     container="$(deployment_container_name "${RB_DEP}")"
-    kubectl patch deployment "${RB_DEP}" -n "${NAMESPACE}" --type=strategic -p "
+    kubectl patch "${rb_kind}" "${RB_DEP}" -n "${NAMESPACE}" --type=strategic -p "
 spec:
   template:
     spec:
@@ -493,7 +525,10 @@ spec:
 }
 
 strip_supplemental_mount_from_rb() {
-  kubectl get deployment "${RB_DEP}" -n "${NAMESPACE}" -o json | python3 -c "
+  local rb_kind
+  rb_kind="$(workload_kind "${RB_DEP}")"
+  [[ -z "${rb_kind}" ]] && return 1
+  kubectl get "${rb_kind}" "${RB_DEP}" -n "${NAMESPACE}" -o json | python3 -c "
 import json,sys
 d=json.load(sys.stdin)
 spec=d['spec']['template']['spec']
@@ -523,10 +558,11 @@ apply_policy_patches_for_dep() {
     patch_policy_mount_strategic "${dep}"
   fi
 
-  local current_import
+  local current_import dep_kind
   current_import="$(deployment_env_value "${dep}" "SPRING_CONFIG_IMPORT")"
   if [[ "${current_import}" != "${POLICY_CONFIG}" ]]; then
-    kubectl set env deployment/"${dep}" -n "${NAMESPACE}" \
+    dep_kind="$(workload_kind "${dep}")"
+    kubectl set env "${dep_kind}/${dep}" -n "${NAMESPACE}" \
       "SPRING_CONFIG_IMPORT=${POLICY_CONFIG}" \
       "SPRING_CONFIG_ADDITIONAL_LOCATION-"
   fi
@@ -537,7 +573,8 @@ apply_policy_patches_for_dep() {
     current_p1="$(deployment_env_value "${dep}" "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX_1")"
     if [[ "${NEEDS_SUPPLEMENTAL_PROCESSES}" -eq 1 ]]; then
       if [[ "${current_p0}" != "${PROCESS_LOCATION_CLASSPATH}" || "${current_p1}" != "${PROCESS_LOCATION_SUPPLEMENTAL}" ]]; then
-        kubectl set env deployment/"${dep}" -n "${NAMESPACE}" \
+        dep_kind="$(workload_kind "${dep}")"
+        kubectl set env "${dep_kind}/${dep}" -n "${NAMESPACE}" \
           "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX-" \
           "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX_0=${PROCESS_LOCATION_CLASSPATH}" \
           "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX_1=${PROCESS_LOCATION_SUPPLEMENTAL}" \
@@ -546,7 +583,8 @@ apply_policy_patches_for_dep() {
           "SPRING_ACTIVITI_PROCESS_EXTENSIONS_LOCATION_PREFIX_1=${PROCESS_LOCATION_SUPPLEMENTAL}"
       fi
     elif [[ "${current_p0}" != "${PROCESS_LOCATION_CLASSPATH}" || -n "${current_p1}" ]]; then
-      kubectl set env deployment/"${dep}" -n "${NAMESPACE}" \
+      dep_kind="$(workload_kind "${dep}")"
+      kubectl set env "${dep_kind}/${dep}" -n "${NAMESPACE}" \
         "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX-" \
         "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX_0=${PROCESS_LOCATION_CLASSPATH}" \
         "SPRING_ACTIVITI_PROCESS_DEFINITION_LOCATION_PREFIX_1-" \

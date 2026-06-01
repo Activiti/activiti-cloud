@@ -10,9 +10,9 @@ import sys
 from typing import Any
 
 
-def load_deployment(namespace: str, name: str) -> dict[str, Any]:
+def load_workload(namespace: str, name: str, kind: str) -> dict[str, Any]:
     result = subprocess.run(
-        ["kubectl", "get", "deployment", name, "-n", namespace, "-o", "json"],
+        ["kubectl", "get", kind, name, "-n", namespace, "-o", "json"],
         check=True,
         capture_output=True,
         text=True,
@@ -62,8 +62,9 @@ def main() -> int:
     patch = json.loads(sys.argv[1])
     namespace = patch["namespace"]
     deployment = patch["deployment"]
+    kind = patch.get("workloadKind", "deployment")
 
-    doc = load_deployment(namespace, deployment)
+    doc = load_workload(namespace, deployment, kind)
     before = copy.deepcopy(doc["spec"]["template"])
     spec = doc["spec"]["template"]["spec"]
     container = spec["containers"][0]

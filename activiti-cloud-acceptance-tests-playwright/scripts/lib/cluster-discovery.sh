@@ -72,7 +72,7 @@ read_acceptance_env_name_from_dotenv() {
 
 namespace_has_runtime_bundle() {
   local namespace=$1
-  [[ -n "$(find_deployment_in_namespace "${namespace}" "runtime-bundle")" ]]
+  [[ -n "$(find_workload_in_namespace "${namespace}" "runtime-bundle")" ]]
 }
 
 discover_preview_namespace() {
@@ -99,17 +99,17 @@ discover_preview_namespace() {
 discover_acceptance_deployments() {
   local namespace=$1
 
-  RB_DEP="$(find_deployment_in_namespace "${namespace}" "runtime-bundle")"
-  [[ -z "${RB_DEP}" ]] && RB_DEP="$(find_deployment_in_namespace "${namespace}" "rb")"
+  RB_DEP="$(find_workload_in_namespace "${namespace}" "runtime-bundle")"
+  [[ -z "${RB_DEP}" ]] && RB_DEP="$(find_workload_in_namespace "${namespace}" "rb")"
 
-  QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-query")"
-  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "query")"
-  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-consumer")"
-  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_deployment_in_namespace "${namespace}" "consumer")"
+  QUERY_DEP="$(find_workload_in_namespace "${namespace}" "activiti-cloud-query")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_workload_in_namespace "${namespace}" "query")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_workload_in_namespace "${namespace}" "activiti-cloud-consumer")"
+  [[ -z "${QUERY_DEP}" ]] && QUERY_DEP="$(find_workload_in_namespace "${namespace}" "consumer")"
 
-  AUDIT_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-audit")"
-  CONNECTOR_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-connector")"
-  IDENTITY_DEP="$(find_deployment_in_namespace "${namespace}" "activiti-cloud-identity-adapter")"
+  AUDIT_DEP="$(find_workload_in_namespace "${namespace}" "activiti-cloud-audit")"
+  CONNECTOR_DEP="$(find_workload_in_namespace "${namespace}" "activiti-cloud-connector")"
+  IDENTITY_DEP="$(find_workload_in_namespace "${namespace}" "activiti-cloud-identity-adapter")"
 
   export RB_DEP QUERY_DEP AUDIT_DEP CONNECTOR_DEP IDENTITY_DEP
 
@@ -125,12 +125,15 @@ wait_for_acceptance_deployments() {
     if discover_acceptance_deployments "${namespace}"; then
       return 0
     fi
+    if (( attempt % 10 == 0 )); then
+      echo "  Still missing — RB=${RB_DEP:-—} QUERY=${QUERY_DEP:-—} CONNECTOR=${CONNECTOR_DEP:-—}"
+    fi
     echo "  Waiting for runtime-bundle, query (or consumer), and connector in ${namespace} (${attempt}/90)..."
     sleep 10
   done
 
   echo "ERROR: Activiti workloads not found in ${namespace} after 15 minutes" >&2
-  kubectl get deployments -n "${namespace}" 2>/dev/null || true
+  kubectl get deployments,statefulsets -n "${namespace}" 2>/dev/null || true
   kubectl get pods -n "${namespace}" 2>/dev/null | head -40 || true
   return 1
 }

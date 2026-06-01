@@ -21,6 +21,53 @@ find_deployment_in_namespace() {
     | head -1
 }
 
+find_statefulset_in_namespace() {
+  local namespace=$1
+  local pattern=$2
+  local candidate
+
+  for candidate in "${namespace}-${pattern}" "${pattern}"; do
+    if kubectl get statefulset "${candidate}" -n "${namespace}" &>/dev/null; then
+      echo "${candidate}"
+      return 0
+    fi
+  done
+
+  kubectl get statefulset -n "${namespace}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null \
+    | grep -i "${pattern}" \
+    | head -1
+}
+
+# Helm chart uses Deployment or StatefulSet depending on broker/partitioning profile.
+find_workload_in_namespace() {
+  local namespace=$1
+  local pattern=$2
+  local name
+
+  name="$(find_deployment_in_namespace "${namespace}" "${pattern}")"
+  if [[ -n "${name}" ]]; then
+    echo "${name}"
+    return 0
+  fi
+
+  find_statefulset_in_namespace "${namespace}" "${pattern}"
+}
+
+workload_kind_in_namespace() {
+  local namespace=$1
+  local name=$2
+
+  if kubectl get deployment "${name}" -n "${namespace}" &>/dev/null; then
+    echo "deployment"
+    return 0
+  fi
+  if kubectl get statefulset "${name}" -n "${namespace}" &>/dev/null; then
+    echo "statefulset"
+    return 0
+  fi
+  return 1
+}
+
 validate_preview_release_name_length() {
   local preview_name=$1
   if [[ ${#preview_name} -gt ${PREVIEW_RELEASE_MAX_LENGTH} ]]; then

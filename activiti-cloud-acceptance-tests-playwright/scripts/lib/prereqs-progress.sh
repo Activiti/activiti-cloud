@@ -223,9 +223,16 @@ run_with_heartbeat() {
 wait_rollout_one() {
   local dep=$1
   local timeout=${2:-180}
+  local kind="deployment"
+  if declare -f workload_kind &>/dev/null; then
+    kind="$(workload_kind "${dep}")"
+  elif kubectl get statefulset "${dep}" -n "${NAMESPACE}" &>/dev/null; then
+    kind="statefulset"
+  fi
+  [[ -z "${kind}" ]] && kind="deployment"
   prereqs_set_actor "$(prereqs_actor_for_dep "${dep}")"
-  prereqs_step "rollout ${dep} (timeout ${timeout}s)"
-  kubectl rollout status deployment/"${dep}" -n "${NAMESPACE}" --timeout="${timeout}s" 2>&1 | while IFS= read -r line; do
+  prereqs_step "rollout ${kind}/${dep} (timeout ${timeout}s)"
+  kubectl rollout status "${kind}/${dep}" -n "${NAMESPACE}" --timeout="${timeout}s" 2>&1 | while IFS= read -r line; do
     prereqs_log "│ ${line}"
   done
   return "${PIPESTATUS[0]}"
@@ -253,9 +260,17 @@ restart_deployments_parallel() {
   local pids=() pid failed=0
 
   for dep in "${deps[@]}"; do
-    if deployment_exists "${dep}"; then
+    if declare -f workload_exists &>/dev/null && workload_exists "${dep}"; then
+      local kind
+      kind="$(workload_kind "${dep}")"
       prereqs_set_actor "$(prereqs_actor_for_dep "${dep}")"
-      prereqs_step "restarting ${dep} — pods go brrr"
+      prereqs_step "restarting ${kind}/${dep} — pods go brrr"
+      kubectl rollout restart "${kind}/${dep}" -n "${NAMESPACE}" &
+      pids+=($!)
+      restart_deps+=("${dep}")
+    elif declare -f deployment_exists &>/dev/null && deployment_exists "${dep}"; then
+      prereqs_set_actor "$(prereqs_actor_for_dep "${dep}")"
+      prereqs_step "restarting deployment/${dep} — pods go brrr"
       kubectl rollout restart deployment/"${dep}" -n "${NAMESPACE}" &
       pids+=($!)
       restart_deps+=("${dep}")
