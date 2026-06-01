@@ -115,6 +115,24 @@ read_runtime_bundle_tag_from_values() {
   grep -A3 '^runtime-bundle:' "${values_file}" | grep 'tag:' | head -1 | sed 's/.*tag:[[:space:]]*\"\\?\\([^\"]*\\)\"\\?.*/\\1/'
 }
 
+read_runtime_bundle_image_from_values() {
+  local values_file=$1
+  local repo tag
+  if [[ ! -f "${values_file}" ]]; then
+    return 1
+  fi
+  if command -v yq &>/dev/null; then
+    repo="$(yq e '.runtime-bundle.image.repository // "activiti/example-runtime-bundle"' "${values_file}" 2>/dev/null || true)"
+    tag="$(yq e '.runtime-bundle.image.tag' "${values_file}" 2>/dev/null || true)"
+  else
+    repo="activiti/example-runtime-bundle"
+    tag="$(read_runtime_bundle_tag_from_values "${values_file}")"
+  fi
+  if [[ -n "${tag}" && "${tag}" != "null" ]]; then
+    ACCEPTANCE_RUNTIME_BUNDLE_IMAGE="${repo}:${tag}"
+  fi
+}
+
 resolve_runtime_bundle_image() {
   prereqs_set_actor registry
   if [[ -n "${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE:-}" ]]; then
@@ -122,6 +140,16 @@ resolve_runtime_bundle_image() {
     return
   fi
   local resolved_tag=""
+  local chart_values="${ROOT_DIR}/.git/activiti-cloud-full-chart/charts/activiti-cloud-full-example/values.yaml"
+
+  if [[ "${ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS:-}" == "true" && -f "${chart_values}" ]]; then
+    prereqs_log "CI chart tags — runtime-bundle image from Helm chart values (no registry resolve)"
+    read_runtime_bundle_image_from_values "${chart_values}"
+    if [[ -n "${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE:-}" ]]; then
+      return
+    fi
+  fi
+
   if [[ "${ACCEPTANCE_SKIP_IMAGE_RESOLVE:-}" == "true" ]]; then
     local values_file=""
     if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]]; then

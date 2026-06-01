@@ -170,7 +170,8 @@ jobs:
   acceptance-tests:
     runs-on: ubuntu-latest
     if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
-    # Playwright bootstrap: do not wait for maven/docker build; chart default image tags are used instead.
+    # Per matrix cell: unique namespace (PREVIEW_NAME), Helm profile, overlay, Playwright.
+    # Shared via cache: Helm chart checkout (~once per workflow). Docker images: chart tags only (no build/push per cell).
     needs:
       - pre-checks
     env:
@@ -179,6 +180,17 @@ jobs:
       ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS: 'true'
       # Chart default tags on develop (see activiti-cloud-full-chart values.yaml); not PR-SNAPSHOT.
       ACCEPTANCE_CHART_IMAGE_VERSION: '9.1.0-alpha.51'
+      # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
+      TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
+      TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
+      HRUSER_USERNAME: ${{ vars.ACCEPTANCE_HRUSER_USERNAME || 'hruser' }}
+      HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
+      HRADMIN_USERNAME: ${{ vars.ACCEPTANCE_HRADMIN_USERNAME || 'hradmin' }}
+      HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
+      PROCESSADMINUSER_USERNAME: ${{ vars.ACCEPTANCE_PROCESSADMINUSER_USERNAME || 'processadminuser' }}
+      PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
+      TESTADMIN_USERNAME: ${{ vars.ACCEPTANCE_TESTADMIN_USERNAME || 'testadmin' }}
+      TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
     strategy:
       # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
       max-parallel: 3
@@ -239,79 +251,23 @@ jobs:
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
           version: ${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}
 
+      - name: Cache Helm chart checkout
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .git/activiti-cloud-full-chart
+          key: activiti-full-chart-${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}
+
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           kubectl delete ns $PREVIEW_NAME || true
 
       - name: Install release for ${{ matrix.messaging-broker }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-
-          ### Main ###
-
-          echo "Installing release with make install"
-          make install
+        run: bash scripts/ci/install-preview-release.sh
 
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export QUERY_CONSUMER_NUMBER=2
-
-          ### Functions ###
-
-          # It checks that the RESULT env var is equals to the first
-          # argument passed to the function
-          #
-          check_result_is () {
-            if [ "$RESULT" == "$1" ]; then
-              echo "correct"
-            else
-              echo "number expected is $1 but result is $RESULT"
-              exit 1
-            fi
-          }
-
-          # It counts the number of query consumer pods in the
-          # cluster and set it in RESULT env var
-          #
-          count_query_consumer_pods () {
-            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
-              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
-              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
-          }
-
-          # It counts the number of query partition of engineEvents topic
-          # created in Kafka and set it in RESULT env var
-          #
-          count_query_topic_partitions () {
-            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
-              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server=localhost:9092 --describe \
-              --topic engineEvents | grep PartitionCount |\
-              awk \'{ printf "%s",$6 }\'')
-          }
-
-          ### Main ###
-
-          echo "It checks the deployment has 1 query pod consumer"
-          count_query_consumer_pods
-          check_result_is 1
-
-          echo "It checks the deployment has 4 query topic patitions"
-          count_query_topic_partitions
-          check_result_is 4
+        run: bash scripts/ci/kafka-partitioned-consumer-check.sh
 
       - uses: ./.github/actions/check-service-health
         with:
@@ -323,43 +279,11 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
 
+      - name: Export Playwright CI environment
+        run: bash scripts/ci/export-playwright-ci-env.sh
+
       - name: Run Playwright Acceptance Tests
-        # Run Playwright for every messaging configuration in the matrix
         uses: ./.github/actions/playwright-run
-        env:
-          CI: 'true'
-          GITHUB_ACTIONS: 'true'
-          PREVIEW_NAME: ${{ env.PREVIEW_NAME }}
-          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
-          CLUSTER_DOMAIN: ${{ env.CLUSTER_DOMAIN }}
-          GATEWAY_PROTOCOL: https
-          GATEWAY_HOST: ${{ env.GATEWAY_HOST }}
-          GATEWAY_URL: https://${{ env.GATEWAY_HOST }}
-          ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS: '300000'
-          SSO_PROTOCOL: https
-          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
-          KEYCLOAK_CLIENT_ID: activiti
-          KEYCLOAK_REALM: activiti
-          KEYCLOAK_CLIENT_SECRET: ${{ env.KEYCLOAK_CLIENT_SECRET }}
-          REALM: activiti
-          # Bundled preview Keycloak (realm activiti) — same seeded users as npm run test:setup, not shared develop credentials
-          TESTUSER_USERNAME: testuser
-          TESTUSER_PASSWORD: password
-          HRUSER_USERNAME: hruser
-          HRUSER_PASSWORD: password
-          HRADMIN_USERNAME: hradmin
-          HRADMIN_PASSWORD: password
-          PROCESSADMINUSER_USERNAME: processadminuser
-          PROCESSADMINUSER_PASSWORD: password
-          TESTADMIN_USERNAME: testadmin
-          TESTADMIN_PASSWORD: password
-          PLAYWRIGHT_WORKERS: '4'
-          PLAYWRIGHT_ACTION_TIMEOUT_MS: '30000'
-          PLAYWRIGHT_HTTP_TIMEOUT_MS: '30000'
-          PLAYWRIGHT_POLL_AUDIT_EVENTS_MS: '60000'
-          PLAYWRIGHT_POLL_QUERY_SYNC_MS: '90000'
-          AUTO_CLUSTER_PREREQS: 'false'
-          ACCEPTANCE_CI_OVERLAY_APPLIED: 'true'
         with:
           script-command: "npm run test:all"
 

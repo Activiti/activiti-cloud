@@ -51,11 +51,15 @@ delete:
 	$(or $(KUBECTL),kubectl) delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
 
 clone-chart:
-	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
+	@if [ -d "$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR)/charts" ] && [ "$(FORCE_CHART_CLONE)" != "true" ]; then \
+		echo "Reusing chart checkout at $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) (set FORCE_CHART_CLONE=true to re-clone)"; \
+	else \
+		rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
 		git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git \
 			--branch $(ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH) \
 			$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) \
-			--depth 1
+			--depth 1; \
+	fi
 
 create-pr: update-chart
 	cd $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
