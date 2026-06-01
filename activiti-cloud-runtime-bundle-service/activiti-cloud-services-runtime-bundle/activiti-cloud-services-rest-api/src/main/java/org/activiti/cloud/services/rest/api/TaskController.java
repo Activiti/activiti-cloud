@@ -29,6 +29,7 @@ import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,12 +44,7 @@ public interface TaskController {
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
 
     @PostMapping(value = "/v1/tasks/next")
-    EntityModel<CloudTask> nextTasks(
-        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
-    );
-
-    @PostMapping(value = "/v1/task/next")
-    EntityModel<CloudTask> nextTask(
+    ResponseEntity<EntityModel<CloudTask>> nextTask(
         @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
     );
 

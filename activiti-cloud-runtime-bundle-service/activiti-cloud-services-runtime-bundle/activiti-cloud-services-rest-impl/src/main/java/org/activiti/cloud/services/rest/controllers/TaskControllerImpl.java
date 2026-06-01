@@ -52,6 +52,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -104,19 +105,14 @@ public class TaskControllerImpl implements TaskController {
     }
 
     @Override
-    public EntityModel<CloudTask> nextTasks(
+    public ResponseEntity<EntityModel<CloudTask>> nextTask(
         @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
     ) {
         Task task = taskRuntime.nextTask(taskIdentificationStrategy);
-        return taskRepresentationModelAssembler.toModel(task);
-    }
-
-    @Override
-    public EntityModel<CloudTask> nextTask(
-        @RequestParam(name = "strategy", required = false) TaskIdentificationStrategy taskIdentificationStrategy
-    ) {
-        Task task = taskRuntime.nextTask(taskIdentificationStrategy);
-        return taskRepresentationModelAssembler.toModel(task);
+        if (task == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(task));
     }
 
     @Override
