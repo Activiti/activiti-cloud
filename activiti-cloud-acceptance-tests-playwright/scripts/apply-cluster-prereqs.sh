@@ -91,14 +91,16 @@ prereqs_set_actor traefik
 prereqs_step "asking Traefik for clusterIP (${PF_SVC} in ${PF_NS})"
 TRAEFIK_IP="$(kubectl get svc "${PF_SVC}" -n "${PF_NS}" -o jsonpath='{.spec.clusterIP}')"
 prereqs_log "Traefik clusterIP: ${TRAEFIK_IP}"
-# Pods reach Keycloak via hostAliases → Traefik clusterIP (HTTP). External HTTPS to identity-* times out inside the cluster.
+# Pods reach Keycloak via hostAliases → Traefik clusterIP (HTTP).
 ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
-# Playwright tokens use public HTTPS; iss is https. JWKS is fetched on the pod network (http + hostAliases).
-JWT_ISSUER_URI=""
+# CI: Playwright tokens have iss=https (public ingress). RealmValidationCheck uses keycloak.auth-server-url (=ACT_KEYCLOAK_URL).
+# JWKS and client-credentials token calls stay on http + hostAliases (https from pods times out).
 JWT_JWK_SET_URI=""
+KEYCLOAK_CLIENT_TOKEN_URI=""
 if [[ "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" ]]; then
-  JWT_ISSUER_URI="https://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}"
+  ACT_KEYCLOAK_URL="https://${IDENTITY_HOST}/auth"
   JWT_JWK_SET_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/certs"
+  KEYCLOAK_CLIENT_TOKEN_URI="http://${IDENTITY_HOST}/auth/realms/${KEYCLOAK_REALM:-activiti}/protocol/openid-connect/token"
 fi
 
 read_runtime_bundle_tag_from_values() {
@@ -186,9 +188,9 @@ prereqs_set_actor query && prereqs_log "Query deploy:           ${QUERY_DEP}"
 prereqs_set_actor connector && prereqs_log "Connector deploy:       ${CONNECTOR_DEP}"
 prereqs_set_actor traefik && prereqs_log "Gateway host:           ${GATEWAY_HOST}"
 prereqs_set_actor identity && prereqs_log "Identity host:          ${IDENTITY_HOST} → ${ACT_KEYCLOAK_URL}"
-if [[ -n "${JWT_ISSUER_URI}" ]]; then
-  prereqs_log "JWT issuer (CI):        ${JWT_ISSUER_URI}"
+if [[ -n "${JWT_JWK_SET_URI}" ]]; then
   prereqs_log "JWT JWKS (in-cluster):  ${JWT_JWK_SET_URI}"
+  prereqs_log "Client token (in-cluster): ${KEYCLOAK_CLIENT_TOKEN_URI}"
 fi
 prereqs_set_actor runtime-bundle && prereqs_log "Runtime bundle image:   ${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE}"
 if [[ "${NEEDS_SUPPLEMENTAL_PROCESSES}" -eq 1 ]]; then
@@ -269,11 +271,11 @@ deployment_needs_host_patch() {
   current_kc_realm="$(deployment_env_value "${dep}" "ACT_KEYCLOAK_REALM")"
   [[ "${current_kc_url}" != "${ACT_KEYCLOAK_URL}" ]] && return 0
   [[ "${current_kc_realm}" != "${KEYCLOAK_REALM:-activiti}" ]] && return 0
-  if [[ -n "${JWT_ISSUER_URI}" ]]; then
-    current_issuer="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI")"
+  if [[ -n "${JWT_JWK_SET_URI}" ]]; then
     current_jwks="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI")"
-    [[ "${current_issuer}" != "${JWT_ISSUER_URI}" ]] && return 0
+    current_client_token="$(deployment_env_value "${dep}" "SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI")"
     [[ "${current_jwks}" != "${JWT_JWK_SET_URI}" ]] && return 0
+    [[ "${current_client_token}" != "${KEYCLOAK_CLIENT_TOKEN_URI}" ]] && return 0
   fi
   return 1
 }
@@ -288,7 +290,7 @@ apply_acceptance_deployment_patch() {
   export DEP_NAME="${dep}" KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
   export INCLUDE_POLICY="${include_policy}" INCLUDE_HOST="${include_host}"
   export HOST_ALIASES="[{\"ip\":\"${TRAEFIK_IP}\",\"hostnames\":[\"${IDENTITY_HOST}\",\"${GATEWAY_HOST}\"]}]"
-  export JWT_ISSUER_URI JWT_JWK_SET_URI
+  export JWT_JWK_SET_URI KEYCLOAK_CLIENT_TOKEN_URI
   patch_json="$(
     python3 -c "
 import json, os
@@ -297,10 +299,10 @@ if os.environ.get('INCLUDE_HOST') == '1':
     patch['hostAliases'] = json.loads(os.environ['HOST_ALIASES'])
     patch['keycloakUrl'] = os.environ['ACT_KEYCLOAK_URL']
     patch['keycloakRealm'] = os.environ['KEYCLOAK_REALM']
-    if os.environ.get('JWT_ISSUER_URI'):
-        patch['jwtIssuerUri'] = os.environ['JWT_ISSUER_URI']
     if os.environ.get('JWT_JWK_SET_URI'):
         patch['jwtJwkSetUri'] = os.environ['JWT_JWK_SET_URI']
+    if os.environ.get('KEYCLOAK_CLIENT_TOKEN_URI'):
+        patch['keycloakClientTokenUri'] = os.environ['KEYCLOAK_CLIENT_TOKEN_URI']
 if os.environ.get('INCLUDE_POLICY') == '1':
     patch['policyConfig'] = os.environ['POLICY_CONFIG']
     if os.environ['DEP_NAME'] == os.environ['RB_DEP']:
