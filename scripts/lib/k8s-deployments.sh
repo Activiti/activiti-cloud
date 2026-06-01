@@ -90,6 +90,6 @@ patch_deployment_keycloak_env() {
     -o jsonpath='{.spec.template.spec.containers[0].name}' 2>/dev/null || true)"
   [[ -z "${container}" ]] && return 1
 
-  kubectl patch deployment "${deployment}" -n "${namespace}" -p \
+  kubectl patch deployment "${deployment}" -n "${namespace}" --type=strategic -p \
     "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${container}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"${keycloak_url}\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"${keycloak_realm}\"}]}]}}}}"
 }
