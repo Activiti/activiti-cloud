@@ -5,6 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 3
     ignore:
       - dependency-name: "org.activiti:*"
       - dependency-name: "org.assertj:assertj-core"
@@ -25,6 +27,8 @@ updates:
     - "/.github/actions/*"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
     groups:
       github-actions:
         patterns:
