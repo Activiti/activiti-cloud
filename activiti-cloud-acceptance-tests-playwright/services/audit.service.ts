@@ -86,4 +86,17 @@ export class AuditService extends BaseService {
     async getEventsByProcessInstanceId(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
         return this.getEvents({ processInstanceId });
     }
+
+    async checkServicesHealth(): Promise<void> {
+        const response = await this.get('/audit/actuator/health');
+        const status = (response as { status?: string }).status;
+        if (status !== 'UP') {
+            throw new Error(`Audit service health check failed: status=${status}`);
+        }
+    }
+
+    async getSwaggerSpecification(group: string = 'Audit'): Promise<string> {
+        const root = this.basePath.replace(/\/v1$/, '');
+        return this.getText(`${root}/v3/api-docs/${encodeURIComponent(group)}`);
+    }
 }

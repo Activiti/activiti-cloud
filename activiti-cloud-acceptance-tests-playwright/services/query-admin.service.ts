@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
+import {
+    CloudIntegrationContext,
+    CloudProcessInstance,
+    CloudServiceTask,
+    ProcessQueryParams,
+    ServiceTaskStatus,
+} from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
@@ -29,6 +35,11 @@ export class QueryAdminService extends BaseService {
     async getAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstanceAdmin(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}`);
+        return this.unwrapEntity<CloudProcessInstance>(response);
     }
 
     async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -62,5 +73,56 @@ export class QueryAdminService extends BaseService {
     async getAllProcessDefinitionsAdmin(): Promise<CloudProcessDefinition[]> {
         const response = await this.get(`${this.basePath}/process-definitions`);
         return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
+    }
+
+    async getProcessModel(processDefinitionId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-definitions/${processDefinitionId}/model`);
+    }
+
+    async getServiceTasksForProcessInstance(processInstanceId: string): Promise<CloudServiceTask[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${processInstanceId}/service-tasks`
+        );
+        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
+    }
+
+    async getServiceTasksByStatusForProcessInstance(
+        processInstanceId: string,
+        status: ServiceTaskStatus | string
+    ): Promise<CloudServiceTask[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${processInstanceId}/service-tasks?status=${encodeURIComponent(status)}`
+        );
+        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
+    }
+
+    async getServiceTaskById(serviceTaskId: string): Promise<CloudServiceTask> {
+        const response = await this.get(`${this.basePath}/service-tasks/${serviceTaskId}`);
+        return this.unwrapEntity<CloudServiceTask>(response);
+    }
+
+    async getServiceTaskIntegrationContext(serviceTaskId: string): Promise<CloudIntegrationContext> {
+        const response = await this.get(
+            `${this.basePath}/service-tasks/${serviceTaskId}/integration-context`
+        );
+        return this.unwrapEntity<CloudIntegrationContext>(response);
+    }
+
+    async getServiceTaskIntegrationContexts(serviceTaskId: string): Promise<CloudIntegrationContext[]> {
+        const response = await this.get(
+            `${this.basePath}/service-tasks/${serviceTaskId}/integration-contexts`
+        );
+        return this.unwrapList<CloudIntegrationContext>(response, 'cloudIntegrationContexts');
+    }
+
+    async getServiceTasksByQuery(params: {
+        processDefinitionKey?: string;
+        status?: ServiceTaskStatus | string;
+    }): Promise<CloudServiceTask[]> {
+        const searchParams = new URLSearchParams();
+        if (params.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
+        if (params.status) searchParams.append('status', String(params.status));
+        const response = await this.get(`${this.basePath}/service-tasks?${searchParams.toString()}`);
+        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
     }
 }
