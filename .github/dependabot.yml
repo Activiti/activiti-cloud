@@ -47,7 +47,6 @@ updates:
       - "/.github/actions/project-models-cleanup"
     schedule:
       interval: "weekly"
-      day: "sunday"
     cooldown:
       default-days: 3
     groups:
