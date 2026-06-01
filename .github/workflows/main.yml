@@ -22,9 +22,6 @@ env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
-  # PR CI: skip Maven + Docker build while validating full Playwright matrix (chart image tags). Push to develop still builds.
-  # Set to 'true' to re-enable build on pull_request as well.
-  ACTIVITI_CLOUD_CI_BUILD_ENABLED: 'false'
 
 jobs:
   pre-checks:
@@ -60,10 +57,11 @@ jobs:
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
 
+  # PR CI: build skipped (acceptance uses chart image tags). Re-enable on PR by adding: || github.event_name == 'pull_request'
   build:
     runs-on: ubuntu-latest
     needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && (github.event_name == 'push' || env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true') }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' && github.event_name == 'push' }}
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
@@ -381,7 +379,7 @@ jobs:
       - name: Check build and acceptance-tests results
         if: >-
           ${{
-              (env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true' && (contains(needs.build.result, 'failure') || contains(needs.build.result, 'cancelled')))
+              (github.event_name == 'push' && (contains(needs.build.result, 'failure') || contains(needs.build.result, 'cancelled')))
            || contains(needs.acceptance-tests.result, 'failure')
            || contains(needs.acceptance-tests.result, 'cancelled')
           }}
@@ -401,7 +399,7 @@ jobs:
 
   delete-test-images:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && (github.event_name == 'push' || env.ACTIVITI_CLOUD_CI_BUILD_ENABLED == 'true') }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' && github.event_name == 'push' }}
     needs:
       - pre-checks
       - acceptance-tests
