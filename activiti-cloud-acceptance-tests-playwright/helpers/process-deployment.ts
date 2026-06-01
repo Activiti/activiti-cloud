@@ -84,7 +84,10 @@ function isTransientProcessCatalogError(error: unknown): boolean {
     const message = error.message;
     return (
         message.includes('Cannot list process definitions (HTTP 401)') ||
-        message.includes('Cannot list process definitions (HTTP 403)')
+        message.includes('Cannot list process definitions (HTTP 403)') ||
+        message.includes('Cannot list process definitions (HTTP 500)') ||
+        message.includes('openid-connect/certs') ||
+        message.includes('decode the Jwt')
     );
 }
 
