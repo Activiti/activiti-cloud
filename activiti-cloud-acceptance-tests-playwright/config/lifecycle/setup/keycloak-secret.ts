@@ -34,7 +34,9 @@ function kubectlEnv(): NodeJS.ProcessEnv {
  * Local runs use npm run test:setup; CI sets KEYCLOAK_CLIENT_SECRET via load-preview-keycloak-secret.
  */
 export async function ensureKeycloakClientSecretFromCluster(): Promise<void> {
-    if (process.env.KEYCLOAK_CLIENT_SECRET?.trim()) {
+    const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+    // CI: always refresh from cluster (Helm uuid per install; workflow env can be stale).
+    if (!isCi && process.env.KEYCLOAK_CLIENT_SECRET?.trim()) {
         return;
     }
 

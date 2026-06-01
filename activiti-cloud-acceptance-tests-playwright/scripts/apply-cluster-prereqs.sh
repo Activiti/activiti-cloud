@@ -91,7 +91,12 @@ prereqs_set_actor traefik
 prereqs_step "asking Traefik for clusterIP (${PF_SVC} in ${PF_NS})"
 TRAEFIK_IP="$(kubectl get svc "${PF_SVC}" -n "${PF_NS}" -o jsonpath='{.spec.clusterIP}')"
 prereqs_log "Traefik clusterIP: ${TRAEFIK_IP}"
-ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
+# CI reaches Keycloak via HTTPS ingress; JWT iss is https. RB must use the same issuer (http → 401 on /rb APIs).
+if [[ "${GITHUB_ACTIONS:-}" == "true" || "${CI:-}" == "true" || "${GATEWAY_PROTOCOL:-}" == "https" ]]; then
+  ACT_KEYCLOAK_URL="https://${IDENTITY_HOST}/auth"
+else
+  ACT_KEYCLOAK_URL="http://${IDENTITY_HOST}/auth"
+fi
 
 read_runtime_bundle_tag_from_values() {
   local values_file=$1

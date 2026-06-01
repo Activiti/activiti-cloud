@@ -36,16 +36,30 @@ runs:
         source "${GITHUB_WORKSPACE}/activiti-cloud-acceptance-tests-playwright/scripts/lib/cluster-discovery.sh"
         wait_for_acceptance_deployments "${PREVIEW_NAME}"
 
-        if [[ -z "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
-          echo "Waiting for activiti-keycloak-client secret in ${PREVIEW_NAME}..."
-          KEYCLOAK_CLIENT_SECRET="$(wait_for_preview_keycloak_client_secret "${PREVIEW_NAME}")"
-          echo "::add-mask::${KEYCLOAK_CLIENT_SECRET}"
-          echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" >> "${GITHUB_ENV}"
-          echo "✓ KEYCLOAK_CLIENT_SECRET loaded from ${PREVIEW_NAME}/activiti-keycloak-client"
-        fi
-
         echo "Applying acceptance overlay (runtime-bundle image + security policies)..."
         bash "${GITHUB_WORKSPACE}/activiti-cloud-acceptance-tests-playwright/scripts/apply-cluster-prereqs.sh" "${PREVIEW_NAME}"
+
+        # Secret is created per Helm install (global.keycloak.clientSecret / activiti-keycloak-client).
+        # Always re-read after overlay rollouts — do not reuse a stale GITHUB_ENV value.
+        echo "Loading activiti client secret from ${PREVIEW_NAME}/activiti-keycloak-client..."
+        KEYCLOAK_CLIENT_SECRET="$(wait_for_preview_keycloak_client_secret "${PREVIEW_NAME}")"
+        echo "::add-mask::${KEYCLOAK_CLIENT_SECRET}"
+        echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" >> "${GITHUB_ENV}"
+
+        TOKEN_URL="$(preview_sso_token_url "${PREVIEW_NAME}" activiti)"
+        TOKEN_HTTP="$(curl -sS -o /tmp/acceptance-token-check.json -w '%{http_code}' \
+          -X POST "${TOKEN_URL}" \
+          -d "grant_type=password" \
+          -d "client_id=activiti" \
+          -d "client_secret=${KEYCLOAK_CLIENT_SECRET}" \
+          -d "username=testuser" \
+          -d "password=password" || echo "000")"
+        if [[ "${TOKEN_HTTP}" != "200" ]]; then
+          echo "::error::Keycloak token check failed (HTTP ${TOKEN_HTTP}) at ${TOKEN_URL}"
+          cat /tmp/acceptance-token-check.json 2>/dev/null || true
+          exit 1
+        fi
+        echo "✓ Keycloak token OK for testuser (client activiti, secret from namespace)"
 
         echo "ACCEPTANCE_CI_OVERLAY_APPLIED=true" >> "${GITHUB_ENV}"
         echo "✓ Preview ${PREVIEW_NAME} ready for Playwright"

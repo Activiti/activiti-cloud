@@ -325,8 +325,10 @@ jobs:
           GATEWAY_HOST: ${{ env.GATEWAY_HOST }}
           GATEWAY_URL: https://${{ env.GATEWAY_HOST }}
           ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS: '300000'
+          SSO_PROTOCOL: https
           SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
           KEYCLOAK_CLIENT_ID: activiti
+          KEYCLOAK_REALM: activiti
           KEYCLOAK_CLIENT_SECRET: ${{ env.KEYCLOAK_CLIENT_SECRET }}
           REALM: activiti
           # Bundled preview Keycloak (realm activiti) — same seeded users as npm run test:setup, not shared develop credentials
