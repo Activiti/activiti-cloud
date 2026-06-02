@@ -63,7 +63,7 @@ class ConsistentHashRingPartitionedChannelKeySelectorTest {
     void shouldUseDefaultNodeWhenRootProcessInstanceIdHeaderIsNotString() {
         Message<String> message = MessageBuilder
             .withPayload("payload")
-            .setHeader(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID, "123")
+            .setHeader(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID, 123)
             .build();
 
         Object selectedKey = keySelector.apply(message);

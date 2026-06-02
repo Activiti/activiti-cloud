@@ -32,7 +32,9 @@ public class ConsistentHashRingPartitionedChannelKeySelector implements QueryCon
     @Override
     public Object apply(Message<?> message) {
         return Optional
-            .ofNullable(message.getHeaders().get(ROOT_PROCESS_INSTANCE_ID, String.class))
+            .ofNullable(message.getHeaders().get(ROOT_PROCESS_INSTANCE_ID))
+            .filter(String.class::isInstance)
+            .map(String.class::cast)
             .map(consistentHashRing::getNode)
             .orElse(DEFAULT_NODE);
     }
