@@ -20,21 +20,32 @@ import org.activiti.cloud.conf.FixedQueryConsumerPartitionedChannelCountProvider
 import org.activiti.cloud.conf.QueryConsumerAutoConfiguration;
 import org.activiti.cloud.conf.QueryConsumerPartitionedChannelCountProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration(before = QueryConsumerAutoConfiguration.class)
 @PropertySource("classpath:query-messaging.properties")
 public class ActivitiQueryConsumerAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnBean(HikariDataSource.class)
-    QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider(
-        HikariDataSource dataSource
-    ) {
-        return new FixedQueryConsumerPartitionedChannelCountProvider(dataSource.getMaximumPoolSize() * 2);
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(HikariDataSource.class)
+    @ConditionalOnProperty(
+        name = "spring.datasource.type",
+        havingValue = "com.zaxxer.hikari.HikariDataSource",
+        matchIfMissing = true
+    )
+    static class HikariQueryConsumerPartitionedChannelConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider(
+            HikariDataSource dataSource
+        ) {
+            return new FixedQueryConsumerPartitionedChannelCountProvider(dataSource.getMaximumPoolSize() * 2);
+        }
     }
 }
