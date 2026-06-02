@@ -17,6 +17,7 @@ package org.activiti.cloud.conf;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
@@ -51,22 +52,50 @@ public class QueryConsumerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider() {
-        return new QueryConsumerPartitionedChannelCountProvider() {};
+        return new RuntimeQueryConsumerPartitionedChannelCountProvider();
+    }
+
+    @Bean
+    ConsistentHashRing<Integer> consistentHashRingPartitions(
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
+    ) {
+        final var consistentHashRing = new ConsistentHashRing<Integer>();
+
+        IntStream.range(0, queryConsumerPartitionedChannelCountProvider.get()).forEach(consistentHashRing::addNode);
+
+        return consistentHashRing;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    QueryConsumerPartitionedChannelKeyFunc queryConsumerPartitionedChannelKeyFunc() {
-        return new QueryConsumerPartitionedChannelKeyFunc() {};
+    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
+        ConsistentHashRing<Integer> consistentHashRingPartitions
+    ) {
+        return new ConsistentHashRingPartitionedChannelKeySelector(consistentHashRingPartitions);
     }
 
     @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
-        QueryConsumerPartitionedChannelKeyFunc queryConsumerPartitionedChannelKeyFunc,
+        QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
+        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter
+    ) {
+        return IntegrationFlow
+            .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
+            .channel(
+                MessageChannels
+                    .partitioned(queryConsumerPartitionedChannelCountProvider.get())
+                    .partitionKey(queryConsumerPartitionedChannelKeySelector)
+            )
+            .handle(genericQueryConsumerChannelHandlerAdapter)
+            .get();
+    }
+
+    @Bean
+    GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericHandlerAdapter = (events, headers) -> {
+        return (events, headers) -> {
             LOGGER.debug(
                 "Handling {} events with root process instance id {} on thread: {}",
                 events.size(),
@@ -78,15 +107,5 @@ public class QueryConsumerAutoConfiguration {
 
             return null;
         };
-
-        return IntegrationFlow
-            .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
-            .channel(
-                MessageChannels
-                    .partitioned(queryConsumerPartitionedChannelCountProvider.get())
-                    .partitionKey(queryConsumerPartitionedChannelKeyFunc)
-            )
-            .handle(genericHandlerAdapter)
-            .get();
     }
 }

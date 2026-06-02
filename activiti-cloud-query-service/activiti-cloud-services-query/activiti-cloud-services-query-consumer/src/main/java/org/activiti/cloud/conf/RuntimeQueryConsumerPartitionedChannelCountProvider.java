@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.function.Function;
-import org.springframework.messaging.Message;
+public class RuntimeQueryConsumerPartitionedChannelCountProvider
+    implements QueryConsumerPartitionedChannelCountProvider {
 
-public interface QueryConsumerPartitionedChannelKeyFunc extends Function<Message<?>, Object> {
-    default Object apply(Message<?> message) {
-        return message.getHeaders().getOrDefault("rootProcessInstanceId", 0);
+    @Override
+    public Integer get() {
+        return Runtime.getRuntime().availableProcessors() * 4;
     }
 }

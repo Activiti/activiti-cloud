@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
+import org.springframework.messaging.Message;
 
 @FunctionalInterface
-public interface QueryConsumerPartitionedChannelCountProvider extends Supplier<Integer> {}
+public interface QueryConsumerPartitionedChannelKeySelector extends Function<Message<?>, Object> {
+    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+}

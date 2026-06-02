@@ -15,7 +15,12 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.function.Supplier;
+import org.springframework.messaging.Message;
 
-@FunctionalInterface
-public interface QueryConsumerPartitionedChannelCountProvider extends Supplier<Integer> {}
+public class DefaultConsumerPartitionedChannelKeySelector implements QueryConsumerPartitionedChannelKeySelector {
+
+    @Override
+    public Object apply(Message<?> message) {
+        return message.getHeaders().getOrDefault(ROOT_PROCESS_INSTANCE_ID, 0);
+    }
+}
