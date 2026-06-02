@@ -50,4 +50,16 @@ class UUIDConsumerPartitionedChannelKeySelectorTest {
 
         assertThat(selectedKey).isEqualTo(0);
     }
+
+    @Test
+    void shouldUseDefaultPartitionWhenInvalidUUID() {
+        Message<String> message = MessageBuilder
+            .withPayload("payload")
+            .setHeader(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID, "foobar")
+            .build();
+
+        Object selectedKey = keySelector.apply(message);
+
+        assertThat(selectedKey).isEqualTo(0);
+    }
 }

@@ -17,9 +17,14 @@ package org.activiti.cloud.conf;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.springframework.messaging.Message;
 
 public class UUIDConsumerPartitionedChannelKeySelector implements QueryConsumerPartitionedChannelKeySelector {
+
+    Pattern UUID_REGEX = Pattern.compile(
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    );
 
     private final int totalPartitions;
 
@@ -33,6 +38,7 @@ public class UUIDConsumerPartitionedChannelKeySelector implements QueryConsumerP
             .ofNullable(message.getHeaders().get(ROOT_PROCESS_INSTANCE_ID))
             .filter(String.class::isInstance)
             .map(String.class::cast)
+            .filter(it -> UUID_REGEX.matcher(it).matches())
             .map(UUID::fromString)
             .map(UUID::getMostSignificantBits)
             .map(it -> it % totalPartitions)
