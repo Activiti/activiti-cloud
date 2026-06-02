@@ -64,6 +64,9 @@ public class ProcessVariableHistoryEntity {
     private VariableValue<?> value;
 
     @Column(nullable = false)
+    private boolean deleted = false;
+
+    @Column(nullable = false)
     private Date createTime;
 
     private String messageId;
@@ -107,6 +110,14 @@ public class ProcessVariableHistoryEntity {
 
     public <T> void setValue(T val) {
         this.value = new VariableValue<>(val);
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Date getCreateTime() {

@@ -339,6 +339,7 @@ create table process_variable_history
     variable_name       varchar(255) not null,
     type                varchar(255),
     "value"             json,
+    deleted             boolean not null default false,
     create_time         timestamp not null,
     message_id          varchar(255),
     command_id          varchar(255),
