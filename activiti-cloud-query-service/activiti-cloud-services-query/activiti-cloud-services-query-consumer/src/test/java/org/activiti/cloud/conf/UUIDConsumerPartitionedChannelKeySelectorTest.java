@@ -30,6 +30,19 @@ class UUIDConsumerPartitionedChannelKeySelectorTest {
     }
 
     @Test
+    void shouldResolveToPositivePartitionKey() {
+        String rootProcessInstanceId = "8650f557-9ff2-4319-8481-8ae64a99315a";
+        Message<String> message = MessageBuilder
+            .withPayload("payload")
+            .setHeader(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID, rootProcessInstanceId)
+            .build();
+
+        Object selectedKey = keySelector.apply(message);
+
+        assertThat(selectedKey).isEqualTo(7);
+    }
+
+    @Test
     void shouldUseDefaultPartitionWhenHeaderIsMissing() {
         Message<String> message = MessageBuilder.withPayload("payload").build();
 

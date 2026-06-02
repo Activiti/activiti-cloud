@@ -35,9 +35,9 @@ public class UUIDConsumerPartitionedChannelKeySelector implements QueryConsumerP
             .map(String.class::cast)
             .map(UUID::fromString)
             .map(UUID::getMostSignificantBits)
-            .map(Math::abs)
-            .map(Long::intValue)
             .map(it -> it % totalPartitions)
+            .map(Long::intValue)
+            .map(Math::abs)
             .orElse(0);
     }
 }
