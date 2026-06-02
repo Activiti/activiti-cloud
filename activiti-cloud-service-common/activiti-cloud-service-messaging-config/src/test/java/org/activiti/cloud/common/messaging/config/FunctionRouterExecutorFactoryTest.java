@@ -93,6 +93,7 @@ class FunctionRouterExecutorFactoryTest {
         final var releaseTask = new CountDownLatch(1);
         final var interrupted = new AtomicBoolean();
         final var thrown = new AtomicReference<Throwable>();
+        final var submitterDone = new CountDownLatch(1);
 
         executor.submit(() -> {
             taskStarted.countDown();
@@ -114,14 +115,14 @@ class FunctionRouterExecutorFactoryTest {
                     thrown.set(throwable);
                 } finally {
                     interrupted.set(Thread.currentThread().isInterrupted());
+                    submitterDone.countDown();
                 }
             });
 
-        submitter.join(TimeUnit.MILLISECONDS.toMillis(2));
+        assertThat(submitterDone.await(1, TimeUnit.SECONDS)).isTrue();
         releaseTask.countDown();
-        submitter.join(TimeUnit.MILLISECONDS.toMillis(2));
+        submitter.join();
 
-        assertThat(submitter.isAlive()).isFalse();
         assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
         assertThat(interrupted.get()).isTrue();
     }
