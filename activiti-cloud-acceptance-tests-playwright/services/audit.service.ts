@@ -35,23 +35,6 @@ function buildAuditSearch(params?: EventQueryParams): string | undefined {
     return parts.length > 0 ? parts.join(',') : undefined;
 }
 
-function buildAuditSearch(params?: EventQueryParams): string | undefined {
-    const parts: string[] = [];
-    if (params?.entityId) {
-        parts.push(`entityId:${params.entityId}`);
-    }
-    if (params?.processInstanceId) {
-        parts.push(`processInstanceId:${params.processInstanceId}`);
-    }
-    if (params?.processDefinitionKey) {
-        parts.push(`processDefinitionKey:${params.processDefinitionKey}`);
-    }
-    if (params?.eventType) {
-        parts.push(`eventType:${params.eventType}`);
-    }
-    return parts.length > 0 ? parts.join(',') : undefined;
-}
-
 export class AuditService extends BaseService {
     private readonly basePath = '/audit/v1';
 

@@ -42,6 +42,8 @@ export KUBECONFIG=~/Downloads/activiti.yaml
 
 `npm run test:setup` runs `kube:use` for you; **manual** `kubectl` commands need one of the options above.
 
+> **Expired token:** if `kubectl cluster-info` returns 403 Forbidden errors, your kubeconfig token has expired. Download a fresh one from the Rancher UI (select your cluster → **Download KubeConfig**) and replace `~/Downloads/activiti.yaml`.
+
 ### 3. First-time preview + `.env`
 
 ```bash
