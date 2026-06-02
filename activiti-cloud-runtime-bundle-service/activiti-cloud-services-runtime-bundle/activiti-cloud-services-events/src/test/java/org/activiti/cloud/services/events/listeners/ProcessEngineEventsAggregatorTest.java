@@ -25,7 +25,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,7 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ProcessEngineEventsAggregatorTest {
+class ProcessEngineEventsAggregatorTest {
 
     @InjectMocks
     @Spy
@@ -60,12 +62,12 @@ public class ProcessEngineEventsAggregatorTest {
     private CloudRuntimeEvent<?, ?> event;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(eventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
     }
 
     @Test
-    public void getCloseListenerClassShouldReturnMessageProducerCommandContextCloseListenerClass() {
+    void getCloseListenerClassShouldReturnMessageProducerCommandContextCloseListenerClass() {
         //when
         Class<MessageProducerCommandContextCloseListener> listenerClass = eventsAggregator.getCloseListenerClass();
 
@@ -74,7 +76,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void getCloseListenerShouldReturnTheCloserListenerPassedInTheConstructor() {
+    void getCloseListenerShouldReturnTheCloserListenerPassedInTheConstructor() {
         //when
         MessageProducerCommandContextCloseListener retrievedCloseListener = eventsAggregator.getCloseListener();
 
@@ -83,7 +85,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void getAttributeKeyShouldReturnProcessEngineEvents() {
+    void getAttributeKeyShouldReturnProcessEngineEvents() {
         //when
         String attributeKey = eventsAggregator.getAttributeKey();
 
@@ -92,7 +94,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
+    void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
         ArrayList<CloudRuntimeEvent<?, ?>> currentEvents = new ArrayList<>();
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -108,7 +110,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
+    void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(null);
@@ -123,7 +125,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void addShouldRegisterCloseListenerWhenItIsMissing() {
+    void addShouldRegisterCloseListenerWhenItIsMissing() {
         //given
         given(commandContext.hasCloseListener(MessageProducerCommandContextCloseListener.class)).willReturn(false);
 
@@ -135,7 +137,7 @@ public class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    public void addShouldNotRegisterCloseListenerWhenItIsAlreadyRegistered() {
+    void addShouldNotRegisterCloseListenerWhenItIsAlreadyRegistered() {
         //given
         given(commandContext.hasCloseListener(MessageProducerCommandContextCloseListener.class)).willReturn(true);
 
@@ -144,5 +146,20 @@ public class ProcessEngineEventsAggregatorTest {
 
         //then
         verify(commandContext, never()).addCloseListener(closeListener);
+    }
+
+    @Test
+    void addShouldStampCommandIdOnCloudRuntimeEventImpl() {
+        //given
+        var expectedCommandId = "test-command-id-123";
+        given(commandContext.getCommandId()).willReturn(expectedCommandId);
+
+        var cloudEvent = new CloudProcessStartedEventImpl(new ProcessInstanceImpl());
+
+        //when
+        eventsAggregator.add(cloudEvent);
+
+        //then
+        assertThat(cloudEvent.getCommandId()).isEqualTo(expectedCommandId);
     }
 }
