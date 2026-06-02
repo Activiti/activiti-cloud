@@ -55,7 +55,7 @@ public class QueryConsumerChannelHandlerTest {
     private Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher;
 
     @Test
-    public void receiveShouldHandleReceivedEventAndPublishAfterCommit() {
+    void receiveShouldHandleReceivedEventAndPublishAfterCommit() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
@@ -75,7 +75,7 @@ public class QueryConsumerChannelHandlerTest {
     }
 
     @Test
-    public void receiveShouldNotPublishWhenTransactionRollsBack() {
+    void receiveShouldNotPublishWhenTransactionRollsBack() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
