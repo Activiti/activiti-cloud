@@ -41,7 +41,7 @@ const scenarios: Array<{ title: string; processDefinitionKey: string; skip?: str
         processDefinitionKey: ERROR_START_EVENT_SUBPROCESS,
     },
     {
-        title: 'check a process instance with boundary error event for callactivitiy',
+        title: 'check a process instance with boundary error event for call activity',
         processDefinitionKey: ERROR_BOUNDARY_EVENT_CALLACTIVITY,
     },
 ];

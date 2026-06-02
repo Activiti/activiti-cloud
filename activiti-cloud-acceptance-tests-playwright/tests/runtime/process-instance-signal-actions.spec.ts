@@ -136,7 +136,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             });
 
             await activiti.step(
-                'And the SIGNAL_RECEIVED event was catched up by intermediateCatchEvent process',
+                'And the SIGNAL_RECEIVED event was caught up by intermediateCatchEvent process',
                 async () => {
                     await expectSignalReceivedByProcess(auditServiceHrUser, processInstanceCatchSignal);
                 }
@@ -154,7 +154,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             });
 
             await activiti.step(
-                'And the SIGNAL_RECEIVED event was catched up by boundary signal process',
+                'And the SIGNAL_RECEIVED event was caught up by boundary signal process',
                 async () => {
                     await expectSignalReceivedByProcess(auditServiceHrUser, processInstanceBoundarySignal);
                 }

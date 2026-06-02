@@ -256,7 +256,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             processInstanceId = processInstance.id;
         });
 
-        await activiti.step('Then the user will get only root tasks when quering for root tasks', async () => {
+        await activiti.step('Then the user will get only root tasks when querying for root tasks', async () => {
             await expect
                 .poll(async () => {
                     const rootTasks = await queryServiceTestUser.getRootTasksByProcessInstance(processInstanceId);

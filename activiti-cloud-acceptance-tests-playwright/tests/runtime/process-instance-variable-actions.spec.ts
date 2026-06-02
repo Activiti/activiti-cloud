@@ -51,7 +51,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
     activiti(
         'admin update process instance variables',
         async ({
-            runtimeBundleServiceTestAdmin,
+            runtimeBundleServiceTestUser,
             runtimeAdminServiceTestAdmin,
         }) => {
             let processInstanceId: string;
@@ -61,7 +61,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                     'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestAdmin,
+                        runtimeBundleServiceTestUser,
                         'PROCESS_INSTANCE_WITH_VARIABLES',
                         { variables: { start1: 'start1', start2: 'start2' } }
                     );
@@ -87,8 +87,8 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And variable start1 has value value1 and start2 has value value2',
                 async () => {
-                    await expectVariableValue(runtimeBundleServiceTestAdmin, processInstanceId, 'start1', 'value1');
-                    await expectVariableValue(runtimeBundleServiceTestAdmin, processInstanceId, 'start2', 'value2');
+                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start1', 'value1');
+                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start2', 'value2');
                 }
             );
         }
@@ -97,7 +97,8 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
     activiti(
         'admin set process instance variables',
         async ({
-            runtimeBundleServiceTestAdmin,
+            runtimeBundleServiceTestUser,
+            runtimeAdminServiceTestAdmin,
         }) => {
             let processInstanceId: string;
 
@@ -106,7 +107,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                     'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestAdmin,
+                        runtimeBundleServiceTestUser,
                         'PROCESS_INSTANCE_WITH_VARIABLES',
                         { variables: { start1: 'start1', start2: 'start2' } }
                     );
@@ -118,7 +119,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy1 with value dummyValue1',
                 async () => {
-                    await runtimeBundleServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
                         dummy1: 'dummyValue1',
                     });
                 }
@@ -127,7 +128,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy2 with value dummyValue2',
                 async () => {
-                    await runtimeBundleServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
                         dummy2: 'dummyValue2',
                     });
                 }
@@ -137,13 +138,13 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                 'Then variable dummy1 has value dummyValue1 and dummy2 has value dummyValue2',
                 async () => {
                     await expectVariableValue(
-                        runtimeBundleServiceTestAdmin,
+                        runtimeBundleServiceTestUser,
                         processInstanceId,
                         'dummy1',
                         'dummyValue1'
                     );
                     await expectVariableValue(
-                        runtimeBundleServiceTestAdmin,
+                        runtimeBundleServiceTestUser,
                         processInstanceId,
                         'dummy2',
                         'dummyValue2'
@@ -156,7 +157,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
     activiti(
         'admin delete process instance variables',
         async ({
-            runtimeBundleServiceTestAdmin,
+            runtimeBundleServiceTestUser,
             runtimeAdminServiceTestAdmin,
         }) => {
             let processInstanceId: string;
@@ -166,7 +167,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                     'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestAdmin,
+                        runtimeBundleServiceTestUser,
                         'PROCESS_INSTANCE_WITH_VARIABLES',
                         { variables: { start1: 'start1', start2: 'start2' } }
                     );
@@ -178,7 +179,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy1 with value dummyValue1',
                 async () => {
-                    await runtimeBundleServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
                         dummy1: 'dummyValue1',
                     });
                 }
@@ -187,7 +188,7 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And the user set the instance variable dummy2 with value dummyValue2',
                 async () => {
-                    await runtimeBundleServiceTestAdmin.setProcessVariables(processInstanceId, {
+                    await runtimeAdminServiceTestAdmin.setProcessVariables(processInstanceId, {
                         dummy2: 'dummyValue2',
                     });
                 }
@@ -200,12 +201,12 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             });
 
             await activiti.step('Then the process variable dummy1 is deleted', async () => {
-                await expectVariableAbsent(runtimeBundleServiceTestAdmin, processInstanceId, 'dummy1');
+                await expectVariableAbsent(runtimeBundleServiceTestUser, processInstanceId, 'dummy1');
             });
 
             await activiti.step('And the process variable dummy2 is created', async () => {
                 await expectVariableValue(
-                    runtimeBundleServiceTestAdmin,
+                    runtimeBundleServiceTestUser,
                     processInstanceId,
                     'dummy2',
                     'dummyValue2'
