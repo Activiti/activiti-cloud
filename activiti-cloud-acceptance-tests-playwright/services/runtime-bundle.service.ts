@@ -22,6 +22,7 @@ import {
 } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { CloudVariableInstance } from '../models/process-variable.models';
+import { pickHighestVersionByKey } from '../helpers/process-definition';
 import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -134,8 +135,11 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
-        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionKey}`);
-        return this.unwrapEntity<CloudProcessDefinition>(response);
+        // RB's GET /process-definitions/{id} is keyed by processDefinitionId (e.g. `key:version:uuid`),
+        // not by processDefinitionKey. Resolve the key to the deployed definition with the highest
+        // appVersion (parity with Serenity's ProcessDefinitionActions#getProcessDefinition).
+        const definitions = await this.getProcessDefinitions();
+        return pickHighestVersionByKey(definitions, processDefinitionKey);
     }
 
     async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {

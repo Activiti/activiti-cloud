@@ -18,26 +18,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { CloudProcessDefinition } from '../../models/process-definition.models';
+import { pickHighestVersionByKey } from '../../helpers/process-definition';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
-
-// Mirrors ProcessDefinitionActions#getProcessDefinition — picks the highest appVersion match for a key.
-function findProcessDefinitionByKey(
-    definitions: CloudProcessDefinition[],
-    key: string
-): CloudProcessDefinition {
-    const matches = definitions.filter((def) => def.key === key);
-    if (matches.length === 0) {
-        throw new Error(`No process definition found matching key ${key}`);
-    }
-    return matches.reduce((best, current) => {
-        const bestVersion = parseInt(String(best.appVersion ?? '0'), 10);
-        const currentVersion = parseInt(String(current.appVersion ?? '0'), 10);
-        return currentVersion > bestVersion ? current : best;
-    });
-}
 
 // Mirrors XmlAssert ignoreWhitespace + node filter (drop <path>) + attr filter (drop style="...").
 function normalizeSvg(svg: string): string {
@@ -56,7 +40,7 @@ activiti.describe('Process Definition Actions', () => {
             `Then the user can get the process model for process with key ${SINGLE_TASK_PROCESS} by passing its id`,
             async () => {
                 const definitions = await queryServiceTestUser.getProcessDefinitions();
-                const definition = findProcessDefinitionByKey(definitions, SINGLE_TASK_PROCESS);
+                const definition = pickHighestVersionByKey(definitions, SINGLE_TASK_PROCESS);
 
                 const processModel = await queryServiceTestUser.getProcessModel(definition.id);
 
@@ -72,8 +56,7 @@ activiti.describe('Process Definition Actions', () => {
         await activiti.step(
             `Then the process diagram image for process with key ${BIG_PROCESS} is the same as process-definition-diagram.result.svg file`,
             async () => {
-                const definitions = await runtimeBundleServiceTestUser.getProcessDefinitions();
-                const definition = findProcessDefinitionByKey(definitions, BIG_PROCESS);
+                const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(BIG_PROCESS);
 
                 const processDiagram = await runtimeBundleServiceTestUser.getProcessDefinitionDiagram(
                     definition.id
