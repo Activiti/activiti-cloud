@@ -17,7 +17,6 @@ package org.activiti.cloud.conf;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
@@ -53,26 +52,33 @@ public class QueryConsumerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider() {
-        return new RuntimeQueryConsumerPartitionedChannelCountProvider();
+        return new FixedQueryConsumerPartitionedChannelCountProvider(32);
     }
 
+    //    @Bean
+    //    ConsistentHashRing<Integer> consistentHashRingPartitions(
+    //        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
+    //    ) {
+    //        final var consistentHashRing = new ConsistentHashRing<Integer>(VIRTUAL_NODES_PER_PARTITION);
+    //
+    //        IntStream.range(0, queryConsumerPartitionedChannelCountProvider.get()).forEach(consistentHashRing::addNode);
+    //
+    //        return consistentHashRing;
+    //    }
+    //
+    //    @Bean
+    //    @ConditionalOnMissingBean
+    //    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
+    //        ConsistentHashRing<Integer> consistentHashRingPartitions
+    //    ) {
+    //        return new ConsistentHashRingPartitionedChannelKeySelector(consistentHashRingPartitions);
+    //    }
+
     @Bean
-    ConsistentHashRing<Integer> consistentHashRingPartitions(
+    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
     ) {
-        final var consistentHashRing = new ConsistentHashRing<Integer>(VIRTUAL_NODES_PER_PARTITION);
-
-        IntStream.range(0, queryConsumerPartitionedChannelCountProvider.get()).forEach(consistentHashRing::addNode);
-
-        return consistentHashRing;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
-        ConsistentHashRing<Integer> consistentHashRingPartitions
-    ) {
-        return new ConsistentHashRingPartitionedChannelKeySelector(consistentHashRingPartitions);
+        return new UUIDConsumerPartitionedChannelKeySelector(queryConsumerPartitionedChannelCountProvider.get());
     }
 
     @Bean
