@@ -1,5 +1,6 @@
 create sequence process_variable_sequence start with 1 increment by 50;
 create sequence task_variable_sequence start with 1 increment by 50;
+create sequence process_variable_history_sequence start with 1 increment by 50;
 
 create table bpmn_activity
 (
@@ -330,3 +331,18 @@ ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_id VARCHAR(255);
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_type VARCHAR(255);
+
+create table process_variable_history
+(
+    id                  bigint,
+    process_instance_id varchar(255) not null,
+    variable_name       varchar(255) not null,
+    type                varchar(255),
+    "value"             json,
+    create_time         timestamp not null,
+    message_id          varchar(255),
+    command_id          varchar(255),
+    sequence_number     integer,
+    primary key (id)
+);
+create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, create_time);

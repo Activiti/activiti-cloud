@@ -859,4 +859,19 @@
     </rollback>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter40-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/40-alter.pg.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      DROP INDEX IF EXISTS idx_pvh_process_var;
+      DROP TABLE IF EXISTS process_variable_history;
+      DROP SEQUENCE IF EXISTS process_variable_history_sequence;
+    </rollback>
+  </changeSet>
+
 </databaseChangeLog>
