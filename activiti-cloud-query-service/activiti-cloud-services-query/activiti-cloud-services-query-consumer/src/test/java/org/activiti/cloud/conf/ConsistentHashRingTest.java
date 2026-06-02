@@ -17,6 +17,7 @@
 package org.activiti.cloud.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -128,6 +129,61 @@ class ConsistentHashRingTest {
             String newNode = stringRing.getNode(key);
 
             assertThat(newNode).isNotNull().isNotEqualTo(initialNode).isIn("Node-A", "Node-B", "Node-C");
+        }
+    }
+
+    @Nested
+    @DisplayName("Edge Case Tests")
+    class EdgeCaseTests {
+
+        @Test
+        @DisplayName("Should keep routing unchanged when removing non-existent node")
+        void shouldKeepRoutingWhenRemovingNonExistentNode() {
+            stringRing.addNode("Node-A");
+
+            stringRing.removeNode("Node-B");
+
+            assertThat(stringRing.getNode("any-key")).isEqualTo("Node-A");
+        }
+
+        @Test
+        @DisplayName("Should overwrite node mapping when a duplicate hash is added")
+        void shouldOverwriteNodeMappingWhenDuplicateHashIsAdded() {
+            class CollisionNode {
+
+                @Override
+                public String toString() {
+                    return "collision-key";
+                }
+            }
+
+            ConsistentHashRing<CollisionNode> ring = new ConsistentHashRing<>();
+            CollisionNode firstNode = new CollisionNode();
+            CollisionNode secondNode = new CollisionNode();
+            ring.addNode(firstNode);
+            ring.addNode(secondNode);
+
+            assertThat(ring.getNode("any-key")).isSameAs(secondNode);
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when adding null node")
+        void shouldThrowNullPointerWhenAddingNullNode() {
+            assertThatThrownBy(() -> stringRing.addNode(null)).isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when removing null node")
+        void shouldThrowNullPointerWhenRemovingNullNode() {
+            assertThatThrownBy(() -> stringRing.removeNode(null)).isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when key is null and ring is not empty")
+        void shouldThrowNullPointerWhenKeyIsNullAndRingIsNotEmpty() {
+            stringRing.addNode("Node-A");
+
+            assertThatThrownBy(() -> stringRing.getNode(null)).isInstanceOf(NullPointerException.class);
         }
     }
 
