@@ -41,14 +41,17 @@ export const RUNTIME_SERVICE_TASK_ACTIONS_REQUIRED_KEYS =
         ProcessDefinitionRegistry.serviceTaskActionsProcessNames
     );
 
+/** Keys required by Playwright specs on this PR (wave 1 + process-instance; wave 2 from task-extended). */
 export const RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS = [
     ...new Set([
         ...RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS,
         ...RUNTIME_TASK_ACTIONS_WAVE1_REQUIRED_KEYS,
         ...RUNTIME_TASK_ACTIONS_WAVE2_REQUIRED_KEYS,
-        ...RUNTIME_SERVICE_TASK_ACTIONS_REQUIRED_KEYS,
     ]),
 ] as const;
+
+/** Service-task BPMN keys — used when service-tasks.spec.ts lands (separate PR). */
+export const RUNTIME_SERVICE_TASK_OPTIONAL_PROCESS_KEYS = RUNTIME_SERVICE_TASK_ACTIONS_REQUIRED_KEYS;
 
 export function formatMissingProcessCatalogMessage(missingKeys: string[]): string {
     return (
@@ -65,12 +68,29 @@ export async function getDeployedProcessDefinitionKeys(
     return new Set(definitions.map((definition) => definition.key));
 }
 
+async function isProcessDefinitionKeyDeployed(
+    runtimeBundleService: RuntimeBundleService,
+    processDefinitionKey: string
+): Promise<boolean> {
+    try {
+        const definition = await runtimeBundleService.getProcessDefinitionByKey(processDefinitionKey);
+        return definition.key === processDefinitionKey;
+    } catch {
+        return false;
+    }
+}
+
 export async function getMissingRequiredProcessDefinitionKeys(
     runtimeBundleService: RuntimeBundleService,
     requiredKeys: readonly string[] = RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS
 ): Promise<string[]> {
-    const deployedKeys = await getDeployedProcessDefinitionKeys(runtimeBundleService);
-    return requiredKeys.filter((key) => !deployedKeys.has(key));
+    const missing: string[] = [];
+    for (const key of requiredKeys) {
+        if (!(await isProcessDefinitionKeyDeployed(runtimeBundleService, key))) {
+            missing.push(key);
+        }
+    }
+    return missing;
 }
 
 function sleep(ms: number): Promise<void> {

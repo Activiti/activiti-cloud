@@ -109,7 +109,7 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        const response = await this.get(`${this.basePath}/process-definitions`);
+        const response = await this.get(`${this.basePath}/process-definitions?maxItems=1000`);
         const status = response.httpStatus;
         if (status === 401 || status === 403) {
             throw new Error(

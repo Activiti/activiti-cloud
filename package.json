@@ -13,6 +13,7 @@
     "preview:delete": "bash activiti-cloud-acceptance-tests-playwright/scripts/delete-preview-namespace.sh",
     "kube:use": "bash activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh",
     "verify:process-catalog": "tsx activiti-cloud-acceptance-tests-playwright/scripts/verify-acceptance-process-catalog.ts",
+    "verify:process-catalog:ci": "bash scripts/ci/wait-for-process-catalog.sh",
     "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
     "test:all": "npm run test",
     "test:identity": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts activiti-cloud-acceptance-tests-playwright/tests/identity-adapter.spec.ts",
