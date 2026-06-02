@@ -477,6 +477,7 @@ public class QueryTaskEntityVariablesIT {
 
         // then
         await()
+            .pollInSameThread()
             .untilAsserted(() -> {
                 assertThat(eventsAggregator.getException()).isNull();
                 assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))

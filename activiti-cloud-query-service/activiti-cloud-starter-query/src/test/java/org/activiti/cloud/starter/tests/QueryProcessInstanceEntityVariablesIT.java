@@ -256,6 +256,7 @@ public class QueryProcessInstanceEntityVariablesIT {
 
         // then
         await()
+            .pollInSameThread()
             .untilAsserted(() -> {
                 assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
                     .isNotEmpty()
