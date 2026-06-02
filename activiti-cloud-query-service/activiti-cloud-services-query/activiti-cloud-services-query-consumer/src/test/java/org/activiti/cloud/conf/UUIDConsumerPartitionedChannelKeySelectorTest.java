@@ -17,6 +17,7 @@
 package org.activiti.cloud.conf;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -55,7 +56,7 @@ class UUIDConsumerPartitionedChannelKeySelectorTest {
 
         Object selectedKey = keySelector.apply(message);
 
-        assertThat(selectedKey).isEqualTo(7);
+        assertThat(selectedKey).isEqualTo(25);
     }
 
     @Test
@@ -77,5 +78,11 @@ class UUIDConsumerPartitionedChannelKeySelectorTest {
         Object selectedKey = keySelector.apply(message);
 
         assertThat(selectedKey).isEqualTo(0);
+    }
+
+    @Test
+    void shouldRejectNegativePartitionCount() {
+        assertThatThrownBy(() -> new UUIDConsumerPartitionedChannelKeySelector(-1))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 }

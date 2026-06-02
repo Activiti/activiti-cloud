@@ -37,7 +37,6 @@ import org.springframework.messaging.Message;
 public class QueryConsumerAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
-    private static final int VIRTUAL_NODES_PER_PARTITION = 256;
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
 
@@ -46,7 +45,7 @@ public class QueryConsumerAutoConfiguration {
     public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
         IntegrationFlow partitionedQueryConsumerIntegrationFlow
     ) {
-        return partitionedQueryConsumerIntegrationFlow.getInputChannel()::send;
+        return message -> partitionedQueryConsumerIntegrationFlow.getInputChannel().send(message);
     }
 
     @Bean
@@ -87,7 +86,7 @@ public class QueryConsumerAutoConfiguration {
             LOGGER.debug(
                 "Handling {} events with root process instance id {} on thread: {}",
                 events.size(),
-                headers.get("rootProcessInstanceId"),
+                headers.get(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
                 Thread.currentThread().getName()
             );
 

@@ -20,6 +20,6 @@ public class RuntimeQueryConsumerPartitionedChannelCountProvider
 
     @Override
     public Integer get() {
-        return Runtime.getRuntime().availableProcessors() * 4;
+        return Runtime.getRuntime().availableProcessors() * 2;
     }
 }
