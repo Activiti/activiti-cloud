@@ -15,29 +15,47 @@
  */
 package org.activiti.cloud.conf;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ConsistentHashRing<T> {
 
+    private static final int DEFAULT_VIRTUAL_NODES_PER_NODE = 1;
     private final SortedMap<Long, T> ring = new ConcurrentSkipListMap<>();
+    private final int virtualNodesPerNode;
+
+    public ConsistentHashRing() {
+        this(DEFAULT_VIRTUAL_NODES_PER_NODE);
+    }
+
+    public ConsistentHashRing(int virtualNodesPerNode) {
+        if (virtualNodesPerNode <= 0) {
+            throw new IllegalArgumentException("virtualNodesPerNode must be greater than zero");
+        }
+        this.virtualNodesPerNode = virtualNodesPerNode;
+    }
 
     public void addNode(T node) {
-        String nodeAddress = node.toString();
-        long hash = Math.abs((long) nodeAddress.hashCode());
-        ring.put(hash, node);
+        String nodeAddress = Objects.requireNonNull(node, "node cannot be null").toString();
+        for (int replica = 0; replica < virtualNodesPerNode; replica++) {
+            ring.put(hash(nodeAddress + "#" + replica), node);
+        }
     }
 
     public void removeNode(T node) {
-        long hash = Math.abs((long) node.toString().hashCode());
-        ring.remove(hash);
+        String nodeAddress = Objects.requireNonNull(node, "node cannot be null").toString();
+        for (int replica = 0; replica < virtualNodesPerNode; replica++) {
+            ring.remove(hash(nodeAddress + "#" + replica));
+        }
     }
 
     public T getNode(String key) {
         if (ring.isEmpty()) {
             return null;
         }
-        long hash = Math.abs((long) key.hashCode());
+        long hash = hash(key);
 
         // Get the tail map of nodes greater than or equal to the key hash
         SortedMap<Long, T> tailMap = ring.tailMap(hash);
@@ -46,5 +64,15 @@ public class ConsistentHashRing<T> {
         long nodeHash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
 
         return ring.get(nodeHash);
+    }
+
+    private long hash(String value) {
+        byte[] bytes = Objects.requireNonNull(value, "value cannot be null").getBytes(StandardCharsets.UTF_8);
+        int hash = 0x811c9dc5;
+        for (byte currentByte : bytes) {
+            hash ^= currentByte & 0xff;
+            hash *= 0x01000193;
+        }
+        return Integer.toUnsignedLong(hash);
     }
 }

@@ -38,6 +38,7 @@ import org.springframework.messaging.Message;
 public class QueryConsumerAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
+    private static final int VIRTUAL_NODES_PER_PARTITION = 256;
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
 
@@ -59,7 +60,7 @@ public class QueryConsumerAutoConfiguration {
     ConsistentHashRing<Integer> consistentHashRingPartitions(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
     ) {
-        final var consistentHashRing = new ConsistentHashRing<Integer>();
+        final var consistentHashRing = new ConsistentHashRing<Integer>(VIRTUAL_NODES_PER_PARTITION);
 
         IntStream.range(0, queryConsumerPartitionedChannelCountProvider.get()).forEach(consistentHashRing::addNode);
 
