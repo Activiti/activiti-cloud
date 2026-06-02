@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.core.GenericHandler;
@@ -36,6 +37,8 @@ import org.springframework.messaging.Message;
 public class QueryConsumerAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
+    public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
+        "partitionedQueryConsumerIntegrationFlowInput";
 
     @Bean
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
@@ -46,26 +49,42 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider() {
+        return new QueryConsumerPartitionedChannelCountProvider() {};
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueryConsumerPartitionedChannelKeyFunc queryConsumerPartitionedChannelKeyFunc() {
+        return new QueryConsumerPartitionedChannelKeyFunc() {};
+    }
+
+    @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
+        QueryConsumerPartitionedChannelKeyFunc queryConsumerPartitionedChannelKeyFunc,
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
         GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericHandlerAdapter = (events, headers) -> {
             LOGGER.debug(
-                "Handling event process instance id {} on thread: {}",
+                "Handling {} events with root process instance id {} on thread: {}",
+                events.size(),
                 headers.get("rootProcessInstanceId"),
                 Thread.currentThread().getName()
             );
 
             queryConsumerChannelHandler.receive(events);
+
             return null;
         };
 
         return IntegrationFlow
-            .from("partitionedQueryConsumerIntegrationFlowInput")
+            .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
             .channel(
                 MessageChannels
-                    .partitioned(Runtime.getRuntime().availableProcessors() * 2)
-                    .partitionKey(message -> message.getHeaders().getOrDefault("rootProcessInstanceId", 0))
+                    .partitioned(queryConsumerPartitionedChannelCountProvider.get())
+                    .partitionKey(queryConsumerPartitionedChannelKeyFunc)
             )
             .handle(genericHandlerAdapter)
             .get();
