@@ -34,8 +34,9 @@ export ACCEPTANCE_CI_OVERLAY_APPLIED=true
 if [[ "${GITHUB_ACTIONS:-}" == "true" && -n "${GITHUB_ENV:-}" ]]; then
   while IFS= read -r name; do
     [[ -z "${name}" ]] && continue
-    printf -v value '%s' "${!name}"
-    echo "${name}=${value}" >> "${GITHUB_ENV}"
+    if [[ -v "${name}" ]]; then
+      echo "${name}=${!name}" >> "${GITHUB_ENV}"
+    fi
   done <<'EOF'
 CI
 GITHUB_ACTIONS
@@ -69,6 +70,5 @@ PLAYWRIGHT_POLL_AUDIT_EVENTS_MS
 PLAYWRIGHT_POLL_QUERY_SYNC_MS
 AUTO_CLUSTER_PREREQS
 ACCEPTANCE_CI_OVERLAY_APPLIED
-ACCEPTANCE_PROCESS_CATALOG_VERIFIED
 EOF
 fi
