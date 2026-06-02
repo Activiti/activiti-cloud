@@ -297,6 +297,7 @@ public class QueryRestApplicationIT {
     @Test
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
+            .isNotEmpty()
             .satisfies(map ->
                 assertThat(map.keySet()).allMatch(key -> key.startsWith("projectedEngineEvents.anonymous."))
             );
