@@ -20,16 +20,16 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ConsistentHashRing<T> {
 
-    private final SortedMap<Integer, T> ring = new ConcurrentSkipListMap<>();
+    private final SortedMap<Long, T> ring = new ConcurrentSkipListMap<>();
 
     public void addNode(T node) {
         String nodeAddress = node.toString();
-        int hash = Math.abs(nodeAddress.hashCode());
+        long hash = Math.abs((long) nodeAddress.hashCode());
         ring.put(hash, node);
     }
 
     public void removeNode(T node) {
-        int hash = Math.abs(node.toString().hashCode());
+        long hash = Math.abs((long) node.toString().hashCode());
         ring.remove(hash);
     }
 
@@ -37,13 +37,13 @@ public class ConsistentHashRing<T> {
         if (ring.isEmpty()) {
             return null;
         }
-        int hash = Math.abs(key.hashCode());
+        long hash = Math.abs((long) key.hashCode());
 
         // Get the tail map of nodes greater than or equal to the key hash
-        SortedMap<Integer, T> tailMap = ring.tailMap(hash);
+        SortedMap<Long, T> tailMap = ring.tailMap(hash);
 
         // If there is no tail, wrap around to the first node in the ring
-        int nodeHash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+        long nodeHash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
 
         return ring.get(nodeHash);
     }
