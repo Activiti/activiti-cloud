@@ -15,13 +15,6 @@
     "rootDir": "./",
     "types": ["node", "@playwright/test"]
   },
-  "include": [
-    "activiti-cloud-acceptance-tests-playwright/**/*",
-    "playwright.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test-results"
-  ]
+  "files": [],
+  "references": [{ "path": "./activiti-cloud-acceptance-tests-playwright" }]
 }

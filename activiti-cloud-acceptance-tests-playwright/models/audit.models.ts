@@ -27,7 +27,10 @@ export interface CloudRuntimeEvent {
     serviceFullName?: string;
     appName?: string;
     appVersion?: string;
-    entity?: any;
+    entity?: unknown;
+    sequenceNumber?: number;
+    messageId?: string;
+    [key: string]: unknown;
 }
 
 export interface EventsResponse {

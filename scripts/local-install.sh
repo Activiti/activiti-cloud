@@ -8,8 +8,10 @@
 # Options:
 #   -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
 #   -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
-#   -pt, --partitioned <bool>   Partitioned: true|false (default: false)
-#   -d, --destinations <type>   Destinations: default|override (default: default)
+#   -pt, --partitioned <bool>   Partitioned: true|false (default: false) [legacy]
+#   -p, --partitioning <mode>   Partitioning: partitioned|non-partitioned|prefix (default: non-partitioned)
+#   -d, --destinations <mode>   Destinations: default|override|pdb (default: default)
+#   --destinations-option <opt> Destinations option: default-destinations|override-destinations|pdb (same as CI)
 #   -v, --version <version>     Version to use (default: auto-generated)
 #   --dry-run                   Show what would be executed without running
 #   -h, --help                  Show this help message
@@ -33,7 +35,7 @@ NC='\033[0m' # No Color
 # Default values
 ENVIRONMENT_NAME=""
 MESSAGING_BROKER="rabbitmq"
-MESSAGING_PARTITIONED="false"
+MESSAGING_PARTITIONED="non-partitioned"
 MESSAGING_DESTINATIONS="default"
 VERSION=""
 DRY_RUN=false
@@ -41,6 +43,11 @@ USE_LOCAL_IMAGES=true  # Always use local images by default
 CLUSTER_NAME=""        # Will be auto-detected or specified
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# shellcheck source=lib/keycloak-preview.sh
+source "${SCRIPT_DIR}/lib/keycloak-preview.sh"
+# shellcheck source=lib/k8s-deployments.sh
+source "${SCRIPT_DIR}/lib/k8s-deployments.sh"
 
 # Help function
 show_help() {
@@ -56,16 +63,20 @@ OPTIONS:
     -n, --name <name>           Environment name (e.g., michal-test, feature-xyz)
     -c, --cluster <name>        Cluster name (auto-detected if not specified)
     -b, --broker <broker>       Messaging broker: rabbitmq|kafka (default: rabbitmq)
-    -pt, --partitioned <bool>   Partitioned: true|false (default: false)
-    -d, --destinations <type>   Destinations: default|override (default: default)
+    -pt, --partitioned <bool>   Partitioned: true|false (default: false) [legacy]
+    -p, --partitioning <mode>   Partitioning: partitioned|non-partitioned|prefix (default: non-partitioned)
+    -d, --destinations <mode>   Destinations: default|override|pdb (default: default)
+    --destinations-option <opt> Destinations option: default-destinations|override-destinations|pdb (same as CI)
     -v, --version <version>     Version to use (default: auto-generated)
-    --no-local-images           Don't use local-values.yaml (uses generated versions)
+    --no-local-images           Don't use local-values.local.yaml (uses generated versions)
     --dry-run                   Show what would be executed without running
     -h, --help                  Show this help message
 
 EXAMPLES:
     $0 -n michal-test                           # Basic environment with working image tags
     $0 -n feature-xyz -b kafka -pt true        # Kafka with partitioning
+    $0 -n rabbit-pdb -b rabbitmq -d pdb        # RabbitMQ with PDB enabled
+    $0 -n rabbit-prefix -b rabbitmq -p prefix --destinations-option pdb
     $0 --dry-run -n test-env                    # See what would happen
     $0 -n my-env -c activiti-hackathon         # Specify cluster explicitly
 
@@ -74,22 +85,20 @@ PREREQUISITES:
     - helm installed (version 3+)
     - yq installed (for YAML processing)
     - python3 available (for version parsing)
-    - Keycloak client secret for 'activiti-keycloak' client
-    - Keycloak admin login from Kubernetes secret 'keycloak-admin-credentials'
+    - Preview namespace with bundled Keycloak (realm activiti, client activiti)
 
 ENVIRONMENT VARIABLES:
-    KEYCLOAK_CLIENT_SECRET    Set to avoid interactive prompt for client secret
+    KEYCLOAK_CLIENT_SECRET    Optional; read from activiti-keycloak-client secret after Helm install
 
 WORKFLOW:
     1. Checks/configures cluster connection
-    2. Prompts for Keycloak client secret (if not set via env var)
-    3. Ensures local-values.yaml exists with working image tags
+    2. Ensures local-values.local.yaml exists with working image tags
     4. Deploys Activiti Cloud with reliable configuration
     5. Configures identity adapter with correct Keycloak settings
     6. Generates .env file for Playwright tests
 
 NOTES:
-    - Uses local-values.yaml by default for reliable deployments
+    - Uses local-values.local.yaml by default for reliable deployments (gitignored)
     - Auto-detects cluster or helps configure it
     - Keycloak admin username/password come from the Kubernetes secret 'keycloak-admin-credentials' in the same namespace as the Keycloak pod
     - Generates complete .env configuration at the end
@@ -112,10 +121,23 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -pt|--partitioned)
+            # legacy boolean flag (true|false)
+            if [[ "$2" == "true" ]]; then
+                MESSAGING_PARTITIONED="partitioned"
+            else
+                MESSAGING_PARTITIONED="non-partitioned"
+            fi
+            shift 2
+            ;;
+        -p|--partitioning)
             MESSAGING_PARTITIONED="$2"
             shift 2
             ;;
         -d|--destinations)
+            MESSAGING_DESTINATIONS="$2"
+            shift 2
+            ;;
+        --destinations-option)
             MESSAGING_DESTINATIONS="$2"
             shift 2
             ;;
@@ -162,96 +184,15 @@ execute_command() {
     fi
 }
 
-# Function to read a secret from the terminal without echoing it.
-# Supports pasting and falls back to stdin when no TTY is available.
-prompt_for_secret() {
-    local prompt="$1"
-
-    if [[ -t 0 ]]; then
-        printf "%b" "$prompt"
-        IFS= read -r -s REPLY
-        printf "\n"
-    else
-        printf "%b" "$prompt"
-        IFS= read -r REPLY
-    fi
-}
-
-# Function to configure Keycloak settings
+# Function to configure Keycloak settings (bundled with Helm preview chart)
 configure_keycloak() {
     echo -e "${BLUE}=== Configuring Keycloak Settings ===${NC}"
-
-    # Determine correct Keycloak URL - use configured cluster domain
-    CLUSTER_DOMAIN="envalfresco.com"
-    KEYCLOAK_URL="https://$CLUSTER_NAME.$CLUSTER_DOMAIN/auth"
-    KEYCLOAK_REALM="alfresco"
-    KEYCLOAK_CLIENT_ID="activiti-keycloak"
-
-    echo -e "${YELLOW}Detected Keycloak configuration:${NC}"
-    echo -e "  ${CYAN}URL: $KEYCLOAK_URL${NC}"
-    echo -e "  ${CYAN}Realm: $KEYCLOAK_REALM${NC}"
-    echo -e "  ${CYAN}Client ID: $KEYCLOAK_CLIENT_ID${NC}"
-
-    # Check if client secret is provided as environment variable
-    if [[ -n "$KEYCLOAK_CLIENT_SECRET" ]]; then
-        echo -e "${GREEN}✓ Using Keycloak client secret from environment variable${NC}"
-    else
-        echo ""
-        echo -e "${YELLOW}🔑 Keycloak Client Secret Required${NC}"
-        echo ""
-        printf "%b\n" "${CYAN}The identity adapter needs the correct client secret for '$KEYCLOAK_CLIENT_ID'${NC}"
-        printf "%b\n" "${CYAN}You can find this secret in the Keycloak admin console:${NC}"
-        printf "%b\n" "${CYAN}To log in, use the admin credentials stored in the Kubernetes secret 'keycloak-admin-credentials' for the Keycloak pod/namespace.${NC}"
-        printf "%b\n" "  ${CYAN}Example username: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.username}' | base64 --decode && echo${NC}"
-        printf "%b\n" "  ${CYAN}Example password: kubectl get secret keycloak-admin-credentials -n <keycloak-namespace> -o jsonpath='{.data.password}' | base64 --decode && echo${NC}"
-        printf "%b\n" "  ${CYAN}1. Open: $KEYCLOAK_URL/admin/master/console/#/alfresco/clients${NC}"
-        printf "%b\n" "  ${CYAN}2. Find client: $KEYCLOAK_CLIENT_ID${NC}"
-        printf "%b\n" "  ${CYAN}3. Go to Credentials tab${NC}"
-        printf "%b\n" "  ${CYAN}4. Copy the Client Secret${NC}"
-        echo ""
-
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${CYAN}[DRY-RUN] Would prompt for client secret${NC}"
-            KEYCLOAK_CLIENT_SECRET="<WOULD_PROMPT_FOR_SECRET>"
-        else
-            printf "%b\n" "${CYAN}Paste the client secret and press Enter. Input will be hidden.${NC}"
-            prompt_for_secret "${YELLOW}Enter the Keycloak client secret for '$KEYCLOAK_CLIENT_ID': ${NC}"
-            KEYCLOAK_CLIENT_SECRET="$REPLY"
-            unset REPLY
-
-            if [[ -z "$KEYCLOAK_CLIENT_SECRET" ]]; then
-                echo -e "${RED}Error: Client secret is required${NC}" >&2
-                exit 1
-            fi
-        fi
-    fi
-
-    # Test the client credentials if not in dry-run mode
-    if [[ "$DRY_RUN" == "false" ]]; then
-        echo -e "${YELLOW}Testing client credentials...${NC}"
-        local test_response
-        test_response=$(curl -s -X POST "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=$KEYCLOAK_CLIENT_ID&client_secret=$KEYCLOAK_CLIENT_SECRET" \
-            2>/dev/null || echo '{"error":"connection_failed"}')
-
-        if echo "$test_response" | grep -q '"access_token"'; then
-            echo -e "${GREEN}✓ Client credentials are valid${NC}"
-        else
-            echo -e "${RED}✗ Client credentials test failed${NC}" >&2
-            echo -e "${YELLOW}Response: $test_response${NC}" >&2
-            echo -e "${YELLOW}Please verify the client secret is correct${NC}" >&2
-            exit 1
-        fi
-    fi
-
-    # Export for use in deployment
-    export KEYCLOAK_URL
-    export KEYCLOAK_REALM
-    export KEYCLOAK_CLIENT_ID
-    export KEYCLOAK_CLIENT_SECRET
-
-    echo -e "${GREEN}✓ Keycloak configuration ready${NC}"
+    echo -e "${GREEN}Keycloak: bundled in preview namespace (realm activiti, client activiti)${NC}"
+    echo -e "${CYAN}Client secret is created by Helm in activiti-keycloak-client.${NC}"
+    KEYCLOAK_REALM="${KEYCLOAK_REALM:-activiti}"
+    KEYCLOAK_CLIENT_ID="${KEYCLOAK_CLIENT_ID:-activiti}"
+    KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
+    export KEYCLOAK_REALM KEYCLOAK_CLIENT_ID KEYCLOAK_CLIENT_SECRET
     echo ""
 }
 
@@ -378,52 +319,67 @@ configure_cluster() {
     fi
 }
 
-# Function to ensure local-values.yaml exists
+# Refresh local-values.local.yaml from Docker Hub (once per install — avoids Helm on :47 then prereqs bump to :48).
+refresh_local_image_tags() {
+    if [[ "${REFRESH_LOCAL_IMAGE_TAGS:-false}" != "true" ]]; then
+        return 0
+    fi
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
+        return 0
+    fi
+    echo -e "${YELLOW}Refreshing image tags from registry (resolve-docker-images.sh)...${NC}"
+    if "$SCRIPT_DIR/resolve-docker-images.sh"; then
+        echo -e "${GREEN}✓ local-values.local.yaml updated with latest tags${NC}"
+        return 0
+    fi
+    echo -e "${RED}✗ Failed to refresh local-values.local.yaml${NC}" >&2
+    return 1
+}
+
+read_local_image_version_from_values() {
+    local values_file=$1
+    if [[ ! -f "${values_file}" ]] || ! command -v yq >/dev/null 2>&1; then
+        return 0
+    fi
+    LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "${values_file}" 2>/dev/null || echo "")
+    if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
+        echo -e "${YELLOW}Using image version: ${LOCAL_IMAGE_VERSION}${NC}"
+        export LOCAL_IMAGE_VERSION
+    fi
+}
+
+# Function to ensure local-values.local.yaml exists (gitignored)
 ensure_local_values() {
     echo -e "${BLUE}=== Ensuring Local Docker Images Configuration ===${NC}"
 
     if [[ "$USE_LOCAL_IMAGES" == "false" ]]; then
-        echo -e "${YELLOW}Skipping local-values.yaml (--no-local-images specified)${NC}"
+        echo -e "${YELLOW}Skipping local-values.local.yaml (--no-local-images specified)${NC}"
         return 0
     fi
 
-    local local_values_file="$ROOT_DIR/local-values.yaml"
+    local local_values_file="$ROOT_DIR/local-values.local.yaml"
+    local legacy_local_values_file="$ROOT_DIR/local-values.yaml"
 
     if [[ -f "$local_values_file" ]]; then
-        echo -e "${GREEN}✓ local-values.yaml already exists${NC}"
-        echo -e "${YELLOW}Using working image tags from local-values.yaml${NC}"
-
-        # Extract version from local-values.yaml for use as main VERSION
-        if command -v yq >/dev/null 2>&1; then
-            LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
-            if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
-                echo -e "${YELLOW}Detected working image version: $LOCAL_IMAGE_VERSION${NC}"
-                export LOCAL_IMAGE_VERSION
-            fi
-        fi
-    else
-        echo -e "${YELLOW}local-values.yaml not found, creating it...${NC}"
-
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh${NC}"
+        if [[ "${REFRESH_LOCAL_IMAGE_TAGS:-false}" == "true" ]]; then
+            refresh_local_image_tags || true
         else
-            if "$SCRIPT_DIR/resolve-docker-images.sh"; then
-                echo -e "${GREEN}✓ local-values.yaml created with working image tags${NC}"
-
-                # Extract version from newly created local-values.yaml
-                if command -v yq >/dev/null 2>&1; then
-                    LOCAL_IMAGE_VERSION=$(yq e '.runtime-bundle.image.tag' "$local_values_file" 2>/dev/null || echo "")
-                    if [[ -n "$LOCAL_IMAGE_VERSION" && "$LOCAL_IMAGE_VERSION" != "null" ]]; then
-                        echo -e "${YELLOW}Using working image version: $LOCAL_IMAGE_VERSION${NC}"
-                        export LOCAL_IMAGE_VERSION
-                    fi
-                fi
-            else
-                echo -e "${RED}✗ Failed to create local-values.yaml${NC}" >&2
-                echo -e "${YELLOW}Will proceed without local image overrides${NC}"
-                USE_LOCAL_IMAGES=false
-            fi
+            echo -e "${GREEN}✓ local-values.local.yaml already exists (use REFRESH_LOCAL_IMAGE_TAGS=true to update tags)${NC}"
         fi
+        read_local_image_version_from_values "${local_values_file}"
+    elif [[ -f "$legacy_local_values_file" ]]; then
+        echo -e "${YELLOW}⚠ Found legacy local-values.yaml — please migrate to local-values.local.yaml${NC}"
+        local_values_file="$legacy_local_values_file"
+        read_local_image_version_from_values "${local_values_file}"
+    else
+        echo -e "${YELLOW}local-values.local.yaml not found, creating it...${NC}"
+        REFRESH_LOCAL_IMAGE_TAGS=true refresh_local_image_tags || {
+            echo -e "${YELLOW}Will proceed without local image overrides${NC}"
+            USE_LOCAL_IMAGES=false
+            return 0
+        }
+        read_local_image_version_from_values "${local_values_file}"
     fi
 }
 
@@ -539,26 +495,44 @@ generate_environment() {
         exit 1
     fi
 
-    # Convert boolean partitioned to expected format
-    if [[ "$MESSAGING_PARTITIONED" == "true" ]]; then
+    # Normalize partitioning option to match Helm values filenames used by Makefile:
+    # - partitioned-values.yaml
+    # - non-partitioned-values.yaml
+    # - prefix-values.yaml
+    if [[ "$MESSAGING_PARTITIONED" == "true" || "$MESSAGING_PARTITIONED" == "partitioned" ]]; then
         MESSAGING_PARTITIONED_SUFFIX="partitioned"
         MESSAGING_PARTITIONED_MAKE="partitioned"
+    elif [[ "$MESSAGING_PARTITIONED" == "prefix" ]]; then
+        MESSAGING_PARTITIONED_SUFFIX="prefix"
+        MESSAGING_PARTITIONED_MAKE="prefix"
     else
         MESSAGING_PARTITIONED_SUFFIX="non-partitioned"
         MESSAGING_PARTITIONED_MAKE="non-partitioned"
     fi
 
-    # Convert destinations to expected format
-    if [[ "$MESSAGING_DESTINATIONS" == "default" ]]; then
+    # Normalize destinations option to match Helm values filenames used by Makefile:
+    # - default-destinations-values.yaml
+    # - override-destinations-values.yaml
+    # - pdb-values.yaml
+    if [[ "$MESSAGING_DESTINATIONS" == "default" || "$MESSAGING_DESTINATIONS" == "default-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="default-destinations"
         MESSAGING_DESTINATIONS_MAKE="default-destinations"
-    else
+    elif [[ "$MESSAGING_DESTINATIONS" == "override" || "$MESSAGING_DESTINATIONS" == "override-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="override-destinations"
         MESSAGING_DESTINATIONS_MAKE="override-destinations"
+    elif [[ "$MESSAGING_DESTINATIONS" == "pdb" ]]; then
+        MESSAGING_DESTINATIONS_SUFFIX="pdb"
+        MESSAGING_DESTINATIONS_MAKE="pdb"
+    else
+        echo -e "${RED}Error: Unknown destinations option: '${MESSAGING_DESTINATIONS}'${NC}" >&2
+        echo -e "${YELLOW}Expected: default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
     fi
 
     # Add broker and configuration suffixes (same logic as GitHub Actions)
     PREVIEW_NAME="$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED_SUFFIX:0:1}-${MESSAGING_DESTINATIONS_SUFFIX:0:1}"
+
+    validate_preview_release_name_length "${PREVIEW_NAME}" || exit 1
 
     # Generate host URLs
     GATEWAY_HOST="gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN"
@@ -579,9 +553,9 @@ generate_environment() {
     # Generate version if not provided
     if [[ -z "$VERSION" ]]; then
         if [[ "$USE_LOCAL_IMAGES" == "true" && -n "$LOCAL_IMAGE_VERSION" ]]; then
-            # When using local images, use the version from local-values.yaml
+            # When using local images, use the version from local-values.local.yaml
             VERSION="$LOCAL_IMAGE_VERSION"
-            echo -e "${YELLOW}Using version from local-values.yaml: $VERSION${NC}"
+            echo -e "${YELLOW}Using version from local-values.local.yaml: $VERSION${NC}"
         else
             # When not using local images, generate custom version
             VERSION="0.0.1-${ENVIRONMENT_NAME}-SNAPSHOT"
@@ -624,13 +598,17 @@ perform_installation() {
 
     # Add local values file if requested
     if [[ "$USE_LOCAL_IMAGES" == "true" ]]; then
-        if [[ -f "$ROOT_DIR/local-values.yaml" ]]; then
+        if [[ -f "$ROOT_DIR/local-values.local.yaml" ]]; then
             # Use absolute path to avoid relative path issues
+            local_values_file="$ROOT_DIR/local-values.local.yaml"
+            make_cmd="$make_cmd LOCAL_VALUES_FILE='$local_values_file'"
+            echo -e "${YELLOW}Using local image overrides from local-values.local.yaml${NC}"
+        elif [[ -f "$ROOT_DIR/local-values.yaml" ]]; then
             local_values_file="$ROOT_DIR/local-values.yaml"
             make_cmd="$make_cmd LOCAL_VALUES_FILE='$local_values_file'"
-            echo -e "${YELLOW}Using local image overrides from local-values.yaml${NC}"
+            echo -e "${YELLOW}Using legacy local image overrides from local-values.yaml${NC}"
         else
-            echo -e "${YELLOW}Warning: --use-local-images specified but local-values.yaml not found${NC}"
+            echo -e "${YELLOW}Warning: --use-local-images specified but local-values.local.yaml not found${NC}"
             echo -e "${YELLOW}Run './scripts/resolve-docker-images.sh' first to create it${NC}"
         fi
     fi
@@ -639,39 +617,10 @@ perform_installation() {
 
     execute_command "$make_cmd" "Running make install"
 
-    # Configure Keycloak settings in the deployed identity adapter
+    # Keycloak URL, hostAliases, policies: apply-cluster-prereqs.sh (single pass — avoids duplicate rollouts here).
     if [[ "$DRY_RUN" == "false" ]]; then
-        echo -e "${BLUE}=== Configuring Identity Adapter ===${NC}"
-
-        # Dynamic deployment name based on preview name
-        local identity_deployment="${PREVIEW_NAME}-activiti-cloud-identity-adapter"
-
-        # Wait for deployment to be ready
-        echo -e "${YELLOW}Waiting for identity adapter deployment...${NC}"
-        kubectl wait --for=condition=available --timeout=300s deployment/$identity_deployment -n $PREVIEW_NAME || true
-
-        # Update the identity adapter with correct Keycloak configuration
-        echo -e "${YELLOW}Updating Keycloak client secret...${NC}"
-        kubectl patch secret activiti-keycloak-client -n $PREVIEW_NAME -p "{\"data\":{\"clientSecret\":\"$(echo -n "$KEYCLOAK_CLIENT_SECRET" | base64)\"}}"
-
-        # Update all deployments with correct Keycloak URL and realm
-        echo -e "${YELLOW}Updating Keycloak URL and realm configuration...${NC}"
-        local deployments=(
-            "$PREVIEW_NAME-activiti-cloud-connector"
-            "$PREVIEW_NAME-activiti-cloud-identity-adapter"
-            "$PREVIEW_NAME-activiti-cloud-query"
-            "$PREVIEW_NAME-runtime-bundle"
-        )
-
-        for deployment in "${deployments[@]}"; do
-            if kubectl get deployment "$deployment" -n $PREVIEW_NAME &>/dev/null; then
-                echo -e "${CYAN}  Updating $deployment...${NC}"
-                kubectl patch deployment "$deployment" -n $PREVIEW_NAME -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"${deployment#$PREVIEW_NAME-}\",\"env\":[{\"name\":\"ACT_KEYCLOAK_URL\",\"value\":\"$KEYCLOAK_URL\"},{\"name\":\"ACT_KEYCLOAK_REALM\",\"value\":\"$KEYCLOAK_REALM\"}]}]}}}}"
-            fi
-        done        # Restart the deployment to pick up the new secret
-        echo -e "${YELLOW}Restarting identity adapter to pick up new configuration...${NC}"
-        kubectl rollout restart deployment/$identity_deployment -n $PREVIEW_NAME
-        kubectl rollout status deployment/$identity_deployment -n $PREVIEW_NAME
+        echo -e "${GREEN}=== Helm install completed ===${NC}"
+        echo -e "${YELLOW}Run npm run cluster:prereqs (or npm run test:setup) to apply acceptance config once.${NC}"
 
         echo -e "${GREEN}=== Installation Completed Successfully! ===${NC}"
         echo -e "${YELLOW}Your Activiti Cloud instance is available at:${NC}"
@@ -695,8 +644,13 @@ generate_env_file() {
     local env_file="$ROOT_DIR/activiti-cloud-acceptance-tests-playwright/.env"
     local local_port="8080"
 
-    # Use the configured Keycloak realm
-    local realm="${KEYCLOAK_REALM:-alfresco}"
+    local realm="${KEYCLOAK_REALM:-activiti}"
+    local sso_host
+    sso_host="$(preview_sso_token_url "${PREVIEW_NAME}" "${realm}")"
+
+    if [[ -z "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+        configure_preview_keycloak_post_install "${PREVIEW_NAME}" 2>/dev/null || true
+    fi
 
     if [[ "$DRY_RUN" == "true" ]]; then
         echo -e "${CYAN}[DRY-RUN] Would create .env file at: $env_file${NC}"
@@ -722,12 +676,12 @@ GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
 GATEWAY_URL=http://gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
 SSO_PROTOCOL=http
 IDENTITY_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN:$local_port
-SSO_HOST=$KEYCLOAK_URL/realms/$realm/protocol/openid-connect/token
+SSO_HOST=$sso_host
 REALM=$realm
 
 # Keycloak Configuration
 KEYCLOAK_REALM=$realm
-KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
+KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-activiti}
 KEYCLOAK_CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
 
 # Application Configuration
@@ -797,15 +751,21 @@ if [[ "$MESSAGING_BROKER" != "rabbitmq" && "$MESSAGING_BROKER" != "kafka" ]]; th
     exit 1
 fi
 
-if [[ "$MESSAGING_PARTITIONED" != "true" && "$MESSAGING_PARTITIONED" != "false" ]]; then
-    echo -e "${RED}Error: Partitioned must be 'true' or 'false'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_PARTITIONED" in
+    true|false|partitioned|non-partitioned|prefix) ;;
+    *)
+        echo -e "${RED}Error: Partitioning must be true|false (legacy) or partitioned|non-partitioned|prefix${NC}" >&2
+        exit 1
+        ;;
+esac
 
-if [[ "$MESSAGING_DESTINATIONS" != "default" && "$MESSAGING_DESTINATIONS" != "override" ]]; then
-    echo -e "${RED}Error: Destinations must be 'default' or 'override'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_DESTINATIONS" in
+    default|override|pdb|default-destinations|override-destinations) ;;
+    *)
+        echo -e "${RED}Error: Destinations must be default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
+        ;;
+esac
 
 # Main execution
 echo -e "${GREEN}=== Activiti Cloud Local Installation ===${NC}"

@@ -27,7 +27,8 @@ export class ProcessDefinitionRegistry {
         ['PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES', 'SingleTaskProcessGroupCandidates'],
         ['PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO', 'fixSystemFailure'],
         ['PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP', 'singletask-b6095889-6177-4b73-b3d9-316e47749a36'],
-        ['SUB_PROCESS_INSTANCE_WITH_TASK', 'subprocess-970cb8df-2d4c-482b-a7f8-c19a983c2ef2']
+        ['SUB_PROCESS_INSTANCE_WITH_TASK', 'subprocess-970cb8df-2d4c-482b-a7f8-c19a983c2ef2'],
+        ['PROCESS_WITH_HEADERS_CONNECTOR', 'HeadersConnectorProcess'],
     ]);
 
     private static readonly processWithNoTasksDefinitionKeys = new Map<string, string>([
@@ -57,5 +58,10 @@ export class ProcessDefinitionRegistry {
 
     public static getProcessDefinitionKey(processName: string): string {
         return ProcessDefinitionRegistry.processDefinitionKeyMatcher(processName);
+    }
+
+    /** Keys expected to be deployed (subset aligned with runtime-acceptance ProcessDefinitionRegistry). */
+    public static getAllProcessDefinitionKeys(): string[] {
+        return [...new Set(ProcessDefinitionRegistry.processDefinitionKeys.values())];
     }
 }

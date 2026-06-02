@@ -1,0 +1,11 @@
+name: Prepare preview for Playwright (CI)
+description: >-
+  Waits for Helm workloads, loads Keycloak secret, and applies acceptance overlay
+  (policies + example-runtime-bundle). Playwright global-setup skips this in CI.
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare cluster for acceptance tests
+      shell: bash
+      run: bash "${GITHUB_WORKSPACE}/scripts/ci/prepare-preview-for-playwright.sh"

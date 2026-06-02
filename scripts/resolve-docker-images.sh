@@ -102,10 +102,10 @@ echo -e "  Found tag: ${GREEN}$IDENTITY_ADAPTER_TAG${NC}"
 echo ""
 
 echo ""
-echo -e "${BLUE}=== Creating local-values.yaml override ===${NC}"
+echo -e "${BLUE}=== Creating local-values.local.yaml override ===${NC}"
 
 # Create a values override file for local development
-cat > "$SCRIPT_DIR/../local-values.yaml" << EOF
+cat > "$SCRIPT_DIR/../local-values.local.yaml" << EOF
 # Local development image overrides
 # Generated automatically by resolve-docker-images.sh
 
@@ -131,7 +131,7 @@ activiti-cloud-identity-adapter:
     pullPolicy: IfNotPresent
 EOF
 
-echo -e "${GREEN}✓ Created local-values.yaml with working image tags${NC}"
+echo -e "${GREEN}✓ Created local-values.local.yaml with working image tags${NC}"
 echo ""
 echo -e "${YELLOW}Image mappings:${NC}"
 echo -e "  activiti/example-runtime-bundle -> ${RUNTIME_BUNDLE_TAG:-latest}"
@@ -141,5 +141,5 @@ echo -e "  activiti/activiti-cloud-identity-adapter -> ${IDENTITY_ADAPTER_TAG:-l
 echo ""
 echo -e "${BLUE}Usage:${NC}"
 echo -e "  ./scripts/local-install.sh -p 123 --use-local-images"
-echo -e "  # This will use the local-values.yaml file to override image tags"
+echo -e "  # This will use the local-values.local.yaml file to override image tags"
 echo ""

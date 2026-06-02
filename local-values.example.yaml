@@ -1,0 +1,23 @@
+# Local development image overrides
+# Generated automatically by resolve-docker-images.sh
+
+# Use available image tags instead of PR-specific ones
+runtime-bundle:
+  image:
+    tag: "9.1.0-alpha.47"
+    pullPolicy: IfNotPresent
+
+activiti-cloud-query:
+  image:
+    tag: "9.1.0-alpha.47"
+    pullPolicy: IfNotPresent
+
+activiti-cloud-connector:
+  image:
+    tag: "9.1.0-alpha.47"
+    pullPolicy: IfNotPresent
+
+activiti-cloud-identity-adapter:
+  image:
+    tag: "9.1.0-alpha.47"
+    pullPolicy: IfNotPresent
