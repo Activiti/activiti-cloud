@@ -15,9 +15,26 @@
  */
 package org.activiti.cloud.starter.query.consumer.config;
 
+import com.zaxxer.hikari.HikariDataSource;
+import org.activiti.cloud.conf.FixedQueryConsumerPartitionedChannelCountProvider;
+import org.activiti.cloud.conf.QueryConsumerAutoConfiguration;
+import org.activiti.cloud.conf.QueryConsumerPartitionedChannelCountProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 
-@AutoConfiguration
+@AutoConfiguration(before = QueryConsumerAutoConfiguration.class)
 @PropertySource("classpath:query-messaging.properties")
-public class ActivitiQueryConsumerAutoConfiguration {}
+public class ActivitiQueryConsumerAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(HikariDataSource.class)
+    QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider(
+        HikariDataSource dataSource
+    ) {
+        return new FixedQueryConsumerPartitionedChannelCountProvider(dataSource.getMaximumPoolSize() * 2);
+    }
+}

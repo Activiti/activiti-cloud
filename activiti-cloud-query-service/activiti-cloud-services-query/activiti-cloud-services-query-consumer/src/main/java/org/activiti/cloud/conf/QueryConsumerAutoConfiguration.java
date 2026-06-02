@@ -52,27 +52,8 @@ public class QueryConsumerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider() {
-        return new FixedQueryConsumerPartitionedChannelCountProvider(32);
+        return new RuntimeQueryConsumerPartitionedChannelCountProvider();
     }
-
-    //    @Bean
-    //    ConsistentHashRing<Integer> consistentHashRingPartitions(
-    //        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
-    //    ) {
-    //        final var consistentHashRing = new ConsistentHashRing<Integer>(VIRTUAL_NODES_PER_PARTITION);
-    //
-    //        IntStream.range(0, queryConsumerPartitionedChannelCountProvider.get()).forEach(consistentHashRing::addNode);
-    //
-    //        return consistentHashRing;
-    //    }
-    //
-    //    @Bean
-    //    @ConditionalOnMissingBean
-    //    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
-    //        ConsistentHashRing<Integer> consistentHashRingPartitions
-    //    ) {
-    //        return new ConsistentHashRingPartitionedChannelKeySelector(consistentHashRingPartitions);
-    //    }
 
     @Bean
     QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
