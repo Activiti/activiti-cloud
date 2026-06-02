@@ -57,8 +57,8 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             let processInstanceId: string;
 
             await activiti.step(
-                'Given the user is authenticated as hradmin ' +
-                    'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
+                'Given the user is authenticated as testuser ' +
+                    'When the user starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
                         runtimeBundleServiceTestUser,
@@ -103,8 +103,8 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             let processInstanceId: string;
 
             await activiti.step(
-                'Given the user is authenticated as hradmin ' +
-                    'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
+                'Given the user is authenticated as testuser ' +
+                    'When the user starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
                         runtimeBundleServiceTestUser,
@@ -163,8 +163,8 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             let processInstanceId: string;
 
             await activiti.step(
-                'Given the user is authenticated as hradmin ' +
-                    'When the admin starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
+                'Given the user is authenticated as testuser ' +
+                    'When the user starts the process PROCESS_INSTANCE_WITH_VARIABLES with variables start1 and start2',
                 async () => {
                     const processInstance = await startCatalogProcess(
                         runtimeBundleServiceTestUser,

@@ -168,13 +168,12 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And variables values created in task with variable mapping are correct', async () => {
-            const task = await expect
+            await expect
                 .poll(async () => {
                     const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
                     return tasks.find((t) => t.name === 'My task1');
                 }, pollOptions('querySync'))
                 .toBeDefined();
-            void task;
 
             const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
             const matched = tasks.find((t) => t.name === 'My task1')!;
@@ -265,12 +264,11 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And process variables are properly mapped to the task variables', async () => {
-            const tasks = await expect
+            await expect
                 .poll(async () => {
                     return taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
                 }, pollOptions('querySync'))
                 .toHaveLength(1);
-            void tasks;
 
             const all = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
             taskId = all[0].id;
