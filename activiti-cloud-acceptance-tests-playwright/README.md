@@ -209,18 +209,6 @@ Do not run prereqs twice in parallel on the same namespace.
 | rabbit pdb         | rabbitmq | non-partitioned | pdb          |
 | rabbit prefix pdb  | rabbitmq | prefix          | pdb          |
 
-### CI matrix (messaging)
-
-| Job                | Broker   | Partitioning    | Destinations |
-| ------------------ | -------- | --------------- | ------------ |
-| baseline           | rabbitmq | non-partitioned | default      |
-| rabbit partitioned | rabbitmq | partitioned     | default      |
-| kafka              | kafka    | non-partitioned | default      |
-| kafka partitioned  | kafka    | partitioned     | default      |
-| kafka override     | kafka    | partitioned     | override     |
-| rabbit pdb         | rabbitmq | non-partitioned | pdb          |
-| rabbit prefix pdb  | rabbitmq | prefix          | pdb          |
-
 ## Project structure
 
 See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md). BPMN assets: [docs/MODELING_PROJECTS.md](docs/MODELING_PROJECTS.md).
