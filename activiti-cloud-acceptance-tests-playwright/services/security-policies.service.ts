@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,6 @@ interface ErrorEntry {
     message?: string;
 }
 
-export interface SecurityPoliciesServiceDeps {
-    runtimeBundleService?: RuntimeBundleService;
-    taskService?: TaskService;
-    queryService?: QueryService;
-    auditService?: AuditService;
-    auditAdminService?: AuditAdminService;
-    runtimeAdminService?: RuntimeAdminService;
-    queryAdminService?: QueryAdminService;
-}
-
 export class SecurityPoliciesService extends BaseService {
     private readonly runtimeBundleService: RuntimeBundleService;
     private readonly taskService: TaskService;
@@ -54,15 +44,15 @@ export class SecurityPoliciesService extends BaseService {
     private readonly runtimeAdminService: RuntimeAdminService;
     private readonly queryAdminService: QueryAdminService;
 
-    constructor(context: CustomAPIRequest, deps: SecurityPoliciesServiceDeps = {}) {
+    constructor(context: CustomAPIRequest) {
         super(context);
-        this.runtimeBundleService = deps.runtimeBundleService ?? new RuntimeBundleService(context);
-        this.taskService = deps.taskService ?? new TaskService(context);
-        this.queryService = deps.queryService ?? new QueryService(context);
-        this.auditService = deps.auditService ?? new AuditService(context);
-        this.auditAdminService = deps.auditAdminService ?? new AuditAdminService(context);
-        this.runtimeAdminService = deps.runtimeAdminService ?? new RuntimeAdminService(context);
-        this.queryAdminService = deps.queryAdminService ?? new QueryAdminService(context);
+        this.runtimeBundleService = new RuntimeBundleService(context);
+        this.taskService = new TaskService(context);
+        this.queryService = new QueryService(context);
+        this.auditService = new AuditService(context);
+        this.auditAdminService = new AuditAdminService(context);
+        this.runtimeAdminService = new RuntimeAdminService(context);
+        this.queryAdminService = new QueryAdminService(context);
     }
 
     attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {

@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env npx ts-node
 /**
  * Preflight check for local Playwright acceptance tests.
  * Usage: npm run check:env [-- identity|security|process|all]

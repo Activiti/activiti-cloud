@@ -7,9 +7,8 @@
 | [MODELING_PROJECTS.md](MODELING_PROJECTS.md)     | BPMN under `resources/modeling-projects/` and cluster mount |
 | [PARALLEL_SAFE.md](PARALLEL_SAFE.md)             | Isolation rules for parallel workers                        |
 | [SERENITY_RETIREMENT.md](SERENITY_RETIREMENT.md) | Serenity vs Playwright coverage and CI gate                 |
-| [CI_LOCAL.md](CI_LOCAL.md)                       | CI vs local env bootstrap (same vars, different transport)  |
 | [MIGRATION_PLAN.md](MIGRATION_PLAN.md)           | Story-by-story migration tracker (Serenity → Playwright)    |
 
-Run `npm run typecheck` and `npm run lint` before pushing TypeScript changes.
+Run `npm run typecheck` before pushing TypeScript changes.
 
 All package documentation lives under `docs/` except the root [README.md](../README.md) entry point.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { bootstrapAcceptanceEnv } from '../bootstrap';
+import '../load-env';
+import { applyResolvedHostsToEnv } from '../connection/env-hosts';
 import { validateEnvironmentVariables } from '../validation/environment-validator';
 import { getTestConfiguration } from '../runtime/test-configuration';
 import { acceptanceLog, acceptancePhase, acceptanceStep } from '../../helpers/acceptance-progress';
@@ -31,7 +32,7 @@ async function globalSetup(): Promise<void> {
     await resolvePreviewNamespace();
     await ensureKeycloakClientSecretFromCluster();
 
-    bootstrapAcceptanceEnv();
+    applyResolvedHostsToEnv();
     acceptanceStep('traefik', `Gateway host: ${process.env.GATEWAY_HOST ?? '(unset)'}`);
 
     const envCheck = validateEnvironmentVariables('all');

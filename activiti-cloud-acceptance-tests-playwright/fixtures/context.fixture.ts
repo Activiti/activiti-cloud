@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,20 @@ import type { UserKey } from '../config/users';
 import { AuthCache } from './auth-cache';
 import { CustomAPIRequest } from './context.models';
 
-export interface UserContexts {
+interface UserContexts {
     hrUserContext: CustomAPIRequest;
     hradminContext: CustomAPIRequest;
     processAdminContext: CustomAPIRequest;
+    modelerUserContext: CustomAPIRequest;
+    modelerqaUserContext: CustomAPIRequest;
+    devopsUserContext: CustomAPIRequest;
+    superadminContext: CustomAPIRequest;
+    salesUserContext: CustomAPIRequest;
     testAdminUserContext: CustomAPIRequest;
     testUserContext: CustomAPIRequest;
 }
 
-export interface WorkerFixtures {
+interface WorkerFixtures {
     authCache: AuthCache;
 }
 
@@ -48,8 +53,13 @@ const contexts = base.extend<UserContexts, WorkerFixtures>({
     ],
 
     processAdminContext: userContext('processadmin'),
+    devopsUserContext: userContext('devopsuser'),
     hrUserContext: userContext('hruser'),
     hradminContext: userContext('hradmin'),
+    modelerUserContext: userContext('modeler'),
+    modelerqaUserContext: userContext('modelerqa'),
+    superadminContext: userContext('superadminuser'),
+    salesUserContext: userContext('salesUser'),
     testAdminUserContext: userContext('testAdminUser'),
     testUserContext: userContext('testUser'),
 });

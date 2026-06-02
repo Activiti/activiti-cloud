@@ -58,10 +58,10 @@ async function cleanupSpecificProcess(): Promise<void> {
     }
 }
 
-async function cleanupRemainingProcesses(localPort: string): Promise<void> {
-    cleanupStep('traefik', `pkill remaining kubectl port-forward on :${localPort}`);
+async function cleanupRemainingProcesses(): Promise<void> {
+    cleanupStep('traefik', 'pkill remaining kubectl port-forward :80');
     try {
-        await execAsync(`pkill -f "kubectl port-forward.*${localPort}:80"`);
+        await execAsync('pkill -f "kubectl port-forward.*:80"');
         cleanupLog('traefik', '✓ Stray port-forward processes cleared');
     } catch {
         cleanupLog('traefik', 'No extra port-forward processes found — already tidy');
@@ -70,11 +70,10 @@ async function cleanupRemainingProcesses(localPort: string): Promise<void> {
 
 export async function cleanupPortForwarding(): Promise<void> {
     cleanupPhase('traefik', 'Port-forward cleanup');
-    const localPort = process.env.LOCAL_PORT || '8080';
 
     try {
         await cleanupSpecificProcess();
-        await cleanupRemainingProcesses(localPort);
+        await cleanupRemainingProcesses();
         cleanupLog('traefik', '✓ Port-forward tunnel closed — localhost:8080 is free again');
     } catch (error) {
         const detail = error instanceof Error ? error.message : String(error);

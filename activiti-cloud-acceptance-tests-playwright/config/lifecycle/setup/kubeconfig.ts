@@ -1,7 +1,11 @@
+import { exec } from 'child_process';
 import { existsSync } from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 import { previewNameFromEnvName } from '../../connection/preview-name';
 import { acceptanceLog } from '../../../helpers/acceptance-progress';
+
+const execAsync = promisify(exec);
 
 export async function ensureKubeconfig(): Promise<void> {
     if (process.env.KUBECONFIG?.trim()) {

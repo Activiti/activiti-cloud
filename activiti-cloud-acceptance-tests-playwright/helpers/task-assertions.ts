@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 
 import { expect } from '@playwright/test';
+import { pollOptions } from '../config/runtime/timeouts';
 import { ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { CloudTask, TaskStatus } from '../models/task.models';
 import { QueryService } from '../services/query.service';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
 import { RequestResponse } from '../services/base.service';
 import { TaskService } from '../services/task.service';
-import { expectPoll } from './expect-poll';
 import { getQueryProcessInstanceWhenSynced } from './query-sync';
 
 export function expectClientError(response: RequestResponse, messageFragment?: string): void {
@@ -49,15 +49,17 @@ export async function expectTaskStatusInRbAndQuery(
     expectedStatus: TaskStatus
 ): Promise<void> {
     if (expectedStatus !== TaskStatus.COMPLETED) {
-        await expectPoll(async () => (await taskService.getTaskById(taskId)).status, 'querySync').toBe(
-            expectedStatus
-        );
+        await expect
+            .poll(async () => (await taskService.getTaskById(taskId)).status, pollOptions('querySync'))
+            .toBe(expectedStatus);
     }
 
-    await expectPoll(async () => {
-        const task = await queryService.getTaskById(taskId);
-        return task?.status;
-    }, 'querySync').toBe(expectedStatus);
+    await expect
+        .poll(async () => {
+            const task = await queryService.getTaskById(taskId);
+            return task?.status;
+        }, pollOptions('querySync'))
+        .toBe(expectedStatus);
 }
 
 export async function expectProcessAndTaskCompleted(
@@ -65,10 +67,12 @@ export async function expectProcessAndTaskCompleted(
     queryService: QueryService,
     processInstanceId: string
 ): Promise<void> {
-    await expectPoll(async () => {
-        const instance = await getQueryProcessInstanceWhenSynced(queryService, processInstanceId);
-        return instance?.status;
-    }, 'querySync').toBe(ProcessInstanceStatus.COMPLETED);
+    await expect
+        .poll(async () => {
+            const instance = await getQueryProcessInstanceWhenSynced(queryService, processInstanceId);
+            return instance?.status;
+        }, pollOptions('querySync'))
+        .toBe(ProcessInstanceStatus.COMPLETED);
 
     await expect(async () => {
         await runtimeBundleService.getProcessInstance(processInstanceId);

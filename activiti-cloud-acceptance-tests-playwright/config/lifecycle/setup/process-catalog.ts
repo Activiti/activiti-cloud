@@ -7,11 +7,6 @@ export async function verifyProcessCatalogIfEnabled(): Promise<void> {
         return;
     }
 
-    if (process.env.ACCEPTANCE_PROCESS_CATALOG_VERIFIED === 'true') {
-        acceptanceLog('registry', '✓ Process catalog already verified in CI workflow — skipping');
-        return;
-    }
-
     acceptancePhase('registry', 'Runtime acceptance process catalog');
     acceptanceStep('registry', 'Checking required BPMN keys on runtime-bundle');
     await verifyAcceptanceProcessCatalog();

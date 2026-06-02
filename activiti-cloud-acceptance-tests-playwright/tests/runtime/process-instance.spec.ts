@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
-import { expectPoll } from '../../helpers/expect-poll';
+import { pollOptions } from '../../config/runtime/timeouts';
 import { isDiagramEmpty, isDiagramShown } from '../../helpers/diagram-utils';
 import { RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS } from '../../helpers/process-deployment';
 
@@ -63,10 +63,12 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('Then the status of the process is changed to suspended', async () => {
-            await expectPoll(async () => {
-                const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
-                return instance.status;
-            }, 'processStatus').toBe(ProcessInstanceStatus.SUSPENDED);
+            await expect
+                .poll(async () => {
+                    const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                    return instance.status;
+                }, pollOptions('processStatus'))
+                .toBe(ProcessInstanceStatus.SUSPENDED);
         });
 
         await activiti.step('And the user is able to resume the process instance', async () => {
@@ -74,10 +76,12 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('Then the status of the process is changed to running', async () => {
-            await expectPoll(async () => {
-                const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
-                return instance.status;
-            }, 'processStatus').toBe(ProcessInstanceStatus.RUNNING);
+            await expect
+                .poll(async () => {
+                    const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                    return instance.status;
+                }, pollOptions('processStatus'))
+                .toBe(ProcessInstanceStatus.RUNNING);
         });
     });
 
@@ -179,10 +183,15 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram', async () => {
-            await expectPoll(async () => {
-                diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
-                return isDiagramShown(diagram);
-            }, 'querySync').toBe(true);
+            await expect
+                .poll(
+                    async () => {
+                        diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+                        return isDiagramShown(diagram);
+                    },
+                    pollOptions('querySync')
+                )
+                .toBe(true);
         });
 
         await activiti.step('Then the query diagram is shown', async () => {
@@ -206,10 +215,15 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram', async () => {
-            await expectPoll(async () => {
-                diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
-                return isDiagramShown(diagram);
-            }, 'querySync').toBe(true);
+            await expect
+                .poll(
+                    async () => {
+                        diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
+                        return isDiagramShown(diagram);
+                    },
+                    pollOptions('querySync')
+                )
+                .toBe(true);
         });
 
         await activiti.step('Then the diagram is shown', async () => {
@@ -233,10 +247,15 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram admin endpoint', async () => {
-            await expectPoll(async () => {
-                diagram = await queryAdminServiceProcessAdmin.getProcessInstanceDiagram(processInstanceId);
-                return isDiagramShown(diagram);
-            }, 'querySync').toBe(true);
+            await expect
+                .poll(
+                    async () => {
+                        diagram = await queryAdminServiceProcessAdmin.getProcessInstanceDiagram(processInstanceId);
+                        return isDiagramShown(diagram);
+                    },
+                    pollOptions('querySync')
+                )
+                .toBe(true);
         });
 
         await activiti.step('Then the query diagram is shown in admin endpoint', async () => {

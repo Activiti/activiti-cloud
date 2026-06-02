@@ -51,7 +51,7 @@ export function resolveGatewayHostEnv(): string {
     }
 
     const hostWithoutPort = explicit.replace(/:\d+$/, '');
-    if (!hostWithoutPort.startsWith(expectedCore)) {
+    if (!hostWithoutPort.includes(`${preview}.${cluster}`)) {
         const resolved = buildGatewayHost(preview, cluster, domain, port);
         console.warn(
             `⚠️  GATEWAY_HOST "${explicit}" does not match PREVIEW_NAME/CLUSTER_NAME — using ${resolved}`

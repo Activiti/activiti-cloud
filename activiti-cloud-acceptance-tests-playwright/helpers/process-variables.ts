@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { expect } from '@playwright/test';
+import { pollOptions } from '../config/runtime/timeouts';
+import { CloudVariableInstance } from '../models/process-variable.models';
 import { QueryService } from '../services/query.service';
-import { expectPoll } from './expect-poll';
 
 function normalizeValues(value: unknown): unknown[] {
     if (Array.isArray(value)) {
@@ -29,10 +31,15 @@ export async function expectProcessVariable(
     processInstanceId: string,
     variableName: string
 ): Promise<void> {
-    await expectPoll(async () => {
-        const variables = await queryService.getProcessInstanceVariables(processInstanceId);
-        return variables.some((variable) => variable.name === variableName);
-    }, 'querySync').toBe(true);
+    await expect
+        .poll(
+            async () => {
+                const variables = await queryService.getProcessInstanceVariables(processInstanceId);
+                return variables.some((variable) => variable.name === variableName);
+            },
+            pollOptions('querySync')
+        )
+        .toBe(true);
 }
 
 export async function expectProcessVariableValue(
@@ -41,17 +48,29 @@ export async function expectProcessVariableValue(
     variableName: string,
     expectedValue: unknown
 ): Promise<void> {
-    await expectPoll(async () => {
-        const variables = await queryService.getProcessInstanceVariables(processInstanceId);
-        const match = variables.find((variable) => variable.name === variableName);
-        if (!match) {
-            return false;
-        }
-        const actual = normalizeValues(match.value);
-        const expected = normalizeValues(expectedValue);
-        return (
-            actual.length === expected.length &&
-            actual.every((item, index) => String(item) === String(expected[index]))
-        );
-    }, 'querySync').toBe(true);
+    await expect
+        .poll(
+            async () => {
+                const variables = await queryService.getProcessInstanceVariables(processInstanceId);
+                const match = variables.find((variable) => variable.name === variableName);
+                if (!match) {
+                    return false;
+                }
+                const actual = normalizeValues(match.value);
+                const expected = normalizeValues(expectedValue);
+                return (
+                    actual.length === expected.length &&
+                    actual.every((item, index) => String(item) === String(expected[index]))
+                );
+            },
+            pollOptions('querySync')
+        )
+        .toBe(true);
+}
+
+export function findVariable(
+    variables: CloudVariableInstance[],
+    variableName: string
+): CloudVariableInstance | undefined {
+    return variables.find((variable) => variable.name === variableName);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,41 @@
  * limitations under the License.
  */
 
-import { bootstrapAcceptanceEnv } from '../config/bootstrap';
-import { withAuthenticatedContext } from '../fixtures/auth-context';
-import { ProcessDefinitionRegistry } from '../models/process-definition-registry';
+import { applyResolvedHostsToEnv } from '../config/connection/env-hosts';
+import { ContextFactory } from '../fixtures/context-factory';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
 
-/** BPMN keys required for process-instance-actions (derived from ProcessDefinitionRegistry). */
-export const RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS =
-    ProcessDefinitionRegistry.definitionKeysForProcessNames(
-        ProcessDefinitionRegistry.processInstanceActionsProcessNames
-    );
+/**
+ * BPMN keys required for process-instance-actions.story parity (Serenity runtime-acceptance-tests).
+ * Deployed from activiti/example-runtime-bundle on chart install.
+ */
+export const RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS = [
+    'SimpleProcess',
+    'ProcessWithVariables',
+    'ConnectorProcess',
+    'fixSystemFailure',
+    'SingleTaskProcess',
+    'HeadersConnectorProcess',
+] as const;
 
-/** BPMN keys for task-actions wave 1 (derived from ProcessDefinitionRegistry). */
-export const RUNTIME_TASK_ACTIONS_WAVE1_REQUIRED_KEYS = ProcessDefinitionRegistry.definitionKeysForProcessNames(
-    ProcessDefinitionRegistry.taskActionsWave1ProcessNames
-);
+/** BPMN keys for task-actions.story wave 1 (Serenity runtime-acceptance-tests). */
+export const RUNTIME_TASK_ACTIONS_WAVE1_REQUIRED_KEYS = [
+    'ProcessWithVariables',
+    'SingleTaskProcess',
+    'SingleTaskProcessUserCandidates',
+    'SingleTaskProcessGroupCandidates',
+    'singletask-b6095889-6177-4b73-b3d9-316e47749a36',
+] as const;
 
-/** BPMN keys for task-actions wave 2 (derived from ProcessDefinitionRegistry). */
-export const RUNTIME_TASK_ACTIONS_WAVE2_REQUIRED_KEYS = ProcessDefinitionRegistry.definitionKeysForProcessNames(
-    ProcessDefinitionRegistry.taskActionsWave2ProcessNames
-);
-
-/** BPMN keys for service-tasks story (derived from ProcessDefinitionRegistry). */
-export const RUNTIME_SERVICE_TASK_ACTIONS_REQUIRED_KEYS =
-    ProcessDefinitionRegistry.definitionKeysForProcessNames(
-        ProcessDefinitionRegistry.serviceTaskActionsProcessNames
-    );
-
-/** Keys required by Playwright specs on this PR (wave 1 + process-instance; wave 2 from task-extended). */
 export const RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS = [
     ...new Set([
         ...RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS,
         ...RUNTIME_TASK_ACTIONS_WAVE1_REQUIRED_KEYS,
-        ...RUNTIME_TASK_ACTIONS_WAVE2_REQUIRED_KEYS,
     ]),
 ] as const;
 
-/** Service-task BPMN keys — used when service-tasks.spec.ts lands (separate PR). */
-export const RUNTIME_SERVICE_TASK_OPTIONAL_PROCESS_KEYS = RUNTIME_SERVICE_TASK_ACTIONS_REQUIRED_KEYS;
+/** @deprecated Use RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS */
+export const PROCESS_INSTANCE_ACTIONS_CORE_KEYS = RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS;
 
 export function formatMissingProcessCatalogMessage(missingKeys: string[]): string {
     return (
@@ -68,29 +65,12 @@ export async function getDeployedProcessDefinitionKeys(
     return new Set(definitions.map((definition) => definition.key));
 }
 
-async function isProcessDefinitionKeyDeployed(
-    runtimeBundleService: RuntimeBundleService,
-    processDefinitionKey: string
-): Promise<boolean> {
-    try {
-        const definition = await runtimeBundleService.getProcessDefinitionByKey(processDefinitionKey);
-        return definition.key === processDefinitionKey;
-    } catch {
-        return false;
-    }
-}
-
 export async function getMissingRequiredProcessDefinitionKeys(
     runtimeBundleService: RuntimeBundleService,
     requiredKeys: readonly string[] = RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS
 ): Promise<string[]> {
-    const missing: string[] = [];
-    for (const key of requiredKeys) {
-        if (!(await isProcessDefinitionKeyDeployed(runtimeBundleService, key))) {
-            missing.push(key);
-        }
-    }
-    return missing;
+    const deployedKeys = await getDeployedProcessDefinitionKeys(runtimeBundleService);
+    return requiredKeys.filter((key) => !deployedKeys.has(key));
 }
 
 function sleep(ms: number): Promise<void> {
@@ -168,9 +148,22 @@ export async function waitForRequiredProcessDefinitions(
 }
 
 export async function verifyAcceptanceProcessCatalog(): Promise<void> {
-    bootstrapAcceptanceEnv();
+    applyResolvedHostsToEnv();
 
-    await withAuthenticatedContext('testUser', async (context) => {
+    const context = await ContextFactory.getContextByUserName('testUser');
+    try {
         await waitForRequiredProcessDefinitions(new RuntimeBundleService(context));
-    });
+    } finally {
+        await context.dispose();
+    }
+}
+
+export async function assertRequiredProcessDefinitionsDeployed(
+    runtimeBundleService: RuntimeBundleService,
+    requiredKeys: readonly string[] = RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS
+): Promise<void> {
+    const missing = await getMissingRequiredProcessDefinitionKeys(runtimeBundleService, requiredKeys);
+    if (missing.length > 0) {
+        throw new Error(formatMissingProcessCatalogMessage(missing));
+    }
 }

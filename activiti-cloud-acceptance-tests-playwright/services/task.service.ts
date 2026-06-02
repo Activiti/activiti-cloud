@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { CloudTask, TaskQueryParams } from '../models/task.models';
-import { CloudVariableInstance } from '../models/process-variable.models';
+import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
 import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
-import { toTaskQueryString } from './query-params';
 
 export interface CreateTaskPayload {
     payloadType: 'CreateTaskPayload';
@@ -57,8 +55,16 @@ export class TaskService extends BaseService {
     }
 
     async getTasks(params?: TaskQueryParams): Promise<CloudTask[]> {
-        const query = toTaskQueryString(params);
-        const response = await this.get(`${this.basePath}/tasks${query ? `?${query}` : ''}`);
+        const searchParams = new URLSearchParams();
+
+        if (params?.status) searchParams.append('status', params.status);
+        if (params?.assignee) searchParams.append('assignee', params.assignee);
+        if (params?.owner) searchParams.append('owner', params.owner);
+        if (params?.processInstanceId) searchParams.append('processInstanceId', params.processInstanceId);
+        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
+        if (params?.name) searchParams.append('name', params.name);
+
+        const response = await this.get(`${this.basePath}/tasks?${searchParams.toString()}`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
@@ -153,18 +159,10 @@ export class TaskService extends BaseService {
     }
 
     async completeTask(taskId: string): Promise<RequestResponse> {
-        return this.completeTaskWithVariables(taskId);
-    }
-
-    async completeTaskWithVariables(
-        taskId: string,
-        variables?: Record<string, unknown>
-    ): Promise<RequestResponse> {
         return this.post(`${this.basePath}/tasks/${taskId}/complete`, {
             data: {
                 payloadType: 'CompleteTaskPayload',
                 taskId,
-                ...(variables ? { variables } : {}),
             },
         });
     }
@@ -185,7 +183,7 @@ export class TaskService extends BaseService {
 
     async updateTask(
         taskId: string,
-        fields: { name?: string; formKey?: string; priority?: number; dueDate?: string }
+        fields: { name?: string; formKey?: string; priority?: number }
     ): Promise<CloudTask> {
         const response = await this.put(`${this.basePath}/tasks/${taskId}`, {
             data: {
@@ -202,22 +200,6 @@ export class TaskService extends BaseService {
                 payloadType: 'AssignTaskPayload',
                 taskId,
                 assignee,
-            },
-        });
-    }
-
-    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
-        const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`);
-        return this.unwrapList<CloudVariableInstance>(response, 'variables');
-    }
-
-    async updateTaskVariable(taskId: string, variableName: string, value: unknown): Promise<void> {
-        await this.put(`${this.basePath}/tasks/${taskId}/variables/${encodeURIComponent(variableName)}`, {
-            data: {
-                payloadType: 'UpdateTaskVariablePayload',
-                taskId,
-                name: variableName,
-                value,
             },
         });
     }

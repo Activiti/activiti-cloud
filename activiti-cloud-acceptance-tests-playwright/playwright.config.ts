@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import './config/load-env';
 import { defineConfig } from '@playwright/test';
-import { bootstrapAcceptanceEnv } from './config/bootstrap';
+import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
 import { paths } from './config/paths';
 import { getTestConfiguration } from './config/runtime/test-configuration';
 import { timeouts } from './config/runtime/timeouts';
-
-bootstrapAcceptanceEnv();
+applyResolvedHostsToEnv();
 
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
@@ -58,7 +58,7 @@ export default defineConfig({
     navigationTimeout: timeouts.navigation,
   },
 
-  // No overlapping projects — use npm scripts with explicit paths for test slices (see README).
+  // No overlapping projects — use npm scripts with explicit paths for slices (see docs/IMPROVEMENTS.md Phase 1).
 
   globalSetup: './config/lifecycle/global-setup.ts',
   globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,

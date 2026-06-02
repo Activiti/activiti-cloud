@@ -14,8 +14,6 @@ import { QueryAdminService } from '../services/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit.service';
-import { AuditAdminService } from '../services/audit-admin.service';
-import { ServiceTasksAdminService } from '../services/service-tasks-admin.service';
 import { IdentityManagementService } from '../services/identity-management.service';
 
 export interface ServiceIsolationOptions {
@@ -46,17 +44,7 @@ export function createSecurityPoliciesService(
     context: CustomAPIRequest,
     isolation: ServiceIsolationOptions = {}
 ): SecurityPoliciesService {
-    const runtimeBundleService = createRuntimeBundleService(context, '/rb', isolation);
-    const taskService = createTaskService(context, isolation);
-    const service = new SecurityPoliciesService(context, {
-        runtimeBundleService,
-        taskService,
-        queryService: createQueryService(context),
-        auditService: createAuditService(context),
-        auditAdminService: new AuditAdminService(context),
-        runtimeAdminService: createRuntimeAdminService(context),
-        queryAdminService: createQueryAdminService(context),
-    });
+    const service = new SecurityPoliciesService(context);
     service.attachIsolation(isolation.dirtyRegistry, isolation.testScope);
     return service;
 }
@@ -92,8 +80,4 @@ export function createAuditService(context: CustomAPIRequest): AuditService {
 
 export function createIdentityManagementService(context: CustomAPIRequest): IdentityManagementService {
     return new IdentityManagementService(context);
-}
-
-export function createServiceTasksAdminService(context: CustomAPIRequest): ServiceTasksAdminService {
-    return new ServiceTasksAdminService(context);
 }

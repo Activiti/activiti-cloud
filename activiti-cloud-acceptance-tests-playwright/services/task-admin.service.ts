@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { CloudTask } from '../models/task.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -36,18 +35,5 @@ export class TaskAdminService extends BaseService {
 
     async deleteTask(taskId: string): Promise<void> {
         await this.delete(`${this.basePath}/tasks/${taskId}`);
-    }
-
-    async updateTask(
-        taskId: string,
-        fields: { name?: string; formKey?: string; priority?: number; dueDate?: string }
-    ): Promise<CloudTask> {
-        const response = await this.put(`${this.basePath}/tasks/${taskId}`, {
-            data: {
-                payloadType: 'UpdateTaskPayload',
-                ...fields,
-            },
-        });
-        return this.unwrapEntity<CloudTask>(response);
     }
 }

@@ -17,7 +17,7 @@ export CI=true
 export GITHUB_ACTIONS=true
 export GATEWAY_PROTOCOL=https
 export GATEWAY_URL="https://${GATEWAY_HOST}"
-export ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS="${ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS:-600000}"
+export ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS="${ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS:-300000}"
 export SSO_PROTOCOL=https
 export SSO_HOST="https://${identity_host}/auth/realms/activiti/protocol/openid-connect/token"
 export KEYCLOAK_CLIENT_ID=activiti
@@ -34,9 +34,8 @@ export ACCEPTANCE_CI_OVERLAY_APPLIED=true
 if [[ "${GITHUB_ACTIONS:-}" == "true" && -n "${GITHUB_ENV:-}" ]]; then
   while IFS= read -r name; do
     [[ -z "${name}" ]] && continue
-    if [[ -v "${name}" ]]; then
-      echo "${name}=${!name}" >> "${GITHUB_ENV}"
-    fi
+    printf -v value '%s' "${!name}"
+    echo "${name}=${value}" >> "${GITHUB_ENV}"
   done <<'EOF'
 CI
 GITHUB_ACTIONS

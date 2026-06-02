@@ -14,7 +14,7 @@
 - Start processes via `runtimeBundleService*.startProcess()` — auto unique `name` / `businessKey` + cleanup.
 - Create standalone tasks via `taskService*.createStandaloneTask()` — tracked + cleaned up.
 - Use `testScope` + `scopedName()` when a test asserts on a specific process name (LIKE queries, rename).
-- Use `expectPoll()` from `helpers/expect-poll.ts` for async engine/query sync (wraps `expect.poll` with profile timeouts).
+- Use `expect.poll()` for async engine/query sync.
 - Give each developer their own `ACCEPTANCE_ENV_NAME` on shared clusters.
 
 ## Do not
@@ -24,7 +24,7 @@
 - Run two `cluster:prereqs` / `global-setup` patches on the **same** namespace simultaneously.
 - Run two Playwright suites on the same machine without coordination (each global-setup tries port `8080`); use different `LOCAL_PORT` or run one suite at a time.
 - Use `workers > 1` for tests marked `@serial` (when introduced).
-- Filter slow integration: `npm run test:slow` (e.g. multi-RB signal spec).
+- Filter slow integration: `npm run test -- --grep @slow` (e.g. multi-RB signal spec).
 
 ## Fixtures
 

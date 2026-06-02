@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,6 @@ export class ProcessDefinitionRegistry {
     private static readonly processWithNoTasksDefinitionKeys = new Map<string, string>([
         ['SIMPLE_PROCESS_INSTANCE', 'SimpleProcess'],
         ['CONNECTOR_PROCESS_INSTANCE', 'ConnectorProcess'],
-        ['CONNECTOR_PROCESS_WITH_LOOP', 'ConnectorProcessWithLoop'],
-        ['BPMN_ERROR_CONNECTOR_PROCESS', 'testBpmnErrorConnectorProcess'],
-        ['ERROR_CONNECTOR_REPLAY_PROCESS', 'testErrorConnectorProcess'],
         ['PROCESS_INSTANCE_WITH_CALL_ACTIVITIES', 'parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8'],
         ['Process Information', 'processinf-4e42752c-cc4d-429b-9528-7d3df24a9537'],
         ['Process with Generic BPMN Task', 'processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7']
@@ -63,40 +60,8 @@ export class ProcessDefinitionRegistry {
         return ProcessDefinitionRegistry.processDefinitionKeyMatcher(processName);
     }
 
-    /** Symbolic process names — process-instance-actions.story parity. */
-    public static readonly processInstanceActionsProcessNames = [
-        'SIMPLE_PROCESS_INSTANCE',
-        'PROCESS_INSTANCE_WITH_VARIABLES',
-        'CONNECTOR_PROCESS_INSTANCE',
-        'PROCESS_INSTANCE_WITHOUT_GRAPHIC_INFO',
-        'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
-        'PROCESS_WITH_HEADERS_CONNECTOR',
-    ] as const;
-
-    /** Symbolic process names — task-actions.story wave 1 parity. */
-    public static readonly taskActionsWave1ProcessNames = [
-        'PROCESS_INSTANCE_WITH_VARIABLES',
-        'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
-        'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES',
-        'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES',
-        'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES_FOR_TESTGROUP',
-    ] as const;
-
-    /** Symbolic process names — process-instance-service-tasks-actions.story parity. */
-    public static readonly serviceTaskActionsProcessNames = [
-        'CONNECTOR_PROCESS_INSTANCE',
-        'CONNECTOR_PROCESS_WITH_LOOP',
-        'BPMN_ERROR_CONNECTOR_PROCESS',
-        'ERROR_CONNECTOR_REPLAY_PROCESS',
-    ] as const;
-
-    /** Symbolic process names — task-actions.story wave 2 (additional BPMN keys). */
-    public static readonly taskActionsWave2ProcessNames = [
-        'PROCESS_INSTANCE_WITH_CALL_ACTIVITIES',
-        'TWO_TASK_PROCESS',
-    ] as const;
-
-    public static definitionKeysForProcessNames(processNames: readonly string[]): string[] {
-        return [...new Set(processNames.map((name) => ProcessDefinitionRegistry.getProcessDefinitionKey(name)))];
+    /** Keys expected to be deployed (subset aligned with runtime-acceptance ProcessDefinitionRegistry). */
+    public static getAllProcessDefinitionKeys(): string[] {
+        return [...new Set(ProcessDefinitionRegistry.processDefinitionKeys.values())];
     }
 }

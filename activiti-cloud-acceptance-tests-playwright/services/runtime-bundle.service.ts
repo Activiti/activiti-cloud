@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import {
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
-import { toProcessQueryString } from './query-params';
 
 export class RuntimeBundleService extends BaseService {
     private readonly basePath: string;
@@ -73,18 +72,17 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        const query = toProcessQueryString(params);
+        const searchParams = new URLSearchParams();
+
+        if (params?.status) searchParams.append('status', params.status);
+        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
+        if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
+        if (params?.name) searchParams.append('name', params.name);
+
         const response = await this.get(
-            `${this.basePath}/process-instances${query ? `?${query}` : ''}`
+            `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
-    }
-
-    async getSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        const response = await this.get(
-            `${this.basePath}/process-instances/${parentProcessInstanceId}/subprocesses`
-        );
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
@@ -109,7 +107,7 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        const response = await this.get(`${this.basePath}/process-definitions?maxItems=1000`);
+        const response = await this.get(`${this.basePath}/process-definitions`);
         const status = response.httpStatus;
         if (status === 401 || status === 403) {
             throw new Error(
@@ -142,17 +140,5 @@ export class RuntimeBundleService extends BaseService {
             },
         });
         return this.unwrapEntity<CloudProcessInstance>(response);
-    }
-
-    async updateProcessVariables(
-        processInstanceId: string,
-        variables: Record<string, unknown>
-    ): Promise<void> {
-        await this.put(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
-            data: {
-                payloadType: 'SetProcessVariablesPayload',
-                variables,
-            },
-        });
     }
 }

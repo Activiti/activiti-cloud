@@ -57,11 +57,10 @@ jobs:
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
 
-  # PR CI: build skipped (acceptance uses chart image tags). Re-enable on PR: || github.event_name == 'pull_request'
   build:
     runs-on: ubuntu-latest
     needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && github.event_name == 'push' }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
@@ -167,51 +166,16 @@ jobs:
       - name: Build Activiti Cloud Identity Adapter
         run: make docker/activiti-cloud-identity-adapter
 
-  playwright-check:
-    runs-on: ubuntu-latest
-    needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: '22'
-
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install npm dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Typecheck Playwright package
-        run: npm run typecheck
-
-      - name: Lint Playwright package
-        run: npm run lint
-
   acceptance-tests:
     runs-on: ubuntu-latest
     if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
-    # Playwright: chart default image tags (no PR-SNAPSHOT build). One namespace per matrix cell.
+    # Per matrix cell: unique namespace + Helm profile. Images: build job → VERSION → update-chart → Helm (Serenity flow).
     needs:
       - pre-checks
-      - playwright-check
+      - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
       ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
-      ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS: 'true'
-      ACCEPTANCE_CHART_IMAGE_VERSION: '9.1.0-alpha.51'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
       TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
@@ -282,13 +246,13 @@ jobs:
           messaging-broker: ${{ matrix.messaging-broker }}
           messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}
+          version: ${{ needs.build.outputs.version }}
 
       - name: Cache Helm chart checkout
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .git/activiti-cloud-full-chart
-          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ env.ACCEPTANCE_CHART_IMAGE_VERSION }}
+          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ needs.build.outputs.version }}
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
@@ -315,13 +279,6 @@ jobs:
       - name: Export Playwright CI environment
         run: bash scripts/ci/export-playwright-ci-env.sh
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: '22'
-
-      - name: Wait for runtime process catalog
-        run: bash scripts/ci/wait-for-process-catalog.sh
-
       - name: Run Playwright Acceptance Tests
         uses: ./.github/actions/playwright-run
         with:
@@ -340,15 +297,13 @@ jobs:
     needs:
       - pre-checks
       - build
-      - playwright-check
       - acceptance-tests
     steps:
       - name: Check build and acceptance-tests results
         if: >-
           ${{
-              (github.event_name == 'push' && (contains(needs.build.result, 'failure') || contains(needs.build.result, 'cancelled')))
-           || contains(needs.playwright-check.result, 'failure')
-           || contains(needs.playwright-check.result, 'cancelled')
+              contains(needs.build.result, 'failure')
+           || contains(needs.build.result, 'cancelled')
            || contains(needs.acceptance-tests.result, 'failure')
            || contains(needs.acceptance-tests.result, 'cancelled')
           }}

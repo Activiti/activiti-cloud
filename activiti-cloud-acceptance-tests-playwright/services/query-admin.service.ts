@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Alfresco Software, Ltd.
+ * Copyright 2017-2020 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,8 @@
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
-import {
-    CloudIntegrationContext,
-    CloudServiceTask,
-    ServiceTaskQueryParams,
-} from '../models/service-task.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
-import { toProcessQueryString, toServiceTaskQueryString } from './query-params';
 
 export class QueryAdminService extends BaseService {
     private readonly basePath = '/query/admin/v1';
@@ -38,9 +32,15 @@ export class QueryAdminService extends BaseService {
     }
 
     async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        const query = toProcessQueryString(params);
+        const searchParams = new URLSearchParams();
+
+        if (params?.status) searchParams.append('status', params.status);
+        if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
+        if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
+        if (params?.name) searchParams.append('name', params.name);
+
         const response = await this.get(
-            `${this.basePath}/process-instances${query ? `?${query}` : ''}`
+            `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
@@ -62,43 +62,5 @@ export class QueryAdminService extends BaseService {
     async getAllProcessDefinitionsAdmin(): Promise<CloudProcessDefinition[]> {
         const response = await this.get(`${this.basePath}/process-definitions`);
         return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
-    }
-
-    async getServiceTasksForProcessInstance(processInstanceId: string): Promise<CloudServiceTask[]> {
-        const response = await this.get(
-            `${this.basePath}/process-instances/${processInstanceId}/service-tasks`
-        );
-        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
-    }
-
-    async getServiceTasksByStatus(
-        processInstanceId: string,
-        status: string
-    ): Promise<CloudServiceTask[]> {
-        const response = await this.get(
-            `${this.basePath}/process-instances/${processInstanceId}/service-tasks?status=${encodeURIComponent(status)}`
-        );
-        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
-    }
-
-    async getServiceTaskById(serviceTaskId: string): Promise<CloudServiceTask> {
-        const response = await this.get(`${this.basePath}/service-tasks/${serviceTaskId}`);
-        return this.unwrapEntity<CloudServiceTask>(response);
-    }
-
-    async getServiceTasksByQuery(params?: ServiceTaskQueryParams): Promise<CloudServiceTask[]> {
-        const query = toServiceTaskQueryString(params);
-        const response = await this.get(`${this.basePath}/service-tasks${query ? `?${query}` : ''}`);
-        return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
-    }
-
-    async getIntegrationContext(serviceTaskId: string): Promise<CloudIntegrationContext> {
-        const response = await this.get(`${this.basePath}/service-tasks/${serviceTaskId}/integration-context`);
-        return this.unwrapEntity<CloudIntegrationContext>(response);
-    }
-
-    async getAllIntegrationContexts(serviceTaskId: string): Promise<CloudIntegrationContext[]> {
-        const response = await this.get(`${this.basePath}/service-tasks/${serviceTaskId}/integration-contexts`);
-        return this.unwrapList<CloudIntegrationContext>(response, 'integrationContexts');
     }
 }

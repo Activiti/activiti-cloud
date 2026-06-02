@@ -165,13 +165,13 @@ Aktualizuj tabelę po każdej zmigrowanej fali.
 
 ## Ryzyka i mitigacje
 
-| Ryzyko                       | Mitigacja                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| Flaky timery / async procesy | `expectPoll()` z `helpers/expect-poll.ts`, dłuższy timeout tylko tam gdzie potrzeba |
-| Brak HRADMIN w `.env`        | `check:env` + `.env.example`                                                        |
-| `/etc/hosts` vs port-forward | Domyślnie localhost + Host header                                                   |
-| Regresja przy 1:1 kopiowaniu | Macierz parity + review asercji                                                     |
-| Długi CI                     | smoke na PR, regression na merge / nocny                                            |
+| Ryzyko                       | Mitigacja                                               |
+| ---------------------------- | ------------------------------------------------------- |
+| Flaky timery / async procesy | `expect.poll`, dłuższy timeout tylko tam gdzie potrzeba |
+| Brak HRADMIN w `.env`        | `check:env` + `.env.example`                            |
+| `/etc/hosts` vs port-forward | Domyślnie localhost + Host header                       |
+| Regresja przy 1:1 kopiowaniu | Macierz parity + review asercji                         |
+| Długi CI                     | smoke na PR, regression na merge / nocny                |
 
 ---
 
