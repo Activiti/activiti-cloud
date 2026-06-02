@@ -15,8 +15,25 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessDefinition } from '../../models/process-definition.models';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
+
+// Mirrors ProcessDefinitionActions#getProcessDefinition — picks the highest appVersion match for a key.
+function findProcessDefinitionByKey(
+    definitions: CloudProcessDefinition[],
+    key: string
+): CloudProcessDefinition {
+    const matches = definitions.filter((def) => def.key === key);
+    if (matches.length === 0) {
+        throw new Error(`No process definition found matching key ${key}`);
+    }
+    return matches.reduce((best, current) => {
+        const bestVersion = parseInt(String(best.appVersion ?? '0'), 10);
+        const currentVersion = parseInt(String(current.appVersion ?? '0'), 10);
+        return currentVersion > bestVersion ? current : best;
+    });
+}
 
 activiti.describe('Process Definition Admin Actions', () => {
     activiti('as an admin I should be able to get process model', async ({ queryAdminServiceHradmin }) => {
@@ -24,10 +41,9 @@ activiti.describe('Process Definition Admin Actions', () => {
             `Then the user, using the admin endpoint, can get the process model for process with key ${SINGLE_TASK_PROCESS} by passing its id`,
             async () => {
                 const definitions = await queryAdminServiceHradmin.getAllProcessDefinitionsAdmin();
-                const definition = definitions.find((def) => def.key === SINGLE_TASK_PROCESS);
-                expect(definition, `No process definition found matching key ${SINGLE_TASK_PROCESS}`).toBeDefined();
+                const definition = findProcessDefinitionByKey(definitions, SINGLE_TASK_PROCESS);
 
-                const processModel = await queryAdminServiceHradmin.getProcessModel(definition!.id);
+                const processModel = await queryAdminServiceHradmin.getProcessModel(definition.id);
 
                 expect(processModel).not.toBe('');
                 expect(processModel).toContain(`bpmn2:process id="${SINGLE_TASK_PROCESS}"`);

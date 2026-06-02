@@ -72,7 +72,8 @@ activiti.describe('Process Definition Actions', () => {
         await activiti.step(
             `Then the process diagram image for process with key ${BIG_PROCESS} is the same as process-definition-diagram.result.svg file`,
             async () => {
-                const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(BIG_PROCESS);
+                const definitions = await runtimeBundleServiceTestUser.getProcessDefinitions();
+                const definition = findProcessDefinitionByKey(definitions, BIG_PROCESS);
 
                 const processDiagram = await runtimeBundleServiceTestUser.getProcessDefinitionDiagram(
                     definition.id
