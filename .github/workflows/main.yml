@@ -323,7 +323,7 @@ jobs:
 
   delete-test-images:
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && github.event_name == 'push' }}
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
       - acceptance-tests
