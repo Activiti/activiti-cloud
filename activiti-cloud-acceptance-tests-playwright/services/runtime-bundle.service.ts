@@ -21,7 +21,9 @@ import {
     UpdateProcessPayload,
 } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
-import { BaseService } from './base.service';
+import { CloudVariableInstance } from '../models/process-variable.models';
+import { pickHighestVersionByKey } from '../helpers/process-definition';
+import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class RuntimeBundleService extends BaseService {
@@ -69,6 +71,20 @@ export class RuntimeBundleService extends BaseService {
         );
 
         return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async isProcessInstanceNotFoundInRuntime(processInstanceId: string): Promise<boolean> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${processInstanceId}`
+        );
+        return response.httpStatus === 404;
+    }
+
+    async getSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${parentProcessInstanceId}/subprocesses`
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -119,13 +135,47 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
-        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionKey}`);
-        return this.unwrapEntity<CloudProcessDefinition>(response);
+        // RB's GET /process-definitions/{id} is keyed by processDefinitionId (e.g. `key:version:uuid`),
+        // not by processDefinitionKey. Resolve the key to the deployed definition with the highest
+        // appVersion (parity with Serenity's ProcessDefinitionActions#getProcessDefinition).
+        const definitions = await this.getProcessDefinitions();
+        return pickHighestVersionByKey(definitions, processDefinitionKey);
     }
 
     async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
         return this.getText(`${this.basePath}/process-instances/${processInstanceId}/model`, {
             Accept: 'image/svg+xml',
+        });
+    }
+
+    async getProcessDefinitionDiagram(processDefinitionId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-definitions/${processDefinitionId}/model`, {
+            Accept: 'image/svg+xml',
+        });
+    }
+
+    async getSwaggerSpecification(group: string = 'Runtime Bundle'): Promise<string> {
+        const root = this.basePath.replace(/\/v1$/, '');
+        return this.getText(`${root}/v3/api-docs/${encodeURIComponent(group)}`);
+    }
+
+    async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${processInstanceId}/variables`,
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async setProcessVariables(
+        processInstanceId: string,
+        variables: Record<string, unknown>
+    ): Promise<void> {
+        await this.put(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
+            data: {
+                payloadType: 'SetProcessVariablesPayload',
+                variables,
+            },
         });
     }
 
@@ -140,5 +190,36 @@ export class RuntimeBundleService extends BaseService {
             },
         });
         return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async sendStartMessage(payload: {
+        name: string;
+        businessKey?: string;
+        variables?: Record<string, unknown>;
+    }): Promise<CloudProcessInstance> {
+        const body = {
+            payloadType: 'StartMessagePayload' as const,
+            ...payload,
+        };
+
+        const response = await this.post(`${this.basePath}/process-instances/message`, { data: body });
+
+        const processInstance = this.unwrapEntity<CloudProcessInstance>(response);
+        if (processInstance.id) {
+            this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
+        }
+        return processInstance;
+    }
+
+    async sendReceiveMessage(payload: {
+        name: string;
+        correlationKey?: string;
+        variables?: Record<string, unknown>;
+    }): Promise<RequestResponse> {
+        const body = {
+            payloadType: 'ReceiveMessagePayload' as const,
+            ...payload,
+        };
+        return this.put(`${this.basePath}/process-instances/message`, { data: body });
     }
 }

@@ -34,6 +34,8 @@ const COLLECTION_ALIASES: Record<string, string[]> = {
     events: ['events', 'list'],
     processDefinitions: ['processDefinitions', 'list'],
     variables: ['variables', 'list'],
+    serviceTasks: ['serviceTasks', 'cloudServiceTasks', 'list'],
+    cloudIntegrationContexts: ['cloudIntegrationContexts', 'integrationContexts', 'list'],
 };
 
 export abstract class BaseService {
@@ -197,20 +199,42 @@ export abstract class BaseService {
     }
 
     private async requestRaw(httpMethod: string, endpoint: string, overriddenOptions?: Options): Promise<APIResponse> {
-        switch (httpMethod.toLowerCase()) {
-            case 'get':
-                return this.context.get(endpoint, overriddenOptions);
-            case 'post':
-                return this.context.post(endpoint, overriddenOptions);
-            case 'put':
-                return this.context.put(endpoint, overriddenOptions);
-            case 'delete':
-                return this.context.delete(endpoint, overriddenOptions);
-            case 'fetch':
-                return this.context.fetch(endpoint, overriddenOptions);
-            default:
-                throw new Error(`Unsupported HTTP method: ${httpMethod}`);
+        const maxAttempts = 3;
+        let lastError: unknown;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                switch (httpMethod.toLowerCase()) {
+                    case 'get':
+                        return await this.context.get(endpoint, overriddenOptions);
+                    case 'post':
+                        return await this.context.post(endpoint, overriddenOptions);
+                    case 'put':
+                        return await this.context.put(endpoint, overriddenOptions);
+                    case 'delete':
+                        return await this.context.delete(endpoint, overriddenOptions);
+                    case 'fetch':
+                        return await this.context.fetch(endpoint, overriddenOptions);
+                    default:
+                        throw new Error(`Unsupported HTTP method: ${httpMethod}`);
+                }
+            } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : String(err);
+                const isNetworkError =
+                    msg.includes('ECONNREFUSED') ||
+                    msg.includes('socket hang up') ||
+                    msg.includes('ECONNRESET') ||
+                    msg.includes('ETIMEDOUT') ||
+                    msg.includes('connect ECONNABORTED');
+                if (!isNetworkError || attempt === maxAttempts) {
+                    throw err;
+                }
+                lastError = err;
+                const delay = attempt * 2000;
+                Logger.warn(`[network] ${httpMethod.toUpperCase()} ${endpoint} failed (attempt ${attempt}/${maxAttempts}): ${msg} — retrying in ${delay}ms`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            }
         }
+        throw lastError;
     }
 
     private parseJsonResponse(httpStatus: number, text: string, contentType: string): RequestResponse {

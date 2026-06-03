@@ -50,6 +50,7 @@ interface ServicesFixture {
     queryServiceHrUser: QueryService;
     queryAdminServiceProcessAdmin: QueryAdminService;
     queryAdminServiceHrUser: QueryAdminService;
+    queryAdminServiceHradmin: QueryAdminService;
     queryServiceTestAdmin: QueryService;
     runtimeAdminServiceTestAdmin: RuntimeAdminService;
     runtimeBundleServiceTestAdmin: RuntimeBundleService;
@@ -58,7 +59,12 @@ interface ServicesFixture {
     taskServiceHrUser: TaskService;
     taskServiceTestAdmin: TaskService;
     taskAdminServiceTestAdmin: TaskAdminService;
+    taskServiceHradmin: TaskService;
+    taskAdminServiceHradmin: TaskAdminService;
     auditServiceTestUser: AuditService;
+    auditServiceHrUser: AuditService;
+    auditServiceTestAdmin: AuditService;
+    queryAdminServiceTestAdmin: QueryAdminService;
     securityPoliciesServiceTestUser: SecurityPoliciesService;
     securityPoliciesServiceHrUser: SecurityPoliciesService;
     securityPoliciesServiceHradmin: SecurityPoliciesService;
@@ -104,6 +110,9 @@ const activiti = contexts.extend<ServicesFixture>({
     queryAdminServiceHrUser: async ({ hrUserContext }, use) => {
         await use(createQueryAdminService(hrUserContext));
     },
+    queryAdminServiceHradmin: async ({ hradminContext }, use) => {
+        await use(createQueryAdminService(hradminContext));
+    },
     queryServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryService(testAdminUserContext));
     },
@@ -128,8 +137,23 @@ const activiti = contexts.extend<ServicesFixture>({
     taskAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createTaskAdminService(testAdminUserContext));
     },
+    taskServiceHradmin: async ({ hradminContext, dirtyRegistry, testScope }, use) => {
+        await use(createTaskService(hradminContext, isolationOpts(dirtyRegistry, testScope)));
+    },
+    taskAdminServiceHradmin: async ({ hradminContext }, use) => {
+        await use(createTaskAdminService(hradminContext));
+    },
     auditServiceTestUser: async ({ testUserContext }, use) => {
         await use(createAuditService(testUserContext));
+    },
+    auditServiceHrUser: async ({ hrUserContext }, use) => {
+        await use(createAuditService(hrUserContext));
+    },
+    auditServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createAuditService(testAdminUserContext));
+    },
+    queryAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createQueryAdminService(testAdminUserContext));
     },
     securityPoliciesServiceTestUser: async ({ testUserContext, dirtyRegistry, testScope }, use) => {
         await use(createSecurityPoliciesService(testUserContext, isolationOpts(dirtyRegistry, testScope)));
