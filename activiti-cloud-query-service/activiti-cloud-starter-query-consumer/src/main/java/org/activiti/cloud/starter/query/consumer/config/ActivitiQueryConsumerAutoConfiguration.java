@@ -42,7 +42,7 @@ public class ActivitiQueryConsumerAutoConfiguration {
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider(
             HikariDataSource dataSource
         ) {
-            return new FixedQueryConsumerPartitionedChannelCountProvider(dataSource.getMaximumPoolSize() * 2);
+            return new FixedQueryConsumerPartitionedChannelCountProvider(dataSource.getMaximumPoolSize());
         }
     }
 }

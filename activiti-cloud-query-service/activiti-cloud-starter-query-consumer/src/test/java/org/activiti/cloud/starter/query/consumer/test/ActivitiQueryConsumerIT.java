@@ -43,6 +43,6 @@ public class ActivitiQueryConsumerIT {
         assertThat(queryConsumerPartitionedChannelCountProvider)
             .isInstanceOf(FixedQueryConsumerPartitionedChannelCountProvider.class)
             .extracting(Supplier::get)
-            .isEqualTo(hikariDataSource.getMaximumPoolSize() * 2);
+            .isEqualTo(hikariDataSource.getMaximumPoolSize());
     }
 }

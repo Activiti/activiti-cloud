@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,18 @@ public class QueryConsumerAutoConfiguration {
         "partitionedQueryConsumerIntegrationFlowInput";
 
     @Bean
+    InitializingBean queryConsumerAutoConfigurationInfo(
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
+    ) {
+        return () -> {
+            LOGGER.info(
+                "Initializing QueryConsumerAutoConfiguration with {} partitioned channel count",
+                queryConsumerPartitionedChannelCountProvider.get()
+            );
+        };
+    }
+
+    @Bean
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
     public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
         IntegrationFlow partitionedQueryConsumerIntegrationFlow
@@ -55,10 +68,8 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
-    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector(
-        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
-    ) {
-        return new UUIDConsumerPartitionedChannelKeySelector(queryConsumerPartitionedChannelCountProvider.get());
+    QueryConsumerPartitionedChannelKeySelector DefaultConsumerPartitionedChannelKeySelector() {
+        return new DefaultConsumerPartitionedChannelKeySelector();
     }
 
     @Bean
@@ -73,6 +84,7 @@ public class QueryConsumerAutoConfiguration {
                 MessageChannels
                     .partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
+                    .workerQueueSize(10)
             )
             .handle(genericQueryConsumerChannelHandlerAdapter)
             .get();
