@@ -58,4 +58,9 @@ export class AuditAdminService extends BaseService {
 
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
+
+    async deleteAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
+        const response = await this.delete(`${this.basePath}/events`);
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+    }
 }

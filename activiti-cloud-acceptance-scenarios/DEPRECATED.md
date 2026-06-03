@@ -15,6 +15,11 @@ This Maven module is **legacy**. New work belongs in:
 
 ## Still in Serenity (`runtime-acceptance-tests`)
 
-Remaining `.story` files under `runtime-acceptance-tests/src/main/resources/stories/runtime-bundle/`, including trimmed `task-actions.story` (wave 2 scenarios not yet in Playwright).
+| File                                          | Status                                                                                                               |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `notifications-actions.story` (6 scenarios)   | Playwright `tests/runtime/notifications.spec.ts` (Serenity kept until retirement ticket)                             |
+| `delete-actions.story.disabled` (2 scenarios) | Playwright `tests/runtime/delete-actions.spec.ts` — `@destructive`, excluded by default (`npm run test:destructive`) |
 
-Do not add new `.story` files here. See [../activiti-cloud-acceptance-tests-playwright/docs/SERENITY_RETIREMENT.md](../activiti-cloud-acceptance-tests-playwright/docs/SERENITY_RETIREMENT.md).
+All other `runtime-bundle/*.story` files were removed after migration to Playwright (#2338).
+
+Do not add new `.story` files here. See [../activiti-cloud-acceptance-tests-playwright/docs/AAE-46640.md](../activiti-cloud-acceptance-tests-playwright/docs/AAE-46640.md) and [SERENITY_RETIREMENT.md](../activiti-cloud-acceptance-tests-playwright/docs/SERENITY_RETIREMENT.md).

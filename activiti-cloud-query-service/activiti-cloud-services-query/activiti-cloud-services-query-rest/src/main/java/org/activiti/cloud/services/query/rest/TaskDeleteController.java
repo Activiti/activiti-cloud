@@ -21,6 +21,7 @@ import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -59,6 +60,7 @@ public class TaskDeleteController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
+    @Transactional
     public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskEntity.class

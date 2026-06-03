@@ -25,6 +25,7 @@
 - Run two Playwright suites on the same machine without coordination (each global-setup tries port `8080`); use different `LOCAL_PORT` or run one suite at a time.
 - Use `workers > 1` for tests marked `@serial` (when introduced).
 - Filter slow integration: `npm run test -- --grep @slow` (e.g. multi-RB signal spec).
+- Destructive admin bulk-delete (`@destructive`) is excluded from `npm run test` and runs last via `npm run test:ci` (after `test:all`, `PLAYWRIGHT_WORKERS=1`, serial describe).
 
 ## Fixtures
 

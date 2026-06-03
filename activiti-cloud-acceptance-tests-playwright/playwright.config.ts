@@ -25,9 +25,11 @@ applyResolvedHostsToEnv();
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
 const isCi = Boolean(process.env.CI);
+const includeDestructive = process.env.PLAYWRIGHT_INCLUDE_DESTRUCTIVE === 'true';
 
 export default defineConfig({
   testDir: './tests',
+  grepInvert: includeDestructive ? undefined : /@destructive/,
   timeout: timeouts.test,
   expect: {
     timeout: timeouts.expect,
