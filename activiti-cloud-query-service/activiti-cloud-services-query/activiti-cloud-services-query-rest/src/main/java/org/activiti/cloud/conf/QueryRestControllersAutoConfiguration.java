@@ -24,7 +24,6 @@ import org.activiti.cloud.services.query.rest.ProcessDefinitionAdminController;
 import org.activiti.cloud.services.query.rest.ProcessDefinitionController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceBpmnActivitiesAdminController;
-import org.activiti.cloud.services.query.rest.ProcessInstanceBpmnActivitiesController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDeleteController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramAdminController;
@@ -82,7 +81,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ApplicationController.class,
         ApplicationAdminController.class,
         IntegrationContextAdminController.class,
-        ProcessInstanceBpmnActivitiesController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
     }
 )
