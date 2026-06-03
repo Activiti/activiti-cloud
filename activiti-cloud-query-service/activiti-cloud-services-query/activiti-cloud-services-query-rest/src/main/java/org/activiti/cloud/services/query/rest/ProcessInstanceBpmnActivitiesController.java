@@ -76,6 +76,10 @@ public class ProcessInstanceBpmnActivitiesController {
         BooleanExpression expression = QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(processInstanceId);
         expression = expression.and(predicate);
 
-        return pagedModelAssembler.toModel(pageable, bpmnActivityRepository.findAll(expression, pageable), activityRepresentationModelAssembler);
+        return pagedModelAssembler.toModel(
+            pageable,
+            bpmnActivityRepository.findAll(expression, pageable),
+            activityRepresentationModelAssembler
+        );
     }
 }

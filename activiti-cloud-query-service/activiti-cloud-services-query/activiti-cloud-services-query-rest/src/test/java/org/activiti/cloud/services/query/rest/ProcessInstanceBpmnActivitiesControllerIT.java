@@ -173,11 +173,7 @@ class ProcessInstanceBpmnActivitiesControllerIT {
     void shouldReturnEmptyActivitiesListWhenNoneExist() throws Exception {
         given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
-                new PageImpl<>(
-                    Collections.emptyList(),
-                    new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
-                    0
-                )
+                new PageImpl<>(Collections.emptyList(), new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)), 0)
             );
 
         MvcResult result = mockMvc
