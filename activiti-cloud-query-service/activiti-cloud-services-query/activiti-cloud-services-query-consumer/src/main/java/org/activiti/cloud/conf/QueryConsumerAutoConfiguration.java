@@ -68,7 +68,7 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
-    QueryConsumerPartitionedChannelKeySelector DefaultConsumerPartitionedChannelKeySelector() {
+    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector() {
         return new DefaultConsumerPartitionedChannelKeySelector();
     }
 
