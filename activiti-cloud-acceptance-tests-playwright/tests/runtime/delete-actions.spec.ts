@@ -17,7 +17,7 @@
 /**
  * Port of delete-actions.story.disabled (AAE-46640).
  * Admin bulk-delete wipes query/audit data for the whole preview namespace — not parallel-safe.
- * Excluded from default runs via @destructive; CI runs via npm run test:ci after the main suite.
+ * Tagged @destructive — runs last in the default Playwright project order (project destructive-last).
  * Query scenario stays skipped: DELETE /query/admin/v1/tasks returns 500 upstream (lazy-init in TaskDeleteController).
  * Serenity story file remains until query bulk-delete is fixed and the scenario is enabled.
  */

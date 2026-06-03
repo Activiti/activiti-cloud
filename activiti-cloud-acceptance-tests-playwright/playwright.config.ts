@@ -25,13 +25,40 @@ applyResolvedHostsToEnv();
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
 const isCi = Boolean(process.env.CI);
-const includeDestructive = process.env.PLAYWRIGHT_INCLUDE_DESTRUCTIVE === 'true';
+const skipDestructive = process.env.PLAYWRIGHT_SKIP_DESTRUCTIVE === 'true';
 
 const notificationsSpec = /notifications\.spec\.ts$/;
+const destructiveTag = /@destructive/;
+
+/** Ordered projects: parallel acceptance → notifications (serial) → destructive last. */
+const acceptanceProjects = [
+  {
+    name: 'acceptance',
+    grepInvert: destructiveTag,
+    testIgnore: notificationsSpec,
+  },
+  {
+    name: 'notifications',
+    testMatch: notificationsSpec,
+    workers: 1,
+    fullyParallel: false,
+    retries: isCi ? 2 : 0,
+  },
+  ...(skipDestructive
+    ? []
+    : [
+        {
+          name: 'destructive-last',
+          grep: destructiveTag,
+          workers: 1,
+          fullyParallel: false,
+          retries: isCi ? 2 : 0,
+        },
+      ]),
+];
 
 export default defineConfig({
   testDir: './tests',
-  grepInvert: includeDestructive ? undefined : /@destructive/,
   timeout: timeouts.test,
   expect: {
     timeout: timeouts.expect,
@@ -41,23 +68,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   forbidOnly: !!process.env.CI,
   workers,
-  ...(isCi
-    ? {
-        projects: [
-          {
-            name: 'parallel',
-            testIgnore: notificationsSpec,
-          },
-          {
-            name: 'notifications',
-            testMatch: notificationsSpec,
-            workers: 1,
-            fullyParallel: false,
-            retries: 2,
-          },
-        ],
-      }
-    : {}),
+  projects: acceptanceProjects,
   maxFailures: process.env.CI ? 10 : undefined,
 
   reporter: [
@@ -78,8 +89,6 @@ export default defineConfig({
     actionTimeout: timeouts.action,
     navigationTimeout: timeouts.navigation,
   },
-
-  // No overlapping projects — use npm scripts with explicit paths for slices (see docs/IMPROVEMENTS.md Phase 1).
 
   globalSetup: './config/lifecycle/global-setup.ts',
   globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,

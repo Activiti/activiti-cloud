@@ -15,10 +15,10 @@ This Maven module is **legacy**. New work belongs in:
 
 ## Still in Serenity (`runtime-acceptance-tests`)
 
-| File                                          | Status                                                                                                                                                                        |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `notifications-actions.story` (6 scenarios)   | Playwright `tests/runtime/notifications.spec.ts` (Serenity kept until retirement ticket)                                                                                      |
-| `delete-actions.story.disabled` (2 scenarios) | Playwright `tests/runtime/delete-actions.spec.ts` — audit scenario ported; query scenario `activiti.skip` (upstream bulk task delete 500); `@destructive` / `npm run test:ci` |
+| File                                          | Status                                                                                                               |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `notifications-actions.story` (6 scenarios)   | Playwright `tests/runtime/notifications.spec.ts` (Serenity kept until retirement ticket)                             |
+| `delete-actions.story.disabled` (2 scenarios) | Playwright `tests/runtime/delete-actions.spec.ts` — audit ported (`destructive-last` project); query `activiti.skip` |
 
 All other `runtime-bundle/*.story` files were removed after migration to Playwright (#2338).
 
