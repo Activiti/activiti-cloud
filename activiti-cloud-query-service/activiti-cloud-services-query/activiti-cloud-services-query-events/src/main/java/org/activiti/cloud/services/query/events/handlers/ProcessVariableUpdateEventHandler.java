@@ -15,23 +15,33 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 
 public class ProcessVariableUpdateEventHandler {
 
     private final ProcessVariableUpdater variableUpdater;
+    private final EntityManager entityManager;
 
-    public ProcessVariableUpdateEventHandler(ProcessVariableUpdater variableUpdater) {
+    public ProcessVariableUpdateEventHandler(ProcessVariableUpdater variableUpdater, EntityManager entityManager) {
         this.variableUpdater = variableUpdater;
+        this.entityManager = entityManager;
     }
 
-    public void handle(ProcessVariableEntity updatedVariableEntity) {
-        String variableName = updatedVariableEntity.getName();
-        String processInstanceId = updatedVariableEntity.getProcessInstanceId();
+    public void handle(CloudVariableUpdatedEvent event) {
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity(event);
+        variableEntity.setValue(event.getEntity().getValue());
+        String variableName = variableEntity.getName();
+        String processInstanceId = variableEntity.getProcessInstanceId();
 
         variableUpdater.update(
-            updatedVariableEntity,
+            variableEntity,
             "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'"
         );
+
+        ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forUpdate(event);
+        entityManager.persist(history);
     }
 }

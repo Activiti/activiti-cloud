@@ -35,7 +35,11 @@ import org.hibernate.type.SqlTypes;
 @Table(
     name = "PROCESS_VARIABLE_HISTORY",
     indexes = {
-        @Index(name = "idx_pvh_process_var", columnList = "processInstanceId, variableName, createTime", unique = false),
+        @Index(
+            name = "idx_pvh_process_var",
+            columnList = "processInstanceId, variableName, createTime",
+            unique = false
+        ),
     }
 )
 public class ProcessVariableHistoryEntity {

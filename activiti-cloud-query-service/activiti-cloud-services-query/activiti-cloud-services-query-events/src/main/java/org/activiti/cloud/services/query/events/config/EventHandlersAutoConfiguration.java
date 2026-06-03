@@ -258,7 +258,10 @@ public class EventHandlersAutoConfiguration {
         EntityManagerFinder entityManagerFinder
     ) {
         return new VariableUpdatedEventHandler(
-            new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
+            new ProcessVariableUpdateEventHandler(
+                new ProcessVariableUpdater(entityManager, entityManagerFinder),
+                entityManager
+            ),
             new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder))
         );
     }
