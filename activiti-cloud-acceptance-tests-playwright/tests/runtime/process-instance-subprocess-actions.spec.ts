@@ -34,8 +34,13 @@ async function expectProcessCompleted(
 ): Promise<void> {
     await expect
         .poll(async () => {
-            const instance = await queryService.getProcessInstance(processInstanceId);
-            return instance.status;
+            try {
+                const instance = await queryService.getProcessInstance(processInstanceId);
+                return instance.status;
+            } catch {
+                // Query DB may not have ingested the instance yet — keep polling.
+                return undefined;
+            }
         }, pollOptions('querySync'))
         .toBe(ProcessInstanceStatus.COMPLETED);
 }

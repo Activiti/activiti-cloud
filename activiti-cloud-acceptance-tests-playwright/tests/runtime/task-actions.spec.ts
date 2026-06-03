@@ -85,6 +85,18 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task has the formKey field and correct processInstance fields', async () => {
+            // Wait for the query DB to ingest the freshly-started process instance.
+            await expect
+                .poll(async () => {
+                    try {
+                        await queryServiceTestUser.getProcessInstance(processInstanceId);
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                }, pollOptions('querySync'))
+                .toBe(true);
+
             const processFromQuery = await queryServiceTestUser.getProcessInstance(processInstanceId);
             expect(processFromQuery).toBeTruthy();
 
@@ -237,6 +249,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
 
+            // Audit event for TASK_UPDATED may arrive before the query DB projection is refreshed.
+            await expect
+                .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
+                .toBe('new-task-name');
+
             const queryTask = await queryServiceTestUser.getTaskById(taskId);
             expect(queryTask?.name).toBe('new-task-name');
             expect(queryTask?.priority).toBe(3);
@@ -351,6 +368,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.priority).toBe(3);
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
+
+            // Audit event for TASK_UPDATED may arrive before the query DB projection is refreshed.
+            await expect
+                .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
+                .toBe('new-task-name');
 
             const queryTask = await queryServiceTestUser.getTaskById(taskId);
             expect(queryTask?.name).toBe('new-task-name');
