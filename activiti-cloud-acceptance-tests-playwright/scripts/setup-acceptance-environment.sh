@@ -223,7 +223,7 @@ bash "${SCRIPT_DIR}/apply-cluster-prereqs.sh" "${PREVIEW_NAME}"
 
 echo ""
 echo "✅ Setup complete. Next:"
-echo "   npm run test:runtime    # or npm run test:all"
+echo "   npm run test:runtime    # or npm run test"
 echo ""
 echo "Note:"
 echo "  - Port-forward is started automatically by Playwright global-setup for local runs."

@@ -25,38 +25,15 @@ applyResolvedHostsToEnv();
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
 const isCi = Boolean(process.env.CI);
-const skipDestructive = process.env.PLAYWRIGHT_SKIP_DESTRUCTIVE === 'true';
 
-const notificationsSpec = /notifications\.spec\.ts$/;
-const destructiveTag = /@destructive/;
+/** Serial projects (subscriptions, admin bulk-delete). */
+const serial = { workers: 1, fullyParallel: false } as const;
 
-/** Ordered projects: parallel acceptance → notifications (serial) → destructive last. */
-const acceptanceProjects = [
-  {
-    name: 'acceptance',
-    grepInvert: destructiveTag,
-    testIgnore: notificationsSpec,
-  },
-  {
-    name: 'notifications',
-    testMatch: notificationsSpec,
-    workers: 1,
-    fullyParallel: false,
-    retries: isCi ? 2 : 0,
-  },
-  ...(skipDestructive
-    ? []
-    : [
-        {
-          name: 'destructive-last',
-          grep: destructiveTag,
-          workers: 1,
-          fullyParallel: false,
-          retries: isCi ? 2 : 0,
-        },
-      ]),
-];
-
+/**
+ * All projects are listed here. `npm run test` selects the CI suite via
+ * `--project=acceptance --project=notifications --project=destructive-last`
+ * (see package.json). Slice scripts pass a single `--project=…`.
+ */
 export default defineConfig({
   testDir: './tests',
   timeout: timeouts.test,
@@ -65,18 +42,44 @@ export default defineConfig({
   },
 
   fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  forbidOnly: !!process.env.CI,
+  retries: isCi ? 2 : 0,
+  forbidOnly: isCi,
   workers,
-  projects: acceptanceProjects,
-  maxFailures: process.env.CI ? 10 : undefined,
+  projects: [
+    {
+      name: 'acceptance',
+      grepInvert: /@destructive/,
+      testIgnore: '**/notifications.spec.ts',
+    },
+    {
+      name: 'notifications',
+      testMatch: '**/notifications.spec.ts',
+      ...serial,
+    },
+    {
+      name: 'destructive-last',
+      grep: /@destructive/,
+      ...serial,
+    },
+    { name: 'smoke', grep: /@smoke/ },
+    { name: 'identity', testMatch: '**/identity-adapter.spec.ts' },
+    {
+      name: 'security',
+      testMatch: ['**/hruser-security-policies.spec.ts', '**/hradmin-security-policies.spec.ts'],
+    },
+    { name: 'process', testMatch: '**/process-instance-actions.spec.ts' },
+    { name: 'runtime', testMatch: '**/runtime/**/*.spec.ts' },
+    { name: 'runtime-process-instance', testMatch: '**/runtime/process-instance*.spec.ts' },
+    { name: 'runtime-tasks', testMatch: '**/runtime/task*.spec.ts' },
+  ],
+  maxFailures: isCi ? 10 : undefined,
 
   reporter: [
     ['html'],
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
     ['json', { outputFile: `${paths.reporter}/results.json` }],
-    ...(process.env.CI ? ([['github']] as const) : []),
+    ...(isCi ? ([['github']] as const) : []),
   ],
 
   outputDir: paths.testResults,

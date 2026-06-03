@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log('\n✅ Environment ready — run tests with npm run test:all\n');
+  console.log('\n✅ Environment ready — run tests with npm run test\n');
 }
 
 main().catch((err) => {

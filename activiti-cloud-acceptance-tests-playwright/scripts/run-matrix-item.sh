@@ -99,7 +99,7 @@ echo "==> Installing preview: broker=${BROKER} partitioning=${PARTITIONING} dest
 "${install_cmd[@]}"
 
 echo "==> Running Playwright"
-npm run test:all
+npm run test
 
 ENV_FILE="${ROOT_DIR}/activiti-cloud-acceptance-tests-playwright/.env"
 if [[ -f "${ENV_FILE}" ]]; then
