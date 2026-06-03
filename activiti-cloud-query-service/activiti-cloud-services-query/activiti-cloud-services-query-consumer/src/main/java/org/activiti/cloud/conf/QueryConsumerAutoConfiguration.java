@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -76,7 +77,8 @@ public class QueryConsumerAutoConfiguration {
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
-        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter
+        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
+        @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
         return IntegrationFlow
             .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
@@ -84,7 +86,7 @@ public class QueryConsumerAutoConfiguration {
                 MessageChannels
                     .partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
-                    .workerQueueSize(10)
+                    .workerQueueSize(workerQueueSize)
             )
             .handle(genericQueryConsumerChannelHandlerAdapter)
             .get();
