@@ -149,9 +149,4 @@ tag:
 	git tag -fa $(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
 	git push -f -q origin $(RELEASE_VERSION)
 
-test/%:
-	$(eval MODULE=$(word 2, $(subst /, ,$@)))
-
-	mvn ${MAVEN_CLI_OPTS} -pl activiti-cloud-acceptance-scenarios/$(MODULE) -Droot.log.level=off verify -am
-
 promote: version tag deploy updatebot/push-version
