@@ -38,7 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-public class TaskControllerImplTest {
+class TaskControllerImplTest {
 
     @InjectMocks
     private TaskControllerImpl taskController;
@@ -65,7 +65,7 @@ public class TaskControllerImplTest {
     private EntityModel<CloudTask> taskModel;
 
     @Test
-    public void nextTaskShouldReturnOkWhenTaskExists() {
+    void nextTaskShouldReturnOkWhenTaskExists() {
         TaskIdentificationStrategy strategy = TaskIdentificationStrategy.values()[0];
         given(taskRuntime.nextTask(strategy)).willReturn(task);
         given(taskRepresentationModelAssembler.toModel(task)).willReturn(taskModel);
@@ -77,7 +77,7 @@ public class TaskControllerImplTest {
     }
 
     @Test
-    public void nextTaskShouldReturnNoContentWhenNoTaskExists() {
+    void nextTaskShouldReturnNoContentWhenNoTaskExists() {
         given(taskRuntime.nextTask(null)).willReturn(null);
 
         ResponseEntity<EntityModel<CloudTask>> response = taskController.nextTask(null);
