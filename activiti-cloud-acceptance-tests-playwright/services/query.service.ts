@@ -86,6 +86,15 @@ export class QueryService extends BaseService {
         });
     }
 
+    async getProcessModel(processDefinitionId: string): Promise<string> {
+        return this.getText(`${this.basePath}/process-definitions/${processDefinitionId}/model`);
+    }
+
+    async getSwaggerSpecification(group: string = 'Query'): Promise<string> {
+        const root = this.basePath.replace(/\/v1$/, '');
+        return this.getText(`${root}/v3/api-docs/${encodeURIComponent(group)}`);
+    }
+
     async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/variables`);
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
@@ -136,5 +145,41 @@ export class QueryService extends BaseService {
             return response.body as string[];
         }
         return [];
+    }
+
+    async getCandidateGroups(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-groups`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        if (Array.isArray(response.body)) {
+            return response.body as string[];
+        }
+        return [];
+    }
+
+    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`);
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async getRootTasksByProcessInstance(processInstanceId: string): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?rootTasksOnly=true&processInstanceId=${encodeURIComponent(processInstanceId)}&sort=createdDate,desc&sort=id,desc`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getApplications(): Promise<{ name: string; [key: string]: unknown }[]> {
+        const response = await this.get(`${this.basePath}/applications`);
+        return this.unwrapList<{ name: string; [key: string]: unknown }>(response, 'applications');
+    }
+
+    async checkServicesHealth(): Promise<void> {
+        const response = await this.get('/query/actuator/health');
+        const status = (response as { status?: string }).status;
+        if (status !== 'UP') {
+            throw new Error(`Query service health check failed: status=${status}`);
+        }
     }
 }

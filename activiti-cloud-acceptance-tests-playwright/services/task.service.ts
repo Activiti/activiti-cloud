@@ -15,6 +15,7 @@
  */
 
 import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
+import { CloudVariableInstance } from '../models/process-variable.models';
 import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -183,7 +184,7 @@ export class TaskService extends BaseService {
 
     async updateTask(
         taskId: string,
-        fields: { name?: string; formKey?: string; priority?: number }
+        fields: { name?: string; formKey?: string; priority?: number; dueDate?: string }
     ): Promise<CloudTask> {
         const response = await this.put(`${this.basePath}/tasks/${taskId}`, {
             data: {
@@ -200,6 +201,45 @@ export class TaskService extends BaseService {
                 payloadType: 'AssignTaskPayload',
                 taskId,
                 assignee,
+            },
+        });
+    }
+
+    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`, {
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async updateTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {
+        await this.put(`${this.basePath}/tasks/${taskId}/variables/${encodeURIComponent(name)}`, {
+            data: {
+                payloadType: 'UpdateTaskVariablePayload',
+                taskId,
+                name,
+                value,
+            },
+        });
+    }
+
+    async createTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {
+        await this.post(`${this.basePath}/tasks/${taskId}/variables`, {
+            data: {
+                payloadType: 'CreateTaskVariablePayload',
+                taskId,
+                name,
+                value,
+            },
+        });
+    }
+
+    async completeTaskWithVariables(taskId: string, variables: Record<string, unknown>): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/tasks/${taskId}/complete`, {
+            data: {
+                payloadType: 'CompleteTaskPayload',
+                taskId,
+                variables,
             },
         });
     }
