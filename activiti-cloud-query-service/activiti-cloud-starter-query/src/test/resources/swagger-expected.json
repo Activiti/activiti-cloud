@@ -6113,6 +6113,100 @@
         } ]
       }
     },
+    "/admin/v1/process-instances/{processInstanceId}/bpmn-activities" : {
+      "get" : {
+        "tags" : [ "process-instance-bpmn-activities-admin-controller" ],
+        "summary" : "getBpmnActivitiesAdmin",
+        "operationId" : "getBpmnActivitiesAdmin",
+        "parameters" : [ {
+          "name" : "processInstanceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudBPMNActivity"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentCloudBPMNActivity"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
     "/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses" : {
       "get" : {
         "tags" : [ "process-instance-admin-controller" ],
@@ -8581,6 +8675,110 @@
           }
         },
         "title" : "ListResponseContentCloudIntegrationContext"
+      },
+      "CloudBPMNActivity" : {
+        "type" : "object",
+        "properties" : {
+          "processDefinitionKey" : {
+            "type" : "string"
+          },
+          "processDefinitionVersion" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "STARTED", "COMPLETED", "CANCELLED", "ERROR" ]
+          },
+          "businessKey" : {
+            "type" : "string"
+          },
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "startedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "cancelledDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "appName" : {
+            "type" : "string"
+          },
+          "serviceName" : {
+            "type" : "string"
+          },
+          "serviceFullName" : {
+            "type" : "string"
+          },
+          "serviceType" : {
+            "type" : "string"
+          },
+          "serviceVersion" : {
+            "type" : "string"
+          },
+          "appVersion" : {
+            "type" : "string"
+          },
+          "activityName" : {
+            "type" : "string"
+          },
+          "activityType" : {
+            "type" : "string"
+          },
+          "executionId" : {
+            "type" : "string"
+          },
+          "processDefinitionId" : {
+            "type" : "string"
+          },
+          "processInstanceId" : {
+            "type" : "string"
+          },
+          "elementId" : {
+            "type" : "string"
+          }
+        },
+        "title" : "CloudBPMNActivity"
+      },
+      "EntriesResponseContentCloudBPMNActivity" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentCloudBPMNActivity"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentCloudBPMNActivity"
+      },
+      "EntryResponseContentCloudBPMNActivity" : {
+        "type" : "object",
+        "properties" : {
+          "entry" : {
+            "$ref" : "#/components/schemas/CloudBPMNActivity"
+          }
+        },
+        "title" : "EntryResponseContentCloudBPMNActivity"
+      },
+      "ListResponseContentCloudBPMNActivity" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentCloudBPMNActivity"
+          }
+        },
+        "title" : "ListResponseContentCloudBPMNActivity"
       }
     }
   },
