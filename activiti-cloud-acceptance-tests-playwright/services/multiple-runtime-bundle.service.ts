@@ -14,107 +14,73 @@
  * limitations under the License.
  */
 
+import { timeouts } from '../config/runtime/timeouts';
+import { waitForProcessInstanceStatus } from '../helpers/multiple-runtime.assertions';
+import { DirtyContextRegistry } from '../helpers/dirty-context';
+import { TestScope } from '../helpers/test-isolation';
 import { RuntimeBundleService } from './runtime-bundle.service';
-import {
-    CloudProcessInstance,
-    StartProcessPayload,
-    ProcessInstanceStatus
-} from '../models/runtime-bundle.models';
+import { QueryService } from './query.service';
+import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
+
+/**
+ * Serenity uses /rb-other-app for a second runtime. Preview installs often expose only /rb;
+ * both processes still complete on one engine (signals via RabbitMQ). Set SECONDARY_RUNTIME_BASE_PATH=/rb-other-app when deployed.
+ */
+const SECONDARY_RUNTIME_BASE_PATH = process.env.SECONDARY_RUNTIME_BASE_PATH?.trim() || '/rb';
 
 export class MultipleRuntimeBundleService extends BaseService {
     private readonly primaryRuntimeService: RuntimeBundleService;
     private readonly secondaryRuntimeService: RuntimeBundleService;
+    private readonly queryService: QueryService;
 
     constructor(context: CustomAPIRequest) {
         super(context);
-        // Primary runtime bundle
         this.primaryRuntimeService = new RuntimeBundleService(context);
-        // Secondary runtime bundle - in a real multi-runtime setup, this would use a different base path
-        // For now, we'll use the same service but with different process keys to simulate different runtimes
-        this.secondaryRuntimeService = new RuntimeBundleService(context);
+        this.secondaryRuntimeService = new RuntimeBundleService(context, SECONDARY_RUNTIME_BASE_PATH);
+        this.queryService = new QueryService(context);
+    }
+
+    attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
+        super.attachIsolation(dirtyRegistry, testScope);
+        this.primaryRuntimeService.attachIsolation(dirtyRegistry, testScope, '/rb/v1');
+        this.secondaryRuntimeService.attachIsolation(
+            dirtyRegistry,
+            testScope,
+            `${SECONDARY_RUNTIME_BASE_PATH.replace(/\/$/, '')}/v1`
+        );
     }
 
     async startProcessOnPrimary(processDefinitionKey: string): Promise<CloudProcessInstance> {
-        const payload: StartProcessPayload = {
-            processDefinitionKey: processDefinitionKey
-        };
-
-        return await this.primaryRuntimeService.startProcess(payload);
+        return this.primaryRuntimeService.startProcess({ processDefinitionKey });
     }
 
     async startProcessOnSecondary(processDefinitionKey: string): Promise<CloudProcessInstance> {
-        const payload: StartProcessPayload = {
-            processDefinitionKey: processDefinitionKey
-        };
-
-        return await this.secondaryRuntimeService.startProcess(payload);
+        return this.secondaryRuntimeService.startProcess({ processDefinitionKey });
     }
 
     async getProcessInstanceFromPrimary(processInstanceId: string): Promise<CloudProcessInstance> {
-        return await this.primaryRuntimeService.getProcessInstance(processInstanceId);
+        return this.queryService.getProcessInstance(processInstanceId);
     }
 
     async getProcessInstanceFromSecondary(processInstanceId: string): Promise<CloudProcessInstance> {
-        return await this.secondaryRuntimeService.getProcessInstance(processInstanceId);
+        return this.queryService.getProcessInstance(processInstanceId);
     }
 
     async waitForProcessInstanceStatusOnPrimary(
         processInstanceId: string,
         expectedStatus: ProcessInstanceStatus,
-        timeoutMs: number = 30000
+        timeoutMs: number = timeouts.poll.signalProcess
     ): Promise<CloudProcessInstance> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeoutMs) {
-            try {
-                const processInstance = await this.getProcessInstanceFromPrimary(processInstanceId);
-
-                if (processInstance.status === expectedStatus) {
-                    return processInstance;
-                }
-
-                // Wait a bit before next check
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            } catch (error) {
-                // If process instance not found yet, continue waiting
-                if (Date.now() - startTime >= timeoutMs) {
-                    throw error;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-
-        throw new Error(`Process instance ${processInstanceId} did not reach status ${expectedStatus} within ${timeoutMs}ms`);
+        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
     }
 
     async waitForProcessInstanceStatusOnSecondary(
         processInstanceId: string,
         expectedStatus: ProcessInstanceStatus,
-        timeoutMs: number = 30000
+        timeoutMs: number = timeouts.poll.signalProcess
     ): Promise<CloudProcessInstance> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeoutMs) {
-            try {
-                const processInstance = await this.getProcessInstanceFromSecondary(processInstanceId);
-
-                if (processInstance.status === expectedStatus) {
-                    return processInstance;
-                }
-
-                // Wait a bit before next check
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            } catch (error) {
-                // If process instance not found yet, continue waiting
-                if (Date.now() - startTime >= timeoutMs) {
-                    throw error;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-
-        throw new Error(`Process instance ${processInstanceId} did not reach status ${expectedStatus} within ${timeoutMs}ms`);
+        return waitForProcessInstanceStatus(this.queryService, processInstanceId, expectedStatus, timeoutMs);
     }
 }

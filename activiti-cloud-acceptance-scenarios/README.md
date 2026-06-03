@@ -27,11 +27,11 @@ or specify the full URL:
 You can use our HELM charts hosted here: [Activiti Cloud HELM Charts](https://github.com/Activiti/activiti-cloud-charts/tree/master/activiti-cloud-full-example) to create these environments
 with all the services that are tested by these acceptance tests.
 
-In order to run these acceptance tests you can run:
+In order to run remaining Serenity scenarios (legacy — prefer Playwright in `activiti-cloud-acceptance-tests-playwright/`):
 
 ```
-> mvn clean install -DskipTests && mvn -pl '!apps-acceptance-tests,!multiple-runtime-acceptance-tests,!security-policies-acceptance-tests' clean verify
+cd activiti-cloud-acceptance-scenarios
+mvn clean verify
 ```
 
-This will ignore the following modules: apps-acceptance-tests,multiple-runtime-acceptance-tests,security-policies-acceptance-tests and run all the others.
-This is extremely useful to control which tests run depending on your environment configurations and why you are trying to test.
+Migrated areas (security policies, multi-runtime signal, process-instance-actions, task-actions wave 1) were removed from this module; see [DEPRECATED.md](DEPRECATED.md).

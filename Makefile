@@ -44,18 +44,22 @@ install: release
 			--create-namespace \
 			--atomic \
 			--wait \
-			--timeout 8m
+			--timeout $(or $(HELM_INSTALL_TIMEOUT),15m)
 
 delete:
 	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
 	$(or $(KUBECTL),kubectl) delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
 
 clone-chart:
-	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
+	@if [ -d "$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR)/charts" ] && [ "$(FORCE_CHART_CLONE)" != "true" ]; then \
+		echo "Reusing chart checkout at $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) (set FORCE_CHART_CLONE=true to re-clone)"; \
+	else \
+		rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
 		git clone https://${GITHUB_TOKEN}@github.com/Activiti/activiti-cloud-full-chart.git \
 			--branch $(ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH) \
 			$(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) \
-			--depth 1
+			--depth 1; \
+	fi
 
 create-pr: update-chart
 	cd $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
@@ -72,11 +76,21 @@ update-chart: clone-chart
 		env VERSION=$(RELEASE_VERSION) make version && \
 		env BACKEND_VERSION=$(RELEASE_VERSION) make update-docker-images
 
+# CI fast path: chart default image tags (no PR-SNAPSHOT); acceptance does not need the build job.
+ifeq ($(ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS),true)
+release: clone-chart
+else
 release: update-chart
+endif
+
+release:
+ifeq ($(ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS),true)
+	@echo "ACCEPTANCE_CI_USE_CHART_IMAGE_TAGS=true — using chart default image tags (not $(RELEASE_VERSION))"
+endif
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
     helm dep up && \
-    helm lint && \
+    helm lint . && \
     cat Chart.yaml && \
 	  cat values.yaml && \
 	  ls -la charts

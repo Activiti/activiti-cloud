@@ -11,7 +11,7 @@ This guide helps you set up Activiti Cloud for local development and testing.
 This single command:
 
 1. 🔧 **Configures cluster connection** (using rancher CLI if needed)
-2. 🐳 **Ensures reliable Docker images** (creates/uses local-values.yaml)
+2. 🐳 **Ensures reliable Docker images** (creates/uses `local-values.local.yaml`, gitignored)
 3. ⚓ **Deploys Activiti Cloud** to Kubernetes
 4. 🧪 **Generates .env file** for Playwright tests
 5. 📋 **Shows next steps** for testing
@@ -102,7 +102,7 @@ kubectl config use-context your-context
 ### Use Generated Docker Images (Advanced)
 
 ```bash
-# Skip local-values.yaml and use generated image versions
+# Skip local-values.local.yaml and use generated image versions
 ./scripts/local-install.sh -n test-env --no-local-images
 ```
 
@@ -137,9 +137,9 @@ After deployment, the script automatically:
 
 ## 📁 Generated Files
 
-### local-values.yaml
+### local-values.local.yaml
 
-- Contains working Docker image tags
+- Contains working Docker image tags (generated, gitignored)
 - Automatically created if missing
 - Ensures reliable deployments
 - Located at repository root

@@ -168,15 +168,21 @@ if [[ "$MESSAGING_BROKER" != "rabbitmq" && "$MESSAGING_BROKER" != "kafka" ]]; th
     exit 1
 fi
 
-if [[ "$MESSAGING_PARTITIONED" != "true" && "$MESSAGING_PARTITIONED" != "false" ]]; then
-    echo -e "${RED}Error: Partitioned must be 'true' or 'false'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_PARTITIONED" in
+    true|false|partitioned|non-partitioned|prefix) ;;
+    *)
+        echo -e "${RED}Error: Partitioning must be true|false (legacy) or partitioned|non-partitioned|prefix${NC}" >&2
+        exit 1
+        ;;
+esac
 
-if [[ "$MESSAGING_DESTINATIONS" != "default" && "$MESSAGING_DESTINATIONS" != "override" ]]; then
-    echo -e "${RED}Error: Destinations must be 'default' or 'override'${NC}" >&2
-    exit 1
-fi
+case "$MESSAGING_DESTINATIONS" in
+    default|override|pdb|default-destinations|override-destinations) ;;
+    *)
+        echo -e "${RED}Error: Destinations must be default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
+        ;;
+esac
 
 if [[ "$MODE" != "full" && "$MODE" != "env-only" && "$MODE" != "test-only" && "$MODE" != "playwright" ]]; then
     echo -e "${RED}Error: Mode must be 'full', 'env-only', 'test-only', or 'playwright'${NC}" >&2
@@ -223,22 +229,38 @@ generate_environment() {
     # Generate base PREVIEW_NAME from environment name
     PREVIEW_NAME="$ENVIRONMENT_NAME"
 
-    # Convert boolean partitioned to expected format
-    if [[ "$MESSAGING_PARTITIONED" == "true" ]]; then
+    # Normalize partitioning option to match Helm values filenames used by Makefile:
+    # - partitioned-values.yaml
+    # - non-partitioned-values.yaml
+    # - prefix-values.yaml
+    if [[ "$MESSAGING_PARTITIONED" == "true" || "$MESSAGING_PARTITIONED" == "partitioned" ]]; then
         MESSAGING_PARTITIONED_SUFFIX="partitioned"
         MESSAGING_PARTITIONED_MAKE="partitioned"
+    elif [[ "$MESSAGING_PARTITIONED" == "prefix" ]]; then
+        MESSAGING_PARTITIONED_SUFFIX="prefix"
+        MESSAGING_PARTITIONED_MAKE="prefix"
     else
         MESSAGING_PARTITIONED_SUFFIX="non-partitioned"
         MESSAGING_PARTITIONED_MAKE="non-partitioned"
     fi
 
-    # Convert destinations to expected format
-    if [[ "$MESSAGING_DESTINATIONS" == "default" ]]; then
+    # Normalize destinations option to match Helm values filenames used by Makefile:
+    # - default-destinations-values.yaml
+    # - override-destinations-values.yaml
+    # - pdb-values.yaml
+    if [[ "$MESSAGING_DESTINATIONS" == "default" || "$MESSAGING_DESTINATIONS" == "default-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="default-destinations"
         MESSAGING_DESTINATIONS_MAKE="default-destinations"
-    else
+    elif [[ "$MESSAGING_DESTINATIONS" == "override" || "$MESSAGING_DESTINATIONS" == "override-destinations" ]]; then
         MESSAGING_DESTINATIONS_SUFFIX="override-destinations"
         MESSAGING_DESTINATIONS_MAKE="override-destinations"
+    elif [[ "$MESSAGING_DESTINATIONS" == "pdb" ]]; then
+        MESSAGING_DESTINATIONS_SUFFIX="pdb"
+        MESSAGING_DESTINATIONS_MAKE="pdb"
+    else
+        echo -e "${RED}Error: Unknown destinations option: '${MESSAGING_DESTINATIONS}'${NC}" >&2
+        echo -e "${YELLOW}Expected: default|override|pdb or default-destinations|override-destinations|pdb${NC}" >&2
+        exit 1
     fi
 
     # Add broker and configuration suffixes (same logic as GitHub Actions)
@@ -403,7 +425,7 @@ EOF
 run_installation() {
     echo -e "${MAGENTA}=== 🚀 Running Installation ===${NC}"
 
-    # Resolve Docker images and create local-values.yaml with working tags
+    # Resolve Docker images and create local-values.local.yaml with working tags
     echo -e "${BLUE}Resolving Docker image versions...${NC}"
     local use_local_images=false
 
@@ -416,15 +438,21 @@ run_installation() {
             echo -e "${CYAN}[DRY-RUN] Would run: ./scripts/resolve-docker-images.sh $VERSION${NC}"
         fi
 
-        # If local-values.yaml exists, use it for reliable image tags
-        if [[ -f "local-values.yaml" ]]; then
-            echo -e "${GREEN}✓ Using local-values.yaml with verified working image tags${NC}"
+        # If local-values.local.yaml exists, use it for reliable image tags
+        if [[ -f "local-values.local.yaml" ]]; then
+            echo -e "${GREEN}✓ Using local-values.local.yaml with verified working image tags${NC}"
+            use_local_images=true
+        elif [[ -f "local-values.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using legacy local-values.yaml (please migrate to local-values.local.yaml)${NC}"
             use_local_images=true
         fi
     else
-        # If resolve script doesn't exist, check for existing local-values.yaml
-        if [[ -f "local-values.yaml" ]]; then
-            echo -e "${YELLOW}⚠ Using existing local-values.yaml (resolve script not found)${NC}"
+        # If resolve script doesn't exist, check for existing local-values.local.yaml
+        if [[ -f "local-values.local.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using existing local-values.local.yaml (resolve script not found)${NC}"
+            use_local_images=true
+        elif [[ -f "local-values.yaml" ]]; then
+            echo -e "${YELLOW}⚠ Using legacy local-values.yaml (resolve script not found)${NC}"
             use_local_images=true
         else
             echo -e "${YELLOW}⚠ No image resolution available - using default tags${NC}"

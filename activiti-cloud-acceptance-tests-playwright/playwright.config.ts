@@ -14,68 +14,52 @@
  * limitations under the License.
  */
 
-import dotenv from 'dotenv';
-import { defineConfig, devices } from '@playwright/test';
-import { paths } from './paths';
-import { testConfig } from './config/test-configuration';
+import './config/load-env';
+import { defineConfig } from '@playwright/test';
+import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
+import { paths } from './config/paths';
+import { getTestConfiguration } from './config/runtime/test-configuration';
+import { timeouts } from './config/runtime/timeouts';
+applyResolvedHostsToEnv();
 
-dotenv.config({ path: paths.dotEnvPath }); // Load environment variables from .env file
+const testConfig = getTestConfiguration();
+const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
+const isCi = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 60000,
+  timeout: timeouts.test,
   expect: {
-    timeout: 10000,
+    timeout: timeouts.expect,
   },
 
-  // Test configuration
   fullyParallel: true,
-  //forbidOnly: !!process.env.CI,
-  retries: 0,
-  workers: 2,
+  retries: process.env.CI ? 2 : 0,
+  forbidOnly: !!process.env.CI,
+  workers,
+  maxFailures: process.env.CI ? 10 : undefined,
 
   reporter: [
     ['html'],
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
-    ['json', { outputFile: `${paths.reporter}/results.json` }]
+    ['json', { outputFile: `${paths.reporter}/results.json` }],
+    ...(process.env.CI ? ([['github']] as const) : []),
   ],
 
   outputDir: paths.testResults,
 
   use: {
     baseURL: testConfig.baseURL,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
+    trace: isCi ? 'on-first-retry' : 'retain-on-failure',
+    screenshot: isCi ? 'off' : 'only-on-failure',
+    video: isCi ? 'off' : 'retain-on-failure',
+    actionTimeout: timeouts.action,
+    navigationTimeout: timeouts.navigation,
   },
 
-  projects: [
-    {
-      name: 'identity-adapter',
-      testMatch: 'tests/identity-adapter.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'security-policies',
-      testMatch: 'tests/*security-policies.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'process-instance-actions',
-      testMatch: 'tests/process-instance-actions.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'all-tests',
-      testMatch: 'tests/**/*.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    }
-  ],
+  // No overlapping projects — use npm scripts with explicit paths for slices (see docs/IMPROVEMENTS.md Phase 1).
 
-  // Global setup for local development
-  globalSetup: testConfig.usePortForwarding ? './config/global-setup.ts' : undefined,
-  globalTeardown: testConfig.usePortForwarding ? './config/global-teardown.ts' : undefined,
+  globalSetup: './config/lifecycle/global-setup.ts',
+  globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,
 });

@@ -16,6 +16,7 @@
 
 export interface CloudProcessInstance {
     id: string;
+    [key: string]: unknown;
     name?: string;
     processDefinitionId: string;
     processDefinitionKey: string;
@@ -39,10 +40,16 @@ export enum ProcessInstanceStatus {
 }
 
 export interface StartProcessPayload {
+    payloadType: 'StartProcessPayload';
     processDefinitionKey: string;
     businessKey?: string;
     name?: string;
-    variables?: Record<string, any>;
+    variables?: Record<string, unknown>;
+}
+
+export interface UpdateProcessPayload {
+    payloadType: 'UpdateProcessPayload';
+    name?: string;
 }
 
 export interface ProcessInstanceResponse {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-
 import { test as base, expect } from '@playwright/test';
-import { ContextFactory } from '../context-factory';
-import { CustomAPIRequest } from '../context.models';
+import type { UserKey } from '../config/users';
+import { AuthCache } from './auth-cache';
+import { CustomAPIRequest } from './context.models';
 
 interface UserContexts {
     hrUserContext: CustomAPIRequest;
@@ -32,37 +32,36 @@ interface UserContexts {
     testUserContext: CustomAPIRequest;
 }
 
-const contexts = base.extend<UserContexts>({
-    processAdminContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('processadmin'));
-    },
-    devopsUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('devopsuser'));
-    },
-    hrUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('hruser'));
-    },
-    hradminContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('hradmin'));
-    },
-    modelerUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('modeler'));
-    },
-    modelerqaUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('modelerqa'));
-    },
-    superadminContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('superadminuser'));
-    },
-    salesUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('salesUser'));
-    },
-    testAdminUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('testAdminUser'));
-    },
-    testUserContext: async ({ }, use) => {
-        await use(await ContextFactory.getContextByUserName('testUser'));
-    }
+interface WorkerFixtures {
+    authCache: AuthCache;
+}
+
+function userContext(userKey: UserKey) {
+    return async ({ authCache }: { authCache: AuthCache }, use: (context: CustomAPIRequest) => Promise<void>) => {
+        await use(await authCache.getContext(userKey));
+    };
+}
+
+const contexts = base.extend<UserContexts, WorkerFixtures>({
+    authCache: [
+        async ({}, use) => {
+            const cache = new AuthCache();
+            await use(cache);
+            await cache.disposeAll();
+        },
+        { scope: 'worker' },
+    ],
+
+    processAdminContext: userContext('processadmin'),
+    devopsUserContext: userContext('devopsuser'),
+    hrUserContext: userContext('hruser'),
+    hradminContext: userContext('hradmin'),
+    modelerUserContext: userContext('modeler'),
+    modelerqaUserContext: userContext('modelerqa'),
+    superadminContext: userContext('superadminuser'),
+    salesUserContext: userContext('salesUser'),
+    testAdminUserContext: userContext('testAdminUser'),
+    testUserContext: userContext('testUser'),
 });
 
 export { contexts, expect };

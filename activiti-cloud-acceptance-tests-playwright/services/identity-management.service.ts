@@ -16,7 +16,7 @@
 
 import { User, Group, SearchUsersParams, SearchGroupsParams } from '../models/identity.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class IdentityManagementService extends BaseService {
     private readonly basePath = '/identity-adapter-service/v1';
