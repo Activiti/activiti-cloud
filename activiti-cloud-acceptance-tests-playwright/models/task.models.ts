@@ -29,6 +29,7 @@ export interface CloudTask {
     processInstanceId?: string;
     processDefinitionId?: string;
     processDefinitionKey?: string;
+    processDefinitionVersion?: number;
     parentTaskId?: string;
     standalone?: boolean;
     formKey?: string;

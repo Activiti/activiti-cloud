@@ -282,13 +282,27 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the process instance is destroyed', async () => {
-            await expect(async () => {
-                await runtimeBundleServiceTestAdmin.getProcessInstance(processInstanceId);
-            }).rejects.toThrow();
+            await expect
+                .poll(async () => {
+                    try {
+                        await runtimeBundleServiceTestAdmin.getProcessInstance(processInstanceId);
+                        return false;
+                    } catch {
+                        return true;
+                    }
+                }, pollOptions('querySync'))
+                .toBe(true);
 
-            await expect(async () => {
-                await queryServiceTestUser.getProcessInstance(processInstanceId);
-            }).rejects.toThrow();
+            await expect
+                .poll(async () => {
+                    try {
+                        await queryServiceTestUser.getProcessInstance(processInstanceId);
+                        return false;
+                    } catch {
+                        return true;
+                    }
+                }, pollOptions('querySync'))
+                .toBe(true);
         });
     });
 
