@@ -91,8 +91,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
                     try {
                         await queryServiceTestUser.getProcessInstance(processInstanceId);
                         return true;
-                    } catch {
-                        return false;
+                    } catch (error) {
+                        // Query DB may not have ingested the instance yet — keep polling.
+                        if (error instanceof Error && /Unable to find process instance/.test(error.message)) {
+                            return false;
+                        }
+                        throw error;
                     }
                 }, pollOptions('querySync'))
                 .toBe(true);

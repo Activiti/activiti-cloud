@@ -225,8 +225,12 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
                     try {
                         const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
                         return instance.status;
-                    } catch {
-                        return undefined;
+                    } catch (error) {
+                        // Query DB may not have ingested the instance yet — keep polling.
+                        if (error instanceof Error && /Unable to find process instance/.test(error.message)) {
+                            return undefined;
+                        }
+                        throw error;
                     }
                 }, pollOptions('querySync'))
                 .toBe(ProcessInstanceStatus.COMPLETED);
