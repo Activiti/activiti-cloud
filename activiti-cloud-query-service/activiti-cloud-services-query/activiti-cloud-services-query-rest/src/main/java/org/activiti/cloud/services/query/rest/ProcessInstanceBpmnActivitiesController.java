@@ -1,0 +1,85 @@
+/*
+ * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.activiti.cloud.services.query.rest;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Optional;
+import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
+import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
+import org.activiti.cloud.services.query.rest.assembler.BPMNActivityRepresentationModelAssembler;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(
+    value = "/v1/process-instances/{processInstanceId}/bpmn-activities",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
+public class ProcessInstanceBpmnActivitiesController {
+
+    private final BPMNActivityRepository bpmnActivityRepository;
+
+    private final BPMNActivityRepresentationModelAssembler activityRepresentationModelAssembler;
+
+    private final AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedModelAssembler;
+
+    public ProcessInstanceBpmnActivitiesController(
+        BPMNActivityRepository bpmnActivityRepository,
+        BPMNActivityRepresentationModelAssembler activityRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<BPMNActivityEntity> pagedModelAssembler
+    ) {
+        this.bpmnActivityRepository = bpmnActivityRepository;
+        this.activityRepresentationModelAssembler = activityRepresentationModelAssembler;
+        this.pagedModelAssembler = pagedModelAssembler;
+    }
+
+    @GetMapping
+    public PagedModel<EntityModel<CloudBPMNActivity>> getBpmnActivities(
+        @PathVariable String processInstanceId,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = BPMNActivityEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
+
+        BooleanExpression expression = QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(processInstanceId);
+        expression = expression.and(predicate);
+
+        return pagedModelAssembler.toModel(
+            pageable,
+            bpmnActivityRepository.findAll(expression, pageable),
+            activityRepresentationModelAssembler
+        );
+    }
+}
