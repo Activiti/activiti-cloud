@@ -38,3 +38,41 @@ export function expectedEngineEventBatch(
         ...(options.actor ? { actor: options.actor } : {}),
     }));
 }
+
+export function engineEventMatches(
+    actual: EngineEventNotification,
+    expected: EngineEventNotification
+): boolean {
+    return (
+        actual.eventType === expected.eventType &&
+        actual.processDefinitionKey === expected.processDefinitionKey &&
+        (expected.serviceName === undefined || actual.serviceName === expected.serviceName) &&
+        (expected.actor === undefined || actual.actor === expected.actor)
+    );
+}
+
+/** Removes the first matching events from {@code buffer} (one actual per expected). */
+export function tryTakeMatchingEngineEvents(
+    buffer: EngineEventNotification[],
+    expected: EngineEventNotification[]
+): EngineEventNotification[] | null {
+    const usedIndices = new Set<number>();
+    const taken: EngineEventNotification[] = [];
+
+    for (const exp of expected) {
+        const index = buffer.findIndex(
+            (actual, i) => !usedIndices.has(i) && engineEventMatches(actual, exp)
+        );
+        if (index < 0) {
+            return null;
+        }
+        usedIndices.add(index);
+        taken.push(buffer[index]);
+    }
+
+    [...usedIndices]
+        .sort((a, b) => b - a)
+        .forEach((index) => buffer.splice(index, 1));
+
+    return taken;
+}

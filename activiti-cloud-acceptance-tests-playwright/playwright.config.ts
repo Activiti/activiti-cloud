@@ -27,6 +27,8 @@ const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' :
 const isCi = Boolean(process.env.CI);
 const includeDestructive = process.env.PLAYWRIGHT_INCLUDE_DESTRUCTIVE === 'true';
 
+const notificationsSpec = /notifications\.spec\.ts$/;
+
 export default defineConfig({
   testDir: './tests',
   grepInvert: includeDestructive ? undefined : /@destructive/,
@@ -39,6 +41,23 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   forbidOnly: !!process.env.CI,
   workers,
+  ...(isCi
+    ? {
+        projects: [
+          {
+            name: 'parallel',
+            testIgnore: notificationsSpec,
+          },
+          {
+            name: 'notifications',
+            testMatch: notificationsSpec,
+            workers: 1,
+            fullyParallel: false,
+            retries: 2,
+          },
+        ],
+      }
+    : {}),
   maxFailures: process.env.CI ? 10 : undefined,
 
   reporter: [

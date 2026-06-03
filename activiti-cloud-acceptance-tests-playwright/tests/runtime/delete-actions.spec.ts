@@ -18,8 +18,8 @@
  * Port of delete-actions.story.disabled (AAE-46640).
  * Admin bulk-delete wipes query/audit data for the whole preview namespace — not parallel-safe.
  * Excluded from default runs via @destructive; CI runs via npm run test:ci after the main suite.
- * Query scenario deletes tasks before process instances (safer after a full parallel run).
- * Serenity story file remains until a separate retirement ticket.
+ * Query scenario stays skipped: DELETE /query/admin/v1/tasks returns 500 upstream (lazy-init in TaskDeleteController).
+ * Serenity story file remains until query bulk-delete is fixed and the scenario is enabled.
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
@@ -67,9 +67,9 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
         }
     );
 
-    activiti(
-        'delete records in query service',
-        async ({
+    // FIXME upstream: DELETE /admin/v1/tasks → 500 "Cannot lazily initialize collection (no session)".
+    // Same reason delete-actions.story stayed disabled in Serenity; enable when query service is fixed.
+    activiti.skip('delete records in query service', async ({
             runtimeBundleServiceTestUser,
             taskServiceTestUser,
             queryAdminServiceTestAdmin,

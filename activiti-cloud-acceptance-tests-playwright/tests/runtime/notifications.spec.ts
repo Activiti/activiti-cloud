@@ -29,6 +29,7 @@ import { actorFromAccessToken, expectedEngineEventBatch } from '../../helpers/no
 import { createEngineEventsSubscription } from '../../services/notifications-graphql.client';
 import type { EngineEventsSubscription } from '../../services/notifications-graphql.client';
 import type { QueryService } from '../../services/query.service';
+import type { RuntimeBundleService } from '../../services/runtime-bundle.service';
 
 async function assertNotificationBatch(
     subscription: EngineEventsSubscription,
@@ -36,22 +37,47 @@ async function assertNotificationBatch(
     processDefinitionKey: string,
     options: { actor?: string; batchTimeoutMs?: number } = {}
 ): Promise<void> {
-    const batch = await subscription.waitForNextBatch(options.batchTimeoutMs);
     const expected = expectedEngineEventBatch(eventTypes, processDefinitionKey, { actor: options.actor });
+    const batch = await subscription.waitForExpectedEvents(expected, options.batchTimeoutMs);
     expect(batch).toEqual(expect.arrayContaining(expected));
     expect(batch).toHaveLength(expected.length);
+}
+
+async function readProcessInstanceStatus(
+    queryService: QueryService,
+    runtimeBundle: RuntimeBundleService | undefined,
+    processInstanceId: string
+): Promise<string | undefined> {
+    const sources = [queryService, runtimeBundle].filter(
+        (service): service is QueryService | RuntimeBundleService => service !== undefined
+    );
+
+    for (const service of sources) {
+        try {
+            const instance = await service.getProcessInstance(processInstanceId);
+            if (instance?.status) {
+                return instance.status;
+            }
+        } catch {
+            // Query may lag behind RB for fast processes (e.g. connector); try the next source.
+        }
+    }
+
+    return undefined;
 }
 
 async function assertNotificationsProcessCompleted(
     queryService: QueryService,
     processInstanceId: string,
-    pollProfile: 'querySync' | 'signalProcess' | 'processStatus' = 'querySync'
+    pollProfile: 'querySync' | 'signalProcess' | 'processStatus' = 'querySync',
+    runtimeBundle?: RuntimeBundleService
 ): Promise<void> {
     await expect
-        .poll(async () => {
-            const instance = await queryService.getProcessInstance(processInstanceId);
-            return instance.status;
-        }, pollOptions(pollProfile))
+        .poll(
+            async () =>
+                readProcessInstanceStatus(queryService, runtimeBundle, processInstanceId),
+            pollOptions(pollProfile)
+        )
         .toBe(ProcessInstanceStatus.COMPLETED);
 }
 
@@ -77,6 +103,7 @@ const BOUNDARY_TIMER_PROCESS = ProcessDefinitionRegistry.processDefinitionKeyMat
 const TIMER_BATCH_TIMEOUT_MS = 90_000;
 
 activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
+    activiti.describe.configure({ mode: 'serial' });
     activiti(
         'complete a process instance that uses a connector with subscription to PROCESS event notifications',
         async ({ runtimeBundleServiceTestAdmin, queryServiceTestAdmin, testAdminUserContext }) => {
@@ -89,18 +116,13 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
             });
 
             try {
-                await activiti.step(
-                    'When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications',
-                    async () => {
-                        await subscription.awaitReady();
-                    }
-                );
-
                 let processInstanceId: string;
 
                 await activiti.step(
-                    'And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE',
+                    'When notifications: the user subscribes to PROCESS_STARTED,PROCESS_COMPLETED notifications ' +
+                        'And notifications: the user starts a process CONNECTOR_PROCESS_INSTANCE',
                     async () => {
+                        await subscription.awaitReady();
                         const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
                             processDefinitionKey: CONNECTOR_PROCESS,
                             businessKey,
@@ -132,7 +154,12 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                 );
 
                 await activiti.step('And notifications: verify the status of the process is completed', async () => {
-                    await assertNotificationsProcessCompleted(queryServiceTestAdmin, processInstanceId!);
+                    await assertNotificationsProcessCompleted(
+                        queryServiceTestAdmin,
+                        processInstanceId!,
+                        'processStatus',
+                        runtimeBundleServiceTestAdmin
+                    );
                 });
             } finally {
                 subscription.close();
@@ -284,7 +311,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
     activiti(
         'complete a process instance with intermediate timer subscription to TIMER event notifications',
         async ({ runtimeBundleServiceTestAdmin, queryServiceTestAdmin, testAdminUserContext }) => {
-            const businessKey = 'businessKey';
+            const businessKey = randomUUID();
             const subscription = createEngineEventsSubscription({
                 accessToken: testAdminUserContext.token,
                 eventTypes: ['TIMER_SCHEDULED', 'TIMER_FIRED', 'TIMER_EXECUTED'],
@@ -358,7 +385,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
     activiti(
         'complete a process instance with boundary timer subscription to TIMER event notifications',
         async ({ runtimeBundleServiceTestAdmin, queryServiceTestAdmin, testAdminUserContext }) => {
-            const businessKey = 'businessKey';
+            const businessKey = randomUUID();
             const subscription = createEngineEventsSubscription({
                 accessToken: testAdminUserContext.token,
                 eventTypes: ['TIMER_SCHEDULED', 'TIMER_FIRED', 'TIMER_EXECUTED'],

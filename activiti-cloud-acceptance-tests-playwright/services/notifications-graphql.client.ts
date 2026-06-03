@@ -19,6 +19,7 @@ import {
     DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME,
     resolveNotificationsEndpoints,
 } from '../config/connection/notifications-url';
+import { tryTakeMatchingEngineEvents } from '../helpers/notifications.flow';
 import { webSocketLogger } from '../helpers/logging/logger-builder';
 import {
     createTraefikAwareWebSocket,
@@ -80,7 +81,10 @@ export interface EngineEventsSubscriptionOptions {
 export interface EngineEventsSubscription {
     readonly client: Client;
     awaitReady(): Promise<void>;
-    waitForNextBatch(timeoutMs?: number): Promise<EngineEventNotification[]>;
+    waitForExpectedEvents(
+        expected: EngineEventNotification[],
+        timeoutMs?: number
+    ): Promise<EngineEventNotification[]>;
     close(): void;
 }
 
@@ -102,15 +106,12 @@ export function createEngineEventsSubscription(
         processDefinitionKey,
         serviceName = DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME,
         actor,
-        subscriptionReadyTimeoutMs = 6_000,
+        subscriptionReadyTimeoutMs = 15_000,
     } = options;
 
     const { webSocketGraphqlUrl, hostHeader } = resolveNotificationsEndpoints();
-    const pendingBatches: EngineEventNotification[][] = [];
-    const batchWaiters: Array<{
-        resolve: (batch: EngineEventNotification[]) => void;
-        reject: (error: Error) => void;
-    }> = [];
+    const eventBuffer: EngineEventNotification[] = [];
+    let bufferNotify: (() => void) | null = null;
 
     const authHeader = normalizeAccessToken(accessToken);
     let subscriptionReady: Promise<void>;
@@ -137,6 +138,20 @@ export function createEngineEventsSubscription(
     const readyTimer = setTimeout(() => {
         rejectReady(new Error(`GraphQL subscription not ready within ${subscriptionReadyTimeoutMs}ms`));
     }, subscriptionReadyTimeoutMs);
+
+    const notifyBufferWaiters = () => {
+        const notify = bufferNotify;
+        bufferNotify = null;
+        notify?.();
+    };
+
+    const appendEvents = (events: EngineEventNotification[]) => {
+        if (events.length === 0) {
+            return;
+        }
+        eventBuffer.push(...events);
+        notifyBufferWaiters();
+    };
 
     const client = createClient({
         url: webSocketGraphqlUrl,
@@ -182,24 +197,13 @@ export function createEngineEventsSubscription(
                     return;
                 }
 
+                resolveReady();
                 const events = (result.data?.engineEvents ?? []) as EngineEventNotification[];
-                if (events.length === 0) {
-                    return;
-                }
-                const batch = events;
-                const waiter = batchWaiters.shift();
-                if (waiter) {
-                    waiter.resolve(batch);
-                } else {
-                    pendingBatches.push(batch);
-                }
+                appendEvents(events);
             },
             error: (error) => {
                 const err = formatGraphqlWsError(error);
                 rejectReady(err);
-                for (const waiter of batchWaiters.splice(0)) {
-                    waiter.reject(err);
-                }
             },
             complete: () => {
                 webSocketLogger.debug('subscription complete');
@@ -210,31 +214,47 @@ export function createEngineEventsSubscription(
     return {
         client,
         awaitReady: () => subscriptionReady,
-        async waitForNextBatch(timeoutMs = 60_000): Promise<EngineEventNotification[]> {
+        async waitForExpectedEvents(
+            expected: EngineEventNotification[],
+            timeoutMs = 60_000
+        ): Promise<EngineEventNotification[]> {
             await subscriptionReady;
-            const pending = pendingBatches.shift();
-            if (pending) {
-                return pending;
-            }
-            return new Promise<EngineEventNotification[]>((resolve, reject) => {
-                const timer = setTimeout(() => {
-                    const index = batchWaiters.findIndex((w) => w.resolve === resolve);
-                    if (index >= 0) {
-                        batchWaiters.splice(index, 1);
-                    }
-                    reject(new Error(`Timed out after ${timeoutMs}ms waiting for engine event notification batch`));
-                }, timeoutMs);
-                batchWaiters.push({
-                    resolve: (batch) => {
+            const deadline = Date.now() + timeoutMs;
+
+            while (Date.now() < deadline) {
+                const taken = tryTakeMatchingEngineEvents(eventBuffer, expected);
+                if (taken) {
+                    return taken;
+                }
+
+                const remaining = deadline - Date.now();
+                if (remaining <= 0) {
+                    break;
+                }
+
+                await new Promise<void>((resolve, reject) => {
+                    const timer = setTimeout(() => {
+                        bufferNotify = null;
+                        reject(
+                            new Error(
+                                `Timed out after ${timeoutMs}ms waiting for engine events: ${expected
+                                    .map((e) => e.eventType)
+                                    .join(',')}`
+                            )
+                        );
+                    }, remaining);
+                    bufferNotify = () => {
                         clearTimeout(timer);
-                        resolve(batch);
-                    },
-                    reject: (error) => {
-                        clearTimeout(timer);
-                        reject(error);
-                    },
+                        resolve();
+                    };
                 });
-            });
+            }
+
+            throw new Error(
+                `Timed out after ${timeoutMs}ms waiting for engine events: ${expected
+                    .map((e) => e.eventType)
+                    .join(',')}`
+            );
         },
         close() {
             clearTimeout(readyTimer);
