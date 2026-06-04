@@ -187,7 +187,20 @@ class ProcessHierarchyMigrationIT {
                             }
                             String sql = new String(fis.readAllBytes(), StandardCharsets.UTF_8);
                             sql = stripLeadingBlockComment(sql);
-                            stmt.execute(sql);
+                            boolean splitStatements = "true".equalsIgnoreCase(sqlFile.getAttribute("splitStatements"));
+                            if (splitStatements) {
+                                // Honor Liquibase splitStatements: execute each ';'-delimited statement
+                                // separately. Required because statements like
+                                // `CREATE INDEX CONCURRENTLY` cannot run inside a JDBC pipeline.
+                                for (String part : sql.split(";")) {
+                                    String trimmed = part.trim();
+                                    if (!trimmed.isEmpty()) {
+                                        stmt.execute(trimmed);
+                                    }
+                                }
+                            } else {
+                                stmt.execute(sql);
+                            }
                         }
                     }
                 }
