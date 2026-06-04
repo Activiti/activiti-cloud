@@ -32,11 +32,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes
- * the way {@link TaskSpecification} builds its predicates: when the flag is OFF (default) the
- * legacy join-based code paths are used and the outer query is forced to {@code SELECT DISTINCT};
- * when the flag is ON correlated EXISTS subqueries are produced instead and {@code DISTINCT} is
- * skipped.
+ * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} flag changes
+ * the way {@link TaskSpecification} builds its predicates: when the flag is OFF (default)
+ * correlated EXISTS subqueries are produced and {@code DISTINCT} is skipped; when the flag
+ * is ON the legacy join-based code paths are used and the outer query is forced to
+ * {@code SELECT DISTINCT}.
  */
 class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
@@ -44,22 +44,7 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
     class UserRestriction {
 
         @Test
-        void shouldAddDistinctAndJoinCandidateUsersAndGroups_whenExistsSubqueriesToggleIsOff() {
-            TaskSearchRequest request = new TaskSearchRequestBuilder().build();
-            TaskSpecification spec = TaskSpecification.restricted(request, USER, List.of("group1"));
-            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
-
-            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
-
-            verify(ctx.query()).distinct(true);
-            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers, JoinType.LEFT);
-            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateGroups, JoinType.LEFT);
-            verify(ctx.query(), never()).subquery(any(Class.class));
-        }
-
-        @Test
-        void shouldSkipDistinctAndCreateSubqueries_whenExistsSubqueriesToggleIsOn() {
-            enableExistsSubqueriesToggle();
+        void shouldSkipDistinctAndCreateSubqueries_byDefault() {
             TaskSearchRequest request = new TaskSearchRequestBuilder().build();
             TaskSpecification spec = TaskSpecification.restricted(request, USER, List.of("group1"));
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
@@ -73,26 +58,28 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
             verify(ctx.root(), never()).join(eq(TaskEntity_.taskCandidateUsers), any(JoinType.class));
             verify(ctx.root(), never()).join(eq(TaskEntity_.taskCandidateGroups), any(JoinType.class));
         }
+
+        @Test
+        void shouldAddDistinctAndJoinCandidateUsersAndGroups_whenLegacyJoinsToggleIsOn() {
+            enableLegacyJoinsToggle();
+            TaskSearchRequest request = new TaskSearchRequestBuilder().build();
+            TaskSpecification spec = TaskSpecification.restricted(request, USER, List.of("group1"));
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.query()).distinct(true);
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers, JoinType.LEFT);
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateGroups, JoinType.LEFT);
+            verify(ctx.query(), never()).subquery(any(Class.class));
+        }
     }
 
     @Nested
     class CandidateUserFilter {
 
         @Test
-        void shouldUseJoin_whenExistsSubqueriesToggleIsOff() {
-            TaskSearchRequest request = new TaskSearchRequestBuilder().withCandidateUserId(USER).build();
-            TaskSpecification spec = TaskSpecification.unrestricted(request);
-            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
-
-            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
-
-            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers);
-            verify(ctx.query(), never()).subquery(any(Class.class));
-        }
-
-        @Test
-        void shouldUseSubquery_whenExistsSubqueriesToggleIsOn() {
-            enableExistsSubqueriesToggle();
+        void shouldUseSubquery_byDefault() {
             TaskSearchRequest request = new TaskSearchRequestBuilder().withCandidateUserId(USER).build();
             TaskSpecification spec = TaskSpecification.unrestricted(request);
             CriteriaContext<TaskEntity> ctx = newCriteriaContext();
@@ -101,6 +88,19 @@ class TaskSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
             verify(ctx.query(), atLeastOnce()).subquery(any(Class.class));
             verify(ctx.root(), never()).join(TaskEntity_.taskCandidateUsers);
+        }
+
+        @Test
+        void shouldUseJoin_whenLegacyJoinsToggleIsOn() {
+            enableLegacyJoinsToggle();
+            TaskSearchRequest request = new TaskSearchRequestBuilder().withCandidateUserId(USER).build();
+            TaskSpecification spec = TaskSpecification.unrestricted(request);
+            CriteriaContext<TaskEntity> ctx = newCriteriaContext();
+
+            spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+            verify(ctx.root(), atLeastOnce()).join(TaskEntity_.taskCandidateUsers);
+            verify(ctx.query(), never()).subquery(any(Class.class));
         }
     }
 }

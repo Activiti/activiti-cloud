@@ -291,7 +291,7 @@ public class ProcessInstanceSpecification
     /**
      * Legacy implementation that adds the user-restriction predicate using {@code LEFT JOIN}s on
      * {@code tasks} and {@code taskCandidateUsers}. Kept for backwards compatibility and
-     * activated when {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is disabled (the default). Relies on
+     * activated when {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} is enabled. Relies on
      * {@link SpecificationSupport#useExistsSubqueries()} returning {@code false} so that the
      * outer query keeps {@code SELECT DISTINCT} to collapse the duplicate rows produced by the
      * joins.
@@ -317,8 +317,8 @@ public class ProcessInstanceSpecification
 
     /**
      * New implementation that adds the user-restriction predicate using correlated {@code EXISTS}
-     * subqueries against {@code task} and {@code task_candidate_user}. Activated when
-     * {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} is enabled. Avoids duplicate rows so the outer query
+     * subqueries against {@code task} and {@code task_candidate_user}. This is the default
+     * behavior. Avoids duplicate rows so the outer query
      * does not need {@code SELECT DISTINCT}, which typically yields better execution plans.
      */
     private void applyUserRestrictionFilterWithExistsSubqueries(

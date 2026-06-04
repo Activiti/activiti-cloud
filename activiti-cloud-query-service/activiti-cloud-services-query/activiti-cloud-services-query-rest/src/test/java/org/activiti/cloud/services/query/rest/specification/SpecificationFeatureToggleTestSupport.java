@@ -27,7 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.mockito.Answers;
 
 /**
- * Shared scaffolding for the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} behavior
+ * Shared scaffolding for the {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} behavior
  * tests of the {@code SpecificationSupport} subclasses. Provides:
  * <ul>
  *     <li>helpers to enable / reset the feature toggle at test level;</li>
@@ -44,8 +44,12 @@ abstract class SpecificationFeatureToggleTestSupport {
         FeatureToggleHolder.reset();
     }
 
-    protected static void enableExistsSubqueriesToggle() {
-        FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES::equals);
+    /**
+     * Enables the legacy join-based query path by activating the
+     * {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} flag.
+     */
+    protected static void enableLegacyJoinsToggle() {
+        FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_LEGACY_JOINS::equals);
     }
 
     protected static <T> CriteriaContext<T> newCriteriaContext() {

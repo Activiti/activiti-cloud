@@ -72,14 +72,14 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
     }
 
     /**
-     * @return {@code true} when the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag is
-     *         enabled in the application-wide {@link FeatureToggleHolder}, in which case
-     *         subclasses must build {@code EXISTS}-subquery based predicates and skip the
-     *         {@code SELECT DISTINCT} clause; {@code false} (the default) keeps the legacy
-     *         join-based behavior including {@code SELECT DISTINCT}.
+     * @return {@code true} when the specifications must build {@code EXISTS}-subquery based
+     *         predicates and skip the {@code SELECT DISTINCT} clause (the default);
+     *         {@code false} re-enables the legacy join-based behavior including
+     *         {@code SELECT DISTINCT} when
+     *         {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} is enabled.
      */
     protected boolean useExistsSubqueries() {
-        return FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES);
+        return !FeatureToggleHolder.isEnabled(QueryFeatureToggles.FEATURE_LEGACY_JOINS);
     }
 
     protected abstract SingularAttribute<T, ?> getIdAttribute();

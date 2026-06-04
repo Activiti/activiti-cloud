@@ -29,33 +29,16 @@ import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchReque
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_EXISTS_SUBQUERIES} flag changes
+ * Verifies that toggling the {@link QueryFeatureToggles#FEATURE_LEGACY_JOINS} flag changes
  * the way {@link ProcessInstanceSpecification} builds the user-restriction predicate: when the
- * flag is OFF (default) the legacy join-based code path is used and the outer query is forced
- * to {@code SELECT DISTINCT}; when the flag is ON correlated EXISTS subqueries are produced
- * instead and {@code DISTINCT} is skipped.
+ * flag is OFF (default) correlated EXISTS subqueries are produced and {@code DISTINCT} is
+ * skipped; when the flag is ON the legacy join-based code path is used and the outer query is
+ * forced to {@code SELECT DISTINCT}.
  */
 class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSupport {
 
     @Test
-    void shouldAddDistinctAndJoinTasks_whenExistsSubqueriesToggleIsOff() {
-        // toggle OFF (default)
-        ProcessInstanceSpecification spec = ProcessInstanceSpecification.restricted(
-            new ProcessInstanceSearchRequest(),
-            USER
-        );
-        CriteriaContext<ProcessInstanceEntity> ctx = newCriteriaContext();
-
-        spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
-
-        verify(ctx.query()).distinct(true);
-        verify(ctx.root(), atLeastOnce()).join(ProcessInstanceEntity_.tasks, JoinType.LEFT);
-        verify(ctx.query(), never()).subquery(any(Class.class));
-    }
-
-    @Test
-    void shouldSkipDistinctAndCreateSubqueries_whenExistsSubqueriesToggleIsOn() {
-        enableExistsSubqueriesToggle();
+    void shouldSkipDistinctAndCreateSubqueries_byDefault() {
         ProcessInstanceSpecification spec = ProcessInstanceSpecification.restricted(
             new ProcessInstanceSearchRequest(),
             USER
@@ -68,5 +51,21 @@ class ProcessInstanceSpecificationTests extends SpecificationFeatureToggleTestSu
         // user-restriction adds two correlated EXISTS subqueries (assignee + candidate user)
         verify(ctx.query(), atLeast(2)).subquery(any(Class.class));
         verify(ctx.root(), never()).join(eq(ProcessInstanceEntity_.tasks), any(JoinType.class));
+    }
+
+    @Test
+    void shouldAddDistinctAndJoinTasks_whenLegacyJoinsToggleIsOn() {
+        enableLegacyJoinsToggle();
+        ProcessInstanceSpecification spec = ProcessInstanceSpecification.restricted(
+            new ProcessInstanceSearchRequest(),
+            USER
+        );
+        CriteriaContext<ProcessInstanceEntity> ctx = newCriteriaContext();
+
+        spec.toPredicate(ctx.root(), ctx.query(), ctx.cb());
+
+        verify(ctx.query()).distinct(true);
+        verify(ctx.root(), atLeastOnce()).join(ProcessInstanceEntity_.tasks, JoinType.LEFT);
+        verify(ctx.query(), never()).subquery(any(Class.class));
     }
 }

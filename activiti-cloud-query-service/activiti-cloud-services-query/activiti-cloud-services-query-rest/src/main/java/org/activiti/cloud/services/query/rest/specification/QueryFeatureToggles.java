@@ -26,6 +26,22 @@ public final class QueryFeatureToggles {
      * Switches the {@link ProcessInstanceSpecification} and {@link TaskSpecification} between the
      * legacy join-based queries (flag {@code false}, the default) and the {@code EXISTS}
      * subquery-based queries (flag {@code true}).
+     *
+     * @deprecated Since the default was changed to use EXISTS subqueries, this flag is no longer
+     *             evaluated. Use {@link #FEATURE_LEGACY_JOINS} (set to {@code true}) to
+     *             re-enable the legacy join-based behavior if needed.
      */
+    @Deprecated(forRemoval = true)
     public static final String FEATURE_EXISTS_SUBQUERIES = "query.specifications.exists-subqueries";
+
+    /**
+     * When set to {@code true}, reverts the {@link ProcessInstanceSpecification} and
+     * {@link TaskSpecification} to the legacy join-based queries that use {@code LEFT JOIN}s
+     * and {@code SELECT DISTINCT}. The default ({@code false}) uses the more efficient
+     * {@code EXISTS}-subquery variant that avoids row duplication and produces better
+     * execution plans.
+     *
+     * <p>Property: {@code activiti.features.query.specifications.legacy-joins.enabled}
+     */
+    public static final String FEATURE_LEGACY_JOINS = "query.specifications.legacy-joins";
 }

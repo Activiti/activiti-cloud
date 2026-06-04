@@ -79,11 +79,11 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
         FeatureToggleHolder.reset();
     }
 
-    @ParameterizedTest(name = "existsSubqueries={0}")
+    @ParameterizedTest(name = "legacyJoins={0}")
     @ValueSource(booleans = { false, true })
-    void should_return_RestrictedProcessInstances(boolean existsSubqueriesEnabled) {
-        if (existsSubqueriesEnabled) {
-            FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_EXISTS_SUBQUERIES::equals);
+    void should_return_RestrictedProcessInstances(boolean legacyJoinsEnabled) {
+        if (legacyJoinsEnabled) {
+            FeatureToggleHolder.initialize(QueryFeatureToggles.FEATURE_LEGACY_JOINS::equals);
         } else {
             FeatureToggleHolder.reset();
         }
