@@ -28,6 +28,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDeleteController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceDiagramController;
+import org.activiti.cloud.services.query.rest.ProcessInstanceSequenceFlowsAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceServiceTasksAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
@@ -82,6 +83,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         ApplicationAdminController.class,
         IntegrationContextAdminController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
+        ProcessInstanceSequenceFlowsAdminController.class,
     }
 )
 @PropertySource("classpath:query-rest.properties")
