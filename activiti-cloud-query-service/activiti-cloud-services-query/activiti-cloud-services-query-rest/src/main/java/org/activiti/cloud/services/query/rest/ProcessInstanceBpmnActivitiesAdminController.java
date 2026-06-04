@@ -24,11 +24,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
 import org.activiti.cloud.services.query.rest.assembler.BPMNActivityRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.BpmnDiagramActivityEntry;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -64,7 +64,7 @@ public class ProcessInstanceBpmnActivitiesAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudBPMNActivity>> getBpmnActivitiesAdmin(
+    public PagedModel<EntityModel<BpmnDiagramActivityEntry>> getBpmnActivitiesAdmin(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = BPMNActivityEntity.class

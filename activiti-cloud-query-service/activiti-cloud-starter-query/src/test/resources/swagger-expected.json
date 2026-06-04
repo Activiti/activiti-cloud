@@ -6188,12 +6188,12 @@
             "content" : {
               "application/hal+json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudBPMNActivity"
+                  "$ref" : "#/components/schemas/ListResponseContentBpmnDiagramActivityEntry"
                 }
               },
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ListResponseContentCloudBPMNActivity"
+                  "$ref" : "#/components/schemas/ListResponseContentBpmnDiagramActivityEntry"
                 }
               }
             }
@@ -8676,109 +8676,72 @@
         },
         "title" : "ListResponseContentCloudIntegrationContext"
       },
-      "CloudBPMNActivity" : {
+      "BpmnDiagramActivityEntry" : {
         "type" : "object",
         "properties" : {
-          "processDefinitionKey" : {
+          "id" : {
             "type" : "string"
           },
-          "processDefinitionVersion" : {
-            "type" : "integer",
-            "format" : "int32"
+          "elementId" : {
+            "type" : "string"
+          },
+          "activityType" : {
+            "type" : "string"
           },
           "status" : {
             "type" : "string",
             "enum" : [ "STARTED", "COMPLETED", "CANCELLED", "ERROR" ]
           },
-          "businessKey" : {
+          "executionId" : {
             "type" : "string"
           },
-          "completedDate" : {
+          "startedDate" : {
             "type" : "string",
             "format" : "date-time"
           },
-          "startedDate" : {
+          "completedDate" : {
             "type" : "string",
             "format" : "date-time"
           },
           "cancelledDate" : {
             "type" : "string",
             "format" : "date-time"
-          },
-          "id" : {
-            "type" : "string"
-          },
-          "appName" : {
-            "type" : "string"
-          },
-          "serviceName" : {
-            "type" : "string"
-          },
-          "serviceFullName" : {
-            "type" : "string"
-          },
-          "serviceType" : {
-            "type" : "string"
-          },
-          "serviceVersion" : {
-            "type" : "string"
-          },
-          "appVersion" : {
-            "type" : "string"
-          },
-          "activityName" : {
-            "type" : "string"
-          },
-          "activityType" : {
-            "type" : "string"
-          },
-          "executionId" : {
-            "type" : "string"
-          },
-          "processDefinitionId" : {
-            "type" : "string"
-          },
-          "processInstanceId" : {
-            "type" : "string"
-          },
-          "elementId" : {
-            "type" : "string"
           }
         },
-        "title" : "CloudBPMNActivity"
+        "title" : "BpmnDiagramActivityEntry"
       },
-      "EntriesResponseContentCloudBPMNActivity" : {
+      "EntriesResponseContentBpmnDiagramActivityEntry" : {
         "type" : "object",
         "properties" : {
           "entries" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/EntryResponseContentCloudBPMNActivity"
+              "$ref" : "#/components/schemas/EntryResponseContentBpmnDiagramActivityEntry"
             }
           },
           "pagination" : {
             "$ref" : "#/components/schemas/PaginationMetadata"
           }
         },
-        "title" : "EntriesResponseContentCloudBPMNActivity"
+        "title" : "EntriesResponseContentBpmnDiagramActivityEntry"
       },
-      "EntryResponseContentCloudBPMNActivity" : {
+      "EntryResponseContentBpmnDiagramActivityEntry" : {
         "type" : "object",
         "properties" : {
           "entry" : {
-            "$ref" : "#/components/schemas/CloudBPMNActivity"
+            "$ref" : "#/components/schemas/BpmnDiagramActivityEntry"
           }
         },
-        "title" : "EntryResponseContentCloudBPMNActivity"
+        "title" : "EntryResponseContentBpmnDiagramActivityEntry"
       },
-      "ListResponseContentCloudBPMNActivity" : {
+      "ListResponseContentBpmnDiagramActivityEntry" : {
         "type" : "object",
         "properties" : {
           "list" : {
-            "$ref" : "#/components/schemas/EntriesResponseContentCloudBPMNActivity"
+            "$ref" : "#/components/schemas/EntriesResponseContentBpmnDiagramActivityEntry"
           }
         },
-        "title" : "ListResponseContentCloudBPMNActivity"
+        "title" : "ListResponseContentBpmnDiagramActivityEntry"
       }
     }
   },

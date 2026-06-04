@@ -15,16 +15,27 @@
  */
 package org.activiti.cloud.services.query.rest.assembler;
 
-import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.rest.dto.BpmnDiagramActivityEntry;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class BPMNActivityRepresentationModelAssembler
-    implements RepresentationModelAssembler<BPMNActivityEntity, EntityModel<CloudBPMNActivity>> {
+    implements RepresentationModelAssembler<BPMNActivityEntity, EntityModel<BpmnDiagramActivityEntry>> {
 
     @Override
-    public EntityModel<CloudBPMNActivity> toModel(BPMNActivityEntity entity) {
-        return EntityModel.of(entity);
+    public EntityModel<BpmnDiagramActivityEntry> toModel(BPMNActivityEntity entity) {
+        return EntityModel.of(
+            new BpmnDiagramActivityEntry(
+                entity.getId(),
+                entity.getElementId(),
+                entity.getActivityType(),
+                entity.getStatus(),
+                entity.getExecutionId(),
+                entity.getStartedDate(),
+                entity.getCompletedDate(),
+                entity.getCancelledDate()
+            )
+        );
     }
 }

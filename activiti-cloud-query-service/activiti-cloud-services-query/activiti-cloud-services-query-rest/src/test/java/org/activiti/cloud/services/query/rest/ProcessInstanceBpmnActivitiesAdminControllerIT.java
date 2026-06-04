@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
+import java.util.Date;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -135,9 +136,30 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
         String body = result.getResponse().getContentAsString();
 
         assertThatJson(body).inPath("list.pagination.count").isEqualTo(1);
+        assertThatJson(body)
+            .inPath("list.entries[0].entry.id")
+            .isEqualTo(PROCESS_INSTANCE_ID + ":start-event-1:execution-1");
         assertThatJson(body).inPath("list.entries[0].entry.elementId").isEqualTo("start-event-1");
         assertThatJson(body).inPath("list.entries[0].entry.activityType").isEqualTo("startEvent");
         assertThatJson(body).inPath("list.entries[0].entry.status").isEqualTo("COMPLETED");
+        assertThatJson(body).inPath("list.entries[0].entry.executionId").isEqualTo("execution-1");
+        assertThatJson(body).inPath("list.entries[0].entry.startedDate").isString();
+        assertThatJson(body).inPath("list.entries[0].entry.completedDate").isString();
+
+        // Diagram-only projection: process / service metadata must be omitted.
+        assertThatJson(body).inPath("list.entries[0].entry.serviceName").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.serviceFullName").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.serviceVersion").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.appName").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.appVersion").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.processInstanceId").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.processDefinitionId").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.processDefinitionKey").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.processDefinitionVersion").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.activityName").isAbsent();
+        assertThatJson(body).inPath("list.entries[0].entry.businessKey").isAbsent();
+        // cancelledDate is null on a COMPLETED activity and must be omitted.
+        assertThatJson(body).inPath("list.entries[0].entry.cancelledDate").isAbsent();
     }
 
     @Test
@@ -174,6 +196,8 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
         activity.setProcessDefinitionId("process-definition-1");
         activity.setExecutionId("execution-1");
         activity.setStatus(BPMNActivityStatus.COMPLETED);
+        activity.setStartedDate(new Date(1_700_000_000_000L));
+        activity.setCompletedDate(new Date(1_700_000_005_000L));
         return activity;
     }
 }
