@@ -75,7 +75,7 @@ class ProcessInstanceHierarchyServiceImplTest {
         ProcessInstanceHierarchyEntity row = captor.getValue();
         assertThat(row.getAncestorId()).isEqualTo("A");
         assertThat(row.getDescendantId()).isEqualTo("A");
-        assertThat(row.getDepth()).isEqualTo(0);
+        assertThat(row.getDepth()).isZero();
         assertThat(row.getRelationType()).isEqualTo(ProcessInstanceHierarchyEntity.RELATION_SELF);
     }
 
@@ -103,7 +103,7 @@ class ProcessInstanceHierarchyServiceImplTest {
             .filter(r -> r.getAncestorId().equals("child") && r.getDescendantId().equals("child"))
             .findFirst()
             .orElseThrow();
-        assertThat(selfRow.getDepth()).isEqualTo(0);
+        assertThat(selfRow.getDepth()).isZero();
         assertThat(selfRow.getRelationType()).isEqualTo(ProcessInstanceHierarchyEntity.RELATION_SELF);
 
         ProcessInstanceHierarchyEntity edge = persisted

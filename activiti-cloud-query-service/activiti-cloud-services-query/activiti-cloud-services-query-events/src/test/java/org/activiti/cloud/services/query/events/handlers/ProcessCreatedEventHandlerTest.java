@@ -73,7 +73,7 @@ public class ProcessCreatedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldRegisterSubprocessWhenParentIdIsPresent() {
+    void handleShouldRegisterSubprocessWhenParentIdIsPresent() {
         ProcessInstanceImpl subprocess = buildProcess();
         subprocess.setId("child");
         subprocess.setParentId("parent");
