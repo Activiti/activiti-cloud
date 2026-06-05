@@ -85,11 +85,12 @@ public class QueryEventsProducerIT {
         //then the projection commits and the listener forwards the events
         await()
             .atMost(Duration.ofSeconds(15))
-            .untilAsserted(() ->
-                assertThat(processInstanceRepository.findById(processInstance.getId())).isPresent()
-            );
+            .untilAsserted(() -> assertThat(processInstanceRepository.findById(processInstance.getId())).isPresent());
 
-        Message<byte[]> received = outputDestination.receive(Duration.ofSeconds(15).toMillis(), QUERY_EVENTS_DESTINATION);
+        Message<byte[]> received = outputDestination.receive(
+            Duration.ofSeconds(15).toMillis(),
+            QUERY_EVENTS_DESTINATION
+        );
         assertThat(received).isNotNull();
         assertThat(new String(received.getPayload()))
             .contains("PROCESS_CREATED")
