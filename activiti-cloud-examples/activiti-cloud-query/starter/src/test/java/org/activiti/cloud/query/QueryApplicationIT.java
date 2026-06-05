@@ -200,9 +200,7 @@ public class QueryApplicationIT {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
             .hasSize(1)
-            .satisfies(map ->
-                assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous."))
-            );
+            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous.")));
     }
 
     @Test
