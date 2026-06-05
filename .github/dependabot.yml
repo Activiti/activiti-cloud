@@ -4,7 +4,7 @@ updates:
     open-pull-requests-limit: 10
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     cooldown:
       default-days: 3
     ignore:
