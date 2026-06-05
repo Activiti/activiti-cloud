@@ -22,7 +22,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.events.config.EventHandlersAutoConfiguration;
+import org.activiti.cloud.services.query.app.QueryEventsProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -35,9 +35,13 @@ import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.messaging.support.ErrorMessage;
 
-@AutoConfiguration(before = EventHandlersAutoConfiguration.class)
+@AutoConfiguration
+@EnableAsync
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 
@@ -143,10 +147,24 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "projectedEngineEventsPublisher")
-    public Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher(
-        MessageChannel projectedEngineEventsProducer
+    @ConditionalOnMissingBean
+    public QueryEventsProducer queryEventsForwarder(MessageChannel queryEventsProducer) {
+        return new QueryEventsProducer(queryEventsProducer);
+    }
+
+    @Bean(name = QueryEventsProducer.QUERY_EVENTS_TASK_EXECUTOR)
+    @ConditionalOnMissingBean(name = QueryEventsProducer.QUERY_EVENTS_TASK_EXECUTOR)
+    public Executor queryEventsTaskExecutor(
+        @Value("${activiti.cloud.query.events.executor.core-pool-size:1}") int corePoolSize,
+        @Value("${activiti.cloud.query.events.executor.max-pool-size:1}") int maxPoolSize,
+        @Value("${activiti.cloud.query.events.executor.queue-capacity:1000}") int queueCapacity
     ) {
-        return events -> projectedEngineEventsProducer.send(MessageBuilder.withPayload(events).build());
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("query-events-");
+        executor.initialize();
+        return executor;
     }
 }

@@ -24,15 +24,15 @@ import org.springframework.messaging.SubscribableChannel;
 public interface QueryConsumerChannels {
     String QUERY_CONSUMER = "queryConsumer";
 
-    String PROJECTED_ENGINE_EVENTS_PRODUCER = "projectedEngineEventsProducer";
+    String QUERY_EVENTS_PRODUCER = "queryEventsProducer";
 
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
     }
 
-    @OutputBinding(PROJECTED_ENGINE_EVENTS_PRODUCER)
-    default MessageChannel projectedEngineEventsProducer() {
-        return MessageChannels.direct(PROJECTED_ENGINE_EVENTS_PRODUCER).getObject();
+    @OutputBinding(QUERY_EVENTS_PRODUCER)
+    default MessageChannel queryEventsProducer() {
+        return MessageChannels.direct(QUERY_EVENTS_PRODUCER).getObject();
     }
 }

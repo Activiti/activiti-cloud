@@ -301,7 +301,7 @@ public class QueryRestApplicationIT {
             .satisfies(map ->
                 assertThat(map.keySet())
                     .isNotEmpty()
-                    .allMatch(key -> key.startsWith("projectedEngineEvents.anonymous."))
+                    .allMatch(key -> key.startsWith("queryEvents.anonymous."))
             );
     }
 
@@ -309,7 +309,7 @@ public class QueryRestApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "projectedEngineEvents");
+            .containsOnlyKeys("engineEvents", "queryEvents");
     }
 
     private HttpEntity entityWithAuthorizationHeader(String user, String password) {

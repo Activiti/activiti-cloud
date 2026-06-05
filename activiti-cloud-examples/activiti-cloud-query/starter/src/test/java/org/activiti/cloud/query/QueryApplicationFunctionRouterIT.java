@@ -32,7 +32,7 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
                 "functionRouterInput",
                 "functionRouterAnonymousInput",
                 "producer",
-                "projectedEngineEventsProducer"
+                "queryEventsProducer"
             );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
@@ -60,7 +60,7 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
         assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
             .containsOnlyKeys("graphQLEngineEventsConsumerSource");
         assertThat(functionRouter.registrations())
-            .containsOnlyKeys("engineEvents", "projectedEngineEvents")
+            .containsOnlyKeys("engineEvents", "queryEvents")
             .satisfies(registrations -> {
                 assertThat(registrations.get("engineEvents"))
                     .containsOnly(
@@ -68,7 +68,7 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
                         "auditConsumerChannelHandlerConsumer_registration"
                     )
                     .isNotEmpty();
-                assertThat(registrations.get("projectedEngineEvents"))
+                assertThat(registrations.get("queryEvents"))
                     .containsOnly("engineEventsGraphQlSourceConsumer_registration")
                     .isNotEmpty();
             });
@@ -83,9 +83,9 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
                     .isNotEmpty()
             );
         assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
-            .containsOnlyKeys("projectedEngineEvents")
+            .containsOnlyKeys("queryEvents")
             .satisfies(registrations ->
-                assertThat(registrations.get("projectedEngineEvents"))
+                assertThat(registrations.get("queryEvents"))
                     .containsOnly("engineEventsGraphQlSourceConsumer_registration")
                     .isNotEmpty()
             );
@@ -111,6 +111,6 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "projectedEngineEvents");
+            .containsOnlyKeys("engineEvents", "queryEvents");
     }
 }

@@ -16,10 +16,7 @@
 package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
@@ -71,6 +68,7 @@ import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHan
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -82,20 +80,14 @@ public class EventHandlersAutoConfiguration {
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer fetchingOptimizer,
         EntityManager entityManager,
-        Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher
+        ApplicationEventPublisher applicationEventPublisher
     ) {
         return new QueryConsumerChannelHandler(
             eventHandlerContext,
             fetchingOptimizer,
             entityManager,
-            projectedEngineEventsPublisher
+            applicationEventPublisher
         );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(name = "projectedEngineEventsPublisher")
-    public Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher() {
-        return events -> {};
     }
 
     @Bean
