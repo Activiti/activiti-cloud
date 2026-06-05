@@ -17,22 +17,25 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
+import org.activiti.cloud.services.query.app.QueryEngineEventsHandledEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -52,50 +55,47 @@ public class QueryConsumerChannelHandlerTest {
     private EntityManager entityManager;
 
     @Mock
-    private Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
-    void receiveShouldHandleReceivedEventAndPublishAfterCommit() {
+    void receiveShouldHandleReceivedEventsAndPublishOriginalEventsAfterCommit() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
         List<CloudRuntimeEvent<?, ?>> events = asList(processCreatedEvent, processStartedEvent);
+        List<CloudRuntimeEvent<?, ?>> optimizedEvents = List.of(processStartedEvent);
 
-        when(optimizer.optimize(events)).thenReturn(events);
+        when(optimizer.optimize(events)).thenReturn(optimizedEvents);
 
         //when
         new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.receive(events));
 
         //then
         verify(optimizer).optimize(events);
-        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
+        verify(eventHandlerContext).handle(processStartedEvent);
         verify(entityManager).clear();
-        verify(projectedEngineEventsPublisher).accept(events);
+        verify(applicationEventPublisher).publishEvent(new QueryEngineEventsHandledEvent(events));
     }
 
     @Test
-    void receiveShouldNotPublishWhenTransactionRollsBack() {
+    void receiveShouldNotPublishWhenEventHandlingFails() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
 
         when(optimizer.optimize(events)).thenReturn(events);
+        doThrow(new IllegalStateException("error")).when(eventHandlerContext).handle(processCreatedEvent);
 
         //when
         TransactionTemplate transactionTemplate = new TransactionTemplate(new PseudoTransactionManager());
-        assertThatThrownBy(() ->
-                transactionTemplate.executeWithoutResult(tx -> {
-                    consumer.receive(events);
-                    throw new IllegalStateException("boom");
-                })
-            )
+        assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(tx -> consumer.receive(events)))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("boom");
+            .hasMessage("error");
 
         //then
         verify(eventHandlerContext).handle(processCreatedEvent);
         verify(entityManager).clear();
-        verify(projectedEngineEventsPublisher, never()).accept(events);
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 }

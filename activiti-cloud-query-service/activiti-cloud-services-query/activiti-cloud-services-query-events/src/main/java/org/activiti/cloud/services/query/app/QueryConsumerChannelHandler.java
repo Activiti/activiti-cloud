@@ -17,10 +17,10 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -32,25 +32,25 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
     private final EntityManager entityManager;
-    private final Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public QueryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
         EntityManager entityManager,
-        Consumer<List<CloudRuntimeEvent<?, ?>>> projectedEngineEventsPublisher
+        ApplicationEventPublisher applicationEventPublisher
     ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
         this.entityManager = entityManager;
-        this.projectedEngineEventsPublisher = projectedEngineEventsPublisher;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events) {
         afterCompletion(entityManager::clear);
         List<CloudRuntimeEvent<?, ?>> optimizedEvents = optimizer.optimize(events);
-        afterCommit(() -> projectedEngineEventsPublisher.accept(optimizedEvents));
         eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
+        applicationEventPublisher.publishEvent(new QueryEngineEventsHandledEvent(events));
     }
 
     private static void afterCompletion(Runnable action) {
@@ -58,17 +58,6 @@ public class QueryConsumerChannelHandler {
             new TransactionSynchronization() {
                 @Override
                 public void afterCompletion(int status) {
-                    action.run();
-                }
-            }
-        );
-    }
-
-    private static void afterCommit(Runnable action) {
-        TransactionSynchronizationManager.registerSynchronization(
-            new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
                     action.run();
                 }
             }

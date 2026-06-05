@@ -28,7 +28,7 @@ public class QueryConsumerApplicationFunctionRouterIT extends QueryConsumerAppli
     void bindingServiceProperties() {
         assertThat(bindingServiceProperties.getBindings())
             .doesNotContainKeys("auditConsumer", "queryConsumer")
-            .containsOnlyKeys("functionRouterInput", "producer", "projectedEngineEventsProducer");
+            .containsOnlyKeys("functionRouterInput", "producer", "queryEventsProducer");
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
             .extracting(BindingProperties::getGroup)
