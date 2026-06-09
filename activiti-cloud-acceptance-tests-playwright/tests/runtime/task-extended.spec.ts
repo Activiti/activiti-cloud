@@ -20,6 +20,7 @@ import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
 import { scopedName } from '../../helpers/test-isolation';
+import { pollOptions } from '../../config/runtime/timeouts';
 import {
     expectClientError,
     expectProcessAndTaskCompleted,
@@ -221,9 +222,17 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         await activiti.step('Then the process is completed', async () => {
             await expect
                 .poll(async () => {
-                    const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                    return instance.status;
-                })
+                    try {
+                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
+                        return instance.status;
+                    } catch (error) {
+                        // Query DB may not have ingested the instance yet — keep polling.
+                        if (error instanceof Error && /Unable to find process instance/.test(error.message)) {
+                            return undefined;
+                        }
+                        throw error;
+                    }
+                }, pollOptions('querySync'))
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
