@@ -68,7 +68,6 @@ import org.activiti.cloud.services.query.events.handlers.VariableDeletedEventHan
 import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -79,15 +78,9 @@ public class EventHandlersAutoConfiguration {
     public QueryConsumerChannelHandler queryConsumerChannelHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer fetchingOptimizer,
-        EntityManager entityManager,
-        ApplicationEventPublisher applicationEventPublisher
+        EntityManager entityManager
     ) {
-        return new QueryConsumerChannelHandler(
-            eventHandlerContext,
-            fetchingOptimizer,
-            entityManager,
-            applicationEventPublisher
-        );
+        return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer, entityManager);
     }
 
     @Bean

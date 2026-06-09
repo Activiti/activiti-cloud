@@ -15,15 +15,17 @@
  */
 package org.activiti.cloud.conf;
 
+import jakarta.persistence.EntityManager;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.app.QueryEventsProducer;
+import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,14 +34,21 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.dsl.Pollers;
+import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.integration.store.ChannelMessageStore;
+import org.springframework.integration.store.SimpleMessageStore;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.ErrorMessage;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @AutoConfiguration
 @EnableAsync
@@ -80,6 +89,21 @@ public class QueryConsumerAutoConfiguration {
     @Bean
     QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector() {
         return new DefaultConsumerPartitionedChannelKeySelector();
+    }
+
+    @Bean
+    QueryConsumerMessageHandler queryConsumerMessageHandler(
+        QueryEventHandlerContext eventHandlerContext,
+        QueryEventHandlerContextOptimizer optimizer,
+        EntityManager entityManager,
+        IntegrationFlow queryEventsQueueIntegrationFlow
+    ) {
+        return new QueryConsumerMessageHandler(
+            eventHandlerContext,
+            optimizer,
+            entityManager,
+            queryEventsQueueIntegrationFlow.getInputChannel()
+        );
     }
 
     @Bean
@@ -131,7 +155,7 @@ public class QueryConsumerAutoConfiguration {
 
     @Bean
     GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter(
-        QueryConsumerChannelHandler queryConsumerChannelHandler
+        QueryConsumerMessageHandler queryConsumerMessageHandler
     ) {
         return (events, headers) -> {
             LOGGER.debug(
@@ -141,7 +165,7 @@ public class QueryConsumerAutoConfiguration {
                 Thread.currentThread().getName()
             );
 
-            queryConsumerChannelHandler.receive(events);
+            queryConsumerMessageHandler.accept(MessageBuilder.withPayload(events).copyHeaders(headers).build());
 
             return null;
         };
@@ -149,23 +173,45 @@ public class QueryConsumerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryEventsProducer queryEventsForwarder(MessageChannel queryEventsProducer) {
-        return new QueryEventsProducer(queryEventsProducer);
+    ChannelMessageStore queryEventsChannelMessageStore() {
+        return new SimpleMessageStore();
     }
 
-    @Bean(name = QueryEventsProducer.QUERY_EVENTS_TASK_EXECUTOR)
-    @ConditionalOnMissingBean(name = QueryEventsProducer.QUERY_EVENTS_TASK_EXECUTOR)
-    public Executor queryEventsTaskExecutor(
-        @Value("${activiti.cloud.query.events.executor.core-pool-size:1}") int corePoolSize,
-        @Value("${activiti.cloud.query.events.executor.max-pool-size:1}") int maxPoolSize,
-        @Value("${activiti.cloud.query.events.executor.queue-capacity:1000}") int queueCapacity
+    @Bean
+    IntegrationFlow queryEventsIntegrationFlow(
+        QueueChannel queryEventsQueueChannel,
+        MessageChannel queryEventsProducer,
+        PlatformTransactionManager platformTransactionManager,
+        Trigger queryEventsPollerTrigger
     ) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setThreadNamePrefix("query-events-");
-        executor.initialize();
-        return executor;
+        return IntegrationFlow
+            .from(queryEventsQueueChannel)
+            .log(LoggingHandler.Level.DEBUG)
+            .handle(
+                message -> queryEventsProducer.send(message),
+                endpoint ->
+                    endpoint.poller(Pollers.trigger(queryEventsPollerTrigger).transactional(platformTransactionManager))
+            )
+            .get();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    Trigger queryEventsPollerTrigger(QueueChannel queryEventsQueueChannel) {
+        return new QueueSizeBasedTrigger(queryEventsQueueChannel, Duration.ofMillis(100), Duration.ZERO);
+    }
+
+    @Bean
+    IntegrationFlow queryEventsQueueIntegrationFlow(
+        QueueChannel queryEventsChannel,
+        @Value(
+            "${activit.cloud.query.consumer.events.queue.headers-to-remove:sourceData,errorChannel,replyChannel,amqp_*,spring.cloud.function.definition}"
+        ) String[] headersToRemove
+    ) {
+        return IntegrationFlow
+            .from("queryEventsQueueIntegrationFlowInput")
+            .headerFilter(headersToRemove)
+            .channel(queryEventsChannel)
+            .get();
     }
 }
