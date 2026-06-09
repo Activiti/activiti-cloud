@@ -17,41 +17,45 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-@Transactional(propagation = Propagation.REQUIRES_NEW)
-public class QueryConsumerChannelHandler {
+public class QueryConsumerMessageHandler
+    extends QueryConsumerChannelHandler
+    implements Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> {
 
-    private final QueryEventHandlerContext eventHandlerContext;
-    private final QueryEventHandlerContextOptimizer optimizer;
-    private final EntityManager entityManager;
+    private final MessageChannel queryEventsChannel;
 
-    public QueryConsumerChannelHandler(
+    public QueryConsumerMessageHandler(
         QueryEventHandlerContext eventHandlerContext,
         QueryEventHandlerContextOptimizer optimizer,
-        EntityManager entityManager
+        EntityManager entityManager,
+        MessageChannel queryEventsChannel
     ) {
-        this.optimizer = optimizer;
-        this.eventHandlerContext = eventHandlerContext;
-        this.entityManager = entityManager;
+        super(eventHandlerContext, optimizer, entityManager);
+        this.queryEventsChannel = queryEventsChannel;
     }
 
-    public void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        afterCompletion(entityManager::clear);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
+        beforeCommit(() -> queryEventsChannel.send(message));
+        receive(message.getPayload());
     }
 
-    private static void afterCompletion(Runnable action) {
+    private static void beforeCommit(Runnable action) {
         TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
                 @Override
-                public void afterCompletion(int status) {
+                public void beforeCommit(boolean readOnly) {
                     action.run();
                 }
             }

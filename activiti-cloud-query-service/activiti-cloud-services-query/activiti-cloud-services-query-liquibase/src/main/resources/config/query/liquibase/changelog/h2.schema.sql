@@ -330,3 +330,20 @@ ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_id VARCHAR(255);
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_type VARCHAR(255);
+
+CREATE SEQUENCE QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE QUERY_INT_CHANNEL_MESSAGE (
+                                   MESSAGE_ID CHAR(36) NOT NULL,
+                                   GROUP_KEY CHAR(36) NOT NULL,
+                                   CREATED_DATE BIGINT NOT NULL,
+                                   MESSAGE_PRIORITY BIGINT,
+                                   MESSAGE_SEQUENCE BIGINT NOT NULL ,
+                                   MESSAGE_CONTENT LONGVARBINARY,
+                                   REGION VARCHAR(100) NOT NULL,
+                                   constraint QUERY_INT_CHANNEL_MESSAGE_PK primary key (REGION, GROUP_KEY, CREATED_DATE, MESSAGE_SEQUENCE)
+);
+
+CREATE INDEX QUERY_INT_CHANNEL_MSG_DELETE_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_ID);
+-- This is only needed if the message group store property 'priorityEnabled' is true
+CREATE UNIQUE INDEX QUERY_INT_CHANNEL_MSG_PRIORITY_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_PRIORITY DESC, CREATED_DATE, MESSAGE_SEQUENCE);

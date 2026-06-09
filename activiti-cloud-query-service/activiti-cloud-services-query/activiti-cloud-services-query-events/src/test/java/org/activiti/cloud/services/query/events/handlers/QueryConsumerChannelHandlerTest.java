@@ -16,10 +16,6 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,13 +25,11 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.activiti.cloud.services.query.app.QueryEngineEventsHandledEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -53,9 +47,6 @@ public class QueryConsumerChannelHandlerTest {
 
     @Mock
     private EntityManager entityManager;
-
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
     void receiveShouldHandleReceivedEventsAndPublishOriginalEventsAfterCommit() {
@@ -75,27 +66,5 @@ public class QueryConsumerChannelHandlerTest {
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processStartedEvent);
         verify(entityManager).clear();
-        verify(applicationEventPublisher).publishEvent(new QueryEngineEventsHandledEvent(events));
-    }
-
-    @Test
-    void receiveShouldNotPublishWhenEventHandlingFails() {
-        //given
-        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
-        List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
-
-        when(optimizer.optimize(events)).thenReturn(events);
-        doThrow(new IllegalStateException("error")).when(eventHandlerContext).handle(processCreatedEvent);
-
-        //when
-        TransactionTemplate transactionTemplate = new TransactionTemplate(new PseudoTransactionManager());
-        assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(tx -> consumer.receive(events)))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("error");
-
-        //then
-        verify(eventHandlerContext).handle(processCreatedEvent);
-        verify(entityManager).clear();
-        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 }
