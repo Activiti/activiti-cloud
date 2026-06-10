@@ -54,7 +54,9 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(error);
 
         IntegrationErrorImpl integrationError;
-        if (error instanceof CloudBpmnError cloudBpmnError && cloudBpmnError.getMessage() != null) {
+        if (error instanceof CloudBpmnError cloudBpmnError &&
+            "BLOCKED_BY_GUARDRAIL".equals(cloudBpmnError.getErrorCode()) &&
+            cloudBpmnError.getMessage() != null) {
             integrationError = new IntegrationErrorImpl(integrationRequest, error, cloudBpmnError.getMessage());
         } else {
             integrationError = new IntegrationErrorImpl(integrationRequest, error);
