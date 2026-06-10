@@ -33,6 +33,7 @@ import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
@@ -41,6 +42,7 @@ public class QueryConsumerAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
+    public static final String PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL = "partitionedQueryConsumerErrorChannel";
 
     @Bean
     InitializingBean queryConsumerAutoConfigurationInfo(
@@ -74,6 +76,24 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
+    public IntegrationFlow partitionedQueryConsumerErrorIntegrationFlow() {
+        return IntegrationFlow
+            .from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
+            .handle(message -> {
+                final var errorMessage = ErrorMessage.class.cast(message);
+                final var exception = errorMessage.getPayload();
+
+                LOGGER.error(
+                    "Error {} handling message {} in partition {}",
+                    exception.getMessage(),
+                    errorMessage.getOriginalMessage(),
+                    Thread.currentThread().getName()
+                );
+            })
+            .get();
+    }
+
+    @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
@@ -82,13 +102,14 @@ public class QueryConsumerAutoConfiguration {
     ) {
         return IntegrationFlow
             .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
+            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
             .channel(
                 MessageChannels
                     .partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
                     .workerQueueSize(workerQueueSize)
             )
-            .handle(genericQueryConsumerChannelHandlerAdapter)
+            .handle(genericQueryConsumerChannelHandlerAdapter, endpoint -> endpoint.requiresReply(false))
             .get();
     }
 
