@@ -42,7 +42,7 @@ public class QueryConsumerChannelHandler {
         this.entityManager = entityManager;
     }
 
-    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+    public void receive(List<CloudRuntimeEvent<?, ?>> events) {
         afterCompletion(entityManager::clear);
         eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
     }

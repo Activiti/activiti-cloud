@@ -16,6 +16,7 @@
 package org.activiti.cloud.conf;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -33,6 +34,7 @@ import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
@@ -41,6 +43,7 @@ public class QueryConsumerAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
+    public static final String PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL = "partitionedQueryConsumerErrorChannel";
 
     @Bean
     InitializingBean queryConsumerAutoConfigurationInfo(
@@ -74,6 +77,33 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
+    public IntegrationFlow partitionedQueryConsumerErrorIntegrationFlow() {
+        return IntegrationFlow
+            .from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
+            .handle(message -> {
+                if (message instanceof ErrorMessage errorMessage) {
+                    final var exception = errorMessage.getPayload();
+
+                    LOGGER.error(
+                        "{} while handling {} for partition thread {}",
+                        exception.getMessage(),
+                        errorMessage.getOriginalMessage(),
+                        Thread.currentThread().getName(),
+                        Optional.ofNullable(exception.getCause()).orElse(exception)
+                    );
+                } else {
+                    LOGGER.error(
+                        "Unexpected message type {} on {}: {}",
+                        message.getClass(),
+                        PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL,
+                        message
+                    );
+                }
+            })
+            .get();
+    }
+
+    @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
@@ -82,13 +112,14 @@ public class QueryConsumerAutoConfiguration {
     ) {
         return IntegrationFlow
             .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
+            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
             .channel(
                 MessageChannels
                     .partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
                     .workerQueueSize(workerQueueSize)
             )
-            .handle(genericQueryConsumerChannelHandlerAdapter)
+            .handle(genericQueryConsumerChannelHandlerAdapter, endpoint -> endpoint.requiresReply(false))
             .get();
     }
 
@@ -98,7 +129,7 @@ public class QueryConsumerAutoConfiguration {
     ) {
         return (events, headers) -> {
             LOGGER.debug(
-                "Handling {} events with root process instance id {} on thread: {}",
+                "Handling {} events with root process instance id {} on partition thread: {}",
                 events.size(),
                 headers.get(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
                 Thread.currentThread().getName()
