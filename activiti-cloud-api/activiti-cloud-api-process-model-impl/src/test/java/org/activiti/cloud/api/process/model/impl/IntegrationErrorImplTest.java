@@ -260,4 +260,35 @@ class IntegrationErrorImplTest {
 
         assertThat(result.getErrorMessage()).isEqualTo("actual error");
     }
+
+    @Test
+    void should_returnCustomMessage_when_customMessageIsProvided() {
+        var rootCause = new RuntimeException("Root cause message");
+        var error = new RuntimeException("Error message", rootCause);
+        String customMessage = "Request content violates guardrail policy";
+
+        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
+
+        assertThat(result.getErrorMessage()).isEqualTo(customMessage);
+    }
+
+    @Test
+    void should_fallbackToDetailedErrorMessage_when_customMessageIsNull() {
+        var rootCause = new RuntimeException("Root cause message");
+        var error = new RuntimeException("Error message", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error, null);
+
+        assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
+    }
+
+    @Test
+    void should_fallbackToDetailedErrorMessage_when_customMessageIsBlank() {
+        var rootCause = new RuntimeException("Root cause message");
+        var error = new RuntimeException("Error message", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error, "   ");
+
+        assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
+    }
 }

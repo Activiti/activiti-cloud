@@ -59,6 +59,24 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
+    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error, String customErrorMessage) {
+        this.integrationRequest = integrationRequest;
+        this.integrationContext = integrationRequest.getIntegrationContext();
+        this.errorClassName = error.getClass().getName();
+        this.errorCode =
+            Optional
+                .of(error)
+                .filter(CloudBpmnError.class::isInstance)
+                .map(CloudBpmnError.class::cast)
+                .map(CloudBpmnError::getErrorCode)
+                .orElse(null);
+
+        Throwable cause = findRootCause(error);
+
+        this.errorMessage = StringUtils.hasText(customErrorMessage) ? customErrorMessage : this.getDetailedErrorMessage(error);
+        this.stackTraceElements = Arrays.asList(cause.getStackTrace());
+    }
+
     @Override
     public IntegrationContext getIntegrationContext() {
         return integrationContext;

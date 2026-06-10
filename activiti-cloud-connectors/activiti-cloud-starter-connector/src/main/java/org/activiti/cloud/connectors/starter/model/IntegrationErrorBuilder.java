@@ -16,6 +16,7 @@
 package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Objects;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -52,7 +53,13 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error);
+        IntegrationErrorImpl integrationError;
+        if (error instanceof CloudBpmnError cloudBpmnError && cloudBpmnError.getMessage() != null) {
+            integrationError = new IntegrationErrorImpl(integrationRequest, error, cloudBpmnError.getMessage());
+        } else {
+            integrationError = new IntegrationErrorImpl(integrationRequest, error);
+        }
+
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
             integrationError.setServiceFullName(connectorProperties.getServiceFullName());
