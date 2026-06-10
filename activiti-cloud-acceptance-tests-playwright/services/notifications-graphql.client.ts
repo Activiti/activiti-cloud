@@ -232,6 +232,7 @@ export function createEngineEventsSubscription(
                     break;
                 }
 
+                let immediateTaken: EngineEventNotification[] | null = null;
                 await new Promise<void>((resolve, reject) => {
                     const timer = setTimeout(() => {
                         bufferNotify = null;
@@ -247,7 +248,17 @@ export function createEngineEventsSubscription(
                         clearTimeout(timer);
                         resolve();
                     };
+                    // Re-check after registering waiter — events may have arrived between tryTake and bufferNotify.
+                    immediateTaken = tryTakeMatchingEngineEvents(eventBuffer, expected);
+                    if (immediateTaken) {
+                        bufferNotify = null;
+                        clearTimeout(timer);
+                        resolve();
+                    }
                 });
+                if (immediateTaken) {
+                    return immediateTaken;
+                }
             }
 
             throw new Error(
