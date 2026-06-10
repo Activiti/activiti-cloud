@@ -15,11 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -64,7 +62,6 @@ public class ProcessVariableHistoryEntity {
     @Convert(converter = VariableValueJsonConverter.class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "`value`", columnDefinition = "jsonb")
-    @Basic(fetch = FetchType.LAZY)
     private VariableValue<?> value;
 
     @Column(nullable = false)

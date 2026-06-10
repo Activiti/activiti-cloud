@@ -37,7 +37,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.main.web-application-type=none",
+        "spring.autoconfigure.exclude=org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration,org.activiti.cloud.common.swagger.springdoc.conf.SwaggerCustomizerConfiguration",
+    }
 )
 @TestPropertySource("classpath:application-test.properties")
 @Import({ TestChannelBinderConfiguration.class, TestProducerAutoConfiguration.class })
