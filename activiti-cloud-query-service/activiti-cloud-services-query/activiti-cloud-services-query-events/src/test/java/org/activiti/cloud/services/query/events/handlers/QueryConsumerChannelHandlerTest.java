@@ -49,22 +49,21 @@ public class QueryConsumerChannelHandlerTest {
     private EntityManager entityManager;
 
     @Test
-    void receiveShouldHandleReceivedEventsAndPublishOriginalEventsAfterCommit() {
+    public void receiveShouldHandleReceivedEvent() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
         List<CloudRuntimeEvent<?, ?>> events = asList(processCreatedEvent, processStartedEvent);
-        List<CloudRuntimeEvent<?, ?>> optimizedEvents = List.of(processStartedEvent);
 
-        when(optimizer.optimize(events)).thenReturn(optimizedEvents);
+        when(optimizer.optimize(events)).thenReturn(events);
 
         //when
         new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.receive(events));
 
         //then
         verify(optimizer).optimize(events);
-        verify(eventHandlerContext).handle(processStartedEvent);
+        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
         verify(entityManager).clear();
     }
 }
