@@ -878,7 +878,7 @@
   </changeSet>
 
   <changeSet author="activiti-query" runInTransaction="false"
-             id="alter40-schema" dbms="oracle">
+             id="alter40-oracle-schema" dbms="oracle">
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/40-alter.oracle.schema.9.1.0.sql"

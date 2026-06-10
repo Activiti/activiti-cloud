@@ -205,7 +205,7 @@ public class QueryConsumerAutoConfiguration {
     IntegrationFlow queryEventsQueueIntegrationFlow(
         QueueChannel queryEventsChannel,
         @Value(
-            "${activit.cloud.query.consumer.events.queue.headers-to-remove:sourceData,errorChannel,replyChannel,amqp_*,spring.cloud.function.definition}"
+            "${activiti.cloud.query.consumer.events.queue.headers-to-remove:sourceData,errorChannel,replyChannel,amqp_*,spring.cloud.function.definition}"
         ) String[] headersToRemove
     ) {
         return IntegrationFlow

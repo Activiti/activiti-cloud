@@ -82,6 +82,9 @@ public class QueryEventsProducerIT {
     @AfterEach
     public void tearDown() {
         outputDestination.clear(QUERY_EVENTS_DESTINATION);
+        while (queryEventsChannel.receive(0) != null) {
+            // drain
+        }
         processInstanceRepository.deleteAll();
     }
 
@@ -102,6 +105,7 @@ public class QueryEventsProducerIT {
         await()
             .untilAsserted(() -> assertThat(processInstanceRepository.findById(processInstance.getId())).isPresent());
 
+        await().untilAsserted(() -> verify(queryEventsProducer).send(any(Message.class)));
         await().untilAsserted(() -> assertThat(queryEventsChannel.getQueueSize()).isZero());
 
         Message<byte[]> received = outputDestination.receive(
@@ -113,8 +117,6 @@ public class QueryEventsProducerIT {
             .contains("PROCESS_CREATED")
             .contains("PROCESS_STARTED")
             .contains(processInstance.getId());
-
-        verify(queryEventsProducer).send(any(Message.class));
     }
 
     @Test
