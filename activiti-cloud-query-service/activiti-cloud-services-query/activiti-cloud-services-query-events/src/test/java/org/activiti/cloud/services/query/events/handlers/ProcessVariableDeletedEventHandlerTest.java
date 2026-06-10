@@ -202,4 +202,28 @@ class ProcessVariableDeletedEventHandlerTest {
         //then - remove was never reached
         verify(entityManager, never()).remove(any());
     }
+
+    @Test
+    void handleShouldRemoveVariableButSkipHistoryWhenVariableIsEphemeral() {
+        //given
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var", "string", "value", "procInstId", null);
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variable, true);
+
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity();
+        variableEntity.setName("var");
+
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
+        processInstanceEntity.getVariables().add(variableEntity);
+
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
+            .thenReturn(Optional.of(processInstanceEntity));
+
+        //when
+        handler.handle(event);
+
+        //then - variable removed but no history persisted
+        verify(entityManager).remove(variableEntity);
+        verify(entityManager, never()).persist(any());
+    }
 }

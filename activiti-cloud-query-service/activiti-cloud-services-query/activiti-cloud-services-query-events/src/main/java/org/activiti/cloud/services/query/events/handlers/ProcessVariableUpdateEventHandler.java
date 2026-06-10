@@ -41,7 +41,9 @@ public class ProcessVariableUpdateEventHandler {
             "Unable to find variable named '" + variableName + "' for process instance '" + processInstanceId + "'"
         );
 
-        ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forUpdate(event);
-        entityManager.persist(history);
+        if (!event.isEphemeralVariable()) {
+            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forUpdate(event);
+            entityManager.persist(history);
+        }
     }
 }

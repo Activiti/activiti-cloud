@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import jakarta.persistence.EntityManager;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -76,5 +77,18 @@ class ProcessVariableUpdateEventHandlerTest {
         assertThat(historyEntity.getMessageId()).isEqualTo("msg-001");
         assertThat(historyEntity.getSequenceNumber()).isEqualTo(3);
         assertThat(historyEntity.getCreateTime()).isNotNull();
+    }
+
+    @Test
+    void handleShouldSkipHistoryWhenVariableIsEphemeral() {
+        //given
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var", "string", "newValue", "procInstId", null);
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(variable, "oldValue", true);
+
+        //when
+        handler.handle(event);
+
+        //then
+        verifyNoInteractions(entityManager);
     }
 }

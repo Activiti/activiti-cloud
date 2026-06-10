@@ -50,8 +50,12 @@ public class ProcessVariableDeletedEventHandler {
                     .getVariable(variableName)
                     .ifPresentOrElse(
                         variableEntity -> {
-                            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forDelete(event);
-                            entityManager.persist(history);
+                            if (!event.isEphemeralVariable()) {
+                                ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forDelete(
+                                    event
+                                );
+                                entityManager.persist(history);
+                            }
 
                             processInstanceEntity.getVariables().remove(variableEntity);
                             entityManager.remove(variableEntity);

@@ -75,8 +75,10 @@ public class ProcessVariableCreatedEventHandler {
         variableEntity.setProcessInstance(processInstanceEntity);
         entityManager.persist(variableEntity);
 
-        ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forCreate(variableCreatedEvent);
-        entityManager.persist(history);
+        if (!variableCreatedEvent.isEphemeralVariable()) {
+            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forCreate(variableCreatedEvent);
+            entityManager.persist(history);
+        }
 
         return variableEntity;
     }

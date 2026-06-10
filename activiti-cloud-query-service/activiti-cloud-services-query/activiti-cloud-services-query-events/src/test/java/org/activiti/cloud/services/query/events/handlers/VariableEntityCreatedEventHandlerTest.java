@@ -109,6 +109,24 @@ class VariableEntityCreatedEventHandlerTest {
         assertThat((String) historyEntity.getValue()).isEqualTo(event.getEntity().getValue());
     }
 
+    @Test
+    void handleShouldCreateVariableButSkipHistoryWhenVariableIsEphemeral() {
+        //given
+        CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable(), true);
+
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
+            .thenReturn(Optional.of(processInstanceEntity));
+
+        //when
+        processVariableCreatedEventHandler.handle(event);
+
+        //then - only the variable entity is persisted, not the history entry
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(entityManager, times(1)).persist(captor.capture());
+        assertThat(captor.getValue()).isInstanceOf(ProcessVariableEntity.class);
+    }
+
     private static VariableInstanceImpl<String> buildVariable() {
         return new VariableInstanceImpl<>("var", "string", "v1", "procInstId", null);
     }
