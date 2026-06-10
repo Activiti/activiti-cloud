@@ -30,9 +30,8 @@ const isCi = Boolean(process.env.CI);
 const serial = { workers: 1, fullyParallel: false } as const;
 
 /**
- * All projects are listed here. `npm run test` selects the CI suite via
- * `--project=acceptance --project=notifications --project=destructive-last`
- * (see package.json). Slice scripts pass a single `--project=…`.
+ * CI suite (`npm run test`) selects acceptance → notifications → destructive-last.
+ * `dependencies` enforce that order; slice scripts pass a single `--project=…`.
  */
 export default defineConfig({
   testDir: './tests',
@@ -54,11 +53,13 @@ export default defineConfig({
     {
       name: 'notifications',
       testMatch: '**/notifications.spec.ts',
+      dependencies: ['acceptance'],
       ...serial,
     },
     {
       name: 'destructive-last',
       grep: /@destructive/,
+      dependencies: ['acceptance', 'notifications'],
       ...serial,
     },
     { name: 'smoke', grep: /@smoke/ },

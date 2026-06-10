@@ -53,8 +53,8 @@ if [[ -n "${ACCESS_TOKEN}" && -n "${GATEWAY_HOST:-}" ]]; then
     -X POST \
     -d '{"query":"{ __typename }"}' \
     "https://${GATEWAY_HOST}/notifications/graphql" || echo "000")"
-  if [[ "${NOTIFICATIONS_HTTP}" == "404" || "${NOTIFICATIONS_HTTP}" == "000" ]]; then
-    echo "::error::notifications GraphQL not reachable (HTTP ${NOTIFICATIONS_HTTP}) at https://${GATEWAY_HOST}/notifications/graphql — required for AAE-46640 (bundled in activiti-cloud-query)"
+  if [[ "${NOTIFICATIONS_HTTP}" != "200" ]]; then
+    echo "::error::notifications GraphQL check failed (HTTP ${NOTIFICATIONS_HTTP}) at https://${GATEWAY_HOST}/notifications/graphql — required for AAE-46640 (bundled in activiti-cloud-query)"
     cat /tmp/acceptance-notifications-probe.txt 2>/dev/null || true
     exit 1
   fi

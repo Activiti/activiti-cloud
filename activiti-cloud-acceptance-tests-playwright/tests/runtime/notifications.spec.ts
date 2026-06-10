@@ -38,7 +38,10 @@ async function assertNotificationBatch(
     options: { actor?: string; batchTimeoutMs?: number } = {}
 ): Promise<void> {
     const expected = expectedEngineEventBatch(eventTypes, processDefinitionKey, { actor: options.actor });
-    const batch = await subscription.waitForExpectedEvents(expected, options.batchTimeoutMs);
+    const batch = await subscription.waitForExpectedEvents(
+        expected,
+        options.batchTimeoutMs ?? NOTIFICATIONS_BATCH_TIMEOUT_MS
+    );
     expect(batch).toEqual(expect.arrayContaining(expected));
     expect(batch).toHaveLength(expected.length);
 }
@@ -100,10 +103,13 @@ const BOUNDARY_TIMER_PROCESS = ProcessDefinitionRegistry.processDefinitionKeyMat
     'BOUNDARY_TIMER_EVENT_PROCESS'
 );
 
-const TIMER_BATCH_TIMEOUT_MS = 90_000;
+/** Batch wait for GraphQL WS events; must stay below describe timeout. */
+const NOTIFICATIONS_BATCH_TIMEOUT_MS = 90_000;
+/** Whole-test cap (CI default test timeout is 60s — too low for WS + actor filter on partitioned RabbitMQ). */
+const NOTIFICATIONS_TEST_TIMEOUT_MS = 120_000;
 
 activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
-    activiti.describe.configure({ mode: 'serial' });
+    activiti.describe.configure({ mode: 'serial', timeout: NOTIFICATIONS_TEST_TIMEOUT_MS });
     activiti(
         'complete a process instance that uses a connector with subscription to PROCESS event notifications',
         async ({ runtimeBundleServiceTestAdmin, queryServiceTestAdmin, testAdminUserContext }) => {
@@ -290,7 +296,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                     'And notifications: the payload with SIGNAL_RECEIVED notifications is expected with process definition key value SignalStartEventProcess',
                     async () => {
                         await assertNotificationBatch(subscription, ['SIGNAL_RECEIVED'], SIGNAL_START_PROCESS, {
-                            batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS,
+                            batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS,
                         });
                     }
                 );
@@ -352,7 +358,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                     'And notifications: the payload with TIMER_SCHEDULED notifications is expected',
                     async () => {
                         await assertNotificationBatch(subscription, ['TIMER_SCHEDULED'], INTERMEDIATE_TIMER_PROCESS, {
-                            batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS,
+                            batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS,
                         });
                     }
                 );
@@ -364,7 +370,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                             subscription,
                             ['TIMER_FIRED', 'TIMER_EXECUTED'],
                             INTERMEDIATE_TIMER_PROCESS,
-                            { batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS }
+                            { batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS }
                         );
                     }
                 );
@@ -426,7 +432,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                     'And notifications: the payload with TIMER_SCHEDULED notifications is expected',
                     async () => {
                         await assertNotificationBatch(subscription, ['TIMER_SCHEDULED'], BOUNDARY_TIMER_PROCESS, {
-                            batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS,
+                            batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS,
                         });
                     }
                 );
@@ -438,7 +444,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                             subscription,
                             ['TIMER_FIRED', 'TIMER_EXECUTED'],
                             BOUNDARY_TIMER_PROCESS,
-                            { batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS }
+                            { batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS }
                         );
                     }
                 );
@@ -505,7 +511,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                             subscription,
                             ['MESSAGE_RECEIVED', 'MESSAGE_WAITING'],
                             processDefinitionKey!,
-                            { batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS }
+                            { batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS }
                         );
                     }
                 );
@@ -527,7 +533,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                             subscription,
                             ['MESSAGE_RECEIVED', 'MESSAGE_WAITING'],
                             processDefinitionKey!,
-                            { batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS }
+                            { batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS }
                         );
                     }
                 );
@@ -549,7 +555,7 @@ activiti.describe('Runtime — Notifications Actions', { tag: '@slow' }, () => {
                             subscription,
                             ['MESSAGE_RECEIVED', 'MESSAGE_SENT'],
                             processDefinitionKey!,
-                            { batchTimeoutMs: TIMER_BATCH_TIMEOUT_MS }
+                            { batchTimeoutMs: NOTIFICATIONS_BATCH_TIMEOUT_MS }
                         );
                     }
                 );

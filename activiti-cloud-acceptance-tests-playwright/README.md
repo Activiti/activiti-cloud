@@ -1,6 +1,6 @@
 # Activiti Cloud — Playwright acceptance tests
 
-API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; Serenity is being retired ([docs/SERENITY_RETIREMENT.md](docs/SERENITY_RETIREMENT.md)).
+API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; remaining Serenity stories are listed in [../activiti-cloud-acceptance-scenarios/DEPRECATED.md](../activiti-cloud-acceptance-scenarios/DEPRECATED.md).
 
 ## Requirements
 
@@ -205,7 +205,7 @@ Do not run prereqs twice in parallel on the same namespace.
 - **CI vs local:** cluster patching runs in the workflow (bash + kubectl), not in Playwright global-setup (`AUTO_CLUSTER_PREREQS=false`, `ACCEPTANCE_CI_OVERLAY_APPLIED=true`). Local runs still use `npm run test:setup` / `cluster:prereqs` from global-setup.
 - **CI gateway URL:** direct `https://gateway-{PREVIEW_NAME}.…` (no port-forward). Local uses `localhost:8080` + `Host` header via Traefik port-forward.
 - **CI users:** `testuser` / `password` (chart seed users). Do not use `vars.KEYCLOAK_USERNAME` — that targets other environments and causes HTTP 401 on runtime-bundle APIs.
-- Playwright `npm run test` runs on each messaging matrix cell ([retirement plan](docs/SERENITY_RETIREMENT.md))
+- Playwright `npm run test` runs on each messaging matrix cell (see [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md) for project order)
 - Retries: `2` on CI; artifacts: JUnit, JSON, HTML; trace on first retry
 
 ### CI matrix (messaging)

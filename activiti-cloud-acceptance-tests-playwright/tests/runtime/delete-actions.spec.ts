@@ -18,8 +18,8 @@
  * Port of delete-actions.story.disabled (AAE-46640).
  * Admin bulk-delete wipes query/audit data for the whole preview namespace — not parallel-safe.
  * Tagged @destructive — runs last in the default Playwright project order (project destructive-last).
- * Query scenario stays skipped: DELETE /query/admin/v1/tasks returns 500 upstream (lazy-init in TaskDeleteController).
- * Serenity story file remains until query bulk-delete is fixed and the scenario is enabled.
+ * Query bulk-delete enabled after @Transactional fix in TaskDeleteController.
+ * Serenity story file remains until a separate retirement ticket removes it.
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
@@ -60,16 +60,18 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                     const before = await auditAdminServiceTestAdmin.getAllEventsAdmin();
                     expect(before.length).toBeGreaterThan(0);
                     await auditAdminServiceTestAdmin.deleteAllEventsAdmin();
-                    const after = await auditAdminServiceTestAdmin.getAllEventsAdmin();
-                    expect(after).toHaveLength(0);
+                    await expect
+                        .poll(
+                            async () => (await auditAdminServiceTestAdmin.getAllEventsAdmin()).length,
+                            pollOptions('auditEvents')
+                        )
+                        .toBe(0);
                 }
             );
         }
     );
 
-    // FIXME upstream: DELETE /admin/v1/tasks → 500 "Cannot lazily initialize collection (no session)".
-    // Same reason delete-actions.story stayed disabled in Serenity; enable when query service is fixed.
-    activiti.skip('delete records in query service', async ({
+    activiti('delete records in query service', async ({
             runtimeBundleServiceTestUser,
             taskServiceTestUser,
             queryAdminServiceTestAdmin,
@@ -113,8 +115,12 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                     const before = await queryAdminServiceTestAdmin.getAllTasksAdmin();
                     expect(before.length).toBeGreaterThan(0);
                     await queryAdminServiceTestAdmin.deleteAllTasksAdmin();
-                    const after = await queryAdminServiceTestAdmin.getAllTasksAdmin();
-                    expect(after).toHaveLength(0);
+                    await expect
+                        .poll(
+                            async () => (await queryAdminServiceTestAdmin.getAllTasksAdmin()).length,
+                            pollOptions('querySync')
+                        )
+                        .toBe(0);
                 }
             );
 
@@ -122,8 +128,12 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 const before = await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin();
                 expect(before.length).toBeGreaterThan(0);
                 await queryAdminServiceTestAdmin.deleteAllProcessInstancesAdmin();
-                const after = await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin();
-                expect(after).toHaveLength(0);
+                await expect
+                    .poll(
+                        async () => (await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin()).length,
+                        pollOptions('querySync')
+                    )
+                    .toBe(0);
             });
         }
     );

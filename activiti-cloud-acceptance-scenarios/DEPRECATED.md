@@ -18,8 +18,8 @@ This Maven module is **legacy**. New work belongs in:
 | File                                          | Status                                                                                                               |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `notifications-actions.story` (6 scenarios)   | Playwright `tests/runtime/notifications.spec.ts` (Serenity kept until retirement ticket)                             |
-| `delete-actions.story.disabled` (2 scenarios) | Playwright `tests/runtime/delete-actions.spec.ts` — audit ported (`destructive-last` project); query `activiti.skip` |
+| `delete-actions.story.disabled` (2 scenarios) | Playwright `tests/runtime/delete-actions.spec.ts` (`destructive-last` project, runs after notifications) |
 
 All other `runtime-bundle/*.story` files were removed after migration to Playwright (#2338).
 
-Do not add new `.story` files here. See [../activiti-cloud-acceptance-tests-playwright/docs/AAE-46640.md](../activiti-cloud-acceptance-tests-playwright/docs/AAE-46640.md) and [SERENITY_RETIREMENT.md](../activiti-cloud-acceptance-tests-playwright/docs/SERENITY_RETIREMENT.md).
+Do not add new `.story` files here. See [../activiti-cloud-acceptance-tests-playwright/docs/README.md](../activiti-cloud-acceptance-tests-playwright/docs/README.md) and [../activiti-cloud-acceptance-tests-playwright/README.md](../activiti-cloud-acceptance-tests-playwright/README.md).

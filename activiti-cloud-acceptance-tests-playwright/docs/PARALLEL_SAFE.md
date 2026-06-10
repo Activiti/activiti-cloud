@@ -25,7 +25,7 @@
 - Run two Playwright suites on the same machine without coordination (each global-setup tries port `8080`); use different `LOCAL_PORT` or run one suite at a time.
 - Use `workers > 1` for tests marked `@serial` (when introduced).
 - Filter slow integration: `npm run pw -- --project=runtime --grep @slow`.
-- Destructive admin bulk-delete (`@destructive`) runs in project `destructive-last` after `acceptance` and `notifications` (`npm run test`). Use `npm run test:no-destructive` to skip it locally.
+- Destructive admin bulk-delete (`@destructive`) runs in project `destructive-last` with `dependencies: ['acceptance', 'notifications']` so bulk delete never runs in parallel with notifications. Use `npm run test:no-destructive` to skip it locally.
 
 ## Fixtures
 
