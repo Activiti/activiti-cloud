@@ -6113,6 +6113,100 @@
         } ]
       }
     },
+    "/admin/v1/process-instances/{processInstanceId}/bpmn-activities" : {
+      "get" : {
+        "tags" : [ "process-instance-bpmn-activities-admin-controller" ],
+        "summary" : "getBpmnActivitiesAdmin",
+        "operationId" : "getBpmnActivitiesAdmin",
+        "parameters" : [ {
+          "name" : "processInstanceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentBpmnDiagramActivityEntry"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentBpmnDiagramActivityEntry"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
     "/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses" : {
       "get" : {
         "tags" : [ "process-instance-admin-controller" ],
@@ -8581,6 +8675,73 @@
           }
         },
         "title" : "ListResponseContentCloudIntegrationContext"
+      },
+      "BpmnDiagramActivityEntry" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "elementId" : {
+            "type" : "string"
+          },
+          "activityType" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "STARTED", "COMPLETED", "CANCELLED", "ERROR" ]
+          },
+          "executionId" : {
+            "type" : "string"
+          },
+          "startedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "cancelledDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "title" : "BpmnDiagramActivityEntry"
+      },
+      "EntriesResponseContentBpmnDiagramActivityEntry" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentBpmnDiagramActivityEntry"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentBpmnDiagramActivityEntry"
+      },
+      "EntryResponseContentBpmnDiagramActivityEntry" : {
+        "type" : "object",
+        "properties" : {
+          "entry" : {
+            "$ref" : "#/components/schemas/BpmnDiagramActivityEntry"
+          }
+        },
+        "title" : "EntryResponseContentBpmnDiagramActivityEntry"
+      },
+      "ListResponseContentBpmnDiagramActivityEntry" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentBpmnDiagramActivityEntry"
+          }
+        },
+        "title" : "ListResponseContentBpmnDiagramActivityEntry"
       }
     }
   },
