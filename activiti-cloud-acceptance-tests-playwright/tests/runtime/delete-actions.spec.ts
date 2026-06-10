@@ -18,7 +18,7 @@
  * Port of delete-actions.story.disabled (AAE-46640).
  * Admin bulk-delete wipes query/audit data for the whole preview namespace — not parallel-safe.
  * Tagged @destructive — runs last in the default Playwright project order (project destructive-last).
- * Query bulk-delete enabled after @Transactional fix in TaskDeleteController.
+ * Query bulk-delete requires eager lazy-association init in TaskDeleteController (JSON after tx).
  * Serenity story file remains until a separate retirement ticket removes it.
  */
 
