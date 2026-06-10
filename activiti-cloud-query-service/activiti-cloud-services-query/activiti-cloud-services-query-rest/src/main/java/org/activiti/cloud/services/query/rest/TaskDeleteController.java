@@ -21,10 +21,8 @@ import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -61,7 +59,6 @@ public class TaskDeleteController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
-    @Transactional
     public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskEntity.class
@@ -71,24 +68,11 @@ public class TaskDeleteController {
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for (TaskEntity entity : iterable) {
-            initializeLazyAssociations(entity);
             result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
         taskRepository.deleteAll(iterable);
 
         return CollectionModel.of(result);
-    }
-
-    /**
-     * JSON serialization runs after the transaction closes; touch lazy associations while the
-     * persistence context is still open (same pattern as {@link ProcessInstanceDeleteController}).
-     */
-    private static void initializeLazyAssociations(TaskEntity entity) {
-        Optional.ofNullable(entity.getTaskCandidateUsers()).ifPresent(Collection::size);
-        Optional.ofNullable(entity.getTaskCandidateGroups()).ifPresent(Collection::size);
-        Optional.ofNullable(entity.getVariables()).ifPresent(Collection::size);
-        Optional.ofNullable(entity.getProcessVariables()).ifPresent(Collection::size);
-        Optional.ofNullable(entity.getProcessInstance()).ifPresent(processInstance -> processInstance.getId());
     }
 }
