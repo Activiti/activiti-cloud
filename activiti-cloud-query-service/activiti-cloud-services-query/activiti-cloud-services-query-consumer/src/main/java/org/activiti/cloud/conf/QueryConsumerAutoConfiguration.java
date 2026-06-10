@@ -85,7 +85,7 @@ public class QueryConsumerAutoConfiguration {
                     final var exception = errorMessage.getPayload();
 
                     LOGGER.error(
-                        "Error {} handling message {} in partition {}",
+                        "{} while handling {} for partition thread {}",
                         exception.getMessage(),
                         errorMessage.getOriginalMessage(),
                         Thread.currentThread().getName(),
@@ -93,7 +93,8 @@ public class QueryConsumerAutoConfiguration {
                     );
                 } else {
                     LOGGER.error(
-                        "Unexpected message type on {}: {}",
+                        "Unexpected message type {} on {}: {}",
+                        message.getClass(),
                         PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL,
                         message
                     );
@@ -128,7 +129,7 @@ public class QueryConsumerAutoConfiguration {
     ) {
         return (events, headers) -> {
             LOGGER.debug(
-                "Handling {} events with root process instance id {} on thread: {}",
+                "Handling {} events with root process instance id {} on partition thread: {}",
                 events.size(),
                 headers.get(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
                 Thread.currentThread().getName()
