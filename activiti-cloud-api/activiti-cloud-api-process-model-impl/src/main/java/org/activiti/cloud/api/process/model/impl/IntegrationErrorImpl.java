@@ -73,7 +73,8 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
 
         Throwable cause = findRootCause(error);
 
-        this.errorMessage = StringUtils.hasText(customErrorMessage) ? customErrorMessage : this.getDetailedErrorMessage(error);
+        this.errorMessage =
+            StringUtils.hasText(customErrorMessage) ? customErrorMessage : this.getDetailedErrorMessage(error);
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
