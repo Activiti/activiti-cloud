@@ -16,11 +16,14 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -34,7 +37,7 @@ import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
-public class QueryConsumerChannelHandlerTest {
+class QueryConsumerChannelHandlerTest {
 
     @InjectMocks
     private QueryConsumerChannelHandler consumer;
@@ -49,21 +52,29 @@ public class QueryConsumerChannelHandlerTest {
     private EntityManager entityManager;
 
     @Test
-    public void receiveShouldHandleReceivedEvent() {
+    void receiveShouldHandleReceivedEvent() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
         List<CloudRuntimeEvent<?, ?>> events = asList(processCreatedEvent, processStartedEvent);
+        var messageId = UUID.randomUUID().toString();
+        Map<String, Object> headers = Map.of("id", messageId);
 
         when(optimizer.optimize(events)).thenReturn(events);
 
         //when
-        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.receive(events));
+        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx ->
+            consumer.receive(events, headers)
+        );
 
         //then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
         verify(entityManager).clear();
+        assertThat(processCreatedEvent.getMessageId()).isEqualTo(messageId);
+        assertThat(processCreatedEvent.getSequenceNumber()).isZero();
+        assertThat(processStartedEvent.getMessageId()).isEqualTo(messageId);
+        assertThat(processStartedEvent.getSequenceNumber()).isEqualTo(1);
     }
 }

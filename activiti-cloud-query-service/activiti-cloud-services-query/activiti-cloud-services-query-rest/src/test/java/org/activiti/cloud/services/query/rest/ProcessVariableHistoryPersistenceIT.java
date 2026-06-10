@@ -79,6 +79,7 @@ class ProcessVariableHistoryPersistenceIT {
             .buildAndSave();
 
         long baseTimestamp = System.currentTimeMillis();
+        String messageId = "msg-it-001";
 
         // when - variable is created
         VariableInstanceImpl<String> createVar = new VariableInstanceImpl<>(
@@ -89,6 +90,8 @@ class ProcessVariableHistoryPersistenceIT {
             null
         );
         CloudVariableCreatedEventImpl createEvent = new CloudVariableCreatedEventImpl("e1", baseTimestamp, createVar);
+        createEvent.setMessageId(messageId);
+        createEvent.setSequenceNumber(0);
         variableCreatedEventHandler.handle(createEvent);
 
         // and then updated twice
@@ -105,6 +108,8 @@ class ProcessVariableHistoryPersistenceIT {
             updateVar1,
             "initial"
         );
+        updateEvent1.setMessageId(messageId);
+        updateEvent1.setSequenceNumber(1);
         variableUpdatedEventHandler.handle(updateEvent1);
 
         VariableInstanceImpl<String> updateVar2 = new VariableInstanceImpl<>(
@@ -120,6 +125,8 @@ class ProcessVariableHistoryPersistenceIT {
             updateVar2,
             "second"
         );
+        updateEvent2.setMessageId(messageId);
+        updateEvent2.setSequenceNumber(2);
         variableUpdatedEventHandler.handle(updateEvent2);
 
         // and then deleted
@@ -135,6 +142,8 @@ class ProcessVariableHistoryPersistenceIT {
             baseTimestamp + 3000,
             deleteVar
         );
+        deleteEvent.setMessageId(messageId);
+        deleteEvent.setSequenceNumber(3);
         variableDeletedEventHandler.handle(deleteEvent);
 
         // then - history has 4 entries in order
@@ -151,20 +160,28 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat((String) entry0.getValue()).isEqualTo("initial");
         assertThat(entry0.isDeleted()).isFalse();
         assertThat(entry0.getCreateTime().getTime()).isEqualTo(baseTimestamp);
+        assertThat(entry0.getMessageId()).isEqualTo(messageId);
+        assertThat(entry0.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry1 = history.get(1);
         assertThat((String) entry1.getValue()).isEqualTo("second");
         assertThat(entry1.isDeleted()).isFalse();
         assertThat(entry1.getCreateTime().getTime()).isEqualTo(baseTimestamp + 1000);
+        assertThat(entry1.getMessageId()).isEqualTo(messageId);
+        assertThat(entry1.getSequenceNumber()).isEqualTo(1);
 
         ProcessVariableHistoryEntity entry2 = history.get(2);
         assertThat((String) entry2.getValue()).isEqualTo("third");
         assertThat(entry2.isDeleted()).isFalse();
         assertThat(entry2.getCreateTime().getTime()).isEqualTo(baseTimestamp + 2000);
+        assertThat(entry2.getMessageId()).isEqualTo(messageId);
+        assertThat(entry2.getSequenceNumber()).isEqualTo(2);
 
         ProcessVariableHistoryEntity entry3 = history.get(3);
         assertThat((Object) entry3.getValue()).isNull();
         assertThat(entry3.isDeleted()).isTrue();
         assertThat(entry3.getCreateTime().getTime()).isEqualTo(baseTimestamp + 3000);
+        assertThat(entry3.getMessageId()).isEqualTo(messageId);
+        assertThat(entry3.getSequenceNumber()).isEqualTo(3);
     }
 }
