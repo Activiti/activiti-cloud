@@ -16,6 +16,7 @@
 package org.activiti.cloud.conf;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -80,15 +81,23 @@ public class QueryConsumerAutoConfiguration {
         return IntegrationFlow
             .from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
             .handle(message -> {
-                final var errorMessage = ErrorMessage.class.cast(message);
-                final var exception = errorMessage.getPayload();
+                if (message instanceof ErrorMessage errorMessage) {
+                    final var exception = errorMessage.getPayload();
 
-                LOGGER.error(
-                    "Error {} handling message {} in partition {}",
-                    exception.getMessage(),
-                    errorMessage.getOriginalMessage(),
-                    Thread.currentThread().getName()
-                );
+                    LOGGER.error(
+                        "Error {} handling message {} in partition {}",
+                        exception.getMessage(),
+                        errorMessage.getOriginalMessage(),
+                        Thread.currentThread().getName(),
+                        Optional.ofNullable(exception.getCause()).orElse(exception)
+                    );
+                } else {
+                    LOGGER.error(
+                        "Unexpected message type on {}: {}",
+                        PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL,
+                        message
+                    );
+                }
             })
             .get();
     }
