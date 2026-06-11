@@ -64,9 +64,7 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = customErrorMessage != null
-            ? new IntegrationErrorImpl(integrationRequest, error, customErrorMessage)
-            : new IntegrationErrorImpl(integrationRequest, error);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
 
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
