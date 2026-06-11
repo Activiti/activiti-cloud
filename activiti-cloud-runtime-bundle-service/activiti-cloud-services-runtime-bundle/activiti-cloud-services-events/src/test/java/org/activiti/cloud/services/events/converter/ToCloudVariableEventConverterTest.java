@@ -23,9 +23,15 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.event.impl.VariableCreatedEventImpl;
+import org.activiti.api.runtime.event.impl.VariableDeletedEventImpl;
+import org.activiti.api.runtime.event.impl.VariableUpdatedEventImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
+import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.VariableDefinition;
@@ -69,6 +75,7 @@ class ToCloudVariableEventConverterTest {
 
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
         assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isFalse();
+        assertThat(cloudVariableCreatedEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
     }
 
     @Test
@@ -94,6 +101,7 @@ class ToCloudVariableEventConverterTest {
 
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isNull();
         assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isFalse();
+        assertThat(cloudVariableCreatedEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
     }
 
     @Test
@@ -120,6 +128,7 @@ class ToCloudVariableEventConverterTest {
         CloudVariableCreatedEvent cloudVariableCreatedEvent = toCloudVariableEventConverter.from(event);
 
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isEqualTo("variableDefinitionId");
+        assertThat(cloudVariableCreatedEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
         VariableInstance entity = cloudVariableCreatedEvent.getEntity();
         assertThat(entity.getName()).isEqualTo("variableName");
         assertThat(entity.getType()).isEqualTo("string");
@@ -153,11 +162,70 @@ class ToCloudVariableEventConverterTest {
 
         assertThat(cloudVariableCreatedEvent.isEphemeralVariable()).isTrue();
         assertThat(cloudVariableCreatedEvent.getVariableDefinitionId()).isEqualTo("variableDefinitionId");
+        assertThat(cloudVariableCreatedEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
         VariableInstance entity = cloudVariableCreatedEvent.getEntity();
         assertThat(entity.getName()).isEqualTo("variableName");
         assertThat(entity.getType()).isEqualTo("string");
         assertThat((String) entity.getValue()).isEqualTo("example");
         assertThat(entity.getProcessInstanceId()).isEqualTo("processInstanceId");
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableCreatedEventImpl.class));
+    }
+
+    @Test
+    void should_setProcessInstanceId_on_VariableUpdatedCloudEvent() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "newValue",
+            "processInstanceId",
+            null
+        );
+        VariableUpdatedEventImpl<String> event = new VariableUpdatedEventImpl<>(
+            variableInstance,
+            "previousValue",
+            false
+        );
+
+        CloudVariableUpdatedEvent cloudEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
+        assertThat(cloudEvent.isEphemeralVariable()).isFalse();
+        assertThat(cloudEvent.getEntity().getProcessInstanceId()).isEqualTo("processInstanceId");
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableUpdatedEventImpl.class));
+    }
+
+    @Test
+    void should_setProcessInstanceId_on_VariableDeletedCloudEvent() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            "processInstanceId",
+            null
+        );
+        VariableDeletedEventImpl event = new VariableDeletedEventImpl(variableInstance, false);
+
+        CloudVariableDeletedEvent cloudEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("processInstanceId");
+        assertThat(cloudEvent.isEphemeralVariable()).isFalse();
+        assertThat(cloudEvent.getEntity().getProcessInstanceId()).isEqualTo("processInstanceId");
+        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudVariableDeletedEventImpl.class));
+    }
+
+    @Test
+    void should_leaveProcessInstanceIdNull_forTaskScopedVariable() {
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            null,
+            "taskId"
+        );
+        VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, null, false);
+
+        CloudVariableCreatedEvent cloudEvent = toCloudVariableEventConverter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isNull();
     }
 }

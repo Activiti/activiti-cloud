@@ -49,6 +49,7 @@ public class ToCloudVariableEventConverter {
             event.getEntity(),
             event.isEphemeralVariable()
         );
+        cloudEvent.setProcessInstanceId(event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         cloudEvent.setVariableDefinitionId(getVariableDefinitionId(event));
         return cloudEvent;
@@ -60,6 +61,7 @@ public class ToCloudVariableEventConverter {
             event.getPreviousValue(),
             event.isEphemeralVariable()
         );
+        cloudEvent.setProcessInstanceId(event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
@@ -69,6 +71,7 @@ public class ToCloudVariableEventConverter {
             event.getEntity(),
             event.isEphemeralVariable()
         );
+        cloudEvent.setProcessInstanceId(event.getEntity().getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
