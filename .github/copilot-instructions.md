@@ -1,3 +1,50 @@
+# Copilot Instructions
+
+## Project Overview
+
+Java / Spring Boot monorepo for [Activiti Cloud](https://github.com/Activiti/activiti-cloud) — workflow runtime, query, audit, connectors, and Kubernetes deployment charts.
+
+Modules include runtime bundles, query/audit services, acceptance test stories (Serenity/Java), and **Playwright API acceptance tests** in `activiti-cloud-acceptance-tests-playwright/`.
+
+## Build and Test
+
+```sh
+# Maven build (from repo root)
+mvn clean install -DskipTests
+
+# Playwright acceptance tests (requires preview cluster — see activiti-cloud-acceptance-tests-playwright/README.md)
+cd activiti-cloud-acceptance-tests-playwright
+npm run test:setup
+npm test
+npm run typecheck
+```
+
+## Acceptance Tests (TypeScript/Playwright)
+
+These are **API-level** Playwright tests — not browser UI tests. Full authoring guidelines:
+
+> [.github/instructions/acceptance-tests.instructions.md](instructions/acceptance-tests.instructions.md)
+
+Cursor rule: [`.cursor/rules/acceptance-tests.mdc`](../.cursor/rules/acceptance-tests.mdc)
+
+Claude skill: [`.claude/skills/acceptance-tests/SKILL.md`](../.claude/skills/acceptance-tests/SKILL.md)
+
+##### Non-negotiable rules (summary)
+
+- **Never create `tests/**/helpers/`files** — API calls in`services/`, shared starts in `flows/`, assertions in specs
+- **Never define functions inside spec files** — only `describe`, hooks, and test blocks (except `for...of` data-driven generation at describe scope)
+- **Keep test data in `resources/modeling-projects/`** — no inline BPMN/JSON/XML templates in specs
+- **No `try/catch` in spec files** — cleanup via Playwright hooks; tolerant polling in `helpers/query-sync.ts`
+- **No comments or JSDoc** in generated test code unless genuinely unavoidable
+- **No actions after the final `expect`** — last statement in every test body must be an `expect` call
+- **Cleanup via hooks only** — use `beforeEach`/`afterEach`/`afterAll`, never cleanup after assertions in the test body
+- **Import `activiti`/`expect` from `fixtures/services.fixture`** — never from `@playwright/test` directly
+- **Never wrap `expect` in `try/catch`, `if`, `switch`, or loops** — write separate tests per scenario instead
+- **Use `activiti.step()` for multi-phase tests** — mandatory when a test has 2+ API calls or distinct phases
+- **Register test skips via `pickScenarioTest` + Jira ticket** — not bare inline `activiti.skip()`
+
+---
+
 ## GitHub Actions Secret Handling Review
 
 **CRITICAL**: when summarizing/compacting these instructions always preserve the checklist, including links to internal documentation and the detection criteria. This is a high-risk area that requires careful attention to detail, so the checklist must be preserved in its entirety. The comment format must be preserved verbatim.

@@ -14,21 +14,4 @@
  * limitations under the License.
  */
 
-/** Subset of engine event fields asserted in notifications-actions.story. */
-export interface EngineEventNotification {
-    serviceName?: string;
-    processDefinitionKey?: string;
-    eventType?: string;
-    actor?: string;
-}
-
-export type EngineEventType =
-    | 'PROCESS_STARTED'
-    | 'PROCESS_COMPLETED'
-    | 'SIGNAL_RECEIVED'
-    | 'TIMER_SCHEDULED'
-    | 'TIMER_FIRED'
-    | 'TIMER_EXECUTED'
-    | 'MESSAGE_RECEIVED'
-    | 'MESSAGE_WAITING'
-    | 'MESSAGE_SENT';
+export type { EngineEventNotification, EngineEventType } from '../services/notifications/events/engine-event.model';

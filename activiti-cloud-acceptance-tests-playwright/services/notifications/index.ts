@@ -18,4 +18,17 @@ export {
     DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME,
     resolveNotificationsEndpoints,
     type NotificationsEndpoints,
-} from '../../services/notifications/connection/endpoints';
+} from './connection/endpoints';
+
+export {
+    actorFromAccessToken,
+    expectedEngineEventBatch,
+} from './events/engine-event-expectations';
+
+export type { EngineEventNotification, EngineEventType } from './events/engine-event.model';
+
+export {
+    openEngineEventsSubscription,
+    type EngineEventsSubscription,
+    type OpenEngineEventsSubscriptionOptions,
+} from './subscriptions/engine-events.subscription';

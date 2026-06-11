@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-export {
-    DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME,
-    resolveNotificationsEndpoints,
-    type NotificationsEndpoints,
-} from '../../services/notifications/connection/endpoints';
+export interface EngineEventNotification {
+    serviceName?: string;
+    processDefinitionKey?: string;
+    eventType?: string;
+    actor?: string;
+}
+
+export type EngineEventType =
+    | 'PROCESS_STARTED'
+    | 'PROCESS_COMPLETED'
+    | 'SIGNAL_RECEIVED'
+    | 'TIMER_SCHEDULED'
+    | 'TIMER_FIRED'
+    | 'TIMER_EXECUTED'
+    | 'MESSAGE_RECEIVED'
+    | 'MESSAGE_WAITING'
+    | 'MESSAGE_SENT';
