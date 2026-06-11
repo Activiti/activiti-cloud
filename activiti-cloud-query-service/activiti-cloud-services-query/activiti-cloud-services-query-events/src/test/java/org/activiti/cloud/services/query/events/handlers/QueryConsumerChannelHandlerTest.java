@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -75,5 +76,24 @@ class QueryConsumerChannelHandlerTest {
         assertThat(processCreatedEvent.getSequenceNumber()).isZero();
         assertThat(processStartedEvent.getMessageId()).isEqualTo(messageId);
         assertThat(processStartedEvent.getSequenceNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void receiveShouldHandleReceivedEvent_when_messageIdHeaderMissing() {
+        //given
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        List<CloudRuntimeEvent<?, ?>> events = List.of(processCreatedEvent);
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("id", null);
+
+        when(optimizer.optimize(events)).thenReturn(events);
+
+        //when
+        new TransactionTemplate(new PseudoTransactionManager())
+            .executeWithoutResult(tx -> consumer.receive(events, headers));
+
+        //then
+        assertThat(processCreatedEvent.getMessageId()).isNull();
+        assertThat(processCreatedEvent.getSequenceNumber()).isZero();
     }
 }

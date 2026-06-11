@@ -52,11 +52,14 @@ public class QueryConsumerChannelHandler {
     }
 
     private static void enrichWithMessageMetadata(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
-        var messageId = headers.get("id").toString();
+        Object idHeader = headers.get("id");
+        var messageId = idHeader != null ? idHeader.toString() : null;
         var counter = new AtomicInteger(0);
         for (CloudRuntimeEvent<?, ?> event : events) {
-            ((CloudRuntimeEventImpl<?, ?>) event).setMessageId(messageId);
-            ((CloudRuntimeEventImpl<?, ?>) event).setSequenceNumber(counter.getAndIncrement());
+            if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
+                impl.setMessageId(messageId);
+                impl.setSequenceNumber(counter.getAndIncrement());
+            }
         }
     }
 
