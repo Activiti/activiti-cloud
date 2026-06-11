@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { timeouts } from '../../../config/runtime/timeouts';
 import {
     DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME,
     resolveNotificationsEndpoints,
@@ -89,10 +90,21 @@ export async function openEngineEventsSubscription(
         throw error;
     }
 
+    await settleAfterSubscribe();
+
     return {
-        waitForExpectedEvents: (expected, timeoutMs = 30_000) => buffer.waitFor(expected, timeoutMs),
+        waitForExpectedEvents: (expected, timeoutMs = timeouts.engineEvents.wait) =>
+            buffer.waitFor(expected, timeoutMs),
         close: () => ws.close(),
     };
+}
+
+async function settleAfterSubscribe(): Promise<void> {
+    const settleMs = timeouts.engineEvents.subscriptionSettle;
+    if (settleMs <= 0) {
+        return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, settleMs));
 }
 
 function buildSubscriptionVariables(options: {

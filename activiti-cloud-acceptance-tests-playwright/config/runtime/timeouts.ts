@@ -27,6 +27,17 @@ export const timeouts = {
         localPortProbe: envMs('PLAYWRIGHT_LOCAL_PORT_PROBE_MS', 5_000),
     },
 
+    engineEvents: {
+        wait: envMs(
+            'PLAYWRIGHT_ENGINE_EVENTS_WAIT_MS',
+            process.env.CI || process.env.GITHUB_ACTIONS ? 90_000 : 30_000
+        ),
+        subscriptionSettle: envMs(
+            'NOTIFICATIONS_SUBSCRIPTION_SETTLE_MS',
+            process.env.CI || process.env.GITHUB_ACTIONS ? 500 : 0
+        ),
+    },
+
     poll: {
         default: envMs('PLAYWRIGHT_POLL_DEFAULT_MS', 30_000),
         querySync: envMs('PLAYWRIGHT_POLL_QUERY_SYNC_MS', 60_000),

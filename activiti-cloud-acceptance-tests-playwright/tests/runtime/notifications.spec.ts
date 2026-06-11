@@ -17,6 +17,7 @@
 import { randomUUID } from 'node:crypto';
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import type { EngineEventsSubscription } from '../../services/notifications';
@@ -95,15 +96,12 @@ activiti.describe('Runtime — Notifications Actions', () => {
             await activiti.step('And the process instance status is COMPLETED', async () => {
                 await expect
                     .poll(async () => {
-                        const fromRuntime = await runtimeBundleServiceTestAdmin.getProcessInstance(
+                        const instance = await getQueryProcessInstanceWhenSynced(
+                            queryServiceTestAdmin,
                             processInstanceId!
                         );
-                        if (fromRuntime?.status) {
-                            return fromRuntime.status;
-                        }
-                        const fromQuery = await queryServiceTestAdmin.getProcessInstance(processInstanceId!);
-                        return fromQuery?.status;
-                    }, pollOptions('processStatus'))
+                        return instance?.status;
+                    }, pollOptions('querySync'))
                     .toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
