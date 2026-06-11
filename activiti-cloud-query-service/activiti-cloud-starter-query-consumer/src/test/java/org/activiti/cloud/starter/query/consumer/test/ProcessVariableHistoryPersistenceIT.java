@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest;
+package org.activiti.cloud.starter.query.consumer.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,29 +23,31 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessVariableHistoryRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
-import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.activiti.cloud.services.test.TestProducerAutoConfiguration;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
+    classes = QueryConsumerTestApplication.class,
     properties = {
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "spring.main.web-application-type=none",
-        "spring.autoconfigure.exclude=org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration,org.activiti.cloud.common.swagger.springdoc.conf.SwaggerCustomizerConfiguration",
     }
 )
+@EnableTestBinder
+@Import(TestProducerAutoConfiguration.class)
 @TestPropertySource("classpath:application-test.properties")
-@Import({ TestChannelBinderConfiguration.class, TestProducerAutoConfiguration.class })
 class ProcessVariableHistoryPersistenceIT {
 
     @Autowired
@@ -55,26 +57,24 @@ class ProcessVariableHistoryPersistenceIT {
     private ProcessVariableHistoryRepository historyRepository;
 
     @Autowired
-    private QueryTestUtils queryTestUtils;
+    private ProcessInstanceRepository processInstanceRepository;
 
     @AfterEach
     void tearDown() {
         historyRepository.deleteAll();
+        processInstanceRepository.deleteAll();
     }
 
     @Test
     void should_persistHistoryEntries_when_createUpdateDeleteLifecycle() {
-        // given - a running process instance
         String processInstanceId = "proc-it-001";
-        queryTestUtils
-            .buildProcessInstance()
-            .withId(processInstanceId)
-            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-            .buildAndSave();
+        var processInstance = new ProcessInstanceEntity();
+        processInstance.setId(processInstanceId);
+        processInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        processInstanceRepository.save(processInstance);
 
         long baseTimestamp = System.currentTimeMillis();
 
-        // when - variable is created (each event is a separate message as in production)
         producer.send(
             new CloudVariableCreatedEventImpl(
                 "e1",
@@ -109,7 +109,6 @@ class ProcessVariableHistoryPersistenceIT {
             )
         );
 
-        // then - history has 4 entries in order
         List<ProcessVariableHistoryEntity> history = historyRepository.findByProcessInstanceIdAndVariableNameOrderByCreateTimeAscSequenceNumberAsc(
             processInstanceId,
             "myVar"
@@ -124,30 +123,29 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry0.isDeleted()).isFalse();
         assertThat(entry0.getCreateTime().getTime()).isEqualTo(baseTimestamp);
         assertThat(entry0.getMessageId()).isNotNull();
-        assertThat(entry0.getSequenceNumber()).isEqualTo(0);
+        assertThat(entry0.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry1 = history.get(1);
         assertThat((String) entry1.getValue()).isEqualTo("second");
         assertThat(entry1.isDeleted()).isFalse();
         assertThat(entry1.getCreateTime().getTime()).isEqualTo(baseTimestamp + 1000);
         assertThat(entry1.getMessageId()).isNotNull();
-        assertThat(entry1.getSequenceNumber()).isEqualTo(0);
+        assertThat(entry1.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry2 = history.get(2);
         assertThat((String) entry2.getValue()).isEqualTo("third");
         assertThat(entry2.isDeleted()).isFalse();
         assertThat(entry2.getCreateTime().getTime()).isEqualTo(baseTimestamp + 2000);
         assertThat(entry2.getMessageId()).isNotNull();
-        assertThat(entry2.getSequenceNumber()).isEqualTo(0);
+        assertThat(entry2.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry3 = history.get(3);
         assertThat((Object) entry3.getValue()).isNull();
         assertThat(entry3.isDeleted()).isTrue();
         assertThat(entry3.getCreateTime().getTime()).isEqualTo(baseTimestamp + 3000);
         assertThat(entry3.getMessageId()).isNotNull();
-        assertThat(entry3.getSequenceNumber()).isEqualTo(0);
+        assertThat(entry3.getSequenceNumber()).isZero();
 
-        // each send() generates a distinct messageId UUID
         assertThat(history)
             .extracting(ProcessVariableHistoryEntity::getMessageId)
             .doesNotContainNull()

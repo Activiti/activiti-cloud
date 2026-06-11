@@ -23,12 +23,14 @@ import org.activiti.cloud.conf.FixedQueryConsumerPartitionedChannelCountProvider
 import org.activiti.cloud.conf.QueryConsumerPartitionedChannelCountProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 
-@SpringBootTest
-@SpringBootApplication
+@SpringBootTest(
+    classes = QueryConsumerTestApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    properties = "activiti.cloud.services.oauth2.iam-name=test"
+)
 @EnableTestBinder
 public class ActivitiQueryConsumerIT {
 
