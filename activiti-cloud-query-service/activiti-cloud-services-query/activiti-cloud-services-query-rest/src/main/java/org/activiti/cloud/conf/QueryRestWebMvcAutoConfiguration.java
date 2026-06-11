@@ -42,6 +42,7 @@ import org.activiti.cloud.services.query.rest.assembler.BPMNSequenceFlowRepresen
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
@@ -82,6 +83,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler() {
         return new ProcessInstanceRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler() {
+        return new ProcessInstanceSearchResultRepresentationModelAssembler();
     }
 
     @Bean

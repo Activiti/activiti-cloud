@@ -23,6 +23,7 @@ import java.util.stream.StreamSupport;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository.RelatedProcessCountProjection;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
@@ -137,20 +138,38 @@ public class ProcessInstanceSearchService {
 
     /**
      * Populates {@code subprocesses} and {@code linkedProcesses} on every entity in the page
-     * with a single closure-table query covering all hierarchy depths (unrestricted — admin use).
-     */
-    @Transactional(readOnly = true)
-    public void enrichWithRelatedProcesses(Page<ProcessInstanceEntity> processInstances) {
-        doEnrich(processInstances, null);
-    }
-
-    /**
-     * Same as {@link #enrichWithRelatedProcesses} but restricts the descendant batch-fetch
-     * to processes visible to the currently authenticated user (user-facing endpoint use).
+     * restricting the descendant batch-fetch to processes visible to the currently authenticated
+     * user (user-facing endpoint use).
      */
     @Transactional(readOnly = true)
     public void enrichWithRelatedProcessesRestricted(Page<ProcessInstanceEntity> processInstances) {
         doEnrich(processInstances, securityManager.getAuthenticatedUserId());
+    }
+
+    /**
+     * Counts, for every ancestor in {@code ancestorIds}, how many descendants exist at any depth,
+     * grouped by relation type ({@code subprocess} / {@code linked}). One closure-table query, no
+     * descendant entities fetched — used by the admin search endpoint to expose counts only.
+     *
+     * @return ancestorId → (relationType → count); ancestors with no descendants are absent.
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Map<String, Long>> countRelatedProcessesByAncestor(Set<String> ancestorIds) {
+        if (ancestorIds == null || ancestorIds.isEmpty()) {
+            return Map.of();
+        }
+        return processInstanceHierarchyRepository
+            .countRelatedByAncestor(ancestorIds)
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    RelatedProcessCountProjection::getAncestorId,
+                    Collectors.toMap(
+                        RelatedProcessCountProjection::getRelationType,
+                        RelatedProcessCountProjection::getRelatedCount
+                    )
+                )
+            );
     }
 
     private void doEnrich(Page<ProcessInstanceEntity> processInstances, String userId) {

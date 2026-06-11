@@ -17,9 +17,13 @@ package org.activiti.cloud.services.query.rest.helper;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -68,13 +72,25 @@ public class ProcessInstanceAdminControllerHelper {
         return processInstanceRepository.mapSubprocesses(processInstance);
     }
 
-    public Page<ProcessInstanceEntity> searchProcessInstances(
+    public Page<ProcessInstanceSearchResult> searchProcessInstances(
         ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.search(searchRequest, pageable);
-        processInstanceSearchService.enrichWithRelatedProcesses(processInstances);
-        return processInstances;
+        Set<String> ids = processInstances
+            .getContent()
+            .stream()
+            .map(ProcessInstanceEntity::getId)
+            .collect(Collectors.toSet());
+        Map<String, Map<String, Long>> countsByAncestor = processInstanceSearchService.countRelatedProcessesByAncestor(
+            ids
+        );
+        return processInstances.map(entity -> {
+            Map<String, Long> counts = countsByAncestor.getOrDefault(entity.getId(), Map.of());
+            long subprocessesCount = counts.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 0L);
+            long linkedProcessesCount = counts.getOrDefault(ProcessInstanceHierarchyEntity.RELATION_LINKED, 0L);
+            return ProcessInstanceSearchResultMapper.toResult(entity, subprocessesCount, linkedProcessesCount);
+        });
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(

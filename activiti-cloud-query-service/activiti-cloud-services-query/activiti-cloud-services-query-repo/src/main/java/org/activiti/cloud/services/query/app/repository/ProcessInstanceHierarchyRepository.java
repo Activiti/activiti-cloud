@@ -20,6 +20,8 @@ import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProcessInstanceHierarchyRepository
     extends JpaRepository<ProcessInstanceHierarchyEntity, ProcessInstanceHierarchyId> {
@@ -30,5 +32,19 @@ public interface ProcessInstanceHierarchyRepository
         int depth
     );
 
+    @Query(
+        "select h.ancestorId as ancestorId, h.relationType as relationType, count(h) as relatedCount " +
+        "from ProcessInstanceHierarchy h " +
+        "where h.ancestorId in :ancestorIds and h.depth > 0 " +
+        "group by h.ancestorId, h.relationType"
+    )
+    List<RelatedProcessCountProjection> countRelatedByAncestor(@Param("ancestorIds") Collection<String> ancestorIds);
+
     void deleteByAncestorIdOrDescendantId(String ancestorId, String descendantId);
+
+    interface RelatedProcessCountProjection {
+        String getAncestorId();
+        String getRelationType();
+        long getRelatedCount();
+    }
 }
