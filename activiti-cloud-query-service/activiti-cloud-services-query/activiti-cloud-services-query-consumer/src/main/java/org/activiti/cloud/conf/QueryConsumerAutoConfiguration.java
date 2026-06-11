@@ -16,24 +16,128 @@
 package org.activiti.cloud.conf;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.integration.core.GenericHandler;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ErrorMessage;
 
 @AutoConfiguration
 @Import(QueryConsumerChannelsConfiguration.class)
 public class QueryConsumerAutoConfiguration {
 
-    @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryConsumerAutoConfiguration.class);
+    public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
+        "partitionedQueryConsumerIntegrationFlowInput";
+    public static final String PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL = "partitionedQueryConsumerErrorChannel";
+
     @Bean
-    public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
+    InitializingBean queryConsumerAutoConfigurationInfo(
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider
+    ) {
+        return () -> {
+            LOGGER.info(
+                "Initializing QueryConsumerAutoConfiguration with {} partitioned channel count",
+                queryConsumerPartitionedChannelCountProvider.get()
+            );
+        };
+    }
+
+    @Bean
+    @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> queryConsumerFunction(
+        IntegrationFlow partitionedQueryConsumerIntegrationFlow
+    ) {
+        return message -> partitionedQueryConsumerIntegrationFlow.getInputChannel().send(message);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider() {
+        return new RuntimeQueryConsumerPartitionedChannelCountProvider();
+    }
+
+    @Bean
+    QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector() {
+        return new DefaultConsumerPartitionedChannelKeySelector();
+    }
+
+    @Bean
+    public IntegrationFlow partitionedQueryConsumerErrorIntegrationFlow() {
+        return IntegrationFlow
+            .from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
+            .handle(message -> {
+                if (message instanceof ErrorMessage errorMessage) {
+                    final var exception = errorMessage.getPayload();
+
+                    LOGGER.error(
+                        "{} while handling {} for partition thread {}",
+                        exception.getMessage(),
+                        errorMessage.getOriginalMessage(),
+                        Thread.currentThread().getName(),
+                        Optional.ofNullable(exception.getCause()).orElse(exception)
+                    );
+                } else {
+                    LOGGER.error(
+                        "Unexpected message type {} on {}: {}",
+                        message.getClass(),
+                        PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL,
+                        message
+                    );
+                }
+            })
+            .get();
+    }
+
+    @Bean
+    public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
+        QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
+        QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
+        GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
+        @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
+    ) {
+        return IntegrationFlow
+            .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
+            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
+            .channel(
+                MessageChannels
+                    .partitioned(queryConsumerPartitionedChannelCountProvider.get())
+                    .partitionKey(queryConsumerPartitionedChannelKeySelector)
+                    .workerQueueSize(workerQueueSize)
+            )
+            .handle(genericQueryConsumerChannelHandlerAdapter, endpoint -> endpoint.requiresReply(false))
+            .get();
+    }
+
+    @Bean
+    GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter(
         QueryConsumerChannelHandler queryConsumerChannelHandler
     ) {
-        return queryConsumerChannelHandler::receive;
+        return (events, headers) -> {
+            LOGGER.debug(
+                "Handling {} events with root process instance id {} on partition thread: {}",
+                events.size(),
+                headers.get(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID),
+                Thread.currentThread().getName()
+            );
+
+            queryConsumerChannelHandler.receive(events);
+
+            return null;
+        };
     }
 }

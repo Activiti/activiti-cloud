@@ -16,6 +16,7 @@
 
 export interface CloudTask {
     id: string;
+    [key: string]: unknown;
     name?: string;
     description?: string;
     assignee?: string;
@@ -28,6 +29,10 @@ export interface CloudTask {
     processInstanceId?: string;
     processDefinitionId?: string;
     processDefinitionKey?: string;
+    processDefinitionVersion?: number;
+    parentTaskId?: string;
+    standalone?: boolean;
+    formKey?: string;
     serviceName?: string;
     serviceFullName?: string;
     appName?: string;

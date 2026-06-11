@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams, EventsResponse } from '../models/audit.models';
+import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class AuditAdminService extends BaseService {
     private readonly basePath = '/audit/admin/v1';
@@ -27,20 +27,21 @@ export class AuditAdminService extends BaseService {
 
     async getAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
         const response = await this.get(`${this.basePath}/events`);
-        const result = response as EventsResponse;
-        return result.content || [];
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
     async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
+        const byProcessInstance = await this.getEventsAdmin({ processInstanceId: entityId });
+        if (byProcessInstance.length > 0) {
+            return byProcessInstance;
+        }
+
         const searchParams = new URLSearchParams();
-        searchParams.append('search', `entityId:${entityId}`);
+        searchParams.append('search', `entityId:${entityId},processInstanceId:${entityId}`);
 
-        const response = await this.get(
-            `${this.basePath}/events?${searchParams.toString()}`
-        );
+        const response = await this.get(`${this.basePath}/events?${searchParams.toString()}`);
 
-        const result = response as EventsResponse;
-        return result.content || [];
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
     async getEventsAdmin(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
@@ -55,7 +56,11 @@ export class AuditAdminService extends BaseService {
             `${this.basePath}/events?${searchParams.toString()}`
         );
 
-        const result = response as EventsResponse;
-        return result.content || [];
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+    }
+
+    async deleteAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
+        const response = await this.delete(`${this.basePath}/events`);
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 }

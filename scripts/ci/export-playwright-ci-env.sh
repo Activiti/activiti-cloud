@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Default Playwright env for CI matrix runs.
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=../lib/preview-env.sh
+source "${ROOT_DIR}/scripts/lib/preview-env.sh"
+# shellcheck source=../lib/acceptance-test-users.sh
+source "${ROOT_DIR}/scripts/lib/acceptance-test-users.sh"
+
+export_preview_gateway_env
+export_acceptance_test_user_env
+
+identity_host="${SSO_HOST}"
+export CI=true
+export GITHUB_ACTIONS=true
+export GATEWAY_PROTOCOL=https
+export GATEWAY_URL="https://${GATEWAY_HOST}"
+export ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS="${ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS:-300000}"
+export SSO_PROTOCOL=https
+export SSO_HOST="https://${identity_host}/auth/realms/activiti/protocol/openid-connect/token"
+export KEYCLOAK_CLIENT_ID=activiti
+export KEYCLOAK_REALM=activiti
+export REALM=activiti
+export PLAYWRIGHT_WORKERS="${PLAYWRIGHT_WORKERS:-4}"
+export PLAYWRIGHT_ACTION_TIMEOUT_MS="${PLAYWRIGHT_ACTION_TIMEOUT_MS:-30000}"
+export PLAYWRIGHT_HTTP_TIMEOUT_MS="${PLAYWRIGHT_HTTP_TIMEOUT_MS:-30000}"
+export PLAYWRIGHT_POLL_AUDIT_EVENTS_MS="${PLAYWRIGHT_POLL_AUDIT_EVENTS_MS:-60000}"
+export PLAYWRIGHT_POLL_QUERY_SYNC_MS="${PLAYWRIGHT_POLL_QUERY_SYNC_MS:-90000}"
+export AUTO_CLUSTER_PREREQS=false
+export ACCEPTANCE_CI_OVERLAY_APPLIED=true
+
+if [[ "${GITHUB_ACTIONS:-}" == "true" && -n "${GITHUB_ENV:-}" ]]; then
+  while IFS= read -r name; do
+    [[ -z "${name}" ]] && continue
+    printf -v value '%s' "${!name}"
+    echo "${name}=${value}" >> "${GITHUB_ENV}"
+  done <<'EOF'
+CI
+GITHUB_ACTIONS
+PREVIEW_NAME
+CLUSTER_NAME
+CLUSTER_DOMAIN
+GATEWAY_PROTOCOL
+GATEWAY_HOST
+GATEWAY_URL
+ACCEPTANCE_PROCESS_CATALOG_TIMEOUT_MS
+SSO_PROTOCOL
+SSO_HOST
+KEYCLOAK_CLIENT_ID
+KEYCLOAK_REALM
+KEYCLOAK_CLIENT_SECRET
+REALM
+TESTUSER_USERNAME
+TESTUSER_PASSWORD
+HRUSER_USERNAME
+HRUSER_PASSWORD
+HRADMIN_USERNAME
+HRADMIN_PASSWORD
+PROCESSADMINUSER_USERNAME
+PROCESSADMINUSER_PASSWORD
+TESTADMIN_USERNAME
+TESTADMIN_PASSWORD
+PLAYWRIGHT_WORKERS
+PLAYWRIGHT_ACTION_TIMEOUT_MS
+PLAYWRIGHT_HTTP_TIMEOUT_MS
+PLAYWRIGHT_POLL_AUDIT_EVENTS_MS
+PLAYWRIGHT_POLL_QUERY_SYNC_MS
+AUTO_CLUSTER_PREREQS
+ACCEPTANCE_CI_OVERLAY_APPLIED
+EOF
+fi

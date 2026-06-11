@@ -22,26 +22,4 @@ runs:
         MAX_ATTEMPTS: ${{ inputs.max-attempts }}
         POLL_INTERVAL: ${{ inputs.poll-interval }}
       shell: bash
-      run: |
-        wait_until_true () {
-          local attempt_counter=0
-          until "$@"
-          do
-            if [ ${attempt_counter} -eq ${MAX_ATTEMPTS} ]
-            then
-              echo "Max attempts reached, cannot connect to environment"
-              exit 1
-            fi
-            printf '.'
-            attempt_counter=$((attempt_counter+1))
-            sleep $POLL_INTERVAL
-          done
-        }
-        check_services_up () {
-          local readonly GATEWAY_URL=https://$GATEWAY_HOST
-          curl --silent --head --fail $HEALTH_URL > /dev/null 2>&1
-        }
-        ### Main ###
-        echo "Waiting for service to be up..."
-        wait_until_true check_services_up
-        echo "Service is up and running!"
+      run: bash "${GITHUB_WORKSPACE}/scripts/ci/check-service-health.sh"

@@ -51,6 +51,7 @@ import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.api.task.runtime.TaskIdentificationStrategy;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
@@ -188,6 +189,32 @@ class TaskControllerImplIT {
         when(taskRuntime.task("1")).thenReturn(buildDefaultAssignedTask());
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
+    }
+
+    @Test
+    void nextTask() throws Exception {
+        when(taskRuntime.nextTask(null)).thenReturn(buildDefaultAssignedTask());
+
+        this.mockMvc.perform(post("/v1/tasks/next").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
+    }
+
+    @Test
+    void nextTaskWithStrategy() throws Exception {
+        TaskIdentificationStrategy strategy = TaskIdentificationStrategy.values()[0];
+        when(taskRuntime.nextTask(strategy)).thenReturn(buildDefaultAssignedTask());
+
+        this.mockMvc.perform(
+                post("/v1/tasks/next").param("strategy", strategy.name()).accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void nextTaskReturnsNoContentWhenNoTaskIsAvailable() throws Exception {
+        when(taskRuntime.nextTask(null)).thenReturn(null);
+
+        this.mockMvc.perform(post("/v1/tasks/next").accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isNoContent());
     }
 
     @Test

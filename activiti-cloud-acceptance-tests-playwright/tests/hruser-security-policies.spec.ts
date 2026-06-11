@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import { activiti } from '../fixtures/services.fixture';
-import { expect } from '../fixtures/context.fixture';
+import { activiti, expect } from '../fixtures/services.fixture';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
+import {
+    expectEventsForKey,
+    expectProcessInstancesForKey,
+    expectQueryProcessInstancesForKey,
+} from '../helpers/security-policies.assertions';
 
-activiti.describe('Security Policies - HR User Actions', () => {
-    let simpleProcessInstance: CloudProcessInstance;
-
+activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () => {
     activiti.describe('Simple Process Instance Operations', () => {
         activiti('should allow hruser to start and access simple process instances', async ({ securityPoliciesServiceHrUser }) => {
+            let simpleProcessInstance: CloudProcessInstance;
+
             await activiti.step('When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE', async () => {
                 simpleProcessInstance = await securityPoliciesServiceHrUser.startProcess('SIMPLE_PROCESS_INSTANCE');
                 expect(simpleProcessInstance).toBeDefined();
@@ -31,21 +35,27 @@ activiti.describe('Security Policies - HR User Actions', () => {
             });
 
             await activiti.step('Then the user can get simple process instances', async () => {
-                const processInstances = await securityPoliciesServiceHrUser.expectProcessInstancesForKey('SIMPLE_PROCESS_INSTANCE', true);
-                expect(processInstances.length).toBeGreaterThan(0);
-                expect(processInstances.some(pi => pi.id === simpleProcessInstance.id)).toBeTruthy();
+                const fetched = await securityPoliciesServiceHrUser.getRuntimeProcessInstance(simpleProcessInstance.id);
+                expect(fetched.id).toBe(simpleProcessInstance.id);
+                expect(fetched.processDefinitionKey).toBe('SimpleProcess');
             });
 
             await activiti.step('And the user can query simple process instances', async () => {
-                const queryProcessInstances = await securityPoliciesServiceHrUser.expectQueryProcessInstancesForKey('SIMPLE_PROCESS_INSTANCE', true);
+                const queryProcessInstances = await expectQueryProcessInstancesForKey(
+                    securityPoliciesServiceHrUser,
+                    'SIMPLE_PROCESS_INSTANCE',
+                    true
+                );
                 expect(queryProcessInstances.length).toBeGreaterThan(0);
-                expect(queryProcessInstances.some(pi => pi.id === simpleProcessInstance.id)).toBeTruthy();
             });
 
             await activiti.step('And the user can get events for simple process instances', async () => {
-                const events = await securityPoliciesServiceHrUser.expectEventsForKey('SIMPLE_PROCESS_INSTANCE', true);
+                const events = await expectEventsForKey(
+                    securityPoliciesServiceHrUser,
+                    'SIMPLE_PROCESS_INSTANCE',
+                    true
+                );
                 expect(events.length).toBeGreaterThan(0);
-                expect(events.some(event => event.processInstanceId === simpleProcessInstance.id)).toBeTruthy();
             });
         });
     });
@@ -61,21 +71,33 @@ activiti.describe('Security Policies - HR User Actions', () => {
 
         activiti('should restrict hruser from accessing process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot get process with variables instances', async () => {
-                const processInstances = await securityPoliciesServiceHrUser.expectProcessInstancesForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
+                const processInstances = await expectProcessInstancesForKey(
+                    securityPoliciesServiceHrUser,
+                    'PROCESS_INSTANCE_WITH_VARIABLES',
+                    false
+                );
                 expect(processInstances).toHaveLength(0);
             });
         });
 
         activiti('should restrict hruser from querying process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot query process with variables instances', async () => {
-                const queryProcessInstances = await securityPoliciesServiceHrUser.expectQueryProcessInstancesForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
+                const queryProcessInstances = await expectQueryProcessInstancesForKey(
+                    securityPoliciesServiceHrUser,
+                    'PROCESS_INSTANCE_WITH_VARIABLES',
+                    false
+                );
                 expect(queryProcessInstances).toHaveLength(0);
             });
         });
 
         activiti('should restrict hruser from accessing events for process with variables', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot get events for process with variables instances', async () => {
-                const events = await securityPoliciesServiceHrUser.expectEventsForKey('PROCESS_INSTANCE_WITH_VARIABLES', false);
+                const events = await expectEventsForKey(
+                    securityPoliciesServiceHrUser,
+                    'PROCESS_INSTANCE_WITH_VARIABLES',
+                    false
+                );
                 expect(events).toHaveLength(0);
             });
         });

@@ -61,13 +61,13 @@ The `local-install.sh` script provides a fully automated local development envir
 2. **Environment Preparation**
 
    - Generates PREVIEW_NAME in format: `pr-{number}-{broker}-{partition}-{destination}`
-   - Creates local-values.yaml with working Docker image tags (8.8.0-alpha.108)
+   - Creates local-values.local.yaml with working Docker image tags (gitignored)
    - Sets up environment variables for consistent deployment
 
 3. **Kubernetes Deployment**
 
    - Creates and configures namespace with proper labels
-   - Deploys Activiti Cloud using Helm with local-values.yaml by default
+   - Deploys Activiti Cloud using Helm with local-values.local.yaml by default
    - Patches deployments with correct external Keycloak configuration
 
 4. **Local Access Configuration**
@@ -102,7 +102,7 @@ The `local-install.sh` script provides a fully automated local development envir
 - **Features**:
   - Cluster configuration and validation
   - Keycloak authentication setup with client secret validation
-  - Kubernetes deployment with local-values.yaml integration
+  - Kubernetes deployment with local-values.local.yaml integration
   - Automated /etc/hosts configuration
   - Port forwarding setup (localhost:8080 → ingress-nginx-controller)
   - .env file generation for Playwright tests
@@ -147,21 +147,21 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 
 #### 3. `resolve-docker-images.sh` - 🐳 **IMAGE RESOLVER**
 
-**Creates local-values.yaml with working Docker image tags**
+**Creates local-values.local.yaml with working Docker image tags (gitignored)**
 
 - **Purpose**: Finds and configures working Docker image versions
 - **Status**: **ESSENTIAL - Prevents deployment failures**
 - **Called by**: `local-install.sh` (automatically)
 - **Features**:
   - Discovers available Docker image tags via API
-  - Creates local-values.yaml with tested versions (8.8.0-alpha.108)
+  - Creates local-values.local.yaml with tested versions
   - Prevents broken deployments from missing images
   - Fallback to known working tags
 
 **Usage:**
 
 ```bash
-# Generate local-values.yaml (called automatically)
+# Generate local-values.local.yaml (called automatically)
 ./scripts/resolve-docker-images.sh
 
 # Manual execution for custom version
@@ -238,7 +238,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 local-install.sh (main)
 ├── fix-kubectl-config.sh (cluster setup)
 ├── resolve-docker-images.sh (working images)
-└── local-values.yaml (generated)
+└── local-values.local.yaml (generated, gitignored)
 
 setup-environment.sh (advanced)
 └── local-install.sh (for installation mode)
@@ -270,7 +270,7 @@ The following scripts were removed as they are no longer needed:
 
 ### ✅ Working Docker Images
 
-- Integrates local-values.yaml with tested image tags by default
+- Integrates local-values.local.yaml with tested image tags by default
 - Uses 8.8.0-alpha.108 versions that are known to work
 - Prevents deployment failures from missing or broken images
 
@@ -318,7 +318,7 @@ The script creates this complete local development setup:
 - **Features**:
   - Cluster configuration and validation
   - Keycloak authentication setup with client secret validation
-  - Kubernetes deployment with local-values.yaml integration
+  - Kubernetes deployment with local-values.local.yaml integration
   - Automated /etc/hosts configuration
   - Port forwarding setup (localhost:8080 → ingress-nginx-controller)
   - .env file generation for Playwright tests
@@ -363,21 +363,21 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 
 #### 3. **`resolve-docker-images.sh`** - 🐳 **IMAGE RESOLVER**
 
-**Creates local-values.yaml with working Docker image tags**
+**Creates local-values.local.yaml with working Docker image tags (gitignored)**
 
 - **Purpose**: Finds and configures working Docker image versions
 - **Status**: **ESSENTIAL - Prevents deployment failures**
 - **Called by**: `local-install.sh` (automatically)
 - **Features**:
   - Discovers available Docker image tags via API
-  - Creates local-values.yaml with tested versions (8.8.0-alpha.108)
+  - Creates local-values.local.yaml with tested versions
   - Prevents broken deployments from missing images
   - Fallback to known working tags
 
 **Usage:**
 
 ```bash
-# Generate local-values.yaml (called automatically)
+# Generate local-values.local.yaml (called automatically)
 ./scripts/resolve-docker-images.sh
 
 # Manual execution for custom version
@@ -454,7 +454,7 @@ KEYCLOAK_CLIENT_SECRET=<secret> ./scripts/local-install.sh -n michal-test
 graph TD
     A[local-install.sh] --> B[fix-kubectl-config.sh]
     A --> C[resolve-docker-images.sh]
-    A --> D[local-values.yaml]
+    A --> D[local-values.local.yaml]
 
     E[setup-environment.sh] --> A
     E --> B

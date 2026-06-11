@@ -16,7 +16,7 @@
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
-import { CustomAPIRequest } from '../context.models';
+import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class RuntimeAdminService extends BaseService {
     private readonly basePath = '/rb/admin/v1';
@@ -27,8 +27,7 @@ export class RuntimeAdminService extends BaseService {
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
         const response = await this.get(`${this.basePath}/process-instances`);
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
@@ -43,7 +42,41 @@ export class RuntimeAdminService extends BaseService {
             `${this.basePath}/process-instances?${searchParams.toString()}`
         );
 
-        const result = response as any;
-        return result.content || [];
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async deleteProcessInstance(processInstanceId: string): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}`);
+    }
+
+    async destroyProcessInstance(processInstanceId: string, force = true): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}/destroy?force=${force}`);
+    }
+
+    async replayServiceTask(executionId: string, flowNodeId: string): Promise<void> {
+        await this.post(`${this.basePath}/executions/${executionId}/replay/service-task`, {
+            data: { flowNodeId },
+        });
+    }
+
+    async setProcessVariables(
+        processInstanceId: string,
+        variables: Record<string, unknown>
+    ): Promise<void> {
+        await this.put(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
+            data: {
+                payloadType: 'SetProcessVariablesPayload',
+                variables,
+            },
+        });
+    }
+
+    async deleteProcessVariables(processInstanceId: string, variableNames: string[]): Promise<void> {
+        await this.delete(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
+            data: {
+                payloadType: 'RemoveProcessVariablesPayload',
+                variableNames,
+            },
+        });
     }
 }
