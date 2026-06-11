@@ -16,7 +16,6 @@
 package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Objects;
-import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -27,11 +26,10 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorBuilder {
 
-    private static final String BLOCKED_BY_GUARDRAIL = "BLOCKED_BY_GUARDRAIL";
-
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
+    private String customErrorMessage;
 
     private IntegrationErrorBuilder(
         IntegrationRequest integrationRequest,
@@ -51,18 +49,24 @@ public class IntegrationErrorBuilder {
         return new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
     }
 
+    public static IntegrationErrorBuilder errorFor(
+        IntegrationRequest integrationRequest,
+        ConnectorProperties connectorProperties,
+        Throwable error,
+        String customErrorMessage
+    ) {
+        IntegrationErrorBuilder builder = new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
+        builder.customErrorMessage = customErrorMessage;
+        return builder;
+    }
+
     public IntegrationError build() {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError;
-        if (
-            error instanceof CloudBpmnError cloudBpmnError && BLOCKED_BY_GUARDRAIL.equals(cloudBpmnError.getErrorCode())
-        ) {
-            integrationError = new IntegrationErrorImpl(integrationRequest, error, cloudBpmnError.getMessage());
-        } else {
-            integrationError = new IntegrationErrorImpl(integrationRequest, error);
-        }
+        IntegrationErrorImpl integrationError = customErrorMessage != null
+            ? new IntegrationErrorImpl(integrationRequest, error, customErrorMessage)
+            : new IntegrationErrorImpl(integrationRequest, error);
 
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
