@@ -272,22 +272,14 @@ class IntegrationErrorImplTest {
         assertThat(result.getErrorMessage()).isEqualTo(customMessage);
     }
 
-    @Test
-    void should_fallbackToDetailedErrorMessage_when_customMessageIsNull() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = { "", "   " })
+    void should_fallbackToDetailedErrorMessage_when_customMessageIsNullOrBlank(String customMessage) {
         var rootCause = new RuntimeException("Root cause message");
         var error = new RuntimeException("Error message", rootCause);
 
-        var result = new IntegrationErrorImpl(integrationRequest, error, null);
-
-        assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
-    }
-
-    @Test
-    void should_fallbackToDetailedErrorMessage_when_customMessageIsBlank() {
-        var rootCause = new RuntimeException("Root cause message");
-        var error = new RuntimeException("Error message", rootCause);
-
-        var result = new IntegrationErrorImpl(integrationRequest, error, "   ");
+        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
 
         assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
     }
