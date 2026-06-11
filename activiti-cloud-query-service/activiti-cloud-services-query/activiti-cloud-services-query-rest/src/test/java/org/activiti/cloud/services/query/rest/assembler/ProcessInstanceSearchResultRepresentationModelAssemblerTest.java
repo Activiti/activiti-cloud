@@ -29,8 +29,7 @@ import org.springframework.hateoas.Link;
 
 class ProcessInstanceSearchResultRepresentationModelAssemblerTest {
 
-    private final ProcessInstanceSearchResultRepresentationModelAssembler assembler =
-        new ProcessInstanceSearchResultRepresentationModelAssembler();
+    private final ProcessInstanceSearchResultRepresentationModelAssembler assembler = new ProcessInstanceSearchResultRepresentationModelAssembler();
 
     @Nested
     class ToModel {
