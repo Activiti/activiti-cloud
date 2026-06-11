@@ -32,6 +32,7 @@ class SafeZipLimitsTest {
         assertThat(limits.allowDirectories()).isTrue();
         assertThat(limits.flatEntryPaths()).isFalse();
         assertThat(limits.rejectNestedZipEntries()).isFalse();
+        assertThat(limits.rejectEmptyEntries()).isFalse();
         assertThat(limits.allowedExtensions()).isEmpty();
         assertThat(limits.nestedZipAllowedExtensions()).isEmpty();
         assertThat(limits.executableContentCheck().test(new byte[0])).isFalse();

@@ -83,7 +83,7 @@ public final class SafeZipExtractor {
                 validateExtension(name, limits);
 
                 byte[] entryBytes = readEntryWithLimits(zis, counting, name, totalDecompressedSize, limits);
-                if (entryBytes.length == 0) {
+                if (entryBytes.length == 0 && limits.rejectEmptyEntries()) {
                     throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, name));
                 }
                 totalDecompressedSize += entryBytes.length;
@@ -329,7 +329,7 @@ public final class SafeZipExtractor {
                 }
                 out.write(buffer, 0, bytesRead);
             }
-            if (out.size() == 0) {
+            if (out.size() == 0 && limits.rejectEmptyEntries()) {
                 throw new IOException(MessageFormat.format(FOLDERS_OR_EMPTY_ENTRIES_MESSAGE, entry.getName()));
             }
             return out.toByteArray();

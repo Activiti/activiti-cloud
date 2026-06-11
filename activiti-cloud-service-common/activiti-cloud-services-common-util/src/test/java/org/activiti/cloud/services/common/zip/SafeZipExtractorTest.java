@@ -344,6 +344,28 @@ class SafeZipExtractorTest {
     }
 
     @Test
+    void extractEntries_shouldReturnEmptyEntry_whenEmptyEntriesNotRejected() throws IOException {
+        byte[] zip = ZipTestFixtures.zipBytes(
+            ZipTestFixtures.entry("empty.json", ""),
+            ZipTestFixtures.entry("data.json", "{}")
+        );
+
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(MB)
+            .maxTotalDecompressedBytes(MB)
+            .build();
+
+        var entries = SafeZipExtractor.extractEntries(new ByteArrayInputStream(zip), limits);
+
+        assertThat(entries).hasSize(2);
+        assertThat(entries.getFirst().name()).isEqualTo("empty.json");
+        assertThat(entries.getFirst().content()).isEmpty();
+        assertThat(entries.getFirst().directory()).isFalse();
+    }
+
+    @Test
     void extractEntries_shouldThrow_when_totalDecompressedExceedsMaxSize() throws IOException {
         byte[] halfLimitPlusOne = ZipTestFixtures.incompressibleBytes(5 * 1024 * 1024 + 1);
         byte[] zip = ZipTestFixtures.zipBytes(
@@ -508,6 +530,7 @@ class SafeZipExtractorTest {
             .allowDirectories(false)
             .flatEntryPaths(true)
             .allowedExtensions(Set.of("json"))
+            .rejectEmptyEntries(true)
             .executableContentCheck(executableContentCheck)
             .build();
     }
