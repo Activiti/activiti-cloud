@@ -22,6 +22,7 @@ import {
     ServiceTaskStatus,
 } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
+import { CloudTask } from '../models/task.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -124,5 +125,20 @@ export class QueryAdminService extends BaseService {
         if (params.status) searchParams.append('status', String(params.status));
         const response = await this.get(`${this.basePath}/service-tasks?${searchParams.toString()}`);
         return this.unwrapList<CloudServiceTask>(response, 'serviceTasks');
+    }
+
+    async getAllTasksAdmin(): Promise<CloudTask[]> {
+        const response = await this.get(`${this.basePath}/tasks`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async deleteAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
+        const response = await this.delete(`${this.basePath}/process-instances`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async deleteAllTasksAdmin(): Promise<CloudTask[]> {
+        const response = await this.delete(`${this.basePath}/tasks`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
     }
 }

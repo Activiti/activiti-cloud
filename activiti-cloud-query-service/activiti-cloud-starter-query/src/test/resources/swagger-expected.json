@@ -6050,6 +6050,192 @@
         } ]
       }
     },
+    "/admin/v1/process-instances/{processInstanceId}/sequence-flows" : {
+      "get" : {
+        "tags" : [ "process-instance-sequence-flows-admin-controller" ],
+        "summary" : "Find sequence flows for process instance",
+        "operationId" : "getSequenceFlowsAdmin",
+        "parameters" : [ {
+          "name" : "processInstanceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "maxItems",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "skipCount",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "processInstanceId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "processDefinitionId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "date",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "sourceActivityElementId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sourceActivityName",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sourceActivityType",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetActivityElementId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetActivityName",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetActivityType",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "elementId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "processDefinitionKey",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "processDefinitionVersion",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "businessKey",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "eventId",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/hal+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentBPMNDiagramSequenceFlowEntry"
+                }
+              },
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ListResponseContentBPMNDiagramSequenceFlowEntry"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          }
+        },
+        "security" : [ {
+          "oauth" : [ ]
+        } ]
+      }
+    },
     "/admin/v1/process-instances/{processInstanceId}/diagram" : {
       "get" : {
         "tags" : [ "process-instance-diagram-admin-controller" ],
@@ -8675,6 +8861,61 @@
           }
         },
         "title" : "ListResponseContentCloudIntegrationContext"
+      },
+      "BPMNDiagramSequenceFlowEntry" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "elementId" : {
+            "type" : "string"
+          },
+          "sourceActivityElementId" : {
+            "type" : "string"
+          },
+          "targetActivityElementId" : {
+            "type" : "string"
+          },
+          "date" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        },
+        "title" : "BPMNDiagramSequenceFlowEntry"
+      },
+      "EntriesResponseContentBPMNDiagramSequenceFlowEntry" : {
+        "type" : "object",
+        "properties" : {
+          "entries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EntryResponseContentBPMNDiagramSequenceFlowEntry"
+            }
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title" : "EntriesResponseContentBPMNDiagramSequenceFlowEntry"
+      },
+      "EntryResponseContentBPMNDiagramSequenceFlowEntry" : {
+        "type" : "object",
+        "properties" : {
+          "entry" : {
+            "$ref" : "#/components/schemas/BPMNDiagramSequenceFlowEntry"
+          }
+        },
+        "title" : "EntryResponseContentBPMNDiagramSequenceFlowEntry"
+      },
+      "ListResponseContentBPMNDiagramSequenceFlowEntry" : {
+        "type" : "object",
+        "properties" : {
+          "list" : {
+            "$ref" : "#/components/schemas/EntriesResponseContentBPMNDiagramSequenceFlowEntry"
+          }
+        },
+        "title" : "ListResponseContentBPMNDiagramSequenceFlowEntry"
       },
       "BpmnDiagramActivityEntry" : {
         "type" : "object",

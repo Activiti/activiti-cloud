@@ -26,6 +26,13 @@ const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
 const isCi = Boolean(process.env.CI);
 
+/** Serial projects (subscriptions, admin bulk-delete). */
+const serial = { workers: 1, fullyParallel: false } as const;
+
+/**
+ * CI suite (`npm run test`) selects acceptance → notifications → destructive-last.
+ * `dependencies` enforce that order; slice scripts pass a single `--project=…`.
+ */
 export default defineConfig({
   testDir: './tests',
   timeout: timeouts.test,
@@ -34,17 +41,46 @@ export default defineConfig({
   },
 
   fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  forbidOnly: !!process.env.CI,
+  retries: isCi ? 2 : 0,
+  forbidOnly: isCi,
   workers,
-  maxFailures: process.env.CI ? 10 : undefined,
+  projects: [
+    {
+      name: 'acceptance',
+      grepInvert: /@destructive/,
+      testIgnore: '**/notifications.spec.ts',
+    },
+    {
+      name: 'notifications',
+      testMatch: '**/notifications.spec.ts',
+      dependencies: ['acceptance'],
+      ...serial,
+    },
+    {
+      name: 'destructive-last',
+      grep: /@destructive/,
+      dependencies: ['acceptance', 'notifications'],
+      ...serial,
+    },
+    { name: 'smoke', grep: /@smoke/ },
+    { name: 'identity', testMatch: '**/identity-adapter.spec.ts' },
+    {
+      name: 'security',
+      testMatch: ['**/hruser-security-policies.spec.ts', '**/hradmin-security-policies.spec.ts'],
+    },
+    { name: 'process', testMatch: '**/process-instance-actions.spec.ts' },
+    { name: 'runtime', testMatch: '**/runtime/**/*.spec.ts' },
+    { name: 'runtime-process-instance', testMatch: '**/runtime/process-instance*.spec.ts' },
+    { name: 'runtime-tasks', testMatch: '**/runtime/task*.spec.ts' },
+  ],
+  maxFailures: isCi ? 10 : undefined,
 
   reporter: [
     ['html'],
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
     ['json', { outputFile: `${paths.reporter}/results.json` }],
-    ...(process.env.CI ? ([['github']] as const) : []),
+    ...(isCi ? ([['github']] as const) : []),
   ],
 
   outputDir: paths.testResults,
@@ -57,8 +93,6 @@ export default defineConfig({
     actionTimeout: timeouts.action,
     navigationTimeout: timeouts.navigation,
   },
-
-  // No overlapping projects — use npm scripts with explicit paths for slices (see docs/IMPROVEMENTS.md Phase 1).
 
   globalSetup: './config/lifecycle/global-setup.ts',
   globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,

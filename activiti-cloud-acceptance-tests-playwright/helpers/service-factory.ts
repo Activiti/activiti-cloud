@@ -14,6 +14,7 @@ import { QueryAdminService } from '../services/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit.service';
+import { AuditAdminService } from '../services/audit-admin.service';
 import { IdentityManagementService } from '../services/identity-management.service';
 
 export interface ServiceIsolationOptions {
@@ -76,6 +77,10 @@ export function createTaskAdminService(context: CustomAPIRequest): TaskAdminServ
 
 export function createAuditService(context: CustomAPIRequest): AuditService {
     return new AuditService(context);
+}
+
+export function createAuditAdminService(context: CustomAPIRequest): AuditAdminService {
+    return new AuditAdminService(context);
 }
 
 export function createIdentityManagementService(context: CustomAPIRequest): IdentityManagementService {

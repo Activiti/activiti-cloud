@@ -45,4 +45,18 @@ if [[ -n "${ACCESS_TOKEN}" && -n "${GATEWAY_HOST:-}" ]]; then
     exit 1
   fi
   echo "✓ identity-adapter group search OK (testuser bearer)"
+
+  NOTIFICATIONS_HTTP="$(curl -sS -o /tmp/acceptance-notifications-probe.txt -w '%{http_code}' \
+    --max-time 30 \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    -d '{"query":"{ __typename }"}' \
+    "https://${GATEWAY_HOST}/notifications/graphql" || echo "000")"
+  if [[ "${NOTIFICATIONS_HTTP}" != "200" ]]; then
+    echo "::error::notifications GraphQL check failed (HTTP ${NOTIFICATIONS_HTTP}) at https://${GATEWAY_HOST}/notifications/graphql — required for AAE-46640 (bundled in activiti-cloud-query)"
+    cat /tmp/acceptance-notifications-probe.txt 2>/dev/null || true
+    exit 1
+  fi
+  echo "✓ notifications GraphQL endpoint reachable (HTTP ${NOTIFICATIONS_HTTP})"
 fi

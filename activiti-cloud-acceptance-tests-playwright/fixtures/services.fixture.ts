@@ -17,6 +17,7 @@
 import { test as playwrightTest } from '@playwright/test';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import {
+    createAuditAdminService,
     createAuditService,
     createIdentityManagementService,
     createMultipleRuntimeBundleService,
@@ -36,6 +37,7 @@ import { QueryAdminService } from '../services/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskService } from '../services/task.service';
 import { TaskAdminService } from '../services/task-admin.service';
+import { AuditAdminService } from '../services/audit-admin.service';
 import { AuditService } from '../services/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
@@ -64,6 +66,7 @@ interface ServicesFixture {
     auditServiceTestUser: AuditService;
     auditServiceHrUser: AuditService;
     auditServiceTestAdmin: AuditService;
+    auditAdminServiceTestAdmin: AuditAdminService;
     queryAdminServiceTestAdmin: QueryAdminService;
     securityPoliciesServiceTestUser: SecurityPoliciesService;
     securityPoliciesServiceHrUser: SecurityPoliciesService;
@@ -151,6 +154,9 @@ const activiti = contexts.extend<ServicesFixture>({
     },
     auditServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createAuditService(testAdminUserContext));
+    },
+    auditAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
+        await use(createAuditAdminService(testAdminUserContext));
     },
     queryAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryAdminService(testAdminUserContext));

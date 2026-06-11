@@ -1,6 +1,6 @@
 # Activiti Cloud — Playwright acceptance tests
 
-API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; Serenity is being retired ([docs/SERENITY_RETIREMENT.md](docs/SERENITY_RETIREMENT.md)).
+API acceptance tests for Activiti Cloud preview installs. **Playwright-only** target; remaining Serenity stories are listed in [../activiti-cloud-acceptance-scenarios/DEPRECATED.md](../activiti-cloud-acceptance-scenarios/DEPRECATED.md).
 
 ## Requirements
 
@@ -84,8 +84,8 @@ Port-forward starts automatically in Playwright global-setup (no second terminal
 ```bash
 npm run check:env
 npm run typecheck           # TypeScript (strict)
-npm run test:smoke          # 18 tests (@smoke)
-npm run test:all            # 58 tests (full suite)
+npm run test:smoke          # @smoke only
+npm run test                # full suite (destructive-last project runs last)
 ```
 
 `npm run port-forward` is only for manual `curl` debugging.
@@ -122,8 +122,18 @@ kubectl get ns | grep '^pr-'
 | `npm run check:env`               | Validate `.env` and connectivity                       |
 | `npm run verify:process-catalog`  | BPMN keys on runtime-bundle                            |
 | `npm run typecheck`               | TypeScript check (`strict`)                            |
-| `npm run test:smoke` / `test:all` | Playwright (18 smoke / 58 full)                        |
+| `npm run test` / `test:smoke`     | Playwright full suite / `@smoke` filter                |
+| `npm run test:no-destructive`     | Full suite without `destructive-last` project          |
+| `npm run test:destructive`        | Only admin bulk-delete (`destructive-last` project)    |
 | `npm run report`                  | Open last HTML report                                  |
+
+Playwright **projects** are in `playwright.config.ts`. `npm run test` runs the CI suite (`acceptance` → `notifications` → `destructive-last` via `package.json` → `config.pw_suite`). Slices use `--project=…`:
+
+```bash
+npm run pw -- --list
+npm run test:smoke
+npm run pw -- --project=runtime --list
+```
 
 ### Run tests by area
 
@@ -132,9 +142,10 @@ npm run test:identity
 npm run test:security
 npm run test:runtime
 npm run test:runtime:tasks
-npm run test:all
+npm run test
 
 npm run test:debug
+npm run pw -- --project=identity --debug
 PLAYWRIGHT_WORKERS=6 npm run test:runtime
 ```
 
@@ -153,7 +164,7 @@ Or install manually, then Playwright:
 export KUBECONFIG=~/Downloads/activiti.yaml
 ./scripts/local-install.sh -n local-dev -b rabbitmq -p non-partitioned --destinations-option default-destinations
 npm run test:setup          # .env + prereqs only
-npm run test:all
+npm run test
 ```
 
 To refresh Docker tags without full setup: `REFRESH_LOCAL_IMAGE_TAGS=true ./scripts/local-install.sh -n ...`
@@ -194,7 +205,7 @@ Do not run prereqs twice in parallel on the same namespace.
 - **CI vs local:** cluster patching runs in the workflow (bash + kubectl), not in Playwright global-setup (`AUTO_CLUSTER_PREREQS=false`, `ACCEPTANCE_CI_OVERLAY_APPLIED=true`). Local runs still use `npm run test:setup` / `cluster:prereqs` from global-setup.
 - **CI gateway URL:** direct `https://gateway-{PREVIEW_NAME}.…` (no port-forward). Local uses `localhost:8080` + `Host` header via Traefik port-forward.
 - **CI users:** `testuser` / `password` (chart seed users). Do not use `vars.KEYCLOAK_USERNAME` — that targets other environments and causes HTTP 401 on runtime-bundle APIs.
-- Playwright `test:all` runs on each messaging matrix cell ([retirement plan](docs/SERENITY_RETIREMENT.md))
+- Playwright `npm run test` runs on each messaging matrix cell (see [docs/PARALLEL_SAFE.md](docs/PARALLEL_SAFE.md) for project order)
 - Retries: `2` on CI; artifacts: JUnit, JSON, HTML; trace on first retry
 
 ### CI matrix (messaging)
