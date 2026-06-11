@@ -82,7 +82,13 @@ class ProcessVariableUpdateEventHandlerTest {
     @Test
     void handleShouldSkipHistoryWhenVariableIsEphemeral() {
         //given
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var", "string", "newValue", "procInstId", null);
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "newValue",
+            "procInstId",
+            null
+        );
         CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(variable, "oldValue", true);
 
         //when

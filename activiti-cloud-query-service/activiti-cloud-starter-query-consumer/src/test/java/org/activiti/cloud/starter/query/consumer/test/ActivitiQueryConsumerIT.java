@@ -32,7 +32,7 @@ import org.springframework.cloud.stream.binder.test.EnableTestBinder;
     properties = "activiti.cloud.services.oauth2.iam-name=test"
 )
 @EnableTestBinder
-public class ActivitiQueryConsumerIT {
+class ActivitiQueryConsumerIT {
 
     @Autowired
     private QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider;

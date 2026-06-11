@@ -64,9 +64,8 @@ class QueryConsumerChannelHandlerTest {
         when(optimizer.optimize(events)).thenReturn(events);
 
         //when
-        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx ->
-            consumer.receive(events, headers)
-        );
+        new TransactionTemplate(new PseudoTransactionManager())
+            .executeWithoutResult(tx -> consumer.receive(events, headers));
 
         //then
         verify(optimizer).optimize(events);

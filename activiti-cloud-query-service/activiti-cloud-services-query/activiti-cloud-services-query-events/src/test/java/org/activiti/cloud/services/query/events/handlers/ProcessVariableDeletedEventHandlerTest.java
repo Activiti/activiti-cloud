@@ -206,7 +206,13 @@ class ProcessVariableDeletedEventHandlerTest {
     @Test
     void handleShouldRemoveVariableButSkipHistoryWhenVariableIsEphemeral() {
         //given
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var", "string", "value", "procInstId", null);
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "value",
+            "procInstId",
+            null
+        );
         CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variable, true);
 
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
