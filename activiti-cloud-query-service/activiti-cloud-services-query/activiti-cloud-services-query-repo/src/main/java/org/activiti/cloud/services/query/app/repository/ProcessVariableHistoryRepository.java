@@ -20,7 +20,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ProcessVariableHistoryRepository extends CrudRepository<ProcessVariableHistoryEntity, Long> {
-    List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByCreateTimeAscSequenceNumberAsc(
+    List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
         String processInstanceId,
         String variableName
     );

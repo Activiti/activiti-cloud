@@ -33,11 +33,8 @@ import org.hibernate.type.SqlTypes;
 @Table(
     name = "PROCESS_VARIABLE_HISTORY",
     indexes = {
-        @Index(
-            name = "idx_pvh_process_var",
-            columnList = "processInstanceId, variableName, createTime",
-            unique = false
-        ),
+        @Index(name = "idx_pvh_process_var", columnList = "processInstanceId, variableName, eventTime", unique = false),
+        @Index(name = "idx_pvh_record_create_time", columnList = "recordCreateTime", unique = false),
     }
 )
 public class ProcessVariableHistoryEntity {
@@ -68,7 +65,10 @@ public class ProcessVariableHistoryEntity {
     private boolean deleted = false;
 
     @Column(nullable = false)
-    private Date createTime;
+    private Date eventTime;
+
+    @Column(nullable = false)
+    private Date recordCreateTime;
 
     private String messageId;
 
@@ -121,12 +121,20 @@ public class ProcessVariableHistoryEntity {
         this.deleted = deleted;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getEventTime() {
+        return eventTime;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setEventTime(Date eventTime) {
+        this.eventTime = eventTime;
+    }
+
+    public Date getRecordCreateTime() {
+        return recordCreateTime;
+    }
+
+    public void setRecordCreateTime(Date recordCreateTime) {
+        this.recordCreateTime = recordCreateTime;
     }
 
     public String getMessageId() {

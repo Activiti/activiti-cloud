@@ -49,7 +49,8 @@ public class ProcessVariableHistoryEntityFactory {
         history.setProcessInstanceId(event.getEntity().getProcessInstanceId());
         history.setVariableName(event.getEntity().getName());
         history.setType(event.getEntity().getType());
-        history.setCreateTime(new Date(event.getTimestamp()));
+        history.setEventTime(new Date(event.getTimestamp()));
+        history.setRecordCreateTime(new Date());
         history.setMessageId(event.getMessageId());
         history.setSequenceNumber(event.getSequenceNumber());
         return history;

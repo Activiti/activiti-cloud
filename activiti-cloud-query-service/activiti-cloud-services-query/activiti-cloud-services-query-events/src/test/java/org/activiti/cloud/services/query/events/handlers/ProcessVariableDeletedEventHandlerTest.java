@@ -95,7 +95,8 @@ class ProcessVariableDeletedEventHandlerTest {
         assertThat((Object) historyEntity.getValue()).isNull();
         assertThat(historyEntity.getMessageId()).isEqualTo("msg-002");
         assertThat(historyEntity.getSequenceNumber()).isEqualTo(5);
-        assertThat(historyEntity.getCreateTime()).isNotNull();
+        assertThat(historyEntity.getEventTime()).isNotNull();
+        assertThat(historyEntity.getRecordCreateTime()).isNotNull();
 
         verify(entityManager).remove(variableEntity);
         assertThat(processInstanceEntity.getVariables()).doesNotContain(variableEntity);

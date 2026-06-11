@@ -66,6 +66,7 @@ class ProcessVariableHistoryPersistenceIT {
     }
 
     @Test
+    @SuppressWarnings("java:S5961")
     void should_persistHistoryEntries_when_createUpdateDeleteLifecycle() {
         String processInstanceId = "proc-it-001";
         var processInstance = new ProcessInstanceEntity();
@@ -109,7 +110,7 @@ class ProcessVariableHistoryPersistenceIT {
             )
         );
 
-        List<ProcessVariableHistoryEntity> history = historyRepository.findByProcessInstanceIdAndVariableNameOrderByCreateTimeAscSequenceNumberAsc(
+        List<ProcessVariableHistoryEntity> history = historyRepository.findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
             processInstanceId,
             "myVar"
         );
@@ -121,28 +122,32 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry0.getType()).isEqualTo("string");
         assertThat((String) entry0.getValue()).isEqualTo("initial");
         assertThat(entry0.isDeleted()).isFalse();
-        assertThat(entry0.getCreateTime().getTime()).isEqualTo(baseTimestamp);
+        assertThat(entry0.getEventTime().getTime()).isEqualTo(baseTimestamp);
+        assertThat(entry0.getRecordCreateTime()).isNotNull();
         assertThat(entry0.getMessageId()).isNotNull();
         assertThat(entry0.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry1 = history.get(1);
         assertThat((String) entry1.getValue()).isEqualTo("second");
         assertThat(entry1.isDeleted()).isFalse();
-        assertThat(entry1.getCreateTime().getTime()).isEqualTo(baseTimestamp + 1000);
+        assertThat(entry1.getEventTime().getTime()).isEqualTo(baseTimestamp + 1000);
+        assertThat(entry1.getRecordCreateTime()).isNotNull();
         assertThat(entry1.getMessageId()).isNotNull();
         assertThat(entry1.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry2 = history.get(2);
         assertThat((String) entry2.getValue()).isEqualTo("third");
         assertThat(entry2.isDeleted()).isFalse();
-        assertThat(entry2.getCreateTime().getTime()).isEqualTo(baseTimestamp + 2000);
+        assertThat(entry2.getEventTime().getTime()).isEqualTo(baseTimestamp + 2000);
+        assertThat(entry2.getRecordCreateTime()).isNotNull();
         assertThat(entry2.getMessageId()).isNotNull();
         assertThat(entry2.getSequenceNumber()).isZero();
 
         ProcessVariableHistoryEntity entry3 = history.get(3);
         assertThat((Object) entry3.getValue()).isNull();
         assertThat(entry3.isDeleted()).isTrue();
-        assertThat(entry3.getCreateTime().getTime()).isEqualTo(baseTimestamp + 3000);
+        assertThat(entry3.getEventTime().getTime()).isEqualTo(baseTimestamp + 3000);
+        assertThat(entry3.getRecordCreateTime()).isNotNull();
         assertThat(entry3.getMessageId()).isNotNull();
         assertThat(entry3.getSequenceNumber()).isZero();
 

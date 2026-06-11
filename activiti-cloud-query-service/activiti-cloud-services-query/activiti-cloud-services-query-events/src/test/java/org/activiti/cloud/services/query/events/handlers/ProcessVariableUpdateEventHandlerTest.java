@@ -76,7 +76,8 @@ class ProcessVariableUpdateEventHandlerTest {
         assertThat(historyEntity.isDeleted()).isFalse();
         assertThat(historyEntity.getMessageId()).isEqualTo("msg-001");
         assertThat(historyEntity.getSequenceNumber()).isEqualTo(3);
-        assertThat(historyEntity.getCreateTime()).isNotNull();
+        assertThat(historyEntity.getEventTime()).isNotNull();
+        assertThat(historyEntity.getRecordCreateTime()).isNotNull();
     }
 
     @Test

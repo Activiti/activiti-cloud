@@ -8,11 +8,13 @@ create table process_variable_history
     type                varchar(255),
     "value"             jsonb,
     deleted             boolean not null default false,
-    create_time         timestamp not null,
+    event_time          timestamp not null,
+    record_create_time  timestamp not null default now(),
     message_id          varchar(255),
     command_id          varchar(255),
     sequence_number     integer,
     primary key (id)
 );
 
-create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, create_time);
+create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, event_time);
+create index idx_pvh_record_create_time on process_variable_history (record_create_time);
