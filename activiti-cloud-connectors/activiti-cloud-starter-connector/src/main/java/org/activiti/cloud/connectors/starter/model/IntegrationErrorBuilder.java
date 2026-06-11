@@ -27,6 +27,8 @@ import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorBuilder {
 
+    private static final String BLOCKED_BY_GUARDRAIL = "BLOCKED_BY_GUARDRAIL";
+
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
@@ -56,7 +58,7 @@ public class IntegrationErrorBuilder {
         IntegrationErrorImpl integrationError;
         if (
             error instanceof CloudBpmnError cloudBpmnError &&
-            "BLOCKED_BY_GUARDRAIL".equals(cloudBpmnError.getErrorCode()) &&
+            BLOCKED_BY_GUARDRAIL.equals(cloudBpmnError.getErrorCode()) &&
             cloudBpmnError.getMessage() != null
         ) {
             integrationError = new IntegrationErrorImpl(integrationRequest, error, cloudBpmnError.getMessage());
