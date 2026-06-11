@@ -282,7 +282,7 @@ jobs:
       - name: Run Playwright Acceptance Tests
         uses: ./.github/actions/playwright-run
         with:
-          script-command: "npm run test:all"
+          script-command: "npm run test"
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()

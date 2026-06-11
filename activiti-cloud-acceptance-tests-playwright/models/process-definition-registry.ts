@@ -34,6 +34,10 @@ export class ProcessDefinitionRegistry {
     private static readonly processWithNoTasksDefinitionKeys = new Map<string, string>([
         ['SIMPLE_PROCESS_INSTANCE', 'SimpleProcess'],
         ['CONNECTOR_PROCESS_INSTANCE', 'ConnectorProcess'],
+        ['SIGNAL_THROW_PROCESS_INSTANCE', 'SignalThrowEventProcess'],
+        ['SIGNAL_START_EVENT_PROCESS', 'SignalStartEventProcess'],
+        ['INTERMEDIATE_TIMER_EVENT_PROCESS', 'intermediateTimerEventExample'],
+        ['BOUNDARY_TIMER_EVENT_PROCESS', 'boundaryTimerEventExample'],
         ['PROCESS_INSTANCE_WITH_CALL_ACTIVITIES', 'parentproc-8e992556-5785-4ee0-9fe7-354decfea4a8'],
         ['Process Information', 'processinf-4e42752c-cc4d-429b-9528-7d3df24a9537'],
         ['Process with Generic BPMN Task', 'processwit-c6fd1b26-0d64-47f2-8d04-0b70764444a7']
