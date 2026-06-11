@@ -28,6 +28,7 @@ public record SafeZipLimits(
     boolean allowDirectories,
     boolean flatEntryPaths,
     boolean rejectNestedZipEntries,
+    boolean rejectEmptyEntries,
     Set<String> allowedExtensions,
     Set<String> nestedZipAllowedExtensions,
     Predicate<byte[]> executableContentCheck
@@ -73,6 +74,7 @@ public record SafeZipLimits(
         private boolean allowDirectories = true;
         private boolean flatEntryPaths = false;
         private boolean rejectNestedZipEntries = false;
+        private boolean rejectEmptyEntries = false;
         private Set<String> allowedExtensions = Set.of();
         private Set<String> nestedZipAllowedExtensions = Set.of();
         private Predicate<byte[]> executableContentCheck = bytes -> false;
@@ -112,6 +114,11 @@ public record SafeZipLimits(
             return this;
         }
 
+        public Builder rejectEmptyEntries(boolean rejectEmptyEntries) {
+            this.rejectEmptyEntries = rejectEmptyEntries;
+            return this;
+        }
+
         public Builder allowedExtensions(Set<String> allowedExtensions) {
             this.allowedExtensions = allowedExtensions;
             return this;
@@ -136,6 +143,7 @@ public record SafeZipLimits(
                 allowDirectories,
                 flatEntryPaths,
                 rejectNestedZipEntries,
+                rejectEmptyEntries,
                 allowedExtensions,
                 nestedZipAllowedExtensions,
                 executableContentCheck

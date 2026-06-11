@@ -266,14 +266,44 @@ class SafeZipExtractorDiskTest {
     }
 
     @Test
-    void extractToDirectory_shouldThrow_whenFileEntryIsEmpty() throws IOException {
+    void extractToDirectory_shouldThrow_whenFileEntryIsEmptyAndEmptyEntriesRejected() throws IOException {
         Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "empty.zip", ZipTestFixtures.entry("empty.txt", ""));
 
-        assertThatThrownBy(() ->
-                SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), permissiveLimits())
-            )
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(1024 * KB)
+            .maxTotalDecompressedBytes(1024 * KB)
+            .rejectEmptyEntries(true)
+            .build();
+
+        assertThatThrownBy(() -> SafeZipExtractor.extractToDirectory(zipPath.toFile(), tempDir.resolve("out"), limits))
             .isInstanceOf(IOException.class)
             .hasMessageContaining("must not contain folders or empty entries");
+    }
+
+    @Test
+    void extractToDirectory_shouldCreateEmptyFile_whenEmptyEntriesNotRejected() throws IOException {
+        Path zipPath = ZipTestFixtures.writeZipFile(
+            tempDir,
+            "empty.zip",
+            ZipTestFixtures.entry("files/empty.bin", ""),
+            ZipTestFixtures.entry("files/data.txt", "content")
+        );
+        Path target = tempDir.resolve("out");
+
+        SafeZipLimits limits = SafeZipLimits
+            .builder()
+            .maxEntries(10)
+            .maxEntryDecompressedBytes(1024 * KB)
+            .maxTotalDecompressedBytes(1024 * KB)
+            .build();
+
+        SafeZipExtractor.extractToDirectory(zipPath.toFile(), target, limits);
+
+        assertThat(Files.isRegularFile(target.resolve("files/empty.bin"))).isTrue();
+        assertThat(Files.size(target.resolve("files/empty.bin"))).isZero();
+        assertThat(Files.readString(target.resolve("files/data.txt"))).isEqualTo("content");
     }
 
     @Test
