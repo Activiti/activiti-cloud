@@ -108,6 +108,7 @@ public class ToCloudTaskRuntimeEventConverter {
 
     public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAddedEvent event) {
         CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(event.getEntity());
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
@@ -116,12 +117,14 @@ public class ToCloudTaskRuntimeEventConverter {
         CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(
             event.getEntity()
         );
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
 
     public CloudTaskCandidateGroupAddedEvent from(TaskCandidateGroupAddedEvent event) {
         CloudTaskCandidateGroupAddedEventImpl cloudEvent = new CloudTaskCandidateGroupAddedEventImpl(event.getEntity());
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
@@ -130,6 +133,7 @@ public class ToCloudTaskRuntimeEventConverter {
         CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(
             event.getEntity()
         );
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }

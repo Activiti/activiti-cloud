@@ -25,12 +25,22 @@ import static org.mockito.Mockito.when;
 import java.security.Principal;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
+import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
+import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.runtime.events.TaskCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskCandidateGroupAddedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskCandidateGroupRemovedImpl;
+import org.activiti.runtime.api.event.impl.TaskCandidateUserAddedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskCandidateUserRemovedImpl;
 import org.activiti.runtime.api.event.impl.TaskCompletedImpl;
 import org.activiti.runtime.api.event.impl.TaskCreatedEventImpl;
 import org.junit.jupiter.api.Test;
@@ -115,5 +125,53 @@ class ToCloudTaskRuntimeEventConverterTest {
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(this.taskAuditServiceInfoAppender, never())
             .appendAuditServiceInfoTo(any(CloudTaskCompletedEventImpl.class));
+    }
+
+    @Test
+    void should_setProcessInstanceId_when_convertingTaskCandidateUserAddedEvent() {
+        TaskCandidateUserAddedEventImpl event = new TaskCandidateUserAddedEventImpl(
+            new TaskCandidateUserImpl(USERNAME, "task-1")
+        );
+        event.setProcessInstanceId("proc-1");
+
+        CloudTaskCandidateUserAddedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-1");
+    }
+
+    @Test
+    void should_setProcessInstanceId_when_convertingTaskCandidateUserRemovedEvent() {
+        TaskCandidateUserRemovedImpl event = new TaskCandidateUserRemovedImpl(
+            new TaskCandidateUserImpl(USERNAME, "task-1")
+        );
+        event.setProcessInstanceId("proc-2");
+
+        CloudTaskCandidateUserRemovedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-2");
+    }
+
+    @Test
+    void should_setProcessInstanceId_when_convertingTaskCandidateGroupAddedEvent() {
+        TaskCandidateGroupAddedEventImpl event = new TaskCandidateGroupAddedEventImpl(
+            new TaskCandidateGroupImpl("group-1", "task-1")
+        );
+        event.setProcessInstanceId("proc-3");
+
+        CloudTaskCandidateGroupAddedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-3");
+    }
+
+    @Test
+    void should_setProcessInstanceId_when_convertingTaskCandidateGroupRemovedEvent() {
+        TaskCandidateGroupRemovedImpl event = new TaskCandidateGroupRemovedImpl(
+            new TaskCandidateGroupImpl("group-1", "task-1")
+        );
+        event.setProcessInstanceId("proc-4");
+
+        CloudTaskCandidateGroupRemovedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-4");
     }
 }
