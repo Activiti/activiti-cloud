@@ -28,16 +28,13 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-@SuppressWarnings("unchecked")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import({ EventsRestTemplate.class, TestChannelBinderConfiguration.class })
-@AutoConfigureTestRestTemplate
+@Import(TestChannelBinderConfiguration.class)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 class AuditCommandIdIT {
 
