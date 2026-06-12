@@ -45,8 +45,8 @@ import org.w3c.dom.NodeList;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Integration test that verifies the Liquibase changeset 41
- * ({@code 41-alter.pg.schema.9.1.0.sql}) correctly migrates pre-existing
+ * Integration test that verifies the Liquibase changeset 40
+ * ({@code 40-alter.pg.schema.9.1.0.sql}) correctly migrates pre-existing
  * process hierarchy data into the new {@code process_instance_hierarchy}
  * closure table.
  *
@@ -55,9 +55,9 @@ import tools.jackson.databind.json.JsonMapper;
  *   <li>Disable Spring's automatic Liquibase run for this test context.</li>
  *   <li>Programmatically execute the SQL files referenced by the master
  *       changelog up to (but excluding) the changeSet that creates the
- *       hierarchy (i.e. apply changesets 1..40).</li>
+ *       hierarchy (i.e. apply changesets 1..39).</li>
  *   <li>Populate {@code process_instance} rows to simulate existing data.</li>
- *   <li>Execute the full changeset 41 script (the migration) as a single
+ *   <li>Execute the full changeset 40 script (the migration) as a single
  *       statement and assert the closure table contents.</li>
  * </ol>
  */
@@ -78,8 +78,8 @@ class ProcessHierarchyMigrationIT {
     private JsonMapper objectMapper;
 
     private static final String MASTER_CHANGELOG = "config/query/liquibase/master.xml";
-    private static final String CHANGESET_41_ID = "alter41-schema"; // id used in master.xml for pg changeSet 41
-    private static final String MIGRATION_SCRIPT_PATH = "config/query/liquibase/changelog/41-alter.pg.schema.9.1.0.sql";
+    private static final String CHANGESET_40_ID = "alter40-schema"; // id used in master.xml for pg changeSet 40
+    private static final String MIGRATION_SCRIPT_PATH = "config/query/liquibase/changelog/40-alter.pg.schema.9.1.0.sql";
 
     // Strip a leading /* ... */ block from the start of SQL content, if present.
     private static String stripLeadingBlockComment(String sql) {
@@ -115,7 +115,7 @@ class ProcessHierarchyMigrationIT {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
 
         // Step 0: Apply changeSets 1..39 by parsing master.xml and executing referenced sqlFiles
-        applyChangeSetsUpTo40();
+        applyChangeSetsUpTo39();
 
         // Step 1: Populate process_instance table (existing data before migration)
         insertProcess(jdbc, "A", null, null);
@@ -145,8 +145,8 @@ class ProcessHierarchyMigrationIT {
         assertThat(countRowsInvolving(jdbc, "F")).isEqualTo(1);
     }
 
-    private void applyChangeSetsUpTo40() throws Exception {
-        // Read master.xml and iterate changeSet nodes until we encounter changeSet with id=CHANGESET_41_ID
+    private void applyChangeSetsUpTo39() throws Exception {
+        // Read master.xml and iterate changeSet nodes until we encounter changeSet with id=CHANGESET_40_ID
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(MASTER_CHANGELOG)) {
             if (is == null) {
                 throw new IllegalStateException("Master changelog not found: " + MASTER_CHANGELOG);
@@ -160,8 +160,8 @@ class ProcessHierarchyMigrationIT {
                 for (int i = 0; i < changeSets.getLength(); i++) {
                     Element cs = (Element) changeSets.item(i);
                     String id = cs.getAttribute("id");
-                    if (CHANGESET_41_ID.equals(id)) {
-                        // stop before changeSet 41
+                    if (CHANGESET_40_ID.equals(id)) {
+                        // stop before changeSet 40
                         break;
                     }
                     // find sqlFile child elements
