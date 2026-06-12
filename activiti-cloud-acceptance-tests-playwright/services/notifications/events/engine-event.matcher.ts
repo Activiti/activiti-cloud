@@ -14,30 +14,7 @@
  * limitations under the License.
  */
 
-import { jwtDecode } from 'jwt-decode';
-import { users } from '../config/users';
-import { DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME } from '../config/connection/notifications-url';
-import type { EngineEventNotification, EngineEventType } from '../models/notifications.models';
-
-/** Matches Serenity {@code AuthToken#getSubject()} (JWT {@code sub}), not {@code preferred_username}. */
-export function actorFromAccessToken(accessToken: string): string {
-    const claims = jwtDecode<{ sub?: string }>(accessToken);
-    return claims.sub ?? users.testAdminUser.username;
-}
-
-export function expectedEngineEventBatch(
-    eventTypes: EngineEventType[],
-    processDefinitionKey: string,
-    options: { serviceName?: string; actor?: string } = {}
-): EngineEventNotification[] {
-    const serviceName = options.serviceName ?? DEFAULT_RUNTIME_BUNDLE_SERVICE_NAME;
-    return eventTypes.map((eventType) => ({
-        serviceName,
-        processDefinitionKey,
-        eventType,
-        ...(options.actor ? { actor: options.actor } : {}),
-    }));
-}
+import type { EngineEventNotification } from './engine-event.model';
 
 export function engineEventMatches(
     actual: EngineEventNotification,
@@ -51,8 +28,7 @@ export function engineEventMatches(
     );
 }
 
-/** Removes the first matching events from {@code buffer} (one actual per expected). */
-export function tryTakeMatchingEngineEvents(
+export function takeMatchingEngineEvents(
     buffer: EngineEventNotification[],
     expected: EngineEventNotification[]
 ): EngineEventNotification[] | null {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/** Subset of engine event fields asserted in notifications-actions.story. */
 export interface EngineEventNotification {
     serviceName?: string;
     processDefinitionKey?: string;
