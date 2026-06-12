@@ -63,6 +63,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 @RestController
@@ -87,6 +88,8 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     private final ProcessDefinitionValuesService processDefinitionValuesService;
 
+    private final JsonMapper jsonMapper;
+
     @Autowired
     public ProcessDefinitionControllerImpl(
         RepositoryService repositoryService,
@@ -97,7 +100,8 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         ProcessDefinitionService processDefinitionService,
-        ProcessDefinitionValuesService processDefinitionValuesService
+        ProcessDefinitionValuesService processDefinitionValuesService,
+        JsonMapper jsonMapper
     ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
@@ -109,6 +113,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         this.pageConverter = pageConverter;
         this.processDefinitionService = processDefinitionService;
         this.processDefinitionValuesService = processDefinitionValuesService;
+        this.jsonMapper = jsonMapper;
     }
 
     @Override
@@ -156,7 +161,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     public String getBpmnModel(@PathVariable String id) {
         checkUserCanReadProcessDefinition(id);
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        ObjectNode json = new BpmnJsonConverter().convertToJson(bpmnModel);
+        ObjectNode json = new BpmnJsonConverter(jsonMapper).convertToJson(bpmnModel);
         return json.toString();
     }
 
