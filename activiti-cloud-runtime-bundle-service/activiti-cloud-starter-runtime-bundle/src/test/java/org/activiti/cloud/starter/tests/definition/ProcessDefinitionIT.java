@@ -50,6 +50,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfigureTestRestTemplate
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -67,6 +68,9 @@ public class ProcessDefinitionIT {
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
+
+    @Autowired
+    private JsonMapper jsonMapper;
 
     public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
@@ -227,7 +231,7 @@ public class ProcessDefinitionIT {
         //then
         assertThat(responseData).isNotNull();
 
-        BpmnModel targetModel = new BpmnJsonConverter().convertToBpmnModel(responseData);
+        BpmnModel targetModel = new BpmnJsonConverter(jsonMapper).convertToBpmnModel(responseData);
         final InputStream byteArrayInputStream = new ByteArrayInputStream(
             TestResourceUtil.getProcessXml(aProcessDefinition.getId().split(":")[0]).getBytes()
         );
