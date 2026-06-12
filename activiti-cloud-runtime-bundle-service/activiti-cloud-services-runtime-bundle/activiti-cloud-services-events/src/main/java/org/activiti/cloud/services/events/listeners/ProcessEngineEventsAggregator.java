@@ -69,9 +69,8 @@ public class ProcessEngineEventsAggregator
     public void add(CloudRuntimeEvent<?, ?> element) {
         CommandContext commandContext = getCurrentCommandContext();
 
-        // Stamp the engine command ID so all events in one transaction share the same key
-        if (element instanceof CloudRuntimeEventImpl) {
-            ((CloudRuntimeEventImpl<?, ?>) element).setCommandId(commandContext.getCommandId());
+        if (element instanceof CloudRuntimeEventImpl<?, ?> impl) {
+            impl.setCommandId(commandContext.getCommandId());
         }
 
         // Let's try resolve underlying execution Id

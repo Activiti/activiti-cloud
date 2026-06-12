@@ -94,7 +94,7 @@ class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
+    void addShouldAddTheEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
         ArrayList<CloudRuntimeEvent<?, ?>> currentEvents = new ArrayList<>();
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -110,7 +110,7 @@ class ProcessEngineEventsAggregatorTest {
     }
 
     @Test
-    void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
+    void addShouldCreateANewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(null);
