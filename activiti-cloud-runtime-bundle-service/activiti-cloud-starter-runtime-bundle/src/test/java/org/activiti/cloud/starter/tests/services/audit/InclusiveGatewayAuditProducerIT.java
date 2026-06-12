@@ -183,12 +183,12 @@ public class InclusiveGatewayAuditProducerIT {
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow3"),
                         tuple(ACTIVITY_STARTED, processInstanceId, "theTask1"),
                         tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, null, "hruser"),
+                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
                         tuple(TASK_CREATED, processInstanceId, task1.getId()),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow4"),
                         tuple(ACTIVITY_STARTED, processInstanceId, "theTask2"),
                         tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, null, "hruser"),
+                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
                         tuple(TASK_CREATED, processInstanceId, task2.getId())
                     );
             });

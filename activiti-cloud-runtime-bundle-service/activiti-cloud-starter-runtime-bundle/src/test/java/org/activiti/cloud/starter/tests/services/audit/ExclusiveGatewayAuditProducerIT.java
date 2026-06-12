@@ -25,6 +25,7 @@ import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessE
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED;
 import static org.activiti.api.process.model.events.SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN;
 import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED;
+import static org.activiti.api.task.model.events.TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_COMPLETED;
 import static org.activiti.api.task.model.events.TaskRuntimeEvent.TaskEvents.TASK_CREATED;
@@ -244,6 +245,7 @@ public class ExclusiveGatewayAuditProducerIT {
                         tuple(VARIABLE_UPDATED, processInstanceId, "input"),
                         tuple(VARIABLE_UPDATED, processInstanceId, "input"),
                         tuple(TASK_COMPLETED, processInstanceId, taskId),
+                        tuple(TASK_CANDIDATE_USER_REMOVED, processInstanceId, "hruser"),
                         tuple(ACTIVITY_COMPLETED, processInstanceId, "task1"),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow2"),
                         tuple(ACTIVITY_STARTED, processInstanceId, "exclusiveGateway"),
