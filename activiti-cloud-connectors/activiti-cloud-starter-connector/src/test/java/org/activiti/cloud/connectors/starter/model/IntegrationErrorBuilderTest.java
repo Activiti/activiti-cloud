@@ -94,4 +94,80 @@ public class IntegrationErrorBuilderTest {
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
     }
+
+    @Test
+    public void shouldUseCustomErrorMessage_when_provided() throws Exception {
+        //given
+        Throwable error = new RuntimeException("Original error message");
+        String customMessage = "Custom error message for audit";
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
+        integrationContext.addInBoundVariables(Collections.emptyMap());
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationError integrationError = IntegrationErrorBuilder
+            .errorFor(integrationRequestEvent, connectorProperties, error, customMessage)
+            .build();
+
+        //then
+        assertThat(integrationError)
+            .hasIntegrationContext(integrationContext)
+            .hasIntegrationRequest(integrationRequestEvent)
+            .hasErrorMessage(customMessage);
+    }
+
+    @Test
+    public void shouldFallbackToDetailedErrorMessage_when_customMessageIsNull() throws Exception {
+        //given
+        Throwable error = new RuntimeException("Original error message");
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
+        integrationContext.addInBoundVariables(Collections.emptyMap());
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationError integrationError = IntegrationErrorBuilder
+            .errorFor(integrationRequestEvent, connectorProperties, error, null)
+            .build();
+
+        //then
+        assertThat(integrationError).hasErrorMessage("Original error message");
+    }
+
+    @Test
+    public void shouldFallbackToDetailedErrorMessage_when_customMessageIsBlank() throws Exception {
+        //given
+        Throwable error = new RuntimeException("Original error message");
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
+        integrationContext.addInBoundVariables(Collections.emptyMap());
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationError integrationError = IntegrationErrorBuilder
+            .errorFor(integrationRequestEvent, connectorProperties, error, "   ")
+            .build();
+
+        //then
+        assertThat(integrationError).hasErrorMessage("Original error message");
+    }
 }
