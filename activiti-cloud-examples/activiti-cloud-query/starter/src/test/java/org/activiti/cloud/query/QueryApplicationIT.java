@@ -200,13 +200,11 @@ public class QueryApplicationIT {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
             .hasSize(1)
-            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous.")));
+            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("engineEvents.anonymous.")));
     }
 
     @Test
     void rabbitExchanges() {
-        assertThat(binderFactoryListenerTestContext.getExchanges())
-            .isNotEmpty()
-            .containsOnlyKeys("engineEvents", "queryEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
     }
 }
