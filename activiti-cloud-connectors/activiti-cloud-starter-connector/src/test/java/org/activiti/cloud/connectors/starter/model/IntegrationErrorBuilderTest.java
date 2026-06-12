@@ -96,7 +96,7 @@ public class IntegrationErrorBuilderTest {
     }
 
     @Test
-    public void shouldUseCustomErrorMessage_when_provided() throws Exception {
+    void shouldUseCustomErrorMessage_when_provided() {
         //given
         Throwable error = new RuntimeException("Original error message");
         String customMessage = "Custom error message for audit";
@@ -124,7 +124,7 @@ public class IntegrationErrorBuilderTest {
     }
 
     @Test
-    public void shouldFallbackToDetailedErrorMessage_when_customMessageIsNull() throws Exception {
+    void shouldFallbackToDetailedErrorMessage_when_customMessageIsNull() {
         //given
         Throwable error = new RuntimeException("Original error message");
 
@@ -148,7 +148,7 @@ public class IntegrationErrorBuilderTest {
     }
 
     @Test
-    public void shouldFallbackToDetailedErrorMessage_when_customMessageIsBlank() throws Exception {
+    void shouldFallbackToDetailedErrorMessage_when_customMessageIsBlank() {
         //given
         Throwable error = new RuntimeException("Original error message");
 
