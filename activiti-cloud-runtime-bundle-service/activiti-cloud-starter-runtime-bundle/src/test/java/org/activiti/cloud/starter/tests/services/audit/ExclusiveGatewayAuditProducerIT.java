@@ -175,7 +175,7 @@ public class ExclusiveGatewayAuditProducerIT {
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow1"),
                         tuple(ACTIVITY_STARTED, processInstanceId, "task1"),
                         tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, null, "hruser"),
+                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
                         tuple(TASK_CREATED, processInstanceId, taskId)
                     );
             });
@@ -251,7 +251,7 @@ public class ExclusiveGatewayAuditProducerIT {
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow3"),
                         tuple(ACTIVITY_STARTED, processInstanceId, "task2"),
                         tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, null, "hruser"),
+                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
                         tuple(TASK_CREATED, processInstanceId, newTaskId)
                     );
 
