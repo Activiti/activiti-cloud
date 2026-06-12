@@ -18,6 +18,7 @@ package org.activiti.cloud.services.events.configuration;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.cloud.services.core.conf.ProcessCleanupProperties;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
@@ -77,12 +78,15 @@ import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilder
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.events.services.IncidentService;
+import org.activiti.cloud.services.events.services.ProcessInstanceCleanupScheduler;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -640,5 +644,16 @@ public class CloudEventsAutoConfiguration {
         ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
         return new CloudProcessDeletedService(managementService, processEngineEventsAggregator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "activiti.cloud.process-cleanup.enabled", havingValue = "true", matchIfMissing = true)
+    public ProcessInstanceCleanupScheduler processInstanceCleanupScheduler(
+        HistoryService historyService,
+        CloudProcessDeletedService cloudProcessDeletedService,
+        ProcessCleanupProperties processCleanupProperties
+    ) {
+        return new ProcessInstanceCleanupScheduler(historyService, cloudProcessDeletedService, processCleanupProperties);
     }
 }

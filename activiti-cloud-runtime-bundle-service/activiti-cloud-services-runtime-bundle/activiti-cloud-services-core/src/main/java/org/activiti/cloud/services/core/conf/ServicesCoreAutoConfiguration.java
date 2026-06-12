@@ -178,6 +178,12 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessCleanupProperties processCleanupProperties() {
+        return new ProcessCleanupProperties();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public SyncProcessDefinitionsCmdExecutor syncProcessDefinitionsCmdExecutor(
         ProcessDefinitionsSyncService processDefinitionsSyncService
     ) {
