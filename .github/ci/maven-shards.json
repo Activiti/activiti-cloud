@@ -1,0 +1,38 @@
+{
+  "core": {
+    "mavenModules": "activiti-cloud-api",
+    "dockerImages": "",
+    "mavenTestModules": "activiti-cloud-build,activiti-cloud-api,activiti-cloud-service-common",
+    "mavenTestRoots": ""
+  },
+  "runtime-bundle": {
+    "mavenModules": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle/starter",
+    "dockerImages": "example-runtime-bundle",
+    "mavenTestModules": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle/starter",
+    "mavenTestRoots": "activiti-cloud-runtime-bundle-service,activiti-cloud-examples/example-runtime-bundle"
+  },
+  "query-audit": {
+    "mavenModules": "activiti-cloud-query-service,activiti-cloud-audit-service,activiti-cloud-examples/activiti-cloud-query/liquibase,activiti-cloud-examples/activiti-cloud-query/starter,activiti-cloud-examples/activiti-cloud-query/rest,activiti-cloud-examples/activiti-cloud-query/consumer",
+    "dockerImages": "activiti-cloud-query",
+    "mavenTestModules": "activiti-cloud-query-service,activiti-cloud-audit-service,activiti-cloud-examples/activiti-cloud-query/liquibase,activiti-cloud-examples/activiti-cloud-query/starter,activiti-cloud-examples/activiti-cloud-query/rest,activiti-cloud-examples/activiti-cloud-query/consumer",
+    "mavenTestRoots": "activiti-cloud-query-service,activiti-cloud-audit-service,activiti-cloud-examples/activiti-cloud-query",
+    "mavenTestRootOptions": {
+      "activiti-cloud-examples/activiti-cloud-query": {
+        "threads": "1",
+        "unitTestsParallel": false
+      }
+    }
+  },
+  "messages-graphql": {
+    "mavenModules": "activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service",
+    "dockerImages": "",
+    "mavenTestModules": "activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service",
+    "mavenTestRoots": "activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service"
+  },
+  "connectors-examples": {
+    "mavenModules": "activiti-cloud-connectors,activiti-cloud-examples/example-cloud-connector/starter,activiti-cloud-examples/activiti-cloud-identity-adapter",
+    "dockerImages": "example-cloud-connector,activiti-cloud-identity-adapter",
+    "mavenTestModules": "activiti-cloud-connectors,activiti-cloud-examples/example-cloud-connector/starter,activiti-cloud-examples/activiti-cloud-identity-adapter",
+    "mavenTestRoots": "activiti-cloud-connectors,activiti-cloud-examples/example-cloud-connector,activiti-cloud-examples/activiti-cloud-identity-adapter"
+  }
+}

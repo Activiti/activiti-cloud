@@ -40,3 +40,11 @@ repos:
           - java
           - xml
         args: ["--config", ".semgrep.yaml", "--error", "--metrics=off"]
+  - repo: local
+    hooks:
+      - id: validate-ci-matrix-lists
+        name: CI matrix lists match JSON config
+        entry: scripts/ci/validate-ci-matrix-lists.sh
+        language: script
+        pass_filenames: false
+        files: ^\.github/(ci/.*\.json|workflows/_reusable-.*\.yml|workflows/pr-closed\.yaml)$

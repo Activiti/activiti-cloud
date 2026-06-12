@@ -1,0 +1,22 @@
+name: Apply Maven version
+description: Sets VERSION file and updates all module POMs (required in each Maven job; resolve-version runs in a separate checkout).
+inputs:
+  version:
+    description: Version to apply (e.g. 0.0.1-PR-2314-SNAPSHOT)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Apply version to all POMs
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        echo "${INPUT_VERSION}" > VERSION
+        echo "VERSION=${INPUT_VERSION}" >> "$GITHUB_ENV"
+        mvn -B versions:set \
+          -DnewVersion="${INPUT_VERSION}" \
+          -DprocessAllModules=true \
+          -DgenerateBackupPoms=false \
+          ${{ env.MAVEN_CLI_OPTS }}

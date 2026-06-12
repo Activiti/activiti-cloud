@@ -1,0 +1,83 @@
+name: Maven build shards
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      skip-tests:
+        required: false
+        type: string
+        default: 'false'
+
+env:
+  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+
+jobs:
+  build:
+    name: maven-build (${{ matrix.shard-id }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        shard-id: [core, runtime-bundle, query-audit, messages-graphql, connectors-examples]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - id: shard
+        uses: ./.github/actions/load-maven-shard-config
+        with:
+          shard-id: ${{ matrix.shard-id }}
+
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/maven-m2-download
+        with:
+          pattern: m2-common
+
+      - uses: ./.github/actions/apply-maven-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Mark M2 before shard build
+        shell: bash
+        run: touch "${RUNNER_TEMP}/m2-before-shard-build"
+
+      - name: Maven build (${{ matrix.shard-id }}, skip test execution)
+        shell: bash
+        env:
+          SKIP_TESTS: ${{ inputs.skip-tests }}
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          if [[ "${SKIP_TESTS}" == "true" ]]; then
+            echo "::warning::Unit tests are skipped (skip-tests label)."
+          fi
+          mvn -DskipTests=true -DskipITs=true \
+            install -pl "${{ steps.shard.outputs.maven-modules }}" -am -T 1C ${{ env.MAVEN_CLI_OPTS }}
+
+      - uses: ./.github/actions/maven-m2-upload
+        with:
+          artifact-name: m2-${{ matrix.shard-id }}
+          version: ${{ inputs.version }}
+          newer-than-file: ${{ runner.temp }}/m2-before-shard-build
+
+      - name: Login to DockerHub
+        if: steps.shard.outputs.docker-images != ''
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker images (${{ matrix.shard-id }})
+        if: steps.shard.outputs.docker-images != ''
+        shell: bash
+        run: |
+          IFS=',' read -ra IMAGES <<< "${{ steps.shard.outputs.docker-images }}"
+          for image in "${IMAGES[@]}"; do
+            make "docker/${image}"
+          done

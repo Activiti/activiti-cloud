@@ -22,6 +22,7 @@ env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
 
 jobs:
   pre-checks:
@@ -57,238 +58,314 @@ jobs:
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
 
-  build:
+  resolve-version:
     runs-on: ubuntu-latest
     needs: pre-checks
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
-    # Map a step output to a job output
     outputs:
-      version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
-    env:
-      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
-
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: ./.github/actions/maven-setup
+
+      - id: version
+        uses: ./.github/actions/resolve-version
+
+  maven-build-common:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - resolve-version
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/apply-project-version
         with:
-          java-version: 25
-          distribution: 'corretto'
+          version: ${{ needs.resolve-version.outputs.version }}
 
-      - name: Resolve override VERSION
-        id: resolve-override-version
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
-          echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        id: update-pom-to-next-version
-        with:
-          version: ${{ steps.resolve-override-version.outputs.version }}
-
-      - name: Update VERSION file
-        run: |
-          echo ${{ steps.update-pom-to-next-version.outputs.next-prerelease }} > VERSION
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Enable testcontainers reuse option
-        run: |
-          echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
-          echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
-      - name: Maven Build and Test
+      - name: Maven build common (skip test execution)
         shell: bash
         run: |
-          TEST_OPTS=""
-          if [[ "${{ needs.pre-checks.outputs.skip-tests }}" == "true" ]]; then
-            TEST_OPTS="-DskipTests=true"
-            echo "::warning::Tests are being skipped due to 'skip-tests' label. This PR cannot be merged until the label is removed."
-          fi
-          mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install $TEST_OPTS ${{ env.MAVEN_CLI_OPTS }}
+          # Do not use -Dmaven.test.skip: reactor modules depend on test-jar artifacts.
+          # Do not use -pl <root> either: it installs only the aggregator POM (packaging=pom), not its children.
+          MVN_BUILD_FLAGS=(-DskipTests=true -DskipITs=true)
+          # Separate -f invocations resolve parents from ~/.m2; install the mono-aggregator POM first.
+          echo "::group::install root mono-aggregator POM (-N)"
+          mvn -N install "${MVN_BUILD_FLAGS[@]}" ${{ env.MAVEN_CLI_OPTS }}
+          echo "::endgroup::"
+          ROOTS=(activiti-cloud-build activiti-cloud-api activiti-cloud-service-common)
+          for root in "${ROOTS[@]}"; do
+            echo "::group::install -f ${root}/pom.xml"
+            mvn -f "${root}/pom.xml" install -T 1C \
+              "${MVN_BUILD_FLAGS[@]}" ${{ env.MAVEN_CLI_OPTS }}
+            echo "::endgroup::"
+          done
+          # activiti-cloud-dependencies* is built in maven-build-dependencies-bom (imports all service BOMs).
         env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: ./.github/actions/maven-m2-upload
+        with:
+          artifact-name: m2-common
+          version: ${{ needs.resolve-version.outputs.version }}
+
+      - name: Remove running docker containers
+        run: docker rm -f $(docker ps -a -q) || true
+        continue-on-error: true
+
+  maven-build:
+    needs: [pre-checks, resolve-version, maven-build-common]
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
+    uses: ./.github/workflows/_reusable-maven-build.yml
+    with:
+      version: ${{ needs.resolve-version.outputs.version }}
+      skip-tests: ${{ needs.pre-checks.outputs.skip-tests }}
+    secrets: inherit
+
+  maven-build-dependencies-bom:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - resolve-version
+      - maven-build-common
+      - maven-build
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/maven-m2-download
+        with:
+          prefer-dependencies-bom: 'false'
+
+      - uses: ./.github/actions/apply-project-version
+        with:
+          version: ${{ needs.resolve-version.outputs.version }}
+
+      - name: Install aggregated dependencies BOM
+        shell: bash
+        run: |
+          mvn -f activiti-cloud-dependencies/pom.xml install \
+            -DskipTests=true -DskipITs=true \
+            ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: ./.github/actions/maven-m2-upload
+        with:
+          artifact-name: m2-dependencies-bom
+          version: ${{ needs.resolve-version.outputs.version }}
+
+  maven-test:
+    needs:
+      - pre-checks
+      - resolve-version
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+    uses: ./.github/workflows/_reusable-maven-test.yml
+    with:
+      version: ${{ needs.resolve-version.outputs.version }}
+    secrets: inherit
+
+  maven-jacoco-merge:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - resolve-version
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - maven-test
+    if: >-
+      always()
+      && needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+      && needs.maven-test.result == 'success'
+    env:
+      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/maven-m2-download
+
+      - uses: ./.github/actions/apply-project-version
+        with:
+          version: ${{ needs.resolve-version.outputs.version }}
+
+      - name: Download JaCoCo from all test shards
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: jacoco-*
+          merge-multiple: true
+
+      - name: Remove invalid JaCoCo exec files
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Some modules can produce empty/truncated jacoco*.exec (e.g. if the JVM exits early).
+          # jacoco:merge fails hard on unreadable execs ("Unknown block type 0"), so drop tiny files.
+          echo "Scanning for JaCoCo exec files..."
+          find . -name 'jacoco*.exec' -type f | wc -l || true
+
+          echo "Deleting suspiciously small exec files (< 128 bytes)..."
+          find . -name 'jacoco*.exec' -type f -size -128c -print -delete || true
+
+          echo "Remaining JaCoCo exec files:"
+          find . -name 'jacoco*.exec' -type f -print | head -200 || true
 
       - name: Merge JaCoCo execution files
         shell: bash
         run: mvn -N jacoco:merge -Djacoco.destFile=${{ env.JACOCO_MERGED_FILE }}
 
+      - name: Compile reactor for JaCoCo reports
+        shell: bash
+        run: mvn compile -DskipTests -DskipITs -T 1C ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: Generate coverage reports
         shell: bash
         run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }}
 
-      - name: Run SonarCloud analysis
-        if: ${{ env.SONAR_TOKEN != '' }}
+      - name: Verify JaCoCo XML reports were generated
         shell: bash
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=activiti -Dsonar.projectKey=Activiti_activiti-cloud -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
+        run: |
+          if ! find . -path '*/target/site/jacoco/jacoco.xml' -print -quit | grep -q .; then
+            echo '::error::No JaCoCo XML reports found under **/target/site/jacoco/jacoco.xml'
+            exit 1
+          fi
+
+      - name: Upload JaCoCo merged data
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-merged
+          path: target/jacoco-merged.exec
+          retention-days: 1
+
+      - name: Upload JaCoCo execution data
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-exec-all
+          path: |
+            **/jacoco.exec
+            **/jacoco-it.exec
+          retention-days: 1
+          if-no-files-found: warn
+
+      - name: Upload JaCoCo XML reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-xml-reports
+          path: |
+            **/target/site/jacoco/jacoco.xml
+            **/target/site/jacoco-it/jacoco.xml
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Echo longest tests
+        shell: bash
+        run: find . -name 'TEST-*.xml' -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs:
+      - pre-checks
+      - resolve-version
+      - maven-jacoco-merge
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-jacoco-merge.result == 'success'
+    env:
+      JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/maven-m2-download
+
+      - uses: ./.github/actions/apply-project-version
+        with:
+          version: ${{ needs.resolve-version.outputs.version }}
+
+      - name: Download JaCoCo merged execution data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: jacoco-merged
+          path: target
+
+      - name: Compile reactor for Sonar (classes + JaCoCo report inputs)
+        shell: bash
+        run: mvn compile -DskipTests -DskipITs -T 1C ${{ env.MAVEN_CLI_OPTS }}
         env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Generate coverage reports
+        shell: bash
+        run: mvn jacoco:report -Djacoco.dataFile=${{ env.JACOCO_MERGED_FILE }} ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Run SonarCloud analysis
+        if: env.SONAR_TOKEN != ''
+        shell: bash
+        run: >-
+          mvn sonar:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=activiti
+          -Dsonar.projectKey=Activiti_activiti-cloud
+          -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco*/jacoco.xml
+          ${{ env.MAVEN_CLI_OPTS }}
+        env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Remove running docker containers
-        run: docker rm -f $(docker ps -a -q)
-        continue-on-error: true
-
-      - name: Echo Longest Tests run
-        shell: bash
-        run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
-
-      - name: Login to DockerHub
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build Example Runtime Bundle
-        run: make docker/example-runtime-bundle
-
-      - name: Build Activiti Cloud Query
-        run: make docker/activiti-cloud-query
-
-      - name: Build Example Cloud Connector
-        run: make docker/example-cloud-connector
-
-      - name: Build Activiti Cloud Identity Adapter
-        run: make docker/activiti-cloud-identity-adapter
-
-  acceptance-tests:
-    runs-on: ubuntu-latest
-    if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
-    # Per matrix cell: unique namespace + Helm profile. Images: build job → VERSION → update-chart → Helm (Serenity flow).
+  playwright-tests:
     needs:
       - pre-checks
-      - build
-    env:
-      MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-      ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
-      TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
-      TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
-      HRUSER_USERNAME: ${{ vars.ACCEPTANCE_HRUSER_USERNAME || 'hruser' }}
-      HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
-      HRADMIN_USERNAME: ${{ vars.ACCEPTANCE_HRADMIN_USERNAME || 'hradmin' }}
-      HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
-      PROCESSADMINUSER_USERNAME: ${{ vars.ACCEPTANCE_PROCESSADMINUSER_USERNAME || 'processadminuser' }}
-      PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
-      TESTADMIN_USERNAME: ${{ vars.ACCEPTANCE_TESTADMIN_USERNAME || 'testadmin' }}
-      TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
-    strategy:
-      # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
-      max-parallel: 4
-      fail-fast: false
-      matrix:
-        messaging-broker: [rabbitmq, kafka]
-        messaging-partitioned: [partitioned, non-partitioned]
-        messaging-destinations: [default-destinations]
-        include:
-          - messaging-broker: kafka
-            messaging-partitioned: partitioned
-            messaging-destinations: override-destinations
-          - messaging-broker: rabbitmq
-            messaging-partitioned: non-partitioned
-            messaging-destinations: pdb
-          - messaging-broker: rabbitmq
-            messaging-partitioned: prefix
-            messaging-destinations: pdb
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # 5.2.0
-        with:
-          java-version: 25
-          distribution: 'corretto'
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
-        with:
-          version: v1.19.6
-
-      - name: Set up Helm
-        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
-        with:
-          version: v3.5.2
-
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
-
-      - uses: ./.github/actions/setup-env-for-broker
-        with:
-          messaging-broker: ${{ matrix.messaging-broker }}
-          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
-          messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ needs.build.outputs.version }}
-
-      - name: Cache Helm chart checkout
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: .git/activiti-cloud-full-chart
-          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ needs.build.outputs.version }}
-
-      - name: Delete preview for ${{ matrix.messaging-broker }}
-        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-        run: |
-          kubectl delete ns $PREVIEW_NAME || true
-
-      - name: Install release for ${{ matrix.messaging-broker }}
-        run: bash scripts/ci/install-preview-release.sh
-
-      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
-        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: bash scripts/ci/kafka-partitioned-consumer-check.sh
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
-
-      - uses: ./.github/actions/prepare-preview-for-playwright
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
-
-      - name: Export Playwright CI environment
-        run: bash scripts/ci/export-playwright-ci-env.sh
-
-      - name: Run Playwright Acceptance Tests
-        uses: ./.github/actions/playwright-run
-        with:
-          script-command: "npm run test"
-
-      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
-        run: |
-          echo "Delete Helm release"
-          make delete
+      - resolve-version
+      - maven-build
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+      && needs.maven-build.result == 'success'
+    uses: ./.github/workflows/_reusable-playwright-tests.yml
+    with:
+      version: ${{ needs.resolve-version.outputs.version }}
+    secrets: inherit
 
   build-summary:
     runs-on: ubuntu-latest
@@ -296,19 +373,35 @@ jobs:
     if: ${{ always() && needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
-      - build
-      - acceptance-tests
+      - resolve-version
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - maven-test
+      - maven-jacoco-merge
+      - sonar
+      - playwright-tests
     steps:
-      - name: Check build and acceptance-tests results
+      - name: Check CI results
         if: >-
           ${{
-              contains(needs.build.result, 'failure')
-           || contains(needs.build.result, 'cancelled')
-           || contains(needs.acceptance-tests.result, 'failure')
-           || contains(needs.acceptance-tests.result, 'cancelled')
+              contains(needs.maven-build-common.result, 'failure')
+           || contains(needs.maven-build-common.result, 'cancelled')
+           || contains(needs.maven-build.result, 'failure')
+           || contains(needs.maven-build.result, 'cancelled')
+           || contains(needs.maven-build-dependencies-bom.result, 'failure')
+           || contains(needs.maven-build-dependencies-bom.result, 'cancelled')
+           || contains(needs.maven-test.result, 'failure')
+           || contains(needs.maven-test.result, 'cancelled')
+           || contains(needs.maven-jacoco-merge.result, 'failure')
+           || contains(needs.maven-jacoco-merge.result, 'cancelled')
+           || contains(needs.sonar.result, 'failure')
+           || contains(needs.sonar.result, 'cancelled')
+           || contains(needs.playwright-tests.result, 'failure')
+           || contains(needs.playwright-tests.result, 'cancelled')
           }}
         run: |
-          echo "Build or acceptance tests have failed or been cancelled. Exiting ..."
+          echo "CI jobs have failed or been cancelled. Exiting ..."
           exit 1
 
       - name: Check if tests were skipped
@@ -326,9 +419,7 @@ jobs:
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     needs:
       - pre-checks
-      - acceptance-tests
-      # dependency needed for build.outputs env variables resolution
-      - build
+      - resolve-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -337,7 +428,7 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-          VERSION: ${{ needs.build.outputs.version }}
+          VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
           if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
           then
@@ -352,11 +443,24 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - pre-checks
-      - build
+      - resolve-version
+      - maven-build-common
+      - maven-build
+      - maven-build-dependencies-bom
+      - build-summary
       - delete-test-images
-    if: ${{ github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
+    if: >-
+      (github.event_name == 'push' && needs.pre-checks.outputs.skip != 'true'
+        || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')))
+      && needs.maven-build-common.result == 'success'
+      && needs.maven-build.result == 'success'
+      && needs.maven-build-dependencies-bom.result == 'success'
+      && (
+        needs.build-summary.result == 'success'
+        || (github.event_name == 'push' && needs.pre-checks.outputs.skip-tests == 'true')
+      )
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      VERSION: ${{ needs.resolve-version.outputs.version }}
 
     steps:
       - name: Checkout repository
@@ -364,21 +468,13 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Setup Java JDK 25
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          java-version: 25
-          distribution: 'corretto'
+      - uses: ./.github/actions/maven-setup
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - uses: ./.github/actions/maven-m2-download
 
-      - name: Update pom files to the new version
-        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+      - uses: ./.github/actions/apply-project-version
+        with:
+          version: ${{ needs.resolve-version.outputs.version }}
 
       - name: Maven Deploy
         shell: bash
@@ -404,17 +500,17 @@ jobs:
   propagate-maven:
     runs-on: ubuntu-latest
     needs:
-      - build
+      - resolve-version
       - publish
     if: github.event_name == 'push'
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      VERSION: ${{ needs.resolve-version.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         with:
-          version: ${{ needs.build.outputs.version }}
+          version: ${{ needs.resolve-version.outputs.version }}
           auto-merge: "true"
           labels: "be-propagation,${{ env.DEVELOPMENT_BRANCH }}"
           base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
@@ -425,14 +521,14 @@ jobs:
   propagate-helm:
     runs-on: ubuntu-latest
     needs:
-      - build
+      - resolve-version
       - publish
     if: github.event_name == 'push' && github.ref_name == 'develop'
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      VERSION: ${{ needs.resolve-version.outputs.version }}
       FULL_CHART_DIR: full-chart
       FULL_CHART_BASE_BRANCH: develop
-      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
+      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.resolve-version.outputs.version }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:

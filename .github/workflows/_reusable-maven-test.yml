@@ -1,0 +1,87 @@
+name: Maven test shards
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+env:
+  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+
+jobs:
+  test:
+    name: maven-test (${{ matrix.shard-id }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        shard-id: [core, runtime-bundle, query-audit, messages-graphql, connectors-examples]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - id: shard
+        uses: ./.github/actions/load-maven-shard-config
+        with:
+          shard-id: ${{ matrix.shard-id }}
+
+      - uses: ./.github/actions/maven-m2-download
+
+      - uses: ./.github/actions/maven-setup
+
+      - uses: ./.github/actions/apply-maven-version
+        with:
+          version: ${{ inputs.version }}
+
+      - name: Clear stale Maven resolution markers
+        shell: bash
+        run: find ~/.m2/repository -name '*.lastUpdated' -delete 2>/dev/null || true
+
+      - name: Reinstall shared libraries from source
+        shell: bash
+        run: |
+          MVN_INSTALL_FLAGS=(-DskipTests=true -DskipITs=true)
+          for root in activiti-cloud-api activiti-cloud-service-common; do
+            echo "::group::install -f ${root}/pom.xml"
+            mvn -f "${root}/pom.xml" install -T 1C \
+              "${MVN_INSTALL_FLAGS[@]}" ${{ env.MAVEN_CLI_OPTS }}
+            echo "::endgroup::"
+          done
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Maven test (${{ matrix.shard-id }})
+        shell: bash
+        env:
+          MAVEN_TEST_MODULES: ${{ steps.shard.outputs.maven-test-modules }}
+          MAVEN_TEST_ROOTS: ${{ steps.shard.outputs.maven-test-roots }}
+          MAVEN_TEST_ROOT_OPTIONS: ${{ steps.shard.outputs.maven-test-root-options }}
+          MAVEN_CLI_OPTS: ${{ env.MAVEN_CLI_OPTS }}
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: bash scripts/ci/maven-test-shard.sh
+
+      - name: Upload JaCoCo data (${{ matrix.shard-id }})
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: jacoco-${{ matrix.shard-id }}
+          path: |
+            **/jacoco.exec
+            **/jacoco-it.exec
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload test reports (${{ matrix.shard-id }})
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: failure()
+        with:
+          name: surefire-reports-${{ matrix.shard-id }}
+          path: '**/surefire-reports'
+          retention-days: 7
+          if-no-files-found: ignore
