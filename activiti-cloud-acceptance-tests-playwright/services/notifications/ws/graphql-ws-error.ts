@@ -14,30 +14,6 @@
  * limitations under the License.
  */
 
-import WebSocket from 'ws';
-
-/**
- * graphql-ws v6 only passes (url, protocol) to WebSocket — no options.
- * Local port-forward to Traefik requires the gateway Host header on the upgrade request.
- */
-export function createTraefikAwareWebSocket(
-    hostHeader: string | undefined,
-    authorization: string
-): typeof WebSocket {
-    const headers: Record<string, string> = {
-        Authorization: authorization,
-    };
-    if (hostHeader) {
-        headers.Host = hostHeader;
-    }
-
-    return class TraefikAwareWebSocket extends WebSocket {
-        constructor(url: string | URL, protocol: string) {
-            super(url, protocol, { headers });
-        }
-    } as typeof WebSocket;
-}
-
 export function formatGraphqlWsError(error: unknown): Error {
     if (error instanceof Error) {
         return error;

@@ -1,18 +1,16 @@
-create table process_variable_history
-(
-    id                  NUMBER(19,0) GENERATED ALWAYS AS IDENTITY NOT NULL,
-    process_instance_id VARCHAR2(255) not null,
-    variable_name       VARCHAR2(255) not null,
-    type                VARCHAR2(255),
-    value               json,
-    deleted             NUMBER(1,0) default 0 not null,
-    event_time          timestamp not null,
-    record_create_time  timestamp default CURRENT_TIMESTAMP not null,
-    message_id          VARCHAR2(255),
-    command_id          VARCHAR2(255),
-    sequence_number     NUMBER(10,0),
-    primary key (id)
+CREATE SEQUENCE IF NOT EXISTS QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE IF NOT EXISTS QUERY_INT_CHANNEL_MESSAGE (
+                                   MESSAGE_ID CHAR(36) NOT NULL,
+                                   GROUP_KEY VARCHAR2(36) NOT NULL,
+                                   CREATED_DATE NUMBER(19,0) NOT NULL,
+                                   MESSAGE_PRIORITY NUMBER(19,0),
+                                   MESSAGE_SEQUENCE NUMBER(19,0) NOT NULL ,
+                                   MESSAGE_CONTENT JSON,
+                                   REGION VARCHAR2(100) NOT NULL,
+                                   constraint QUERY_INT_CHANNEL_MESSAGE_PK primary key (REGION, GROUP_KEY, CREATED_DATE, MESSAGE_SEQUENCE)
 );
 
-create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, event_time);
-create index idx_pvh_record_create_time on process_variable_history (record_create_time);
+CREATE INDEX IF NOT EXISTS QUERY_INT_CHANNEL_MSG_DELETE_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_ID);
+-- This is needed if the message group store property 'priorityEnabled' is true
+CREATE UNIQUE INDEX IF NOT EXISTS QUERY_INT_CHANNEL_MSG_PRIORITY_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_PRIORITY DESC, CREATED_DATE, MESSAGE_SEQUENCE);

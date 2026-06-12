@@ -1,20 +1,16 @@
-create sequence process_variable_history_sequence start with 1 increment by 50;
+CREATE SEQUENCE IF NOT EXISTS QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1 NO CYCLE;
 
-create table process_variable_history
-(
-    id                  bigint not null default nextval('process_variable_history_sequence'),
-    process_instance_id varchar(255) not null,
-    variable_name       varchar(255) not null,
-    type                varchar(255),
-    "value"             jsonb,
-    deleted             boolean not null default false,
-    event_time          timestamp not null,
-    record_create_time  timestamp not null default now(),
-    message_id          varchar(255),
-    command_id          varchar(255),
-    sequence_number     integer,
-    primary key (id)
+CREATE TABLE IF NOT EXISTS QUERY_INT_CHANNEL_MESSAGE (
+                                   MESSAGE_ID CHAR(36) NOT NULL,
+                                   GROUP_KEY CHAR(36) NOT NULL,
+                                   CREATED_DATE BIGINT NOT NULL,
+                                   MESSAGE_PRIORITY BIGINT,
+                                   MESSAGE_SEQUENCE BIGINT NOT NULL DEFAULT nextval('QUERY_INT_MESSAGE_SEQ'),
+                                   MESSAGE_CONTENT JSONB,
+                                   REGION VARCHAR(100) NOT NULL,
+                                   constraint QUERY_INT_CHANNEL_MESSAGE_PK primary key (REGION, GROUP_KEY, CREATED_DATE, MESSAGE_SEQUENCE)
 );
 
-create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, event_time);
-create index idx_pvh_record_create_time on process_variable_history (record_create_time);
+CREATE INDEX IF NOT EXISTS QUERY_INT_CHANNEL_MSG_DELETE_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_ID);
+-- This is needed if the message group store property 'priorityEnabled' is true
+CREATE UNIQUE INDEX IF NOT EXISTS QUERY_INT_CHANNEL_MSG_PRIORITY_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_PRIORITY DESC NULLS LAST, CREATED_DATE, MESSAGE_SEQUENCE);

@@ -860,17 +860,53 @@
   </changeSet>
 
   <changeSet author="activiti-query" runInTransaction="false"
+             id="alter40-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/40-alter.pg.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="postgresql"
+               encoding="utf8"
+               path="changelog/40-rollback.pg.schema.9.1.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
              id="alter40-oracle-schema" dbms="oracle">
     <sqlFile dbms="oracle"
              encoding="utf8"
              path="changelog/40-alter.oracle.schema.9.1.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+    <rollback>
+      <sqlFile dbms="oracle"
+               encoding="utf8"
+               path="changelog/40-rollback.oracle.schema.9.1.0.sql"
+               relativeToChangelogFile="true"
+               splitStatements="true"
+               stripComments="true"/>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter41-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/41-alter.oracle.schema.9.1.0.sql"
              relativeToChangelogFile="true"
              splitStatements="false"
              stripComments="true"/>
     <rollback>
       <sqlFile dbms="oracle"
                encoding="utf8"
-               path="changelog/40-rollback.oracle.schema.9.1.0.sql"
+               path="changelog/41-rollback.oracle.schema.9.1.0.sql"
                relativeToChangelogFile="true"
                splitStatements="false"
                stripComments="true"/>
@@ -878,10 +914,10 @@
   </changeSet>
 
   <changeSet author="activiti-query" runInTransaction="false"
-             id="alter40-schema" dbms="postgresql">
+             id="alter41-schema" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
-             path="changelog/40-alter.pg.schema.9.1.0.sql"
+             path="changelog/41-alter.pg.schema.9.1.0.sql"
              relativeToChangelogFile="true"
              splitStatements="true"
              stripComments="true"/>
