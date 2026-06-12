@@ -70,6 +70,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
@@ -176,7 +177,8 @@ public class ServicesCoreAutoConfiguration {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
-    @Bean
+    @Bean("processCleanupProperties")
+    @ConfigurationProperties(prefix = "activiti.cloud.process-cleanup")
     @ConditionalOnMissingBean
     public ProcessCleanupProperties processCleanupProperties() {
         return new ProcessCleanupProperties();

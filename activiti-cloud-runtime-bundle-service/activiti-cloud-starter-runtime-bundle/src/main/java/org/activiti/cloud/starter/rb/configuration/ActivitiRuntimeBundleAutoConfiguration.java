@@ -22,12 +22,12 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @AutoConfiguration
-@EnableScheduling
-@Import(RuntimeBundleSwaggerConfig.class)
+@Import({ RuntimeBundleSwaggerConfig.class, ActivitiRuntimeBundleAutoConfiguration.ProcessCleanupSchedulingConfiguration.class })
 public class ActivitiRuntimeBundleAutoConfiguration {
 
     @Bean
@@ -36,4 +36,9 @@ public class ActivitiRuntimeBundleAutoConfiguration {
     public ActivitiAuditProducerPartitionKeyExtractor activitiAuditProducerPartitionKeyExtractor() {
         return new ActivitiAuditProducerPartitionKeyExtractor();
     }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableScheduling
+    @ConditionalOnProperty(name = "activiti.cloud.process-cleanup.enabled", havingValue = "true", matchIfMissing = true)
+    static class ProcessCleanupSchedulingConfiguration {}
 }
