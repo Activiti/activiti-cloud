@@ -39,6 +39,7 @@ public class ProcessStartedAuditEventEntityTest {
         processStartedEvent.setServiceType("Audit");
         processStartedEvent.setServiceVersion("serviceV2");
         processStartedEvent.setMessageId("messageId");
+        processStartedEvent.setCommandId("commandId");
         processStartedEvent.setSequenceNumber(3);
         processStartedEvent.setEntityId("entityID");
         processStartedEvent.setProcessInstanceId("procInstId");
@@ -62,6 +63,7 @@ public class ProcessStartedAuditEventEntityTest {
             .hasServiceType("Audit")
             .hasServiceVersion("serviceV2")
             .hasMessageId("messageId")
+            .hasCommandId("commandId")
             .hasSequenceNumber(3)
             .hasEntityId("entityID")
             .hasProcessInstanceId("procInstId")
