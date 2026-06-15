@@ -78,22 +78,22 @@ class ProcessVariableHistoryPersistenceIT {
 
         long baseTimestamp = System.currentTimeMillis();
 
-        producer.send(
-            new CloudVariableCreatedEventImpl(
-                "e1",
-                baseTimestamp,
-                new VariableInstanceImpl<>("myVar", "string", "initial", processInstanceId, null)
-            )
+        var createEvent = new CloudVariableCreatedEventImpl(
+            "e1",
+            baseTimestamp,
+            new VariableInstanceImpl<>("myVar", "string", "initial", processInstanceId, null)
         );
+        createEvent.setCommandId("cmd-001");
+        producer.send(createEvent);
 
-        producer.send(
-            new CloudVariableUpdatedEventImpl<>(
-                "e2",
-                baseTimestamp + 1000,
-                new VariableInstanceImpl<>("myVar", "string", "second", processInstanceId, null),
-                "initial"
-            )
+        var updateEvent1 = new CloudVariableUpdatedEventImpl<>(
+            "e2",
+            baseTimestamp + 1000,
+            new VariableInstanceImpl<>("myVar", "string", "second", processInstanceId, null),
+            "initial"
         );
+        updateEvent1.setCommandId("cmd-002");
+        producer.send(updateEvent1);
 
         producer.send(
             new CloudVariableUpdatedEventImpl<>(
@@ -140,6 +140,7 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry0.getRecordCreateTime()).isNotNull();
         assertThat(entry0.getMessageId()).isNotNull();
         assertThat(entry0.getSequenceNumber()).isZero();
+        assertThat(entry0.getCommandId()).isEqualTo("cmd-001");
 
         ProcessVariableHistoryEntity entry1 = history.get(1);
         assertThat((String) entry1.getValue()).isEqualTo("second");
@@ -148,6 +149,7 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry1.getRecordCreateTime()).isNotNull();
         assertThat(entry1.getMessageId()).isNotNull();
         assertThat(entry1.getSequenceNumber()).isZero();
+        assertThat(entry1.getCommandId()).isEqualTo("cmd-002");
 
         ProcessVariableHistoryEntity entry2 = history.get(2);
         assertThat((String) entry2.getValue()).isEqualTo("third");
@@ -156,6 +158,7 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry2.getRecordCreateTime()).isNotNull();
         assertThat(entry2.getMessageId()).isNotNull();
         assertThat(entry2.getSequenceNumber()).isZero();
+        assertThat(entry2.getCommandId()).isNull();
 
         ProcessVariableHistoryEntity entry3 = history.get(3);
         assertThat((Object) entry3.getValue()).isNull();
@@ -164,6 +167,7 @@ class ProcessVariableHistoryPersistenceIT {
         assertThat(entry3.getRecordCreateTime()).isNotNull();
         assertThat(entry3.getMessageId()).isNotNull();
         assertThat(entry3.getSequenceNumber()).isZero();
+        assertThat(entry3.getCommandId()).isNull();
 
         assertThat(history)
             .extracting(ProcessVariableHistoryEntity::getMessageId)

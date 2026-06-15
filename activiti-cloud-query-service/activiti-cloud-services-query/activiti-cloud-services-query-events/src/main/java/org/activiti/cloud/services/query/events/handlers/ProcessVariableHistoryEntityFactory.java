@@ -53,6 +53,7 @@ public class ProcessVariableHistoryEntityFactory {
         history.setRecordCreateTime(new Date());
         history.setMessageId(event.getMessageId());
         history.setSequenceNumber(event.getSequenceNumber());
+        history.setCommandId(event.getCommandId());
         return history;
     }
 }

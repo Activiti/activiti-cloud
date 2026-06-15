@@ -70,6 +70,7 @@ class ProcessVariableCreatedEventHandlerTest {
         );
         event.setMessageId("msg-003");
         event.setSequenceNumber(7);
+        event.setCommandId("cmd-abc");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
@@ -95,6 +96,7 @@ class ProcessVariableCreatedEventHandlerTest {
         assertThat(history.get().isDeleted()).isFalse();
         assertThat(history.get().getMessageId()).isEqualTo("msg-003");
         assertThat(history.get().getSequenceNumber()).isEqualTo(7);
+        assertThat(history.get().getCommandId()).isEqualTo("cmd-abc");
         assertThat(history.get().getEventTime()).isNotNull();
         assertThat(history.get().getRecordCreateTime()).isNotNull();
     }
