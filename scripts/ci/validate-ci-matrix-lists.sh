@@ -12,7 +12,7 @@ json_keys() {
 
 yaml_shard_ids() {
   local file="$1"
-  grep -E '^\s+shard-id:' "${file}" | head -1 \
+  grep -E '^[[:space:]]+shard-id:' "${file}" | head -1 \
     | sed -E 's/.*\[(.*)\].*/\1/' \
     | tr ',' '\n' \
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
