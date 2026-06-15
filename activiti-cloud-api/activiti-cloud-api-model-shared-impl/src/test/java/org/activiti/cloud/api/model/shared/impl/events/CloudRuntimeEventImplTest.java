@@ -17,6 +17,7 @@ package org.activiti.cloud.api.model.shared.impl.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.junit.jupiter.api.Test;
 
 class CloudRuntimeEventImplTest {
@@ -32,10 +33,11 @@ class CloudRuntimeEventImplTest {
 
     @Test
     void should_notBeEqual_when_commandIdDiffers() {
-        var event1 = new CloudVariableCreatedEventImpl();
+        var variableInstance = new VariableInstanceImpl<Object>();
+        var event1 = new CloudVariableCreatedEventImpl("event-id", 0L, variableInstance);
         event1.setCommandId("cmd-1");
 
-        var event2 = new CloudVariableCreatedEventImpl();
+        var event2 = new CloudVariableCreatedEventImpl("event-id", 0L, variableInstance);
         event2.setCommandId("cmd-2");
 
         assertThat(event1).isNotEqualTo(event2);
@@ -43,10 +45,11 @@ class CloudRuntimeEventImplTest {
 
     @Test
     void should_beEqual_when_commandIdMatches() {
-        var event1 = new CloudVariableCreatedEventImpl();
+        var variableInstance = new VariableInstanceImpl<Object>();
+        var event1 = new CloudVariableCreatedEventImpl("event-id", 0L, variableInstance);
         event1.setCommandId("cmd-1");
 
-        var event2 = new CloudVariableCreatedEventImpl();
+        var event2 = new CloudVariableCreatedEventImpl("event-id", 0L, variableInstance);
         event2.setCommandId("cmd-1");
 
         assertThat(event1).isEqualTo(event2);
