@@ -108,9 +108,7 @@ Static BPMN/DMN and modeling project files belong in `resources/modeling-project
 const bpmn = `<?xml version="1.0" ...`;
 
 // ✅ APPROVE — use catalog processes via ProcessDefinitionRegistry
-const key = ProcessDefinitionRegistry.processDefinitionKeyMatcher(
-  "CONNECTOR_PROCESS_INSTANCE"
-);
+const key = ProcessDefinitionRegistry.processDefinitionKeyMatcher("CONNECTOR_PROCESS_INSTANCE");
 ```
 
 ### 5. No comments or JSDoc in generated code
