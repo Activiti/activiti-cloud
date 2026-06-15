@@ -30,19 +30,29 @@ import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.runtime.events.TaskCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.api.task.model.events.CloudTaskActivatedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
+import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskActivatedImpl;
+import org.activiti.runtime.api.event.impl.TaskAssignedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskCancelledImpl;
 import org.activiti.runtime.api.event.impl.TaskCandidateGroupAddedEventImpl;
 import org.activiti.runtime.api.event.impl.TaskCandidateGroupRemovedImpl;
 import org.activiti.runtime.api.event.impl.TaskCandidateUserAddedEventImpl;
 import org.activiti.runtime.api.event.impl.TaskCandidateUserRemovedImpl;
 import org.activiti.runtime.api.event.impl.TaskCompletedImpl;
 import org.activiti.runtime.api.event.impl.TaskCreatedEventImpl;
+import org.activiti.runtime.api.event.impl.TaskSuspendedImpl;
+import org.activiti.runtime.api.event.impl.TaskUpdatedEventImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -90,12 +100,12 @@ class ToCloudTaskRuntimeEventConverterTest {
         CloudTaskCompletedEvent taskCompleted = this.converter.from(event);
 
         //then
-        assertThat(taskCompleted).isInstanceOf(CloudTaskCompletedEvent.class);
-
-        assertThat(taskCompleted.getEntity().getId()).isEqualTo("10");
-        assertThat(taskCompleted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(taskCompleted.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(taskCompleted.getActor()).isEqualTo(USERNAME_GUID);
+        assertThat(taskCompleted)
+            .isInstanceOf(CloudTaskCompletedEvent.class)
+            .returns("10", e -> e.getEntity().getId())
+            .returns("myProcessDef", e -> e.getEntity().getProcessDefinitionId())
+            .returns("myProcessDef", e -> e.getProcessDefinitionId())
+            .returns(USERNAME_GUID, e -> e.getActor());
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(this.taskAuditServiceInfoAppender).appendAuditServiceInfoTo(any(CloudTaskCompletedEventImpl.class));
@@ -115,12 +125,12 @@ class ToCloudTaskRuntimeEventConverterTest {
         CloudTaskCreatedEvent taskCreated = this.converter.from(event);
 
         //then
-        assertThat(taskCreated).isInstanceOf(CloudTaskCreatedEvent.class);
-
-        assertThat(taskCreated.getEntity().getId()).isEqualTo("10");
-        assertThat(taskCreated.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(taskCreated.getProcessDefinitionId()).isEqualTo("myProcessDef");
-        assertThat(taskCreated.getActor()).isEqualTo("service_user");
+        assertThat(taskCreated)
+            .isInstanceOf(CloudTaskCreatedEvent.class)
+            .returns("10", e -> e.getEntity().getId())
+            .returns("myProcessDef", e -> e.getEntity().getProcessDefinitionId())
+            .returns("myProcessDef", e -> e.getProcessDefinitionId())
+            .returns("service_user", e -> e.getActor());
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(this.taskAuditServiceInfoAppender, never())
@@ -128,50 +138,136 @@ class ToCloudTaskRuntimeEventConverterTest {
     }
 
     @Test
-    void should_setProcessInstanceId_when_convertingTaskCandidateUserAddedEvent() {
-        TaskCandidateUserAddedEventImpl event = new TaskCandidateUserAddedEventImpl(
-            new TaskCandidateUserImpl(USERNAME, "task-1")
-        );
+    void should_convertInternalTaskCandidateUserAddedEvent_when_convertToExternalEvent() {
+        TaskCandidateUserImpl candidate = new TaskCandidateUserImpl(USERNAME, "task-1");
+        TaskCandidateUserAddedEventImpl event = new TaskCandidateUserAddedEventImpl(candidate);
         event.setProcessInstanceId("proc-1");
 
         CloudTaskCandidateUserAddedEvent cloudEvent = this.converter.from(event);
 
-        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-1");
+        assertThat(cloudEvent)
+            .isInstanceOf(CloudTaskCandidateUserAddedEvent.class)
+            .returns("proc-1", CloudTaskCandidateUserAddedEvent::getProcessInstanceId)
+            .returns(candidate, CloudTaskCandidateUserAddedEvent::getEntity)
+            .returns(USERNAME, e -> e.getEntity().getUserId())
+            .returns("task-1", e -> e.getEntity().getTaskId());
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    void should_setProcessInstanceId_when_convertingTaskCandidateUserRemovedEvent() {
-        TaskCandidateUserRemovedImpl event = new TaskCandidateUserRemovedImpl(
-            new TaskCandidateUserImpl(USERNAME, "task-1")
-        );
+    void should_convertInternalTaskCandidateUserRemovedEvent_when_convertToExternalEvent() {
+        TaskCandidateUserImpl candidate = new TaskCandidateUserImpl(USERNAME, "task-1");
+        TaskCandidateUserRemovedImpl event = new TaskCandidateUserRemovedImpl(candidate);
         event.setProcessInstanceId("proc-2");
 
         CloudTaskCandidateUserRemovedEvent cloudEvent = this.converter.from(event);
 
-        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-2");
+        assertThat(cloudEvent)
+            .isInstanceOf(CloudTaskCandidateUserRemovedEvent.class)
+            .returns("proc-2", CloudTaskCandidateUserRemovedEvent::getProcessInstanceId)
+            .returns(candidate, CloudTaskCandidateUserRemovedEvent::getEntity)
+            .returns(USERNAME, e -> e.getEntity().getUserId())
+            .returns("task-1", e -> e.getEntity().getTaskId());
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    void should_setProcessInstanceId_when_convertingTaskCandidateGroupAddedEvent() {
-        TaskCandidateGroupAddedEventImpl event = new TaskCandidateGroupAddedEventImpl(
-            new TaskCandidateGroupImpl("group-1", "task-1")
-        );
+    void should_convertInternalTaskCandidateGroupAddedEvent_when_convertToExternalEvent() {
+        TaskCandidateGroupImpl candidate = new TaskCandidateGroupImpl("group-1", "task-1");
+        TaskCandidateGroupAddedEventImpl event = new TaskCandidateGroupAddedEventImpl(candidate);
         event.setProcessInstanceId("proc-3");
 
         CloudTaskCandidateGroupAddedEvent cloudEvent = this.converter.from(event);
 
-        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-3");
+        assertThat(cloudEvent)
+            .isInstanceOf(CloudTaskCandidateGroupAddedEvent.class)
+            .returns("proc-3", CloudTaskCandidateGroupAddedEvent::getProcessInstanceId)
+            .returns(candidate, CloudTaskCandidateGroupAddedEvent::getEntity)
+            .returns("group-1", e -> e.getEntity().getGroupId())
+            .returns("task-1", e -> e.getEntity().getTaskId());
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    void should_setProcessInstanceId_when_convertingTaskCandidateGroupRemovedEvent() {
-        TaskCandidateGroupRemovedImpl event = new TaskCandidateGroupRemovedImpl(
-            new TaskCandidateGroupImpl("group-1", "task-1")
-        );
+    void should_convertInternalTaskCandidateGroupRemovedEvent_when_convertToExternalEvent() {
+        TaskCandidateGroupImpl candidate = new TaskCandidateGroupImpl("group-1", "task-1");
+        TaskCandidateGroupRemovedImpl event = new TaskCandidateGroupRemovedImpl(candidate);
         event.setProcessInstanceId("proc-4");
 
         CloudTaskCandidateGroupRemovedEvent cloudEvent = this.converter.from(event);
 
-        assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("proc-4");
+        assertThat(cloudEvent)
+            .isInstanceOf(CloudTaskCandidateGroupRemovedEvent.class)
+            .returns("proc-4", CloudTaskCandidateGroupRemovedEvent::getProcessInstanceId)
+            .returns(candidate, CloudTaskCandidateGroupRemovedEvent::getEntity)
+            .returns("group-1", e -> e.getEntity().getGroupId())
+            .returns("task-1", e -> e.getEntity().getTaskId());
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalTaskAssignedEvent_when_convertToExternalEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("11");
+        task.setProcessDefinitionId("myProcessDef");
+        TaskAssignedEventImpl event = new TaskAssignedEventImpl(task);
+
+        CloudTaskAssignedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent)
+            .returns("11", e -> e.getEntity().getId())
+            .returns("myProcessDef", CloudTaskAssignedEvent::getProcessDefinitionId);
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalTaskUpdatedEvent_when_convertToExternalEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("12");
+        task.setProcessDefinitionId("myProcessDef");
+        TaskUpdatedEventImpl event = new TaskUpdatedEventImpl(task);
+
+        CloudTaskUpdatedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent)
+            .returns("12", e -> e.getEntity().getId())
+            .returns("myProcessDef", CloudTaskUpdatedEvent::getProcessDefinitionId);
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalTaskCancelledEvent_when_convertToExternalEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("13");
+        TaskCancelledImpl event = new TaskCancelledImpl(task, "user request");
+
+        CloudTaskCancelledEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getEntity().getId()).isEqualTo("13");
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalTaskSuspendedEvent_when_convertToExternalEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("14");
+        TaskSuspendedImpl event = new TaskSuspendedImpl(task);
+
+        CloudTaskSuspendedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getEntity().getId()).isEqualTo("14");
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalTaskActivatedEvent_when_convertToExternalEvent() {
+        TaskImpl task = new TaskImpl();
+        task.setId("15");
+        TaskActivatedImpl event = new TaskActivatedImpl(task);
+
+        CloudTaskActivatedEvent cloudEvent = this.converter.from(event);
+
+        assertThat(cloudEvent.getEntity().getId()).isEqualTo("15");
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 }
