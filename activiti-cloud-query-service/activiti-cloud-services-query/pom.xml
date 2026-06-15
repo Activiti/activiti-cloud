@@ -12,6 +12,7 @@
   <name>Activiti Cloud Query :: Services :: Parent</name>
   <packaging>pom</packaging>
   <modules>
+    <module>activiti-cloud-services-query-common</module>
     <module>activiti-cloud-services-query-model</module>
     <module>activiti-cloud-services-query-repo</module>
     <module>activiti-cloud-services-query-rest</module>

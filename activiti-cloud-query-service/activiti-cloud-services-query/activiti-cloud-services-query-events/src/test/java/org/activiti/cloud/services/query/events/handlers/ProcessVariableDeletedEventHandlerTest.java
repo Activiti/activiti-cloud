@@ -28,6 +28,8 @@ import java.util.Optional;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
+import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
@@ -50,9 +52,13 @@ class ProcessVariableDeletedEventHandlerTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
+    @Mock
+    private FeatureToggle featureToggle;
+
     @Test
     void handleShouldRemoveVariableAndPersistHistoryEntryAsDeleted() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
             "var",
             "string",
@@ -177,6 +183,7 @@ class ProcessVariableDeletedEventHandlerTest {
     @Test
     void handleShouldCatchExceptionAndNotPropagate() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
             "var",
             "string",
@@ -215,6 +222,41 @@ class ProcessVariableDeletedEventHandlerTest {
             null
         );
         CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(variable, true);
+
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity();
+        variableEntity.setName("var");
+
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
+        processInstanceEntity.getVariables().add(variableEntity);
+
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
+            .thenReturn(Optional.of(processInstanceEntity));
+
+        //when
+        handler.handle(event);
+
+        //then - variable removed but no history persisted
+        verify(entityManager).remove(variableEntity);
+        verify(entityManager, never()).persist(any());
+    }
+
+    @Test
+    void handleShouldRemoveVariableButSkipHistoryWhenFeatureFlagDisabled() {
+        //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(false);
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "value",
+            "procInstId",
+            null
+        );
+        CloudVariableDeletedEventImpl event = new CloudVariableDeletedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            variable
+        );
 
         ProcessVariableEntity variableEntity = new ProcessVariableEntity();
         variableEntity.setName("var");

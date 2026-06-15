@@ -33,6 +33,8 @@ import java.util.Set;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
+import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
@@ -65,6 +67,9 @@ class VariableEntityCreatedEventHandlerTest {
     @Mock
     private EntityManagerFinder entityManagerFinder;
 
+    @Mock
+    private FeatureToggle featureToggle;
+
     // Used by VariableCreatedEventHandler routing tests; also injected into `handler` by Mockito
     @Mock
     private ProcessVariableCreatedEventHandler processVariableCreatedEventHandlerMock;
@@ -75,6 +80,7 @@ class VariableEntityCreatedEventHandlerTest {
     @Test
     void handleShouldCreateAndStoreProcessInstanceVariable() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
         event.setVariableDefinitionId("variableDefId");
 
@@ -212,6 +218,7 @@ class VariableEntityCreatedEventHandlerTest {
     @Test
     void handleShouldAssignNewVariableToTask() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
@@ -232,6 +239,7 @@ class VariableEntityCreatedEventHandlerTest {
     @Test
     void handleShouldWarnAndSkipWhenVariableAlreadyExistsInTask() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessVariableEntity existingInTask = new ProcessVariableEntity();

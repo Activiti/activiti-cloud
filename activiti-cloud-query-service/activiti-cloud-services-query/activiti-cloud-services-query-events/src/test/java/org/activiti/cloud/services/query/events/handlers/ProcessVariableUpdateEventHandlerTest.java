@@ -18,10 +18,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
+import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,9 +45,13 @@ class ProcessVariableUpdateEventHandlerTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private FeatureToggle featureToggle;
+
     @Test
     void handleShouldUpdateVariableAndPersistHistoryEntry() {
         //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(true);
         VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
             "var",
             "string",
@@ -91,6 +98,31 @@ class ProcessVariableUpdateEventHandlerTest {
             null
         );
         CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(variable, "oldValue", true);
+
+        //when
+        handler.handle(event);
+
+        //then
+        verifyNoInteractions(entityManager);
+    }
+
+    @Test
+    void handleShouldSkipHistoryWhenFeatureFlagDisabled() {
+        //given
+        when(featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)).thenReturn(false);
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
+            "var",
+            "string",
+            "newValue",
+            "procInstId",
+            null
+        );
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
+            "eventId",
+            System.currentTimeMillis(),
+            variable,
+            "oldValue"
+        );
 
         //when
         handler.handle(event);

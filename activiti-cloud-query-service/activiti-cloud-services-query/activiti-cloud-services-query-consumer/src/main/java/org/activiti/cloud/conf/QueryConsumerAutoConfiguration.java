@@ -165,7 +165,9 @@ public class QueryConsumerAutoConfiguration {
                 Thread.currentThread().getName()
             );
 
-            queryConsumerMessageHandler.accept(MessageBuilder.withPayload(events, headers).copyHeaders(headers).build());
+            queryConsumerMessageHandler.accept(
+                MessageBuilder.withPayload(events, headers).copyHeaders(headers).build()
+            );
 
             return null;
         };
