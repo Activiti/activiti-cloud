@@ -16,17 +16,7 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.store.ChannelMessageStore;
 
 @Configuration
-public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
-
-    @Bean
-    QueueChannel queryEventsChannel(ChannelMessageStore queryEventsChannelMessageStore) {
-        return MessageChannels.queue(queryEventsChannelMessageStore, "queryEvents").getObject();
-    }
-}
+public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {}

@@ -56,8 +56,8 @@ runs:
       env:
         SCRIPT_COMMAND: ${{ inputs.script-command }}
       run: |
-        npm clean-install
-        npx playwright install chromium
+        npm ci --ignore-scripts
+        ./node_modules/.bin/playwright install chromium
         eval "${SCRIPT_COMMAND}"
       continue-on-error: true
 
