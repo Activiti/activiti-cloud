@@ -420,4 +420,31 @@
       splitStatements="true"
       stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter22-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/22-alter.pg.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false"
+    id="alter22-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+      encoding="utf8"
+      path="changelog/22-alter.oracle.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="false"
+      stripComments="true"/>
+  </changeSet>
+  <changeSet author="activiti-audit"
+    id="h2-schema-alter22" dbms="h2">
+    <sqlFile dbms="h2"
+      encoding="utf8"
+      path="changelog/22-alter.h2.schema.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
