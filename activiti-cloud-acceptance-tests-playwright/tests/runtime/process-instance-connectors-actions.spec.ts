@@ -16,6 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 
@@ -148,18 +149,16 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
 
         await activiti.step('And the status of the process is changed to completed', async () => {
             await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (
+                            await getQueryProcessInstanceWhenSynced(
+                                queryServiceTestUser,
+                                processInstanceId
+                            )
+                        )?.status,
+                    pollOptions('querySync')
+                )
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
@@ -279,18 +278,16 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
             }).rejects.toThrow();
 
             await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (
+                            await getQueryProcessInstanceWhenSynced(
+                                queryServiceTestUser,
+                                processInstanceId
+                            )
+                        )?.status,
+                    pollOptions('querySync')
+                )
                 .toBe(ProcessInstanceStatus.CANCELLED);
 
             await expect

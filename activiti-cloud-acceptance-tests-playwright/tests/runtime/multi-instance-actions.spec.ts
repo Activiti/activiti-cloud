@@ -16,6 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
@@ -138,18 +139,16 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
 
         await activiti.step('And the process with service tasks is completed', async () => {
             await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (
+                            await getQueryProcessInstanceWhenSynced(
+                                queryServiceTestUser,
+                                processInstanceId
+                            )
+                        )?.status,
+                    pollOptions('querySync')
+                )
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
     });

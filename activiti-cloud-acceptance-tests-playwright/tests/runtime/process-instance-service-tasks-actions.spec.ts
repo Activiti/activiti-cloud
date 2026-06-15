@@ -16,9 +16,9 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceAdminWhenSynced, loadOrUndefined } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import {
-    CloudIntegrationContext,
     CloudProcessInstance,
     IntegrationContextStatus,
     ProcessInstanceStatus,
@@ -37,19 +37,6 @@ interface IntegrationEventEntity {
     processInstanceId?: string;
     clientType?: string;
     status?: string;
-}
-
-async function expectServiceTasks(
-    queryAdminService: QueryAdminService,
-    processInstanceId: string,
-    predicate: (tasks: { activityType?: string; status?: ServiceTaskStatus }[]) => boolean
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const tasks = await queryAdminService.getServiceTasksForProcessInstance(processInstanceId);
-            return predicate(tasks);
-        }, pollOptions('querySync'))
-        .toBe(true);
 }
 
 async function expectIntegrationContextEventsForProcess(
@@ -121,18 +108,15 @@ async function expectIntegrationContextEventsForProcess(
 
 async function expectProcessCompleted(
     queryAdminService: QueryAdminService,
-    processInstanceId: string,
-    _processDefinitionKey: string
+    processInstanceId: string
 ): Promise<void> {
     await expect
-        .poll(async () => {
-            try {
-                const instance = await queryAdminService.getProcessInstanceAdmin(processInstanceId);
-                return instance.status;
-            } catch {
-                return undefined;
-            }
-        }, pollOptions('querySync'))
+        .poll(
+            async () =>
+                (await getQueryProcessInstanceAdminWhenSynced(queryAdminService, processInstanceId))
+                    ?.status,
+            pollOptions('querySync')
+        )
         .toBe(ProcessInstanceStatus.COMPLETED);
 }
 
@@ -160,7 +144,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id, CONNECTOR_PROCESS);
+            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id);
         });
     });
 
@@ -179,15 +163,18 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('Then the user can get list of service tasks for process instance', async () => {
-            await expectServiceTasks(
-                queryAdminServiceTestAdmin,
-                processInstance.id,
-                (tasks) => tasks.length > 0 && tasks.every((task) => task.activityType === 'serviceTask')
-            );
+            await expect
+                .poll(async () => {
+                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
+                        processInstance.id
+                    );
+                    return tasks.length > 0 && tasks.every((task) => task.activityType === 'serviceTask');
+                }, pollOptions('querySync'))
+                .toBe(true);
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id, CONNECTOR_PROCESS);
+            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id);
         });
     });
 
@@ -221,7 +208,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id, CONNECTOR_PROCESS);
+            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id);
         });
     });
 
@@ -250,14 +237,9 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
                         if (tasks.length !== 1) {
                             return false;
                         }
-                        let integrationContext: CloudIntegrationContext | undefined;
-                        try {
-                            integrationContext = await queryAdminServiceTestAdmin.getServiceTaskIntegrationContext(
-                                tasks[0].id
-                            );
-                        } catch {
-                            return false;
-                        }
+                        const integrationContext = await loadOrUndefined(() =>
+                            queryAdminServiceTestAdmin.getServiceTaskIntegrationContext(tasks[0].id)
+                        );
                         return (
                             integrationContext?.clientType === 'ServiceTask' &&
                             integrationContext?.status ===
@@ -269,7 +251,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id, CONNECTOR_PROCESS);
+            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id);
         });
     });
 
@@ -320,15 +302,10 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
                         if (serviceTask.integrationContextCounter !== 2) {
                             return false;
                         }
-                        let contexts: CloudIntegrationContext[];
-                        try {
-                            contexts = await queryAdminServiceTestAdmin.getServiceTaskIntegrationContexts(
-                                serviceTask.id
-                            );
-                        } catch {
-                            return false;
-                        }
-                        if (contexts.length !== 2) {
+                        const contexts = await loadOrUndefined(() =>
+                            queryAdminServiceTestAdmin.getServiceTaskIntegrationContexts(serviceTask.id)
+                        );
+                        if (!contexts || contexts.length !== 2) {
                             return false;
                         }
                         return contexts.some(
@@ -344,8 +321,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step('And the process with service tasks is completed', async () => {
             await expectProcessCompleted(
                 queryAdminServiceTestAdmin,
-                processInstance.id,
-                CONNECTOR_PROCESS_WITH_LOOP
+                processInstance.id
             );
         });
     });
@@ -387,7 +363,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id, CONNECTOR_PROCESS);
+            await expectProcessCompleted(queryAdminServiceTestAdmin, processInstance.id);
         });
     });
 
@@ -613,15 +589,13 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
                     if (!entity?.executionId || !entity?.clientId) {
                         return false;
                     }
-                    try {
-                        await runtimeAdminServiceTestAdmin.replayServiceTask(
-                            entity.executionId,
-                            entity.clientId
-                        );
-                    } catch {
-                        return false;
-                    }
-                    return true;
+                    const replayed = await loadOrUndefined(() =>
+                        runtimeAdminServiceTestAdmin.replayServiceTask(
+                            entity.executionId!,
+                            entity.clientId!
+                        )
+                    );
+                    return replayed !== undefined;
                 }, pollOptions('querySync'))
                 .toBe(true);
         });
@@ -662,8 +636,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step('And the process with service tasks is completed', async () => {
             await expectProcessCompleted(
                 queryAdminServiceTestAdmin,
-                processInstance.id,
-                TEST_ERROR_CONNECTOR_PROCESS
+                processInstance.id
             );
         });
     });

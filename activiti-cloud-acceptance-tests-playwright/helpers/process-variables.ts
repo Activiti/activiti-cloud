@@ -16,7 +16,6 @@
 
 import { expect } from '@playwright/test';
 import { pollOptions } from '../config/runtime/timeouts';
-import { CloudVariableInstance } from '../models/process-variable.models';
 import { QueryService } from '../services/query.service';
 
 function normalizeValues(value: unknown): unknown[] {
@@ -66,11 +65,4 @@ export async function expectProcessVariableValue(
             pollOptions('querySync')
         )
         .toBe(true);
-}
-
-export function findVariable(
-    variables: CloudVariableInstance[],
-    variableName: string
-): CloudVariableInstance | undefined {
-    return variables.find((variable) => variable.name === variableName);
 }

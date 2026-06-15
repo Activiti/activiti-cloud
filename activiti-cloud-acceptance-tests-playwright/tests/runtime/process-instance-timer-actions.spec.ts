@@ -16,6 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { AuditService } from '../../services/audit.service';
@@ -24,22 +25,6 @@ import { QueryService } from '../../services/query.service';
 const INTERMEDIATE_TIMER_EVENT_PROCESS = 'intermediateTimerEventExample';
 const START_TIMER_EVENT_PROCESS = 'startTimerEventExample';
 const BOUNDARY_TIMER_EVENT_PROCESS = 'boundaryTimerEventExample';
-
-async function expectProcessCompleted(
-    queryService: QueryService,
-    processInstanceId: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            try {
-                const instance = await queryService.getProcessInstance(processInstanceId);
-                return instance.status;
-            } catch {
-                return undefined;
-            }
-        }, pollOptions('querySync'))
-        .toBe(ProcessInstanceStatus.COMPLETED);
-}
 
 async function expectTimerEvent(
     auditService: AuditService,
@@ -107,7 +92,18 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
             );
 
             await activiti.step('And the process with timer events is completed', async () => {
-                await expectProcessCompleted(queryServiceHrUser, processInstanceId);
+                await expect
+                    .poll(
+                        async () =>
+                            (
+                                await getQueryProcessInstanceWhenSynced(
+                                    queryServiceHrUser,
+                                    processInstanceId
+                                )
+                            )?.status,
+                        pollOptions('querySync')
+                    )
+                    .toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );
@@ -206,7 +202,18 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
             );
 
             await activiti.step('And the process with timer events is completed', async () => {
-                await expectProcessCompleted(queryServiceHrUser, processInstanceId);
+                await expect
+                    .poll(
+                        async () =>
+                            (
+                                await getQueryProcessInstanceWhenSynced(
+                                    queryServiceHrUser,
+                                    processInstanceId
+                                )
+                            )?.status,
+                        pollOptions('querySync')
+                    )
+                    .toBe(ProcessInstanceStatus.COMPLETED);
             });
         }
     );

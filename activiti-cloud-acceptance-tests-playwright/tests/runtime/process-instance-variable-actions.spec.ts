@@ -34,19 +34,6 @@ async function expectVariableValue(
         .toBe(String(expectedValue));
 }
 
-async function expectVariableAbsent(
-    rbService: RuntimeBundleService,
-    processInstanceId: string,
-    variableName: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const variables = await rbService.getProcessInstanceVariables(processInstanceId);
-            return variables.some((v) => v.name === variableName);
-        }, pollOptions('querySync'))
-        .toBe(false);
-}
-
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
     activiti(
         'admin update process instance variables',
@@ -201,7 +188,15 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             });
 
             await activiti.step('Then the process variable dummy1 is deleted', async () => {
-                await expectVariableAbsent(runtimeBundleServiceTestUser, processInstanceId, 'dummy1');
+                await expect
+                    .poll(async () => {
+                        const variables =
+                            await runtimeBundleServiceTestUser.getProcessInstanceVariables(
+                                processInstanceId
+                            );
+                        return variables.some((v) => v.name === 'dummy1');
+                    }, pollOptions('querySync'))
+                    .toBe(false);
             });
 
             await activiti.step('And the process variable dummy2 is created', async () => {

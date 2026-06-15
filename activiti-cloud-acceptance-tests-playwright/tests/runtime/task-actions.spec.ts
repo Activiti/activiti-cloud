@@ -25,6 +25,7 @@ import {
     expectTaskStatusInRbAndQuery,
 } from '../../helpers/task-assertions';
 import { expectProcessVariableValue } from '../../helpers/process-variables';
+import { getQueryProcessInstanceWhenSynced, loadOrUndefined } from '../../helpers/query-sync';
 import { pollOptions } from '../../config/runtime/timeouts';
 
 activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
@@ -43,24 +44,21 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task from SUB_PROCESS_INSTANCE_WITH_TASK is CREATED and it is called subprocess-task', async () => {
-            // Resolve the subprocess via the parent process instance rather than
-            // querying tasks by processDefinitionKey directly (testuser has no
-            // policy for the subprocess key in this preview).
             await expect
                 .poll(async () => {
-                    try {
-                        const subProcesses = await runtimeBundleServiceTestUser.getSubProcesses(parentProcessInstanceId);
-                        if (subProcesses.length === 0) return false;
-                        for (const sub of subProcesses) {
-                            const tasks = await queryServiceTestUser.getTasksByProcessInstanceId(sub.id);
-                            if (tasks.some(t => t.name === 'subprocess-task' && t.status === TaskStatus.CREATED)) {
-                                return true;
-                            }
+                    const subProcesses = await loadOrUndefined(() =>
+                        runtimeBundleServiceTestUser.getSubProcesses(parentProcessInstanceId)
+                    );
+                    if (!subProcesses || subProcesses.length === 0) return false;
+                    for (const sub of subProcesses) {
+                        const tasks = await loadOrUndefined(() =>
+                            queryServiceTestUser.getTasksByProcessInstanceId(sub.id)
+                        );
+                        if (tasks?.some(t => t.name === 'subprocess-task' && t.status === TaskStatus.CREATED)) {
+                            return true;
                         }
-                        return false;
-                    } catch {
-                        return false;
                     }
+                    return false;
                 }, pollOptions('querySync'))
                 .toBe(true);
         });
@@ -85,20 +83,15 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task has the formKey field and correct processInstance fields', async () => {
-            // Wait for the query DB to ingest the freshly-started process instance.
             await expect
-                .poll(async () => {
-                    try {
-                        await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return true;
-                    } catch (error) {
-                        // Query DB may not have ingested the instance yet — keep polling.
-                        if (error instanceof Error && /Unable to find process instance/.test(error.message)) {
-                            return false;
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (await getQueryProcessInstanceWhenSynced(
+                            queryServiceTestUser,
+                            processInstanceId
+                        )) !== undefined,
+                    pollOptions('querySync')
+                )
                 .toBe(true);
 
             const processFromQuery = await queryServiceTestUser.getProcessInstance(processInstanceId);
@@ -451,14 +444,16 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
             await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch {
-                        return undefined;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (
+                            await getQueryProcessInstanceWhenSynced(
+                                queryServiceTestUser,
+                                processInstanceId
+                            )
+                        )?.status,
+                    pollOptions('querySync')
+                )
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
 
@@ -499,14 +494,16 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
             await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch {
-                        return undefined;
-                    }
-                }, pollOptions('querySync'))
+                .poll(
+                    async () =>
+                        (
+                            await getQueryProcessInstanceWhenSynced(
+                                queryServiceTestUser,
+                                processInstanceId
+                            )
+                        )?.status,
+                    pollOptions('querySync')
+                )
                 .toBe(ProcessInstanceStatus.COMPLETED);
         });
 
