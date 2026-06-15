@@ -166,7 +166,7 @@ public class QueryConsumerAutoConfiguration {
             );
 
             queryConsumerMessageHandler.accept(
-                MessageBuilder.withPayload(events, headers).copyHeaders(headers).build()
+                MessageBuilder.withPayload(events).copyHeaders(headers).build()
             );
 
             return null;

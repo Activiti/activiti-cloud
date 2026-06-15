@@ -48,7 +48,7 @@ public class QueryConsumerMessageHandler
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void accept(Message<List<CloudRuntimeEvent<?, ?>>> message) {
         beforeCommit(() -> queryEventsChannel.send(message));
-        receive(message.getPayload());
+        receive(message.getPayload(), message.getHeaders());
     }
 
     private static void beforeCommit(Runnable action) {
