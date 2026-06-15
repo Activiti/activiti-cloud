@@ -402,7 +402,6 @@ jobs:
     with:
       version: ${{ needs.resolve-version.outputs.version }}
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ACCEPTANCE_TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
       ACCEPTANCE_HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
       ACCEPTANCE_HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
