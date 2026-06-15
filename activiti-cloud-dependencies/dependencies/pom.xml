@@ -28,13 +28,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-        <version>${activiti-cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
         <version>${activiti-cloud.version}</version>
         <type>pom</type>

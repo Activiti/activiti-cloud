@@ -1,0 +1,27 @@
+---
+description: Rules for writing and modifying Playwright API acceptance tests in activiti-cloud-acceptance-tests-playwright/
+globs: activiti-cloud-acceptance-tests-playwright/**/*.ts
+alwaysApply: false
+---
+
+# Acceptance Tests (Playwright API)
+
+Read the full guidelines: `.github/instructions/acceptance-tests.instructions.md`
+
+## Hard rules
+
+1. **Never create `tests/**/helpers/` files** — API calls go in `services/`, shared starts in `flows/`, assertions stay in specs.
+2. **Never define functions inside spec files** — only hooks and test blocks (except `for...of` data-driven generation at describe scope).
+3. **Keep static test data in `resources/`** — no inline BPMN/JSON/XML string templates.
+4. **No `try/catch` in spec files** — cleanup in Playwright hooks; optional-error polling in `helpers/query-sync.ts`.
+5. **No comments or JSDoc** in generated code.
+6. **Cleanup in hooks only** — last statement in every test must be `expect`.
+7. **Import `activiti`/`expect` from fixtures** — never from `@playwright/test`.
+8. **Never wrap `expect` in `try/catch`, `if`, `switch`, or loops** — assertions must be unconditional.
+9. **Use `activiti.step()` for multi-phase tests** — mandatory when test has 2+ API calls or distinct phases.
+
+## Architecture
+
+- Specs → `activiti` fixture → services → BaseService → ContextFactory
+- GraphQL WS: `services/notifications/` (`openEngineEventsSubscription`)
+- Shared process starts: `flows/`
