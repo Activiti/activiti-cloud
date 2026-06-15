@@ -33,9 +33,16 @@ jobs:
 
       - uses: ./.github/actions/maven-m2-download
 
-      - uses: ./.github/actions/apply-project-version
+      - name: Write VERSION file
+        shell: bash
+        run: |
+          echo "${{ inputs.version }}" > VERSION
+          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
           version: ${{ inputs.version }}
+          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
       - name: Clear stale Maven resolution markers
         shell: bash
