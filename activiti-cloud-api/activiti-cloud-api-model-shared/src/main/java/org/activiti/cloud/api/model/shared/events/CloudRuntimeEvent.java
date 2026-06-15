@@ -39,4 +39,11 @@ public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
      * User who performed an action
      */
     String getActor();
+
+    /**
+     * ID of the engine CommandContext (transaction) that produced this event.
+     */
+    default String getCommandId() {
+        return null;
+    }
 }

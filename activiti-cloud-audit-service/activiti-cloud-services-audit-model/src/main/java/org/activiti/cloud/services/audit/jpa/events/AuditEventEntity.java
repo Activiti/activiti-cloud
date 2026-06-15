@@ -51,6 +51,7 @@ public abstract class AuditEventEntity {
     private String serviceVersion;
     private int sequenceNumber;
     private String messageId;
+    private String commandId;
 
     /* base Process Data */
     private String entityId;
@@ -73,6 +74,7 @@ public abstract class AuditEventEntity {
         this.serviceType = cloudEvent.getServiceType();
         this.serviceVersion = cloudEvent.getServiceVersion();
         this.messageId = cloudEvent.getMessageId();
+        this.commandId = cloudEvent.getCommandId();
         this.sequenceNumber = cloudEvent.getSequenceNumber();
         this.entityId = cloudEvent.getEntityId();
         this.processInstanceId = cloudEvent.getProcessInstanceId();
@@ -226,6 +228,14 @@ public abstract class AuditEventEntity {
         this.messageId = messageId;
     }
 
+    public String getCommandId() {
+        return commandId;
+    }
+
+    public void setCommandId(String commandId) {
+        this.commandId = commandId;
+    }
+
     @Override
     public int hashCode() {
         return getClass().hashCode();
@@ -274,6 +284,8 @@ public abstract class AuditEventEntity {
             .append(sequenceNumber)
             .append(", messageId=")
             .append(messageId)
+            .append(", commandId=")
+            .append(commandId)
             .append(", entityId=")
             .append(entityId)
             .append(", processDefinitionId=")

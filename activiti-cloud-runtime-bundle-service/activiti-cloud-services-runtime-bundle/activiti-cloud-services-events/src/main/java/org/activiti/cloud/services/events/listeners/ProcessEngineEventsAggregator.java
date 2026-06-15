@@ -69,6 +69,10 @@ public class ProcessEngineEventsAggregator
     public void add(CloudRuntimeEvent<?, ?> element) {
         CommandContext commandContext = getCurrentCommandContext();
 
+        if (element instanceof CloudRuntimeEventImpl<?, ?> impl) {
+            impl.setCommandId(commandContext.getCommandId());
+        }
+
         // Let's try resolve underlying execution Id
         String executionId = resolveExecutionId(element);
 
