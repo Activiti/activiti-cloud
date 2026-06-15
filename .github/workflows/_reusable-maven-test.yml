@@ -42,9 +42,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ inputs.version }}
         run: |
-          echo "${{ inputs.version }}" > VERSION
-          echo "VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:

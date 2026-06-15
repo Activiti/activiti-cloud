@@ -89,9 +89,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
-          echo "${{ needs.resolve-version.outputs.version }}" > VERSION
-          echo "VERSION=${{ needs.resolve-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
@@ -167,9 +169,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
-          echo "${{ needs.resolve-version.outputs.version }}" > VERSION
-          echo "VERSION=${{ needs.resolve-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
@@ -240,9 +244,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
-          echo "${{ needs.resolve-version.outputs.version }}" > VERSION
-          echo "VERSION=${{ needs.resolve-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
@@ -345,9 +351,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
-          echo "${{ needs.resolve-version.outputs.version }}" > VERSION
-          echo "VERSION=${{ needs.resolve-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
@@ -518,9 +526,11 @@ jobs:
 
       - name: Write VERSION file
         shell: bash
+        env:
+          PROJECT_VERSION: ${{ needs.resolve-version.outputs.version }}
         run: |
-          echo "${{ needs.resolve-version.outputs.version }}" > VERSION
-          echo "VERSION=${{ needs.resolve-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "${PROJECT_VERSION}" > VERSION
+          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
