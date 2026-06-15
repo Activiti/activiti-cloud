@@ -6,6 +6,25 @@ on:
       version:
         required: true
         type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      ACCEPTANCE_TESTUSER_PASSWORD:
+        required: true
+      ACCEPTANCE_HRUSER_PASSWORD:
+        required: true
+      ACCEPTANCE_HRADMIN_PASSWORD:
+        required: true
+      ACCEPTANCE_PROCESSADMINUSER_PASSWORD:
+        required: true
+      ACCEPTANCE_TESTADMIN_PASSWORD:
+        required: true
+      RANCHER2_URL:
+        required: true
+      RANCHER2_ACCESS_KEY:
+        required: true
+      RANCHER2_SECRET_KEY:
+        required: true
 
 env:
   CLUSTER_NAME: activiti

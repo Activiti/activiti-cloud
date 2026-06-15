@@ -6,6 +6,13 @@ on:
       version:
         required: true
         type: string
+    secrets:
+      BOT_GITHUB_TOKEN:
+        required: true
+      NEXUS_USERNAME:
+        required: true
+      NEXUS_PASSWORD:
+        required: true
 
 env:
   MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml

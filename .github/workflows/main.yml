@@ -136,7 +136,12 @@ jobs:
     with:
       version: ${{ needs.resolve-version.outputs.version }}
       skip-tests: ${{ needs.pre-checks.outputs.skip-tests }}
-    secrets: inherit
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 
   maven-build-dependencies-bom:
     runs-on: ubuntu-latest
@@ -202,7 +207,10 @@ jobs:
     uses: ./.github/workflows/_reusable-maven-test.yml
     with:
       version: ${{ needs.resolve-version.outputs.version }}
-    secrets: inherit
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
   maven-jacoco-merge:
     runs-on: ubuntu-latest
@@ -393,7 +401,16 @@ jobs:
     uses: ./.github/workflows/_reusable-playwright-tests.yml
     with:
       version: ${{ needs.resolve-version.outputs.version }}
-    secrets: inherit
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACCEPTANCE_TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
+      ACCEPTANCE_HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
+      ACCEPTANCE_HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
+      ACCEPTANCE_PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
+      ACCEPTANCE_TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
+      RANCHER2_URL: ${{ secrets.RANCHER2_URL }}
+      RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
+      RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
 
   build-summary:
     runs-on: ubuntu-latest
