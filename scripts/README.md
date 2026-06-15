@@ -53,31 +53,26 @@ KEYCLOAK_CLIENT_SECRET=<grab-from-keycloak> ./scripts/local-install.sh [options]
 The `local-install.sh` script provides a fully automated local development environment:
 
 1. **Cluster Configuration**
-
    - Validates kubectl connection and cluster access
    - Configures kubectl context using Rancher CLI integration
    - Verifies cluster connectivity and namespace permissions
 
 2. **Environment Preparation**
-
    - Generates PREVIEW_NAME in format: `pr-{number}-{broker}-{partition}-{destination}`
    - Creates local-values.local.yaml with working Docker image tags (gitignored)
    - Sets up environment variables for consistent deployment
 
 3. **Kubernetes Deployment**
-
    - Creates and configures namespace with proper labels
    - Deploys Activiti Cloud using Helm with local-values.local.yaml by default
    - Patches deployments with correct external Keycloak configuration
 
 4. **Local Access Configuration**
-
    - Automatically configures /etc/hosts entries for gateway routing
    - Sets up port forwarding: localhost:8080 → ingress-nginx-controller
    - Generates .env file for Playwright tests with proper SSO configuration
 
 5. **Keycloak Authentication Setup**
-
    - Configures external Keycloak URL: `https://{cluster}.envalfresco.com/auth`
    - Sets correct realm: `alfresco`
    - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM
