@@ -43,7 +43,6 @@ assert_same_lists() {
   local expected_tmp actual_tmp
   expected_tmp="$(mktemp)"
   actual_tmp="$(mktemp)"
-  trap 'rm -f "${expected_tmp}" "${actual_tmp}"' RETURN
 
   json_keys "${expected_file}" > "${expected_tmp}"
   "${actual_extractor}" "${actual_file}" > "${actual_tmp}"
@@ -54,8 +53,11 @@ assert_same_lists() {
     sed 's/^/  /' "${expected_tmp}" >&2
     echo "Found in YAML:" >&2
     sed 's/^/  /' "${actual_tmp}" >&2
+    rm -f "${expected_tmp}" "${actual_tmp}"
     return 1
   fi
+
+  rm -f "${expected_tmp}" "${actual_tmp}"
 }
 
 errors=0

@@ -39,7 +39,7 @@ jobs:
         with:
           pattern: m2-common
 
-      - uses: ./.github/actions/apply-maven-version
+      - uses: ./.github/actions/apply-project-version
         with:
           version: ${{ inputs.version }}
 

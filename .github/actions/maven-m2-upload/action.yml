@@ -37,7 +37,7 @@ runs:
           local module_dir="$1"
           local artifact_id
           artifact_id="$(basename "$(dirname "${module_dir}")")"
-          mkdir -p "${STAGE}/${artifact_id}"
+          mkdir -p "${STAGE}/${artifact_id}/${INPUT_VERSION}"
           cp -a "${module_dir}/." "${STAGE}/${artifact_id}/${INPUT_VERSION}/"
         }
 

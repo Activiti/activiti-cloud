@@ -1,0 +1,24 @@
+name: Apply project version
+description: >-
+  Writes VERSION file and sets the project version in all module POMs.
+  resolve-version runs once in a separate job; this action reapplies that version in each Maven checkout.
+inputs:
+  version:
+    description: Project version to apply (e.g. 0.0.1-PR-2314-SNAPSHOT)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Write VERSION file
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        echo "${INPUT_VERSION}" > VERSION
+        echo "VERSION=${INPUT_VERSION}" >> "$GITHUB_ENV"
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      with:
+        version: ${{ inputs.version }}
+        maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}

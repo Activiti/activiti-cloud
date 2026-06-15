@@ -1,10 +1,8 @@
 name: Maven setup
-description: Java 25, Maven cache, and testcontainers defaults (run actions/checkout in the job first).
-inputs:
-  fetch-depth:
-    description: Unused; kept for compatibility. Checkout is performed in the workflow job.
-    required: false
-    default: '1'
+description: >-
+  Java 25, Maven cache restore, and testcontainers defaults.
+  Thin wrapper around cache + setup-java (not alfresco-build-tools maven-configure, which couples
+  skip-tests/preview labels and different JDK defaults). Run actions/checkout in the job first.
 
 runs:
   using: composite

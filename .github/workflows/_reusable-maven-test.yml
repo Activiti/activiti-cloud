@@ -29,11 +29,11 @@ jobs:
         with:
           shard-id: ${{ matrix.shard-id }}
 
-      - uses: ./.github/actions/maven-m2-download
-
       - uses: ./.github/actions/maven-setup
 
-      - uses: ./.github/actions/apply-maven-version
+      - uses: ./.github/actions/maven-m2-download
+
+      - uses: ./.github/actions/apply-project-version
         with:
           version: ${{ inputs.version }}
 
