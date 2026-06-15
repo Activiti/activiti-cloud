@@ -47,8 +47,9 @@ public class QueryConsumerChannelHandler {
 
     public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
         afterCompletion(entityManager::clear);
-        enrichWithMessageMetadata(events, headers);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+        var optimizedEvents = optimizer.optimize(events);
+        enrichWithMessageMetadata(optimizedEvents, headers);
+        eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
     }
 
     private static void enrichWithMessageMetadata(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {

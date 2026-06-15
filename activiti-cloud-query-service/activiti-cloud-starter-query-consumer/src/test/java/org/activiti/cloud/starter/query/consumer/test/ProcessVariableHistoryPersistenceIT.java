@@ -16,7 +16,9 @@
 package org.activiti.cloud.starter.query.consumer.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.List;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -109,6 +111,17 @@ class ProcessVariableHistoryPersistenceIT {
                 new VariableInstanceImpl<>("myVar", "string", null, processInstanceId, null)
             )
         );
+
+        await()
+            .atMost(Duration.ofSeconds(10))
+            .untilAsserted(() ->
+                assertThat(
+                    historyRepository.findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
+                        processInstanceId,
+                        "myVar"
+                    )
+                ).hasSize(4)
+            );
 
         List<ProcessVariableHistoryEntity> history = historyRepository.findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
             processInstanceId,

@@ -1,6 +1,8 @@
+create sequence process_variable_history_sequence start with 1 increment by 50;
+
 create table process_variable_history
 (
-    id                  NUMBER(19,0) GENERATED ALWAYS AS IDENTITY NOT NULL,
+    id                  NUMBER(19,0) NOT NULL,
     process_instance_id VARCHAR2(255) not null,
     variable_name       VARCHAR2(255) not null,
     type                VARCHAR2(255),

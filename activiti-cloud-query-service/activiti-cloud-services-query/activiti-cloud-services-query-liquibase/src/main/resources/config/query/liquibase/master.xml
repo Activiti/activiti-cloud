@@ -865,14 +865,14 @@
              encoding="utf8"
              path="changelog/41-alter.oracle.schema.9.1.0.sql"
              relativeToChangelogFile="true"
-             splitStatements="false"
+             splitStatements="true"
              stripComments="true"/>
     <rollback>
       <sqlFile dbms="oracle"
                encoding="utf8"
                path="changelog/41-rollback.oracle.schema.9.1.0.sql"
                relativeToChangelogFile="true"
-               splitStatements="false"
+               splitStatements="true"
                stripComments="true"/>
     </rollback>
   </changeSet>
