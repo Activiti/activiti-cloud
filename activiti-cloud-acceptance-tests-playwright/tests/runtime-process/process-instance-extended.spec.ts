@@ -24,7 +24,7 @@ import {
 } from '../../helpers/security-policies.assertions';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
+import { getQueryProcessInstanceWhenGone, getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
 import {
     expectProcessVariable,
@@ -295,7 +295,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
             await expect
                 .poll(
                     async () =>
-                        (await getQueryProcessInstanceWhenSynced(
+                        (await getQueryProcessInstanceWhenGone(
                             queryServiceTestUser,
                             processInstanceId
                         )) === undefined,

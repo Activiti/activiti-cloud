@@ -11,6 +11,14 @@ export function isQueryProcessInstanceNotFoundError(error: unknown): boolean {
     return message.includes('Unable to find process instance');
 }
 
+function isQueryProcessInstanceGoneError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+        message.includes('Unable to find process instance') ||
+        message.includes('Operation not permitted')
+    );
+}
+
 async function returnUndefinedWhenNotFound<T>(loader: () => Promise<T>): Promise<T | undefined> {
     try {
         return await loader();
@@ -22,11 +30,29 @@ async function returnUndefinedWhenNotFound<T>(loader: () => Promise<T>): Promise
     }
 }
 
+async function returnUndefinedWhenGone<T>(loader: () => Promise<T>): Promise<T | undefined> {
+    try {
+        return await loader();
+    } catch (error) {
+        if (isQueryProcessInstanceGoneError(error)) {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
 export function getQueryProcessInstanceWhenSynced(
     queryService: QueryService,
     processInstanceId: string
 ): Promise<CloudProcessInstance | undefined> {
     return returnUndefinedWhenNotFound(() => queryService.getProcessInstance(processInstanceId));
+}
+
+export function getQueryProcessInstanceWhenGone(
+    queryService: QueryService,
+    processInstanceId: string
+): Promise<CloudProcessInstance | undefined> {
+    return returnUndefinedWhenGone(() => queryService.getProcessInstance(processInstanceId));
 }
 
 export function getQueryProcessInstanceAdminWhenSynced(
