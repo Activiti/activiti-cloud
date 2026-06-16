@@ -57,7 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TaskAdminControllerImpl implements TaskAdminController {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskAdminControllerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskAdminControllerImpl.class);
 
     private final TaskAdminRuntime taskAdminRuntime;
 
@@ -102,7 +102,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("User {} wants to complete task {}", userId, taskId);
+        LOGGER.debug("User {} wants to complete task {}", userId, taskId);
         try {
             if (completeTaskPayload == null) {
                 completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
@@ -112,7 +112,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
             Task task = taskAdminRuntime.complete(completeTaskPayload);
             return taskRepresentationModelAssembler.toModel(task);
         } catch (RuntimeException e) {
-            log.warn("Completing task {} failed", taskId, e);
+            LOGGER.warn("Completing task {} failed", taskId, e);
             throw e;
         }
     }

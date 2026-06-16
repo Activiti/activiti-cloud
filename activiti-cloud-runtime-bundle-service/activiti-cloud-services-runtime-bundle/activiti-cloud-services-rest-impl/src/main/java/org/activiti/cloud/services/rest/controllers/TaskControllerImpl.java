@@ -66,7 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class TaskControllerImpl implements TaskController {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskControllerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerImpl.class);
 
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
@@ -123,13 +123,13 @@ public class TaskControllerImpl implements TaskController {
     @Override
     public EntityModel<CloudTask> claimTask(@PathVariable String taskId) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("User {} wants to claim task {}", userId, taskId);
+        LOGGER.debug("User {} wants to claim task {}", userId, taskId);
         try {
             return taskRepresentationModelAssembler.toModel(
                 taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
             );
         } catch (RuntimeException e) {
-            log.warn("Claiming task {} failed", taskId, e);
+            LOGGER.warn("Claiming task {} failed", taskId, e);
             throw e;
         }
     }
@@ -147,7 +147,7 @@ public class TaskControllerImpl implements TaskController {
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("User {} wants to complete task {}", userId, taskId);
+        LOGGER.debug("User {} wants to complete task {}", userId, taskId);
         try {
             if (completeTaskPayload == null) {
                 completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
@@ -158,7 +158,7 @@ public class TaskControllerImpl implements TaskController {
             Task task = taskRuntime.complete(completeTaskPayload);
             return taskRepresentationModelAssembler.toModel(task);
         } catch (RuntimeException e) {
-            log.warn("Completing task {} failed", taskId, e);
+            LOGGER.warn("Completing task {} failed", taskId, e);
             throw e;
         }
     }
