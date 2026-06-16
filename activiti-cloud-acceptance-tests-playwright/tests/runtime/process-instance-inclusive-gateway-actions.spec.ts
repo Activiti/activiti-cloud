@@ -55,19 +55,30 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         });
 
         await activiti.step('When the user claims and completes the task Start Process', async () => {
-            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Start Process');
-            await taskServiceHrUser.claimTask(task!.id);
+            let taskId = '';
+            await expect
+                .poll(async () => {
+                    const found = await taskServiceHrUser.findTaskByName(
+                        processInstanceId,
+                        'Start Process'
+                    );
+                    taskId = found?.id ?? '';
+                    return taskId;
+                }, pollOptions('querySync'))
+                .toBeTruthy();
+
+            await taskServiceHrUser.claimTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.ASSIGNED
             );
-            await taskServiceHrUser.completeTask(task!.id);
+            await taskServiceHrUser.completeTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.COMPLETED
             );
         });
@@ -128,19 +139,30 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         });
 
         await activiti.step('When the user claims and completes the task Send e-mail', async () => {
-            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Send e-mail');
-            await taskServiceHrUser.claimTask(task!.id);
+            let taskId = '';
+            await expect
+                .poll(async () => {
+                    const found = await taskServiceHrUser.findTaskByName(
+                        processInstanceId,
+                        'Send e-mail'
+                    );
+                    taskId = found?.id ?? '';
+                    return taskId;
+                }, pollOptions('querySync'))
+                .toBeTruthy();
+
+            await taskServiceHrUser.claimTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.ASSIGNED
             );
-            await taskServiceHrUser.completeTask(task!.id);
+            await taskServiceHrUser.completeTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.COMPLETED
             );
         });
@@ -165,19 +187,30 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         });
 
         await activiti.step('When the user claims and completes the task Check account', async () => {
-            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account');
-            await taskServiceHrUser.claimTask(task!.id);
+            let taskId = '';
+            await expect
+                .poll(async () => {
+                    const found = await taskServiceHrUser.findTaskByName(
+                        processInstanceId,
+                        'Check account'
+                    );
+                    taskId = found?.id ?? '';
+                    return taskId;
+                }, pollOptions('querySync'))
+                .toBeTruthy();
+
+            await taskServiceHrUser.claimTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.ASSIGNED
             );
-            await taskServiceHrUser.completeTask(task!.id);
+            await taskServiceHrUser.completeTask(taskId);
             await expectTaskStatusInRbAndQuery(
                 taskServiceHrUser,
                 queryServiceHrUser,
-                task!.id,
+                taskId,
                 TaskStatus.COMPLETED
             );
         });

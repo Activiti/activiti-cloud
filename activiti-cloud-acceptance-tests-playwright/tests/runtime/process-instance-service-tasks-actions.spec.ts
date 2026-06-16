@@ -573,20 +573,28 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('And the user can replay service task execution', async () => {
-            const events = await auditServiceTestAdmin.getEventsByProcessInstanceId(
-                processInstance.id
-            );
-            const errorEvent = events.find(
-                (event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED
-            );
-            const entity = errorEvent?.entity as
-                | { executionId?: string; clientId?: string }
-                | undefined;
-            expect(entity?.executionId).toBeTruthy();
-            expect(entity?.clientId).toBeTruthy();
+            let executionId = '';
+            let clientId = '';
+            await expect
+                .poll(async () => {
+                    const events = await auditServiceTestAdmin.getEventsByProcessInstanceId(
+                        processInstance.id
+                    );
+                    const errorEvent = events.find(
+                        (event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED
+                    );
+                    const entity = errorEvent?.entity as
+                        | { executionId?: string; clientId?: string }
+                        | undefined;
+                    executionId = entity?.executionId ?? '';
+                    clientId = entity?.clientId ?? '';
+                    return Boolean(executionId && clientId);
+                }, pollOptions('querySync'))
+                .toBe(true);
+
             const response = await runtimeAdminServiceTestAdmin.replayServiceTask(
-                entity!.executionId!,
-                entity!.clientId!
+                executionId,
+                clientId
             );
             expect(response.httpStatus).toBeGreaterThanOrEqual(200);
             expect(response.httpStatus).toBeLessThan(300);
