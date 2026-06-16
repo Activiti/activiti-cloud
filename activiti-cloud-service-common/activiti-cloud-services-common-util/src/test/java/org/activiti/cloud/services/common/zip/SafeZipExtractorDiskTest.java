@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -164,8 +165,8 @@ class SafeZipExtractorDiskTest {
         Path trap = target.resolve("trap");
         try {
             Files.createSymbolicLink(trap, outside);
-        } catch (UnsupportedOperationException | IOException ignored) {
-            org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
+        } catch (UnsupportedOperationException | IOException _) {
+            Assumptions.abort("Symbolic links are not supported in this environment");
         }
 
         Path zipPath = ZipTestFixtures.writeZipFile(
@@ -250,8 +251,8 @@ class SafeZipExtractorDiskTest {
         Path link = target.resolve("linked.txt");
         try {
             Files.createSymbolicLink(link, outside);
-        } catch (UnsupportedOperationException | IOException ignored) {
-            org.junit.jupiter.api.Assumptions.abort("Symbolic links are not supported in this environment");
+        } catch (UnsupportedOperationException | IOException _) {
+            Assumptions.abort("Symbolic links are not supported in this environment");
         }
 
         Path zipPath = ZipTestFixtures.writeZipFile(

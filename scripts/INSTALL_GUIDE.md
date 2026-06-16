@@ -110,31 +110,26 @@ You need access to a Rancher-managed Kubernetes cluster. The script supports any
 The script performs these operations:
 
 1. **Cluster Configuration**
-
    - Connects to Rancher and switches kubectl context
    - Validates cluster access and permissions
    - Confirms namespace creation capabilities
 
 2. **Environment Setup**
-
    - Generates PREVIEW_NAME: `pr-123-rabbit-n-d`
    - Creates local-values.local.yaml with working Docker image tags (gitignored)
    - Sets up all required environment variables
 
 3. **Kubernetes Deployment**
-
    - Creates namespace with proper labels
    - Deploys Activiti Cloud using Helm with local-values.local.yaml
    - Patches all deployments with external Keycloak configuration
 
 4. **Local Access Configuration**
-
    - Automatically adds entries to /etc/hosts (requires sudo password)
    - Sets up port forwarding: localhost:8080 → traefik
    - Configures DNS resolution for `pr-123-rabbit-n-d.activiti-hackathon.envalfresco.com`
 
 5. **Authentication Setup**
-
    - Configures external Keycloak URL: `https://activiti-hackathon.envalfresco.com/auth`
    - Sets realm: `alfresco`
    - Patches all services with ACT_KEYCLOAK_URL and ACT_KEYCLOAK_REALM

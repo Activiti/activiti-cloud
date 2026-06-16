@@ -48,8 +48,12 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ToCloudTaskRuntimeEventConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToCloudTaskRuntimeEventConverter.class);
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
@@ -108,7 +112,15 @@ public class ToCloudTaskRuntimeEventConverter {
 
     public CloudTaskCandidateUserAddedEvent from(TaskCandidateUserAddedEvent event) {
         CloudTaskCandidateUserAddedEventImpl cloudEvent = new CloudTaskCandidateUserAddedEventImpl(event.getEntity());
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        LOGGER.debug(
+            "[runtime] TASK_CANDIDATE_USER_ADDED converted: taskId={}, userId={}, processInstanceId={}, sourceEventPid={}",
+            event.getEntity() != null ? event.getEntity().getTaskId() : null,
+            event.getEntity() != null ? event.getEntity().getUserId() : null,
+            cloudEvent.getProcessInstanceId(),
+            event.getProcessInstanceId()
+        );
         return cloudEvent;
     }
 
@@ -116,13 +128,29 @@ public class ToCloudTaskRuntimeEventConverter {
         CloudTaskCandidateUserRemovedEventImpl cloudEvent = new CloudTaskCandidateUserRemovedEventImpl(
             event.getEntity()
         );
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        LOGGER.debug(
+            "[runtime] TASK_CANDIDATE_USER_REMOVED converted: taskId={}, userId={}, processInstanceId={}, sourceEventPid={}",
+            event.getEntity() != null ? event.getEntity().getTaskId() : null,
+            event.getEntity() != null ? event.getEntity().getUserId() : null,
+            cloudEvent.getProcessInstanceId(),
+            event.getProcessInstanceId()
+        );
         return cloudEvent;
     }
 
     public CloudTaskCandidateGroupAddedEvent from(TaskCandidateGroupAddedEvent event) {
         CloudTaskCandidateGroupAddedEventImpl cloudEvent = new CloudTaskCandidateGroupAddedEventImpl(event.getEntity());
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        LOGGER.debug(
+            "[runtime] TASK_CANDIDATE_GROUP_ADDED converted: taskId={}, groupId={}, processInstanceId={}, sourceEventPid={}",
+            event.getEntity() != null ? event.getEntity().getTaskId() : null,
+            event.getEntity() != null ? event.getEntity().getGroupId() : null,
+            cloudEvent.getProcessInstanceId(),
+            event.getProcessInstanceId()
+        );
         return cloudEvent;
     }
 
@@ -130,7 +158,15 @@ public class ToCloudTaskRuntimeEventConverter {
         CloudTaskCandidateGroupRemovedEventImpl cloudEvent = new CloudTaskCandidateGroupRemovedEventImpl(
             event.getEntity()
         );
+        cloudEvent.setProcessInstanceId(event.getProcessInstanceId());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        LOGGER.debug(
+            "[runtime] TASK_CANDIDATE_GROUP_REMOVED converted: taskId={}, groupId={}, processInstanceId={}, sourceEventPid={}",
+            event.getEntity() != null ? event.getEntity().getTaskId() : null,
+            event.getEntity() != null ? event.getEntity().getGroupId() : null,
+            cloudEvent.getProcessInstanceId(),
+            event.getProcessInstanceId()
+        );
         return cloudEvent;
     }
 }

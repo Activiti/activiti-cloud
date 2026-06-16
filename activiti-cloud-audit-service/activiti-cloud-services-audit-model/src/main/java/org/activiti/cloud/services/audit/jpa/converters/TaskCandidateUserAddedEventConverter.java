@@ -22,8 +22,12 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.TaskCandidateUserAddedEventEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskCandidateUserAddedEventConverter extends BaseEventToEntityConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskCandidateUserAddedEventConverter.class);
 
     public TaskCandidateUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
@@ -36,7 +40,16 @@ public class TaskCandidateUserAddedEventConverter extends BaseEventToEntityConve
 
     @Override
     public TaskCandidateUserAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new TaskCandidateUserAddedEventEntity((CloudTaskCandidateUserAddedEvent) cloudRuntimeEvent);
+        CloudTaskCandidateUserAddedEvent cloudEvent = (CloudTaskCandidateUserAddedEvent) cloudRuntimeEvent;
+        LOGGER.debug(
+            "[audit] TASK_CANDIDATE_USER_ADDED received: taskId={}, userId={}, processInstanceId={}, processDefinitionId={}, eventId={}",
+            cloudEvent.getEntity() != null ? cloudEvent.getEntity().getTaskId() : null,
+            cloudEvent.getEntity() != null ? cloudEvent.getEntity().getUserId() : null,
+            cloudEvent.getProcessInstanceId(),
+            cloudEvent.getProcessDefinitionId(),
+            cloudEvent.getId()
+        );
+        return new TaskCandidateUserAddedEventEntity(cloudEvent);
     }
 
     @Override
