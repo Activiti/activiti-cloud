@@ -24,13 +24,21 @@ yaml_profile_ids() {
   awk '
     /^[[:space:]]+matrix:/ { in_matrix=1; next }
     in_matrix && /^[[:space:]]+profile:[[:space:]]*$/ { in_profiles=1; next }
+    in_matrix && /^[[:space:]]+include:[[:space:]]*$/ { in_include=1; next }
     in_profiles && /^[[:space:]]+- (rabbitmq|kafka)-[a-z0-9-]+$/ {
       sub(/^[[:space:]]+- /, "")
       print
       next
     }
+    in_include && /^[[:space:]]+profile:[[:space:]]*(rabbitmq|kafka)-[a-z0-9-]+$/ {
+      sub(/^[[:space:]]+profile:[[:space:]]*/, "")
+      print
+      next
+    }
     in_profiles && /^[[:space:]]+steps:/ { exit }
+    in_include && /^[[:space:]]+steps:/ { exit }
     in_profiles && /^[^[:space:]]/ { exit }
+    in_include && /^[^[:space:]]/ { exit }
   ' "${file}" | sort
 }
 
