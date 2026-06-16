@@ -36,7 +36,7 @@ jobs:
     name: playwright (${{ matrix.profile }})
     runs-on: ubuntu-latest
     concurrency:
-      group: playwright-${{ env.CLUSTER_NAME }}-slot-${{ matrix.concurrency-slot }}
+      group: playwright-activiti-slot-${{ matrix.concurrency-slot }}
       cancel-in-progress: false
     strategy:
       max-parallel: 4 # this is a max parallel - above that, the jobs will fail
