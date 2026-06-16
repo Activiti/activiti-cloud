@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
-import { CloudProcessInstance } from '../models/runtime-bundle.models';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessInstance } from '../../models/runtime-bundle.models';
 import {
     expectNoAuditEventsForProcessInstance,
     expectProcessInstancesAdminForKey,
     expectProcessInstancesForKey,
     expectQueryDoesNotIncludeProcessInstance,
     expectQueryProcessInstancesAdminForKey,
-} from '../helpers/security-policies.assertions';
+} from '../../helpers/security-policies.assertions';
 
 activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () => {
     activiti.describe('Admin Access to Process with Variables', () => {

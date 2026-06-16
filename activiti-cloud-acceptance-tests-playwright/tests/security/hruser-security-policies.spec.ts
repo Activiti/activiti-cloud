@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
-import { CloudProcessInstance } from '../models/runtime-bundle.models';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessInstance } from '../../models/runtime-bundle.models';
 import {
     expectEventsForKey,
     expectProcessInstancesForKey,
     expectQueryProcessInstancesForKey,
-} from '../helpers/security-policies.assertions';
+} from '../../helpers/security-policies.assertions';
 
 activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () => {
     activiti.describe('Simple Process Instance Operations', () => {

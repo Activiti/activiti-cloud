@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
+import { activiti, expect } from '../../fixtures/services.fixture';
 
 activiti.describe('Identity Management', { tag: '@smoke' }, () => {
     activiti.describe('Group Search', () => {

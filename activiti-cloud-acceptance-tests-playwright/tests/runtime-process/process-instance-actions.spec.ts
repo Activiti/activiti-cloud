@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
-import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
-import { timeouts } from '../config/runtime/timeouts';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessInstance, ProcessInstanceStatus } from '../../models/runtime-bundle.models';
+import { timeouts } from '../../config/runtime/timeouts';
 
 activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services', { tag: '@slow' }, () => {
     activiti.describe('Signal Between Multiple Runtime Bundles', () => {
