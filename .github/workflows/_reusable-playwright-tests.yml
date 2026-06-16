@@ -35,18 +35,28 @@ jobs:
   test:
     name: playwright (${{ matrix.profile }})
     runs-on: ubuntu-latest
+    concurrency:
+      group: playwright-${{ env.CLUSTER_NAME }}-slot-${{ matrix.concurrency-slot }}
+      cancel-in-progress: false
     strategy:
       max-parallel: 4 # this is a max parallel - above that, the jobs will fail
       fail-fast: false
       matrix:
-        profile:
-          - rabbitmq-partitioned-default
-          - rabbitmq-non-partitioned-default
-          - kafka-partitioned-default
-          - kafka-non-partitioned-default
-          - kafka-partitioned-override
-          - rabbitmq-non-partitioned-pdb
-          - rabbitmq-prefix-pdb
+        include:
+          - profile: rabbitmq-partitioned-default
+            concurrency-slot: 1
+          - profile: rabbitmq-non-partitioned-default
+            concurrency-slot: 2
+          - profile: kafka-partitioned-default
+            concurrency-slot: 3
+          - profile: kafka-non-partitioned-default
+            concurrency-slot: 4
+          - profile: kafka-partitioned-override
+            concurrency-slot: 1
+          - profile: rabbitmq-non-partitioned-pdb
+            concurrency-slot: 2
+          - profile: rabbitmq-prefix-pdb
+            concurrency-slot: 3
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
