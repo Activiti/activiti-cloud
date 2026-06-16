@@ -50,12 +50,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -123,9 +123,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> claimTask(@PathVariable String taskId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication != null ? authentication.getName() : "unknown";
-        LOGGER.debug("User {} wants to claim task {}", userId, taskId);
+        logTaskAttempt("claim", taskId);
         try {
             return taskRepresentationModelAssembler.toModel(
                 taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
@@ -138,9 +136,15 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
-        return taskRepresentationModelAssembler.toModel(
-            taskRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
-        );
+        logTaskAttempt("release", taskId);
+        try {
+            return taskRepresentationModelAssembler.toModel(
+                taskRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
+            );
+        } catch (RuntimeException e) {
+            LOGGER.warn("Releasing task {} failed", taskId, e);
+            throw e;
+        }
     }
 
     @Override
@@ -148,9 +152,7 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication != null ? authentication.getName() : "unknown";
-        LOGGER.debug("User {} wants to complete task {}", userId, taskId);
+        logTaskAttempt("complete", taskId);
         try {
             if (completeTaskPayload == null) {
                 completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
@@ -168,13 +170,25 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
-        Task task = taskRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
-        return taskRepresentationModelAssembler.toModel(task);
+        logTaskAttempt("delete", taskId);
+        try {
+            Task task = taskRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
+            return taskRepresentationModelAssembler.toModel(task);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Deleting task {} failed", taskId, e);
+            throw e;
+        }
     }
 
     @Override
     public EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload) {
-        return taskRepresentationModelAssembler.toModel(taskRuntime.create(createTaskPayload));
+        logTaskAttempt("create a task");
+        try {
+            return taskRepresentationModelAssembler.toModel(taskRuntime.create(createTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Creating task failed", e);
+            throw e;
+        }
     }
 
     @Override
@@ -182,10 +196,16 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload
     ) {
-        if (updateTaskPayload != null) {
-            updateTaskPayload.setTaskId(taskId);
+        logTaskAttempt("update", taskId);
+        try {
+            if (updateTaskPayload != null) {
+                updateTaskPayload.setTaskId(taskId);
+            }
+            return taskRepresentationModelAssembler.toModel(taskRuntime.update(updateTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Updating task {} failed", taskId, e);
+            throw e;
         }
-        return taskRepresentationModelAssembler.toModel(taskRuntime.update(updateTaskPayload));
     }
 
     @Override
@@ -204,10 +224,16 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public void saveTask(@PathVariable String taskId, @RequestBody SaveTaskPayload saveTaskPayload) {
-        if (saveTaskPayload != null) {
-            saveTaskPayload.setTaskId(taskId);
+        logTaskAttempt("save", taskId);
+        try {
+            if (saveTaskPayload != null) {
+                saveTaskPayload.setTaskId(taskId);
+            }
+            taskRuntime.save(payloadConverter.convert(saveTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Saving task {} failed", taskId, e);
+            throw e;
         }
-        taskRuntime.save(payloadConverter.convert(saveTaskPayload));
     }
 
     @Override
@@ -215,10 +241,31 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody AssignTaskPayload assignTaskPayload
     ) {
-        if (assignTaskPayload != null) {
-            assignTaskPayload.setTaskId(taskId);
+        logTaskAttempt("assign", taskId);
+        try {
+            if (assignTaskPayload != null) {
+                assignTaskPayload.setTaskId(taskId);
+            }
+            return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Assigning task {} failed", taskId, e);
+            throw e;
         }
+    }
 
-        return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
+    private void logTaskAttempt(String action, String taskId) {
+        if (LOGGER.isDebugEnabled()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication != null ? authentication.getName() : "unknown";
+            LOGGER.debug("User {} wants to {} task {}", userId, action, taskId);
+        }
+    }
+
+    private void logTaskAttempt(String action) {
+        if (LOGGER.isDebugEnabled()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication != null ? authentication.getName() : "unknown";
+            LOGGER.debug("User {} wants to {}", userId, action);
+        }
     }
 }

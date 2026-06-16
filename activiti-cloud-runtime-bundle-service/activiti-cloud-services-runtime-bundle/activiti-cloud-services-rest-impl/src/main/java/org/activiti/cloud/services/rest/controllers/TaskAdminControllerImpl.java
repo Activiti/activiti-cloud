@@ -47,10 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -102,9 +102,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication != null ? authentication.getName() : "unknown";
-        LOGGER.debug("User {} wants to complete task {}", userId, taskId);
+        logTaskAttempt("complete", taskId);
         try {
             if (completeTaskPayload == null) {
                 completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
@@ -121,8 +119,14 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     @Override
     public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
-        Task task = taskAdminRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
-        return taskRepresentationModelAssembler.toModel(task);
+        logTaskAttempt("delete", taskId);
+        try {
+            Task task = taskAdminRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
+            return taskRepresentationModelAssembler.toModel(task);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Deleting task {} failed", taskId, e);
+            throw e;
+        }
     }
 
     @Override
@@ -130,10 +134,16 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload
     ) {
-        if (updateTaskPayload != null) {
-            updateTaskPayload.setTaskId(taskId);
+        logTaskAttempt("update", taskId);
+        try {
+            if (updateTaskPayload != null) {
+                updateTaskPayload.setTaskId(taskId);
+            }
+            return taskRepresentationModelAssembler.toModel(taskAdminRuntime.update(updateTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Updating task {} failed", taskId, e);
+            throw e;
         }
-        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.update(updateTaskPayload));
     }
 
     @Override
@@ -141,18 +151,47 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody AssignTaskPayload assignTaskPayload
     ) {
-        if (assignTaskPayload != null) assignTaskPayload.setTaskId(taskId);
-
-        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
+        logTaskAttempt("assign", taskId);
+        try {
+            if (assignTaskPayload != null) {
+                assignTaskPayload.setTaskId(taskId);
+            }
+            return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Assigning task {} failed", taskId, e);
+            throw e;
+        }
     }
 
     @Override
     public PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksPayload assignTasksPayload) {
-        Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
-        Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
-        return pagedCollectionModelAssembler.toModel(
-            pageConverter.toSpringPage(pageable, tasks),
-            taskRepresentationModelAssembler
-        );
+        logTaskAttempt("assign multiple tasks");
+        try {
+            Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
+            Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
+            return pagedCollectionModelAssembler.toModel(
+                pageConverter.toSpringPage(pageable, tasks),
+                taskRepresentationModelAssembler
+            );
+        } catch (RuntimeException e) {
+            LOGGER.warn("Assigning multiple tasks failed", e);
+            throw e;
+        }
+    }
+
+    private void logTaskAttempt(String action, String taskId) {
+        if (LOGGER.isDebugEnabled()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication != null ? authentication.getName() : "unknown";
+            LOGGER.debug("User {} wants to {} task {}", userId, action, taskId);
+        }
+    }
+
+    private void logTaskAttempt(String action) {
+        if (LOGGER.isDebugEnabled()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication != null ? authentication.getName() : "unknown";
+            LOGGER.debug("User {} wants to {}", userId, action);
+        }
     }
 }
