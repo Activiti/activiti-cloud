@@ -30,8 +30,8 @@ yaml_profile_ids() {
       print
       next
     }
-    in_include && /^[[:space:]]+profile:[[:space:]]*(rabbitmq|kafka)-[a-z0-9-]+$/ {
-      sub(/^[[:space:]]+profile:[[:space:]]*/, "")
+    in_include && /^[[:space:]]+-[[:space:]]+profile:[[:space:]]*(rabbitmq|kafka)-[a-z0-9-]+$/ {
+      sub(/^[[:space:]]+-[[:space:]]+profile:[[:space:]]*/, "")
       print
       next
     }
