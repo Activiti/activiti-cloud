@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -101,7 +102,8 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication != null ? authentication.getName() : "unknown";
         LOGGER.debug("User {} wants to complete task {}", userId, taskId);
         try {
             if (completeTaskPayload == null) {
