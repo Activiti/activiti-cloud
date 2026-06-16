@@ -115,7 +115,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         queryServiceTestUser,
         queryServiceHrUser,
     }) => {
-        activiti.slow(); // many sequential polls: triple the timeout
+        activiti.slow();
         let processInstanceId: string;
         let taskId: string;
         let hruserTaskId: string;
@@ -175,22 +175,22 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             await taskServiceTestUser.completeTask(taskId);
         });
 
-        await activiti.step('And another user is authenticated as hruser', async () => {
-            // hruser context is provided by taskServiceHrUser / queryServiceHrUser fixtures
-        });
-
-        await activiti.step('And a task variable was created with name start1', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                    const activeTask = tasks.find(t => t.status !== TaskStatus.COMPLETED);
-                    if (!activeTask) return false;
-                    hruserTaskId = activeTask.id;
-                    const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
-                    return vars.some(v => v.name === 'start1');
-                }, pollOptions('querySync'))
-                .toBe(true);
-        });
+        await activiti.step(
+            'And another user is authenticated as hruser ' +
+                'And a task variable was created with name start1',
+            async () => {
+                await expect
+                    .poll(async () => {
+                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
+                        const activeTask = tasks.find(t => t.status !== TaskStatus.COMPLETED);
+                        if (!activeTask) return false;
+                        hruserTaskId = activeTask.id;
+                        const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
+                        return vars.some(v => v.name === 'start1');
+                    }, pollOptions('querySync'))
+                    .toBe(true);
+            }
+        );
 
         await activiti.step('And a task variable was created with name start2', async () => {
             const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
@@ -246,7 +246,6 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
 
-            // Audit event for TASK_UPDATED may arrive before the query DB projection is refreshed.
             await expect
                 .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
                 .toBe('new-task-name');
@@ -332,32 +331,32 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             taskId = task.id;
         });
 
-        await activiti.step('And another user is authenticated as testadmin', async () => {
-            // testadmin context provided by taskAdminServiceTestAdmin fixture
-        });
+        await activiti.step(
+            'And another user is authenticated as testadmin ' +
+                'And the admin updates the updatable fields of the task',
+            async () => {
+                const tomorrow = new Date(Date.now() + 86400000).toISOString();
+                await taskAdminServiceTestAdmin.updateTask(taskId, {
+                    name: 'new-task-name',
+                    priority: 3,
+                    dueDate: tomorrow,
+                    formKey: 'new-task-form-key',
+                });
+            }
+        );
 
-        await activiti.step('And the admin updates the updatable fields of the task', async () => {
-            const tomorrow = new Date(Date.now() + 86400000).toISOString();
-            await taskAdminServiceTestAdmin.updateTask(taskId, {
-                name: 'new-task-name',
-                priority: 3,
-                dueDate: tomorrow,
-                formKey: 'new-task-form-key',
-            });
-        });
-
-        await activiti.step('And another user is authenticated as testuser', async () => {
-            // testuser context provided by taskServiceTestUser fixture
-        });
-
-        await activiti.step('Then the task is updated', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByEntityId(taskId);
-                    return events.some(e => e.eventType === EventType.TASK_UPDATED);
-                }, pollOptions('querySync'))
-                .toBe(true);
-        });
+        await activiti.step(
+            'And another user is authenticated as testuser ' +
+                'Then the task is updated',
+            async () => {
+                await expect
+                    .poll(async () => {
+                        const events = await auditServiceTestUser.getEventsByEntityId(taskId);
+                        return events.some(e => e.eventType === EventType.TASK_UPDATED);
+                    }, pollOptions('querySync'))
+                    .toBe(true);
+            }
+        );
 
         await activiti.step('And the task has the updated fields', async () => {
             const rbTask = await taskServiceTestUser.getTaskById(taskId);
@@ -366,7 +365,6 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
 
-            // Audit event for TASK_UPDATED may arrive before the query DB projection is refreshed.
             await expect
                 .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
                 .toBe('new-task-name');
@@ -521,7 +519,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         taskServiceTestUser,
         queryServiceTestUser,
     }) => {
-        activiti.slow(); // many sequential polls: triple the timeout
+        activiti.slow();
         let processInstanceId: string;
         let taskId: string;
 
@@ -609,18 +607,18 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             await taskServiceTestUser.assignTask(taskId, 'hruser');
         });
 
-        await activiti.step('And another user is authenticated as hruser', async () => {
-            // hruser context is provided by taskServiceHrUser fixture
-        });
-
-        await activiti.step('Then the assignee is hruser', async () => {
-            await expect
-                .poll(async () => {
-                    const task = await taskServiceHrUser.tryGetTaskById(taskId);
-                    return task?.assignee;
-                }, pollOptions('querySync'))
-                .toBe('hruser');
-        });
+        await activiti.step(
+            'And another user is authenticated as hruser ' +
+                'Then the assignee is hruser',
+            async () => {
+                await expect
+                    .poll(async () => {
+                        const task = await taskServiceHrUser.tryGetTaskById(taskId);
+                        return task?.assignee;
+                    }, pollOptions('querySync'))
+                    .toBe('hruser');
+            }
+        );
     });
 
     activiti('current assignee of a task cannot reassign it to a user that is not a candidate', async ({

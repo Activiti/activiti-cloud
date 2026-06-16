@@ -16,79 +16,12 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
+import { expectTaskStatusInRbAndQuery } from '../../helpers/task-assertions';
+import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
-import { TaskService } from '../../services/task.service';
-import { QueryService } from '../../services/query.service';
-import { AuditService } from '../../services/audit.service';
 
 const PROCESS_INSTANCE_WITH_INCLUSIVE_GATEWAY = 'basicInclusiveGateway';
-
-async function findTaskIdByName(
-    taskService: TaskService,
-    processInstanceId: string,
-    taskName: string
-): Promise<string> {
-    let foundTaskId: string | undefined;
-    await expect
-        .poll(async () => {
-            const tasks = await taskService.getTasksByProcessInstanceId(processInstanceId);
-            const match = tasks.find((task) => task.name === taskName);
-            if (match) {
-                foundTaskId = match.id;
-                return true;
-            }
-            return false;
-        }, pollOptions('querySync'))
-        .toBe(true);
-    return foundTaskId as string;
-}
-
-async function claimAndCompleteTask(
-    taskService: TaskService,
-    queryService: QueryService,
-    taskId: string
-): Promise<void> {
-    await taskService.claimTask(taskId);
-    await expect
-        .poll(async () => (await taskService.getTaskById(taskId)).status, pollOptions('querySync'))
-        .toBe(TaskStatus.ASSIGNED);
-    await expect
-        .poll(async () => (await queryService.getTaskById(taskId))?.status, pollOptions('querySync'))
-        .toBe(TaskStatus.ASSIGNED);
-
-    await taskService.completeTask(taskId);
-    await expect
-        .poll(async () => (await queryService.getTaskById(taskId))?.status, pollOptions('querySync'))
-        .toBe(TaskStatus.COMPLETED);
-}
-
-async function expectInclusiveGatewayEvents(
-    auditService: AuditService,
-    processInstanceId: string,
-    gatewayId: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const events = await auditService.getEventsByProcessInstanceId(processInstanceId);
-            const matches = events.filter((event) => {
-                if (event.entityId !== gatewayId) {
-                    return false;
-                }
-                const entity = event.entity as
-                    | { activityType?: string; processInstanceId?: string }
-                    | undefined;
-                return (
-                    entity?.activityType === 'inclusiveGateway' &&
-                    entity?.processInstanceId === processInstanceId
-                );
-            });
-            const hasStarted = matches.some((event) => event.eventType === 'ACTIVITY_STARTED');
-            const hasCompleted = matches.some((event) => event.eventType === 'ACTIVITY_COMPLETED');
-            return hasStarted && hasCompleted;
-        }, pollOptions('querySync'))
-        .toBe(true);
-}
 
 activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }, () => {
     activiti('complete a process instance with inclusive gateway', async ({
@@ -112,28 +45,56 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         );
 
         await activiti.step('Then the task is created Start Process', async () => {
-            await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Start Process'
-            );
+            await expect
+                .poll(
+                    async () =>
+                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Start Process'))?.id,
+                    pollOptions('querySync')
+                )
+                .toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Start Process', async () => {
-            const taskId = await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Start Process'
+            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Start Process');
+            await taskServiceHrUser.claimTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.ASSIGNED
             );
-            await claimAndCompleteTask(taskServiceHrUser, queryServiceHrUser, taskId);
+            await taskServiceHrUser.completeTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.COMPLETED
+            );
         });
 
         await activiti.step(
             'Then events are emitted for the inclusive gateway inclusiveGateway',
             async () => {
-                await expectInclusiveGatewayEvents(
-                    auditServiceHrUser,
-                    processInstanceId,
-                    'inclusiveGateway'
-                );
+                await expect
+                    .poll(
+                        async () =>
+                            (
+                                await auditServiceHrUser.getActivityEventsForEntity(
+                                    processInstanceId,
+                                    'inclusiveGateway',
+                                    'inclusiveGateway'
+                                )
+                            )
+                                .map((event) => event.eventType)
+                                .sort(),
+                        pollOptions('querySync')
+                    )
+                    .toEqual(
+                        expect.arrayContaining([
+                            EventType.ACTIVITY_STARTED,
+                            EventType.ACTIVITY_COMPLETED,
+                        ])
+                    );
             }
         );
 
@@ -147,25 +108,41 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         });
 
         await activiti.step('And the task is created Send e-mail', async () => {
-            await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Send e-mail'
-            );
+            await expect
+                .poll(
+                    async () =>
+                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Send e-mail'))?.id,
+                    pollOptions('querySync')
+                )
+                .toBeTruthy();
         });
 
         await activiti.step('And the task is created Check account', async () => {
-            await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Check account'
-            );
+            await expect
+                .poll(
+                    async () =>
+                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account'))?.id,
+                    pollOptions('querySync')
+                )
+                .toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Send e-mail', async () => {
-            const taskId = await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Send e-mail'
+            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Send e-mail');
+            await taskServiceHrUser.claimTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.ASSIGNED
             );
-            await claimAndCompleteTask(taskServiceHrUser, queryServiceHrUser, taskId);
+            await taskServiceHrUser.completeTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.COMPLETED
+            );
         });
 
         await activiti.step('Then the user will see 1 tasks', async () => {
@@ -178,28 +155,56 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         });
 
         await activiti.step('And the task is created Check account', async () => {
-            await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Check account'
-            );
+            await expect
+                .poll(
+                    async () =>
+                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account'))?.id,
+                    pollOptions('querySync')
+                )
+                .toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Check account', async () => {
-            const taskId = await findTaskIdByName(taskServiceHrUser,
-                processInstanceId,
-                'Check account'
+            const task = await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account');
+            await taskServiceHrUser.claimTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.ASSIGNED
             );
-            await claimAndCompleteTask(taskServiceHrUser, queryServiceHrUser, taskId);
+            await taskServiceHrUser.completeTask(task!.id);
+            await expectTaskStatusInRbAndQuery(
+                taskServiceHrUser,
+                queryServiceHrUser,
+                task!.id,
+                TaskStatus.COMPLETED
+            );
         });
 
         await activiti.step(
             'Then events are emitted for the inclusive gateway inclusiveGatewayEnd',
             async () => {
-                await expectInclusiveGatewayEvents(
-                    auditServiceHrUser,
-                    processInstanceId,
-                    'inclusiveGatewayEnd'
-                );
+                await expect
+                    .poll(
+                        async () =>
+                            (
+                                await auditServiceHrUser.getActivityEventsForEntity(
+                                    processInstanceId,
+                                    'inclusiveGatewayEnd',
+                                    'inclusiveGateway'
+                                )
+                            )
+                                .map((event) => event.eventType)
+                                .sort(),
+                        pollOptions('querySync')
+                    )
+                    .toEqual(
+                        expect.arrayContaining([
+                            EventType.ACTIVITY_STARTED,
+                            EventType.ACTIVITY_COMPLETED,
+                        ])
+                    );
             }
         );
 

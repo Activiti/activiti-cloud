@@ -167,6 +167,14 @@ export class RuntimeBundleService extends BaseService {
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
     }
 
+    async getProcessInstanceVariableValue(
+        processInstanceId: string,
+        variableName: string
+    ): Promise<unknown> {
+        const variables = await this.getProcessInstanceVariables(processInstanceId);
+        return variables.find((variable) => variable.name === variableName)?.value;
+    }
+
     async setProcessVariables(
         processInstanceId: string,
         variables: Record<string, unknown>
@@ -209,6 +217,18 @@ export class RuntimeBundleService extends BaseService {
             this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
         }
         return processInstance;
+    }
+
+    async trySendStartMessage(payload: {
+        name: string;
+        businessKey?: string;
+        variables?: Record<string, unknown>;
+    }): Promise<RequestResponse> {
+        const body = {
+            payloadType: 'StartMessagePayload' as const,
+            ...payload,
+        };
+        return this.post(`${this.basePath}/process-instances/message`, { data: body });
     }
 
     async sendReceiveMessage(payload: {

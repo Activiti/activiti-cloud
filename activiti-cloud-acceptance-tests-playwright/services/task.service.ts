@@ -74,6 +74,11 @@ export class TaskService extends BaseService {
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
+    async findTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask | undefined> {
+        const tasks = await this.getTasksByProcessInstanceId(processInstanceId);
+        return tasks.find((task) => task.name === taskName);
+    }
+
     async getTaskById(taskId: string): Promise<CloudTask> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}`);
         return this.unwrapEntity<CloudTask>(response);

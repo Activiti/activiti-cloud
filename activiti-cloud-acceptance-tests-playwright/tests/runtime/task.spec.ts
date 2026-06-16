@@ -340,15 +340,15 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             }
         );
 
-        await activiti.step('And another user is authenticated as hruser', async () => {
-            // hruser context is provided by taskServiceHrUser fixture
-        });
-
-        await activiti.step('Then the task cannot be claimed by user', async () => {
-            const response = await taskServiceHrUser.claimTask(taskId);
-            expectClientError(response, 'Unable to find task');
-            const hrTasks = await queryServiceHrUser.getAllTasks();
-            expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
-        });
+        await activiti.step(
+            'And another user is authenticated as hruser ' +
+                'Then the task cannot be claimed by user',
+            async () => {
+                const response = await taskServiceHrUser.claimTask(taskId);
+                expectClientError(response, 'Unable to find task');
+                const hrTasks = await queryServiceHrUser.getAllTasks();
+                expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
+            }
+        );
     });
 });

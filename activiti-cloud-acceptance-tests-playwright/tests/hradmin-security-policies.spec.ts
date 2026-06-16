@@ -56,8 +56,6 @@ activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () 
             });
 
             await activiti.step('And the user can access audit admin endpoints', async () => {
-                // Note: /audit/admin/v1/events does not support filtering by process instance.
-                // We only validate the endpoint is reachable and returns data.
                 const adminEvents = await securityPoliciesServiceProcessAdmin.getEventsByEntityIdAdmin(
                     processWithVariablesInstance.id
                 );

@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-export function isDiagramShown(diagram: string): boolean {
-    const trimmed = diagram?.trim() ?? '';
-    return trimmed.length > 0 && /<svg/i.test(trimmed);
-}
-
-export function isDiagramEmpty(diagram: string): boolean {
-    return !diagram?.trim();
-}
-
-export function normalizeSvg(svg: string): string {
-    return svg
-        .replace(/<path\b[^>]*\/>/g, '')
-        .replace(/<path\b[^>]*>[\s\S]*?<\/path>/g, '')
-        .replace(/\sstyle="[^"]*"/g, '')
-        .replace(/>\s+</g, '><')
-        .replace(/\s+/g, ' ')
-        .trim();
+export function formatDefaultUtc(date: Date): string {
+    const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+    const y = date.getUTCFullYear();
+    const M = pad(date.getUTCMonth() + 1);
+    const d = pad(date.getUTCDate());
+    const h = pad(date.getUTCHours());
+    const m = pad(date.getUTCMinutes());
+    const s = pad(date.getUTCSeconds());
+    const ms = pad(date.getUTCMilliseconds(), 3);
+    return `${y}-${M}-${d}T${h}:${m}:${s}.${ms}+0000`;
 }

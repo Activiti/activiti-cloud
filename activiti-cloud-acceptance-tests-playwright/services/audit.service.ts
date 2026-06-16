@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
+import { CloudRuntimeEvent, EventQueryParams, EventType } from '../models/audit.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
+
+const INTEGRATION_EVENT_TYPES: readonly string[] = [
+    EventType.INTEGRATION_REQUESTED,
+    EventType.INTEGRATION_RESULT_RECEIVED,
+    EventType.INTEGRATION_ERROR_RECEIVED,
+];
 
 function buildAuditSearch(params?: EventQueryParams): string | undefined {
     const parts: string[] = [];
@@ -68,6 +74,109 @@ export class AuditService extends BaseService {
 
     async getEventsByProcessInstanceId(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
         return this.getEvents({ processInstanceId });
+    }
+
+    async getIntegrationContextEvents(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEventsByProcessInstanceId(processInstanceId);
+        return events.filter((event) => INTEGRATION_EVENT_TYPES.includes(event.eventType));
+    }
+
+    async getActivityEventsForEntity(
+        processInstanceId: string,
+        entityId: string,
+        activityType: string
+    ): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEventsByProcessInstanceId(processInstanceId);
+        return events.filter((event) => {
+            if (event.entityId !== entityId) {
+                return false;
+            }
+            const entity = event.entity as
+                | { activityType?: string; processInstanceId?: string }
+                | undefined;
+            return (
+                entity?.activityType === activityType &&
+                entity?.processInstanceId === processInstanceId
+            );
+        });
+    }
+
+    async getActivityEventsByType(
+        processInstanceId: string,
+        activityType: string
+    ): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEventsByProcessInstanceId(processInstanceId);
+        return events.filter((event) => {
+            const entity = event.entity as
+                | { activityType?: string; processInstanceId?: string }
+                | undefined;
+            return (
+                entity?.activityType === activityType &&
+                entity?.processInstanceId === processInstanceId
+            );
+        });
+    }
+
+    async getEventsByEntityAndType(
+        processInstanceId: string,
+        entityId: string,
+        eventType: EventType
+    ): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEvents({ processInstanceId, entityId });
+        return events.filter(
+            (event) =>
+                event.eventType === eventType &&
+                event.entityId === entityId &&
+                event.processInstanceId === processInstanceId
+        );
+    }
+
+    async getEventTypesByEntityAndDefinitionKey(
+        entityId: string,
+        processDefinitionKey: string
+    ): Promise<string[]> {
+        const events = await this.getEventsByEntityId(entityId);
+        return events
+            .filter((event) =>
+                (event.processDefinitionId ?? '').startsWith(processDefinitionKey)
+            )
+            .map((event) => event.eventType);
+    }
+
+    async getMessageEventsForProcessInstance(
+        processInstanceId: string,
+        eventType: EventType,
+        messageName: string
+    ): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEvents({ processInstanceId, eventType });
+        return events.filter((event) => {
+            const entity = event.entity as
+                | { messagePayload?: { name?: string } }
+                | undefined;
+            return (
+                event.eventType === eventType &&
+                event.processInstanceId === processInstanceId &&
+                entity?.messagePayload?.name === messageName
+            );
+        });
+    }
+
+    async getMessageEventsByDefinitionAndBusinessKey(
+        processDefinitionKey: string,
+        businessKey: string,
+        eventType: EventType,
+        messageName: string
+    ): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getEvents({ processDefinitionKey });
+        return events.filter((event) => {
+            if (event.businessKey !== businessKey || event.eventType !== eventType) {
+                return false;
+            }
+            const entity = event.entity as
+                | { messagePayload?: { name?: string } }
+                | undefined;
+            return entity?.messagePayload?.name === messageName;
+        });
     }
 
     async checkServicesHealth(): Promise<void> {

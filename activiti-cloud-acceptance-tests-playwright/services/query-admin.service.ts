@@ -18,6 +18,7 @@ import {
     CloudIntegrationContext,
     CloudProcessInstance,
     CloudServiceTask,
+    ProcessInstanceStatus,
     ProcessQueryParams,
     ServiceTaskStatus,
 } from '../models/runtime-bundle.models';
@@ -56,6 +57,16 @@ export class QueryAdminService extends BaseService {
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstanceStatusesByBusinessKey(
+        processDefinitionKey: string,
+        businessKey: string
+    ): Promise<ProcessInstanceStatus[]> {
+        const instances = await this.getProcessInstancesAdminWithParams({ processDefinitionKey });
+        return instances
+            .filter((instance) => instance.businessKey === businessKey)
+            .map((instance) => instance.status);
     }
 
     async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {

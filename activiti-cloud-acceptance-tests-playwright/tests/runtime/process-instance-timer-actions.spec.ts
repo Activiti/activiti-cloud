@@ -19,31 +19,10 @@ import { pollOptions } from '../../config/runtime/timeouts';
 import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { AuditService } from '../../services/audit.service';
-import { QueryService } from '../../services/query.service';
 
 const INTERMEDIATE_TIMER_EVENT_PROCESS = 'intermediateTimerEventExample';
 const START_TIMER_EVENT_PROCESS = 'startTimerEventExample';
 const BOUNDARY_TIMER_EVENT_PROCESS = 'boundaryTimerEventExample';
-
-async function expectTimerEvent(
-    auditService: AuditService,
-    processInstanceId: string,
-    timerId: string,
-    eventType: EventType
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const events = await auditService.getEvents({ processInstanceId, entityId: timerId });
-            return events.some(
-                (event) =>
-                    event.eventType === eventType &&
-                    event.entityId === timerId &&
-                    event.processInstanceId === processInstanceId
-            );
-        }, pollOptions('querySync'))
-        .toBe(true);
-}
 
 activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
     // FIXME upstream BPMN bug: intermediateTimerEventExample is deployed with a raw-UUID
@@ -70,24 +49,38 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
             await activiti.step(
                 "Then TIMER_SCHEDULED events are emitted for the timer 'timer' and timeout 5 seconds",
                 async () => {
-                    await expectTimerEvent(
-                        auditServiceHrUser,
-                        processInstanceId,
-                        'timer',
-                        EventType.TIMER_SCHEDULED
-                    );
+                    await expect
+                        .poll(
+                            async () =>
+                                (
+                                    await auditServiceHrUser.getEventsByEntityAndType(
+                                        processInstanceId,
+                                        'timer',
+                                        EventType.TIMER_SCHEDULED
+                                    )
+                                ).length,
+                            pollOptions('querySync')
+                        )
+                        .toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And TIMER_EXECUTED events are emitted for the timer 'timer' and timeout 10 seconds",
                 async () => {
-                    await expectTimerEvent(
-                        auditServiceHrUser,
-                        processInstanceId,
-                        'timer',
-                        EventType.TIMER_EXECUTED
-                    );
+                    await expect
+                        .poll(
+                            async () =>
+                                (
+                                    await auditServiceHrUser.getEventsByEntityAndType(
+                                        processInstanceId,
+                                        'timer',
+                                        EventType.TIMER_EXECUTED
+                                    )
+                                ).length,
+                            pollOptions('querySync')
+                        )
+                        .toBeGreaterThan(0);
                 }
             );
 
@@ -134,27 +127,22 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
                 'And timer events are emitted for processes called START_TIMER_EVENT_PROCESS',
                 async () => {
                     await expect
-                        .poll(async () => {
-                            const events = await auditServiceTestAdmin.getEventsByEntityId('theStart');
-                            const filtered = events.filter((event) =>
-                                (event.processDefinitionId ?? '').startsWith(
+                        .poll(
+                            async () =>
+                                auditServiceTestAdmin.getEventTypesByEntityAndDefinitionKey(
+                                    'theStart',
                                     START_TIMER_EVENT_PROCESS
-                                )
-                            );
-                            const eventTypes = new Set(filtered.map((event) => event.eventType));
-                            return {
-                                scheduled: eventTypes.has(EventType.TIMER_SCHEDULED),
-                                fired: eventTypes.has(EventType.TIMER_FIRED),
-                                executed: eventTypes.has(EventType.TIMER_EXECUTED),
-                                activityCompleted: eventTypes.has(EventType.ACTIVITY_COMPLETED),
-                            };
-                        }, pollOptions('querySync'))
-                        .toEqual({
-                            scheduled: true,
-                            fired: true,
-                            executed: true,
-                            activityCompleted: true,
-                        });
+                                ),
+                            pollOptions('querySync')
+                        )
+                        .toEqual(
+                            expect.arrayContaining([
+                                EventType.TIMER_SCHEDULED,
+                                EventType.TIMER_FIRED,
+                                EventType.TIMER_EXECUTED,
+                                EventType.ACTIVITY_COMPLETED,
+                            ])
+                        );
                 }
             );
         }
@@ -180,24 +168,38 @@ activiti.describe('Process Instance Timer Actions', { tag: '@slow' }, () => {
             await activiti.step(
                 "Then TIMER_SCHEDULED boundary events are emitted for the timer 'timer' and timeout 5 seconds",
                 async () => {
-                    await expectTimerEvent(
-                        auditServiceHrUser,
-                        processInstanceId,
-                        'timer',
-                        EventType.TIMER_SCHEDULED
-                    );
+                    await expect
+                        .poll(
+                            async () =>
+                                (
+                                    await auditServiceHrUser.getEventsByEntityAndType(
+                                        processInstanceId,
+                                        'timer',
+                                        EventType.TIMER_SCHEDULED
+                                    )
+                                ).length,
+                            pollOptions('querySync')
+                        )
+                        .toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And TIMER_EXECUTED events are emitted for the timer 'timer' and timeout 10 seconds",
                 async () => {
-                    await expectTimerEvent(
-                        auditServiceHrUser,
-                        processInstanceId,
-                        'timer',
-                        EventType.TIMER_EXECUTED
-                    );
+                    await expect
+                        .poll(
+                            async () =>
+                                (
+                                    await auditServiceHrUser.getEventsByEntityAndType(
+                                        processInstanceId,
+                                        'timer',
+                                        EventType.TIMER_EXECUTED
+                                    )
+                                ).length,
+                            pollOptions('querySync')
+                        )
+                        .toBeGreaterThan(0);
                 }
             );
 

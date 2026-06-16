@@ -17,32 +17,10 @@
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
 import { EventType } from '../../models/audit.models';
-import { CloudVariableInstance } from '../../models/process-variable.models';
+import { formatDefaultUtc } from '../../helpers/date-format';
 
 const TASK_DATE_VAR_MAPPING_PROCESS = 'taskDateVarMapping';
 const PROCESS_START_EVENT_VARIABLE_MAPPING_PROCESS = 'process-b42a166d-605b-4eec-8b96-82b1253666bf';
-
-// Mirrors Java DEFAULT_FORMAT "yyyy-MM-dd'T'HH:mm:ss.SSSZ" in UTC (e.g. "2019-09-09T00:00:00.000+0000").
-function formatDefaultUtc(date: Date): string {
-    const pad = (n: number, w = 2) => String(n).padStart(w, '0');
-    const y = date.getUTCFullYear();
-    const M = pad(date.getUTCMonth() + 1);
-    const d = pad(date.getUTCDate());
-    const h = pad(date.getUTCHours());
-    const m = pad(date.getUTCMinutes());
-    const s = pad(date.getUTCSeconds());
-    const ms = pad(date.getUTCMilliseconds(), 3);
-    return `${y}-${M}-${d}T${h}:${m}:${s}.${ms}+0000`;
-}
-
-// Mirrors Java ISO_FORMAT "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" in UTC (e.g. "2026-05-29T13:00:00.000Z").
-function formatIsoUtc(date: Date): string {
-    return date.toISOString();
-}
-
-function findVar(vars: CloudVariableInstance[], name: string): CloudVariableInstance | undefined {
-    return vars.find((v) => v.name === name);
-}
 
 activiti.describe('Process Variable Mapping Types', () => {
     activiti('variable types are correct for variables', async ({
@@ -86,7 +64,7 @@ activiti.describe('Process Variable Mapping Types', () => {
                         [processVariableInteger]: 123,
                         [processVariableBoolean]: true,
                         [processVariableDate]: '2019-09-09',
-                        [processVariableDateTime]: formatIsoUtc(testDateTime),
+                        [processVariableDateTime]: testDateTime.toISOString(),
                     }
                 );
                 processInstanceId = processInstance.id;
@@ -113,20 +91,20 @@ activiti.describe('Process Variable Mapping Types', () => {
 
         await activiti.step('And variables have correct values', async () => {
             const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
-            expect(findVar(vars, processVariableString)?.value).toBe('stringValue1');
-            expect(findVar(vars, processVariableInteger)?.value).toBe(123);
-            expect(findVar(vars, processVariableBoolean)?.value).toBe(true);
-            expect(findVar(vars, processVariableDate)?.value).toBe(expectedDate);
-            expect(findVar(vars, processVariableDateTime)?.value).toBe(expectedDateTime);
+            expect(vars.find((v) => v.name === processVariableString)?.value).toBe('stringValue1');
+            expect(vars.find((v) => v.name === processVariableInteger)?.value).toBe(123);
+            expect(vars.find((v) => v.name === processVariableBoolean)?.value).toBe(true);
+            expect(vars.find((v) => v.name === processVariableDate)?.value).toBe(expectedDate);
+            expect(vars.find((v) => v.name === processVariableDateTime)?.value).toBe(expectedDateTime);
         });
 
         await activiti.step('And variables have correct types in rb', async () => {
             const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
-            expect(findVar(vars, processVariableString)?.type).toBe('string');
-            expect(findVar(vars, processVariableInteger)?.type).toBe('integer');
-            expect(findVar(vars, processVariableBoolean)?.type).toBe('boolean');
-            expect(findVar(vars, processVariableDate)?.type).toBe('date');
-            expect(findVar(vars, processVariableDateTime)?.type).toBe('date');
+            expect(vars.find((v) => v.name === processVariableString)?.type).toBe('string');
+            expect(vars.find((v) => v.name === processVariableInteger)?.type).toBe('integer');
+            expect(vars.find((v) => v.name === processVariableBoolean)?.type).toBe('boolean');
+            expect(vars.find((v) => v.name === processVariableDate)?.type).toBe('date');
+            expect(vars.find((v) => v.name === processVariableDateTime)?.type).toBe('date');
         });
 
         await activiti.step('And check variables in query', async () => {
@@ -181,20 +159,20 @@ activiti.describe('Process Variable Mapping Types', () => {
             expect(matched.status).toBe('CREATED');
 
             const taskVars = await taskServiceHrUser.getTaskVariables(taskId);
-            expect(findVar(taskVars, taskVariableString)?.value).toBe('stringValue1');
-            expect(findVar(taskVars, taskVariableInteger)?.value).toBe(123);
-            expect(findVar(taskVars, taskVariableBoolean)?.value).toBe(true);
-            expect(findVar(taskVars, taskVariableDate)?.value).toBe(expectedDate);
-            expect(findVar(taskVars, taskVariableDateTime)?.value).toBe(expectedDateTime);
+            expect(taskVars.find((v) => v.name === taskVariableString)?.value).toBe('stringValue1');
+            expect(taskVars.find((v) => v.name === taskVariableInteger)?.value).toBe(123);
+            expect(taskVars.find((v) => v.name === taskVariableBoolean)?.value).toBe(true);
+            expect(taskVars.find((v) => v.name === taskVariableDate)?.value).toBe(expectedDate);
+            expect(taskVars.find((v) => v.name === taskVariableDateTime)?.value).toBe(expectedDateTime);
         });
 
         await activiti.step('And variables types in task are correct', async () => {
             const taskVars = await taskServiceHrUser.getTaskVariables(taskId);
-            expect(findVar(taskVars, taskVariableString)?.type).toBe('string');
-            expect(findVar(taskVars, taskVariableInteger)?.type).toBe('integer');
-            expect(findVar(taskVars, taskVariableBoolean)?.type).toBe('boolean');
-            expect(findVar(taskVars, taskVariableDate)?.type).toBe('date');
-            expect(findVar(taskVars, taskVariableDateTime)?.type).toBe('date');
+            expect(taskVars.find((v) => v.name === taskVariableString)?.type).toBe('string');
+            expect(taskVars.find((v) => v.name === taskVariableInteger)?.type).toBe('integer');
+            expect(taskVars.find((v) => v.name === taskVariableBoolean)?.type).toBe('boolean');
+            expect(taskVars.find((v) => v.name === taskVariableDate)?.type).toBe('date');
+            expect(taskVars.find((v) => v.name === taskVariableDateTime)?.type).toBe('date');
         });
 
         await activiti.step('When the user ask to claim the task', async () => {
@@ -216,11 +194,11 @@ activiti.describe('Process Variable Mapping Types', () => {
                 .poll(async () => {
                     const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
                     return {
-                        s: findVar(vars, processVariableString)?.value,
-                        i: findVar(vars, processVariableInteger)?.value,
-                        b: findVar(vars, processVariableBoolean)?.value,
-                        d: findVar(vars, processVariableDate)?.value,
-                        dt: findVar(vars, processVariableDateTime)?.value,
+                        s: vars.find((v) => v.name === processVariableString)?.value,
+                        i: vars.find((v) => v.name === processVariableInteger)?.value,
+                        b: vars.find((v) => v.name === processVariableBoolean)?.value,
+                        d: vars.find((v) => v.name === processVariableDate)?.value,
+                        dt: vars.find((v) => v.name === processVariableDateTime)?.value,
                     };
                 }, pollOptions('querySync'))
                 .toEqual({

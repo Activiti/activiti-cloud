@@ -17,22 +17,6 @@
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pollOptions } from '../../config/runtime/timeouts';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
-import { RuntimeBundleService } from '../../services/runtime-bundle.service';
-
-async function expectVariableValue(
-    rbService: RuntimeBundleService,
-    processInstanceId: string,
-    variableName: string,
-    expectedValue: unknown
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const variables = await rbService.getProcessInstanceVariables(processInstanceId);
-            const match = variables.find((v) => v.name === variableName);
-            return match ? String(match.value) : undefined;
-        }, pollOptions('querySync'))
-        .toBe(String(expectedValue));
-}
 
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
     activiti(
@@ -67,15 +51,29 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                 }
             );
 
-            await activiti.step('Then the list of errors messages is empty', async () => {
-                // PUT returning 200 without throwing means no errors — verified implicitly above
-            });
-
             await activiti.step(
                 'And variable start1 has value value1 and start2 has value value2',
                 async () => {
-                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start1', 'value1');
-                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start2', 'value2');
+                    await expect
+                        .poll(
+                            async () =>
+                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                    processInstanceId,
+                                    'start1'
+                                ),
+                            pollOptions('querySync')
+                        )
+                        .toBe('value1');
+                    await expect
+                        .poll(
+                            async () =>
+                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                    processInstanceId,
+                                    'start2'
+                                ),
+                            pollOptions('querySync')
+                        )
+                        .toBe('value2');
                 }
             );
         }
@@ -124,18 +122,26 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'Then variable dummy1 has value dummyValue1 and dummy2 has value dummyValue2',
                 async () => {
-                    await expectVariableValue(
-                        runtimeBundleServiceTestUser,
-                        processInstanceId,
-                        'dummy1',
-                        'dummyValue1'
-                    );
-                    await expectVariableValue(
-                        runtimeBundleServiceTestUser,
-                        processInstanceId,
-                        'dummy2',
-                        'dummyValue2'
-                    );
+                    await expect
+                        .poll(
+                            async () =>
+                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                    processInstanceId,
+                                    'dummy1'
+                                ),
+                            pollOptions('querySync')
+                        )
+                        .toBe('dummyValue1');
+                    await expect
+                        .poll(
+                            async () =>
+                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                    processInstanceId,
+                                    'dummy2'
+                                ),
+                            pollOptions('querySync')
+                        )
+                        .toBe('dummyValue2');
                 }
             );
         }
@@ -189,23 +195,28 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
 
             await activiti.step('Then the process variable dummy1 is deleted', async () => {
                 await expect
-                    .poll(async () => {
-                        const variables =
-                            await runtimeBundleServiceTestUser.getProcessInstanceVariables(
-                                processInstanceId
-                            );
-                        return variables.some((v) => v.name === 'dummy1');
-                    }, pollOptions('querySync'))
-                    .toBe(false);
+                    .poll(
+                        async () =>
+                            runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                processInstanceId,
+                                'dummy1'
+                            ),
+                        pollOptions('querySync')
+                    )
+                    .toBeUndefined();
             });
 
             await activiti.step('And the process variable dummy2 is created', async () => {
-                await expectVariableValue(
-                    runtimeBundleServiceTestUser,
-                    processInstanceId,
-                    'dummy2',
-                    'dummyValue2'
-                );
+                await expect
+                    .poll(
+                        async () =>
+                            runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
+                                processInstanceId,
+                                'dummy2'
+                            ),
+                        pollOptions('querySync')
+                    )
+                    .toBe('dummyValue2');
             });
         }
     );

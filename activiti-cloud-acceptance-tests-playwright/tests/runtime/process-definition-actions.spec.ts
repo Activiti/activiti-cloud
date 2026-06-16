@@ -18,21 +18,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { activiti, expect } from '../../fixtures/services.fixture';
+import { normalizeSvg } from '../../helpers/diagram-utils';
 import { pickHighestVersionByKey } from '../../helpers/process-definition';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
-
-// Mirrors XmlAssert ignoreWhitespace + node filter (drop <path>) + attr filter (drop style="...").
-function normalizeSvg(svg: string): string {
-    return svg
-        .replace(/<path\b[^>]*\/>/g, '')
-        .replace(/<path\b[^>]*>[\s\S]*?<\/path>/g, '')
-        .replace(/\sstyle="[^"]*"/g, '')
-        .replace(/>\s+</g, '><')
-        .replace(/\s+/g, ' ')
-        .trim();
-}
 
 activiti.describe('Process Definition Actions', () => {
     activiti('as a user I should be able to get process model', async ({ queryServiceTestUser }) => {
