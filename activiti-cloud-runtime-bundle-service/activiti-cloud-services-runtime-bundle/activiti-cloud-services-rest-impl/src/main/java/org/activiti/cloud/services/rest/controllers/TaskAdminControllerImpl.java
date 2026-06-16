@@ -43,8 +43,11 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +56,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TaskAdminControllerImpl implements TaskAdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(TaskAdminControllerImpl.class);
 
     private final TaskAdminRuntime taskAdminRuntime;
 
@@ -96,14 +101,20 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
-        if (completeTaskPayload == null) {
-            completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
-        } else {
-            completeTaskPayload.setTaskId(taskId);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("User {} wants to complete task {}", userId, taskId);
+        try {
+            if (completeTaskPayload == null) {
+                completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
+            } else {
+                completeTaskPayload.setTaskId(taskId);
+            }
+            Task task = taskAdminRuntime.complete(completeTaskPayload);
+            return taskRepresentationModelAssembler.toModel(task);
+        } catch (RuntimeException e) {
+            log.warn("Completing task {} failed", taskId, e);
+            throw e;
         }
-
-        Task task = taskAdminRuntime.complete(completeTaskPayload);
-        return taskRepresentationModelAssembler.toModel(task);
     }
 
     @Override

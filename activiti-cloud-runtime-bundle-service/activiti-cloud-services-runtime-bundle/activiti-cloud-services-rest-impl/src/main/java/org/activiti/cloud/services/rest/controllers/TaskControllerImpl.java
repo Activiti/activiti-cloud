@@ -46,6 +46,8 @@ import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -53,6 +55,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,6 +65,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class TaskControllerImpl implements TaskController {
+
+    private static final Logger log = LoggerFactory.getLogger(TaskControllerImpl.class);
 
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
@@ -117,9 +122,16 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> claimTask(@PathVariable String taskId) {
-        return taskRepresentationModelAssembler.toModel(
-            taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
-        );
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("User {} wants to claim task {}", userId, taskId);
+        try {
+            return taskRepresentationModelAssembler.toModel(
+                taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
+            );
+        } catch (RuntimeException e) {
+            log.warn("Claiming task {} failed", taskId, e);
+            throw e;
+        }
     }
 
     @Override
@@ -134,15 +146,21 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
-        if (completeTaskPayload == null) {
-            completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
-        } else {
-            completeTaskPayload.setTaskId(taskId);
-            completeTaskPayload = payloadConverter.convert(completeTaskPayload);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("User {} wants to complete task {}", userId, taskId);
+        try {
+            if (completeTaskPayload == null) {
+                completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
+            } else {
+                completeTaskPayload.setTaskId(taskId);
+                completeTaskPayload = payloadConverter.convert(completeTaskPayload);
+            }
+            Task task = taskRuntime.complete(completeTaskPayload);
+            return taskRepresentationModelAssembler.toModel(task);
+        } catch (RuntimeException e) {
+            log.warn("Completing task {} failed", taskId, e);
+            throw e;
         }
-
-        Task task = taskRuntime.complete(completeTaskPayload);
-        return taskRepresentationModelAssembler.toModel(task);
     }
 
     @Override
