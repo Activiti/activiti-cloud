@@ -169,7 +169,7 @@ public class EmbeddedSubProcessAuditIT {
                         tuple(ACTIVITY_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
+                        tuple(TASK_CANDIDATE_GROUP_ADDED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(TASK_CREATED, processInstanceId, rootRootProcessInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS)
                     );
 
@@ -246,7 +246,7 @@ public class EmbeddedSubProcessAuditIT {
                     )
                     .containsExactly(
                         tuple(TASK_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
-                        tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null),
+                        tuple(TASK_CANDIDATE_GROUP_REMOVED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(ACTIVITY_COMPLETED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
                         tuple(ACTIVITY_STARTED, processInstanceId, SIMPLE_EMBEDDED_SUB_PROCESS),
@@ -327,7 +327,12 @@ public class EmbeddedSubProcessAuditIT {
                             SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
                         ),
                         tuple(ACTIVITY_STARTED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(TASK_CANDIDATE_GROUP_ADDED, null, null, null),
+                        tuple(
+                            TASK_CANDIDATE_GROUP_ADDED,
+                            processInstanceId,
+                            null,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                        ),
                         tuple(
                             TASK_CREATED,
                             processInstanceId,
@@ -410,7 +415,12 @@ public class EmbeddedSubProcessAuditIT {
                     )
                     .containsExactly(
                         tuple(TASK_COMPLETED, processInstanceId, null, SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY),
-                        tuple(TASK_CANDIDATE_GROUP_REMOVED, null, null, null),
+                        tuple(
+                            TASK_CANDIDATE_GROUP_REMOVED,
+                            processInstanceId,
+                            null,
+                            SIMPLE_EMBEDDED_SUB_PROCESS_WITH_CALLACTIVITY
+                        ),
                         tuple(
                             ACTIVITY_COMPLETED,
                             processInstanceId,
