@@ -24,6 +24,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ProcessVariableHistoryRepository extends JpaRepository<ProcessVariableHistoryEntity, Long> {
     List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
@@ -36,7 +37,8 @@ public interface ProcessVariableHistoryRepository extends JpaRepository<ProcessV
         Pageable pageable
     );
 
-    @Modifying
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ProcessVariableHistory h WHERE h.recordCreateTime < :cutoff")
     int deleteByRecordCreateTimeBefore(@Param("cutoff") Date cutoff);
 }
