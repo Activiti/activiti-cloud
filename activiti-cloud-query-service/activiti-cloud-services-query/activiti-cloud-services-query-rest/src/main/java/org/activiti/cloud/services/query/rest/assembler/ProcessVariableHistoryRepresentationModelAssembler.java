@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app.repository;
+package org.activiti.cloud.services.query.rest.assembler;
 
-import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public interface ProcessVariableHistoryRepository extends JpaRepository<ProcessVariableHistoryEntity, Long> {
-    List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
-        String processInstanceId,
-        String variableName
-    );
+public class ProcessVariableHistoryRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessVariableHistoryEntity, EntityModel<ProcessVariableHistoryEntity>> {
 
-    Page<ProcessVariableHistoryEntity> findByProcessInstanceIdOrderByEventTimeAscSequenceNumberAsc(
-        String processInstanceId,
-        Pageable pageable
-    );
+    @Override
+    public EntityModel<ProcessVariableHistoryEntity> toModel(ProcessVariableHistoryEntity entity) {
+        return EntityModel.of(entity);
+    }
 }

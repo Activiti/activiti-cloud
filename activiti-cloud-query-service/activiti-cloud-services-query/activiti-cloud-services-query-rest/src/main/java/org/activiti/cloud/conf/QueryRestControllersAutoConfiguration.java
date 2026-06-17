@@ -34,6 +34,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceTasksAdminControlle
 import org.activiti.cloud.services.query.rest.ProcessInstanceTasksController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableAdminController;
 import org.activiti.cloud.services.query.rest.ProcessInstanceVariableController;
+import org.activiti.cloud.services.query.rest.ProcessInstanceVariableHistoryAdminController;
 import org.activiti.cloud.services.query.rest.ProcessModelAdminController;
 import org.activiti.cloud.services.query.rest.ProcessModelController;
 import org.activiti.cloud.services.query.rest.ServiceTaskAdminController;
@@ -84,6 +85,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         IntegrationContextAdminController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
         ProcessInstanceSequenceFlowsAdminController.class,
+        ProcessInstanceVariableHistoryAdminController.class
     }
 )
 @PropertySource("classpath:query-rest.properties")
