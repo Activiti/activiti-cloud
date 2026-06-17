@@ -102,6 +102,21 @@ class ProcessInstanceVariableHistoryAdminControllerIT {
     }
 
     @Test
+    void should_returnHistory_when_calledWithHalJson() {
+        var processInstanceId = UUID.randomUUID().toString();
+        historyRepository.save(buildHistoryEntity(processInstanceId, "myVar", "hello", new Date(1000), 1));
+
+        given()
+            .accept("application/hal+json")
+            .when()
+            .get("/admin/v1/process-instances/{processInstanceId}/variables/history", processInstanceId)
+            .then()
+            .statusCode(200)
+            .body("_embedded", org.hamcrest.Matchers.notNullValue())
+            .body("_links", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test
     void should_returnEmptyList_when_noHistoryExistsForProcessInstance() {
         var processInstanceId = UUID.randomUUID().toString();
 
