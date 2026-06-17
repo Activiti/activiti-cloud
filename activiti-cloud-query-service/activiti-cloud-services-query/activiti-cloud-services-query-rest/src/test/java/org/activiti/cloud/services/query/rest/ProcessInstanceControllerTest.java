@@ -44,6 +44,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessVariableHistoryRepository;
 import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -130,6 +131,9 @@ class ProcessInstanceControllerTest {
 
     @MockitoBean
     private ProcessInstanceService processInstanceService;
+
+    @MockitoBean
+    private ProcessVariableHistoryRepository processVariableHistoryRepository;
 
     @BeforeEach
     void setUp() {
