@@ -16,11 +16,8 @@
 package org.activiti.cloud.services.query.rest;
 
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.services.query.app.repository.ProcessVariableHistoryRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessVariableHistoryRepresentationModelAssembler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -38,19 +35,18 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class ProcessInstanceVariableHistoryAdminController {
 
-    private final ProcessVariableHistoryRepository historyRepository;
+    private final ProcessVariableHistoryService historyService;
 
     private final ProcessVariableHistoryRepresentationModelAssembler historyRepresentationModelAssembler;
 
     private final AlfrescoPagedModelAssembler<ProcessVariableHistoryEntity> pagedModelAssembler;
 
-    @Autowired
     public ProcessInstanceVariableHistoryAdminController(
-        ProcessVariableHistoryRepository historyRepository,
+        ProcessVariableHistoryService historyService,
         ProcessVariableHistoryRepresentationModelAssembler historyRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessVariableHistoryEntity> pagedModelAssembler
     ) {
-        this.historyRepository = historyRepository;
+        this.historyService = historyService;
         this.historyRepresentationModelAssembler = historyRepresentationModelAssembler;
         this.pagedModelAssembler = pagedModelAssembler;
     }
@@ -60,12 +56,10 @@ public class ProcessInstanceVariableHistoryAdminController {
         @PathVariable String processInstanceId,
         Pageable pageable
     ) {
-        Page<ProcessVariableHistoryEntity> history =
-            historyRepository.findByProcessInstanceIdOrderByEventTimeAscSequenceNumberAsc(
-                processInstanceId,
-                pageable
-            );
-
-        return pagedModelAssembler.toModel(pageable, history, historyRepresentationModelAssembler);
+        return pagedModelAssembler.toModel(
+            pageable,
+            historyService.getVariableHistory(processInstanceId, pageable),
+            historyRepresentationModelAssembler
+        );
     }
 }

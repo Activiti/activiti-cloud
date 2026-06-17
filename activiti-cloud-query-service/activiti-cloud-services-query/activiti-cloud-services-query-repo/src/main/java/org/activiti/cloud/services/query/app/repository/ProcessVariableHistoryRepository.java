@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import java.util.Date;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProcessVariableHistoryRepository extends JpaRepository<ProcessVariableHistoryEntity, Long> {
     List<ProcessVariableHistoryEntity> findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
@@ -31,4 +35,8 @@ public interface ProcessVariableHistoryRepository extends JpaRepository<ProcessV
         String processInstanceId,
         Pageable pageable
     );
+
+    @Modifying
+    @Query("DELETE FROM ProcessVariableHistory h WHERE h.recordCreateTime < :cutoff")
+    int deleteByRecordCreateTimeBefore(@Param("cutoff") Date cutoff);
 }

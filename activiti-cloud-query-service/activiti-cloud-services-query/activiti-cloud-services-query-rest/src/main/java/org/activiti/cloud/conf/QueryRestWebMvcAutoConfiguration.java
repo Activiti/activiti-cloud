@@ -24,6 +24,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessVariableHistoryRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -33,6 +34,7 @@ import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
+import org.activiti.cloud.services.query.rest.ProcessVariableHistoryService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
@@ -324,6 +326,14 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessVariableService processVariableService(VariableRepository variableRepository) {
         return new ProcessVariableService(variableRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableHistoryService processVariableHistoryService(
+        ProcessVariableHistoryRepository historyRepository
+    ) {
+        return new ProcessVariableHistoryService(historyRepository);
     }
 
     @Bean
