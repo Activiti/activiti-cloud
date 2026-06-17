@@ -39,6 +39,7 @@ class TaskControllerLoggingHelperTest {
         testLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
             "test." + TaskControllerLoggingHelperTest.class.getName()
         );
+        testLogger.setAdditive(false);
         listAppender = new ListAppender<>();
         listAppender.start();
         testLogger.addAppender(listAppender);

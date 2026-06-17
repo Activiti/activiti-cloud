@@ -19,7 +19,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -47,7 +46,7 @@ public class RuntimeBundleExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeBundleExceptionHandler.class);
 
     @ExceptionHandler(ActivitiInterchangeInfoNotFoundException.class)
-    @ResponseStatus(NO_CONTENT)
+    @ResponseStatus(NOT_FOUND)
     public EntityModel<ActivitiErrorMessage> handleAppException(
         ActivitiInterchangeInfoNotFoundException ex,
         HttpServletRequest request,
