@@ -29,10 +29,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -64,7 +66,11 @@ public class ProcessInstanceAdminController {
 
     private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
+    private final ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler;
+
     private final AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
+
+    private final AlfrescoPagedModelAssembler<ProcessInstanceSearchResult> pagedSearchResultCollectionModelAssembler;
 
     private final ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
 
@@ -72,12 +78,17 @@ public class ProcessInstanceAdminController {
     public ProcessInstanceAdminController(
         ProcessInstanceAdminService processInstanceAdminService,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceSearchResult> pagedSearchResultCollectionModelAssembler,
         ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper
     ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
+        this.processInstanceSearchResultRepresentationModelAssembler =
+            processInstanceSearchResultRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+        this.pagedSearchResultCollectionModelAssembler = pagedSearchResultCollectionModelAssembler;
         this.processInstanceAdminControllerHelper = processInstanceAdminControllerHelper;
     }
 
@@ -156,14 +167,14 @@ public class ProcessInstanceAdminController {
     @Operation(summary = "Search process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/search")
-    public PagedModel<EntityModel<QueryCloudProcessInstance>> searchProcessInstances(
+    public PagedModel<EntityModel<ProcessInstanceSearchResult>> searchProcessInstances(
         @RequestBody ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
-        return pagedCollectionModelAssembler.toModel(
+        return pagedSearchResultCollectionModelAssembler.toModel(
             pageable,
             processInstanceAdminControllerHelper.searchProcessInstances(searchRequest, pageable),
-            processInstanceRepresentationModelAssembler
+            processInstanceSearchResultRepresentationModelAssembler
         );
     }
 

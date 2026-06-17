@@ -330,3 +330,15 @@ ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_id VARCHAR(255);
 ALTER TABLE process_instance
   ADD COLUMN linked_process_instance_type VARCHAR(255);
+
+create table process_instance_hierarchy
+(
+    ancestor_id   varchar(255) not null,
+    descendant_id varchar(255) not null,
+    depth         int          not null default 0,
+    relation_type varchar(20)  not null,
+    primary key (ancestor_id, descendant_id)
+);
+create index idx_pih_ancestor      on process_instance_hierarchy (ancestor_id);
+create index idx_pih_descendant    on process_instance_hierarchy (descendant_id);
+create index idx_pih_relation_type on process_instance_hierarchy (relation_type);

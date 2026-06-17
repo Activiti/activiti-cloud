@@ -40,6 +40,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.QueryEntityNotFoundException;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -111,6 +112,9 @@ class ProcessInstanceAdminControllerIT {
 
     @MockitoBean
     private VariableRepository processVariableRepository;
+
+    @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;

@@ -25,9 +25,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -40,13 +42,16 @@ public class ProcessInstanceBuilder {
 
     private final VariableRepository variableRepository;
     private final ProcessInstanceRepository processInstanceRepository;
+    private final ProcessInstanceHierarchyRepository hierarchyRepository;
 
     public ProcessInstanceBuilder(
         VariableRepository variableRepository,
-        ProcessInstanceRepository processInstanceRepository
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceHierarchyRepository hierarchyRepository
     ) {
         this.variableRepository = variableRepository;
         this.processInstanceRepository = processInstanceRepository;
+        this.hierarchyRepository = hierarchyRepository;
         this.process = new ProcessInstanceEntity();
         this.process.setId(UUID.randomUUID().toString());
         this.process.setName(UUID.randomUUID().toString());
@@ -175,9 +180,55 @@ public class ProcessInstanceBuilder {
 
         if (processInstance.getRootProcessInstanceId() == null) {
             processInstance.setRootProcessInstanceId(processInstance.getId());
-            return processInstanceRepository.save(processInstance);
+            processInstance = processInstanceRepository.save(processInstance);
         }
+
+        registerHierarchy(processInstance);
         return processInstance;
+    }
+
+    private void registerHierarchy(ProcessInstanceEntity processInstance) {
+        String id = processInstance.getId();
+        // Self-row — always required so child insertions can walk up this node
+        saveIfAbsent(id, id, 0, ProcessInstanceHierarchyEntity.RELATION_SELF);
+
+        if (processInstance.getParentId() != null) {
+            // Subprocess: propagate through every ancestor of the parent
+            for (ProcessInstanceHierarchyEntity ancestor : hierarchyRepository.findByDescendantId(
+                processInstance.getParentId()
+            )) {
+                saveIfAbsent(
+                    ancestor.getAncestorId(),
+                    id,
+                    ancestor.getDepth() + 1,
+                    ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS
+                );
+            }
+        }
+
+        if (processInstance.getLinkedProcessInstanceId() != null) {
+            // Linked process: propagate through every ancestor of the target
+            for (ProcessInstanceHierarchyEntity ancestor : hierarchyRepository.findByDescendantId(
+                processInstance.getLinkedProcessInstanceId()
+            )) {
+                saveIfAbsent(
+                    ancestor.getAncestorId(),
+                    id,
+                    ancestor.getDepth() + 1,
+                    ProcessInstanceHierarchyEntity.RELATION_LINKED
+                );
+            }
+        }
+    }
+
+    private void saveIfAbsent(String ancestorId, String descendantId, int depth, String relationType) {
+        if (
+            !hierarchyRepository.existsById(
+                new org.activiti.cloud.services.query.model.ProcessInstanceHierarchyId(ancestorId, descendantId)
+            )
+        ) {
+            hierarchyRepository.save(new ProcessInstanceHierarchyEntity(ancestorId, descendantId, depth, relationType));
+        }
     }
 
     public List<ProcessInstanceEntity> findProcessInstanceByFilter(ProcessInstanceSearchRequest searchRequest) {
