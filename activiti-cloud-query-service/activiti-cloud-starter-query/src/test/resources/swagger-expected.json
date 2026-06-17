@@ -5521,6 +5521,109 @@
         } ]
       }
     },
+    "/admin/v1/process-instances/{processInstanceId}/variables/history": {
+      "get": {
+        "tags": [
+          "process-instance-variable-history-admin-controller"
+        ],
+        "summary": "getVariableHistory",
+        "operationId": "getVariableHistory",
+        "parameters": [
+          {
+            "name": "processInstanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntity"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
     "/admin/v1/process-instances/{processInstanceId}/tasks" : {
       "get" : {
         "tags" : [ "process-instance-tasks-admin-controller" ],
@@ -7945,6 +8048,21 @@
         },
         "title" : "EntriesResponseContentProcessInstanceSearchResult_ProcessVariables"
       },
+      "EntriesResponseContentProcessVariableHistoryEntity": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentProcessVariableHistoryEntity"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        },
+        "title": "EntriesResponseContentProcessVariableHistoryEntity",
+        "type": "object"
+      },
       "EntryResponseContentProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
         "properties" : {
@@ -7954,6 +8072,15 @@
         },
         "title" : "EntryResponseContentProcessInstanceSearchResult_ProcessVariables"
       },
+      "EntryResponseContentProcessVariableHistoryEntity": {
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/ProcessVariableHistoryEntity"
+          }
+        },
+        "title": "EntryResponseContentProcessVariableHistoryEntity",
+        "type": "object"
+      },
       "ListResponseContentProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
         "properties" : {
@@ -7962,6 +8089,15 @@
           }
         },
         "title" : "ListResponseContentProcessInstanceSearchResult_ProcessVariables"
+      },
+      "ListResponseContentProcessVariableHistoryEntity": {
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentProcessVariableHistoryEntity"
+          }
+        },
+        "title": "ListResponseContentProcessVariableHistoryEntity",
+        "type": "object"
       },
       "ProcessInstanceSearchResult_ProcessVariables" : {
         "type" : "object",
@@ -8050,6 +8186,47 @@
           }
         },
         "title" : "ProcessInstanceSearchResult_ProcessVariables"
+      },
+      "ProcessVariableHistoryEntity": {
+        "properties": {
+          "commandId": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "eventTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "recordCreateTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sequenceNumber": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {},
+          "variableName": {
+            "type": "string"
+          }
+        },
+        "title": "ProcessVariableHistoryEntity",
+        "type": "object"
       },
       "QueryCloudVariableInstance_ProcessVariables" : {
         "type" : "object",
