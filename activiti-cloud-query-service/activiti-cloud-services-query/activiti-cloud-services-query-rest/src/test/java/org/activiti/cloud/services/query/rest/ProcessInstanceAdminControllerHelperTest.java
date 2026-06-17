@@ -16,16 +16,24 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.activiti.cloud.api.process.model.ProcessInstanceSearchResult;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceHierarchyEntity;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,59 +59,146 @@ class ProcessInstanceAdminControllerHelperTest {
     @Mock
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
 
-    @Test
-    void findAllProcessInstanceAdmin_shouldReturnProcessInstances() {
-        //given
-        Predicate predicate = mock(Predicate.class);
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
-        given(processInstanceAdminService.findAll(predicate, pageable)).willReturn(pageResult);
-        given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
+    @Mock
+    private ProcessInstanceSearchService processInstanceSearchService;
 
-        //when
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(
-            predicate,
-            pageable
-        );
+    @Nested
+    class FindAllProcessInstanceAdmin {
 
-        //then
-        assertThat(result).isEqualTo(pageResult);
+        @Test
+        void should_returnProcessInstances() {
+            Predicate predicate = mock(Predicate.class);
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<ProcessInstanceEntity> pageResult = new PageImpl<>(
+                Collections.singletonList(new ProcessInstanceEntity())
+            );
+            given(processInstanceAdminService.findAll(predicate, pageable)).willReturn(pageResult);
+            given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
+
+            Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(
+                predicate,
+                pageable
+            );
+
+            assertThat(result).isEqualTo(pageResult);
+        }
     }
 
-    @Test
-    void findAllProcessInstanceAdminWithVariables_shouldReturnProcessInstances() {
-        //given
-        Predicate predicate = mock(Predicate.class);
-        List<String> variableKeys = Collections.singletonList("var1");
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
-        given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable))
-            .willReturn(pageResult);
-        given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
+    @Nested
+    class FindAllProcessInstanceAdminWithVariables {
 
-        //when
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
-            predicate,
-            variableKeys,
-            pageable
-        );
+        @Test
+        void should_returnProcessInstances() {
+            Predicate predicate = mock(Predicate.class);
+            List<String> variableKeys = Collections.singletonList("var1");
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<ProcessInstanceEntity> pageResult = new PageImpl<>(
+                Collections.singletonList(new ProcessInstanceEntity())
+            );
+            given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable))
+                .willReturn(pageResult);
+            given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
-        //then
-        assertThat(result).isEqualTo(pageResult);
+            Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
+                predicate,
+                variableKeys,
+                pageable
+            );
+
+            assertThat(result).isEqualTo(pageResult);
+        }
     }
 
-    @Test
-    void findByIdProcessAdmin_shouldReturnProcessInstance() {
-        //given
-        String processInstanceId = "1";
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        given(processInstanceAdminService.findById(processInstanceId)).willReturn(processInstanceEntity);
-        given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity);
+    @Nested
+    class FindByIdProcessAdmin {
 
-        //when
-        ProcessInstanceEntity result = processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId);
+        @Test
+        void should_returnProcessInstance() {
+            String processInstanceId = "1";
+            ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+            given(processInstanceAdminService.findById(processInstanceId)).willReturn(processInstanceEntity);
+            given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity);
 
-        //then
-        assertThat(result).isEqualTo(processInstanceEntity);
+            ProcessInstanceEntity result = processInstanceAdminControllerHelper.findByIdProcessAdmin(processInstanceId);
+
+            assertThat(result).isEqualTo(processInstanceEntity);
+        }
+    }
+
+    @Nested
+    class SearchProcessInstances {
+
+        @Test
+        void should_mapEntitiesToResultsWithCounts() {
+            Pageable pageable = PageRequest.of(0, 10);
+            ProcessInstanceEntity entity = new ProcessInstanceEntity();
+            entity.setId("pi-1");
+            Page<ProcessInstanceEntity> pageResult = new PageImpl<>(List.of(entity));
+
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
+                .willReturn(pageResult);
+            given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of("pi-1")))
+                .willReturn(
+                    Map.of(
+                        "pi-1",
+                        Map.of(
+                            ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS,
+                            4L,
+                            ProcessInstanceHierarchyEntity.RELATION_LINKED,
+                            7L
+                        )
+                    )
+                );
+
+            Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
+                new ProcessInstanceSearchRequest(),
+                pageable
+            );
+
+            assertThat(result.getContent()).hasSize(1);
+            ProcessInstanceSearchResult dto = result.getContent().get(0);
+            assertThat(dto.getId()).isEqualTo("pi-1");
+            assertThat(dto.getSubprocessesCount()).isEqualTo(4L);
+            assertThat(dto.getLinkedProcessesCount()).isEqualTo(7L);
+        }
+
+        @Test
+        void should_returnZeroCounts_whenAncestorHasNoDescendants() {
+            Pageable pageable = PageRequest.of(0, 10);
+            ProcessInstanceEntity entity = new ProcessInstanceEntity();
+            entity.setId("pi-1");
+            Page<ProcessInstanceEntity> pageResult = new PageImpl<>(List.of(entity));
+
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
+                .willReturn(pageResult);
+            given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of("pi-1"))).willReturn(Map.of());
+
+            Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
+                new ProcessInstanceSearchRequest(),
+                pageable
+            );
+
+            assertThat(result.getContent()).hasSize(1);
+            ProcessInstanceSearchResult dto = result.getContent().get(0);
+            assertThat(dto.getSubprocessesCount()).isZero();
+            assertThat(dto.getLinkedProcessesCount()).isZero();
+        }
+
+        @Test
+        void should_returnEmptyPage_whenServiceReturnsNoResults() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.emptyList());
+
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
+                .willReturn(pageResult);
+            given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of())).willReturn(Map.of());
+
+            Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
+                new ProcessInstanceSearchRequest(),
+                pageable
+            );
+
+            assertThat(result.getContent()).isEmpty();
+        }
     }
 }

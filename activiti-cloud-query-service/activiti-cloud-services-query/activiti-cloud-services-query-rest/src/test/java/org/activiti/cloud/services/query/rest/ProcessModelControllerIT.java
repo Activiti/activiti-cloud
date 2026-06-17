@@ -33,6 +33,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -105,6 +106,9 @@ public class ProcessModelControllerIT {
 
     @MockitoBean
     private ProcessInstanceService processInstanceService;
+
+    @MockitoBean
+    private ProcessInstanceHierarchyRepository processInstanceHierarchyRepository;
 
     @MockitoBean
     private EntityManagerFactory entityManagerFactory;

@@ -38,6 +38,8 @@ import org.activiti.cloud.services.query.events.handlers.ProcessCompletedEventHa
 import org.activiti.cloud.services.query.events.handlers.ProcessCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyService;
+import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyServiceImpl;
 import org.activiti.cloud.services.query.events.handlers.ProcessResumedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
@@ -119,8 +121,17 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCreatedEventHandler processCreatedEventHandler(EntityManager entityManager) {
-        return new ProcessCreatedEventHandler(entityManager);
+    public ProcessInstanceHierarchyService processInstanceHierarchyService(EntityManager entityManager) {
+        return new ProcessInstanceHierarchyServiceImpl(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCreatedEventHandler processCreatedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessCreatedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
@@ -131,8 +142,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessStartedEventHandler processStartedEventHandler(EntityManager entityManager) {
-        return new ProcessStartedEventHandler(entityManager);
+    public ProcessStartedEventHandler processStartedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessStartedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
@@ -149,8 +163,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDeletedEventHandler processDeletedEventHandler(EntityManager entityManager) {
-        return new ProcessDeletedEventHandler(entityManager);
+    public ProcessDeletedEventHandler processDeletedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessDeletedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
