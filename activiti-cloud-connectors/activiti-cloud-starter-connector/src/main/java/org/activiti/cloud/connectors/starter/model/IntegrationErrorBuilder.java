@@ -49,15 +49,9 @@ public class IntegrationErrorBuilder {
         return new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
     }
 
-    public static IntegrationErrorBuilder errorFor(
-        IntegrationRequest integrationRequest,
-        ConnectorProperties connectorProperties,
-        Throwable error,
-        String customErrorMessage
-    ) {
-        IntegrationErrorBuilder builder = new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
-        builder.customErrorMessage = customErrorMessage;
-        return builder;
+    public IntegrationErrorBuilder withCustomErrorMessage(String customErrorMessage) {
+        this.customErrorMessage = customErrorMessage;
+        return this;
     }
 
     public IntegrationError build() {

@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.activiti.test.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -35,7 +34,7 @@ public class IntegrationErrorBuilderTest {
     private static final String RB_NAME = "rbName";
     private static final String APP_NAME = "appName";
 
-    private ConnectorProperties connectorProperties = new ConnectorProperties();
+    private final ConnectorProperties connectorProperties = new ConnectorProperties();
 
     @Test
     public void shouldBuildIntegrationErrorBasedOnInformationFromIntegrationRequest() throws Exception {
@@ -88,8 +87,7 @@ public class IntegrationErrorBuilderTest {
             .buildMessage();
 
         //then
-        Assertions
-            .assertThat(message.getHeaders())
+        assertThat(message.getHeaders())
             .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
@@ -113,7 +111,8 @@ public class IntegrationErrorBuilderTest {
 
         //when
         IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error, customMessage)
+            .errorFor(integrationRequestEvent, connectorProperties, error)
+            .withCustomErrorMessage(customMessage)
             .build();
 
         //then
@@ -140,7 +139,8 @@ public class IntegrationErrorBuilderTest {
 
         //when
         IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error, null)
+            .errorFor(integrationRequestEvent, connectorProperties, error)
+            .withCustomErrorMessage(null)
             .build();
 
         //then
@@ -164,7 +164,8 @@ public class IntegrationErrorBuilderTest {
 
         //when
         IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error, "   ")
+            .errorFor(integrationRequestEvent, connectorProperties, error)
+            .withCustomErrorMessage("   ")
             .build();
 
         //then
