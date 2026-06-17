@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.junit.jupiter.api.AfterEach;
 import org.mockito.Answers;
 

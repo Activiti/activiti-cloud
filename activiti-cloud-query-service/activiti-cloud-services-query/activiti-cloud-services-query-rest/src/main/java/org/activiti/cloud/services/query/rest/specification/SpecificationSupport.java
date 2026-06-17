@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
