@@ -15,13 +15,14 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.activiti.test.Assertions.assertThat;
 
 import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -87,7 +88,8 @@ public class IntegrationErrorBuilderTest {
             .buildMessage();
 
         //then
-        assertThat(message.getHeaders())
+        Assertions
+            .assertThat(message.getHeaders())
             .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
