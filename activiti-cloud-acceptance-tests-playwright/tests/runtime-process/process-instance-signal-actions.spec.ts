@@ -15,8 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import {
     CloudProcessInstance,
@@ -76,14 +74,11 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             });
 
             await activiti.step("Then the task 'Boundary container' is created", async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(
-                            processInstanceBoundarySignal.id
-                        );
-                        return tasks[0]?.name;
-                    }, pollOptions('querySync'))
-                    .toBe('Boundary container');
+                const task = await taskServiceHrUser.waitForTaskByName(
+                    processInstanceBoundarySignal.id,
+                    'Boundary container'
+                );
+                expect(task.name).toBe('Boundary container');
             });
 
             await activiti.step('When the user starts a process with intermediate throw signal', async () => {
@@ -95,85 +90,48 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             });
 
             await activiti.step('Then the process throwing a signal is completed', async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await getQueryProcessInstanceWhenSynced(
-                                    queryServiceHrUser,
-                                    processInstanceThrowSignal.id
-                                )
-                            )?.status,
-                        pollOptions('querySync')
-                    )
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceHrUser.waitForProcessInstanceStatus(
+                    processInstanceThrowSignal.id,
+                    ProcessInstanceStatus.COMPLETED
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
 
             await activiti.step('And the process catching a signal is completed', async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await getQueryProcessInstanceWhenSynced(
-                                    queryServiceHrUser,
-                                    processInstanceCatchSignal.id
-                                )
-                            )?.status,
-                        pollOptions('querySync')
-                    )
-                    .toBe(ProcessInstanceStatus.COMPLETED);
+                const instance = await queryServiceHrUser.waitForProcessInstanceStatus(
+                    processInstanceCatchSignal.id,
+                    ProcessInstanceStatus.COMPLETED
+                );
+                expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             });
 
             await activiti.step(
                 'And the SIGNAL_RECEIVED event was caught up by intermediateCatchEvent process',
                 async () => {
-                    await expect
-                        .poll(async () => {
-                            const events = await auditServiceHrUser.getEvents({
-                                processInstanceId: processInstanceCatchSignal.id,
-                                eventType: EventType.SIGNAL_RECEIVED,
-                            });
-                            return events.some(
-                                (event) =>
-                                    event.eventType === EventType.SIGNAL_RECEIVED &&
-                                    event.processInstanceId === processInstanceCatchSignal.id &&
-                                    event.processDefinitionKey ===
-                                        processInstanceCatchSignal.processDefinitionKey
-                            );
-                        }, pollOptions('querySync'))
-                        .toBe(true);
+                    const event = await auditServiceHrUser.waitForEventOfTypeForProcessInstance(
+                        processInstanceCatchSignal.id,
+                        EventType.SIGNAL_RECEIVED
+                    );
+                    expect(event.processDefinitionKey).toBe(processInstanceCatchSignal.processDefinitionKey);
                 }
             );
 
             await activiti.step("And the task 'Boundary target' is created", async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(
-                            processInstanceBoundarySignal.id
-                        );
-                        return tasks[0]?.name;
-                    }, pollOptions('querySync'))
-                    .toBe('Boundary target');
+                const task = await taskServiceHrUser.waitForTaskByName(
+                    processInstanceBoundarySignal.id,
+                    'Boundary target'
+                );
+                expect(task.name).toBe('Boundary target');
             });
 
             await activiti.step(
                 'And the SIGNAL_RECEIVED event was caught up by boundary signal process',
                 async () => {
-                    await expect
-                        .poll(async () => {
-                            const events = await auditServiceHrUser.getEvents({
-                                processInstanceId: processInstanceBoundarySignal.id,
-                                eventType: EventType.SIGNAL_RECEIVED,
-                            });
-                            return events.some(
-                                (event) =>
-                                    event.eventType === EventType.SIGNAL_RECEIVED &&
-                                    event.processInstanceId === processInstanceBoundarySignal.id &&
-                                    event.processDefinitionKey ===
-                                        processInstanceBoundarySignal.processDefinitionKey
-                            );
-                        }, pollOptions('querySync'))
-                        .toBe(true);
+                    const event = await auditServiceHrUser.waitForEventOfTypeForProcessInstance(
+                        processInstanceBoundarySignal.id,
+                        EventType.SIGNAL_RECEIVED
+                    );
+                    expect(event.processDefinitionKey).toBe(processInstanceBoundarySignal.processDefinitionKey);
                 }
             );
 
@@ -188,28 +146,20 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             );
 
             await activiti.step('Then boundary signal process is deleted', async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            runtimeBundleServiceHrUser.isProcessInstanceNotFoundInRuntime(
-                                processInstanceBoundarySignal.id
-                            ),
-                        pollOptions('querySync')
-                    )
-                    .toBe(true);
+                const notFound = await runtimeBundleServiceHrUser.waitForProcessInstanceNotFoundInRuntime(
+                    processInstanceBoundarySignal.id
+                );
+                expect(notFound).toBe(true);
             });
 
             await activiti.step(
                 'And check number of processes with processDefinitionKey SignalStartEventProcess increased',
                 async () => {
-                    await expect
-                        .poll(async () => {
-                            const instances = await queryAdminServiceTestAdmin.getProcessInstancesAdminWithParams({
-                                processDefinitionKey: SIGNAL_START_EVENT_PROCESS,
-                            });
-                            return instances.length;
-                        }, pollOptions('querySync'))
-                        .toBeGreaterThan(initialSignalStartCount);
+                    const instances = await queryAdminServiceTestAdmin.waitForProcessInstancesAdminCountGreaterThan(
+                        { processDefinitionKey: SIGNAL_START_EVENT_PROCESS },
+                        initialSignalStartCount
+                    );
+                    expect(instances.length).toBeGreaterThan(initialSignalStartCount);
                 }
             );
         }

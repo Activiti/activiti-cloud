@@ -15,7 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
 
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
@@ -54,26 +53,18 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'And variable start1 has value value1 and start2 has value value2',
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                    processInstanceId,
-                                    'start1'
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toBe('value1');
-                    await expect
-                        .poll(
-                            async () =>
-                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                    processInstanceId,
-                                    'start2'
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toBe('value2');
+                    const start1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'start1',
+                        'value1'
+                    );
+                    const start2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'start2',
+                        'value2'
+                    );
+                    expect(start1).toBe('value1');
+                    expect(start2).toBe('value2');
                 }
             );
         }
@@ -122,26 +113,18 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'Then variable dummy1 has value dummyValue1 and dummy2 has value dummyValue2',
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                    processInstanceId,
-                                    'dummy1'
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toBe('dummyValue1');
-                    await expect
-                        .poll(
-                            async () =>
-                                runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                    processInstanceId,
-                                    'dummy2'
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toBe('dummyValue2');
+                    const dummy1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'dummy1',
+                        'dummyValue1'
+                    );
+                    const dummy2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'dummy2',
+                        'dummyValue2'
+                    );
+                    expect(dummy1).toBe('dummyValue1');
+                    expect(dummy2).toBe('dummyValue2');
                 }
             );
         }
@@ -194,29 +177,20 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             });
 
             await activiti.step('Then the process variable dummy1 is deleted', async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                processInstanceId,
-                                'dummy1'
-                            ),
-                        pollOptions('querySync')
-                    )
-                    .toBeUndefined();
+                const dummy1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableDeleted(
+                    processInstanceId,
+                    'dummy1'
+                );
+                expect(dummy1).toBeUndefined();
             });
 
             await activiti.step('And the process variable dummy2 is created', async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            runtimeBundleServiceTestUser.getProcessInstanceVariableValue(
-                                processInstanceId,
-                                'dummy2'
-                            ),
-                        pollOptions('querySync')
-                    )
-                    .toBe('dummyValue2');
+                const dummy2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                    processInstanceId,
+                    'dummy2',
+                    'dummyValue2'
+                );
+                expect(dummy2).toBe('dummyValue2');
             });
         }
     );

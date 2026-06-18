@@ -16,7 +16,6 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { timeouts } from '../../config/runtime/timeouts';
 
 activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services', { tag: '@slow' }, () => {
     activiti.describe('Signal Between Multiple Runtime Bundles', () => {
@@ -39,20 +38,14 @@ activiti.describe('Process Instance Actions - Multiple Runtime Bundle Services',
             });
 
             await activiti.step('Then a signal was received and the signal catch and throw processes were completed', async () => {
-                await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnPrimary(
+                const finalCatchProcess = await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnPrimary(
                     processInstanceCatchSignal.id,
-                    ProcessInstanceStatus.COMPLETED,
-                    timeouts.poll.signalProcess
+                    ProcessInstanceStatus.COMPLETED
                 );
-
-                await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnSecondary(
+                const finalThrowProcess = await multipleRuntimeServiceTestUser.waitForProcessInstanceStatusOnSecondary(
                     processInstanceThrowSignal.id,
-                    ProcessInstanceStatus.COMPLETED,
-                    timeouts.poll.signalProcess
+                    ProcessInstanceStatus.COMPLETED
                 );
-
-                const finalCatchProcess = await multipleRuntimeServiceTestUser.getProcessInstanceFromPrimary(processInstanceCatchSignal.id);
-                const finalThrowProcess = await multipleRuntimeServiceTestUser.getProcessInstanceFromSecondary(processInstanceThrowSignal.id);
 
                 expect(finalCatchProcess.status).toBe(ProcessInstanceStatus.COMPLETED);
                 expect(finalThrowProcess.status).toBe(ProcessInstanceStatus.COMPLETED);

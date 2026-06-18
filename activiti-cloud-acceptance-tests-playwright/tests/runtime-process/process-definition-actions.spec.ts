@@ -19,7 +19,6 @@ import { resolve } from 'node:path';
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { normalizeSvg } from '../../helpers/diagram-utils';
-import { pickHighestVersionByKey } from '../../helpers/process-definition';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
@@ -29,8 +28,7 @@ activiti.describe('Process Definition Actions', () => {
         await activiti.step(
             `Then the user can get the process model for process with key ${SINGLE_TASK_PROCESS} by passing its id`,
             async () => {
-                const definitions = await queryServiceTestUser.getProcessDefinitions();
-                const definition = pickHighestVersionByKey(definitions, SINGLE_TASK_PROCESS);
+                const definition = await queryServiceTestUser.getProcessDefinitionByKey(SINGLE_TASK_PROCESS);
 
                 const processModel = await queryServiceTestUser.getProcessModel(definition.id);
 

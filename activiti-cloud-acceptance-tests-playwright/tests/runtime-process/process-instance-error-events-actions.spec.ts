@@ -15,7 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { EventType } from '../../models/audit.models';
 import { TaskStatus } from '../../models/task.models';
 
@@ -74,54 +73,47 @@ activiti.describe('Process Instance Error Events Actions', { tag: '@slow' }, () 
             );
 
             await activiti.step('Then error events are emitted for the process', async () => {
-                await expect
-                    .poll(async () => {
-                        const events = await auditServiceHrUser.getEventsByProcessInstanceId(
-                            processInstanceId
+                const event = await auditServiceHrUser.waitForEventMatching(
+                    processInstanceId,
+                    (event) => {
+                        if (event.eventType !== EventType.ERROR_RECEIVED) {
+                            return false;
+                        }
+                        const entity = event.entity as
+                            | {
+                                  processDefinitionId?: string;
+                                  processInstanceId?: string;
+                                  errorCode?: string;
+                                  errorId?: string;
+                                  activityType?: string | null;
+                                  activityName?: string | null;
+                              }
+                            | undefined;
+                        return (
+                            event.processDefinitionId === processDefinitionId &&
+                            event.processInstanceId === processInstanceId &&
+                            event.processDefinitionKey === processDefinitionKey &&
+                            event.businessKey === businessKey &&
+                            entity?.processDefinitionId === processDefinitionId &&
+                            entity?.processInstanceId === processInstanceId &&
+                            entity?.errorCode === '123' &&
+                            entity?.errorId === 'errorId' &&
+                            (entity?.activityType ?? null) === null &&
+                            (entity?.activityName ?? null) === null
                         );
-
-                        return events.some((event) => {
-                            if (event.eventType !== EventType.ERROR_RECEIVED) {
-                                return false;
-                            }
-                            const entity = event.entity as
-                                | {
-                                      processDefinitionId?: string;
-                                      processInstanceId?: string;
-                                      errorCode?: string;
-                                      errorId?: string;
-                                      activityType?: string | null;
-                                      activityName?: string | null;
-                                  }
-                                | undefined;
-                            return (
-                                event.processDefinitionId === processDefinitionId &&
-                                event.processInstanceId === processInstanceId &&
-                                event.processDefinitionKey === processDefinitionKey &&
-                                event.businessKey === businessKey &&
-                                entity?.processDefinitionId === processDefinitionId &&
-                                entity?.processInstanceId === processInstanceId &&
-                                entity?.errorCode === '123' &&
-                                entity?.errorId === 'errorId' &&
-                                (entity?.activityType ?? null) === null &&
-                                (entity?.activityName ?? null) === null
-                            );
-                        });
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                    },
+                    `ERROR_RECEIVED event on process ${processInstanceId}`
+                );
+                expect(event.eventType).toBe(EventType.ERROR_RECEIVED);
             });
 
             await activiti.step("And the user can see a task 'Task' with a status CREATED", async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(
-                            processInstanceId
-                        );
-                        return tasks.some(
-                            (task) => task.name === 'Task' && task.status === TaskStatus.CREATED
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const task = await taskServiceHrUser.waitForTaskWithNameAndStatus(
+                    processInstanceId,
+                    'Task',
+                    TaskStatus.CREATED
+                );
+                expect(task.status).toBe(TaskStatus.CREATED);
             });
 
             await activiti.step('And the user deletes the process with error events', async () => {

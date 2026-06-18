@@ -15,11 +15,8 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { TaskStatus } from '../../models/task.models';
 
 const MI_PARALLEL_USER_TASKS_PROCESS = 'miParallelUserTasksAllOutputCollection';
 const MI_SERVICE_TASK_PROCESS = 'Process_B-f96qb1';
@@ -47,59 +44,38 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
         await activiti.step(
             'And the user completes the task available in the current process instance passing the following variables: meal=pizza, size=large',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                        return tasks.filter(t => t.status !== TaskStatus.COMPLETED).length;
-                    }, pollOptions('querySync'))
-                    .toBeGreaterThanOrEqual(1);
-
-                const tasks = await taskServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                const task = tasks.find(t => t.status !== TaskStatus.COMPLETED);
-                await taskServiceTestUser.completeTaskWithVariables(task!.id, { meal: 'pizza', size: 'large' });
+                const task = await taskServiceTestUser.waitForOpenTaskByProcessInstanceId(processInstanceId);
+                await taskServiceTestUser.completeTaskWithVariables(task.id, { meal: 'pizza', size: 'large' });
             }
         );
 
         await activiti.step(
             'And the user completes the task available in the current process instance passing the following variables: meal=pasta, size=medium',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                        return tasks.filter(t => t.status !== TaskStatus.COMPLETED).length;
-                    }, pollOptions('querySync'))
-                    .toBeGreaterThanOrEqual(1);
-
-                const tasks = await taskServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                const task = tasks.find(t => t.status !== TaskStatus.COMPLETED);
-                await taskServiceTestUser.completeTaskWithVariables(task!.id, { meal: 'pasta', size: 'medium' });
+                const task = await taskServiceTestUser.waitForOpenTaskByProcessInstanceId(processInstanceId);
+                await taskServiceTestUser.completeTaskWithVariables(task.id, { meal: 'pasta', size: 'medium' });
             }
         );
 
         await activiti.step('Then the process instance reaches a task named Wait', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                    return tasks.some(t => t.name === 'Wait');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const task = await queryServiceTestUser.waitForTaskByName(processInstanceId, 'Wait');
+            expect(task.name).toBe('Wait');
         });
 
         await activiti.step(
             'And the process instance has a resultCollection named miResult with entries of size 3 as following: meal=pizza/large/testuser, meal=pasta/medium/testuser',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const variables = await queryServiceTestUser.getProcessInstanceVariables(processInstanceId);
-                        const miResult = variables.find(v => v.name === 'miResult');
-                        return miResult?.value;
-                    }, pollOptions('querySync'))
-                    .toEqual(
-                        expect.arrayContaining([
-                            expect.objectContaining({ meal: 'pizza', size: 'large', sys_task_assignee: 'testuser' }),
-                            expect.objectContaining({ meal: 'pasta', size: 'medium', sys_task_assignee: 'testuser' }),
-                        ])
-                    );
+                const miResult = await queryServiceTestUser.waitForVariable(
+                    processInstanceId,
+                    'miResult',
+                    (v) => Array.isArray(v.value) && v.value.length >= 2
+                );
+                expect(miResult.value).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({ meal: 'pizza', size: 'large', sys_task_assignee: 'testuser' }),
+                        expect.objectContaining({ meal: 'pasta', size: 'medium', sys_task_assignee: 'testuser' }),
+                    ])
+                );
             }
         );
     });
@@ -125,31 +101,24 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
         await activiti.step(
             `Then the generated ACTIVITY_COMPLETED events for activity ${MI_SERVICE_TASK_ELEMENT_ID} have the expected count of 3`,
             async () => {
-                await expect
-                    .poll(async () => {
-                        const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-                        return events.filter(e =>
-                            e.eventType === EventType.ACTIVITY_COMPLETED &&
-                            (e.entity as { elementId?: string })?.elementId === MI_SERVICE_TASK_ELEMENT_ID
-                        ).length;
-                    }, pollOptions('auditEvents'))
-                    .toBe(3);
+                const events = await auditServiceTestUser.waitForEventsCount(
+                    processInstanceId,
+                    (e) =>
+                        e.eventType === EventType.ACTIVITY_COMPLETED &&
+                        (e.entity as { elementId?: string })?.elementId === MI_SERVICE_TASK_ELEMENT_ID,
+                    3,
+                    `3 ACTIVITY_COMPLETED events for ${MI_SERVICE_TASK_ELEMENT_ID}`
+                );
+                expect(events.length).toBeGreaterThanOrEqual(3);
             }
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceWhenSynced(
-                                queryServiceTestUser,
-                                processInstanceId
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 });

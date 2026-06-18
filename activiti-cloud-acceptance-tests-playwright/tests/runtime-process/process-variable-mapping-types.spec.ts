@@ -15,8 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { EventType } from '../../models/audit.models';
 import { formatDefaultUtc } from '../../helpers/date-format';
 
 const TASK_DATE_VAR_MAPPING_PROCESS = 'taskDateVarMapping';
@@ -73,20 +71,25 @@ activiti.describe('Process Variable Mapping Types', () => {
         );
 
         await activiti.step('And the process variables are created', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
-                    return vars.map((v) => v.name).sort();
-                }, pollOptions('querySync'))
-                .toEqual(
-                    expect.arrayContaining([
-                        processVariableString,
-                        processVariableInteger,
-                        processVariableBoolean,
-                        processVariableDate,
-                        processVariableDateTime,
-                    ])
-                );
+            const vars = await runtimeBundleServiceHrUser.waitForProcessInstanceVariablesIncluding(
+                processInstanceId,
+                [
+                    processVariableString,
+                    processVariableInteger,
+                    processVariableBoolean,
+                    processVariableDate,
+                    processVariableDateTime,
+                ]
+            );
+            expect(vars.map((v) => v.name).sort()).toEqual(
+                expect.arrayContaining([
+                    processVariableString,
+                    processVariableInteger,
+                    processVariableBoolean,
+                    processVariableDate,
+                    processVariableDateTime,
+                ])
+            );
         });
 
         await activiti.step('And variables have correct values', async () => {
@@ -108,20 +111,25 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('And check variables in query', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await queryServiceHrUser.getProcessInstanceVariables(processInstanceId);
-                    return vars.map((v) => v.name).sort();
-                }, pollOptions('querySync'))
-                .toEqual(
-                    expect.arrayContaining([
-                        processVariableString,
-                        processVariableInteger,
-                        processVariableBoolean,
-                        processVariableDate,
-                        processVariableDateTime,
-                    ])
-                );
+            const vars = await queryServiceHrUser.waitForProcessInstanceVariablesIncluding(
+                processInstanceId,
+                [
+                    processVariableString,
+                    processVariableInteger,
+                    processVariableBoolean,
+                    processVariableDate,
+                    processVariableDateTime,
+                ]
+            );
+            expect(vars.map((v) => v.name).sort()).toEqual(
+                expect.arrayContaining([
+                    processVariableString,
+                    processVariableInteger,
+                    processVariableBoolean,
+                    processVariableDate,
+                    processVariableDateTime,
+                ])
+            );
         });
 
         await activiti.step('And variables was created event in audit', async () => {
@@ -132,29 +140,18 @@ activiti.describe('Process Variable Mapping Types', () => {
                 processVariableDate,
                 processVariableDateTime,
             ];
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceHrUser.getEvents({
-                        processInstanceId,
-                        eventType: EventType.VARIABLE_CREATED,
-                    });
-                    return events
-                        .map((e) => (e.entity as { name?: string } | undefined)?.name)
-                        .filter((n): n is string => typeof n === 'string');
-                }, pollOptions('auditEvents'))
-                .toEqual(expect.arrayContaining(expectedNames));
+            const events = await auditServiceHrUser.waitForVariableCreatedEvents(
+                processInstanceId,
+                expectedNames
+            );
+            const names = events
+                .map((e) => (e.entity as { name?: string } | undefined)?.name)
+                .filter((n): n is string => typeof n === 'string');
+            expect(names).toEqual(expect.arrayContaining(expectedNames));
         });
 
         await activiti.step('And variables values created in task with variable mapping are correct', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                    return tasks.find((t) => t.name === 'My task1');
-                }, pollOptions('querySync'))
-                .toBeDefined();
-
-            const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-            const matched = tasks.find((t) => t.name === 'My task1')!;
+            const matched = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'My task1');
             taskId = matched.id;
             expect(matched.status).toBe('CREATED');
 
@@ -190,24 +187,29 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('Then variables have correct values in process', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
-                    return {
-                        s: vars.find((v) => v.name === processVariableString)?.value,
-                        i: vars.find((v) => v.name === processVariableInteger)?.value,
-                        b: vars.find((v) => v.name === processVariableBoolean)?.value,
-                        d: vars.find((v) => v.name === processVariableDate)?.value,
-                        dt: vars.find((v) => v.name === processVariableDateTime)?.value,
-                    };
-                }, pollOptions('querySync'))
-                .toEqual({
-                    s: 'string321',
-                    i: 321,
-                    b: false,
-                    d: expectedDate,
-                    dt: expectedDateTime,
-                });
+            const vars = await runtimeBundleServiceHrUser.waitForProcessInstanceVariableValues(
+                processInstanceId,
+                {
+                    [processVariableString]: 'string321',
+                    [processVariableInteger]: 321,
+                    [processVariableBoolean]: false,
+                    [processVariableDate]: expectedDate,
+                    [processVariableDateTime]: expectedDateTime,
+                }
+            );
+            expect({
+                s: vars.find((v) => v.name === processVariableString)?.value,
+                i: vars.find((v) => v.name === processVariableInteger)?.value,
+                b: vars.find((v) => v.name === processVariableBoolean)?.value,
+                d: vars.find((v) => v.name === processVariableDate)?.value,
+                dt: vars.find((v) => v.name === processVariableDateTime)?.value,
+            }).toEqual({
+                s: 'string321',
+                i: 321,
+                b: false,
+                d: expectedDate,
+                dt: expectedDateTime,
+            });
         });
     });
 
@@ -228,40 +230,36 @@ activiti.describe('Process Variable Mapping Types', () => {
         });
 
         await activiti.step('Then process variables are properly mapped on start event', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await runtimeBundleServiceHrUser.getProcessInstanceVariables(processInstanceId);
-                    return vars
-                        .map((v) => ({ name: v.name, value: v.value }))
-                        .sort((a, b) => a.name.localeCompare(b.name));
-                }, pollOptions('querySync'))
-                .toEqual([
-                    { name: 'email', value: 'Form email' },
-                    { name: 'name', value: 'Form name' },
-                ]);
+            const vars = await runtimeBundleServiceHrUser.waitForProcessInstanceVariableValues(
+                processInstanceId,
+                { email: 'Form email', name: 'Form name' }
+            );
+            expect(
+                vars
+                    .map((v) => ({ name: v.name, value: v.value }))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+            ).toEqual([
+                { name: 'email', value: 'Form email' },
+                { name: 'name', value: 'Form name' },
+            ]);
         });
 
         await activiti.step('And process variables are properly mapped to the task variables', async () => {
-            await expect
-                .poll(async () => {
-                    return taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                }, pollOptions('querySync'))
-                .toHaveLength(1);
+            const tasks = await taskServiceHrUser.waitForTasksCount(processInstanceId, 1);
+            taskId = tasks[0].id;
 
-            const all = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-            taskId = all[0].id;
-
-            await expect
-                .poll(async () => {
-                    const vars = await taskServiceHrUser.getTaskVariables(taskId);
-                    return vars
-                        .map((v) => ({ name: v.name, value: v.value }))
-                        .sort((a, b) => a.name.localeCompare(b.name));
-                }, pollOptions('querySync'))
-                .toEqual([
-                    { name: 'Text0rvs0o', value: 'Form email' },
-                    { name: 'Text0xfems', value: 'Form name' },
-                ]);
+            const vars = await taskServiceHrUser.waitForTaskVariablesIncluding(taskId, [
+                'Text0rvs0o',
+                'Text0xfems',
+            ]);
+            expect(
+                vars
+                    .map((v) => ({ name: v.name, value: v.value }))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+            ).toEqual([
+                { name: 'Text0rvs0o', value: 'Form email' },
+                { name: 'Text0xfems', value: 'Form name' },
+            ]);
         });
 
         await activiti.step('And the user may complete the task', async () => {

@@ -15,8 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceAdminWhenSynced, loadOrUndefined } from '../../helpers/query-sync';
 import { EventType } from '../../models/audit.models';
 import {
     CloudProcessInstance,
@@ -47,39 +45,24 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('Then integration context events are emitted for the process', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await auditServiceTestAdmin.getIntegrationContextEvents(
-                                processInstance.id
-                            )
-                        )
-                            .map((event) => event.eventType)
-                            .sort(),
-                    pollOptions('querySync')
-                )
-                .toEqual(
-                    [
-                        EventType.INTEGRATION_REQUESTED,
-                        EventType.INTEGRATION_RESULT_RECEIVED,
-                    ].sort()
-                );
+            const events = await auditServiceTestAdmin.waitForIntegrationContextEventTypes(
+                processInstance.id,
+                [EventType.INTEGRATION_REQUESTED, EventType.INTEGRATION_RESULT_RECEIVED]
+            );
+            expect(events.map((event) => event.eventType).sort()).toEqual(
+                [
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_RESULT_RECEIVED,
+                ].sort()
+            );
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -98,29 +81,20 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('Then the user can get list of service tasks for process instance', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
-                        processInstance.id
-                    );
-                    return tasks.length > 0 && tasks.every((task) => task.activityType === 'serviceTask');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(
+                processInstance.id,
+                (list) => list.length > 0 && list.every((task) => task.activityType === 'serviceTask'),
+                `service tasks for process ${processInstance.id} of type serviceTask`
+            );
+            expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -139,33 +113,21 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('Then the user can get service task by id', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
-                        processInstance.id
-                    );
-                    if (tasks.length !== 1) {
-                        return false;
-                    }
-                    const serviceTask = await queryAdminServiceTestAdmin.getServiceTaskById(tasks[0].id);
-                    return serviceTask?.activityType === 'serviceTask';
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(
+                processInstance.id,
+                (list) => list.length === 1,
+                `single service task for process ${processInstance.id}`
+            );
+            const serviceTask = await queryAdminServiceTestAdmin.getServiceTaskById(tasks[0].id);
+            expect(serviceTask.activityType).toBe('serviceTask');
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -186,40 +148,28 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'Then the user can get service task integration context by service task id',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
-                            processInstance.id
-                        );
-                        if (tasks.length !== 1) {
-                            return false;
-                        }
-                        const integrationContext = await loadOrUndefined(() =>
-                            queryAdminServiceTestAdmin.getServiceTaskIntegrationContext(tasks[0].id)
-                        );
-                        return (
-                            integrationContext?.clientType === 'ServiceTask' &&
-                            integrationContext?.status ===
-                                IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(
+                    processInstance.id,
+                    (list) => list.length === 1,
+                    `single service task for process ${processInstance.id}`
+                );
+                const integrationContext =
+                    await queryAdminServiceTestAdmin.waitForServiceTaskIntegrationContext(
+                        tasks[0].id,
+                        (context) =>
+                            context.clientType === 'ServiceTask' &&
+                            context.status === IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    );
+                expect(integrationContext.clientType).toBe('ServiceTask');
             }
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -242,63 +192,42 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('And the service task is executed two times', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
-                        processInstance.id
-                    );
-                    if (tasks.length !== 1) {
-                        return false;
-                    }
-                    return tasks[0].integrationContextCounter === 2;
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(
+                processInstance.id,
+                (list) => list.length === 1 && list[0].integrationContextCounter === 2,
+                `service task with integrationContextCounter 2 for process ${processInstance.id}`
+            );
+            expect(tasks[0].integrationContextCounter).toBe(2);
         });
 
         await activiti.step(
             'Then the user can get all service task integration contexts by service task id',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await queryAdminServiceTestAdmin.getServiceTasksForProcessInstance(
-                            processInstance.id
-                        );
-                        if (tasks.length !== 1) {
-                            return false;
-                        }
-                        const serviceTask = tasks[0];
-                        if (serviceTask.integrationContextCounter !== 2) {
-                            return false;
-                        }
-                        const contexts = await loadOrUndefined(() =>
-                            queryAdminServiceTestAdmin.getServiceTaskIntegrationContexts(serviceTask.id)
-                        );
-                        if (!contexts || contexts.length !== 2) {
-                            return false;
-                        }
-                        return contexts.some(
+                const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(
+                    processInstance.id,
+                    (list) => list.length === 1 && list[0].integrationContextCounter === 2,
+                    `service task ready with 2 integration contexts for process ${processInstance.id}`
+                );
+                const contexts = await queryAdminServiceTestAdmin.waitForServiceTaskIntegrationContexts(
+                    tasks[0].id,
+                    (list) =>
+                        list.length === 2 &&
+                        list.some(
                             (ctx) =>
                                 ctx.clientType === 'ServiceTask' &&
                                 ctx.status === IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                        )
+                );
+                expect(contexts).toHaveLength(2);
             }
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -319,38 +248,27 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'Then the user can get list of service tasks with status of COMPLETED',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await queryAdminServiceTestAdmin.getServiceTasksByStatusForProcessInstance(
-                            processInstance.id,
-                            ServiceTaskStatus.COMPLETED
-                        );
-                        return (
-                            tasks.length > 0 &&
-                            tasks.every(
-                                (task) =>
-                                    task.activityType === 'serviceTask' &&
-                                    task.status === ServiceTaskStatus.COMPLETED
-                            )
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByStatusForProcessInstance(
+                    processInstance.id,
+                    ServiceTaskStatus.COMPLETED,
+                    (list) =>
+                        list.length > 0 &&
+                        list.every(
+                            (task) =>
+                                task.activityType === 'serviceTask' &&
+                                task.status === ServiceTaskStatus.COMPLETED
+                        )
+                );
+                expect(tasks.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -379,55 +297,39 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('Then integration context error events are emitted for the process', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await auditServiceTestAdmin.getIntegrationContextEvents(
-                                processInstance.id
-                            )
-                        )
-                            .map((event) => event.eventType)
-                            .sort(),
-                    pollOptions('querySync')
-                )
-                .toEqual(
-                    [
-                        EventType.INTEGRATION_REQUESTED,
-                        EventType.INTEGRATION_ERROR_RECEIVED,
-                    ].sort()
-                );
+            const events = await auditServiceTestAdmin.waitForIntegrationContextEventTypes(
+                processInstance.id,
+                [EventType.INTEGRATION_REQUESTED, EventType.INTEGRATION_ERROR_RECEIVED]
+            );
+            expect(events.map((event) => event.eventType).sort()).toEqual(
+                [
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_ERROR_RECEIVED,
+                ].sort()
+            );
         });
 
         await activiti.step('And the user can get list of service tasks with status of ERROR', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksByStatusForProcessInstance(
-                        processInstance.id,
-                        ServiceTaskStatus.ERROR
-                    );
-                    return (
-                        tasks.length > 0 &&
-                        tasks.every(
-                            (task) =>
-                                task.activityType === 'serviceTask' &&
-                                task.status === ServiceTaskStatus.ERROR
-                        )
-                    );
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByStatusForProcessInstance(
+                processInstance.id,
+                ServiceTaskStatus.ERROR,
+                (list) =>
+                    list.length > 0 &&
+                    list.every(
+                        (task) =>
+                            task.activityType === 'serviceTask' &&
+                            task.status === ServiceTaskStatus.ERROR
+                    )
+            );
+            expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the status of the process is changed to cancelled', async () => {
-            await expect
-                .poll(async () => {
-                    const instances = await queryAdminServiceTestAdmin.getProcessInstancesAdminWithParams({
-                        processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
-                    });
-                    const match = instances.find((i) => i.id === processInstance.id);
-                    return match?.status;
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.CANCELLED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.CANCELLED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.CANCELLED);
         });
     });
 
@@ -453,24 +355,22 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
                 const processDefinition = processDefinitions.find((d) => d.key === CONNECTOR_PROCESS);
                 expect(processDefinition?.id).toBeTruthy();
 
-                await expect
-                    .poll(async () => {
-                        const tasks = await queryAdminServiceTestAdmin.getServiceTasksByQuery({
-                            processDefinitionKey: CONNECTOR_PROCESS,
-                            status: ServiceTaskStatus.COMPLETED,
-                        });
-                        return (
-                            tasks.length > 0 &&
-                            tasks.every(
-                                (task) =>
-                                    task.processDefinitionId === processDefinition?.id &&
-                                    task.processDefinitionKey === CONNECTOR_PROCESS &&
-                                    task.activityType === 'serviceTask' &&
-                                    task.status === ServiceTaskStatus.COMPLETED
-                            )
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByQuery(
+                    {
+                        processDefinitionKey: CONNECTOR_PROCESS,
+                        status: ServiceTaskStatus.COMPLETED,
+                    },
+                    (list) =>
+                        list.length > 0 &&
+                        list.every(
+                            (task) =>
+                                task.processDefinitionId === processDefinition?.id &&
+                                task.processDefinitionKey === CONNECTOR_PROCESS &&
+                                task.activityType === 'serviceTask' &&
+                                task.status === ServiceTaskStatus.COMPLETED
+                        )
+                );
+                expect(tasks.length).toBeGreaterThan(0);
             }
         );
     });
@@ -499,23 +399,21 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'Then the user can get list of service tasks for process key testBpmnErrorConnectorProcess and status ERROR',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await queryAdminServiceTestAdmin.getServiceTasksByQuery({
-                            processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
-                            status: ServiceTaskStatus.ERROR,
-                        });
-                        return (
-                            tasks.length > 0 &&
-                            tasks.every(
-                                (task) =>
-                                    task.processDefinitionKey === TEST_BPMN_ERROR_CONNECTOR_PROCESS &&
-                                    task.activityType === 'serviceTask' &&
-                                    task.status === ServiceTaskStatus.ERROR
-                            )
-                        );
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByQuery(
+                    {
+                        processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
+                        status: ServiceTaskStatus.ERROR,
+                    },
+                    (list) =>
+                        list.length > 0 &&
+                        list.every(
+                            (task) =>
+                                task.processDefinitionKey === TEST_BPMN_ERROR_CONNECTOR_PROCESS &&
+                                task.activityType === 'serviceTask' &&
+                                task.status === ServiceTaskStatus.ERROR
+                        )
+                );
+                expect(tasks.length).toBeGreaterThan(0);
             }
         );
     });
@@ -541,31 +439,23 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         );
 
         await activiti.step('And integration error event is emitted for the process', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestAdmin.getEventsByProcessInstanceId(
-                        processInstance.id
-                    );
-                    return events.some(
-                        (event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED
-                    );
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const events = await auditServiceTestAdmin.waitForEventsByProcessInstanceMatching(
+                processInstance.id,
+                (list) => list.some((event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED),
+                `INTEGRATION_ERROR_RECEIVED event for process ${processInstance.id}`
+            );
+            expect(events.some((event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED)).toBe(true);
         });
 
         await activiti.step('And the user can get list of service tasks with status of ERROR', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksByStatusForProcessInstance(
-                        processInstance.id,
-                        ServiceTaskStatus.ERROR
-                    );
-                    return (
-                        tasks.length > 0 &&
-                        tasks.every((task) => task.status === ServiceTaskStatus.ERROR)
-                    );
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByStatusForProcessInstance(
+                processInstance.id,
+                ServiceTaskStatus.ERROR,
+                (list) =>
+                    list.length > 0 &&
+                    list.every((task) => task.status === ServiceTaskStatus.ERROR)
+            );
+            expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('Then the user set the instance variable var with value replay', async () => {
@@ -573,24 +463,22 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('And the user can replay service task execution', async () => {
-            let executionId = '';
-            let clientId = '';
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestAdmin.getEventsByProcessInstanceId(
-                        processInstance.id
-                    );
-                    const errorEvent = events.find(
-                        (event) => event.eventType === EventType.INTEGRATION_ERROR_RECEIVED
-                    );
-                    const entity = errorEvent?.entity as
+            const errorEvent = await auditServiceTestAdmin.waitForEventMatching(
+                processInstance.id,
+                (event) => {
+                    if (event.eventType !== EventType.INTEGRATION_ERROR_RECEIVED) {
+                        return false;
+                    }
+                    const entity = event.entity as
                         | { executionId?: string; clientId?: string }
                         | undefined;
-                    executionId = entity?.executionId ?? '';
-                    clientId = entity?.clientId ?? '';
-                    return Boolean(executionId && clientId);
-                }, pollOptions('querySync'))
-                .toBe(true);
+                    return Boolean(entity?.executionId && entity?.clientId);
+                },
+                `INTEGRATION_ERROR_RECEIVED event with executionId/clientId for process ${processInstance.id}`
+            );
+            const entity = errorEvent.entity as { executionId?: string; clientId?: string };
+            const executionId = entity.executionId ?? '';
+            const clientId = entity.clientId ?? '';
 
             const response = await runtimeAdminServiceTestAdmin.replayServiceTask(
                 executionId,
@@ -601,65 +489,47 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('And the user can get list of service tasks with status of STARTED', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksByStatusForProcessInstance(
-                        processInstance.id,
-                        ServiceTaskStatus.STARTED
-                    );
-                    return tasks.length > 0;
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByStatusForProcessInstance(
+                processInstance.id,
+                ServiceTaskStatus.STARTED
+            );
+            expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And all integration context events are emitted for the process', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await auditServiceTestAdmin.getIntegrationContextEvents(
-                                processInstance.id
-                            )
-                        )
-                            .map((event) => event.eventType)
-                            .sort(),
-                    pollOptions('querySync')
-                )
-                .toEqual(
-                    [
-                        EventType.INTEGRATION_REQUESTED,
-                        EventType.INTEGRATION_ERROR_RECEIVED,
-                        EventType.INTEGRATION_REQUESTED,
-                        EventType.INTEGRATION_RESULT_RECEIVED,
-                    ].sort()
-                );
+            const events = await auditServiceTestAdmin.waitForIntegrationContextEventTypes(
+                processInstance.id,
+                [
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_ERROR_RECEIVED,
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_RESULT_RECEIVED,
+                ]
+            );
+            expect(events.map((event) => event.eventType).sort()).toEqual(
+                [
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_ERROR_RECEIVED,
+                    EventType.INTEGRATION_REQUESTED,
+                    EventType.INTEGRATION_RESULT_RECEIVED,
+                ].sort()
+            );
         });
 
         await activiti.step('And the user can get list of service tasks with status of COMPLETED', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await queryAdminServiceTestAdmin.getServiceTasksByStatusForProcessInstance(
-                        processInstance.id,
-                        ServiceTaskStatus.COMPLETED
-                    );
-                    return tasks.length > 0;
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksByStatusForProcessInstance(
+                processInstance.id,
+                ServiceTaskStatus.COMPLETED
+            );
+            expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the process with service tasks is completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceAdminWhenSynced(
-                                queryAdminServiceTestAdmin,
-                                processInstance.id
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryAdminServiceTestAdmin.waitForProcessInstanceAdminStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 });

@@ -17,19 +17,8 @@
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { scopedName } from '../../helpers/test-isolation';
 import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
-import {
-    expectEventsAdminForKey,
-    expectProcessInstancesAdminForKey,
-    expectQueryProcessInstancesAdminForKey,
-} from '../../helpers/security-policies.assertions';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { getQueryProcessInstanceWhenGone, getQueryProcessInstanceWhenSynced } from '../../helpers/query-sync';
 import { buildConnectorStartVariables } from '../../helpers/connector-process-payload';
-import {
-    expectProcessVariable,
-    expectProcessVariableValue,
-} from '../../helpers/process-variables';
 
 const CONNECTOR_RESULT_VARIABLES = [
     'var1',
@@ -79,30 +68,27 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstanceId
-                    );
-                    return instance?.status;
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
 
         for (const variableName of CONNECTOR_RESULT_VARIABLES) {
             await activiti.step(`And a variable was created with name ${variableName}`, async () => {
-                await expectProcessVariable(queryServiceTestUser, processInstanceId, variableName);
+                const variable = await queryServiceTestUser.waitForVariable(processInstanceId, variableName);
+                expect(variable.name).toBe(variableName);
             });
         }
 
         await activiti.step('And query process instance variable test_bigdecimal_variable_result has value 12345678.90', async () => {
-            await expectProcessVariableValue(
-                queryServiceTestUser,
+            const variable = await queryServiceTestUser.waitForProcessInstanceVariableValue(
                 processInstanceId,
                 'test_bigdecimal_variable_result',
                 '12345678.90'
             );
+            expect(String(variable.value)).toBe('12345678.90');
         });
     });
 
@@ -130,29 +116,28 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the user can get process with variables instances in admin endpoint', async () => {
-            await expectProcessInstancesAdminForKey(
-                securityPoliciesServiceProcessAdmin,
-                'PROCESS_INSTANCE_WITH_VARIABLES',
-                true
-            );
+            const adminInstances =
+                await securityPoliciesServiceProcessAdmin.waitForFilteredRuntimeAdminInstancesByName(
+                    'PROCESS_INSTANCE_WITH_VARIABLES'
+                );
+            expect(adminInstances.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the user can query process with variables instances in admin endpoints', async () => {
-            const queryInstances = await expectQueryProcessInstancesAdminForKey(
-                securityPoliciesServiceProcessAdmin,
-                'PROCESS_INSTANCE_WITH_VARIABLES',
-                true
-            );
+            const queryInstances =
+                await securityPoliciesServiceProcessAdmin.waitForFilteredQueryAdminInstancesByName(
+                    'PROCESS_INSTANCE_WITH_VARIABLES'
+                );
             expect(queryInstances.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the user can get events for process with variables instances in admin endpoint', async () => {
-            await expectEventsAdminForKey(
-                securityPoliciesServiceProcessAdmin,
-                processInstanceId,
-                'PROCESS_INSTANCE_WITH_VARIABLES',
-                true
-            );
+            const adminEvents =
+                await securityPoliciesServiceProcessAdmin.waitForFilteredAdminEventsForProcessInstance(
+                    processInstanceId,
+                    'PROCESS_INSTANCE_WITH_VARIABLES'
+                );
+            expect(adminEvents.length).toBeGreaterThan(0);
         });
     });
 
@@ -192,15 +177,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the process has the name new-process-name', async () => {
-            await expect
-                .poll(async () => {
-                    const queryInstance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstanceId
-                    );
-                    return queryInstance?.name;
-                }, pollOptions('querySync'))
-                .toBe(newName);
+            const queryInstance = await queryServiceTestUser.waitForProcessInstanceName(
+                processInstanceId,
+                newName
+            );
+            expect(queryInstance.name).toBe(newName);
         });
     });
 
@@ -220,15 +201,11 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
             const runtimeInstance = await runtimeBundleServiceTestUser.getProcessInstance(processInstance.id);
             expect(runtimeInstance.name).toBe(processInstanceName);
 
-            await expect
-                .poll(async () => {
-                    const queryInstance = await getQueryProcessInstanceWhenSynced(
-                        queryServiceTestUser,
-                        processInstance.id
-                    );
-                    return queryInstance?.name;
-                }, pollOptions('querySync'))
-                .toBe(processInstanceName);
+            const queryInstance = await queryServiceTestUser.waitForProcessInstanceName(
+                processInstance.id,
+                processInstanceName
+            );
+            expect(queryInstance.name).toBe(processInstanceName);
         });
 
         await activiti.step('Then verify the process instance name is my_process_instance_name', async () => {
@@ -282,26 +259,13 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the process instance is destroyed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        runtimeBundleServiceTestAdmin.isProcessInstanceNotFoundInRuntime(
-                            processInstanceId
-                        ),
-                    pollOptions('querySync')
-                )
-                .toBe(true);
+            const notFound = await runtimeBundleServiceTestAdmin.waitForProcessInstanceNotFoundInRuntime(
+                processInstanceId
+            );
+            expect(notFound).toBe(true);
 
-            await expect
-                .poll(
-                    async () =>
-                        (await getQueryProcessInstanceWhenGone(
-                            queryServiceTestUser,
-                            processInstanceId
-                        )) === undefined,
-                    pollOptions('querySync')
-                )
-                .toBe(true);
+            await queryServiceTestUser.waitForProcessInstanceGone(processInstanceId);
+            expect(await queryServiceTestUser.getProcessInstanceWhenGone(processInstanceId)).toBeUndefined();
         });
     });
 
@@ -321,36 +285,40 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('Then the generated events have sequence number set', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByEntityId(processInstanceId);
-                    if (events.length === 0) {
+            const events = await auditServiceTestUser.waitForEventsByEntityIdMatching(
+                processInstanceId,
+                (list) => {
+                    if (list.length === 0) {
                         return false;
                     }
-                    const sequenceNumbers = events
+                    const sequenceNumbers = list
                         .map((event) => event.sequenceNumber)
                         .filter((value): value is number => value !== undefined);
-                    for (let index = 0; index < events.length; index++) {
+                    for (let index = 0; index < list.length; index++) {
                         if (!sequenceNumbers.includes(index)) {
                             return false;
                         }
                     }
                     return true;
-                }, pollOptions('auditEvents'))
-                .toBe(true);
+                },
+                `events for process ${processInstanceId} to have contiguous sequence numbers`
+            );
+            expect(events.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And the generated events have the same message id', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-                    if (events.length === 0) {
+            const events = await auditServiceTestUser.waitForEventsByProcessInstanceMatching(
+                processInstanceId,
+                (list) => {
+                    if (list.length === 0) {
                         return false;
                     }
-                    const messageId = events[0].messageId;
-                    return events.every((event) => event.messageId === messageId && Boolean(messageId));
-                }, pollOptions('auditEvents'))
-                .toBe(true);
+                    const messageId = list[0].messageId;
+                    return list.every((event) => event.messageId === messageId && Boolean(messageId));
+                },
+                `events for process ${processInstanceId} to share a messageId`
+            );
+            expect(events.length).toBeGreaterThan(0);
         });
     });
 
@@ -369,12 +337,8 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
 
         await activiti.step('Then the process instance can be queried using LIKE operator', async () => {
             const namePrefix = testScope.prefix;
-            await expect
-                .poll(async () => {
-                    const instances = await queryServiceTestUser.getProcessInstancesByName(namePrefix);
-                    return instances.some((instance) => instance.name?.includes(namePrefix));
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const instances = await queryServiceTestUser.waitForProcessInstanceByNamePrefix(namePrefix);
+            expect(instances.some((instance) => instance.name?.includes(namePrefix))).toBe(true);
         });
     });
 
@@ -411,7 +375,8 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
 
         for (const variableName of headerVariableNames) {
             await activiti.step(`Then a variable was created with name ${variableName}`, async () => {
-                await expectProcessVariable(queryServiceHrUser, processInstanceId, variableName);
+                const variable = await queryServiceHrUser.waitForVariable(processInstanceId, variableName);
+                expect(variable.name).toBe(variableName);
             });
         }
     });

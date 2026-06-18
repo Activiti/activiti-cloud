@@ -16,12 +16,8 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { TaskStatus } from '../../models/task.models';
+import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
-import {
-    expectClientError,
-    expectProcessAndTaskCompleted,
-    expectTaskStatusInRbAndQuery,
-} from '../../helpers/task-assertions';
 
 activiti.describe('Runtime — Task Actions (wave 1)', () => {
     activiti('should claim and complete tasks in a running process', async ({
@@ -54,17 +50,16 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
-            await expectProcessAndTaskCompleted(
-                runtimeBundleServiceTestUser,
-                queryServiceTestUser,
-                processInstanceId
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
             );
-            await expectTaskStatusInRbAndQuery(
-                taskServiceTestUser,
-                queryServiceTestUser,
-                taskId,
-                TaskStatus.COMPLETED
-            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
+            await expect(async () => {
+                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            }).rejects.toThrow();
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
+            expect(queryTask.status).toBe(TaskStatus.COMPLETED);
         });
     });
 
@@ -81,12 +76,10 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the created task has a status assigned', async () => {
-            await expectTaskStatusInRbAndQuery(
-                taskServiceTestUser,
-                queryServiceTestUser,
-                taskId,
-                TaskStatus.ASSIGNED
-            );
+            const rbTask = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(rbTask.status).toBe(TaskStatus.ASSIGNED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(queryTask.status).toBe(TaskStatus.ASSIGNED);
         });
     });
 
@@ -177,12 +170,10 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         );
 
         await activiti.step('And the status of the task since the beginning is ASSIGNED', async () => {
-            await expectTaskStatusInRbAndQuery(
-                taskServiceTestUser,
-                queryServiceTestUser,
-                taskId,
-                TaskStatus.ASSIGNED
-            );
+            const rbTask = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(rbTask.status).toBe(TaskStatus.ASSIGNED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(queryTask.status).toBe(TaskStatus.ASSIGNED);
         });
 
         await activiti.step('And the user completes the task', async () => {
@@ -190,11 +181,14 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
-            await expectProcessAndTaskCompleted(
-                runtimeBundleServiceTestUser,
-                queryServiceTestUser,
-                processInstanceId
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
             );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
+            await expect(async () => {
+                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            }).rejects.toThrow();
         });
     });
 
@@ -220,12 +214,10 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         );
 
         await activiti.step('And the status of the task is CREATED', async () => {
-            await expectTaskStatusInRbAndQuery(
-                taskServiceTestUser,
-                queryServiceTestUser,
-                taskId,
-                TaskStatus.CREATED
-            );
+            const rbTask = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(rbTask.status).toBe(TaskStatus.CREATED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(queryTask.status).toBe(TaskStatus.CREATED);
         });
 
         await activiti.step('And the user claims the task', async () => {
@@ -237,11 +229,14 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
-            await expectProcessAndTaskCompleted(
-                runtimeBundleServiceTestUser,
-                queryServiceTestUser,
-                processInstanceId
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
             );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
+            await expect(async () => {
+                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            }).rejects.toThrow();
         });
     });
 
@@ -267,12 +262,10 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         );
 
         await activiti.step('And the status of the task is CREATED', async () => {
-            await expectTaskStatusInRbAndQuery(
-                taskServiceTestUser,
-                queryServiceTestUser,
-                taskId,
-                TaskStatus.CREATED
-            );
+            const rbTask = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(rbTask.status).toBe(TaskStatus.CREATED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(queryTask.status).toBe(TaskStatus.CREATED);
         });
 
         await activiti.step('And the user claims the task', async () => {
@@ -284,11 +277,14 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
-            await expectProcessAndTaskCompleted(
-                runtimeBundleServiceTestUser,
-                queryServiceTestUser,
-                processInstanceId
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
             );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
+            await expect(async () => {
+                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            }).rejects.toThrow();
         });
     });
 
@@ -316,7 +312,9 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
 
         await activiti.step('Then the user cannot complete the task', async () => {
             const response = await taskServiceTestUser.completeTask(taskId);
-            expectClientError(response, 'Unable to find task');
+            expect(response.httpStatus).toBeGreaterThanOrEqual(400);
+            expect(response.httpStatus).toBeLessThan(500);
+            expect(JSON.stringify(response)).toContain('Unable to find task');
         });
     });
 
@@ -345,7 +343,9 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
                 'Then the task cannot be claimed by user',
             async () => {
                 const response = await taskServiceHrUser.claimTask(taskId);
-                expectClientError(response, 'Unable to find task');
+                expect(response.httpStatus).toBeGreaterThanOrEqual(400);
+            expect(response.httpStatus).toBeLessThan(500);
+            expect(JSON.stringify(response)).toContain('Unable to find task');
                 const hrTasks = await queryServiceHrUser.getAllTasks();
                 expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
             }

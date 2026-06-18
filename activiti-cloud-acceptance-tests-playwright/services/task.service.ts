@@ -74,9 +74,70 @@ export class TaskService extends BaseService {
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
+    async getFirstTaskByProcessInstanceId(processInstanceId: string): Promise<CloudTask> {
+        const tasks = await this.getTasksByProcessInstanceId(processInstanceId);
+        if (tasks.length === 0) {
+            throw new Error(`No tasks found for process instance ${processInstanceId}`);
+        }
+        return tasks[0];
+    }
+
+    async waitForOpenTaskByProcessInstanceId(processInstanceId: string): Promise<CloudTask> {
+        const tasks = await TaskService.waitFor(
+            () => this.getTasksByProcessInstanceId(processInstanceId),
+            (list) => list.some((t) => t.status !== TaskStatus.COMPLETED),
+            'querySync',
+            `open task on process ${processInstanceId}`
+        );
+        return tasks.find((t) => t.status !== TaskStatus.COMPLETED)!;
+    }
+
     async findTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask | undefined> {
         const tasks = await this.getTasksByProcessInstanceId(processInstanceId);
         return tasks.find((task) => task.name === taskName);
+    }
+
+    async waitForTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask> {
+        const tasks = await TaskService.waitFor(
+            () => this.getTasksByProcessInstanceId(processInstanceId),
+            (list) => list.some((task) => task.name === taskName),
+            'querySync',
+            `task named ${taskName} on process ${processInstanceId}`
+        );
+        return tasks.find((task) => task.name === taskName)!;
+    }
+
+    async waitForTaskWithNameAndStatus(
+        processInstanceId: string,
+        taskName: string,
+        status: TaskStatus
+    ): Promise<CloudTask> {
+        const tasks = await TaskService.waitFor(
+            () => this.getTasksByProcessInstanceId(processInstanceId),
+            (list) => list.some((task) => task.name === taskName && task.status === status),
+            'querySync',
+            `task ${taskName} with status ${status} on process ${processInstanceId}`
+        );
+        return tasks.find((task) => task.name === taskName && task.status === status)!;
+    }
+
+    async waitForTaskStatus(taskId: string, expectedStatus: TaskStatus): Promise<CloudTask> {
+        return TaskService.waitFor(
+            () => this.getTaskById(taskId),
+            (task) => task.status === expectedStatus,
+            'querySync',
+            `task ${taskId} to reach status ${expectedStatus}`
+        );
+    }
+
+    async waitForTaskAssignee(taskId: string, expectedAssignee: string): Promise<CloudTask> {
+        const task = await TaskService.waitFor(
+            () => this.tryGetTaskById(taskId),
+            (value) => value?.assignee === expectedAssignee,
+            'querySync',
+            `task ${taskId} to be assigned to ${expectedAssignee}`
+        );
+        return task!;
     }
 
     async getTaskById(taskId: string): Promise<CloudTask> {
@@ -215,6 +276,58 @@ export class TaskService extends BaseService {
             headers: { 'Content-Type': 'application/json' },
         });
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async waitForTaskVariablesIncluding(
+        taskId: string,
+        variableNames: readonly string[]
+    ): Promise<CloudVariableInstance[]> {
+        return TaskService.waitFor(
+            () => this.getTaskVariables(taskId),
+            (variables) => {
+                const names = new Set(variables.map((variable) => variable.name));
+                return variableNames.every((name) => names.has(name));
+            },
+            'querySync',
+            `task ${taskId} variables to include [${variableNames.join(',')}]`
+        );
+    }
+
+    async waitForTaskVariableValues(
+        taskId: string,
+        expected: Record<string, unknown>
+    ): Promise<CloudVariableInstance[]> {
+        return TaskService.waitFor(
+            () => this.getTaskVariables(taskId),
+            (variables) => {
+                const map = Object.fromEntries(variables.map((v) => [v.name, v.value]));
+                return (
+                    Object.keys(expected).every((name) => map[name] === expected[name]) &&
+                    Object.keys(map).length === Object.keys(expected).length
+                );
+            },
+            'querySync',
+            `task ${taskId} variables to match ${JSON.stringify(expected)}`
+        );
+    }
+
+    async waitForTasksCount(processInstanceId: string, expectedCount: number): Promise<CloudTask[]> {
+        return TaskService.waitFor(
+            () => this.getTasksByProcessInstanceId(processInstanceId),
+            (tasks) => tasks.length === expectedCount,
+            'querySync',
+            `process ${processInstanceId} to have ${expectedCount} tasks`
+        );
+    }
+
+    async waitForActiveTasksCount(processInstanceId: string, expectedCount: number): Promise<CloudTask[]> {
+        const tasks = await TaskService.waitFor(
+            () => this.getTasksByProcessInstanceId(processInstanceId),
+            (list) => list.filter((task) => task.status !== TaskStatus.COMPLETED).length === expectedCount,
+            'querySync',
+            `process ${processInstanceId} to have ${expectedCount} active tasks`
+        );
+        return tasks.filter((task) => task.status !== TaskStatus.COMPLETED);
     }
 
     async updateTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {

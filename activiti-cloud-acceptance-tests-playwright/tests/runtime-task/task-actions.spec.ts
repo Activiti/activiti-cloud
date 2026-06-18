@@ -20,13 +20,6 @@ import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { EventType } from '../../models/audit.models';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
-import {
-    expectProcessAndTaskCompleted,
-    expectTaskStatusInRbAndQuery,
-} from '../../helpers/task-assertions';
-import { expectProcessVariableValue } from '../../helpers/process-variables';
-import { getQueryProcessInstanceWhenSynced, loadOrUndefined } from '../../helpers/query-sync';
-import { pollOptions } from '../../config/runtime/timeouts';
 
 activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
     activiti('subprocess task is created when starting a parent process with call activities', async ({
@@ -44,23 +37,17 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task from SUB_PROCESS_INSTANCE_WITH_TASK is CREATED and it is called subprocess-task', async () => {
-            await expect
-                .poll(async () => {
-                    const subProcesses = await loadOrUndefined(() =>
-                        runtimeBundleServiceTestUser.getSubProcesses(parentProcessInstanceId)
+            const task = await queryServiceTestUser.waitForTaskInProcessInstances(
+                async () => {
+                    const subProcesses = await runtimeBundleServiceTestUser.findSubProcesses(
+                        parentProcessInstanceId
                     );
-                    if (!subProcesses || subProcesses.length === 0) return false;
-                    for (const sub of subProcesses) {
-                        const tasks = await loadOrUndefined(() =>
-                            queryServiceTestUser.getTasksByProcessInstanceId(sub.id)
-                        );
-                        if (tasks?.some(t => t.name === 'subprocess-task' && t.status === TaskStatus.CREATED)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }, pollOptions('querySync'))
-                .toBe(true);
+                    return subProcesses?.map((sub) => sub.id) ?? [];
+                },
+                (t) => t.name === 'subprocess-task' && t.status === TaskStatus.CREATED,
+                `subprocess-task in CREATED state under parent ${parentProcessInstanceId}`
+            );
+            expect(task.name).toBe('subprocess-task');
         });
     });
 
@@ -83,18 +70,9 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task has the formKey field and correct processInstance fields', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (await getQueryProcessInstanceWhenSynced(
-                            queryServiceTestUser,
-                            processInstanceId
-                        )) !== undefined,
-                    pollOptions('querySync')
-                )
-                .toBe(true);
-
-            const processFromQuery = await queryServiceTestUser.getProcessInstance(processInstanceId);
+            const processFromQuery = await queryServiceTestUser.waitForProcessInstanceSynced(
+                processInstanceId
+            );
             expect(processFromQuery).toBeTruthy();
 
             const rbTask = await taskServiceTestUser.getTaskById(taskId);
@@ -132,12 +110,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And a task variable was created with name start1', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await queryServiceTestUser.getTaskVariables(taskId);
-                    return vars.some(v => v.name === 'start1' && String(v.value) === 'start1');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const variable = await queryServiceTestUser.waitForTaskVariable(
+                taskId,
+                'start1',
+                (v) => String(v.value) === 'start1'
+            );
+            expect(String(variable.value)).toBe('start1');
         });
 
         await activiti.step('And task variable start1 has value start1', async () => {
@@ -146,12 +124,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And a task variable was created with name start2', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await queryServiceTestUser.getTaskVariables(taskId);
-                    return vars.some(v => v.name === 'start2' && String(v.value) === 'start2');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const variable = await queryServiceTestUser.waitForTaskVariable(
+                taskId,
+                'start2',
+                (v) => String(v.value) === 'start2'
+            );
+            expect(String(variable.value)).toBe('start2');
         });
 
         await activiti.step('And the user claims the task', async () => {
@@ -163,12 +141,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And task variable start1 has value start1modified', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await queryServiceTestUser.getTaskVariables(taskId);
-                    return vars.find(v => v.name === 'start1')?.value;
-                }, pollOptions('querySync'))
-                .toBe('start1modified');
+            const variable = await queryServiceTestUser.waitForTaskVariable(
+                taskId,
+                'start1',
+                (v) => String(v.value) === 'start1modified'
+            );
+            expect(String(variable.value)).toBe('start1modified');
         });
 
         await activiti.step('And the user completes the task', async () => {
@@ -179,16 +157,10 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             'And another user is authenticated as hruser ' +
                 'And a task variable was created with name start1',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                        const activeTask = tasks.find(t => t.status !== TaskStatus.COMPLETED);
-                        if (!activeTask) return false;
-                        hruserTaskId = activeTask.id;
-                        const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
-                        return vars.some(v => v.name === 'start1');
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const activeTask = await taskServiceHrUser.waitForOpenTaskByProcessInstanceId(processInstanceId);
+                hruserTaskId = activeTask.id;
+                const variable = await queryServiceHrUser.waitForTaskVariable(hruserTaskId, 'start1');
+                expect(variable.name).toBe('start1');
             }
         );
 
@@ -231,12 +203,8 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task is updated', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByEntityId(taskId);
-                    return events.some(e => e.eventType === EventType.TASK_UPDATED);
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const event = await auditServiceTestUser.waitForEventOfTypeForEntity(taskId, EventType.TASK_UPDATED);
+            expect(event.eventType).toBe(EventType.TASK_UPDATED);
         });
 
         await activiti.step('And the task has the updated fields', async () => {
@@ -246,14 +214,10 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
 
-            await expect
-                .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
-                .toBe('new-task-name');
-
-            const queryTask = await queryServiceTestUser.getTaskById(taskId);
-            expect(queryTask?.name).toBe('new-task-name');
-            expect(queryTask?.priority).toBe(3);
-            expect(queryTask?.dueDate).toBeTruthy();
+            const queryTask = await queryServiceTestUser.waitForTaskName(taskId, 'new-task-name');
+            expect(queryTask.name).toBe('new-task-name');
+            expect(queryTask.priority).toBe(3);
+            expect(queryTask.dueDate).toBeTruthy();
         });
     });
 
@@ -270,14 +234,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the user will get only root tasks when querying for root tasks', async () => {
-            await expect
-                .poll(async () => {
-                    const rootTasks = await queryServiceTestUser.getRootTasksByProcessInstance(processInstanceId);
-                    return rootTasks.length > 0 && rootTasks.every(t => !t.parentTaskId);
-                }, pollOptions('querySync'))
-                .toBe(true);
-
-            const rootTasks = await queryServiceTestUser.getRootTasksByProcessInstance(processInstanceId);
+            const rootTasks = await queryServiceTestUser.waitForRootTasks(processInstanceId);
             expect(rootTasks.length).toBeGreaterThan(0);
             rootTasks.forEach(task => expect(task.parentTaskId).toBeFalsy());
         });
@@ -304,12 +261,9 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the task has the completion fields set', async () => {
-            await expect
-                .poll(async () => {
-                    const task = await queryServiceTestUser.getTaskById(taskId);
-                    return task?.status === TaskStatus.COMPLETED && !!task?.completedDate;
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const task = await queryServiceTestUser.waitForTaskCompleted(taskId);
+            expect(task.status).toBe(TaskStatus.COMPLETED);
+            expect(task.completedDate).toBeTruthy();
         });
     });
 
@@ -349,12 +303,8 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             'And another user is authenticated as testuser ' +
                 'Then the task is updated',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const events = await auditServiceTestUser.getEventsByEntityId(taskId);
-                        return events.some(e => e.eventType === EventType.TASK_UPDATED);
-                    }, pollOptions('querySync'))
-                    .toBe(true);
+                const event = await auditServiceTestUser.waitForEventOfTypeForEntity(taskId, EventType.TASK_UPDATED);
+                expect(event.eventType).toBe(EventType.TASK_UPDATED);
             }
         );
 
@@ -365,14 +315,10 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.dueDate).toBeTruthy();
             expect(rbTask.formKey).toBe('new-task-form-key');
 
-            await expect
-                .poll(async () => (await queryServiceTestUser.getTaskById(taskId))?.name, pollOptions('querySync'))
-                .toBe('new-task-name');
-
-            const queryTask = await queryServiceTestUser.getTaskById(taskId);
-            expect(queryTask?.name).toBe('new-task-name');
-            expect(queryTask?.priority).toBe(3);
-            expect(queryTask?.dueDate).toBeTruthy();
+            const queryTask = await queryServiceTestUser.waitForTaskName(taskId, 'new-task-name');
+            expect(queryTask.name).toBe('new-task-name');
+            expect(queryTask.priority).toBe(3);
+            expect(queryTask.dueDate).toBeTruthy();
         });
     });
 
@@ -401,12 +347,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then task variable status has value approved', async () => {
-            await expect
-                .poll(async () => {
-                    const vars = await queryServiceTestUser.getTaskVariables(taskId);
-                    return vars.find(v => v.name === 'status')?.value;
-                }, pollOptions('querySync'))
-                .toBe('approved');
+            const variable = await queryServiceTestUser.waitForTaskVariable(
+                taskId,
+                'status',
+                (v) => v.value === 'approved'
+            );
+            expect(variable.value).toBe('approved');
         });
     });
 
@@ -441,22 +387,20 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceWhenSynced(
-                                queryServiceTestUser,
-                                processInstanceId
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
 
         await activiti.step('And query process instance variable status has value approved', async () => {
-            await expectProcessVariableValue(queryServiceTestUser, processInstanceId, 'status', 'approved');
+            const variable = await queryServiceTestUser.waitForProcessInstanceVariableValue(
+                processInstanceId,
+                'status',
+                'approved'
+            );
+            expect(String(variable.value)).toBe('approved');
         });
     });
 
@@ -491,26 +435,29 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (
-                            await getQueryProcessInstanceWhenSynced(
-                                queryServiceTestUser,
-                                processInstanceId
-                            )
-                        )?.status,
-                    pollOptions('querySync')
-                )
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
 
         await activiti.step('And query process instance variable comments has value lgtm', async () => {
-            await expectProcessVariableValue(queryServiceTestUser, processInstanceId, 'comments', 'lgtm');
+            const variable = await queryServiceTestUser.waitForProcessInstanceVariableValue(
+                processInstanceId,
+                'comments',
+                'lgtm'
+            );
+            expect(String(variable.value)).toBe('lgtm');
         });
 
         await activiti.step('And query process instance variable outcome has value approved', async () => {
-            await expectProcessVariableValue(queryServiceTestUser, processInstanceId, 'outcome', 'approved');
+            const variable = await queryServiceTestUser.waitForProcessInstanceVariableValue(
+                processInstanceId,
+                'outcome',
+                'approved'
+            );
+            expect(String(variable.value)).toBe('approved');
         });
     });
 
@@ -534,16 +481,15 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the status of the task is CREATED', async () => {
-            await expectTaskStatusInRbAndQuery(taskServiceTestUser, queryServiceTestUser, taskId, TaskStatus.CREATED);
+            const rbTask = await taskServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(rbTask.status).toBe(TaskStatus.CREATED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.CREATED);
+            expect(queryTask.status).toBe(TaskStatus.CREATED);
         });
 
         await activiti.step('And the task contains candidate groups hr,testgroup in Query', async () => {
-            await expect
-                .poll(async () => {
-                    const groups = await queryServiceTestUser.getCandidateGroups(taskId);
-                    return groups;
-                }, pollOptions('querySync'))
-                .toEqual(expect.arrayContaining(['hr', 'testgroup']));
+            const groups = await queryServiceTestUser.waitForCandidateGroups(taskId, ['hr', 'testgroup']);
+            expect(groups).toEqual(expect.arrayContaining(['hr', 'testgroup']));
         });
 
         await activiti.step('And the user claims the task', async () => {
@@ -555,7 +501,14 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
-            await expectProcessAndTaskCompleted(runtimeBundleServiceTestUser, queryServiceTestUser, processInstanceId);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
+            await expect(async () => {
+                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+            }).rejects.toThrow();
         });
 
         await activiti.step('And the status of the task is COMPLETED in Query', async () => {
@@ -564,7 +517,8 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             // in the rabbit preview namespace (no audit deployment / ACL gap), even
             // though Query is updated correctly. Process+task completion is already
             // verified above via Query+RB, so the Audit assertion is omitted here.
-            await expectTaskStatusInRbAndQuery(taskServiceTestUser, queryServiceTestUser, taskId, TaskStatus.COMPLETED);
+            const queryTask = await queryServiceTestUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
+            expect(queryTask.status).toBe(TaskStatus.COMPLETED);
         });
 
         await activiti.step('And the task contains candidate groups hr,testgroup in Query', async () => {
@@ -591,12 +545,8 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the task contains candidate users hruser in Query', async () => {
-            await expect
-                .poll(async () => {
-                    const users = await queryServiceTestUser.getCandidateUsers(taskId);
-                    return users.includes('hruser');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const users = await queryServiceTestUser.waitForCandidateUser(taskId, 'hruser');
+            expect(users).toContain('hruser');
         });
 
         await activiti.step('And the user claims the task', async () => {
@@ -611,12 +561,8 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             'And another user is authenticated as hruser ' +
                 'Then the assignee is hruser',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const task = await taskServiceHrUser.tryGetTaskById(taskId);
-                        return task?.assignee;
-                    }, pollOptions('querySync'))
-                    .toBe('hruser');
+                const task = await taskServiceHrUser.waitForTaskAssignee(taskId, 'hruser');
+                expect(task.assignee).toBe('hruser');
             }
         );
     });

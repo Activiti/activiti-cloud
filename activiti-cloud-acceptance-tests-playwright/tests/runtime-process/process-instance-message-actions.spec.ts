@@ -16,7 +16,6 @@
 
 import { randomUUID } from 'node:crypto';
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 
@@ -52,38 +51,24 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             "Then messages: MESSAGE_RECEIVED event is emitted for the message 'startMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_RECEIVED,
-                                    'startMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_RECEIVED,
+                    'startMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step(
             "And messages: MESSAGE_WAITING event is emitted for the message 'boundaryMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_WAITING,
-                                    'boundaryMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_WAITING,
+                    'boundaryMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
@@ -102,38 +87,24 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             "And messages: MESSAGE_RECEIVED event is emitted for the message 'boundaryMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_RECEIVED,
-                                    'boundaryMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_RECEIVED,
+                    'boundaryMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step(
             "And messages: MESSAGE_WAITING event is emitted for the message 'catchMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_WAITING,
-                                    'catchMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_WAITING,
+                    'catchMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
@@ -152,48 +123,33 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             "And messages: MESSAGE_RECEIVED event is emitted for the message 'catchMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_RECEIVED,
-                                    'catchMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_RECEIVED,
+                    'catchMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step(
             "And messages: MESSAGE_SENT event is emitted for the message 'endMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_SENT,
-                                    'endMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_SENT,
+                    'endMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step('And messages: the process with message events is completed', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await queryServiceHrUser.getProcessInstance(processInstanceId);
-                    return instance.status;
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceHrUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -219,38 +175,24 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             "Then messages: MESSAGE_RECEIVED event is emitted for the message 'startMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_RECEIVED,
-                                    'startMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_RECEIVED,
+                    'startMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step(
             "And messages: MESSAGE_WAITING event is emitted for the message 'boundaryMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_WAITING,
-                                    'boundaryMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_WAITING,
+                    'boundaryMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
@@ -291,38 +233,24 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
         await activiti.step(
             "Then messages: MESSAGE_RECEIVED event is emitted for the message 'startMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_RECEIVED,
-                                    'startMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_RECEIVED,
+                    'startMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
         await activiti.step(
             "And messages: MESSAGE_WAITING event is emitted for the message 'boundaryMessage'",
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getMessageEventsForProcessInstance(
-                                    processInstanceId,
-                                    EventType.MESSAGE_WAITING,
-                                    'boundaryMessage'
-                                )
-                            ).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const events = await auditServiceHrUser.waitForMessageEventsForProcessInstance(
+                    processInstanceId,
+                    EventType.MESSAGE_WAITING,
+                    'boundaryMessage'
+                );
+                expect(events.length).toBeGreaterThan(0);
             }
         );
 
@@ -364,248 +292,166 @@ activiti.describe('Process Instance Message Actions', { tag: '@slow' }, () => {
             await activiti.step(
                 "Then messages: MESSAGE_RECEIVED event is emitted for the message 'StartCloudMessage1'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process1',
-                                        businessId,
-                                        EventType.MESSAGE_RECEIVED,
-                                        'StartCloudMessage1'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process1',
+                        businessId,
+                        EventType.MESSAGE_RECEIVED,
+                        'StartCloudMessage1'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_SENT event is emitted for the message 'StartCloudMessage3'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process1',
-                                        businessId,
-                                        EventType.MESSAGE_SENT,
-                                        'StartCloudMessage3'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process1',
+                        businessId,
+                        EventType.MESSAGE_SENT,
+                        'StartCloudMessage3'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_SENT event is emitted for the message 'StartCloudMessage2'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process1',
-                                        businessId,
-                                        EventType.MESSAGE_SENT,
-                                        'StartCloudMessage2'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process1',
+                        businessId,
+                        EventType.MESSAGE_SENT,
+                        'StartCloudMessage2'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: the process with definition key of 'ThrowCatchMessageIT_Process1' having businessKey value of 'businessId' session variable has status 'COMPLETED'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                queryAdminServiceTestAdmin.getProcessInstanceStatusesByBusinessKey(
-                                    'ThrowCatchMessageIT_Process1',
-                                    businessId
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toContain(ProcessInstanceStatus.COMPLETED);
+                    const statuses = await queryAdminServiceTestAdmin.waitForProcessInstanceStatusByBusinessKey(
+                        'ThrowCatchMessageIT_Process1',
+                        businessId,
+                        ProcessInstanceStatus.COMPLETED
+                    );
+                    expect(statuses).toContain(ProcessInstanceStatus.COMPLETED);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_RECEIVED event is emitted for the message 'StartCloudMessage3' for process definition key 'ThrowCatchMessageIT_Process3' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process3',
-                                        businessId,
-                                        EventType.MESSAGE_RECEIVED,
-                                        'StartCloudMessage3'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process3',
+                        businessId,
+                        EventType.MESSAGE_RECEIVED,
+                        'StartCloudMessage3'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_SENT event is emitted for the message 'IntermediateCloudMessage2' for process definition key 'ThrowCatchMessageIT_Process3' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process3',
-                                        businessId,
-                                        EventType.MESSAGE_SENT,
-                                        'IntermediateCloudMessage2'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process3',
+                        businessId,
+                        EventType.MESSAGE_SENT,
+                        'IntermediateCloudMessage2'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_WAITING event is emitted for the message 'IntermediateCloudMessage3' for process definition key 'ThrowCatchMessageIT_Process3' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process3',
-                                        businessId,
-                                        EventType.MESSAGE_WAITING,
-                                        'IntermediateCloudMessage3'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process3',
+                        businessId,
+                        EventType.MESSAGE_WAITING,
+                        'IntermediateCloudMessage3'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_RECEIVED event is emitted for the message 'StartCloudMessage2' for process definition key 'ThrowCatchMessageIT_Process2' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process2',
-                                        businessId,
-                                        EventType.MESSAGE_RECEIVED,
-                                        'StartCloudMessage2'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process2',
+                        businessId,
+                        EventType.MESSAGE_RECEIVED,
+                        'StartCloudMessage2'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_WAITING event is emitted for the message 'IntermediateCloudMessage2' for process definition key 'ThrowCatchMessageIT_Process2' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process2',
-                                        businessId,
-                                        EventType.MESSAGE_WAITING,
-                                        'IntermediateCloudMessage2'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process2',
+                        businessId,
+                        EventType.MESSAGE_WAITING,
+                        'IntermediateCloudMessage2'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_SENT event is emitted for the message 'IntermediateCloudMessage3' for process definition key 'ThrowCatchMessageIT_Process2' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process2',
-                                        businessId,
-                                        EventType.MESSAGE_SENT,
-                                        'IntermediateCloudMessage3'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process2',
+                        businessId,
+                        EventType.MESSAGE_SENT,
+                        'IntermediateCloudMessage3'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: MESSAGE_RECEIVED event is emitted for the message 'IntermediateCloudMessage3' for process definition key 'ThrowCatchMessageIT_Process3' having businessKey value of 'businessId' session variable",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                (
-                                    await auditServiceTestAdmin.getMessageEventsByDefinitionAndBusinessKey(
-                                        'ThrowCatchMessageIT_Process3',
-                                        businessId,
-                                        EventType.MESSAGE_RECEIVED,
-                                        'IntermediateCloudMessage3'
-                                    )
-                                ).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditServiceTestAdmin.waitForMessageEventsByDefinitionAndBusinessKey(
+                        'ThrowCatchMessageIT_Process3',
+                        businessId,
+                        EventType.MESSAGE_RECEIVED,
+                        'IntermediateCloudMessage3'
+                    );
+                    expect(events.length).toBeGreaterThan(0);
                 }
             );
 
             await activiti.step(
                 "And messages: the process with definition key of 'ThrowCatchMessageIT_Process2' having businessKey value of 'businessId' session variable has status 'COMPLETED'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                queryAdminServiceTestAdmin.getProcessInstanceStatusesByBusinessKey(
-                                    'ThrowCatchMessageIT_Process2',
-                                    businessId
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toContain(ProcessInstanceStatus.COMPLETED);
+                    const statuses = await queryAdminServiceTestAdmin.waitForProcessInstanceStatusByBusinessKey(
+                        'ThrowCatchMessageIT_Process2',
+                        businessId,
+                        ProcessInstanceStatus.COMPLETED
+                    );
+                    expect(statuses).toContain(ProcessInstanceStatus.COMPLETED);
                 }
             );
 
             await activiti.step(
                 "And messages: the process with definition key of 'ThrowCatchMessageIT_Process3' having businessKey value of 'businessId' session variable has status 'COMPLETED'",
                 async () => {
-                    await expect
-                        .poll(
-                            async () =>
-                                queryAdminServiceTestAdmin.getProcessInstanceStatusesByBusinessKey(
-                                    'ThrowCatchMessageIT_Process3',
-                                    businessId
-                                ),
-                            pollOptions('querySync')
-                        )
-                        .toContain(ProcessInstanceStatus.COMPLETED);
+                    const statuses = await queryAdminServiceTestAdmin.waitForProcessInstanceStatusByBusinessKey(
+                        'ThrowCatchMessageIT_Process3',
+                        businessId,
+                        ProcessInstanceStatus.COMPLETED
+                    );
+                    expect(statuses).toContain(ProcessInstanceStatus.COMPLETED);
                 }
             );
         }

@@ -15,7 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 
 const TASK_VARIABLES: Record<string, unknown> = {
     var1: 'one',
@@ -39,23 +38,14 @@ activiti.describe('Runtime — Task Variable Actions', () => {
         });
 
         await activiti.step('Then task variables are visible in rb and query', async () => {
-            await expect
-                .poll(async () => {
-                    const rbVars = await taskServiceTestUser.getTaskVariables(taskId);
-                    const queryVars = await queryServiceTestUser.getTaskVariables(taskId);
-                    const toMap = (list: { name: string; value?: unknown }[]): Record<string, unknown> =>
-                        Object.fromEntries(list.map(v => [v.name, v.value]));
-                    const rbMap = toMap(rbVars);
-                    const queryMap = toMap(queryVars);
-                    return (
-                        Object.keys(TASK_VARIABLES).every(
-                            k => rbMap[k] === TASK_VARIABLES[k] && queryMap[k] === TASK_VARIABLES[k],
-                        ) &&
-                        Object.keys(rbMap).length === Object.keys(TASK_VARIABLES).length &&
-                        Object.keys(queryMap).length === Object.keys(TASK_VARIABLES).length
-                    );
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const rbVars = await taskServiceTestUser.waitForTaskVariableValues(taskId, TASK_VARIABLES);
+            const queryVars = await queryServiceTestUser.waitForTaskVariableValues(taskId, TASK_VARIABLES);
+            const toMap = (list: { name: string; value?: unknown }[]): Record<string, unknown> =>
+                Object.fromEntries(list.map((v) => [v.name, v.value]));
+            expect({ rb: toMap(rbVars), query: toMap(queryVars) }).toEqual({
+                rb: TASK_VARIABLES,
+                query: TASK_VARIABLES,
+            });
         });
     });
 });

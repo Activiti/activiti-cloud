@@ -15,8 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
-import { expectTaskStatusInRbAndQuery } from '../../helpers/task-assertions';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { TaskStatus } from '../../models/task.models';
@@ -45,209 +43,119 @@ activiti.describe('Process Instance Inclusive Gateway Actions', { tag: '@slow' }
         );
 
         await activiti.step('Then the task is created Start Process', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Start Process'))?.id,
-                    pollOptions('querySync')
-                )
-                .toBeTruthy();
+            const task = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Start Process');
+            expect(task.id).toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Start Process', async () => {
-            let taskId = '';
-            await expect
-                .poll(async () => {
-                    const found = await taskServiceHrUser.findTaskByName(
-                        processInstanceId,
-                        'Start Process'
-                    );
-                    taskId = found?.id ?? '';
-                    return taskId;
-                }, pollOptions('querySync'))
-                .toBeTruthy();
+            const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Start Process');
+            const taskId = found.id;
 
             await taskServiceHrUser.claimTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.ASSIGNED
-            );
+            const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(claimed.status).toBe(TaskStatus.ASSIGNED);
+            const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
             await taskServiceHrUser.completeTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.COMPLETED
-            );
+            const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
+            expect(completed.status).toBe(TaskStatus.COMPLETED);
         });
 
         await activiti.step(
             'Then events are emitted for the inclusive gateway inclusiveGateway',
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getActivityEventsForEntity(
-                                    processInstanceId,
-                                    'inclusiveGateway',
-                                    'inclusiveGateway'
-                                )
-                            )
-                                .map((event) => event.eventType)
-                                .sort(),
-                        pollOptions('querySync')
-                    )
-                    .toEqual(
-                        expect.arrayContaining([
-                            EventType.ACTIVITY_STARTED,
-                            EventType.ACTIVITY_COMPLETED,
-                        ])
-                    );
+                const events = await auditServiceHrUser.waitForActivityEventsForEntity(
+                    processInstanceId,
+                    'inclusiveGateway',
+                    'inclusiveGateway',
+                    [EventType.ACTIVITY_STARTED, EventType.ACTIVITY_COMPLETED]
+                );
+                expect(events.map((event) => event.eventType).sort()).toEqual(
+                    expect.arrayContaining([
+                        EventType.ACTIVITY_STARTED,
+                        EventType.ACTIVITY_COMPLETED,
+                    ])
+                );
             }
         );
 
         await activiti.step('Then the user will see 2 tasks', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                    return tasks.filter((task) => task.status !== TaskStatus.COMPLETED).length;
-                }, pollOptions('querySync'))
-                .toBe(2);
+            const activeTasks = await taskServiceHrUser.waitForActiveTasksCount(processInstanceId, 2);
+            expect(activeTasks).toHaveLength(2);
         });
 
         await activiti.step('And the task is created Send e-mail', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Send e-mail'))?.id,
-                    pollOptions('querySync')
-                )
-                .toBeTruthy();
+            const task = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Send e-mail');
+            expect(task.id).toBeTruthy();
         });
 
         await activiti.step('And the task is created Check account', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account'))?.id,
-                    pollOptions('querySync')
-                )
-                .toBeTruthy();
+            const task = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Check account');
+            expect(task.id).toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Send e-mail', async () => {
-            let taskId = '';
-            await expect
-                .poll(async () => {
-                    const found = await taskServiceHrUser.findTaskByName(
-                        processInstanceId,
-                        'Send e-mail'
-                    );
-                    taskId = found?.id ?? '';
-                    return taskId;
-                }, pollOptions('querySync'))
-                .toBeTruthy();
+            const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Send e-mail');
+            const taskId = found.id;
 
             await taskServiceHrUser.claimTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.ASSIGNED
-            );
+            const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(claimed.status).toBe(TaskStatus.ASSIGNED);
+            const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
             await taskServiceHrUser.completeTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.COMPLETED
-            );
+            const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
+            expect(completed.status).toBe(TaskStatus.COMPLETED);
         });
 
         await activiti.step('Then the user will see 1 tasks', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstanceId);
-                    return tasks.filter((task) => task.status !== TaskStatus.COMPLETED).length;
-                }, pollOptions('querySync'))
-                .toBe(1);
+            const activeTasks = await taskServiceHrUser.waitForActiveTasksCount(processInstanceId, 1);
+            expect(activeTasks).toHaveLength(1);
         });
 
         await activiti.step('And the task is created Check account', async () => {
-            await expect
-                .poll(
-                    async () =>
-                        (await taskServiceHrUser.findTaskByName(processInstanceId, 'Check account'))?.id,
-                    pollOptions('querySync')
-                )
-                .toBeTruthy();
+            const task = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Check account');
+            expect(task.id).toBeTruthy();
         });
 
         await activiti.step('When the user claims and completes the task Check account', async () => {
-            let taskId = '';
-            await expect
-                .poll(async () => {
-                    const found = await taskServiceHrUser.findTaskByName(
-                        processInstanceId,
-                        'Check account'
-                    );
-                    taskId = found?.id ?? '';
-                    return taskId;
-                }, pollOptions('querySync'))
-                .toBeTruthy();
+            const found = await taskServiceHrUser.waitForTaskByName(processInstanceId, 'Check account');
+            const taskId = found.id;
 
             await taskServiceHrUser.claimTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.ASSIGNED
-            );
+            const claimed = await taskServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(claimed.status).toBe(TaskStatus.ASSIGNED);
+            const querClaimed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.ASSIGNED);
+            expect(querClaimed.status).toBe(TaskStatus.ASSIGNED);
             await taskServiceHrUser.completeTask(taskId);
-            await expectTaskStatusInRbAndQuery(
-                taskServiceHrUser,
-                queryServiceHrUser,
-                taskId,
-                TaskStatus.COMPLETED
-            );
+            const completed = await queryServiceHrUser.waitForTaskStatus(taskId, TaskStatus.COMPLETED);
+            expect(completed.status).toBe(TaskStatus.COMPLETED);
         });
 
         await activiti.step(
             'Then events are emitted for the inclusive gateway inclusiveGatewayEnd',
             async () => {
-                await expect
-                    .poll(
-                        async () =>
-                            (
-                                await auditServiceHrUser.getActivityEventsForEntity(
-                                    processInstanceId,
-                                    'inclusiveGatewayEnd',
-                                    'inclusiveGateway'
-                                )
-                            )
-                                .map((event) => event.eventType)
-                                .sort(),
-                        pollOptions('querySync')
-                    )
-                    .toEqual(
-                        expect.arrayContaining([
-                            EventType.ACTIVITY_STARTED,
-                            EventType.ACTIVITY_COMPLETED,
-                        ])
-                    );
+                const events = await auditServiceHrUser.waitForActivityEventsForEntity(
+                    processInstanceId,
+                    'inclusiveGatewayEnd',
+                    'inclusiveGateway',
+                    [EventType.ACTIVITY_STARTED, EventType.ACTIVITY_COMPLETED]
+                );
+                expect(events.map((event) => event.eventType).sort()).toEqual(
+                    expect.arrayContaining([
+                        EventType.ACTIVITY_STARTED,
+                        EventType.ACTIVITY_COMPLETED,
+                    ])
+                );
             }
         );
 
         await activiti.step('Then the process with inclusive gateway is completed', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await queryServiceHrUser.getProcessInstance(processInstanceId);
-                    return instance.status;
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceHrUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 });

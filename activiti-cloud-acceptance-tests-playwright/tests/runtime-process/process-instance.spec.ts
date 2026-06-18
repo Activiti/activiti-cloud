@@ -17,9 +17,8 @@
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { isDiagramEmpty, isDiagramShown } from '../../helpers/diagram-utils';
-import { RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS } from '../../helpers/process-deployment';
+import { RUNTIME_PROCESS_INSTANCE_ACTIONS_REQUIRED_KEYS } from '../../helpers/process-deployment-keys';
 
 activiti.describe('Runtime — Process Instance Actions', () => {
     activiti('should delete a process instance', async ({ runtimeBundleServiceTestUser }) => {
@@ -63,12 +62,11 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('Then the status of the process is changed to suspended', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
-                    return instance.status;
-                }, pollOptions('processStatus'))
-                .toBe(ProcessInstanceStatus.SUSPENDED);
+            const instance = await runtimeBundleServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.SUSPENDED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.SUSPENDED);
         });
 
         await activiti.step('And the user is able to resume the process instance', async () => {
@@ -76,12 +74,11 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('Then the status of the process is changed to running', async () => {
-            await expect
-                .poll(async () => {
-                    const instance = await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
-                    return instance.status;
-                }, pollOptions('processStatus'))
-                .toBe(ProcessInstanceStatus.RUNNING);
+            const instance = await runtimeBundleServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.RUNNING
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.RUNNING);
         });
     });
 
@@ -183,15 +180,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram', async () => {
-            await expect
-                .poll(
-                    async () => {
-                        diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
-                        return isDiagramShown(diagram);
-                    },
-                    pollOptions('querySync')
-                )
-                .toBe(true);
+            diagram = await queryServiceTestUser.waitForProcessInstanceDiagram(processInstanceId);
         });
 
         await activiti.step('Then the query diagram is shown', async () => {
@@ -215,15 +204,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram', async () => {
-            await expect
-                .poll(
-                    async () => {
-                        diagram = await queryServiceTestUser.getProcessInstanceDiagram(processInstanceId);
-                        return isDiagramShown(diagram);
-                    },
-                    pollOptions('querySync')
-                )
-                .toBe(true);
+            diagram = await queryServiceTestUser.waitForProcessInstanceDiagram(processInstanceId);
         });
 
         await activiti.step('Then the diagram is shown', async () => {
@@ -247,15 +228,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
         });
 
         await activiti.step('And query the process diagram admin endpoint', async () => {
-            await expect
-                .poll(
-                    async () => {
-                        diagram = await queryAdminServiceProcessAdmin.getProcessInstanceDiagram(processInstanceId);
-                        return isDiagramShown(diagram);
-                    },
-                    pollOptions('querySync')
-                )
-                .toBe(true);
+            diagram = await queryAdminServiceProcessAdmin.waitForProcessInstanceDiagram(processInstanceId);
         });
 
         await activiti.step('Then the query diagram is shown in admin endpoint', async () => {
