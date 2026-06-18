@@ -51,6 +51,9 @@ class ProcessInstanceControllerHelperTest {
     @Mock
     private ProcessInstanceService processInstanceService;
 
+    @Mock
+    private ProcessInstanceSearchService processInstanceSearchService;
+
     @Test
     void findAllProcessInstances_shouldReturnProcessInstances() {
         //given
@@ -113,8 +116,6 @@ class ProcessInstanceControllerHelperTest {
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
         given(processInstanceService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
             .willReturn(pageResult);
-        given(processInstanceService.searchSubProcesses(pageResult)).willReturn(pageResult);
-        given(processInstanceService.searchLinkedProcesses(any())).willReturn(Collections.emptyList());
 
         //when
         Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(

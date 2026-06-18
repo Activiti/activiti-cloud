@@ -39,6 +39,7 @@ public class ProcessDeletedAuditEventEntityTest {
         processDeletedEvent.setServiceType("Audit");
         processDeletedEvent.setServiceVersion("serviceV2");
         processDeletedEvent.setMessageId("messageId");
+        processDeletedEvent.setCommandId("commandId");
         processDeletedEvent.setSequenceNumber(3);
         processDeletedEvent.setEntityId("entityID");
         processDeletedEvent.setProcessInstanceId("procInstId");
@@ -62,6 +63,7 @@ public class ProcessDeletedAuditEventEntityTest {
             .hasServiceType("Audit")
             .hasServiceVersion("serviceV2")
             .hasMessageId("messageId")
+            .hasCommandId("commandId")
             .hasSequenceNumber(3)
             .hasEntityId("entityID")
             .hasProcessInstanceId("procInstId")

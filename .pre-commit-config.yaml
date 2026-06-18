@@ -7,7 +7,9 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
       - id: end-of-file-fixer
+        exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
       - id: trailing-whitespace
+        exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
       - id: check-yaml
       - id: check-json
         exclude: ^.*invalid.*\.json$
@@ -20,14 +22,16 @@ repos:
           - java
           - markdown
         additional_dependencies:
-          - prettier@2.7.1
-          - prettier-plugin-java@1.6.2
+          - prettier@3.8.1
+          - prettier-plugin-java@2.8.1
+        exclude: ^\.github/workflows/.*\.(lock\.yml|md)$
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.31.2
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
+        exclude: ^\.github/workflows/.*\.lock\.yml$
   - repo: https://github.com/returntocorp/semgrep
     rev: v1.59.1
     hooks:

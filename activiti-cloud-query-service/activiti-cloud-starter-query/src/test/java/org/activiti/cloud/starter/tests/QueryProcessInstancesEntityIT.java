@@ -1332,39 +1332,42 @@ public class QueryProcessInstancesEntityIT {
         var sentEvents = eventsAggregator.sendAll();
 
         // then
-        assertThat(eventsAggregator.getException()).isNull();
-        assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
-            .isNotEmpty()
-            .get()
-            .extracting(ProcessInstanceEntity::getStatus)
-            .isEqualTo(RUNNING);
+        await()
+            .untilAsserted(() -> {
+                assertThat(eventsAggregator.getException()).isNull();
+                assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+                    .isNotEmpty()
+                    .get()
+                    .extracting(ProcessInstanceEntity::getStatus)
+                    .isEqualTo(RUNNING);
 
-        assertThat(sequenceFlowRepository.findAll())
-            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-            .extracting(
-                BPMNSequenceFlowEntity::getElementId,
-                BPMNSequenceFlowEntity::getSourceActivityElementId,
-                BPMNSequenceFlowEntity::getTargetActivityElementId
-            )
-            .containsExactly(
-                tuple(
-                    "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
-                    "startEvent1",
-                    "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
-                )
-            );
+                assertThat(sequenceFlowRepository.findAll())
+                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                    .extracting(
+                        BPMNSequenceFlowEntity::getElementId,
+                        BPMNSequenceFlowEntity::getSourceActivityElementId,
+                        BPMNSequenceFlowEntity::getTargetActivityElementId
+                    )
+                    .containsExactly(
+                        tuple(
+                            "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
+                            "startEvent1",
+                            "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
+                        )
+                    );
 
-        assertThat(activityRepository.findAll())
-            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-            .extracting(
-                BPMNActivityEntity::getElementId,
-                BPMNActivityEntity::getActivityName,
-                BPMNActivityEntity::getActivityType
-            )
-            .containsExactly(
-                tuple("startEvent1", "", "startEvent"),
-                tuple("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask")
-            );
+                assertThat(activityRepository.findAll())
+                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                    .extracting(
+                        BPMNActivityEntity::getElementId,
+                        BPMNActivityEntity::getActivityName,
+                        BPMNActivityEntity::getActivityType
+                    )
+                    .containsExactly(
+                        tuple("startEvent1", "", "startEvent"),
+                        tuple("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask")
+                    );
+            });
 
         // and when duplicates are sent
         eventsAggregator.addEvents(sentEvents).sendAll();

@@ -19,7 +19,6 @@ import java.util.Date;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +63,7 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 taskVariableUpdatedEventHandler.handle(variableEntity);
             } else {
-                ProcessVariableEntity variableEntity = new ProcessVariableEntity(variableUpdatedEvent);
-                variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
-                processVariableUpdateEventHandler.handle(variableEntity);
+                processVariableUpdateEventHandler.handle(variableUpdatedEvent);
             }
         } catch (Exception cause) {
             LOGGER.debug("Error handling VariableUpdatedEvent[" + event + "]", cause);

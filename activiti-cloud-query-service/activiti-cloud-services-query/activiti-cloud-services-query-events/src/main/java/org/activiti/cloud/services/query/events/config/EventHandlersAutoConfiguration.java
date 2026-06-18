@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
 import java.util.Set;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
@@ -37,6 +38,8 @@ import org.activiti.cloud.services.query.events.handlers.ProcessCompletedEventHa
 import org.activiti.cloud.services.query.events.handlers.ProcessCreatedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessDeletedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessDeployedEventHandler;
+import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyService;
+import org.activiti.cloud.services.query.events.handlers.ProcessInstanceHierarchyServiceImpl;
 import org.activiti.cloud.services.query.events.handlers.ProcessResumedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessStartedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.ProcessSuspendedEventHandler;
@@ -118,8 +121,17 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCreatedEventHandler processCreatedEventHandler(EntityManager entityManager) {
-        return new ProcessCreatedEventHandler(entityManager);
+    public ProcessInstanceHierarchyService processInstanceHierarchyService(EntityManager entityManager) {
+        return new ProcessInstanceHierarchyServiceImpl(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCreatedEventHandler processCreatedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessCreatedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
@@ -130,8 +142,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessStartedEventHandler processStartedEventHandler(EntityManager entityManager) {
-        return new ProcessStartedEventHandler(entityManager);
+    public ProcessStartedEventHandler processStartedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessStartedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
@@ -148,8 +163,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDeletedEventHandler processDeletedEventHandler(EntityManager entityManager) {
-        return new ProcessDeletedEventHandler(entityManager);
+    public ProcessDeletedEventHandler processDeletedEventHandler(
+        EntityManager entityManager,
+        ProcessInstanceHierarchyService processInstanceHierarchyService
+    ) {
+        return new ProcessDeletedEventHandler(entityManager, processInstanceHierarchyService);
     }
 
     @Bean
@@ -231,11 +249,12 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableCreatedEventHandler variableCreatedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder
+        EntityManagerFinder entityManagerFinder,
+        FeatureToggle featureToggle
     ) {
         return new VariableCreatedEventHandler(
             new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
-            new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder)
+            new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder, featureToggle)
         );
     }
 
@@ -243,10 +262,11 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableDeletedEventHandler variableDeletedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder
+        EntityManagerFinder entityManagerFinder,
+        FeatureToggle featureToggle
     ) {
         return new VariableDeletedEventHandler(
-            new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
+            new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder, featureToggle),
             new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder)
         );
     }
@@ -255,10 +275,15 @@ public class EventHandlersAutoConfiguration {
     @ConditionalOnMissingBean
     public VariableUpdatedEventHandler variableUpdatedEventHandler(
         EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder
+        EntityManagerFinder entityManagerFinder,
+        FeatureToggle featureToggle
     ) {
         return new VariableUpdatedEventHandler(
-            new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
+            new ProcessVariableUpdateEventHandler(
+                new ProcessVariableUpdater(entityManager, entityManagerFinder),
+                entityManager,
+                featureToggle
+            ),
             new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder))
         );
     }

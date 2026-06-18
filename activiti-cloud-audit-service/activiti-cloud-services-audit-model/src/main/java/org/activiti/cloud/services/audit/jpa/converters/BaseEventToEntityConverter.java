@@ -45,6 +45,7 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
         apiEvent.setServiceType(auditEventEntity.getServiceType());
         apiEvent.setServiceVersion(auditEventEntity.getServiceVersion());
         apiEvent.setMessageId(auditEventEntity.getMessageId());
+        apiEvent.setCommandId(auditEventEntity.getCommandId());
         apiEvent.setSequenceNumber(auditEventEntity.getSequenceNumber());
         return eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
     }

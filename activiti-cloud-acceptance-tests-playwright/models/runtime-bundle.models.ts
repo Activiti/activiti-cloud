@@ -16,9 +16,11 @@
 
 export interface CloudProcessInstance {
     id: string;
+    [key: string]: unknown;
     name?: string;
     processDefinitionId: string;
     processDefinitionKey: string;
+    processDefinitionVersion?: number;
     status: ProcessInstanceStatus;
     businessKey?: string;
     startDate: string;
@@ -39,10 +41,16 @@ export enum ProcessInstanceStatus {
 }
 
 export interface StartProcessPayload {
+    payloadType: 'StartProcessPayload';
     processDefinitionKey: string;
     businessKey?: string;
     name?: string;
-    variables?: Record<string, any>;
+    variables?: Record<string, unknown>;
+}
+
+export interface UpdateProcessPayload {
+    payloadType: 'UpdateProcessPayload';
+    name?: string;
 }
 
 export interface ProcessInstanceResponse {
@@ -54,4 +62,42 @@ export interface ProcessQueryParams {
     processDefinitionKey?: string;
     businessKey?: string;
     name?: string;
+}
+
+export enum ServiceTaskStatus {
+    SCHEDULED = 'SCHEDULED',
+    STARTED = 'STARTED',
+    COMPLETED = 'COMPLETED',
+    ERROR = 'ERROR',
+    CANCELLED = 'CANCELLED'
+}
+
+export interface CloudServiceTask {
+    id: string;
+    activityType?: string;
+    status?: ServiceTaskStatus;
+    integrationContextCounter?: number;
+    processDefinitionId?: string;
+    processDefinitionKey?: string;
+    processInstanceId?: string;
+    elementId?: string;
+    [key: string]: unknown;
+}
+
+export enum IntegrationContextStatus {
+    INTEGRATION_REQUESTED = 'INTEGRATION_REQUESTED',
+    INTEGRATION_RESULT_RECEIVED = 'INTEGRATION_RESULT_RECEIVED',
+    INTEGRATION_ERROR_RECEIVED = 'INTEGRATION_ERROR_RECEIVED'
+}
+
+export interface CloudIntegrationContext {
+    id?: string;
+    clientId?: string;
+    clientName?: string;
+    clientType?: string;
+    status?: IntegrationContextStatus;
+    executionId?: string;
+    processDefinitionId?: string;
+    processInstanceId?: string;
+    [key: string]: unknown;
 }

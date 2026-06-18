@@ -3,19 +3,41 @@
   "version": "1.0.0",
   "description": "Playwright TypeScript tests for Activiti Cloud",
   "main": "index.js",
+  "config": {
+    "pw_root": "activiti-cloud-acceptance-tests-playwright",
+    "pw_suite": "--project=acceptance --project=notifications --project=destructive-last"
+  },
   "scripts": {
-    "test": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts",
-    "test:identity": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
-    "test:security": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
-    "test:process": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
-    "test:all": "playwright test --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=all-tests",
-    "test:debug": "playwright test --debug",
-    "test:identity:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=identity-adapter",
-    "test:security:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=security-policies",
-    "test:process:debug": "playwright test --debug --config=./activiti-cloud-acceptance-tests-playwright/playwright.config.ts --project=process-instance-actions",
+    "typecheck": "tsc --noEmit -p activiti-cloud-acceptance-tests-playwright/tsconfig.json",
+    "check:env": "tsx activiti-cloud-acceptance-tests-playwright/scripts/check-local-env.ts",
+    "port-forward": "activiti-cloud-acceptance-tests-playwright/scripts/start-port-forward.sh",
+    "cluster:prereqs": "bash activiti-cloud-acceptance-tests-playwright/scripts/apply-cluster-prereqs.sh",
+    "test:setup": "bash activiti-cloud-acceptance-tests-playwright/scripts/setup-acceptance-environment.sh",
+    "preview:delete": "bash activiti-cloud-acceptance-tests-playwright/scripts/delete-preview-namespace.sh",
+    "kube:use": "bash activiti-cloud-acceptance-tests-playwright/scripts/use-kubeconfig.sh",
+    "verify:process-catalog": "tsx activiti-cloud-acceptance-tests-playwright/scripts/verify-acceptance-process-catalog.ts",
+    "pw": "playwright test --config=$npm_package_config_pw_root/playwright.config.ts",
+    "test": "npm run pw -- $npm_package_config_pw_suite",
+    "test:no-destructive": "npm run pw -- --project=acceptance --project=notifications",
+    "test:destructive": "npm run pw -- --project=destructive-last --no-deps",
+    "test:smoke": "npm run pw -- --project=smoke",
+    "test:debug": "npm run pw -- $npm_package_config_pw_suite --debug",
+    "test:identity": "npm run pw -- --project=identity",
+    "test:security": "npm run pw -- --project=security",
+    "test:process": "npm run pw -- --project=process",
+    "test:runtime": "npm run pw -- --project=runtime",
+    "test:runtime:process-instance": "npm run pw -- --project=runtime-process-instance",
+    "test:runtime:tasks": "npm run pw -- --project=runtime-tasks",
     "report": "playwright show-report",
     "install:browsers": "playwright install",
-    "install:deps": "playwright install-deps"
+    "install:deps": "playwright install-deps",
+    "matrix:rabbitmq:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d default-destinations",
+    "matrix:rabbitmq:partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p partitioned -d default-destinations",
+    "matrix:kafka:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p non-partitioned -d default-destinations",
+    "matrix:kafka:partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p partitioned -d default-destinations",
+    "matrix:kafka:partitioned:override": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b kafka -p partitioned -d override-destinations",
+    "matrix:rabbitmq:non-partitioned:pdb": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d pdb",
+    "matrix:rabbitmq:prefix:pdb": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p prefix -d pdb"
   },
   "keywords": [
     "playwright",
@@ -28,17 +50,20 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^20.14.0",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.5.4"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "dependencies": {
     "chalk": "^4.1.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "jwt-decode": "^4.0.0",
-    "winston": "^3.14.2"
+    "winston": "^3.14.2",
+    "ws": "^8.21.0"
   }
 }

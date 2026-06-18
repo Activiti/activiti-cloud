@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+# One-shot setup for Playwright acceptance tests:
+#   - kubeconfig
+#   - Helm install preview (optional)
+#   - .env for tests
+#   - cluster prerequisites (policies, RB image, hostAliases)
+#
+# Usage (from repo root):
+#   export ACTIVITI_KUBECONFIG=~/Downloads/activiti.yaml
+#   npm run test:setup
+#
+# First install on empty cluster:
+#   npm run test:setup -- --install
+#
+# Options:
+#   --install          Run scripts/local-install.sh when preview is missing
+#   --no-install       Fail instead of installing (only patch existing preview)
+#   --kubeconfig PATH  Override kubeconfig file
+#   --name NAME        Environment name → namespace pr-NAME-rabbit-n-d
+#   --new-env          Ignore .env and generate a new $USER-<random> name
+#   --cluster NAME     Cluster DNS segment (default: activiti) → *.NAME.envalfresco.com
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ROOT_DIR="$(cd "${PKG_DIR}/.." && pwd)"
+
+# shellcheck source=lib/cluster-discovery.sh
+source "${SCRIPT_DIR}/lib/cluster-discovery.sh"
+
+INSTALL_MODE="auto"
+KUBECONFIG_ARG=""
+ENV_NAME=""
+ENV_NAME_EXPLICIT=false
+FORCE_NEW_ENV=false
+CLUSTER_NAME="${CLUSTER_NAME:-activiti}"
+ENV_FILE="${PKG_DIR}/.env"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --install)
+      INSTALL_MODE="always"
+      shift
+      ;;
+    --no-install)
+      INSTALL_MODE="never"
+      shift
+      ;;
+    --kubeconfig)
+      KUBECONFIG_ARG="${2:-}"
+      shift 2
+      ;;
+    --name)
+      ENV_NAME="${2:-}"
+      ENV_NAME_EXPLICIT=true
+      shift 2
+      ;;
+    --new-env)
+      FORCE_NEW_ENV=true
+      shift
+      ;;
+    --cluster)
+      CLUSTER_NAME="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      sed -n '1,20p' "$0"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "${ENV_NAME}" && "${FORCE_NEW_ENV}" == "false" ]]; then
+  existing="$(read_acceptance_env_name_from_dotenv "${ENV_FILE}" || true)"
+  if [[ -n "${existing}" ]]; then
+    ENV_NAME="${existing}"
+  fi
+fi
+if [[ -z "${ENV_NAME}" ]]; then
+  ENV_NAME="$(default_acceptance_env_name)"
+fi
+
+export ACCEPTANCE_ENV_NAME="${ENV_NAME}"
+export CLUSTER_NAME="${CLUSTER_NAME}"
+export CLUSTER_DOMAIN="${CLUSTER_DOMAIN:-envalfresco.com}"
+export MESSAGING_BROKER="${MESSAGING_BROKER:-rabbitmq}"
+export MESSAGING_PARTITIONED="${MESSAGING_PARTITIONED:-non-partitioned}"
+export MESSAGING_DESTINATIONS="${MESSAGING_DESTINATIONS:-default}"
+
+# shellcheck source=use-kubeconfig.sh
+source "${SCRIPT_DIR}/use-kubeconfig.sh" "${KUBECONFIG_ARG}"
+
+echo ""
+echo "=== Activiti Cloud acceptance test setup ==="
+echo "Kubeconfig:     ${KUBECONFIG}"
+echo "Env name:       ${ENV_NAME}  (namespace: $(preview_name_from_env_name "${ENV_NAME}"))"
+echo "Cluster:        ${CLUSTER_NAME}.${CLUSTER_DOMAIN}"
+echo ""
+
+PREVIEW_NAME="$(preview_name_from_env_name "${ENV_NAME}")"
+export PREVIEW_NAME
+validate_preview_release_name_length "${PREVIEW_NAME}" || exit 1
+DISCOVERED_NS="$(discover_preview_namespace "${PREVIEW_NAME}" || true)"
+
+needs_install=0
+if [[ -z "${DISCOVERED_NS}" ]] || ! namespace_has_runtime_bundle "${DISCOVERED_NS:-${PREVIEW_NAME}}"; then
+  needs_install=1
+fi
+
+if [[ "${needs_install}" -eq 1 ]]; then
+  if [[ "${INSTALL_MODE}" == "never" ]]; then
+    echo "❌ Preview not found (expected namespace ${PREVIEW_NAME} with runtime-bundle)."
+    echo "   Run: npm run test:setup -- --install"
+    exit 1
+  fi
+
+  echo "📦 Installing Activiti Cloud preview (namespace ${PREVIEW_NAME})..."
+  echo "   Helm installs Keycloak inside the preview namespace (no shared cluster Keycloak)."
+  echo "   Resolves latest Docker tags once, then Helm + acceptance prereqs (no duplicate redeploys)."
+  echo ""
+
+  export REFRESH_LOCAL_IMAGE_TAGS=true
+  export ACCEPTANCE_FRESH_HELM_INSTALL=true
+  (cd "${ROOT_DIR}" && ./scripts/local-install.sh -n "${ENV_NAME}" -c "${CLUSTER_NAME}")
+  PREVIEW_NAME="$(preview_name_from_env_name "${ENV_NAME}")"
+
+  # Prereqs use the same tags Helm just deployed — skip slow registry resolve + RB image bump.
+  export ACCEPTANCE_SKIP_IMAGE_RESOLVE=true
+  if [[ -f "${ROOT_DIR}/local-values.local.yaml" ]] && command -v yq &>/dev/null; then
+    _rb_tag="$(yq e '.runtime-bundle.image.tag' "${ROOT_DIR}/local-values.local.yaml" 2>/dev/null || true)"
+    if [[ -n "${_rb_tag}" && "${_rb_tag}" != "null" ]]; then
+      export ACCEPTANCE_RUNTIME_BUNDLE_IMAGE="activiti/example-runtime-bundle:${_rb_tag}"
+    fi
+  fi
+else
+  PREVIEW_NAME="${DISCOVERED_NS}"
+  echo "✓ Using existing preview namespace: ${PREVIEW_NAME}"
+fi
+
+if ! discover_acceptance_deployments "${PREVIEW_NAME}"; then
+  echo "❌ Preview ${PREVIEW_NAME} exists but required deployments are missing."
+  echo "   Try: npm run test:setup -- --install"
+  exit 1
+fi
+
+CLUSTER_DOMAIN="${CLUSTER_DOMAIN}"
+GATEWAY_HOST="gateway-${PREVIEW_NAME}.${CLUSTER_NAME}.${CLUSTER_DOMAIN}:8080"
+IDENTITY_HOST="identity-${PREVIEW_NAME}.${CLUSTER_NAME}.${CLUSTER_DOMAIN}"
+SSO_HOST="https://${IDENTITY_HOST}/auth/realms/activiti/protocol/openid-connect/token"
+
+cat > "${ENV_FILE}" <<EOF
+# Generated by npm run test:setup ($(date -u +%Y-%m-%dT%H:%MZ))
+CLUSTER_PROFILE=preview
+PREVIEW_NAME=${PREVIEW_NAME}
+ACCEPTANCE_ENV_NAME=${ENV_NAME}
+MESSAGING_BROKER=${MESSAGING_BROKER}
+MESSAGING_PARTITIONED=${MESSAGING_PARTITIONED}
+MESSAGING_DESTINATIONS=${MESSAGING_DESTINATIONS}
+CLUSTER_NAME=${CLUSTER_NAME}
+CLUSTER_DOMAIN=${CLUSTER_DOMAIN}
+LOCAL_PORT=8080
+
+CI=false
+GITHUB_ACTIONS=false
+
+GATEWAY_PROTOCOL=http
+GATEWAY_HOST=${GATEWAY_HOST}
+GATEWAY_URL=http://${GATEWAY_HOST}
+LOCAL_USE_PORT_FORWARD=true
+
+PORT_FORWARD_NAMESPACE=traefik
+PORT_FORWARD_SERVICE=traefik
+
+SSO_HOST=${SSO_HOST}
+KEYCLOAK_REALM=activiti
+KEYCLOAK_CLIENT_ID=activiti
+
+AUTO_CLUSTER_PREREQS=true
+VERIFY_ACCEPTANCE_PROCESS_CATALOG=true
+ACCEPTANCE_SKIP_IMAGE_RESOLVE=true
+
+ACTIVITI_CLOUD_APPLICATION_NAME=default-app
+
+TESTUSER_USERNAME=testuser
+TESTUSER_PASSWORD=password
+HRUSER_USERNAME=hruser
+HRUSER_PASSWORD=password
+HRADMIN_USERNAME=hradmin
+HRADMIN_PASSWORD=password
+TESTADMIN_USERNAME=testadmin
+TESTADMIN_PASSWORD=password
+PROCESSADMINUSER_USERNAME=processadminuser
+PROCESSADMINUSER_PASSWORD=password
+EOF
+
+if [[ -z "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+  # shellcheck source=../../../scripts/lib/keycloak-preview.sh
+  source "${ROOT_DIR}/scripts/lib/keycloak-preview.sh"
+  KEYCLOAK_CLIENT_SECRET="$(read_preview_keycloak_client_secret "${PREVIEW_NAME}" 2>/dev/null || true)"
+fi
+
+if [[ -n "${KEYCLOAK_CLIENT_SECRET:-}" ]]; then
+  echo "KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}" >> "${ENV_FILE}"
+fi
+
+if [[ -n "${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE:-}" ]]; then
+  echo "ACCEPTANCE_RUNTIME_BUNDLE_IMAGE=${ACCEPTANCE_RUNTIME_BUNDLE_IMAGE}" >> "${ENV_FILE}"
+fi
+
+echo ""
+echo "✓ Wrote ${ENV_FILE}"
+echo "  PREVIEW_NAME=${PREVIEW_NAME}"
+echo "  GATEWAY_HOST=${GATEWAY_HOST}"
+echo ""
+
+echo "🧩 Applying acceptance cluster prerequisites..."
+bash "${SCRIPT_DIR}/apply-cluster-prereqs.sh" "${PREVIEW_NAME}"
+
+echo ""
+echo "✅ Setup complete. Next:"
+echo "   npm run test:runtime    # or npm run test"
+echo ""
+echo "Note:"
+echo "  - Port-forward is started automatically by Playwright global-setup for local runs."
+echo "  - Use: npm run port-forward  (only for manual debugging without Playwright)"

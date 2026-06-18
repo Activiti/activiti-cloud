@@ -14,68 +14,86 @@
  * limitations under the License.
  */
 
-import dotenv from 'dotenv';
-import { defineConfig, devices } from '@playwright/test';
-import { paths } from './paths';
-import { testConfig } from './config/test-configuration';
+import './config/load-env';
+import { defineConfig } from '@playwright/test';
+import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
+import { paths } from './config/paths';
+import { getTestConfiguration } from './config/runtime/test-configuration';
+import { timeouts } from './config/runtime/timeouts';
+applyResolvedHostsToEnv();
 
-dotenv.config({ path: paths.dotEnvPath }); // Load environment variables from .env file
+const testConfig = getTestConfiguration();
+const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
+const isCi = Boolean(process.env.CI);
 
+/** Serial projects (subscriptions, admin bulk-delete). */
+const serial = { workers: 1, fullyParallel: false } as const;
+
+/**
+ * CI suite (`npm run test`) selects acceptance → notifications → destructive-last.
+ * `dependencies` enforce that order; slice scripts pass a single `--project=…`.
+ */
 export default defineConfig({
   testDir: './tests',
-  timeout: 60000,
+  timeout: timeouts.test,
   expect: {
-    timeout: 10000,
+    timeout: timeouts.expect,
   },
 
-  // Test configuration
   fullyParallel: true,
-  //forbidOnly: !!process.env.CI,
-  retries: 0,
-  workers: 2,
+  retries: isCi ? 2 : 0,
+  forbidOnly: isCi,
+  workers,
+  projects: [
+    {
+      name: 'acceptance',
+      grepInvert: /@destructive/,
+      testIgnore: '**/notifications.spec.ts',
+    },
+    {
+      name: 'notifications',
+      testMatch: '**/notifications.spec.ts',
+      dependencies: ['acceptance'],
+      ...serial,
+    },
+    {
+      name: 'destructive-last',
+      grep: /@destructive/,
+      dependencies: ['acceptance', 'notifications'],
+      ...serial,
+    },
+    { name: 'smoke', grep: /@smoke/ },
+    { name: 'identity', testMatch: '**/identity-adapter.spec.ts' },
+    {
+      name: 'security',
+      testMatch: ['**/hruser-security-policies.spec.ts', '**/hradmin-security-policies.spec.ts'],
+    },
+    { name: 'process', testMatch: '**/process-instance-actions.spec.ts' },
+    { name: 'runtime', testMatch: '**/runtime/**/*.spec.ts' },
+    { name: 'runtime-process-instance', testMatch: '**/runtime/process-instance*.spec.ts' },
+    { name: 'runtime-tasks', testMatch: '**/runtime/task*.spec.ts' },
+  ],
+  maxFailures: isCi ? 10 : undefined,
 
   reporter: [
     ['html'],
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
-    ['json', { outputFile: `${paths.reporter}/results.json` }]
+    ['json', { outputFile: `${paths.reporter}/results.json` }],
+    ...(isCi ? ([['github']] as const) : []),
   ],
 
   outputDir: paths.testResults,
 
   use: {
     baseURL: testConfig.baseURL,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
+    trace: isCi ? 'on-first-retry' : 'retain-on-failure',
+    screenshot: isCi ? 'off' : 'only-on-failure',
+    video: isCi ? 'off' : 'retain-on-failure',
+    actionTimeout: timeouts.action,
+    navigationTimeout: timeouts.navigation,
   },
 
-  projects: [
-    {
-      name: 'identity-adapter',
-      testMatch: 'tests/identity-adapter.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'security-policies',
-      testMatch: 'tests/*security-policies.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'process-instance-actions',
-      testMatch: 'tests/process-instance-actions.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'all-tests',
-      testMatch: 'tests/**/*.spec.ts',
-      use: { ...devices['Desktop Chrome'] },
-    }
-  ],
-
-  // Global setup for local development
-  globalSetup: testConfig.usePortForwarding ? './config/global-setup.ts' : undefined,
-  globalTeardown: testConfig.usePortForwarding ? './config/global-teardown.ts' : undefined,
+  globalSetup: './config/lifecycle/global-setup.ts',
+  globalTeardown: testConfig.usePortForwarding ? './config/lifecycle/global-teardown.ts' : undefined,
 });

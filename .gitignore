@@ -65,7 +65,21 @@ videos/
 traces/
 reporter/
 port-forward.pid
+combined.log
+websocket.log
 VERSION
+
+# Playwright acceptance tests — local only
+activiti-cloud-acceptance-tests-playwright/.env
+activiti-cloud-acceptance-tests-playwright/.env.develop
+
+# Local Helm image overrides (generated; do not commit)
+local-values.yaml
+local-values.local.yaml
+
+# IDE / hackathon (not part of product PRs)
+.vscode/
+HACKATHON_PRESENTATION_SCRIPT.md
 
 # TypeScript
 *.tsbuildinfo
@@ -86,3 +100,7 @@ dist/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Python (cluster prereqs scripts)
+**/__pycache__/
+*.py[cod]

@@ -4,7 +4,9 @@ updates:
     open-pull-requests-limit: 10
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    cooldown:
+      default-days: 3
     ignore:
       - dependency-name: "org.activiti:*"
       - dependency-name: "org.assertj:assertj-core"
@@ -25,10 +27,39 @@ updates:
     - "/.github/actions/*"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
     groups:
       github-actions:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Managed by gh aw add. Version-locked to the gh-aw compiler; do not bump.
+      - dependency-name: "github/gh-aw-actions"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/.github/actions/force-full-model-cleanup"
+      - "/.github/actions/project-models-cleanup"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3
+    groups:
+      framework:
+        patterns:
+          - "@playwright/test"
+        update-types:
+          - "minor"
+          - "patch"
+      tools:
+        patterns:
+          - "dotenv*"
+          - "winston"
         update-types:
           - "minor"
           - "patch"

@@ -62,6 +62,7 @@ public class ProcessStartedEventConverterTest {
         assertThat(auditEventEntity.getServiceType()).isEqualTo(event.getServiceType());
         assertThat(auditEventEntity.getServiceVersion()).isEqualTo(event.getServiceVersion());
         assertThat(auditEventEntity.getMessageId()).isEqualTo(event.getMessageId());
+        assertThat(auditEventEntity.getCommandId()).isEqualTo(event.getCommandId());
         assertThat(auditEventEntity.getSequenceNumber()).isEqualTo(event.getSequenceNumber());
         assertThat(auditEventEntity.getProcessInstance()).isEqualTo(event.getEntity());
     }
@@ -79,6 +80,7 @@ public class ProcessStartedEventConverterTest {
         cloudAuditEventEntity.setServiceType("rb");
         cloudAuditEventEntity.setServiceVersion("sv1");
         cloudAuditEventEntity.setMessageId("msgId");
+        cloudAuditEventEntity.setCommandId("cmd-456");
         cloudAuditEventEntity.setSequenceNumber(2);
         return cloudAuditEventEntity;
     }
@@ -119,6 +121,7 @@ public class ProcessStartedEventConverterTest {
         assertThat(apiEvent.getServiceType()).isEqualTo(auditEventEntity.getServiceType());
         assertThat(apiEvent.getServiceVersion()).isEqualTo(auditEventEntity.getServiceVersion());
         assertThat(apiEvent.getMessageId()).isEqualTo(auditEventEntity.getMessageId());
+        assertThat(apiEvent.getCommandId()).isEqualTo(auditEventEntity.getCommandId());
         assertThat(apiEvent.getSequenceNumber()).isEqualTo(auditEventEntity.getSequenceNumber());
     }
 

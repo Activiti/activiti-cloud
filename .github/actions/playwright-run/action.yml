@@ -23,7 +23,7 @@ runs:
 
     - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
-        node-version: '20.18.3'
+        node-version: '22'
 
     - name: Get npm cache directory
       id: npm-cache-dir
@@ -56,8 +56,8 @@ runs:
       env:
         SCRIPT_COMMAND: ${{ inputs.script-command }}
       run: |
-        npm clean-install
-        npx playwright install chromium
+        npm ci --ignore-scripts
+        ./node_modules/.bin/playwright install chromium
         eval "${SCRIPT_COMMAND}"
       continue-on-error: true
 

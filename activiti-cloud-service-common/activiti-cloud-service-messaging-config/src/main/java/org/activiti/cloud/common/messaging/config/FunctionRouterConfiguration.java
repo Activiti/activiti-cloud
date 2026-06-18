@@ -137,8 +137,10 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    Function<String, ExecutorService> functionRouterExecutorFactory() {
-        return new FunctionRouterExecutorFactory();
+    Function<String, ExecutorService> functionRouterExecutorFactory(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
+        return new FunctionRouterExecutorFactory(messagingProperties.getFunctionRouter().getRequestTimeout());
     }
 
     @Bean

@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.activiti.cloud.api.process.model.impl.ProcessInstanceSearchResultImpl;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -41,6 +42,10 @@ public class QueryLinkRelationProvider implements LinkRelationProvider {
         );
         resourceRelationDescriptors.put(
             ProcessInstanceEntity.class,
+            new ResourceRelationDescriptor("processInstance", "processInstances")
+        );
+        resourceRelationDescriptors.put(
+            ProcessInstanceSearchResultImpl.class,
             new ResourceRelationDescriptor("processInstance", "processInstances")
         );
         resourceRelationDescriptors.put(TaskEntity.class, new ResourceRelationDescriptor("task", "tasks"));

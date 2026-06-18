@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -36,9 +37,12 @@ import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.BPMNActivityRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.BPMNSequenceFlowRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceSearchResultRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.QueryCloudVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
@@ -83,6 +87,12 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessInstanceSearchResultRepresentationModelAssembler processInstanceSearchResultRepresentationModelAssembler() {
+        return new ProcessInstanceSearchResultRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ProcessInstanceVariableRepresentationModelAssembler processInstanceVariableRepresentationModelAssembler() {
         return new ProcessInstanceVariableRepresentationModelAssembler();
     }
@@ -103,6 +113,18 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ServiceTaskRepresentationModelAssembler serviceTaskRepresentationModelAssembler() {
         return new ServiceTaskRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BPMNActivityRepresentationModelAssembler bpmnActivityRepresentationModelAssembler() {
+        return new BPMNActivityRepresentationModelAssembler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BPMNSequenceFlowRepresentationModelAssembler bpmnSequenceFlowRepresentationModelAssembler() {
+        return new BPMNSequenceFlowRepresentationModelAssembler();
     }
 
     @Bean
@@ -302,9 +324,15 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceSearchService processInstanceSearchService(
         ProcessInstanceRepository processInstanceRepository,
         ProcessVariableService processVariableService,
-        SecurityManager securityManager
+        SecurityManager securityManager,
+        ProcessInstanceHierarchyRepository processInstanceHierarchyRepository
     ) {
-        return new ProcessInstanceSearchService(processInstanceRepository, processVariableService, securityManager);
+        return new ProcessInstanceSearchService(
+            processInstanceRepository,
+            processVariableService,
+            securityManager,
+            processInstanceHierarchyRepository
+        );
     }
 
     @Bean
@@ -348,9 +376,14 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceControllerHelper processInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
-        ProcessInstanceService processInstanceService
+        ProcessInstanceService processInstanceService,
+        ProcessInstanceSearchService processInstanceSearchService
     ) {
-        return new ProcessInstanceControllerHelper(processInstanceRepository, processInstanceService);
+        return new ProcessInstanceControllerHelper(
+            processInstanceRepository,
+            processInstanceService,
+            processInstanceSearchService
+        );
     }
 
     @Bean
@@ -358,12 +391,14 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceAdminService processInstanceAdminService,
-        ProcessInstanceControllerHelper processInstanceControllerHelper
+        ProcessInstanceControllerHelper processInstanceControllerHelper,
+        ProcessInstanceSearchService processInstanceSearchService
     ) {
         return new ProcessInstanceAdminControllerHelper(
             processInstanceRepository,
             processInstanceAdminService,
-            processInstanceControllerHelper
+            processInstanceControllerHelper,
+            processInstanceSearchService
         );
     }
 }

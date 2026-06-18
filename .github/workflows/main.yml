@@ -30,7 +30,7 @@ jobs:
       skip: ${{ steps.dependabot.outputs.result }}
       skip-tests: ${{ steps.check-skip-tests.outputs.result }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Check dependabot build
         uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -149,7 +149,7 @@ jobs:
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
       - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -169,16 +169,29 @@ jobs:
   acceptance-tests:
     runs-on: ubuntu-latest
     if: ${{ needs.pre-checks.outputs.skip != 'true' && needs.pre-checks.outputs.skip-tests != 'true' }}
+    # Per matrix cell: unique namespace + Helm profile. Images: build job → VERSION → update-chart → Helm (Serenity flow).
     needs:
       - pre-checks
       - build
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
       ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH: develop
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Bundled preview Keycloak users — repo variables (usernames) + secrets (passwords).
+      TESTUSER_USERNAME: ${{ vars.ACCEPTANCE_TESTUSER_USERNAME || 'testuser' }}
+      TESTUSER_PASSWORD: ${{ secrets.ACCEPTANCE_TESTUSER_PASSWORD }}
+      HRUSER_USERNAME: ${{ vars.ACCEPTANCE_HRUSER_USERNAME || 'hruser' }}
+      HRUSER_PASSWORD: ${{ secrets.ACCEPTANCE_HRUSER_PASSWORD }}
+      HRADMIN_USERNAME: ${{ vars.ACCEPTANCE_HRADMIN_USERNAME || 'hradmin' }}
+      HRADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_HRADMIN_PASSWORD }}
+      PROCESSADMINUSER_USERNAME: ${{ vars.ACCEPTANCE_PROCESSADMINUSER_USERNAME || 'processadminuser' }}
+      PROCESSADMINUSER_PASSWORD: ${{ secrets.ACCEPTANCE_PROCESSADMINUSER_PASSWORD }}
+      TESTADMIN_USERNAME: ${{ vars.ACCEPTANCE_TESTADMIN_USERNAME || 'testadmin' }}
+      TESTADMIN_PASSWORD: ${{ secrets.ACCEPTANCE_TESTADMIN_PASSWORD }}
     strategy:
-      # avoid overloading test cluster
-      max-parallel: 2
-      fail-fast: true
+      # One namespace per matrix cell (unique PREVIEW_NAME); parallel capped for shared cluster capacity.
+      max-parallel: 4
+      fail-fast: false
       matrix:
         messaging-broker: [rabbitmq, kafka]
         messaging-partitioned: [partitioned, non-partitioned]
@@ -195,7 +208,7 @@ jobs:
             messaging-destinations: pdb
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -235,108 +248,41 @@ jobs:
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
           version: ${{ needs.build.outputs.version }}
 
+      - name: Cache Helm chart checkout
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .git/activiti-cloud-full-chart
+          key: activiti-full-chart-${{ env.ACTIVITI_CLOUD_FULL_CHART_RELEASE_BRANCH }}-${{ needs.build.outputs.version }}
+
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           kubectl delete ns $PREVIEW_NAME || true
 
       - name: Install release for ${{ matrix.messaging-broker }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-
-          ### Main ###
-
-          echo "Installing release with make install"
-          make install
+        run: bash scripts/ci/install-preview-release.sh
 
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export QUERY_CONSUMER_NUMBER=2
-
-          ### Functions ###
-
-          # It checks that the RESULT env var is equals to the first
-          # argument passed to the function
-          #
-          check_result_is () {
-            if [ "$RESULT" == "$1" ]; then
-              echo "correct"
-            else
-              echo "number expected is $1 but result is $RESULT"
-              exit 1
-            fi
-          }
-
-          # It counts the number of query consumer pods in the
-          # cluster and set it in RESULT env var
-          #
-          count_query_consumer_pods () {
-            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
-              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
-              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
-          }
-
-          # It counts the number of query partition of engineEvents topic
-          # created in Kafka and set it in RESULT env var
-          #
-          count_query_topic_partitions () {
-            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
-              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server=localhost:9092 --describe \
-              --topic engineEvents | grep PartitionCount |\
-              awk \'{ printf "%s",$6 }\'')
-          }
-
-          ### Main ###
-
-          echo "It checks the deployment has 1 query pod consumer"
-          count_query_consumer_pods
-          check_result_is 1
-
-          echo "It checks the deployment has 4 query topic patitions"
-          count_query_topic_partitions
-          check_result_is 4
+        run: bash scripts/ci/kafka-partitioned-consumer-check.sh
 
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        uses: ./.github/actions/playwright-run
-        env:
-          TESTUSER_USERNAME: ${{ vars.KEYCLOAK_USERNAME }}
-          TESTUSER_PASSWORD: ${{ secrets.KEYCLOAK_PASSWORD }}
-          GATEWAY_URL: ${{ env.GATEWAY_HOST }}
-          SSO_HOST: https://${{ env.SSO_HOST }}/auth/realms/activiti/protocol/openid-connect/token
-          REALM: activiti
-        with:
-          script-command: "npm run test:identity"
+      - uses: ./.github/actions/prepare-preview-for-playwright
 
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
 
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
+      - name: Export Playwright CI environment
+        run: bash scripts/ci/export-playwright-ci-env.sh
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        run: |
-          make test/runtime-acceptance-tests
+      - name: Run Playwright Acceptance Tests
+        uses: ./.github/actions/playwright-run
+        with:
+          script-command: "npm run test"
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
@@ -385,7 +331,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -414,7 +360,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -465,7 +411,7 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
           version: ${{ needs.build.outputs.version }}
@@ -488,7 +434,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart

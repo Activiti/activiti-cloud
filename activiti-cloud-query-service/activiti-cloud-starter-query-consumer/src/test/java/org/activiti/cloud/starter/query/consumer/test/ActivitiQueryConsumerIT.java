@@ -15,16 +15,36 @@
  */
 package org.activiti.cloud.starter.query.consumer.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.zaxxer.hikari.HikariDataSource;
+import java.util.function.Supplier;
+import org.activiti.cloud.conf.FixedQueryConsumerPartitionedChannelCountProvider;
+import org.activiti.cloud.conf.QueryConsumerPartitionedChannelCountProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 
-@SpringBootTest
-@SpringBootApplication
+@SpringBootTest(
+    classes = QueryConsumerTestApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    properties = "activiti.cloud.services.oauth2.iam-name=test"
+)
 @EnableTestBinder
-public class ActivitiQueryConsumerIT {
+class ActivitiQueryConsumerIT {
+
+    @Autowired
+    private QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider;
+
+    @Autowired
+    private HikariDataSource hikariDataSource;
 
     @Test
-    void contextLoads() {}
+    void contextLoads() {
+        assertThat(queryConsumerPartitionedChannelCountProvider)
+            .isInstanceOf(FixedQueryConsumerPartitionedChannelCountProvider.class)
+            .extracting(Supplier::get)
+            .isEqualTo(hikariDataSource.getMaximumPoolSize());
+    }
 }

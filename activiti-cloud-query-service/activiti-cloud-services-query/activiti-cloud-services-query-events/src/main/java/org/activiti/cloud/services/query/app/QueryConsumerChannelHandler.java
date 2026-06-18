@@ -17,7 +17,10 @@ package org.activiti.cloud.services.query.app;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,9 +45,23 @@ public class QueryConsumerChannelHandler {
         this.entityManager = entityManager;
     }
 
-    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
+    public void receive(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
         afterCompletion(entityManager::clear);
-        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
+        var optimizedEvents = optimizer.optimize(events);
+        enrichWithMessageMetadata(optimizedEvents, headers);
+        eventHandlerContext.handle(optimizedEvents.toArray(new CloudRuntimeEvent[] {}));
+    }
+
+    private static void enrichWithMessageMetadata(List<CloudRuntimeEvent<?, ?>> events, Map<String, Object> headers) {
+        Object idHeader = headers.get("id");
+        var messageId = idHeader != null ? idHeader.toString() : null;
+        var counter = new AtomicInteger(0);
+        for (CloudRuntimeEvent<?, ?> event : events) {
+            if (event instanceof CloudRuntimeEventImpl<?, ?> impl) {
+                impl.setMessageId(messageId);
+                impl.setSequenceNumber(counter.getAndIncrement());
+            }
+        }
     }
 
     private static void afterCompletion(Runnable action) {
