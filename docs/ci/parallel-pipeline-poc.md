@@ -197,6 +197,7 @@ pre-commit run --files .github/workflows/main.yml .github/workflows/_reusable-*.
 - Workflow: [`.github/workflows/main.yml`](../../.github/workflows/main.yml)
 - Reusable: [`_reusable-maven-build.yml`](../../.github/workflows/_reusable-maven-build.yml), [`_reusable-maven-test.yml`](../../.github/workflows/_reusable-maven-test.yml), [`_reusable-playwright-tests.yml`](../../.github/workflows/_reusable-playwright-tests.yml)
 - Shard/profile config: [`.github/ci/maven-shards.json`](../../.github/ci/maven-shards.json), [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json)
+- process-services alignment (planned): [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json), [`docs/ci/process-services-alignment.md`](process-services-alignment.md)
 - M2 actions: [`maven-m2-upload`](../../.github/actions/maven-m2-upload), [`maven-m2-download`](../../.github/actions/maven-m2-download)
-- CI scripts: [`maven-test-shard.sh`](../../scripts/ci/maven-test-shard.sh), [`validate-ci-matrix-lists.sh`](../../scripts/ci/validate-ci-matrix-lists.sh)
+- CI scripts: [`maven-test-shard.sh`](../../scripts/ci/maven-test-shard.sh), [`validate-ci-matrix-lists.sh`](../../scripts/ci/validate-ci-matrix-lists.sh), [`transform-docker-image-matrix.sh`](../../scripts/ci/transform-docker-image-matrix.sh)
 - Playwright env: [`load-acceptance-test-env`](../../.github/actions/load-acceptance-test-env)
