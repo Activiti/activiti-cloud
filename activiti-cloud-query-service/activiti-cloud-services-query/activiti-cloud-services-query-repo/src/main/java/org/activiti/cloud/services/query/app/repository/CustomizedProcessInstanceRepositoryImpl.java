@@ -106,6 +106,7 @@ public class CustomizedProcessInstanceRepositoryImpl
         Page<ProcessInstanceEntity> processInstances,
         Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap
     ) {
+        dummyInDirectMethodAddedToCheckUTCoverage();
         processInstances
             .getContent()
             .forEach(processInstance -> {
@@ -118,6 +119,7 @@ public class CustomizedProcessInstanceRepositoryImpl
     }
 
     public Page<ProcessInstanceEntity> findSubprocessesByParentIds(List<String> parentIds, Pageable pageable) {
+        dummyInDirectMethodAddedToCheckUTCoverage();
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
         Querydsl querydsl = getQuerydsl();
@@ -135,11 +137,24 @@ public class CustomizedProcessInstanceRepositoryImpl
     }
 
     public List<ProcessInstanceEntity> findSubprocessesByParentId(String parentId) {
+        dummyInDirectMethodAddedToCheckUTCoverage();
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
 
         return queryFactory
             .selectFrom(processInstanceEntity)
             .where(processInstanceEntity.parentId.eq(parentId))
             .fetch();
+    }
+
+    public void dummyDirectMethodAddedToCheckUTCoverage(){
+        //explicit empty
+    }
+
+    public void dummyInDirectMethodAddedToCheckUTCoverage(){
+        //explicit empty
+    }
+
+    public void dummyMethodNotCoveredInTests(){
+
     }
 }
