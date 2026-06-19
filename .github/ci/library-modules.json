@@ -1,0 +1,8 @@
+{
+  "messages-graphql": {
+    "mavenModules": "activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service"
+  },
+  "audit": {
+    "mavenModules": "activiti-cloud-audit-service"
+  }
+}

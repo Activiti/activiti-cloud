@@ -76,7 +76,7 @@ Correct order: **all builds → BOM → all tests**.
 
 GitHub Actions limitation: separate `maven-build` and `maven-test` matrix jobs cannot express per-shard pairing (`test(core)` needs only `build(core)`). A test matrix with `needs: maven-build` waits for **all** build cells. That is acceptable here because tests need the BOM anyway.
 
-`main.yml` calls reusable workflows (`_reusable-maven-build.yml`, `_reusable-maven-test.yml`, `_reusable-playwright-tests.yml`) with `version` / `skip-tests` only. **Matrix definitions live inside each reusable workflow** (single dimension: `shard-id` or `profile`). Per-shard module lists and broker settings are in [`.github/ci/maven-shards.json`](../../.github/ci/maven-shards.json) and [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json).
+`main.yml` calls reusable workflows for Maven build (docker images + libraries), test, and Playwright. **Docker build matrix** comes from `scan-image-dirs` + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json); **library builds** use [`.github/ci/library-modules.json`](../../.github/ci/library-modules.json). **Test shards** and Playwright profiles are in [`.github/ci/maven-shards.json`](../../.github/ci/maven-shards.json) and [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json). See also [process-services alignment](process-services-alignment.md).
 
 Matrix id lists in YAML must match JSON keys — enforced by [`scripts/ci/validate-ci-matrix-lists.sh`](../../scripts/ci/validate-ci-matrix-lists.sh) (pre-commit hook `validate-ci-matrix-lists`).
 
@@ -86,9 +86,11 @@ Matrix id lists in YAML must match JSON keys — enforced by [`scripts/ci/valida
 | ------------------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `pre-checks`                   | ✓                               | Lint/pre-commit, dependabot gate, SHA pins                                                      |
 | `resolve-version`              | ✓                               | PR snapshot / release version                                                                   |
-| `maven-build-common`           | ✓                               | Shared foundations (`build`, `api`, `service-common`)                                           |
-| `maven-build`                  | 5 matrix cells                  | Per cell: compile + Docker push (build only)                                                    |
-| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM after all shard builds                                                           |
+| `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                                     |
+| `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                                   |
+| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push (no m2-common download)                 |
+| `maven-build-libraries`        | 2 matrix cells                  | Library-only modules (messages-graphql, audit)                                                  |
+| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM after all service/library builds                                                 |
 | `maven-test`                   | 5 matrix cells                  | `mvn verify` per shard (after BOM)                                                              |
 | `maven-jacoco-merge`           | ✓                               | Merge JaCoCo from 5 test shards                                                                 |
 | `sonar`                        | ✓                               | SonarCloud: restore M2, compile, `jacoco:report` from merged exec (same as `develop`), analysis |
@@ -195,8 +197,8 @@ pre-commit run --files .github/workflows/main.yml .github/workflows/_reusable-*.
 ## Related files
 
 - Workflow: [`.github/workflows/main.yml`](../../.github/workflows/main.yml)
-- Reusable: [`_reusable-maven-build.yml`](../../.github/workflows/_reusable-maven-build.yml), [`_reusable-maven-test.yml`](../../.github/workflows/_reusable-maven-test.yml), [`_reusable-playwright-tests.yml`](../../.github/workflows/_reusable-playwright-tests.yml)
-- Shard/profile config: [`.github/ci/maven-shards.json`](../../.github/ci/maven-shards.json), [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json)
+- Reusable: [`_reusable-maven-build.yml`](../../.github/workflows/_reusable-maven-build.yml), [`_reusable-maven-library-build.yml`](../../.github/workflows/_reusable-maven-library-build.yml), [`_reusable-maven-test.yml`](../../.github/workflows/_reusable-maven-test.yml), [`_reusable-playwright-tests.yml`](../../.github/workflows/_reusable-playwright-tests.yml)
+- Config: [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json), [`.github/ci/library-modules.json`](../../.github/ci/library-modules.json), [`.github/ci/maven-shards.json`](../../.github/ci/maven-shards.json), [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json)
 - process-services alignment (planned): [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json), [`docs/ci/process-services-alignment.md`](process-services-alignment.md)
 - M2 actions: [`maven-m2-upload`](../../.github/actions/maven-m2-upload), [`maven-m2-download`](../../.github/actions/maven-m2-download)
 - CI scripts: [`maven-test-shard.sh`](../../scripts/ci/maven-test-shard.sh), [`validate-ci-matrix-lists.sh`](../../scripts/ci/validate-ci-matrix-lists.sh), [`transform-docker-image-matrix.sh`](../../scripts/ci/transform-docker-image-matrix.sh)

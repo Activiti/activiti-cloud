@@ -1,5 +1,5 @@
 name: Download Maven M2 artifacts
-description: Restore org.activiti.cloud artifacts produced by maven-m2-upload jobs.
+description: Restore org.activiti.cloud artifacts from maven-m2-upload or maven-build M2 uploads.
 inputs:
   pattern:
     description: Artifact name pattern passed to download-artifact
@@ -49,16 +49,18 @@ runs:
         merge_tree() {
           local src_root="$1"
           [[ -d "${src_root}" ]] || return 0
+          if [[ -d "${src_root}/org/activiti/cloud" ]]; then
+            mkdir -p "${HOME}/.m2/repository/org/activiti/cloud"
+            cp -a "${src_root}/org/activiti/cloud/." \
+              "${HOME}/.m2/repository/org/activiti/cloud/"
+            return 0
+          fi
           for artifact_id in "${src_root}"/*; do
             [[ -d "${artifact_id}" ]] || continue
             mkdir -p "${HOME}/.m2/repository/org/activiti/cloud/$(basename "${artifact_id}")"
             cp -a "${artifact_id}/." \
               "${HOME}/.m2/repository/org/activiti/cloud/$(basename "${artifact_id}")/"
           done
-          if [[ -d "${src_root}/org/activiti/cloud" ]]; then
-            cp -a "${src_root}/org/activiti/cloud/." \
-              "${HOME}/.m2/repository/org/activiti/cloud/"
-          fi
         }
 
         if [[ "${INPUT_PATTERN}" == "m2-*" && "${INPUT_PREFER_DEPENDENCIES_BOM}" == "true" ]]; then

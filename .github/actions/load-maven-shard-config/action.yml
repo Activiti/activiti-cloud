@@ -1,5 +1,5 @@
 name: Load Maven shard config
-description: Resolve shard build/test settings from .github/ci/maven-shards.json (single matrix dimension in workflows).
+description: Resolve shard test settings from .github/ci/maven-shards.json (test shards only).
 inputs:
   shard-id:
     description: Maven shard identifier (core, runtime-bundle, …)

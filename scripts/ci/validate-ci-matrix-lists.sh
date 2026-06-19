@@ -19,6 +19,15 @@ yaml_shard_ids() {
     | sort
 }
 
+yaml_library_ids() {
+  local file="$1"
+  grep -E '^[[:space:]]+library-id:' "${file}" | head -1 \
+    | sed -E 's/.*\[(.*)\].*/\1/' \
+    | tr ',' '\n' \
+    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+    | sort
+}
+
 yaml_profile_ids() {
   local file="$1"
   awk '
@@ -71,16 +80,16 @@ assert_same_lists() {
 errors=0
 
 assert_same_lists \
-  "Maven build shards" \
-  ".github/ci/maven-shards.json" \
-  ".github/workflows/_reusable-maven-build.yml" \
-  yaml_shard_ids || errors=$((errors + 1))
-
-assert_same_lists \
   "Maven test shards" \
   ".github/ci/maven-shards.json" \
   ".github/workflows/_reusable-maven-test.yml" \
   yaml_shard_ids || errors=$((errors + 1))
+
+assert_same_lists \
+  "Library build modules" \
+  ".github/ci/library-modules.json" \
+  ".github/workflows/_reusable-maven-library-build.yml" \
+  yaml_library_ids || errors=$((errors + 1))
 
 assert_same_lists \
   "Playwright profiles (reusable)" \

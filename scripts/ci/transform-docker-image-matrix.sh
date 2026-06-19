@@ -27,7 +27,11 @@ transformed="$(jq -c --slurpfile cfg "${CONFIG}" '
     ($services[$entry.path] // {}) as $svc |
     $entry
     | .["short-name"] = ($svc.shortName // ($entry.path | sub(".*/"; "")))
-    | .["extra-modules"] = ($svc.extraModules // "")
+    | .["extra-modules"] = (
+        if ($svc.extraModules // "") == "" then ""
+        else ($svc.extraModules + ",")
+        end
+      )
   )
 ' <<< "${DIRS_AS_JSON}")"
 

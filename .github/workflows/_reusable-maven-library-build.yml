@@ -1,11 +1,8 @@
-name: Maven build (docker images)
+name: Maven build (library modules)
 
 on:
   workflow_call:
     inputs:
-      matrix-json:
-        required: true
-        type: string
       version:
         required: true
         type: string
@@ -16,27 +13,38 @@ on:
         required: true
       NEXUS_PASSWORD:
         required: true
-      DOCKERHUB_USERNAME:
-        required: true
-      DOCKERHUB_PASSWORD:
-        required: true
 
 env:
   MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
 
 jobs:
   build:
-    name: maven-build (${{ matrix.short-name }})
+    name: maven-build-library (${{ matrix.library-id }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 2
       matrix:
-        include: ${{ fromJSON(inputs.matrix-json) }}
+        library-id: [messages-graphql, audit]
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - id: library
+        name: Load library module config (${{ matrix.library-id }})
+        shell: bash
+        env:
+          LIBRARY_ID: ${{ matrix.library-id }}
+        run: |
+          set -euo pipefail
+          CONFIG="${GITHUB_WORKSPACE}/.github/ci/library-modules.json"
+          if ! jq -e --arg id "${LIBRARY_ID}" '.[$id]' "${CONFIG}" >/dev/null; then
+            echo "::error::Unknown library id: ${LIBRARY_ID}"
+            exit 1
+          fi
+          modules="$(jq -r --arg id "${LIBRARY_ID}" '.[$id].mavenModules' "${CONFIG}")"
+          echo "maven-modules=${modules}" >> "${GITHUB_OUTPUT}"
 
       - name: Write VERSION file
         shell: bash
@@ -61,14 +69,7 @@ jobs:
           reuse-testcontainers: 'true'
           maven-command: >-
             install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true
-            -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
-          m2-current-build-upload-name: m2-${{ matrix.short-name }}
+            -pl ${{ steps.library.outputs.maven-modules }} -am
+          m2-current-build-upload-name: m2-${{ matrix.library-id }}
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
-          docker-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          docker-password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build and push Docker image (${{ matrix.short-name }})
-        if: matrix.skip-docker != 'true'
-        shell: bash
-        run: make "docker/${{ matrix.short-name }}"
