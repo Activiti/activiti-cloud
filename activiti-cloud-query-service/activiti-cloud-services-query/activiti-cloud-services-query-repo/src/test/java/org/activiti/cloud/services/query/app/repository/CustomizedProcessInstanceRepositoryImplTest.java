@@ -208,4 +208,9 @@ class CustomizedProcessInstanceRepositoryImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getSubprocesses()).hasSize(2);
     }
+
+    @Test
+    void checkCoverageOfDirectMethod() {
+        repository.dummyDirectMethodAddedToCheckUTCoverage();
+    }
 }

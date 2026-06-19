@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.query.liquibase;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Service;
 
-@SpringBootTest
-@SpringBootApplication
-class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
+@Service
+public class DummyClassToTestITCoverage {
 
-    @Autowired
-    private DummyClassToTestITCoverage dummyClassToTestITCoverage;
-
-    @Test
-    void contextLoads() {
-        // application context loads successfully
+    public void directDummyMethod() {
+        inDirectDummyMethod();
+        // This method is intentionally left blank to verify test coverage
     }
 
-    @Test
-    void verifyCoverage(){
-        dummyClassToTestITCoverage.directDummyMethod();
+    public void inDirectDummyMethod() {
+        // This method is intentionally left blank to verify test coverage
     }
+
+    public void dummyMethodNotCoveredInTests(){
+
+    }
+
 }
