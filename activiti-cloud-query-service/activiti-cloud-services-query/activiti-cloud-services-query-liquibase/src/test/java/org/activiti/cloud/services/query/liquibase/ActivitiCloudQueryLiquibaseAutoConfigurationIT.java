@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.query.liquibase;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -25,16 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootApplication
 class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
 
-    @Autowired
-    private DummyClassToTestITCoverage dummyClassToTestITCoverage;
-
     @Test
     void contextLoads() {
         // application context loads successfully
-    }
-
-    @Test
-    void verifyCoverage(){
-        dummyClassToTestITCoverage.directDummyMethod();
     }
 }
