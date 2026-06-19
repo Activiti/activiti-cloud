@@ -136,6 +136,19 @@ jobs:
           artifact-name: m2-common
           version: ${{ needs.resolve-version.outputs.version }}
 
+      - name: Upload JaCoCo data (common)
+        if: needs.pre-checks.outputs.skip-tests != 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: jacoco-common
+          path: |
+            activiti-cloud-api/**/jacoco.exec
+            activiti-cloud-api/**/jacoco-it.exec
+            activiti-cloud-service-common/**/jacoco.exec
+            activiti-cloud-service-common/**/jacoco-it.exec
+          retention-days: 1
+          if-no-files-found: warn
+
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q) || true
         continue-on-error: true
@@ -308,11 +321,24 @@ jobs:
           version: ${{ needs.resolve-version.outputs.version }}
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
-      - name: Download JaCoCo from all test shards
+      - name: Download JaCoCo from test shards
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: jacoco-*
           merge-multiple: true
+
+      - name: Drop stale common-module JaCoCo from test shards
+        shell: bash
+        run: |
+          # Common tests run in maven-build-common; test shards may leave empty jacoco stubs
+          # under activiti-cloud-api / activiti-cloud-service-common that break jacoco:merge.
+          find activiti-cloud-api activiti-cloud-service-common -name 'jacoco*.exec' -type f -print -delete \
+            2>/dev/null || true
+
+      - name: Download JaCoCo from build-common
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: jacoco-common
 
       - name: Remove invalid JaCoCo exec files
         shell: bash
