@@ -17,19 +17,23 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
+import java.util.List;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -148,9 +152,41 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnLatestProcessDefinition() throws Exception {
         //given
-        given(processDefinitionRepository.findAll(any(), any(Pageable.class))).willReturn(
-            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
-        );
+        given(processDefinitionRepository.findAllLatestVersions(any()))
+            .willReturn(Collections.singletonList(buildDefaultProcessDefinition()));
+        //when
+        mockMvc
+            .perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
+            //then
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldReturnDeduplicatedListWhenLatestVersionIsTrue() throws Exception {
+        //given
+        ProcessDefinitionEntity processOne = buildDefaultProcessDefinition();
+        processOne.setKey("processOne");
+        processOne.setVersion(3);
+        ProcessDefinitionEntity processTwo = buildDefaultProcessDefinition();
+        processTwo.setKey("processTwo");
+        processTwo.setVersion(7);
+        given(processDefinitionRepository.findAllLatestVersions(any()))
+            .willReturn(List.of(processOne, processTwo));
+
+        //when
+        mockMvc
+            .perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
+            //then
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.processDefinitions", hasSize(2)));
+    }
+
+    @Test
+    public void shouldIgnorePaginationWhenLatestVersionIsTrue() throws Exception {
+        //given
+        given(processDefinitionRepository.findAllLatestVersions(any()))
+            .willReturn(Collections.singletonList(buildDefaultProcessDefinition()));
+
         //when
         mockMvc
             .perform(

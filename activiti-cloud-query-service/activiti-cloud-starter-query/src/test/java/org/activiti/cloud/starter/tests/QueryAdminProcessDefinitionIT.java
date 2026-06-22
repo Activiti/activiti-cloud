@@ -228,6 +228,46 @@ public class QueryAdminProcessDefinitionIT {
     }
 
     @Test
+    public void shouldReturnDeduplicatedLatestVersionsWhenLatestVersionIsTrue() {
+        //given
+        ProcessDefinitionImpl firstKeyV1 = new ProcessDefinitionImpl();
+        firstKeyV1.setId(UUID.randomUUID().toString());
+        firstKeyV1.setKey("myFirstProcess");
+        firstKeyV1.setName("My First Process v1");
+        firstKeyV1.setVersion(1);
+
+        ProcessDefinitionImpl firstKeyV2 = new ProcessDefinitionImpl();
+        firstKeyV2.setId(UUID.randomUUID().toString());
+        firstKeyV2.setKey("myFirstProcess");
+        firstKeyV2.setName("My First Process v2");
+        firstKeyV2.setVersion(2);
+
+        ProcessDefinitionImpl secondKeyV1 = new ProcessDefinitionImpl();
+        secondKeyV1.setId(UUID.randomUUID().toString());
+        secondKeyV1.setKey("mySecondProcess");
+        secondKeyV1.setName("My Second Process v1");
+        secondKeyV1.setVersion(1);
+
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstKeyV1),
+            new CloudProcessDeployedEventImpl(firstKeyV2),
+            new CloudProcessDeployedEventImpl(secondKeyV1)
+        );
+
+        //when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.getProcDefinitionsLatestVersion();
+
+        //then
+        assertThat(responseEntity.getBody())
+            .isNotNull()
+            .extracting(ProcessDefinition::getId, ProcessDefinition::getKey, ProcessDefinition::getName)
+            .containsExactlyInAnyOrder(
+                tuple(firstKeyV2.getId(), "myFirstProcess", "My First Process v2"),
+                tuple(secondKeyV1.getId(), "mySecondProcess", "My Second Process v1")
+            );
+    }
+
+    @Test
     public void shouldUpdateProcessModelOnDuplicate() throws Exception {
         //given
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
