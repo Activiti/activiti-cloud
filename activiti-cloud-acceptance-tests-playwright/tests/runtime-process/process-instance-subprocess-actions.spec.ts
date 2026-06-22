@@ -15,85 +15,14 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { EventType } from '../../models/audit.models';
 import {
     CloudProcessInstance,
     ProcessInstanceStatus,
 } from '../../models/runtime-bundle.models';
-import { AuditService } from '../../services/audit.service';
-import { QueryService } from '../../services/query.service';
-import { RuntimeBundleService } from '../../services/runtime-bundle.service';
 
 const PROCESS_INSTANCE_WITH_EMBEDDED_SUB_PROCESS = 'startSimpleSubProcess';
 const PARENT_PROCESS = 'parentproc-843144bc-3797-40db-8edc-d23190b118e5';
-
-async function expectProcessCompleted(
-    queryService: QueryService,
-    processInstanceId: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            try {
-                const instance = await queryService.getProcessInstance(processInstanceId);
-                return instance.status;
-            } catch (error) {
-                // Query DB may not have ingested the instance yet — keep polling.
-                if (error instanceof Error && /Unable to find process instance/.test(error.message)) {
-                    return undefined;
-                }
-                throw error;
-            }
-        }, pollOptions('querySync'))
-        .toBe(ProcessInstanceStatus.COMPLETED);
-}
-
-async function expectSubProcessEvents(
-    auditService: AuditService,
-    processInstanceId: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const events = await auditService.getEventsByProcessInstanceId(processInstanceId);
-            const matches = events.filter((event) => {
-                if (
-                    event.eventType !== EventType.ACTIVITY_STARTED &&
-                    event.eventType !== EventType.ACTIVITY_COMPLETED
-                ) {
-                    return false;
-                }
-                const entity = event.entity as
-                    | { activityType?: string; processInstanceId?: string }
-                    | undefined;
-                return (
-                    entity?.activityType === 'subProcess' &&
-                    entity?.processInstanceId === processInstanceId
-                );
-            });
-            const hasStarted = matches.some((event) => event.eventType === EventType.ACTIVITY_STARTED);
-            const hasCompleted = matches.some(
-                (event) => event.eventType === EventType.ACTIVITY_COMPLETED
-            );
-            return hasStarted && hasCompleted;
-        }, pollOptions('querySync'))
-        .toBe(true);
-}
-
-async function expectProcessVariableHasValue(
-    runtimeBundleService: RuntimeBundleService,
-    processInstanceId: string,
-    variableName: string,
-    variableValue: unknown
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const variables = await runtimeBundleService.getProcessInstanceVariables(processInstanceId);
-            return variables.some(
-                (variable) => variable.name === variableName && variable.value === variableValue
-            );
-        }, pollOptions('querySync'))
-        .toBe(true);
-}
 
 activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () => {
     activiti('complete a process instance with a subProcess', async ({
@@ -115,17 +44,8 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
                 expect(processInstance).toBeTruthy();
                 expect(processInstance.id).toBeTruthy();
 
-                await expect
-                    .poll(async () => {
-                        const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(
-                            processInstance.id
-                        );
-                        return tasks.length;
-                    }, pollOptions('querySync'))
-                    .toBeGreaterThan(0);
-
-                const tasks = await taskServiceHrUser.getTasksByProcessInstanceId(processInstance.id);
-                currentTaskId = tasks[0].id;
+                const task = await taskServiceHrUser.waitForOpenTaskByProcessInstanceId(processInstance.id);
+                currentTaskId = task.id;
                 expect(currentTaskId).toBeTruthy();
             }
         );
@@ -139,11 +59,25 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         });
 
         await activiti.step('Then subProcess events are emitted', async () => {
-            await expectSubProcessEvents(auditServiceHrUser, processInstance.id);
+            const events = await auditServiceHrUser.waitForActivityEventsByType(
+                processInstance.id,
+                'subProcess',
+                [EventType.ACTIVITY_STARTED, EventType.ACTIVITY_COMPLETED]
+            );
+            expect(events.map((event) => event.eventType)).toEqual(
+                expect.arrayContaining([
+                    EventType.ACTIVITY_STARTED,
+                    EventType.ACTIVITY_COMPLETED,
+                ])
+            );
         });
 
         await activiti.step('And the process with embedded subprocess is completed', async () => {
-            await expectProcessCompleted(queryServiceHrUser, processInstance.id);
+            const instance = await queryServiceHrUser.waitForProcessInstanceStatus(
+                processInstance.id,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -169,26 +103,17 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'Then the parent process instance has a variable named name with value inName',
             async () => {
-                await expectProcessVariableHasValue(
-                    runtimeBundleServiceHrUser,
+                const value = await runtimeBundleServiceHrUser.waitForProcessInstanceVariableValue(
                     processInstance.id,
                     'name',
                     'inName'
                 );
+                expect(value).toBe('inName');
             }
         );
 
         await activiti.step('And the subprocess has been created', async () => {
-            await expect
-                .poll(async () => {
-                    const subprocesses = await runtimeBundleServiceHrUser.getSubProcesses(
-                        processInstance.id
-                    );
-                    return subprocesses.length;
-                }, pollOptions('querySync'))
-                .toBeGreaterThan(0);
-
-            const subprocesses = await runtimeBundleServiceHrUser.getSubProcesses(processInstance.id);
+            const subprocesses = await runtimeBundleServiceHrUser.waitForSubProcesses(processInstance.id);
             subprocessInstance = subprocesses[0];
             expect(subprocessInstance).toBeTruthy();
             expect(subprocessInstance.parentId).toBe(processInstance.id);
@@ -197,12 +122,12 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'And a subprocess variable subprocess_input_var1 is created with value inName',
             async () => {
-                await expectProcessVariableHasValue(
-                    runtimeBundleServiceHrUser,
+                const value = await runtimeBundleServiceHrUser.waitForProcessInstanceVariableValue(
                     subprocessInstance.id,
                     'subprocess_input_var1',
                     'inName'
                 );
+                expect(value).toBe('inName');
             }
         );
 
@@ -221,12 +146,12 @@ activiti.describe('Process Instance SubProcess Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'Then the parent process instance has a variable named name with value outValue',
             async () => {
-                await expectProcessVariableHasValue(
-                    runtimeBundleServiceHrUser,
+                const value = await runtimeBundleServiceHrUser.waitForProcessInstanceVariableValue(
                     processInstance.id,
                     'name',
                     'outValue'
                 );
+                expect(value).toBe('outValue');
             }
         );
     });

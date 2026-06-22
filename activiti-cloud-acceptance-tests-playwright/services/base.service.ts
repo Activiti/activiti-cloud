@@ -11,6 +11,7 @@ import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { scopedBusinessKey, scopedName, TestScope } from '../helpers/test-isolation';
 import { Options } from '../models/base-service.models';
 import { Logger } from '../helpers/logging/logger';
+import { PollProfile, pollOptions } from '../config/runtime/timeouts';
 
 export interface RequestResponse {
     [key: string]: any;
@@ -80,6 +81,31 @@ export abstract class BaseService {
             return explicit;
         }
         return this.testScope ? scopedBusinessKey(this.testScope) : `pw-bk-${Date.now()}`;
+    }
+
+    protected static async waitFor<T>(
+        fetcher: () => Promise<T>,
+        predicate: (value: T) => boolean,
+        profile: PollProfile = 'querySync',
+        description?: string,
+        intervalsOverride?: readonly number[]
+    ): Promise<T> {
+        const { timeout, intervals } = pollOptions(profile, intervalsOverride);
+        const deadline = Date.now() + timeout;
+        let attempt = 0;
+        let lastValue: T | undefined;
+        while (Date.now() < deadline) {
+            lastValue = await fetcher();
+            if (predicate(lastValue)) {
+                return lastValue;
+            }
+            const intervalMs = intervals[Math.min(attempt, intervals.length - 1)];
+            attempt += 1;
+            await new Promise((resolve) => setTimeout(resolve, intervalMs));
+        }
+        throw new Error(
+            `Timed out after ${timeout}ms waiting${description ? ` for ${description}` : ''}`
+        );
     }
 
     async get(endpoint: string, options?: Options): Promise<RequestResponse> {

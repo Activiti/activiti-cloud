@@ -23,7 +23,6 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
 
 type DeleteScenario = AcceptanceScenarioMeta & { id: 'audit' | 'query' };
@@ -64,12 +63,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 );
 
                 await activiti.step('And audit service has synced events for the process', async () => {
-                    await expect
-                        .poll(
-                            async () => (await auditAdminServiceTestAdmin.getAllEventsAdmin()).length,
-                            pollOptions('querySync')
-                        )
-                        .toBeGreaterThan(0);
+                    const events = await auditAdminServiceTestAdmin.waitForAllEventsAdminCountGreaterThan(0);
+                    expect(events.length).toBeGreaterThan(0);
                 });
 
                 await activiti.step(
@@ -79,12 +74,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                         const before = await auditAdminServiceTestAdmin.getAllEventsAdmin();
                         expect(before.length).toBeGreaterThan(0);
                         await auditAdminServiceTestAdmin.deleteAllEventsAdmin();
-                        await expect
-                            .poll(
-                                async () => (await auditAdminServiceTestAdmin.getAllEventsAdmin()).length,
-                                pollOptions('auditEvents')
-                            )
-                            .toBe(0);
+                        const after = await auditAdminServiceTestAdmin.waitForAllEventsAdminCount(0);
+                        expect(after.length).toBe(0);
                     }
                 );
                 return;
@@ -108,18 +99,10 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
             });
 
             await activiti.step('And query service has synced process instances and tasks', async () => {
-                await expect
-                    .poll(
-                        async () => (await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin()).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
-                await expect
-                    .poll(
-                        async () => (await queryAdminServiceTestAdmin.getAllTasksAdmin()).length,
-                        pollOptions('querySync')
-                    )
-                    .toBeGreaterThan(0);
+                const instances = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCountGreaterThan(0);
+                expect(instances.length).toBeGreaterThan(0);
+                const tasks = await queryAdminServiceTestAdmin.waitForAllTasksAdminCountGreaterThan(0);
+                expect(tasks.length).toBeGreaterThan(0);
             });
 
             await activiti.step(
@@ -129,12 +112,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                     const before = await queryAdminServiceTestAdmin.getAllTasksAdmin();
                     expect(before.length).toBeGreaterThan(0);
                     await queryAdminServiceTestAdmin.deleteAllTasksAdmin();
-                    await expect
-                        .poll(
-                            async () => (await queryAdminServiceTestAdmin.getAllTasksAdmin()).length,
-                            pollOptions('querySync')
-                        )
-                        .toBe(0);
+                    const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
+                    expect(after.length).toBe(0);
                 }
             );
 
@@ -142,12 +121,8 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 const before = await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin();
                 expect(before.length).toBeGreaterThan(0);
                 await queryAdminServiceTestAdmin.deleteAllProcessInstancesAdmin();
-                await expect
-                    .poll(
-                        async () => (await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin()).length,
-                        pollOptions('querySync')
-                    )
-                    .toBe(0);
+                const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
+                expect(after.length).toBe(0);
             });
         });
     }

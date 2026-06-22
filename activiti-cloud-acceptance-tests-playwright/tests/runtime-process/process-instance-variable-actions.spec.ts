@@ -15,37 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
-import { RuntimeBundleService } from '../../services/runtime-bundle.service';
-
-async function expectVariableValue(
-    rbService: RuntimeBundleService,
-    processInstanceId: string,
-    variableName: string,
-    expectedValue: unknown
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const variables = await rbService.getProcessInstanceVariables(processInstanceId);
-            const match = variables.find((v) => v.name === variableName);
-            return match ? String(match.value) : undefined;
-        }, pollOptions('querySync'))
-        .toBe(String(expectedValue));
-}
-
-async function expectVariableAbsent(
-    rbService: RuntimeBundleService,
-    processInstanceId: string,
-    variableName: string
-): Promise<void> {
-    await expect
-        .poll(async () => {
-            const variables = await rbService.getProcessInstanceVariables(processInstanceId);
-            return variables.some((v) => v.name === variableName);
-        }, pollOptions('querySync'))
-        .toBe(false);
-}
 
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
     activiti(
@@ -80,15 +50,21 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
                 }
             );
 
-            await activiti.step('Then the list of errors messages is empty', async () => {
-                // PUT returning 200 without throwing means no errors — verified implicitly above
-            });
-
             await activiti.step(
                 'And variable start1 has value value1 and start2 has value value2',
                 async () => {
-                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start1', 'value1');
-                    await expectVariableValue(runtimeBundleServiceTestUser, processInstanceId, 'start2', 'value2');
+                    const start1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'start1',
+                        'value1'
+                    );
+                    const start2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                        processInstanceId,
+                        'start2',
+                        'value2'
+                    );
+                    expect(start1).toBe('value1');
+                    expect(start2).toBe('value2');
                 }
             );
         }
@@ -137,18 +113,18 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             await activiti.step(
                 'Then variable dummy1 has value dummyValue1 and dummy2 has value dummyValue2',
                 async () => {
-                    await expectVariableValue(
-                        runtimeBundleServiceTestUser,
+                    const dummy1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
                         processInstanceId,
                         'dummy1',
                         'dummyValue1'
                     );
-                    await expectVariableValue(
-                        runtimeBundleServiceTestUser,
+                    const dummy2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
                         processInstanceId,
                         'dummy2',
                         'dummyValue2'
                     );
+                    expect(dummy1).toBe('dummyValue1');
+                    expect(dummy2).toBe('dummyValue2');
                 }
             );
         }
@@ -201,16 +177,20 @@ activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, (
             });
 
             await activiti.step('Then the process variable dummy1 is deleted', async () => {
-                await expectVariableAbsent(runtimeBundleServiceTestUser, processInstanceId, 'dummy1');
+                const dummy1 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableDeleted(
+                    processInstanceId,
+                    'dummy1'
+                );
+                expect(dummy1).toBeUndefined();
             });
 
             await activiti.step('And the process variable dummy2 is created', async () => {
-                await expectVariableValue(
-                    runtimeBundleServiceTestUser,
+                const dummy2 = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
                     processInstanceId,
                     'dummy2',
                     'dummyValue2'
                 );
+                expect(dummy2).toBe('dummyValue2');
             });
         }
     );
