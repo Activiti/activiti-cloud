@@ -1,5 +1,5 @@
 import { acceptanceLog, acceptancePhase, acceptanceStep } from '../../../helpers/acceptance-progress';
-import { verifyAcceptanceProcessCatalog } from '../../../helpers/process-deployment';
+import { verifyAcceptanceProcessCatalog } from '../../../helpers/process-deployment-keys';
 
 export async function verifyProcessCatalogIfEnabled(): Promise<void> {
     const enabled = process.env.VERIFY_ACCEPTANCE_PROCESS_CATALOG?.trim().toLowerCase();

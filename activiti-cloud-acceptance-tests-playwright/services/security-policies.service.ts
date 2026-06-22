@@ -102,6 +102,15 @@ export class SecurityPoliciesService extends BaseService {
         return this.queryService.getProcessInstances({ processDefinitionKey });
     }
 
+    async waitForQueryInstancesByProcessName(processName: string): Promise<CloudProcessInstance[]> {
+        return SecurityPoliciesService.waitFor(
+            () => this.getQueryInstancesByProcessName(processName),
+            (instances) => instances.length > 0,
+            'querySync',
+            `query process instances for ${processName}`
+        );
+    }
+
     async getEventsByProcessName(processName: string): Promise<CloudRuntimeEvent[]> {
         const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
         return this.auditService.getEvents({ processDefinitionKey });
@@ -137,6 +146,86 @@ export class SecurityPoliciesService extends BaseService {
 
     async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
         return this.auditAdminService.getEventsByEntityIdAdmin(entityId);
+    }
+
+    async getFilteredAllRuntimeInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        return this.filterProcessInstancesByKey(await this.getAllProcessInstances(), processName);
+    }
+
+    async getFilteredAllQueryInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        return this.filterProcessInstancesByKey(await this.queryAllProcessInstances(), processName);
+    }
+
+    async getFilteredEventsByName(processName: string): Promise<CloudRuntimeEvent[]> {
+        return this.filterEventsByProcessKey(await this.getEventsByProcessName(processName), processName);
+    }
+
+    async waitForFilteredEventsByName(processName: string): Promise<CloudRuntimeEvent[]> {
+        return SecurityPoliciesService.waitFor(
+            () => this.getFilteredEventsByName(processName),
+            (events) => events.length > 0,
+            'auditEvents',
+            `audit events for ${processName}`
+        );
+    }
+
+    async getFilteredRuntimeAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        const all = await this.getRuntimeAdminProcessInstances({ processDefinitionKey });
+        return this.filterProcessInstancesByKey(all, processName);
+    }
+
+    async getFilteredQueryAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        const processDefinitionKey = ProcessDefinitionRegistry.getProcessDefinitionKey(processName);
+        const all = await this.getQueryAdminProcessInstances({ processDefinitionKey });
+        return this.filterProcessInstancesByKey(all, processName);
+    }
+
+    async waitForFilteredRuntimeAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        return SecurityPoliciesService.waitFor(
+            () => this.getFilteredRuntimeAdminInstancesByName(processName),
+            (instances) => instances.length > 0,
+            'querySync',
+            `runtime admin process instances for ${processName}`
+        );
+    }
+
+    async waitForFilteredQueryAdminInstancesByName(processName: string): Promise<CloudProcessInstance[]> {
+        return SecurityPoliciesService.waitFor(
+            () => this.getFilteredQueryAdminInstancesByName(processName),
+            (instances) => instances.length > 0,
+            'querySync',
+            `query admin process instances for ${processName}`
+        );
+    }
+
+    async getFilteredAdminEventsForProcessInstance(
+        processInstanceId: string,
+        processName: string
+    ): Promise<CloudRuntimeEvent[]> {
+        const all = await this.getEventsByEntityIdAdmin(processInstanceId);
+        return this.filterEventsByProcessInstance(all, processInstanceId, processName);
+    }
+
+    async waitForFilteredAdminEventsForProcessInstance(
+        processInstanceId: string,
+        processName: string
+    ): Promise<CloudRuntimeEvent[]> {
+        return SecurityPoliciesService.waitFor(
+            () => this.getFilteredAdminEventsForProcessInstance(processInstanceId, processName),
+            (events) => events.length > 0,
+            'auditEvents',
+            `admin events for process ${processInstanceId} (${processName})`
+        );
+    }
+
+    async getAuditEventsByProcessInstanceFiltered(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
+        const events = await this.getAuditEventsForProcessInstance(processInstanceId);
+        return events.filter(
+            (event) =>
+                event.processInstanceId === processInstanceId ||
+                (event.entity as { id?: string } | undefined)?.id === processInstanceId
+        );
     }
 
     filterProcessInstancesByKey(processInstances: CloudProcessInstance[], processName: string): CloudProcessInstance[] {

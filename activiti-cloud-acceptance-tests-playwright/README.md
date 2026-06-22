@@ -141,7 +141,8 @@ npm run pw -- --project=runtime --list
 npm run test:identity
 npm run test:security
 npm run test:runtime
-npm run test:runtime:tasks
+npm run test:runtime:process
+npm run test:runtime:task
 npm run test
 
 npm run test:debug

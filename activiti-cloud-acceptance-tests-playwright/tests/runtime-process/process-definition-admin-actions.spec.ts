@@ -15,7 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pickHighestVersionByKey } from '../../helpers/process-definition';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 
@@ -24,8 +23,7 @@ activiti.describe('Process Definition Admin Actions', () => {
         await activiti.step(
             `Then the user, using the admin endpoint, can get the process model for process with key ${SINGLE_TASK_PROCESS} by passing its id`,
             async () => {
-                const definitions = await queryAdminServiceHradmin.getAllProcessDefinitionsAdmin();
-                const definition = pickHighestVersionByKey(definitions, SINGLE_TASK_PROCESS);
+                const definition = await queryAdminServiceHradmin.getProcessDefinitionByKey(SINGLE_TASK_PROCESS);
 
                 const processModel = await queryAdminServiceHradmin.getProcessModel(definition.id);
 

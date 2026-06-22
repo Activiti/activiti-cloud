@@ -185,4 +185,3 @@ export const cleanupLog = acceptanceLog;
 export const cleanupPhase = acceptancePhase;
 export const cleanupStep = acceptanceStep;
 export const cleanupVibe = acceptanceVibe;
-export const cleanupActorLabel = acceptanceActorLabel;
