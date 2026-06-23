@@ -86,7 +86,7 @@ public class ActivitiQueryConsumerAutoConfiguration {
     @ConditionalOnMissingBean
     Supplier<JacksonJsonObjectMapper> queryConsumerJsonObjectMapperProvider(
         @Value(
-            "${activiti.cloud.query.consumer.events.json.trusted-packages:org.activiti.api,org.activiti.cloud.api}"
+            "${activiti.cloud.query.consumer.events.json.trusted-packages:org.activiti.api,org.activiti.cloud.api,java.math,java.time}"
         ) String[] trustedPackages
     ) {
         final var jsonObjectMapper = new JacksonJsonObjectMapper(
