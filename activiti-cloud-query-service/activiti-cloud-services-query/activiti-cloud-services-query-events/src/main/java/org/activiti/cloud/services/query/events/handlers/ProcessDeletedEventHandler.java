@@ -46,9 +46,11 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
     );
 
     private final EntityManager entityManager;
+    private final ProcessInstanceHierarchyService hierarchyService;
 
-    public ProcessDeletedEventHandler(EntityManager entityManager) {
+    public ProcessDeletedEventHandler(EntityManager entityManager, ProcessInstanceHierarchyService hierarchyService) {
         this.entityManager = entityManager;
+        this.hierarchyService = hierarchyService;
     }
 
     @Override
@@ -89,6 +91,7 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
             remove(ServiceTaskEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNActivityEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNSequenceFlowEntity.class, "processInstanceId", eventProcessInstanceId);
+            hierarchyService.removeProcess(eventProcessInstanceId);
             remove(ProcessInstanceEntity.class, "id", eventProcessInstanceId);
         } else {
             throw new IllegalStateException(

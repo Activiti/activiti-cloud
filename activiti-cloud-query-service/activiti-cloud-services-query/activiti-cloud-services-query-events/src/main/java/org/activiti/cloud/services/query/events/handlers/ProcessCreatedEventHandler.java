@@ -29,10 +29,12 @@ import org.slf4j.LoggerFactory;
 public class ProcessCreatedEventHandler implements QueryEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessCreatedEventHandler.class);
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+    private final ProcessInstanceHierarchyService hierarchyService;
 
-    public ProcessCreatedEventHandler(EntityManager entityManager) {
+    public ProcessCreatedEventHandler(EntityManager entityManager, ProcessInstanceHierarchyService hierarchyService) {
         this.entityManager = entityManager;
+        this.hierarchyService = hierarchyService;
     }
 
     @Override
@@ -50,6 +52,13 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
                 () -> {
                     var createdProcessInstanceEntity = createProcessInstanceEntity(createdEvent);
                     entityManager.persist(createdProcessInstanceEntity);
+
+                    String parentId = createdEvent.getEntity().getParentId();
+                    if (parentId != null && !parentId.equals(processInstanceId)) {
+                        hierarchyService.registerSubprocess(processInstanceId, parentId);
+                    } else {
+                        hierarchyService.registerProcess(processInstanceId);
+                    }
                 }
             );
     }

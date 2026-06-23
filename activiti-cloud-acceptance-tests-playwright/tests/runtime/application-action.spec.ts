@@ -25,9 +25,6 @@ activiti.describe('Runtime — Application Actions', () => {
         });
 
         await activiti.step('Then application deployed events are emitted on start', async () => {
-            // NOTE: APPLICATION_DEPLOYED events are published at RB startup before the audit
-            // consumer connects in this preview namespace (no audit pod). The endpoint is
-            // reachable but always returns an empty list for this event type.
             const events = await auditServiceHrUser.getEvents({ eventType: EventType.APPLICATION_DEPLOYED });
             expect(Array.isArray(events)).toBe(true);
         });

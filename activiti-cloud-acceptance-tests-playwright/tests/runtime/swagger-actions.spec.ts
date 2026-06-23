@@ -26,8 +26,7 @@
  *   Then the user gets swagger specification following Alfresco MediaType
  */
 
-import { expect } from '@playwright/test';
-import { activiti } from '../../fixtures/services.fixture';
+import { activiti, expect } from '../../fixtures/services.fixture';
 
 activiti.describe('Runtime — Swagger Actions', () => {
     activiti(

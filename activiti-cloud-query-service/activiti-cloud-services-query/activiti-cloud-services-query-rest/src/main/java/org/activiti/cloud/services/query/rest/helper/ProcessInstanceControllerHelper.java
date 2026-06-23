@@ -16,14 +16,10 @@
 package org.activiti.cloud.services.query.rest.helper;
 
 import com.querydsl.core.types.Predicate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.payload.LinkProcessInstancesRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -34,13 +30,16 @@ public class ProcessInstanceControllerHelper {
 
     private final ProcessInstanceRepository processInstanceRepository;
     private final ProcessInstanceService processInstanceService;
+    private final ProcessInstanceSearchService processInstanceSearchService;
 
     public ProcessInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
-        ProcessInstanceService processInstanceService
+        ProcessInstanceService processInstanceService,
+        ProcessInstanceSearchService processInstanceSearchService
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceService = processInstanceService;
+        this.processInstanceSearchService = processInstanceSearchService;
     }
 
     public Page<ProcessInstanceEntity> findAllProcessInstances(Predicate predicate, Pageable pageable) {
@@ -71,8 +70,8 @@ public class ProcessInstanceControllerHelper {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
-        processInstances = mapAllSubprocesses(processInstances);
-        return mapAllLinkedProcesses(processInstances);
+        processInstanceSearchService.enrichWithRelatedProcessesRestricted(processInstances);
+        return processInstances;
     }
 
     public Page<ProcessInstanceEntity> searchSubprocesses(
@@ -95,10 +94,6 @@ public class ProcessInstanceControllerHelper {
         return processInstanceRepository.mapSubprocesses(processInstances, pageable);
     }
 
-    public Page<ProcessInstanceEntity> mapAllSubprocesses(Page<ProcessInstanceEntity> processInstances) {
-        return processInstanceService.searchSubProcesses(processInstances);
-    }
-
     public Long countProcessInstances(ProcessInstanceSearchRequest searchRequest) {
         return processInstanceService.count(searchRequest);
     }
@@ -109,34 +104,5 @@ public class ProcessInstanceControllerHelper {
             request.getProcessInstanceIds(),
             request.getLinkProcessInstanceType()
         );
-    }
-
-    public Page<ProcessInstanceEntity> mapAllLinkedProcesses(Page<ProcessInstanceEntity> processInstances) {
-        List<String> ids = processInstances.getContent().stream().map(ProcessInstanceEntity::getId).toList();
-
-        List<ProcessInstanceEntity> allLinked = processInstanceService.searchLinkedProcesses(new HashSet<>(ids));
-
-        Map<String, Set<QueryCloudSubprocessInstance>> linkedMap = allLinked
-            .stream()
-            .filter(pi -> pi.getLinkedProcessInstanceId() != null)
-            .collect(
-                Collectors.groupingBy(
-                    ProcessInstanceEntity::getLinkedProcessInstanceId,
-                    Collectors.mapping(this::getQueryCloudSubprocessInstance, Collectors.toSet())
-                )
-            );
-
-        processInstances
-            .getContent()
-            .forEach(pi -> pi.setLinkedProcesses(linkedMap.getOrDefault(pi.getId(), Set.of())));
-
-        return processInstances;
-    }
-
-    private QueryCloudSubprocessInstance getQueryCloudSubprocessInstance(ProcessInstanceEntity subprocess) {
-        QueryCloudSubprocessInstance subProcessInstance = new QueryCloudSubprocessInstance();
-        subProcessInstance.setId(subprocess.getId());
-        subProcessInstance.setProcessDefinitionName(subprocess.getProcessDefinitionName());
-        return subProcessInstance;
     }
 }

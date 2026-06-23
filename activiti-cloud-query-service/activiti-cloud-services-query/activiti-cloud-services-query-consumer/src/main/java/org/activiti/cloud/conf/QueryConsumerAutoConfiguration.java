@@ -135,7 +135,7 @@ public class QueryConsumerAutoConfiguration {
                 Thread.currentThread().getName()
             );
 
-            queryConsumerChannelHandler.receive(events);
+            queryConsumerChannelHandler.receive(events, headers);
 
             return null;
         };
