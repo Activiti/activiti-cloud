@@ -85,7 +85,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
         IntegrationContextAdminController.class,
         ProcessInstanceBpmnActivitiesAdminController.class,
         ProcessInstanceSequenceFlowsAdminController.class,
-        ProcessInstanceVariableHistoryAdminController.class
+        ProcessInstanceVariableHistoryAdminController.class,
     }
 )
 @PropertySource("classpath:query-rest.properties")

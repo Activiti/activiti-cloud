@@ -21,9 +21,15 @@ import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProcessVariableHistoryEntry(
-    Long id, String processInstanceId, String variableName, String type, Object value, boolean deleted, @JsonFormat(
-        shape = JsonFormat.Shape.STRING
-    ) Date eventTime, @JsonFormat(
-        shape = JsonFormat.Shape.STRING
-    ) Date recordCreateTime, String messageId, String commandId, Integer sequenceNumber
+    Long id,
+    String processInstanceId,
+    String variableName,
+    String type,
+    Object value,
+    boolean deleted,
+    @JsonFormat(shape = JsonFormat.Shape.STRING) Date eventTime,
+    @JsonFormat(shape = JsonFormat.Shape.STRING) Date recordCreateTime,
+    String messageId,
+    String commandId,
+    Integer sequenceNumber
 ) {}
