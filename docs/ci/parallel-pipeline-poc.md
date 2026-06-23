@@ -41,22 +41,22 @@ Parallel graph (Elias review): **build-common**, per-image **build** / **test**,
 
 ## Job reference
 
-| Job                            | Runs exactly once per workflow? | Purpose                                                                          |
-| ------------------------------ | ------------------------------- | -------------------------------------------------------------------------------- |
-| `pre-checks`                   | ✓                               | Lint/pre-commit, dependabot gate, SHA pins                                       |
-| `resolve-version`              | ✓                               | PR snapshot / release version                                                    |
-| `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                      |
-| `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                    |
-| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push (no m2-common download)  |
-| `maven-build-libraries`        | 2 matrix cells                  | Library-only modules (messages-graphql, audit)                                   |
-| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds     |
-| `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                         |
-| `maven-test-libraries`         | 2 matrix cells                  | `mvn verify` per library module                                                  |
+| Job                            | Runs exactly once per workflow? | Purpose                                                                                                                              |
+| ------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `pre-checks`                   | ✓                               | Lint/pre-commit, dependabot gate, SHA pins                                                                                           |
+| `resolve-version`              | ✓                               | PR snapshot / release version                                                                                                        |
+| `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                                                                          |
+| `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                                                                        |
+| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push (no m2-common download)                                                      |
+| `maven-build-libraries`        | 2 matrix cells                  | Library-only modules (messages-graphql, audit)                                                                                       |
+| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds                                                         |
+| `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                                                                             |
+| `maven-test-libraries`         | 2 matrix cells                  | `mvn verify` per library module                                                                                                      |
 | `sonar`                        | ✓                               | Download `target*` + `m2*`, `compile`, then `sonar:sonar` (test cells upload `target-test-*` so build `target-*` is not overwritten) |
-| `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                  |
-| `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                  |
-| `delete-test-images`           | ✓                               | Delete stale PR Docker tags before fresh push (parallel with builds)             |
-| `publish`                      | ✓ (push / preview PR)           | Maven deploy after `build-summary` green                                         |
+| `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                                                                      |
+| `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                                                                      |
+| `delete-test-images`           | ✓                               | Delete stale PR Docker tags before fresh push (parallel with builds)                                                                 |
+| `publish`                      | ✓ (push / preview PR)           | Maven deploy after `build-summary` green                                                                                             |
 
 Legacy monolithic `acceptance-tests` job is **removed** — Playwright runs on the same broker profiles instead.
 
@@ -90,12 +90,12 @@ Playwright starts after `maven-build` (Docker images pushed) and runs **in paral
 
 ## Artifacts vs cache vs local build
 
-| Mechanism                             | What                                      | Why                                                                                   |
-| ------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
-| **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps          | Restored by `maven-build` / `maven-configure`                                         |
+| Mechanism                             | What                                      | Why                                                                                                  |
+| ------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps          | Restored by `maven-build` / `maven-configure`                                                        |
 | **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`       | Sonar downloads `target*` (build + `target-test-*` JaCoCo) and `m2*`; `compile` before `sonar:sonar` |
-| **Artifact** `surefire-reports-*`     | On test failure only                      | Debug                                                                                 |
-| **Local in job**                      | `mvn install` / `verify` with `-pl … -am` | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds |
+| **Artifact** `surefire-reports-*`     | On test failure only                      | Debug                                                                                                |
+| **Local in job**                      | `mvn install` / `verify` with `-pl … -am` | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds                |
 
 ## `needs` rationale
 
