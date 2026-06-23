@@ -21,9 +21,6 @@ on:
       DOCKERHUB_PASSWORD:
         required: true
 
-env:
-  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-
 jobs:
   build:
     name: maven-build (${{ matrix.short-name }})
@@ -49,7 +46,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
           version: ${{ inputs.version }}
-          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         env:
@@ -63,6 +59,7 @@ jobs:
             install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true
             -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
           m2-current-build-upload-name: m2-${{ matrix.short-name }}
+          target-folder-upload-name: target-${{ matrix.short-name }}
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
           docker-username: ${{ secrets.DOCKERHUB_USERNAME }}

@@ -17,9 +17,6 @@ on:
       NEXUS_PASSWORD:
         required: true
 
-env:
-  MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-
 jobs:
   test:
     name: maven-test (${{ matrix.short-name }})
@@ -45,36 +42,20 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
           version: ${{ inputs.version }}
-          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
-      - name: Maven test (${{ matrix.short-name }})
-        shell: bash
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          PL_MODULES: ${{ matrix.extra-modules }}${{ matrix.path }}
-          TEST_MAVEN_FLAGS: ${{ matrix.test-maven-flags }}
-        run: |
-          # shellcheck disable=SC2086
-          mvn verify -Dskip.common.tests=true -pl "${PL_MODULES}" -am \
-            ${TEST_MAVEN_FLAGS} -U ${{ env.MAVEN_CLI_OPTS }}
-
-      - name: Upload JaCoCo data (${{ matrix.short-name }})
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
         with:
-          name: jacoco-${{ matrix.short-name }}
-          path: |
-            **/jacoco.exec
-            **/jacoco-it.exec
-          retention-days: 1
-          if-no-files-found: ignore
-
-      - name: Upload test reports (${{ matrix.short-name }})
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: failure()
-        with:
-          name: surefire-reports-${{ matrix.short-name }}
-          path: '**/surefire-reports'
-          retention-days: 7
-          if-no-files-found: ignore
+          java-version: '25'
+          java-distribution: 'corretto'
+          reuse-testcontainers: 'true'
+          maven-command: >-
+            verify -Dskip.common.tests=true -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
+            ${{ matrix.test-maven-flags }} -U
+          jacoco-report-name: jacoco-${{ matrix.short-name }}
+          target-folder-upload-name: target-${{ matrix.short-name }}
+          m2-current-build-upload-name: m2-test-${{ matrix.short-name }}
+          m2-cache-exclusion-pattern: org/activiti
+          uploaded-artifacts-retention-days: '1'
