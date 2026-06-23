@@ -211,8 +211,7 @@ public class ToCloudProcessRuntimeEventConverter {
     }
 
     public CloudStartMessageDeployedEvent from(StartMessageDeployedEvent event) {
-        CloudStartMessageDeployedEventImpl cloudEvent = CloudStartMessageDeployedEventImpl
-            .builder()
+        CloudStartMessageDeployedEventImpl cloudEvent = CloudStartMessageDeployedEventImpl.builder()
             .withEntity(event.getEntity())
             .build();
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
@@ -220,8 +219,7 @@ public class ToCloudProcessRuntimeEventConverter {
     }
 
     public CloudMessageSubscriptionCancelledEvent from(MessageSubscriptionCancelledEvent event) {
-        CloudMessageSubscriptionCancelledEventImpl cloudEvent = CloudMessageSubscriptionCancelledEventImpl
-            .builder()
+        CloudMessageSubscriptionCancelledEventImpl cloudEvent = CloudMessageSubscriptionCancelledEventImpl.builder()
             .withEntity(event.getEntity())
             .build();
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);

@@ -22,7 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 
 public class CloudSequenceFlowTakenEventImpl
     extends CloudRuntimeEventImpl<BPMNSequenceFlow, SequenceFlowEvent.SequenceFlowEvents>
-    implements CloudSequenceFlowTakenEvent {
+    implements CloudSequenceFlowTakenEvent
+{
 
     public CloudSequenceFlowTakenEventImpl() {}
 

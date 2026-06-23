@@ -86,17 +86,16 @@ public abstract class AbstractTaskControllerIT {
 
     @Test
     void should_return400_whenInvalidSearchParameterIsProvided() {
-        String missingSortField =
-            """
-                {
-                    "sort": {
-                        "direction": "ASC",
-                        "isProcessVariable": false,
-                        "processDefinitionKey": null,
-                        "type": "bigdecimal",
-                        "processVariable": false
-                    }
-                }""";
+        String missingSortField = """
+            {
+                "sort": {
+                    "direction": "ASC",
+                    "isProcessVariable": false,
+                    "processDefinitionKey": null,
+                    "type": "bigdecimal",
+                    "processVariable": false
+                }
+            }""";
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -106,12 +105,11 @@ public abstract class AbstractTaskControllerIT {
             .then()
             .statusCode(400)
             .expect(
-                content()
-                    .string(
-                        is(
-                            "Invalid search parameter: Could not resolve attribute 'null' of 'org.activiti.cloud.services.query.model.TaskEntity'"
-                        )
+                content().string(
+                    is(
+                        "Invalid search parameter: Could not resolve attribute 'null' of 'org.activiti.cloud.services.query.model.TaskEntity'"
                     )
+                )
             );
 
         given()
@@ -274,8 +272,9 @@ public abstract class AbstractTaskControllerIT {
             )
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableKeys(new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME));
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withProcessVariableKeys(
+            new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -300,9 +299,9 @@ public abstract class AbstractTaskControllerIT {
 
     @Test
     void should_returnTasks_filteredById() {
-        IntStream
-            .range(0, 3)
-            .forEach(i -> queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave());
+        IntStream.range(0, 3).forEach(i ->
+            queryTestUtils.buildTask().withId("id" + i).withAssignee(CURRENT_USER).buildAndSave()
+        );
 
         TaskSearchRequest request = new TaskSearchRequestBuilder().withId("id0", "id2").build();
 
@@ -497,8 +496,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(matchingFilter1, matchingFilter2);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            matchingFilter1,
+            matchingFilter2
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -547,8 +548,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(matchingFilter, notMatchingFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            matchingFilter,
+            notMatchingFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -596,8 +599,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(matchingFilter1, matchingFilter2);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            matchingFilter1,
+            matchingFilter2
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -649,8 +654,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(matchingFilter1, notMatchingFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            matchingFilter1,
+            notMatchingFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -695,8 +702,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -739,8 +747,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -786,8 +795,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -831,8 +841,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -878,8 +889,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LIKE
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -928,8 +940,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LIKE
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -980,8 +993,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1023,8 +1037,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1075,8 +1090,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1119,8 +1135,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1171,8 +1188,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1236,16 +1254,9 @@ public abstract class AbstractTaskControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(
-                new VariableFilter(
-                    null,
-                    VAR_NAME,
-                    VariableType.INTEGER,
-                    String.valueOf(42),
-                    FilterOperator.GREATER_THAN
-                )
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(42), FilterOperator.GREATER_THAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1325,8 +1336,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1390,10 +1402,9 @@ public abstract class AbstractTaskControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 42))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(
-                new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(42), FilterOperator.LESS_THAN)
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(42), FilterOperator.LESS_THAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1459,23 +1470,22 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(
-                new VariableFilter(
-                    PROCESS_DEFINITION_KEY,
-                    VAR_NAME,
-                    VariableType.INTEGER,
-                    String.valueOf(42),
-                    FilterOperator.GREATER_THAN_OR_EQUAL
-                ),
-                new VariableFilter(
-                    PROCESS_DEFINITION_KEY,
-                    VAR_NAME,
-                    VariableType.INTEGER,
-                    String.valueOf(84),
-                    FilterOperator.LESS_THAN
-                )
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            new VariableFilter(
+                PROCESS_DEFINITION_KEY,
+                VAR_NAME,
+                VariableType.INTEGER,
+                String.valueOf(42),
+                FilterOperator.GREATER_THAN_OR_EQUAL
+            ),
+            new VariableFilter(
+                PROCESS_DEFINITION_KEY,
+                VAR_NAME,
+                VariableType.INTEGER,
+                String.valueOf(84),
+                FilterOperator.LESS_THAN
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1546,17 +1556,16 @@ public abstract class AbstractTaskControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 84))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(
-                new VariableFilter(
-                    null,
-                    VAR_NAME,
-                    VariableType.INTEGER,
-                    String.valueOf(42),
-                    FilterOperator.GREATER_THAN_OR_EQUAL
-                ),
-                new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(84), FilterOperator.LESS_THAN)
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            new VariableFilter(
+                null,
+                VAR_NAME,
+                VariableType.INTEGER,
+                String.valueOf(42),
+                FilterOperator.GREATER_THAN_OR_EQUAL
+            ),
+            new VariableFilter(null, VAR_NAME, VariableType.INTEGER, String.valueOf(84), FilterOperator.LESS_THAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1639,8 +1648,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1684,8 +1694,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1738,8 +1749,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1785,8 +1797,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1837,8 +1850,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1910,8 +1924,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1991,8 +2006,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2064,8 +2080,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2147,8 +2164,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterGte, filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterGte,
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2235,8 +2254,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterGte, filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterGte,
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2323,8 +2344,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2367,8 +2389,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2419,8 +2442,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2464,8 +2488,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2518,8 +2543,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2592,8 +2618,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2675,8 +2702,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2749,8 +2777,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2833,8 +2862,10 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterGte, filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterGte,
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2906,17 +2937,10 @@ public abstract class AbstractTaskControllerIT {
             .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-08-04"))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(
-                new VariableFilter(
-                    null,
-                    VAR_NAME,
-                    VariableType.DATE,
-                    "2024-08-02",
-                    FilterOperator.GREATER_THAN_OR_EQUAL
-                ),
-                new VariableFilter(null, VAR_NAME, VariableType.DATE, "2024-08-04", FilterOperator.LESS_THAN)
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            new VariableFilter(null, VAR_NAME, VariableType.DATE, "2024-08-02", FilterOperator.GREATER_THAN_OR_EQUAL),
+            new VariableFilter(null, VAR_NAME, VariableType.DATE, "2024-08-04", FilterOperator.LESS_THAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2997,8 +3021,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3045,8 +3070,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3103,8 +3129,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3152,8 +3179,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.NOT_EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3212,8 +3240,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3290,8 +3319,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterGt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterGt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3379,8 +3409,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3457,8 +3488,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(filterLt);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            filterLt
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3529,23 +3561,22 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(
-                new VariableFilter(
-                    PROCESS_DEFINITION_KEY,
-                    VAR_NAME,
-                    VariableType.DATETIME,
-                    "2024-08-02T00:11:00.000+00:00",
-                    FilterOperator.GREATER_THAN_OR_EQUAL
-                ),
-                new VariableFilter(
-                    PROCESS_DEFINITION_KEY,
-                    VAR_NAME,
-                    VariableType.DATETIME,
-                    "2024-08-02T00:14:00.000+00:00",
-                    FilterOperator.LESS_THAN
-                )
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            new VariableFilter(
+                PROCESS_DEFINITION_KEY,
+                VAR_NAME,
+                VariableType.DATETIME,
+                "2024-08-02T00:11:00.000+00:00",
+                FilterOperator.GREATER_THAN_OR_EQUAL
+            ),
+            new VariableFilter(
+                PROCESS_DEFINITION_KEY,
+                VAR_NAME,
+                VariableType.DATETIME,
+                "2024-08-02T00:14:00.000+00:00",
+                FilterOperator.LESS_THAN
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3621,23 +3652,22 @@ public abstract class AbstractTaskControllerIT {
             )
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(
-                new VariableFilter(
-                    null,
-                    VAR_NAME,
-                    VariableType.DATETIME,
-                    "2024-08-02T00:10:00.000+00:00",
-                    FilterOperator.GREATER_THAN_OR_EQUAL
-                ),
-                new VariableFilter(
-                    null,
-                    VAR_NAME,
-                    VariableType.DATETIME,
-                    "2024-08-02T00:14:00.000+00:00",
-                    FilterOperator.LESS_THAN
-                )
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            new VariableFilter(
+                null,
+                VAR_NAME,
+                VariableType.DATETIME,
+                "2024-08-02T00:10:00.000+00:00",
+                FilterOperator.GREATER_THAN_OR_EQUAL
+            ),
+            new VariableFilter(
+                null,
+                VAR_NAME,
+                VariableType.DATETIME,
+                "2024-08-02T00:14:00.000+00:00",
+                FilterOperator.LESS_THAN
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3726,8 +3756,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3748,14 +3779,13 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("1"));
 
-        variableFilter =
-            new VariableFilter(
-                PROCESS_DEFINITION_KEY,
-                VAR_NAME,
-                VariableType.BOOLEAN,
-                String.valueOf(false),
-                FilterOperator.EQUALS
-            );
+        variableFilter = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            VAR_NAME,
+            VariableType.BOOLEAN,
+            String.valueOf(false),
+            FilterOperator.EQUALS
+        );
 
         taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(variableFilter);
 
@@ -3801,8 +3831,9 @@ public abstract class AbstractTaskControllerIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(variableFilter);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(
+            variableFilter
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3823,8 +3854,13 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("1"));
 
-        variableFilter =
-            new VariableFilter(null, VAR_NAME, VariableType.BOOLEAN, String.valueOf(false), FilterOperator.EQUALS);
+        variableFilter = new VariableFilter(
+            null,
+            VAR_NAME,
+            VariableType.BOOLEAN,
+            String.valueOf(false),
+            FilterOperator.EQUALS
+        );
 
         taskSearchRequestBuilder = new TaskSearchRequestBuilder().withTaskVariableFilters(variableFilter);
 
@@ -3937,8 +3973,10 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withDescription("Frodo Baggins").buildAndSave();
         queryTestUtils.buildTask().withDescription("Duke Leto").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withDescription("darth", "baggins");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withDescription(
+            "darth",
+            "baggins"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -3966,8 +4004,10 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withProcessDefinitionName("name2").buildAndSave();
         queryTestUtils.buildTask().withProcessDefinitionName("name3").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessDefinitionName("name1", "name2");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessDefinitionName(
+            "name1",
+            "name2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4023,8 +4063,10 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withStatus(Task.TaskStatus.CANCELLED).buildAndSave();
         queryTestUtils.buildTask().withStatus(Task.TaskStatus.COMPLETED).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withStatus(Task.TaskStatus.ASSIGNED, Task.TaskStatus.CANCELLED);
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withStatus(
+            Task.TaskStatus.ASSIGNED,
+            Task.TaskStatus.CANCELLED
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4052,8 +4094,10 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withCompletedBy("Robert Plant").buildAndSave();
         queryTestUtils.buildTask().withCompletedBy("John Bonham").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCompletedBy("Jimmy Page", "Robert Plant");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCompletedBy(
+            "Jimmy Page",
+            "Robert Plant"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4091,8 +4135,10 @@ public abstract class AbstractTaskControllerIT {
             .buildAndSave();
         queryTestUtils.buildTask().withOwner(CURRENT_USER).withAssignee("Sebastian Vettel").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withAssignees("Kimi Raikkonen", "Lewis Hamilton");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withAssignees(
+            "Kimi Raikkonen",
+            "Lewis Hamilton"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4120,8 +4166,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withCreatedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withCreatedDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCreatedFrom(new Date(900));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCreatedFrom(
+            new Date(900)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4149,8 +4196,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withCreatedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withCreatedDate(new Date(3000)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCreatedTo(new Date(2500));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCreatedTo(
+            new Date(2500)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4178,8 +4226,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withLastModifiedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withLastModifiedDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withLastModifiedFrom(new Date(900));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withLastModifiedFrom(
+            new Date(900)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4207,8 +4256,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withLastModifiedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withLastModifiedDate(new Date(3000)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withLastModifiedTo(new Date(2500));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withLastModifiedTo(
+            new Date(2500)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4236,8 +4286,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withClaimedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withClaimedDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withLastClaimedFrom(new Date(900));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withLastClaimedFrom(
+            new Date(900)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4265,8 +4316,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withClaimedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withClaimedDate(new Date(3000)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withLastClaimedTo(new Date(2500));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withLastClaimedTo(
+            new Date(2500)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4294,8 +4346,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withDueDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withDueDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withDueDateFrom(new Date(900));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withDueDateFrom(
+            new Date(900)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4323,8 +4376,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withDueDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withDueDate(new Date(3000)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withDueDateTo(new Date(2500));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withDueDateTo(
+            new Date(2500)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4352,8 +4406,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withCompletedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withCompletedDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCompletedFrom(new Date(900));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCompletedFrom(
+            new Date(900)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4381,8 +4436,9 @@ public abstract class AbstractTaskControllerIT {
         queryTestUtils.buildTask().withId(TASK_ID_2).withCompletedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withCompletedDate(new Date(3000)).buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCompletedTo(new Date(2500));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCompletedTo(
+            new Date(2500)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4420,8 +4476,10 @@ public abstract class AbstractTaskControllerIT {
             .buildAndSave();
         queryTestUtils.buildTask().withOwner(CURRENT_USER).withTaskCandidateUsers("user3").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCandidateUserId("user1", "user2");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCandidateUserId(
+            "user1",
+            "user2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4459,8 +4517,10 @@ public abstract class AbstractTaskControllerIT {
             .buildAndSave();
         queryTestUtils.buildTask().withOwner(CURRENT_USER).withTaskCandidateGroups("group3").buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withCandidateGroupId("group1", "group2");
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withCandidateGroupId(
+            "group1",
+            "group2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4484,16 +4544,15 @@ public abstract class AbstractTaskControllerIT {
 
     @Test
     void should_returnBadRequest_whenFilterIsIllegal() {
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(
-                new VariableFilter(
-                    PROCESS_DEFINITION_KEY,
-                    VAR_NAME,
-                    VariableType.BOOLEAN,
-                    String.valueOf(true),
-                    FilterOperator.LIKE
-                )
-            );
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withProcessVariableFilters(
+            new VariableFilter(
+                PROCESS_DEFINITION_KEY,
+                VAR_NAME,
+                VariableType.BOOLEAN,
+                String.valueOf(true),
+                FilterOperator.LIKE
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4542,8 +4601,9 @@ public abstract class AbstractTaskControllerIT {
             .withLastModifiedDate(new Date(2000))
             .buildAndSave();
 
-        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null));
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4564,9 +4624,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        taskSearchRequestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("priority", Sort.Direction.DESC, false, null, null));
+        taskSearchRequestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("priority", Sort.Direction.DESC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4587,9 +4647,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        taskSearchRequestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("status", Sort.Direction.ASC, false, null, null));
+        taskSearchRequestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("status", Sort.Direction.ASC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4610,9 +4670,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        taskSearchRequestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("lastModified", Sort.Direction.DESC, false, null, null));
+        taskSearchRequestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort("lastModified", Sort.Direction.DESC, false, null, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4660,16 +4720,9 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.STRING
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4690,17 +4743,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.STRING
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.DESC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4748,16 +4793,9 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.INTEGER
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.INTEGER)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4778,17 +4816,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.INTEGER
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.INTEGER
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4836,16 +4872,15 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.BIGDECIMAL
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.ASC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BIGDECIMAL
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4866,17 +4901,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.BIGDECIMAL
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BIGDECIMAL
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4924,16 +4957,9 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.DATE
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -4954,17 +4980,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.DATE
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.DESC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5018,16 +5036,15 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_3))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.DATETIME
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.ASC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.DATETIME
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5048,17 +5065,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("3"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.DATETIME
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.DATETIME
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5098,16 +5113,9 @@ public abstract class AbstractTaskControllerIT {
             .withTasks(queryTestUtils.buildTask().withId(TASK_ID_2))
             .buildAndSave();
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.BOOLEAN
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.BOOLEAN)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5128,17 +5136,15 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("2"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(
-                    new CloudRuntimeEntitySort(
-                        VAR_NAME,
-                        Sort.Direction.DESC,
-                        true,
-                        PROCESS_DEFINITION_KEY,
-                        VariableType.BOOLEAN
-                    )
-                );
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(
+                VAR_NAME,
+                Sort.Direction.DESC,
+                true,
+                PROCESS_DEFINITION_KEY,
+                VariableType.BOOLEAN
+            )
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5180,16 +5186,9 @@ public abstract class AbstractTaskControllerIT {
                 .buildAndSave();
         }
 
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(
-                new CloudRuntimeEntitySort(
-                    VAR_NAME,
-                    Sort.Direction.ASC,
-                    true,
-                    PROCESS_DEFINITION_KEY,
-                    VariableType.INTEGER
-                )
-            );
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.INTEGER)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5238,8 +5237,9 @@ public abstract class AbstractTaskControllerIT {
 
     @Test
     void should_returnBadRequest_when_sortParameterIsInvalid() {
-        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, null, VariableType.STRING));
+        TaskSearchRequestBuilder requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, null, VariableType.STRING)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5258,9 +5258,9 @@ public abstract class AbstractTaskControllerIT {
             .statusCode(200)
             .body(equalTo("0"));
 
-        requestBuilder =
-            new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+        requestBuilder = new TaskSearchRequestBuilder().withSort(
+            new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null)
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -5387,8 +5387,7 @@ public abstract class AbstractTaskControllerIT {
         ProcessInstanceEntity processInstance = queryTestUtils
             .buildProcessInstance()
             .withTasks(
-                IntStream
-                    .range(0, 10)
+                IntStream.range(0, 10)
                     .mapToObj(i ->
                         queryTestUtils
                             .buildTask()
@@ -5417,8 +5416,7 @@ public abstract class AbstractTaskControllerIT {
                 queryTestUtils.buildTask().withId("3.1")
             )
             .withVariables(
-                IntStream
-                    .range(0, 10)
+                IntStream.range(0, 10)
                     .mapToObj(i -> new QueryTestUtils.VariableInput("var" + i, VariableType.STRING, "value"))
                     .toArray(QueryTestUtils.VariableInput[]::new)
             )

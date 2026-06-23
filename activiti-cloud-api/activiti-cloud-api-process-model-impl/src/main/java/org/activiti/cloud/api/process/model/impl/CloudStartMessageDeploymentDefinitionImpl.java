@@ -23,7 +23,8 @@ import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinitio
 
 public class CloudStartMessageDeploymentDefinitionImpl
     extends CloudRuntimeEntityImpl
-    implements CloudStartMessageDeploymentDefinition {
+    implements CloudStartMessageDeploymentDefinition
+{
 
     private ProcessDefinition processDefinition;
 

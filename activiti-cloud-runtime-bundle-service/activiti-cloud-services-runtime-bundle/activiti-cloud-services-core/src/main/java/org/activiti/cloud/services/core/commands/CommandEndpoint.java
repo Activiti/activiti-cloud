@@ -31,8 +31,9 @@ public class CommandEndpoint<T extends Payload> {
     private Map<String, CommandExecutor<T>> commandExecutors;
 
     public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        this.commandExecutors =
-            cmdExecutors.stream().collect(Collectors.toMap(CommandExecutor::getHandledType, Function.identity()));
+        this.commandExecutors = cmdExecutors
+            .stream()
+            .collect(Collectors.toMap(CommandExecutor::getHandledType, Function.identity()));
     }
 
     public <R> R execute(T payload) {

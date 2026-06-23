@@ -239,16 +239,14 @@ public class TaskVariablesIT {
                 variablesUtil.getExpectedDateTimeFormattedString(date),
                 variablesResponse.getBody().getContent()
             )
-        )
-            .isTrue();
+        ).isTrue();
         assertThat(
             variablesContainEntry(
                 "variableDate",
                 variablesUtil.getExpectedDateFormattedString(date),
                 variablesResponse.getBody().getContent()
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
@@ -296,16 +294,14 @@ public class TaskVariablesIT {
                 variablesUtil.getExpectedDateTimeFormattedString(date),
                 variablesResponse.getBody().getContent()
             )
-        )
-            .isTrue();
+        ).isTrue();
         assertThat(
             variablesContainEntry(
                 "variableDate",
                 variablesUtil.getExpectedDateFormattedString(date),
                 variablesResponse.getBody().getContent()
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
@@ -344,7 +340,9 @@ public class TaskVariablesIT {
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<
+            PagedModel<CloudProcessDefinition>
+        >() {};
         return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL, HttpMethod.GET, null, responseType);
     }
 }

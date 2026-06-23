@@ -28,7 +28,9 @@ import org.springframework.http.ResponseEntity;
 
 public abstract class BaseProcessDefinitionRestTemplate {
 
-    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+    private static final ParameterizedTypeReference<
+        PagedModel<CloudProcessDefinition>
+    > PAGED_PROCESS_DEFINITION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
 
     private TestRestTemplate testRestTemplate;
 

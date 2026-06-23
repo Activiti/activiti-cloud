@@ -97,30 +97,36 @@ class ProcessEngineEventsAggregatorTest {
     void addShouldAddTheEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
         ArrayList<CloudRuntimeEvent<?, ?>> currentEvents = new ArrayList<>();
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(currentEvents);
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(currentEvents);
 
         //when
         eventsAggregator.add(event);
 
         //then
         assertThat(currentEvents).containsExactly(event);
-        verify(commandContext, never())
-            .addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), any());
+        verify(commandContext, never()).addAttribute(
+            eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS),
+            any()
+        );
     }
 
     @Test
     void addShouldCreateANewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(null);
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(null);
 
         //when
         eventsAggregator.add(event);
 
         //then
-        verify(commandContext)
-            .addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), eventsCaptor.capture());
+        verify(commandContext).addAttribute(
+            eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS),
+            eventsCaptor.capture()
+        );
         assertThat(eventsCaptor.getValue()).containsExactly(event);
     }
 

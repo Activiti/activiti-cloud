@@ -127,16 +127,15 @@ public class QueryRestApplicationIT {
             .perform(MockMvcRequestBuilders.get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(
-                content()
-                    .string(
-                        both(notNullValue(String.class))
-                            .and(containsString("ListResponseContentCloudProcessDefinition"))
-                            .and(containsString("EntriesResponseContentCloudProcessDefinition"))
-                            .and(containsString("EntryResponseContentCloudProcessDefinition"))
-                            .and(not(containsString("PagedModel")))
-                            .and(not(containsString("ResourcesOfResource")))
-                            .and(not(containsString("Resource")))
-                    )
+                content().string(
+                    both(notNullValue(String.class))
+                        .and(containsString("ListResponseContentCloudProcessDefinition"))
+                        .and(containsString("EntriesResponseContentCloudProcessDefinition"))
+                        .and(containsString("EntryResponseContentCloudProcessDefinition"))
+                        .and(not(containsString("PagedModel")))
+                        .and(not(containsString("ResourcesOfResource")))
+                        .and(not(containsString("Resource")))
+                )
             );
     }
 
@@ -227,9 +226,8 @@ public class QueryRestApplicationIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors()).isNull();
-        assertThat(result.getData().toString())
-            .isEqualTo(
-                "{Tasks={select=[" +
+        assertThat(result.getData().toString()).isEqualTo(
+            "{Tasks={select=[" +
                 "{name=task1, assignee=testuser, priority=5}, " +
                 "{name=task2, assignee=hruser, priority=10}, " +
                 "{name=task3, assignee=hruser, priority=5}, " +
@@ -237,7 +235,7 @@ public class QueryRestApplicationIT {
                 "{name=task5, assignee=hruser, priority=10}, " +
                 "{name=task6, assignee=hruser, priority=10}" +
                 "]}}"
-            );
+        );
     }
 
     @Test
@@ -258,16 +256,19 @@ public class QueryRestApplicationIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors()).isNull();
-        assertThat(result.getData().toString())
-            .isEqualTo("{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}");
+        assertThat(result.getData().toString()).isEqualTo(
+            "{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}"
+        );
     }
 
     @Test
     void rabbitBinderCompression() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
-            .isEqualTo(9);
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
-            .isTrue();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class)
+        ).isEqualTo(9);
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class)
+        ).isTrue();
     }
 
     @Test
@@ -283,10 +284,12 @@ public class QueryRestApplicationIT {
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isNullOrEmpty();
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isNullOrEmpty();
     }
 
     @Test
@@ -296,8 +299,9 @@ public class QueryRestApplicationIT {
 
     @Test
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
-            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous.")));
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).satisfies(map ->
+            assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous."))
+        );
     }
 
     @Test

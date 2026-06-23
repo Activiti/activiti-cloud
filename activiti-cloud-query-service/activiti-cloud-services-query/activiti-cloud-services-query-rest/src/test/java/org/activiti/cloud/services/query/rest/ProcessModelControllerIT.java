@@ -130,17 +130,20 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-            .willReturn(true);
+        given(
+            securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName())
+        ).willReturn(true);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString())).willReturn(
+            new ProcessModelEntity(processDefinition, "<model/>")
+        );
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
-                    .accept(MediaType.APPLICATION_XML_VALUE)
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId).accept(
+                    MediaType.APPLICATION_XML_VALUE
+                )
             )
             //then
             .andExpect(status().isOk())
@@ -157,17 +160,20 @@ public class ProcessModelControllerIT {
         processDefinition.setKey("processKey");
         processDefinition.setServiceName("serviceName");
 
-        given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-            .willReturn(false);
+        given(
+            securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName())
+        ).willReturn(false);
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString())).willReturn(
+            new ProcessModelEntity(processDefinition, "<model/>")
+        );
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
-                    .accept(MediaType.APPLICATION_XML_VALUE)
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId).accept(
+                    MediaType.APPLICATION_XML_VALUE
+                )
             )
             //then
             .andExpect(status().isForbidden())

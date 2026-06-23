@@ -40,7 +40,8 @@ import org.springframework.util.CollectionUtils;
 
 @CountOverFullWindow
 public class ProcessInstanceSpecification
-    extends SpecificationSupport<ProcessInstanceEntity, ProcessInstanceSearchRequest> {
+    extends SpecificationSupport<ProcessInstanceEntity, ProcessInstanceSearchRequest>
+{
 
     private final String userId;
 

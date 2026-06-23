@@ -31,14 +31,14 @@ public class BinderFactoryListenerTestExecutionListener extends AbstractTestExec
 
     @Override
     public void afterTestClass(TestContext testContext) {
-        Optional
-            .of(testContext.getTestClass())
+        Optional.of(testContext.getTestClass())
             .filter(testClass ->
-                Optional
-                    .ofNullable(AnnotationUtils.findAnnotation(testClass, EnableBinderFactoryListenerTestContext.class))
-                    .isPresent()
+                Optional.ofNullable(
+                    AnnotationUtils.findAnnotation(testClass, EnableBinderFactoryListenerTestContext.class)
+                ).isPresent()
             )
-            .map(testClass -> testContext.getApplicationContext().getBeansOfType(BinderFactoryListenerTestContext.class)
+            .map(testClass ->
+                testContext.getApplicationContext().getBeansOfType(BinderFactoryListenerTestContext.class)
             )
             .map(Map::values)
             .ifPresent(binderFactoryListenerTestConfigurations ->

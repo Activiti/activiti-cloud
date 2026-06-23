@@ -41,8 +41,9 @@ class ProcessDefinitionConstantValuesDecoratorTest {
         processDefinition.setId("processId");
         Map<String, Object> constantValues = Map.of("constantKey", "constantValue");
 
-        when(processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId"))
-            .thenReturn(constantValues);
+        when(processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId")).thenReturn(
+            constantValues
+        );
 
         var result = decorator.decorate(processDefinition);
 
@@ -54,8 +55,9 @@ class ProcessDefinitionConstantValuesDecoratorTest {
         var processDefinition = new CloudProcessDefinitionImpl();
         processDefinition.setId("processId");
 
-        when(processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId"))
-            .thenReturn(Map.of());
+        when(processDefinitionValuesService.getProcessModelConstantValuesForStartEvent("processId")).thenReturn(
+            Map.of()
+        );
 
         var result = decorator.decorate(processDefinition);
 

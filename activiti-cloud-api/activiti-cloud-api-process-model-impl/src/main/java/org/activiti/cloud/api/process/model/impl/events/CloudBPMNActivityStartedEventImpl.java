@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent
 
 public class CloudBPMNActivityStartedEventImpl
     extends CloudBPMNActivityEventImpl
-    implements CloudBPMNActivityStartedEvent {
+    implements CloudBPMNActivityStartedEvent
+{
 
     public CloudBPMNActivityStartedEventImpl() {}
 

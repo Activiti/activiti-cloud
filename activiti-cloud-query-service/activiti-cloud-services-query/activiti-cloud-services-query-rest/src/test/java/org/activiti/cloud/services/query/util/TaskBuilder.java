@@ -96,8 +96,7 @@ public class TaskBuilder {
 
     public TaskBuilder withVariables(QueryTestUtils.VariableInput... variables) {
         task.setVariables(
-            Arrays
-                .stream(variables)
+            Arrays.stream(variables)
                 .map(variable -> {
                     TaskVariableEntity taskVariable = new TaskVariableEntity();
                     taskVariable.setName(variable.name());
@@ -165,16 +164,14 @@ public class TaskBuilder {
     }
 
     public TaskEntity buildAndSave() {
-        Set<TaskCandidateUserEntity> candidateUsers =
-            this.candidateUserIds.stream()
-                .map(user -> new TaskCandidateUserEntity(task.getId(), user))
-                .collect(Collectors.toSet());
+        Set<TaskCandidateUserEntity> candidateUsers = this.candidateUserIds.stream()
+            .map(user -> new TaskCandidateUserEntity(task.getId(), user))
+            .collect(Collectors.toSet());
         taskCandidateUserRepository.saveAll(candidateUsers);
         task.setTaskCandidateUsers(candidateUsers);
-        Set<TaskCandidateGroupEntity> candidateGroups =
-            this.candidateGroupsIds.stream()
-                .map(group -> new TaskCandidateGroupEntity(task.getId(), group))
-                .collect(Collectors.toSet());
+        Set<TaskCandidateGroupEntity> candidateGroups = this.candidateGroupsIds.stream()
+            .map(group -> new TaskCandidateGroupEntity(task.getId(), group))
+            .collect(Collectors.toSet());
         taskCandidateGroupRepository.saveAll(candidateGroups);
         task.setTaskCandidateGroups(candidateGroups);
         task

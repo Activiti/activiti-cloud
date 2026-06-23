@@ -38,8 +38,7 @@ public class PathPrefixOpenApiCustomizer implements DefaultOpenApiCustomizer {
 
     private String getServicePrefix(OpenAPI openApi) {
         String servicePrefix = "";
-        final String configuredPrefix = (String) Optional
-            .ofNullable(openApi.getExtensions())
+        final String configuredPrefix = (String) Optional.ofNullable(openApi.getExtensions())
             .map(extensions -> extensions.get(BaseOpenApiBuilder.SERVICE_URL_PREFIX))
             .orElse(null);
         if (configuredPrefix != null) {

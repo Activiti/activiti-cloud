@@ -25,8 +25,10 @@ import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 
-public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity>
-    implements VariableSelectionExpression {
+public class VariableSelectionExpressionImpl<
+    R,
+    K extends AbstractVariableEntity
+> implements VariableSelectionExpression {
 
     protected final From<R, K> root;
     private final Predicate selectionPredicate;
@@ -43,14 +45,13 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
         this.root = root;
         this.variableJavaType = variableJavaType;
         this.criteriaBuilder = criteriaBuilder;
-        this.selectionPredicate =
-            criteriaBuilder.and(
-                selectionFilters
-                    .entrySet()
-                    .stream()
-                    .map(entry -> criteriaBuilder.equal(entry.getKey(), entry.getValue()))
-                    .toArray(Predicate[]::new)
-            );
+        this.selectionPredicate = criteriaBuilder.and(
+            selectionFilters
+                .entrySet()
+                .stream()
+                .map(entry -> criteriaBuilder.equal(entry.getKey(), entry.getValue()))
+                .toArray(Predicate[]::new)
+        );
     }
 
     public Expression getExtractedValue() {
@@ -66,17 +67,14 @@ public class VariableSelectionExpressionImpl<R, K extends AbstractVariableEntity
     @Override
     public Expression getSelectionExpression() {
         if (selectionExpression == null) {
-            selectionExpression =
-                criteriaBuilder.greatest(
-                    (Expression) criteriaBuilder
-                        .selectCase()
-                        .when(selectionPredicate, getExtractedValue())
-                        .otherwise(
-                            criteriaBuilder.nullLiteral(
-                                CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType)
-                            )
-                        )
-                );
+            selectionExpression = criteriaBuilder.greatest(
+                (Expression) criteriaBuilder
+                    .selectCase()
+                    .when(selectionPredicate, getExtractedValue())
+                    .otherwise(
+                        criteriaBuilder.nullLiteral(CustomPostgreSQLDialect.getExtractionReturnType(variableJavaType))
+                    )
+            );
         }
         return selectionExpression;
     }

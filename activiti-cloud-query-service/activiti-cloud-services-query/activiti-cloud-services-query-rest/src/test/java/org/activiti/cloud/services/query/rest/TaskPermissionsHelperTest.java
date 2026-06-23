@@ -121,7 +121,8 @@ public class TaskPermissionsHelperTest {
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(1))
-            .setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.RELEASE, TaskPermissions.UPDATE));
+        verify(taskEntity, times(1)).setPermissions(
+            List.of(TaskPermissions.VIEW, TaskPermissions.RELEASE, TaskPermissions.UPDATE)
+        );
     }
 }

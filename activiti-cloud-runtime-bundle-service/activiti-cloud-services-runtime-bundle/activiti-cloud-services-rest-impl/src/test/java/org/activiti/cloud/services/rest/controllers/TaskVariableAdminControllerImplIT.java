@@ -155,26 +155,22 @@ class TaskVariableAdminControllerImplIT {
             TASK_ID
         );
         given(taskRuntime.variables(any())).willReturn(Arrays.asList(name, age));
-        this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/variables", TASK_ID).accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(
+            get("/admin/v1/tasks/{taskId}/variables", TASK_ID).accept(MediaTypes.HAL_JSON_VALUE)
+        ).andExpect(status().isOk());
     }
 
     @Test
     void createVariable() throws Exception {
         this.mockMvc.perform(
-                post("/admin/v1/tasks/{taskId}/variables", TASK_ID)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        mapper.writeValueAsString(
-                            TaskPayloadBuilder
-                                .createVariable()
-                                .withTaskId(TASK_ID)
-                                .withVariable("name", "Alice")
-                                .build()
-                        )
+            post("/admin/v1/tasks/{taskId}/variables", TASK_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        TaskPayloadBuilder.createVariable().withTaskId(TASK_ID).withVariable("name", "Alice").build()
                     )
-            )
-            .andExpect(status().isOk());
+                )
+        ).andExpect(status().isOk());
 
         verify(taskRuntime).createVariable(any());
     }
@@ -183,19 +179,14 @@ class TaskVariableAdminControllerImplIT {
     void updateVariable() throws Exception {
         //WHEN
         this.mockMvc.perform(
-                put("/admin/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        mapper.writeValueAsString(
-                            TaskPayloadBuilder
-                                .updateVariable()
-                                .withTaskId(TASK_ID)
-                                .withVariable("name", "Alice")
-                                .build()
-                        )
+            put("/admin/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID).withVariable("name", "Alice").build()
                     )
-            )
-            .andExpect(status().isOk());
+                )
+        ).andExpect(status().isOk());
 
         verify(taskRuntime).updateVariable(any());
     }

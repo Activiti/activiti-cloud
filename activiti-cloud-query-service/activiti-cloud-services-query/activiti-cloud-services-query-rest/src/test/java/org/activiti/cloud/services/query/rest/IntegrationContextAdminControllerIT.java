@@ -112,15 +112,17 @@ class IntegrationContextAdminControllerIT {
         //when
         mockMvc
             .perform(
-                get("/admin/v1/integration-contexts/{integrationContextId}", integrationContextId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/integration-contexts/{integrationContextId}", integrationContextId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
-                jsonPath("$.entry.message")
-                    .value("Unable to find integration context for the given id: '" + integrationContextId + "'")
+                jsonPath("$.entry.message").value(
+                    "Unable to find integration context for the given id: '" + integrationContextId + "'"
+                )
             );
     }
 }

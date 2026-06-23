@@ -118,8 +118,7 @@ public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
         }
 
         results.put("var1", var1);
-        Message<IntegrationResult> message = IntegrationResultBuilder
-            .resultFor(event, connectorProperties)
+        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(event, connectorProperties)
             .withOutboundVariables(results)
             .buildMessage();
 

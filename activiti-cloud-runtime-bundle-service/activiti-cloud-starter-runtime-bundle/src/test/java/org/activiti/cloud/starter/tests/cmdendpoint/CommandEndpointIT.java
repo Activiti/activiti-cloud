@@ -154,8 +154,7 @@ public class CommandEndpointIT {
         vars.put("hey", "one");
 
         String simpleProcessDefinitionId = processDefinitionIds.get(SIMPLE_PROCESS);
-        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start()
             .withProcessDefinitionId(simpleProcessDefinitionId)
             .withVariables(vars)
             .build();
@@ -192,25 +191,26 @@ public class CommandEndpointIT {
 
         responseEntity = getTasks(processInstanceId);
         tasks = responseEntity.getBody().getContent();
-        assertThat(tasks).filteredOn(t -> t.getId().equals(task.getId())).isEmpty();
+        assertThat(tasks)
+            .filteredOn(t -> t.getId().equals(task.getId()))
+            .isEmpty();
 
         Thread.sleep(1000);
-        await()
-            .untilAsserted(() -> {
-                // Checking that the process is finished
-                ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = restTemplate.exchange(
-                    PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {},
-                    "0",
-                    "2"
-                );
+        await().untilAsserted(() -> {
+            // Checking that the process is finished
+            ResponseEntity<PagedModel<ProcessInstance>> processInstancesPage = restTemplate.exchange(
+                PROCESS_INSTANCES_RELATIVE_URL + "?page={page}&size={size}",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {},
+                "0",
+                "2"
+            );
 
-                assertThat(processInstancesPage.getBody().getContent())
-                    .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
-                    .isEmpty();
-            });
+            assertThat(processInstancesPage.getBody().getContent())
+                .filteredOn(processInstance -> processInstance.getId().equals(processInstanceId))
+                .isEmpty();
+        });
 
         assertThat(streamHandler.getStartedProcessInstanceAck()).isTrue();
         assertThat(streamHandler.getSuspendedProcessInstanceAck()).isTrue();
@@ -243,8 +243,7 @@ public class CommandEndpointIT {
                 .flatMap(it -> it.getProcessDeployedEvents().stream())
                 .map(ProcessDeployedEvent::getProcessDefinitionId)
                 .toList()
-        )
-            .contains(processDefinitionIds.values().toArray(String[]::new));
+        ).contains(processDefinitionIds.values().toArray(String[]::new));
     }
 
     protected SyncCloudProcessDefinitionsResult doSyncCloudProcessDefinitions(
@@ -252,8 +251,9 @@ public class CommandEndpointIT {
     ) {
         clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).setHeader("cmdId", "jobId").build());
 
-        await("process definitions result to be synced")
-            .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
+        await("process definitions result to be synced").untilAsserted(() ->
+            assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull()
+        );
 
         return streamHandler.getSyncProcessDefinitionsAck().get();
     }
@@ -262,8 +262,7 @@ public class CommandEndpointIT {
     public void syncCloudProcessDefinitionsExcludedTest() {
         streamHandler.resetSyncProcessDefinitionsAck();
 
-        var payload = SyncCloudProcessDefinitionsPayload
-            .builder()
+        var payload = SyncCloudProcessDefinitionsPayload.builder()
             .excludedProcessDefinitionIds(List.of(processDefinitionIds.values().toArray(String[]::new)))
             .build();
 
@@ -283,8 +282,7 @@ public class CommandEndpointIT {
         final var testProcessDefinitionKey = "SimpleProcess";
         streamHandler.resetSyncProcessDefinitionsAck();
 
-        var payload = SyncCloudProcessDefinitionsPayload
-            .builder()
+        var payload = SyncCloudProcessDefinitionsPayload.builder()
             .processDefinitionKeys(List.of(testProcessDefinitionKey))
             .excludedProcessDefinitionIds(List.of("foo", "bar"))
             .build();
@@ -303,16 +301,14 @@ public class CommandEndpointIT {
                         .stream()
                         .map(String.class::cast)
                         .allMatch(it -> it.contains(testProcessDefinitionKey))
-                )
-                    .isTrue()
+                ).isTrue()
             );
     }
 
     private void completeTask(Task task) {
         Map<String, Object> variables = new HashMap<>();
 
-        CompleteTaskPayload completeTaskCmd = TaskPayloadBuilder
-            .complete()
+        CompleteTaskPayload completeTaskCmd = TaskPayloadBuilder.complete()
             .withTaskId(task.getId())
             .withVariables(variables)
             .build();
@@ -346,8 +342,7 @@ public class CommandEndpointIT {
 
     private void setProcessVariables(String proInstanceId) {
         Map<String, Object> variables = Collections.singletonMap("procVar", "v2");
-        SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder
-            .setVariables()
+        SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder.setVariables()
             .withProcessInstanceId(proInstanceId)
             .withVariables(variables)
             .build();
@@ -372,8 +367,7 @@ public class CommandEndpointIT {
 
     private void claimTask(Task task) {
         streamHandler.resetClaimedTaskAck();
-        ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder
-            .claim()
+        ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder.claim()
             .withTaskId(task.getId())
             .withAssignee("hruser")
             .build();
@@ -403,18 +397,17 @@ public class CommandEndpointIT {
 
         doResumeProcessInstance(resumeProcess);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
+        await().untilAsserted(() -> {
+            //when
+            ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
 
-                //then
+            //then
 
-                assertThat(processInstance.getProcessDefinitionId()).isEqualTo(processDefinitionId);
-                assertThat(processInstance.getId()).isNotNull();
-                assertThat(processInstance.getStartDate()).isNotNull();
-                assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
-            });
+            assertThat(processInstance.getProcessDefinitionId()).isEqualTo(processDefinitionId);
+            assertThat(processInstance.getId()).isNotNull();
+            assertThat(processInstance.getStartDate()).isNotNull();
+            assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        });
     }
 
     protected void doResumeProcessInstance(ResumeProcessPayload resumeProcess) {
@@ -502,7 +495,9 @@ public class CommandEndpointIT {
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<
+            PagedModel<CloudProcessDefinition>
+        >() {};
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL, HttpMethod.GET, null, responseType);
     }

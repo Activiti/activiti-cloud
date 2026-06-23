@@ -118,7 +118,9 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow(MessageChannel controlBusInput) {
-        return IntegrationFlow.from(controlBusInput).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+        return IntegrationFlow.from(controlBusInput)
+            .controlBus(spec -> spec.id(CONTROL_BUS))
+            .get();
     }
 
     @Bean
@@ -223,8 +225,7 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnMissingBean(name = "metadataStoreKeyStrategy")
     public MessageProcessor<String> metadataStoreKeyStrategy() {
         return m ->
-            Optional
-                .ofNullable(m.getHeaders().get(MessageEventHeaders.MESSAGE_EVENT_ID))
+            Optional.ofNullable(m.getHeaders().get(MessageEventHeaders.MESSAGE_EVENT_ID))
                 .map(Object::toString)
                 .orElseGet(() -> m.getHeaders().getId().toString());
     }
@@ -272,8 +273,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupProcessorChain messageGroupProcessorChain(MessageGroupStore messageGroupStore) {
-        return ChainBuilder
-            .of(MessageGroupProcessorChain.class)
+        return ChainBuilder.of(MessageGroupProcessorChain.class)
             .first(new StartMessagePayloadGroupProcessor(messageGroupStore))
             .then(new ReceiveMessagePayloadGroupProcessor(messageGroupStore))
             .build();

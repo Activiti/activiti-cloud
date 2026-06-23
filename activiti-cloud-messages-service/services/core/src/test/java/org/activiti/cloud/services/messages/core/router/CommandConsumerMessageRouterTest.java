@@ -46,8 +46,7 @@ public class CommandConsumerMessageRouterTest {
     public void should_returnResultOfDestinationResolver_when_headerHasServiceFullName() {
         //given
         final String outputDestination = "messageConnectorOutput";
-        final Message<String> message = MessageBuilder
-            .withPayload("any")
+        final Message<String> message = MessageBuilder.withPayload("any")
             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
             .build();
 
@@ -68,7 +67,8 @@ public class CommandConsumerMessageRouterTest {
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)
-            .isThrownBy(() -> messageRouter.determineTargetChannels(messageWithoutHeaders) //when
+            .isThrownBy(
+                () -> messageRouter.determineTargetChannels(messageWithoutHeaders) //when
             )
             .withMessage("Unable to determine target channel for message");
     }
@@ -77,8 +77,7 @@ public class CommandConsumerMessageRouterTest {
     public void should_throwException_when_destinationResolverDoesNotFindADestination() {
         //given
         final String outputDestination = "messageConnectorOutput";
-        final Message<String> message = MessageBuilder
-            .withPayload("any")
+        final Message<String> message = MessageBuilder.withPayload("any")
             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, outputDestination)
             .build();
 
@@ -86,7 +85,8 @@ public class CommandConsumerMessageRouterTest {
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)
-            .isThrownBy(() -> messageRouter.determineTargetChannels(message) //when
+            .isThrownBy(
+                () -> messageRouter.determineTargetChannels(message) //when
             )
             .withMessage("Unable to determine target channel for message");
     }

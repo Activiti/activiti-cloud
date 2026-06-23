@@ -27,9 +27,10 @@ public class AuditProducerRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyFromValidHeadersInAnyOrder() {
         // given
-        Map<String, Object> headers = MapBuilder
-            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
-            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder.<String, Object>map(
+            RuntimeBundleInfoMessageHeaders.APP_NAME,
+            "app-name"
+        ).with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
 
         // when
         String routingKey = subject.resolve(headers);
@@ -41,9 +42,10 @@ public class AuditProducerRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyFromEmptyHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder
-            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "")
-            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder.<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "").with(
+            RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
+            "service-name"
+        );
 
         // when
         String routingKey = subject.resolve(headers);
@@ -55,9 +57,10 @@ public class AuditProducerRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyFromNullHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder
-            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, null)
-            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder.<String, Object>map(
+            RuntimeBundleInfoMessageHeaders.APP_NAME,
+            null
+        ).with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
 
         // when
         String routingKey = subject.resolve(headers);
@@ -69,9 +72,10 @@ public class AuditProducerRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyWithEscapedValues() {
         // given
-        Map<String, Object> headers = MapBuilder
-            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app:na#me")
-            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "ser.vice*na me");
+        Map<String, Object> headers = MapBuilder.<String, Object>map(
+            RuntimeBundleInfoMessageHeaders.APP_NAME,
+            "app:na#me"
+        ).with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "ser.vice*na me");
 
         // when
         String routingKey = subject.resolve(headers);

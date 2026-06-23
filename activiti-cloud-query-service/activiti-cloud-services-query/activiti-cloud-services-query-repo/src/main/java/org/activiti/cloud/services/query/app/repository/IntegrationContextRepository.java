@@ -33,7 +33,8 @@ public interface IntegrationContextRepository
         PagingAndSortingRepository<IntegrationContextEntity, String>,
         QuerydslPredicateExecutor<IntegrationContextEntity>,
         QuerydslBinderCustomizer<QIntegrationContextEntity>,
-        CrudRepository<IntegrationContextEntity, String> {
+        CrudRepository<IntegrationContextEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QIntegrationContextEntity root) {
         whitelist(root).apply(bindings);

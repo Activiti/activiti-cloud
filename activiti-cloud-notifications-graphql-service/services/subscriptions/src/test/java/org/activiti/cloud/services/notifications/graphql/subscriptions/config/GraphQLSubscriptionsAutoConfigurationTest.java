@@ -52,17 +52,16 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
     public void testGraphQLSubscriptionSchemaProperties() {
         assertThat(properties.getGraphqls()).isEqualTo("classpath:activiti.graphqls");
         assertThat(properties.getSubscriptionFieldName()).isEqualTo("engineEvents");
-        assertThat(properties.getSubscriptionArgumentNames())
-            .isEqualTo(
-                new String[] {
-                    "serviceName",
-                    "appName",
-                    "eventType",
-                    "processDefinitionKey",
-                    "processInstanceId",
-                    "businessKey",
-                    "actor",
-                }
-            );
+        assertThat(properties.getSubscriptionArgumentNames()).isEqualTo(
+            new String[] {
+                "serviceName",
+                "appName",
+                "eventType",
+                "processDefinitionKey",
+                "processInstanceId",
+                "businessKey",
+                "actor",
+            }
+        );
     }
 }

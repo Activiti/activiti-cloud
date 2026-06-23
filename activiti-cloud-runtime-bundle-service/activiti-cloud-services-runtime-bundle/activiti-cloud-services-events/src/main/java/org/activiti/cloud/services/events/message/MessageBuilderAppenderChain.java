@@ -55,8 +55,9 @@ public class MessageBuilderAppenderChain {
         }
 
         // Let's resolve and set routingKey in the message headers if present
-        resolveRoutingKey(accessor.getMessageHeaders())
-            .ifPresent(routingKey -> accessor.setHeader(ROUTING_KEY, routingKey));
+        resolveRoutingKey(accessor.getMessageHeaders()).ifPresent(routingKey ->
+            accessor.setHeader(ROUTING_KEY, routingKey)
+        );
 
         return messageBuilder;
     }

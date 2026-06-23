@@ -73,8 +73,7 @@ public class ProcessDefinitionsSyncService {
 
         var query = repositoryService.createProcessDefinitionQuery();
 
-        Optional
-            .ofNullable(processDefinitionKeys)
+        Optional.ofNullable(processDefinitionKeys)
             .filter(Predicate.not(Collection::isEmpty))
             .map(Set::copyOf)
             .ifPresent(query::processDefinitionKeys);
@@ -83,7 +82,9 @@ public class ProcessDefinitionsSyncService {
             .list()
             .stream()
             .filter(it ->
-                Optional.ofNullable(excludedProcessDefinitionIds).map(list -> !list.contains(it.getId())).orElse(true)
+                Optional.ofNullable(excludedProcessDefinitionIds)
+                    .map(list -> !list.contains(it.getId()))
+                    .orElse(true)
             )
             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 10))
             .values()

@@ -27,7 +27,11 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class EventRepresentationModelAssembler
     implements
-        RepresentationModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>, EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> {
+        RepresentationModelAssembler<
+            CloudRuntimeEvent<?, CloudRuntimeEventType>,
+            EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>
+        >
+{
 
     @Override
     public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> toModel(

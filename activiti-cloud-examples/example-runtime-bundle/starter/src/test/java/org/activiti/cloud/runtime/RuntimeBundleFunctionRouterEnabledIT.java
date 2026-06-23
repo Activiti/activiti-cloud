@@ -65,30 +65,28 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
 
     @Test
     void bindingServiceProperties() {
-        assertThat(bindingServiceProperties.getBindings())
-            .doesNotContainKeys(
-                "commandConsumer",
-                "integrationErrorsConsumer",
-                "integrationResultsConsumer",
-                "connectorIncidentConsumer",
-                "myCmdResults",
-                "signalConsumer",
-                "messageConnectorInput",
-                "asyncExecutorJobsInput"
-            );
+        assertThat(bindingServiceProperties.getBindings()).doesNotContainKeys(
+            "commandConsumer",
+            "integrationErrorsConsumer",
+            "integrationResultsConsumer",
+            "connectorIncidentConsumer",
+            "myCmdResults",
+            "signalConsumer",
+            "messageConnectorInput",
+            "asyncExecutorJobsInput"
+        );
 
-        assertThat(bindingServiceProperties.getBindings())
-            .containsOnlyKeys(
-                "functionRouterInput",
-                "asyncExecutorJobsOutput",
-                "auditProducer",
-                "auditProducerIncidents",
-                "commandResults",
-                "messageConnectorOutput",
-                "messageEventsOutput",
-                "myCmdProducer",
-                "signalProducer"
-            );
+        assertThat(bindingServiceProperties.getBindings()).containsOnlyKeys(
+            "functionRouterInput",
+            "asyncExecutorJobsOutput",
+            "auditProducer",
+            "auditProducerIncidents",
+            "commandResults",
+            "messageConnectorOutput",
+            "messageEventsOutput",
+            "myCmdProducer",
+            "signalProducer"
+        );
 
         assertThat(bindingServiceProperties.getBindingProperties("functionRouterInput"))
             .extracting(BindingProperties::getGroup)
@@ -99,10 +97,12 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
     void bindingServicePropertiesRequiredProducerGroups() {
         assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
-            .containsOnly("consumer");
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups())
-            .containsOnly("consumer");
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups()).containsOnly(
+            "consumer"
+        );
+        assertThat(
+            bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups()
+        ).containsOnly("consumer");
     }
 
     @Test
@@ -111,40 +111,37 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getFunctionRoutes())
-            .containsOnly(
-                "commandConsumer",
-                "integrationErrorsConsumer",
-                "integrationResultsConsumer",
-                "connectorIncidentConsumer",
-                "myCmdResults",
-                "signalConsumer",
-                "messageConnectorInput",
-                "asyncExecutorJobsInput"
-            );
+        assertThat(functionRouter.getFunctionRoutes()).containsOnly(
+            "commandConsumer",
+            "integrationErrorsConsumer",
+            "integrationResultsConsumer",
+            "connectorIncidentConsumer",
+            "myCmdResults",
+            "signalConsumer",
+            "messageConnectorInput",
+            "asyncExecutorJobsInput"
+        );
 
-        assertThat(functionRouter.destinations())
-            .containsOnlyKeys(
-                "commandConsumer",
-                "integrationErrorsConsumer",
-                "integrationResultsConsumer",
-                "connectorIncidentConsumer",
-                "myCmdResults",
-                "signalConsumer",
-                "messageConnectorInput",
-                "asyncExecutorJobsInput"
-            );
+        assertThat(functionRouter.destinations()).containsOnlyKeys(
+            "commandConsumer",
+            "integrationErrorsConsumer",
+            "integrationResultsConsumer",
+            "connectorIncidentConsumer",
+            "myCmdResults",
+            "signalConsumer",
+            "messageConnectorInput",
+            "asyncExecutorJobsInput"
+        );
 
-        assertThat(functionRouter.registrations())
-            .containsOnlyKeys(
-                "commandConsumer_default-app",
-                "asyncExecutorJobs_default-app",
-                "messageEvents_default-app",
-                "integrationResult_my-runtime-bundle",
-                "integrationError_my-runtime-bundle",
-                "connectorIncident",
-                "signalEvent"
-            );
+        assertThat(functionRouter.registrations()).containsOnlyKeys(
+            "commandConsumer_default-app",
+            "asyncExecutorJobs_default-app",
+            "messageEvents_default-app",
+            "integrationResult_my-runtime-bundle",
+            "integrationError_my-runtime-bundle",
+            "connectorIncident",
+            "signalEvent"
+        );
     }
 
     @Test
@@ -154,23 +151,20 @@ public class RuntimeBundleFunctionRouterEnabledIT extends RuntimeBundleApplicati
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.auditProducer.producer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.auditProducerIncidents.producer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
     }
 }

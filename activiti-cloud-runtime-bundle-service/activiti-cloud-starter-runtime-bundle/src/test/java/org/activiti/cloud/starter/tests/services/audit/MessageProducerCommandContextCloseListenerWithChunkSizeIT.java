@@ -99,24 +99,28 @@ class MessageProducerCommandContextCloseListenerWithChunkSizeIT {
     void should_createIncident_when_messageExceedChunkSizeLimit() throws InterruptedException {
         var processDefinitionKey = "SimpleProcess";
 
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> this.runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
+        assertThrows(IllegalArgumentException.class, () ->
+            this.runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start()
         );
 
-        verify(this.incidentService)
-            .createAndSendIncidentEvent(this.executionContextCaptor.capture(), any(Exception.class));
+        verify(this.incidentService).createAndSendIncidentEvent(
+            this.executionContextCaptor.capture(),
+            any(Exception.class)
+        );
 
         var executionContextCaptorValue = this.executionContextCaptor.getValue();
         assertThat(executionContextCaptorValue.getProcessInstance().getProcessInstanceId()).isNotEmpty();
-        assertThat(executionContextCaptorValue.getProcessInstance().getProcessDefinitionKey())
-            .isEqualTo(processDefinitionKey);
-        assertThat(executionContextCaptorValue.getProcessInstance().getProcessDefinitionName())
-            .isEqualTo(processDefinitionKey);
+        assertThat(executionContextCaptorValue.getProcessInstance().getProcessDefinitionKey()).isEqualTo(
+            processDefinitionKey
+        );
+        assertThat(executionContextCaptorValue.getProcessInstance().getProcessDefinitionName()).isEqualTo(
+            processDefinitionKey
+        );
         assertThat(executionContextCaptorValue.getExecution().getProcessInstanceId()).isNotEmpty();
 
-        var result =
-            this.runtimeService.createProcessInstanceQuery().processDefinitionKey(processDefinitionKey).singleResult();
+        var result = this.runtimeService.createProcessInstanceQuery()
+            .processDefinitionKey(processDefinitionKey)
+            .singleResult();
         assertThat(result).isNull();
 
         Thread.sleep(2000);

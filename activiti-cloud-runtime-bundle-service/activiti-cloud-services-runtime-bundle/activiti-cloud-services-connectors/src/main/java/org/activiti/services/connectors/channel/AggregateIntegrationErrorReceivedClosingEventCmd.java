@@ -20,7 +20,8 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 
 class AggregateIntegrationErrorReceivedClosingEventCmd
     extends CommandContextCloseListenerAdapter
-    implements Command<Void> {
+    implements Command<Void>
+{
 
     private final AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd;
 

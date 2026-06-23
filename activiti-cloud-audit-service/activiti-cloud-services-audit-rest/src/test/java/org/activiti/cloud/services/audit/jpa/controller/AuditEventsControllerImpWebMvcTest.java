@@ -156,8 +156,9 @@ class AuditEventsControllerImpWebMvcTest {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
-        assertThat(pageableCaptor.getValue().getSort())
-            .containsExactly(new Sort.Order(Sort.Direction.ASC, "timestamp"));
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
+            new Sort.Order(Sort.Direction.ASC, "timestamp")
+        );
     }
 
     @Test
@@ -172,8 +173,9 @@ class AuditEventsControllerImpWebMvcTest {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(eventsRepository).findAll(any(Specification.class), pageableCaptor.capture());
 
-        assertThat(pageableCaptor.getValue().getSort())
-            .containsExactly(new Sort.Order(Sort.Direction.ASC, "eventType"));
+        assertThat(pageableCaptor.getValue().getSort()).containsExactly(
+            new Sort.Order(Sort.Direction.ASC, "eventType")
+        );
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
@@ -212,8 +214,9 @@ class AuditEventsControllerImpWebMvcTest {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class)))
-            .willReturn(new PageImpl<>(events, pageRequest, 12));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         MvcResult result = mockMvc
             .perform(get("/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
@@ -245,8 +248,9 @@ class AuditEventsControllerImpWebMvcTest {
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class)))
-            .willReturn(new PageImpl<>(events, pageRequest, 12));
+        given(eventsRepository.findAll(any(), any(AlfrescoPageRequest.class))).willReturn(
+            new PageImpl<>(events, pageRequest, 12)
+        );
 
         mockMvc
             .perform(head("/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
@@ -413,8 +417,7 @@ class AuditEventsControllerImpWebMvcTest {
     }
 
     private MessageEventPayload createMessagePayload() {
-        return MessagePayloadBuilder
-            .event("messageName")
+        return MessagePayloadBuilder.event("messageName")
             .withBusinessKey("businessId")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")

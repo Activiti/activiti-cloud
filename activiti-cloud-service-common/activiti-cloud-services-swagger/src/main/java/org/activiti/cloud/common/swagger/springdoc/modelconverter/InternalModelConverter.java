@@ -34,16 +34,15 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
         if (javaType != null) {
             if (applies(javaType)) {
                 ResolvedRecursiveType resolvedRecursiveType = resolveType(javaType);
-                annotatedType =
-                    new AnnotatedType()
-                        .type(resolvedRecursiveType)
-                        .ctxAnnotations(annotatedType.getCtxAnnotations())
-                        .parent(annotatedType.getParent())
-                        .schemaProperty(annotatedType.isSchemaProperty())
-                        .resolveAsRef(annotatedType.isResolveAsRef())
-                        .jsonViewAnnotation(annotatedType.getJsonViewAnnotation())
-                        .propertyName(annotatedType.getPropertyName())
-                        .skipOverride(true);
+                annotatedType = new AnnotatedType()
+                    .type(resolvedRecursiveType)
+                    .ctxAnnotations(annotatedType.getCtxAnnotations())
+                    .parent(annotatedType.getParent())
+                    .schemaProperty(annotatedType.isSchemaProperty())
+                    .resolveAsRef(annotatedType.isResolveAsRef())
+                    .jsonViewAnnotation(annotatedType.getJsonViewAnnotation())
+                    .propertyName(annotatedType.getPropertyName())
+                    .skipOverride(true);
                 return this.resolve(annotatedType, context, chain);
             }
         }

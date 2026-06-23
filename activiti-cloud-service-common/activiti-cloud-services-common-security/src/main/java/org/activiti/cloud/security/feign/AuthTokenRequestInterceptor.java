@@ -27,10 +27,9 @@ public interface AuthTokenRequestInterceptor extends RequestInterceptor {
 
     @Override
     default void apply(RequestTemplate template) {
-        getToken()
-            .ifPresent(token -> {
-                template.removeHeader(AUTHORIZATION);
-                template.header(AUTHORIZATION, String.format("%s %s", BEARER, token));
-            });
+        getToken().ifPresent(token -> {
+            template.removeHeader(AUTHORIZATION);
+            template.header(AUTHORIZATION, String.format("%s %s", BEARER, token));
+        });
     }
 }

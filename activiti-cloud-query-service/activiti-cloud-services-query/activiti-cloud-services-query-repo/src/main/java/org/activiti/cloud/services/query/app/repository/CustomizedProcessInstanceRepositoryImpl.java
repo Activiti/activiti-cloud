@@ -34,7 +34,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 public class CustomizedProcessInstanceRepositoryImpl
     extends QuerydslRepositorySupport
-    implements CustomizedProcessInstanceRepository {
+    implements CustomizedProcessInstanceRepository
+{
 
     private final JPAQueryFactory queryFactory;
 

@@ -30,7 +30,8 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class SecurityPoliciesApplicationServiceImpl
     extends BaseSecurityPoliciesManagerImpl
-    implements SecurityPoliciesManager {
+    implements SecurityPoliciesManager
+{
 
     public SecurityPoliciesApplicationServiceImpl(
         SecurityManager securityManager,
@@ -69,7 +70,8 @@ public class SecurityPoliciesApplicationServiceImpl
             //will filter by app name and will also filter by definition keys if no wildcard,
             if (defKeys != null && defKeys.size() > 0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
                 return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName, defKeys));
-            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) { //will filter by app name if wildcard is set
+            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) {
+                //will filter by app name if wildcard is set
                 return spec.and(new ApplicationSecuritySpecification(serviceName));
             }
         }

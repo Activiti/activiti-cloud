@@ -23,7 +23,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 public interface CloudStartMessageDeployedEvent
     extends
         CloudRuntimeEvent<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>,
-        StartMessageDeployedEvent {
+        StartMessageDeployedEvent
+{
     @Override
     default MessageDefinitionEvents getEventType() {
         return MessageDefinitionEvents.START_MESSAGE_DEPLOYED;

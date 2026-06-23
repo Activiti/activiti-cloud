@@ -78,13 +78,12 @@ class QueryBPMNSequenceFlowIT {
         eventsAggregator.addEvents(sequenceFlowTakenEvent);
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() ->
-                assertThat(bpmnSequenceFlowRepository.findByEventId(sequenceFlowTakenEvent.getId()))
-                    .isNotNull()
-                    .extracting(BPMNSequenceFlow::getSourceActivityName, BPMNSequenceFlow::getTargetActivityName)
-                    .contains("a".repeat(255), "a".repeat(255))
-            );
+        await().untilAsserted(() ->
+            assertThat(bpmnSequenceFlowRepository.findByEventId(sequenceFlowTakenEvent.getId()))
+                .isNotNull()
+                .extracting(BPMNSequenceFlow::getSourceActivityName, BPMNSequenceFlow::getTargetActivityName)
+                .contains("a".repeat(255), "a".repeat(255))
+        );
     }
 
     private CloudSequenceFlowTakenEventImpl buildSequenceFlowTakenEvent(

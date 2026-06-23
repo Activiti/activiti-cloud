@@ -68,8 +68,7 @@ public class EventsAggregator implements MessageHandler {
     }
 
     public Throwable getException() {
-        return Optional
-            .ofNullable(errorMessageRef.get())
+        return Optional.ofNullable(errorMessageRef.get())
             .map(ErrorMessage.class::cast)
             .map(ErrorMessage::getPayload)
             .orElse(null);

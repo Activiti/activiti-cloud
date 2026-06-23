@@ -71,8 +71,10 @@ class CloudProcessCompletedProducerTest {
     @BeforeEach
     void beforeEach() {
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
-        this.cloudProcessCompletedProducer =
-            new CloudProcessCompletedProducer(this.eventConverter, this.eventsAggregator);
+        this.cloudProcessCompletedProducer = new CloudProcessCompletedProducer(
+            this.eventConverter,
+            this.eventsAggregator
+        );
     }
 
     @Test

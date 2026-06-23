@@ -70,10 +70,10 @@ public class TaskRepresentationModelAssembler implements RepresentationModelAsse
         if (cloudTask.getProcessInstanceId() != null && !cloudTask.getProcessInstanceId().isEmpty()) {
             links.add(
                 linkTo(
-                    methodOn(ProcessInstanceControllerImpl.class)
-                        .getProcessInstanceById(cloudTask.getProcessInstanceId())
-                )
-                    .withRel("processInstance")
+                    methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(
+                        cloudTask.getProcessInstanceId()
+                    )
+                ).withRel("processInstance")
             );
         }
         if (cloudTask.getParentTaskId() != null && !cloudTask.getParentTaskId().isEmpty()) {

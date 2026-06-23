@@ -116,9 +116,8 @@ public class ProcessInstanceSearchService {
             return Page.empty(pageable);
         }
 
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds
-        );
+        ProcessInstanceSpecification unrestrictedSpecification =
+            ProcessInstanceSpecification.unrestrictedLinkedProcesses(linkedProcessInstanceIds);
 
         return processInstanceRepository.findAll(unrestrictedSpecification, pageable);
     }
@@ -129,9 +128,8 @@ public class ProcessInstanceSearchService {
             return List.of();
         }
 
-        ProcessInstanceSpecification unrestrictedSpecification = ProcessInstanceSpecification.unrestrictedLinkedProcesses(
-            linkedProcessInstanceIds
-        );
+        ProcessInstanceSpecification unrestrictedSpecification =
+            ProcessInstanceSpecification.unrestrictedLinkedProcesses(linkedProcessInstanceIds);
 
         return processInstanceRepository.findAll(unrestrictedSpecification);
     }
@@ -181,10 +179,8 @@ public class ProcessInstanceSearchService {
         Set<String> pageIds = content.stream().map(ProcessInstanceEntity::getId).collect(Collectors.toSet());
 
         // One query: all descendants of every page-level process, at any depth (depth > 0 excludes self-rows)
-        List<ProcessInstanceHierarchyEntity> hierarchyRows = processInstanceHierarchyRepository.findByAncestorIdInAndDepthGreaterThan(
-            pageIds,
-            0
-        );
+        List<ProcessInstanceHierarchyEntity> hierarchyRows =
+            processInstanceHierarchyRepository.findByAncestorIdInAndDepthGreaterThan(pageIds, 0);
 
         Set<String> descendantIds = hierarchyRows
             .stream()
@@ -223,9 +219,10 @@ public class ProcessInstanceSearchService {
         }
         if (userId == null) {
             // Admin: unrestricted batch-fetch
-            return StreamSupport
-                .stream(processInstanceRepository.findAllById(descendantIds).spliterator(), false)
-                .collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
+            return StreamSupport.stream(
+                processInstanceRepository.findAllById(descendantIds).spliterator(),
+                false
+            ).collect(Collectors.toMap(ProcessInstanceEntity::getId, pi -> pi));
         }
         // User: only descendants visible to the requesting user
         ProcessInstanceSearchRequest descendantsRequest = new ProcessInstanceSearchRequest();

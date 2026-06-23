@@ -114,8 +114,9 @@ class ProcessInstanceControllerHelperTest {
         //given
         Pageable pageable = PageRequest.of(0, 10);
         Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.singletonList(new ProcessInstanceEntity()));
-        given(processInstanceService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
-            .willReturn(pageResult);
+        given(processInstanceService.search(any(ProcessInstanceSearchRequest.class), eq(pageable))).willReturn(
+            pageResult
+        );
 
         //when
         Page<ProcessInstanceEntity> result = processInstanceControllerHelper.searchProcessInstances(

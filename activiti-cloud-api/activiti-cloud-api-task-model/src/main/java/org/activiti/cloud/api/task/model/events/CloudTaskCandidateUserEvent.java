@@ -21,4 +21,5 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public interface CloudTaskCandidateUserEvent
     extends
-        CloudRuntimeEvent<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>, TaskCandidateUserEvent {}
+        CloudRuntimeEvent<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>,
+        TaskCandidateUserEvent {}

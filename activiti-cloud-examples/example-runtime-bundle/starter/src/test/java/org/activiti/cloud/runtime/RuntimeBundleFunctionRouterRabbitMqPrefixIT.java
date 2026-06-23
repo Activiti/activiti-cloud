@@ -58,11 +58,13 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
     @Test
     @Override
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 
     @Test
@@ -70,9 +72,11 @@ public class RuntimeBundleFunctionRouterRabbitMqPrefixIT extends RuntimeBundleFu
     void bindingServicePropertiesRequiredProducerGroups() {
         assertThat(bindingServiceProperties.getProducerProperties("signalProducer").getRequiredGroups()).isEmpty();
         assertThat(bindingServiceProperties.getProducerProperties("messageEventsOutput").getRequiredGroups()).isEmpty();
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
-            .containsOnly("default-app.consumer");
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups())
-            .containsOnly("default-app.consumer");
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups()).containsOnly(
+            "default-app.consumer"
+        );
+        assertThat(
+            bindingServiceProperties.getProducerProperties("auditProducerIncidents").getRequiredGroups()
+        ).containsOnly("default-app.consumer");
     }
 }

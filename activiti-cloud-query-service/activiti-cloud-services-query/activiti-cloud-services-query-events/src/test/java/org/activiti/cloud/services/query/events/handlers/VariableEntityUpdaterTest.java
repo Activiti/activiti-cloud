@@ -51,8 +51,9 @@ public class VariableEntityUpdaterTest {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.getVariables().add(currentVariableEntity);
 
-        given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .willReturn(Optional.of(processInstanceEntity));
+        given(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).willReturn(
+            Optional.of(processInstanceEntity)
+        );
         Date now = new Date();
         ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
         updatedVariableEntity.setName("var");

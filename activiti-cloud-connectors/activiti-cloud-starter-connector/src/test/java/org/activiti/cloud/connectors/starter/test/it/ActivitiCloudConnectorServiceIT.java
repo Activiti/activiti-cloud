@@ -114,23 +114,19 @@ public class ActivitiCloudConnectorServiceIT {
         integrationRequest.setServiceVersion("1");
         integrationRequest.setAppVersion("1");
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .<IntegrationRequest>withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
             .setHeader("type", "Mock")
             .build();
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        message =
-            MessageBuilder
-                .<IntegrationRequest>withPayload(integrationRequest)
-                .setHeader("type", "MockProcessRuntime")
-                .build();
+        message = MessageBuilder.<IntegrationRequest>withPayload(integrationRequest)
+            .setHeader("type", "MockProcessRuntime")
+            .build();
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        await("Should receive at least 2 integration results")
-            .untilAsserted(() ->
-                assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
-            );
+        await("Should receive at least 2 integration results").untilAsserted(() ->
+            assertThat(streamHandler.getIntegrationResultEventsCounter().get()).isGreaterThanOrEqualTo(1)
+        );
     }
 
     @Test
@@ -140,15 +136,15 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("type", "RuntimeException")
             .build();
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        await("Should produce RuntimeException integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+        await("Should produce RuntimeException integration error").untilTrue(
+            streamHandler.isIntegrationErrorEventProduced()
+        );
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -165,8 +161,7 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("type", "Error")
             .build();
@@ -189,16 +184,16 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("type", "CloudBpmnErrorCause")
             .build();
 
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        await("Should produce CloudBpmnError with root cause and message integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+        await("Should produce CloudBpmnError with root cause and message integration error").untilTrue(
+            streamHandler.isIntegrationErrorEventProduced()
+        );
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -224,16 +219,16 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("type", "CloudBpmnErrorMessage")
             .build();
 
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        await("Should produce CloudBpmnError with error code and message integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+        await("Should produce CloudBpmnError with error code and message integration error").untilTrue(
+            streamHandler.isIntegrationErrorEventProduced()
+        );
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -244,7 +239,8 @@ public class ActivitiCloudConnectorServiceIT {
             .asList()
             .isNotEmpty()
             .extracting("methodName")
-            .anyMatch(element -> String.valueOf(element).matches(".*(mockTypeIntegrationCloudBpmnErrorMessageSender).*")
+            .anyMatch(element ->
+                String.valueOf(element).matches(".*(mockTypeIntegrationCloudBpmnErrorMessageSender).*")
             )
             .doesNotContain("raiseErrorCause");
 
@@ -258,16 +254,16 @@ public class ActivitiCloudConnectorServiceIT {
 
         IntegrationRequest integrationRequest = mockIntegrationRequest();
 
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("type", "CloudBpmnError")
             .build();
 
         runtimeMockStreams.integrationEventsProducer().send(message);
 
-        await("Should produce CloudBpmnError integration error")
-            .untilTrue(streamHandler.isIntegrationErrorEventProduced());
+        await("Should produce CloudBpmnError integration error").untilTrue(
+            streamHandler.isIntegrationErrorEventProduced()
+        );
 
         IntegrationError integrationError = streamHandler.getIntegrationError();
 
@@ -298,8 +294,7 @@ public class ActivitiCloudConnectorServiceIT {
 
         var errorMessage = new ErrorMessage(
             new MessagingException(
-                MessageBuilder
-                    .withPayload(objectMapper.writeValueAsBytes(integrationRequest))
+                MessageBuilder.withPayload(objectMapper.writeValueAsBytes(integrationRequest))
                     .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
                     .build(),
                 new RuntimeException("Unexpected exception")
@@ -324,8 +319,7 @@ public class ActivitiCloudConnectorServiceIT {
         String variablesFragment
     ) {
         //given
-        String idpPayload =
-            """
+        String idpPayload = """
             {
               "id": "da504fe5-479d-11f1-95ff-4afa9ca877cc",
               %s
@@ -337,9 +331,7 @@ public class ActivitiCloudConnectorServiceIT {
               "clientType": "ServiceTask",
               "connectorType": "my-classification.CLASSIFICATION"
             }
-            """.formatted(
-                    variablesFragment
-                );
+            """.formatted(variablesFragment);
 
         //when
         CloudIntegrationContextImpl context = objectMapper.readValue(
@@ -360,22 +352,22 @@ public class ActivitiCloudConnectorServiceIT {
     void should_receiveNonNullVariables_whenIntegrationRequestHasNullVariables() {
         //given
         String json = objectMapper.writeValueAsString(this.mockIntegrationRequest());
-        json =
-            json
-                .replace("\"inBoundVariables\":{}", "\"inBoundVariables\":null")
-                .replace("\"outBoundVariables\":{}", "\"outBoundVariables\":null");
+        json = json
+            .replace("\"inBoundVariables\":{}", "\"inBoundVariables\":null")
+            .replace("\"outBoundVariables\":{}", "\"outBoundVariables\":null");
 
         // when
-        Message<byte[]> message = MessageBuilder
-            .withPayload(json.getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload(json.getBytes())
             .setHeader("type", "NullVariables")
             .setHeader("contentType", "application/json")
             .build();
         runtimeMockStreams.integrationEventsProducer().send(message);
 
         //then
-        await("Connector should process the message with non-null variables")
-            .untilAtomic(ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST, notNullValue());
+        await("Connector should process the message with non-null variables").untilAtomic(
+            ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST,
+            notNullValue()
+        );
 
         IntegrationRequest receivedRequest = ActivitiCloudConnectorApp.NULL_VARIABLES_RECEIVED_REQUEST.get();
         assertThat(receivedRequest.getIntegrationContext().getInBoundVariables())

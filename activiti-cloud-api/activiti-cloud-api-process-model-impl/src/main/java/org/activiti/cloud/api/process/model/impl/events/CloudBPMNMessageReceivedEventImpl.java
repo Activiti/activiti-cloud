@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent
 
 public class CloudBPMNMessageReceivedEventImpl
     extends CloudBPMNMessageEventImpl
-    implements CloudBPMNMessageReceivedEvent {
+    implements CloudBPMNMessageReceivedEvent
+{
 
     public CloudBPMNMessageReceivedEventImpl() {}
 

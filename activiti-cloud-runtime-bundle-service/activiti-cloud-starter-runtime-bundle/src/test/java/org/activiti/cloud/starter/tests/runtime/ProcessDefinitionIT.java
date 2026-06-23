@@ -60,7 +60,8 @@ public class ProcessDefinitionIT {
     @BeforeEach
     public void setUp() {
         identityTokenProducer.withTestUser("hruser");
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -71,73 +72,82 @@ public class ProcessDefinitionIT {
 
     @Test
     public void shouldReturnStartEventStaticMappingsOnlyWhenProcessHasStartEventFormAndMappings() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
-            processDefinitionIds.get("StartEventStaticMapping")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
+                processDefinitionIds.get("StartEventStaticMapping")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of("static", "static value"));
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventStaticMappingsAndHasNoStartEventForm() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
-            processDefinitionIds.get("shouldDeliverMessages")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
+                processDefinitionIds.get("shouldDeliverMessages")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventStaticMappingsAndHasNoMappingForStartEvent() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
-            processDefinitionIds.get("SimpleProcess")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
+                processDefinitionIds.get("SimpleProcess")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventStaticMappingsAndHasNoExtensions() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
-            processDefinitionIds.get("ProcessWithVariables")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelStaticValuesMappingForStartEvent(
+                processDefinitionIds.get("ProcessWithVariables")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
 
     @Test
     public void shouldReturnStartEventConstantsOnlyWhenProcessHasStartEventFormAndMappings() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
-            processDefinitionIds.get("StartEventStaticMapping")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+                processDefinitionIds.get("StartEventStaticMapping")
+            );
 
-        assertThat(staticValues.getBody())
-            .isEqualTo(Map.of("startEnabled", "true", "startLabel", "Start the process", "cancelEnabled", "false"));
+        assertThat(staticValues.getBody()).isEqualTo(
+            Map.of("startEnabled", "true", "startLabel", "Start the process", "cancelEnabled", "false")
+        );
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoStartEventForm() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
-            processDefinitionIds.get("shouldDeliverMessages")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+                processDefinitionIds.get("shouldDeliverMessages")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoConstantsForStartEvent() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
-            processDefinitionIds.get("SimpleProcess")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+                processDefinitionIds.get("SimpleProcess")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
 
     @Test
     public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoExtensions() {
-        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
-            processDefinitionIds.get("ProcessWithVariables")
-        );
+        ResponseEntity<Map<String, String>> staticValues =
+            processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+                processDefinitionIds.get("ProcessWithVariables")
+            );
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }

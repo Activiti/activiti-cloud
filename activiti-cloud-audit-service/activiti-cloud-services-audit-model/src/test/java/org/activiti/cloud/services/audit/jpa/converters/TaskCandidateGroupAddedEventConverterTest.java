@@ -33,8 +33,9 @@ class TaskCandidateGroupAddedEventConverterTest {
 
     @Test
     void should_returnTaskCandidateGroupAdded_when_getSupportedEvent() {
-        assertThat(eventConverter.getSupportedEvent())
-            .isEqualTo(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name());
+        assertThat(eventConverter.getSupportedEvent()).isEqualTo(
+            TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name()
+        );
     }
 
     @Test
@@ -49,13 +50,11 @@ class TaskCandidateGroupAddedEventConverterTest {
         assertThat(auditEventEntity)
             .isNotNull()
             .isInstanceOf(TaskCandidateGroupAddedEventEntity.class)
-            .returns(
-                event.getEntity().getTaskId(),
-                e -> ((TaskCandidateGroupAddedEventEntity) e).getCandidateGroup().getTaskId()
+            .returns(event.getEntity().getTaskId(), e ->
+                ((TaskCandidateGroupAddedEventEntity) e).getCandidateGroup().getTaskId()
             )
-            .returns(
-                event.getEntity().getGroupId(),
-                e -> ((TaskCandidateGroupAddedEventEntity) e).getCandidateGroup().getGroupId()
+            .returns(event.getEntity().getGroupId(), e ->
+                ((TaskCandidateGroupAddedEventEntity) e).getCandidateGroup().getGroupId()
             )
             .returns(event.getEntityId(), AuditEventEntity::getEntityId)
             .returns(event.getProcessInstanceId(), AuditEventEntity::getProcessInstanceId)
@@ -78,13 +77,11 @@ class TaskCandidateGroupAddedEventConverterTest {
         assertThat(cloudEvent)
             .isNotNull()
             .isInstanceOf(CloudTaskCandidateGroupAddedEventImpl.class)
-            .returns(
-                entity.getCandidateGroup().getTaskId(),
-                e -> ((CloudTaskCandidateGroupAddedEventImpl) e).getEntity().getTaskId()
+            .returns(entity.getCandidateGroup().getTaskId(), e ->
+                ((CloudTaskCandidateGroupAddedEventImpl) e).getEntity().getTaskId()
             )
-            .returns(
-                entity.getCandidateGroup().getGroupId(),
-                e -> ((CloudTaskCandidateGroupAddedEventImpl) e).getEntity().getGroupId()
+            .returns(entity.getCandidateGroup().getGroupId(), e ->
+                ((CloudTaskCandidateGroupAddedEventImpl) e).getEntity().getGroupId()
             )
             .returns(entity.getEntityId(), CloudRuntimeEvent::getEntityId)
             .returns(entity.getProcessInstanceId(), CloudRuntimeEvent::getProcessInstanceId)

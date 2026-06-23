@@ -69,18 +69,19 @@ public class KeycloakClientApplication {
         OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
         ClientRegistrationRepository clientRegistrationRepository
     ) {
-        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
+        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration =
+            new ClientCredentialsAuthConfiguration();
         ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(
             clientRegistrationRepository,
             "keycloak"
         );
-        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
-            oAuth2AuthorizedClientService,
-            clientRegistrationRepository,
-            clientRegistration
-        );
-        TestKeycloakClient testKeycloakClient = Feign
-            .builder()
+        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor =
+            clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
+                oAuth2AuthorizedClientService,
+                clientRegistrationRepository,
+                clientRegistration
+            );
+        TestKeycloakClient testKeycloakClient = Feign.builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters))

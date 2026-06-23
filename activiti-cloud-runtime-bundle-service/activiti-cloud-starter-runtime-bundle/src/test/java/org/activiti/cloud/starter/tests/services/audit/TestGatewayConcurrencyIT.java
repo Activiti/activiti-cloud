@@ -137,9 +137,9 @@ public class TestGatewayConcurrencyIT {
         Set<Callable<Void>> tasks = new LinkedHashSet<>();
 
         tasks.add(() -> {
-            Message message = MessageBuilder
-                .withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap()))
-                .build();
+            Message message = MessageBuilder.withPayload(
+                new SignalPayload(SIGNAL_NAME, Collections.emptyMap())
+            ).build();
             String destination = bindingServiceProperties.getBindingDestination("signalConsumer");
 
             inputDestination.send(message, destination);
@@ -155,23 +155,21 @@ public class TestGatewayConcurrencyIT {
         });
         executorService.invokeAll(tasks);
 
-        await()
-            .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-                Assertions
-                    .assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getEntityId
-                    )
-                    .contains(
-                        tuple(PROCESS_CREATED, processInstanceId, processInstanceId),
-                        tuple(PROCESS_STARTED, processInstanceId, processInstanceId),
-                        tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
-                    );
-            });
+            Assertions.assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId
+                )
+                .contains(
+                    tuple(PROCESS_CREATED, processInstanceId, processInstanceId),
+                    tuple(PROCESS_STARTED, processInstanceId, processInstanceId),
+                    tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
+                );
+        });
     }
 
     private IntegrationRequest getIntegrationRequest() throws IOException {

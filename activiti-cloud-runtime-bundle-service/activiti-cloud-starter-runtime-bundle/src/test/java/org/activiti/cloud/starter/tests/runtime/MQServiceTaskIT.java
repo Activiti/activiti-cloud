@@ -119,15 +119,11 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         replayServiceTask(integrationContext);
 
         //then
-        await("the execution should arrive in the human tasks which follows the service task")
-            .untilAsserted(() -> {
-                List<Task> tasks = taskService
-                    .createTaskQuery()
-                    .processInstanceId(procInst.getProcessInstanceId())
-                    .list();
-                assertThat(tasks).isNotNull();
-                assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
-            });
+        await("the execution should arrive in the human tasks which follows the service task").untilAsserted(() -> {
+            List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
+            assertThat(tasks).isNotNull();
+            assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
+        });
     }
 
     private void replayServiceTask(IntegrationContext integrationContext) {
@@ -149,41 +145,40 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder.start().withProcessDefinitionKey("ProcessWithRestConnectorEphemeralVars").build()
         );
-        await()
-            .untilAsserted(() -> {
-                List<CloudIntegrationRequestedEvent> integrationRequestedEvents = auditConsumer.getAllReceivedEvents(
-                    CloudIntegrationRequestedEvent.class
-                );
+        await().untilAsserted(() -> {
+            List<CloudIntegrationRequestedEvent> integrationRequestedEvents = auditConsumer.getAllReceivedEvents(
+                CloudIntegrationRequestedEvent.class
+            );
 
-                IntegrationContext integrationRequestEntity = integrationRequestedEvents.getFirst().getEntity();
+            IntegrationContext integrationRequestEntity = integrationRequestedEvents.getFirst().getEntity();
 
-                assertThat(integrationRequestEntity)
-                    .extracting(IntegrationContext::hasEphemeralVariables, IntegrationContext::getInBoundVariables)
-                    .containsExactly(true, Map.of());
+            assertThat(integrationRequestEntity)
+                .extracting(IntegrationContext::hasEphemeralVariables, IntegrationContext::getInBoundVariables)
+                .containsExactly(true, Map.of());
 
-                List<CloudVariableUpdatedEvent> variableUpdatedEvents = auditConsumer.getAllReceivedEvents(
-                    CloudVariableUpdatedEvent.class
-                );
+            List<CloudVariableUpdatedEvent> variableUpdatedEvents = auditConsumer.getAllReceivedEvents(
+                CloudVariableUpdatedEvent.class
+            );
 
-                assertThat(variableUpdatedEvents)
-                    .extracting(RuntimeEvent::getEntity)
-                    .extracting(VariableInstance::getName, VariableInstance::getValue)
-                    .contains(tuple("result", "fromConnector"));
+            assertThat(variableUpdatedEvents)
+                .extracting(RuntimeEvent::getEntity)
+                .extracting(VariableInstance::getName, VariableInstance::getValue)
+                .contains(tuple("result", "fromConnector"));
 
-                List<CloudIntegrationResultReceivedEvent> integrationResultEvents = auditConsumer.getAllReceivedEvents(
-                    CloudIntegrationResultReceivedEvent.class
-                );
+            List<CloudIntegrationResultReceivedEvent> integrationResultEvents = auditConsumer.getAllReceivedEvents(
+                CloudIntegrationResultReceivedEvent.class
+            );
 
-                IntegrationContext integrationResponseEntity = integrationResultEvents.getFirst().getEntity();
+            IntegrationContext integrationResponseEntity = integrationResultEvents.getFirst().getEntity();
 
-                assertThat(integrationResponseEntity)
-                    .extracting(
-                        IntegrationContext::hasEphemeralVariables,
-                        IntegrationContext::getInBoundVariables,
-                        IntegrationContext::getOutBoundVariables
-                    )
-                    .containsExactly(true, Map.of(), Map.of());
-            });
+            assertThat(integrationResponseEntity)
+                .extracting(
+                    IntegrationContext::hasEphemeralVariables,
+                    IntegrationContext::getInBoundVariables,
+                    IntegrationContext::getOutBoundVariables
+                )
+                .containsExactly(true, Map.of(), Map.of());
+        });
     }
 
     @Test
@@ -192,36 +187,35 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder.start().withProcessDefinitionKey("ProcessWithRestConnectorNonEphemeralVars").build()
         );
-        await()
-            .untilAsserted(() -> {
-                List<CloudIntegrationRequestedEvent> integrationRequestedEvents = auditConsumer.getAllReceivedEvents(
-                    CloudIntegrationRequestedEvent.class
+        await().untilAsserted(() -> {
+            List<CloudIntegrationRequestedEvent> integrationRequestedEvents = auditConsumer.getAllReceivedEvents(
+                CloudIntegrationRequestedEvent.class
+            );
+
+            IntegrationContext integrationRequestEntity = integrationRequestedEvents.getFirst().getEntity();
+
+            assertThat(integrationRequestEntity)
+                .extracting(IntegrationContext::hasEphemeralVariables, IntegrationContext::getInBoundVariables)
+                .containsExactly(false, Map.of("restUrl", "https://jsonplaceholder.typicode.com/posts/1"));
+
+            List<CloudIntegrationResultReceivedEvent> integrationResultEvents = auditConsumer.getAllReceivedEvents(
+                CloudIntegrationResultReceivedEvent.class
+            );
+            assertThat(integrationResultEvents).isNotEmpty();
+
+            IntegrationContext integrationResponseEntity = integrationResultEvents.getFirst().getEntity();
+
+            assertThat(integrationResponseEntity)
+                .extracting(
+                    IntegrationContext::hasEphemeralVariables,
+                    IntegrationContext::getInBoundVariables,
+                    IntegrationContext::getOutBoundVariables
+                )
+                .containsExactly(
+                    false,
+                    Map.of("restUrl", "https://jsonplaceholder.typicode.com/posts/1"),
+                    Map.of("restResult", "fromConnector")
                 );
-
-                IntegrationContext integrationRequestEntity = integrationRequestedEvents.getFirst().getEntity();
-
-                assertThat(integrationRequestEntity)
-                    .extracting(IntegrationContext::hasEphemeralVariables, IntegrationContext::getInBoundVariables)
-                    .containsExactly(false, Map.of("restUrl", "https://jsonplaceholder.typicode.com/posts/1"));
-
-                List<CloudIntegrationResultReceivedEvent> integrationResultEvents = auditConsumer.getAllReceivedEvents(
-                    CloudIntegrationResultReceivedEvent.class
-                );
-                assertThat(integrationResultEvents).isNotEmpty();
-
-                IntegrationContext integrationResponseEntity = integrationResultEvents.getFirst().getEntity();
-
-                assertThat(integrationResponseEntity)
-                    .extracting(
-                        IntegrationContext::hasEphemeralVariables,
-                        IntegrationContext::getInBoundVariables,
-                        IntegrationContext::getOutBoundVariables
-                    )
-                    .containsExactly(
-                        false,
-                        Map.of("restUrl", "https://jsonplaceholder.typicode.com/posts/1"),
-                        Map.of("restResult", "fromConnector")
-                    );
-            });
+        });
     }
 }

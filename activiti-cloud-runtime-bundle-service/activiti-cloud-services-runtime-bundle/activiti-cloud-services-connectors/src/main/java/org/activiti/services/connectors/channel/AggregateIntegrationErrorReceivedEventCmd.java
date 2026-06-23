@@ -52,8 +52,9 @@ class AggregateIntegrationErrorReceivedEventCmd implements Command<Void> {
                 sanitizedContext.clearInBoundVariables();
                 integrationErrorReceived = createIntegrationErrorReceivedEvent(sanitizedContext);
             } else {
-                integrationErrorReceived =
-                    createIntegrationErrorReceivedEvent(integrationError.getIntegrationContext());
+                integrationErrorReceived = createIntegrationErrorReceivedEvent(
+                    integrationError.getIntegrationContext()
+                );
             }
             processEngineEventsAggregator.add(integrationErrorReceived);
         }

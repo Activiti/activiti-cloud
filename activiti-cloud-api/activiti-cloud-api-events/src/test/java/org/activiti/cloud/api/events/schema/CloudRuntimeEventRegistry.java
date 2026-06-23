@@ -130,8 +130,7 @@ public class CloudRuntimeEventRegistry {
     }
 
     private Class<?> findInterface(RuntimeEvent<?, ?> eventImplementationClass) {
-        return Arrays
-            .stream(eventImplementationClass.getClass().getInterfaces())
+        return Arrays.stream(eventImplementationClass.getClass().getInterfaces())
             .filter(eventInterFace ->
                 eventImplementationClass.getClass().getSimpleName().contains(eventInterFace.getSimpleName())
             )

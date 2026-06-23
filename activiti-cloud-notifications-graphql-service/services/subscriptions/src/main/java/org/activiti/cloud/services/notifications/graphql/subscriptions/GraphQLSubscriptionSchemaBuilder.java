@@ -54,22 +54,21 @@ public class GraphQLSubscriptionSchemaBuilder {
         }
         this.typeRegistry = new SchemaParser().parse(streamReader);
 
-        this.wiring =
-            RuntimeWiring
-                .newRuntimeWiring()
-                .scalar(
-                    newScalar()
-                        .name("ObjectScalar")
-                        .description("An object scalar")
-                        .coercing(new JavaScalars.GraphQLObjectCoercing())
-                        .build()
-                )
-                .scalar(ExtendedScalars.GraphQLLong);
+        this.wiring = RuntimeWiring.newRuntimeWiring()
+            .scalar(
+                newScalar()
+                    .name("ObjectScalar")
+                    .description("An object scalar")
+                    .coercing(new JavaScalars.GraphQLObjectCoercing())
+                    .build()
+            )
+            .scalar(ExtendedScalars.GraphQLLong);
     }
 
     private GraphQLSchema buildSchema() {
-        return new JavaScalarsWiringPostProcessor()
-            .process(new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build()));
+        return new JavaScalarsWiringPostProcessor().process(
+            new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build())
+        );
     }
 
     public TypeRuntimeWiring.Builder withTypeWiring(String typeName) {

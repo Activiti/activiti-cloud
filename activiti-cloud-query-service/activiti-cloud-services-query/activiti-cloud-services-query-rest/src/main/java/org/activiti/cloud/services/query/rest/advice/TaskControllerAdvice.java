@@ -30,8 +30,8 @@ public class TaskControllerAdvice {
     @ExceptionHandler(value = InvalidDataAccessApiUsageException.class, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e) {
         LOGGER.warn("Invalid data access in task search: {}", e.getMessage());
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(String.format("Invalid search parameter: %s", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            String.format("Invalid search parameter: %s", e.getMessage())
+        );
     }
 }

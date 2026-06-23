@@ -84,8 +84,7 @@ public class CandidateGroupControllerImpl implements CandidateGroupController {
             groupCandidatesRepresentationModelAssembler,
             linkTo(
                 methodOn(this.getClass()).getGroupCandidates(groupCandidatesRepresentationModelAssembler.getTaskId())
-            )
-                .withSelfRel()
+            ).withSelfRel()
         );
     }
 }

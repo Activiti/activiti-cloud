@@ -142,9 +142,9 @@ public class ServiceTaskIntegrationResultEventHandler {
                 IntegrationRequest fakeRequest = new IntegrationRequestImpl(integrationContext);
                 IntegrationErrorImpl integrationError = new IntegrationErrorImpl(fakeRequest, triggerException);
                 this.serviceTaskIntegrationCompletionHandler.handlePropagationFailure(
-                        integrationError,
-                        integrationContextEntity
-                    );
+                    integrationError,
+                    integrationContextEntity
+                );
             }
         }
     }

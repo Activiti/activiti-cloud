@@ -62,9 +62,8 @@ class CreateIncidentEventFromExecutionCmdTest {
     };
 
     @Spy
-    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
-        properties
-    );
+    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory =
+        new ExecutionContextIncidentEventMessageBuilderFactory(properties);
 
     private IllegalArgumentException testException = new IllegalArgumentException("Test exception");
 
@@ -72,13 +71,12 @@ class CreateIncidentEventFromExecutionCmdTest {
     void setUp() {
         this.executionContext = TestUtils.mockExecutionContext();
 
-        this.createIncidentEventFromExecutionCmd =
-            new CreateIncidentEventFromExecutionCmd(
-                this.executionContext,
-                testException,
-                this.messageBuilderChainIncidentFactory,
-                this.runtimeBundleInfoAppender
-            );
+        this.createIncidentEventFromExecutionCmd = new CreateIncidentEventFromExecutionCmd(
+            this.executionContext,
+            testException,
+            this.messageBuilderChainIncidentFactory,
+            this.runtimeBundleInfoAppender
+        );
     }
 
     @Test
@@ -103,11 +101,10 @@ class CreateIncidentEventFromExecutionCmdTest {
         assertThat(incident.getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
 
-        assertThat(message.getHeaders())
-            .contains(
-                entry("routingKey", "engineEvents.springAppName.appName"),
-                entry("messagePayloadType", "java.util.ArrayList")
-            );
+        assertThat(message.getHeaders()).contains(
+            entry("routingKey", "engineEvents.springAppName.appName"),
+            entry("messagePayloadType", "java.util.ArrayList")
+        );
     }
 
     @Test

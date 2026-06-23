@@ -47,17 +47,20 @@ public class CloudRuntimeEventTypeTest {
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNActivityEvent.ActivityEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNErrorReceivedEvent.ErrorEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNSignalEvent.SignalEvents.class));
-        assertThat(enumValues)
-            .containsAll(this.getEnumValuesAsStringList(ProcessDefinitionEvent.ProcessDefinitionEvents.class));
+        assertThat(enumValues).containsAll(
+            this.getEnumValuesAsStringList(ProcessDefinitionEvent.ProcessDefinitionEvents.class)
+        );
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(IntegrationEvent.IntegrationEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNTimerEvent.TimerEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNMessageEvent.MessageEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(SequenceFlowEvent.SequenceFlowEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessRuntimeEvent.ProcessEvents.class));
-        assertThat(enumValues)
-            .containsAll(this.getEnumValuesAsStringList(MessageDefinitionEvent.MessageDefinitionEvents.class));
-        assertThat(enumValues)
-            .containsAll(this.getEnumValuesAsStringList(MessageSubscriptionEvent.MessageSubscriptionEvents.class));
+        assertThat(enumValues).containsAll(
+            this.getEnumValuesAsStringList(MessageDefinitionEvent.MessageDefinitionEvents.class)
+        );
+        assertThat(enumValues).containsAll(
+            this.getEnumValuesAsStringList(MessageSubscriptionEvent.MessageSubscriptionEvents.class)
+        );
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ApplicationEvent.ApplicationEvents.class));
     }
 }

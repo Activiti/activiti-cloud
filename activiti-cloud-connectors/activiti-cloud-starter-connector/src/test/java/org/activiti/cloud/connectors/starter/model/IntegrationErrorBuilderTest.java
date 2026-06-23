@@ -53,9 +53,11 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error)
-            .build();
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        ).build();
         //then
         assertThat(integrationError)
             .hasIntegrationContext(integrationContext)
@@ -83,13 +85,14 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        Message<IntegrationError> message = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error)
-            .buildMessage();
+        Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        ).buildMessage();
 
         //then
-        Assertions
-            .assertThat(message.getHeaders())
+        Assertions.assertThat(message.getHeaders())
             .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
@@ -112,8 +115,11 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error)
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        )
             .withCustomErrorMessage(customMessage)
             .build();
 
@@ -140,8 +146,11 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error)
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        )
             .withCustomErrorMessage(null)
             .build();
 
@@ -165,8 +174,11 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationError integrationError = IntegrationErrorBuilder
-            .errorFor(integrationRequestEvent, connectorProperties, error)
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        )
             .withCustomErrorMessage("   ")
             .build();
 

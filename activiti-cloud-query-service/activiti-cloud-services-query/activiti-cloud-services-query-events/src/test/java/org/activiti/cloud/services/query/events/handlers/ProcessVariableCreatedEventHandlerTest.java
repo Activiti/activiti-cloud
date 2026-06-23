@@ -73,8 +73,9 @@ class ProcessVariableCreatedEventHandlerTest {
         event.setCommandId("cmd-abc");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
 
         //when
@@ -114,8 +115,9 @@ class ProcessVariableCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(variable, true);
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
 
         //when
@@ -144,8 +146,9 @@ class ProcessVariableCreatedEventHandlerTest {
         );
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of());
 
         //when

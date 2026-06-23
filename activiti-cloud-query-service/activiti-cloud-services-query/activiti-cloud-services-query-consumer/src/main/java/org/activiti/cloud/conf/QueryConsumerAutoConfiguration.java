@@ -78,8 +78,7 @@ public class QueryConsumerAutoConfiguration {
 
     @Bean
     public IntegrationFlow partitionedQueryConsumerErrorIntegrationFlow() {
-        return IntegrationFlow
-            .from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
+        return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL)
             .handle(message -> {
                 if (message instanceof ErrorMessage errorMessage) {
                     final var exception = errorMessage.getPayload();
@@ -110,12 +109,10 @@ public class QueryConsumerAutoConfiguration {
         GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
         @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
-        return IntegrationFlow
-            .from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
+        return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
             .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
             .channel(
-                MessageChannels
-                    .partitioned(queryConsumerPartitionedChannelCountProvider.get())
+                MessageChannels.partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
                     .workerQueueSize(workerQueueSize)
             )

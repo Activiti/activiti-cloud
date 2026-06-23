@@ -68,8 +68,7 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
         Predicate<TaskEntity> cancellableTasks = task ->
             TaskStatus.ASSIGNED.equals(task.getStatus()) || TaskStatus.CREATED.equals(task.getStatus());
 
-        Stream
-            .ofNullable(processInstanceEntity.getTasks())
+        Stream.ofNullable(processInstanceEntity.getTasks())
             .flatMap(Set::stream)
             .filter(cancellableTasks)
             .map(task -> {

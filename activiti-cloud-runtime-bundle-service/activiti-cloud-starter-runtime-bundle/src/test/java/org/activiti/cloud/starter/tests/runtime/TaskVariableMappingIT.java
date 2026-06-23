@@ -84,30 +84,27 @@ public class TaskVariableMappingIT {
     public void shouldHandleVariableMappingsForTask() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
-            ProcessPayloadBuilder
-                .start()
+            ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey("taskVarMapping")
                 .withBusinessKey("businessKey")
                 .build()
         );
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                .containsOnly(
+                    tuple("process_variable_unmapped_1", "unmapped1Value"),
+                    tuple("process_variable_inputmap_1", "inputmap1Value"),
+                    tuple("process_variable_outputmap_1", "outputmap1Value")
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
-                    .containsOnly(
-                        tuple("process_variable_unmapped_1", "unmapped1Value"),
-                        tuple("process_variable_inputmap_1", "inputmap1Value"),
-                        tuple("process_variable_outputmap_1", "outputmap1Value")
-                    );
-            });
+        });
 
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(
             processInstanceResponseEntity
@@ -116,19 +113,18 @@ public class TaskVariableMappingIT {
         assertThat(tasks.getBody().getContent()).extracting(CloudTask::getName).containsExactly("testSimpleTask");
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(
-                    taskId
-                );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
-                    .containsOnly(tuple("task_input_variable_name_1", "inputmap1Value"));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(
+                taskId
+            );
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                .containsOnly(tuple("task_input_variable_name_1", "inputmap1Value"));
+        });
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("task_input_variable_name_1", "outputValue");
@@ -136,23 +132,21 @@ public class TaskVariableMappingIT {
 
         claimAndCompleteTask(taskId, variables);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                .containsOnly(
+                    tuple("process_variable_unmapped_1", "unmapped1Value"),
+                    tuple("process_variable_inputmap_1", "inputmap1Value"), //Should be unchanged
+                    tuple("process_variable_outputmap_1", "outputTaskValue")
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
-                    .containsOnly(
-                        tuple("process_variable_unmapped_1", "unmapped1Value"),
-                        tuple("process_variable_inputmap_1", "inputmap1Value"), //Should be unchanged
-                        tuple("process_variable_outputmap_1", "outputTaskValue")
-                    );
-            });
+        });
 
         //cleanup
         processInstanceRestTemplate.delete(processInstanceResponseEntity);
@@ -162,33 +156,30 @@ public class TaskVariableMappingIT {
     public void should_Handle_VariableMappingsWithDate() throws Exception {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
-            ProcessPayloadBuilder
-                .start()
+            ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey("taskDateVarMapping")
                 .withBusinessKey("businessKey")
                 .build()
         );
 
         //Check default process variables
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
+                .containsOnly(
+                    tuple("process_variable_string", "string"),
+                    tuple("process_variable_integer", "integer"),
+                    tuple("process_variable_boolean", "boolean"),
+                    tuple("process_variable_date", "date"),
+                    tuple("process_variable_datetime", "date")
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
-                    .containsOnly(
-                        tuple("process_variable_string", "string"),
-                        tuple("process_variable_integer", "integer"),
-                        tuple("process_variable_boolean", "boolean"),
-                        tuple("process_variable_date", "date"),
-                        tuple("process_variable_datetime", "date")
-                    );
-            });
+        });
 
         //Check mapped task variables
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(
@@ -197,25 +188,24 @@ public class TaskVariableMappingIT {
         assertThat(tasks.getBody()).isNotNull();
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(
-                    taskId
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = taskRestTemplate.getVariables(
+                taskId
+            );
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
+                .containsOnly(
+                    tuple("task_variable_string", "string"),
+                    tuple("task_variable_integer", "integer"),
+                    tuple("task_variable_boolean", "boolean"),
+                    tuple("task_variable_date", "date"),
+                    tuple("task_variable_datetime", "date")
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
-                    .containsOnly(
-                        tuple("task_variable_string", "string"),
-                        tuple("task_variable_integer", "integer"),
-                        tuple("task_variable_boolean", "boolean"),
-                        tuple("task_variable_date", "date"),
-                        tuple("task_variable_datetime", "date")
-                    );
-            });
+        });
 
         //Check mapped process variables
         Date date = new Date();
@@ -228,33 +218,27 @@ public class TaskVariableMappingIT {
 
         claimAndCompleteTask(taskId, variables);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(
+                    CloudVariableInstance::getName,
+                    CloudVariableInstance::getType,
+                    CloudVariableInstance::getValue
+                )
+                .containsOnly(
+                    tuple("process_variable_string", "string", "new value"),
+                    tuple("process_variable_integer", "integer", 10),
+                    tuple("process_variable_boolean", "boolean", false),
+                    tuple("process_variable_date", "date", variablesUtil.getExpectedDateFormattedString(date)),
+                    tuple("process_variable_datetime", "date", variablesUtil.getExpectedDateTimeFormattedString(date))
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(
-                        CloudVariableInstance::getName,
-                        CloudVariableInstance::getType,
-                        CloudVariableInstance::getValue
-                    )
-                    .containsOnly(
-                        tuple("process_variable_string", "string", "new value"),
-                        tuple("process_variable_integer", "integer", 10),
-                        tuple("process_variable_boolean", "boolean", false),
-                        tuple("process_variable_date", "date", variablesUtil.getExpectedDateFormattedString(date)),
-                        tuple(
-                            "process_variable_datetime",
-                            "date",
-                            variablesUtil.getExpectedDateTimeFormattedString(date)
-                        )
-                    );
-            });
+        });
 
         //cleanup
         processInstanceRestTemplate.delete(processInstanceResponseEntity);
@@ -266,8 +250,7 @@ public class TaskVariableMappingIT {
         assertThat(claimTask.getBody()).isNotNull();
         assertThat(claimTask.getBody().getStatus()).isEqualTo(TaskStatus.ASSIGNED);
 
-        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder
-            .complete()
+        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete()
             .withTaskId(taskId)
             .withVariables(variables)
             .build();

@@ -28,7 +28,8 @@ import org.springframework.hateoas.Link;
 
 public class ProcessDefinitionMetaRepresentationModelAssemblerTest {
 
-    private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler = new ProcessDefinitionMetaRepresentationModelAssembler();
+    private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler =
+        new ProcessDefinitionMetaRepresentationModelAssembler();
 
     @Test
     public void toResourceShouldReturnResourceWithSelfLinkContainingResourceId() {

@@ -28,7 +28,8 @@ import org.activiti.cloud.api.process.model.IncidentSeverity;
 
 public class CloudIncidentCreatedEventImpl
     extends CloudRuntimeEventImpl<IncidentContext, IncidentEventType>
-    implements IncidentEvent {
+    implements IncidentEvent
+{
 
     private String errorCode;
     private String errorMessage;
@@ -41,13 +42,11 @@ public class CloudIncidentCreatedEventImpl
     public CloudIncidentCreatedEventImpl(Throwable error, IncidentContext incidentContext) {
         super(incidentContext);
         this.errorClassName = error.getClass().getName();
-        this.errorCode =
-            Optional
-                .of(error)
-                .filter(CloudBpmnError.class::isInstance)
-                .map(CloudBpmnError.class::cast)
-                .map(CloudBpmnError::getErrorCode)
-                .orElse(null);
+        this.errorCode = Optional.of(error)
+            .filter(CloudBpmnError.class::isInstance)
+            .map(CloudBpmnError.class::cast)
+            .map(CloudBpmnError::getErrorCode)
+            .orElse(null);
 
         Throwable cause = findRootCause(error);
         this.errorMessage = cause.getMessage();

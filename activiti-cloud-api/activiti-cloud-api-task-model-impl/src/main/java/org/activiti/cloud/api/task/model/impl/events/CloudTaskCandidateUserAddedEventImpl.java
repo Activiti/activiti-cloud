@@ -22,7 +22,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent
 
 public class CloudTaskCandidateUserAddedEventImpl
     extends CloudRuntimeEventImpl<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>
-    implements CloudTaskCandidateUserAddedEvent {
+    implements CloudTaskCandidateUserAddedEvent
+{
 
     public CloudTaskCandidateUserAddedEventImpl() {}
 

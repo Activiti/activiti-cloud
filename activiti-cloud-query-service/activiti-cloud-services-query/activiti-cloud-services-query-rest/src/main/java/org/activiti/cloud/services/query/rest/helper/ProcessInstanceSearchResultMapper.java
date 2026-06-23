@@ -59,8 +59,7 @@ public final class ProcessInstanceSearchResultMapper {
         result.setSubprocessesCount(subprocessesCount);
         result.setLinkedProcessesCount(linkedProcessesCount);
         result.setVariables(
-            Optional
-                .ofNullable(entity.getVariables())
+            Optional.ofNullable(entity.getVariables())
                 .map(vars -> (Set<QueryCloudVariableInstance>) new LinkedHashSet<QueryCloudVariableInstance>(vars))
                 .orElseGet(LinkedHashSet::new)
         );

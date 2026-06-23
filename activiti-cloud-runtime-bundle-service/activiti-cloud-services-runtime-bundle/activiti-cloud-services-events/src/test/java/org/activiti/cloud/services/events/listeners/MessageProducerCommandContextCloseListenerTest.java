@@ -105,14 +105,12 @@ class MessageProducerCommandContextCloseListenerTest {
     private EventChunker eventChunker = new EventChunker(new ObjectMapper(), properties);
 
     @Spy
-    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory = new ExecutionContextMessageBuilderFactory(
-        properties
-    );
+    private ExecutionContextMessageBuilderFactory messageBuilderChainFactory =
+        new ExecutionContextMessageBuilderFactory(properties);
 
     @Spy
-    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
-        properties
-    );
+    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory =
+        new ExecutionContextIncidentEventMessageBuilderFactory(properties);
 
     private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
@@ -137,24 +135,22 @@ class MessageProducerCommandContextCloseListenerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        incidentService =
-            new IncidentService(
-                producer,
-                messageBuilderChainIncidentFactory,
-                runtimeBundleInfoAppender,
-                managementService,
-                runtimeService
-            );
+        incidentService = new IncidentService(
+            producer,
+            messageBuilderChainIncidentFactory,
+            runtimeBundleInfoAppender,
+            managementService,
+            runtimeService
+        );
 
-        closeListener =
-            new MessageProducerCommandContextCloseListener(
-                producer,
-                messageBuilderChainFactory,
-                runtimeBundleInfoAppender,
-                properties,
-                eventChunker,
-                incidentService
-            );
+        closeListener = new MessageProducerCommandContextCloseListener(
+            producer,
+            messageBuilderChainFactory,
+            runtimeBundleInfoAppender,
+            properties,
+            eventChunker,
+            incidentService
+        );
 
         ProcessInstance processInstance = new ProcessInstanceImpl();
         event = new CloudProcessCreatedEventImpl(processInstance);
@@ -168,16 +164,18 @@ class MessageProducerCommandContextCloseListenerTest {
 
         ExecutionContext executionContext = TestUtils.mockExecutionContext();
         given(commandContext.getGenericAttribute(event.getEntityId())).willReturn(executionContext);
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT))
-            .willReturn(executionContext);
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT)
+        ).willReturn(executionContext);
     }
 
     @Test
     void closedShouldSendEventsRegisteredOnTheCommandContext() {
         // given
         processEngineEventsAggregator.add(event);
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(Collections.singletonList(event));
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(Collections.singletonList(event));
 
         // when
         closeListener.closed(commandContext);
@@ -207,8 +205,9 @@ class MessageProducerCommandContextCloseListenerTest {
     @Test
     void closedShouldDoNothingWhenRegisteredEventsIsNull() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(null);
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(null);
 
         // when
         closeListener.closed(commandContext);
@@ -220,8 +219,9 @@ class MessageProducerCommandContextCloseListenerTest {
     @Test
     void closedShouldDoNothingWhenRegisteredEventsIsEmpty() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(Collections.emptyList());
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(Collections.emptyList());
 
         // when
         closeListener.closed(commandContext);
@@ -233,8 +233,9 @@ class MessageProducerCommandContextCloseListenerTest {
     @Test
     void closedShouldSendMessageHeadersWithExecutionContext() {
         // given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(Collections.singletonList(event));
+        given(
+            commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(Collections.singletonList(event));
 
         // when
         closeListener.closed(commandContext);
@@ -256,8 +257,9 @@ class MessageProducerCommandContextCloseListenerTest {
     void closedShouldSendEventsInChunksWhenMultipleEventsExist() {
         List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(8);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
         this.closeListener.closed(this.commandContext);
 
@@ -284,8 +286,9 @@ class MessageProducerCommandContextCloseListenerTest {
     void closedShouldSendSingleMessageWhenEventsAreLessThanChunkSize() {
         List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(2);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
         this.closeListener.closed(this.commandContext);
 
@@ -305,8 +308,9 @@ class MessageProducerCommandContextCloseListenerTest {
         var testListener = getMessageProducerCloseListenerWithDisabledChunker();
         List<CloudRuntimeEventImpl<?, ?>> events = getCloudRuntimeEvents(10);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
         testListener.closed(this.commandContext);
 
@@ -320,12 +324,12 @@ class MessageProducerCommandContextCloseListenerTest {
     void closedShouldNotSendMessageWhenSingleEventIsLargerThanLimit() {
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> this.closeListener.closed(this.commandContext)
+        var exception = assertThrows(IllegalArgumentException.class, () ->
+            this.closeListener.closed(this.commandContext)
         );
 
         assertMessageNotSent(exception);
@@ -335,12 +339,12 @@ class MessageProducerCommandContextCloseListenerTest {
     void closedShouldNotSendMessageWhenTwoEventAreLargerThatLimit() {
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(2);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> this.closeListener.closed(this.commandContext)
+        var exception = assertThrows(IllegalArgumentException.class, () ->
+            this.closeListener.closed(this.commandContext)
         );
 
         assertMessageNotSent(exception);
@@ -362,12 +366,12 @@ class MessageProducerCommandContextCloseListenerTest {
 
         List<CloudRuntimeEventImpl<?, ?>> events = getLargeCloudRuntimeEvents(1);
 
-        given(this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
-            .willReturn(events);
+        given(
+            this.commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)
+        ).willReturn(events);
 
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> this.closeListener.closed(this.commandContext)
+        var exception = assertThrows(IllegalArgumentException.class, () ->
+            this.closeListener.closed(this.commandContext)
         );
         assertThat(exception).hasMessage("Chunk size limit exceeded");
 

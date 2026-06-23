@@ -58,8 +58,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Override
     protected String getSearchEndpoint() {
@@ -254,8 +255,10 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator("user3").buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withInitiators("user1", "user2");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withInitiators(
+            "user1",
+            "user2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -330,17 +333,18 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
         assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(19);
 
-        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
-            .contains(rootProcessInstance.getId());
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(
+            rootProcessInstance.getId()
+        );
 
         Integer rootLinkedCount = response
             .body()
             .jsonPath()
             .getList(
                 PROCESS_INSTANCES_JSON_PATH +
-                ".findAll { it.id == '" +
-                rootProcessInstance.getId() +
-                "' }.linkedProcessesCount",
+                    ".findAll { it.id == '" +
+                    rootProcessInstance.getId() +
+                    "' }.linkedProcessesCount",
                 Integer.class
             )
             .get(0);
@@ -352,13 +356,12 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
                 .jsonPath()
                 .getList(
                     PROCESS_INSTANCES_JSON_PATH +
-                    ".findAll { it.id != '" +
-                    rootProcessInstance.getId() +
-                    "' }.linkedProcessesCount",
+                        ".findAll { it.id != '" +
+                        rootProcessInstance.getId() +
+                        "' }.linkedProcessesCount",
                     Integer.class
                 )
-        )
-            .containsOnly(0);
+        ).containsOnly(0);
     }
 
     @Test
@@ -392,17 +395,18 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
 
         assertThat(response.body().jsonPath().getList(PROCESS_INSTANCES_JSON_PATH)).hasSize(4);
 
-        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH))
-            .contains(rootProcessInstance.getId());
+        assertThat(response.body().jsonPath().getList(PROCESS_INSTANCE_IDS_JSON_PATH)).contains(
+            rootProcessInstance.getId()
+        );
 
         Integer rootLinkedCount = response
             .body()
             .jsonPath()
             .getList(
                 PROCESS_INSTANCES_JSON_PATH +
-                ".findAll { it.id == '" +
-                rootProcessInstance.getId() +
-                "' }.linkedProcessesCount",
+                    ".findAll { it.id == '" +
+                    rootProcessInstance.getId() +
+                    "' }.linkedProcessesCount",
                 Integer.class
             )
             .get(0);
@@ -438,8 +442,8 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .withLinkedProcessInstanceType("form-type")
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withProcessRelatedTo(rootProcessInstance.getId());
+        ProcessInstanceSearchRequestBuilder requestBuilder =
+            new ProcessInstanceSearchRequestBuilder().withProcessRelatedTo(rootProcessInstance.getId());
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

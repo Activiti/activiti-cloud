@@ -21,8 +21,12 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserRemovedEvent;
 
 public class CloudProcessCandidateStarterUserRemovedEventImpl
-    extends CloudRuntimeEventImpl<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>
-    implements CloudProcessCandidateStarterUserRemovedEvent {
+    extends CloudRuntimeEventImpl<
+        ProcessCandidateStarterUser,
+        ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents
+    >
+    implements CloudProcessCandidateStarterUserRemovedEvent
+{
 
     public CloudProcessCandidateStarterUserRemovedEventImpl() {}
 

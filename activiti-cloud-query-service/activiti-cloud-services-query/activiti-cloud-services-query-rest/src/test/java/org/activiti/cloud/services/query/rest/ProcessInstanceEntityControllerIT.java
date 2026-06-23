@@ -139,10 +139,12 @@ class ProcessInstanceEntityControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(restrictedPredicate);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
@@ -165,10 +167,12 @@ class ProcessInstanceEntityControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(restrictedPredicate);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
@@ -178,8 +182,9 @@ class ProcessInstanceEntityControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$._embedded.processInstances.[0].id").value(parentProcessInstance.getId()))
             .andExpect(
-                jsonPath("$._embedded.processInstances[0].processDefinitionId")
-                    .value(parentProcessInstance.getProcessDefinitionId())
+                jsonPath("$._embedded.processInstances[0].processDefinitionId").value(
+                    parentProcessInstance.getProcessDefinitionId()
+                )
             );
     }
 
@@ -202,23 +207,25 @@ class ProcessInstanceEntityControllerIT {
         //given
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
         processInstanceEntity.setInitiator("testuser");
-        given(entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any()))
-            .willReturn(processInstanceEntity);
+        given(
+            entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any())
+        ).willReturn(processInstanceEntity);
         given(
             securityPoliciesApplicationService.canRead(
                 processInstanceEntity.getProcessDefinitionKey(),
                 processInstanceEntity.getServiceName()
             )
-        )
-            .willReturn(true);
+        ).willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
-        given(processInstanceRepository.mapSubprocesses(any(ProcessInstanceEntity.class)))
-            .willReturn(processInstanceEntity);
+        given(processInstanceRepository.mapSubprocesses(any(ProcessInstanceEntity.class))).willReturn(
+            processInstanceEntity
+        );
 
         //when
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}", processInstanceEntity.getId())
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
+                get("/v1/process-instances/{processInstanceId}", processInstanceEntity.getId()).accept(
+                    MediaType.APPLICATION_JSON_VALUE
+                )
             )
             //then
             .andExpect(status().isOk())

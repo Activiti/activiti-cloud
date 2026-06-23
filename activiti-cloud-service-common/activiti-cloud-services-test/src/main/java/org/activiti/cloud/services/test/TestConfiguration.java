@@ -89,12 +89,11 @@ public class TestConfiguration {
             Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
         );
 
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
-            .additionalMessageConverters(
-                jacksonHttpMessageConverter,
-                new StringHttpMessageConverter(StandardCharsets.UTF_8),
-                new ByteArrayHttpMessageConverter()
-            );
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().additionalMessageConverters(
+            jacksonHttpMessageConverter,
+            new StringHttpMessageConverter(StandardCharsets.UTF_8),
+            new ByteArrayHttpMessageConverter()
+        );
         if (identityTokenInterceptor != null) {
             return restTemplateBuilder.additionalInterceptors(identityTokenInterceptor);
         } else {

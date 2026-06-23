@@ -21,8 +21,12 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 
 public class CloudProcessCandidateStarterGroupAddedEventImpl
-    extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
-    implements CloudProcessCandidateStarterGroupAddedEvent {
+    extends CloudRuntimeEventImpl<
+        ProcessCandidateStarterGroup,
+        ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents
+    >
+    implements CloudProcessCandidateStarterGroupAddedEvent
+{
 
     public CloudProcessCandidateStarterGroupAddedEventImpl() {}
 

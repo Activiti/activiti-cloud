@@ -57,11 +57,22 @@ public class TaskRestTemplate {
         CONTENT_TYPE_HEADER.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudTask>() {};
-    private static final ParameterizedTypeReference<PagedModel<CloudTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudTask>>() {};
-    private static final ParameterizedTypeReference<CollectionModel<EntityModel<CandidateUser>>> CANDIDATE_USERS_RESPONSE_TYPE = new ParameterizedTypeReference<CollectionModel<EntityModel<CandidateUser>>>() {};
-    private static final ParameterizedTypeReference<CollectionModel<EntityModel<CandidateGroup>>> CANDIDATES_GROUPS_RESPONSE_TYPE = new ParameterizedTypeReference<CollectionModel<EntityModel<CandidateGroup>>>() {};
-    private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<Void>() {};
+    private static final ParameterizedTypeReference<CloudTask> TASK_RESPONSE_TYPE = new ParameterizedTypeReference<
+        CloudTask
+    >() {};
+    private static final ParameterizedTypeReference<PagedModel<CloudTask>> PAGED_TASKS_RESPONSE_TYPE =
+        new ParameterizedTypeReference<PagedModel<CloudTask>>() {};
+    private static final ParameterizedTypeReference<
+        CollectionModel<EntityModel<CandidateUser>>
+    > CANDIDATE_USERS_RESPONSE_TYPE = new ParameterizedTypeReference<CollectionModel<EntityModel<CandidateUser>>>() {};
+    private static final ParameterizedTypeReference<
+        CollectionModel<EntityModel<CandidateGroup>>
+    > CANDIDATES_GROUPS_RESPONSE_TYPE = new ParameterizedTypeReference<
+        CollectionModel<EntityModel<CandidateGroup>>
+    >() {};
+    private static final ParameterizedTypeReference<Void> VOID_RESPONSE_TYPE = new ParameterizedTypeReference<
+        Void
+    >() {};
 
     private TestRestTemplate testRestTemplate;
 
@@ -314,8 +325,7 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> createVariable(String taskId, String name, Object value) {
-        CreateTaskVariablePayload createTaskVariablePayload = TaskPayloadBuilder
-            .createVariable()
+        CreateTaskVariablePayload createTaskVariablePayload = TaskPayloadBuilder.createVariable()
             .withVariable(name, value)
             .build();
 
@@ -334,8 +344,7 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> updateVariable(String taskId, String name, Object value) {
-        UpdateTaskVariablePayload updateTaskVariablePayload = TaskPayloadBuilder
-            .updateVariable()
+        UpdateTaskVariablePayload updateTaskVariablePayload = TaskPayloadBuilder.updateVariable()
             .withVariable(name, value)
             .build();
 
@@ -366,8 +375,7 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> adminCreateVariable(String taskId, String name, Object value) {
-        CreateTaskVariablePayload createTaskVariablePayload = TaskPayloadBuilder
-            .createVariable()
+        CreateTaskVariablePayload createTaskVariablePayload = TaskPayloadBuilder.createVariable()
             .withVariable(name, value)
             .build();
 
@@ -383,8 +391,7 @@ public class TaskRestTemplate {
     }
 
     public ResponseEntity<Void> adminUpdateVariable(String taskId, String name, Object value) {
-        UpdateTaskVariablePayload updateTaskVariablePayload = TaskPayloadBuilder
-            .updateVariable()
+        UpdateTaskVariablePayload updateTaskVariablePayload = TaskPayloadBuilder.updateVariable()
             .withVariable(name, value)
             .build();
 

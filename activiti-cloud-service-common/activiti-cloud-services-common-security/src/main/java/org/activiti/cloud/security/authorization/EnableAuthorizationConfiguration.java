@@ -28,5 +28,4 @@ import org.springframework.context.annotation.Import;
 @Inherited
 @Import(AuthorizationConfigurer.class)
 @EnableConfigurationProperties(AuthorizationProperties.class)
-public @interface EnableAuthorizationConfiguration {
-}
+public @interface EnableAuthorizationConfiguration {}

@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNMessageWaitingEvent;
 
 public class CloudBPMNMessageWaitingEventImpl
     extends CloudBPMNMessageEventImpl
-    implements CloudBPMNMessageWaitingEvent {
+    implements CloudBPMNMessageWaitingEvent
+{
 
     public CloudBPMNMessageWaitingEventImpl() {}
 

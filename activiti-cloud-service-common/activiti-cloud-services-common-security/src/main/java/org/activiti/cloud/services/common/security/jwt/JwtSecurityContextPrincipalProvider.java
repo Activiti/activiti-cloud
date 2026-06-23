@@ -28,8 +28,7 @@ public class JwtSecurityContextPrincipalProvider implements SecurityContextPrinc
 
     @Override
     public Optional<Principal> getCurrentPrincipal() {
-        return Optional
-            .ofNullable(SecurityContextHolder.getContext())
+        return Optional.ofNullable(SecurityContextHolder.getContext())
             .map(SecurityContext::getAuthentication)
             .map(Authentication::getPrincipal)
             .filter(Jwt.class::isInstance)

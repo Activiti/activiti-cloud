@@ -137,8 +137,9 @@ class ProcessInstanceAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
@@ -148,8 +149,9 @@ class ProcessInstanceAdminControllerIT {
             .andExpect(jsonPath("$.list.entries[0].entry.id").value(parentProcessInstance.getId()))
             .andExpect(jsonPath("$.list.entries[0].entry.status").value(parentProcessInstance.getStatus().name()))
             .andExpect(
-                jsonPath("$.list.entries[0].entry.processDefinitionId")
-                    .value(parentProcessInstance.getProcessDefinitionId())
+                jsonPath("$.list.entries[0].entry.processDefinitionId").value(
+                    parentProcessInstance.getProcessDefinitionId()
+                )
             );
     }
 
@@ -165,15 +167,18 @@ class ProcessInstanceAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceAdminService.findAllWithVariables(null, variableKeys, PageRequest.of(0, 10)))
-            .willReturn(processInstancePage);
+        given(processInstanceAdminService.findAllWithVariables(null, variableKeys, PageRequest.of(0, 10))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10", variableKeys)
-                    .accept(MediaType.APPLICATION_JSON)
+                get(
+                    "/admin/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10",
+                    variableKeys
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())
@@ -193,8 +198,9 @@ class ProcessInstanceAdminControllerIT {
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isOk())
@@ -206,8 +212,9 @@ class ProcessInstanceAdminControllerIT {
     @Test
     void shouldReturnProcessAppVersions() throws Exception {
         //given
-        given(processInstanceAdminService.findAllAppVersions(any(Predicate.class)))
-            .willReturn(Collections.singleton("1.0"));
+        given(processInstanceAdminService.findAllAppVersions(any(Predicate.class))).willReturn(
+            Collections.singleton("1.0")
+        );
 
         //when
         mockMvc
@@ -223,8 +230,9 @@ class ProcessInstanceAdminControllerIT {
         ProcessInstanceEntity processInstance = buildProcessInstanceEntity();
         var linkedProcessInstanceId = processInstance.getId();
 
-        given(entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString()))
-            .willReturn(processInstance);
+        given(
+            entityFinder.findById(eq(processInstanceRepository), eq(linkedProcessInstanceId), anyString())
+        ).willReturn(processInstance);
 
         List<String> roles = List.of("ACTIVITI_ADMIN");
         given(securityManager.getAuthenticatedUserRoles()).willReturn(roles);
@@ -238,35 +246,42 @@ class ProcessInstanceAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class)))
-            .willReturn(linkedProcessInstancePage);
+        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class))).willReturn(
+            linkedProcessInstancePage
+        );
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", linkedProcessInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get(
+                    "/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses",
+                    linkedProcessInstanceId
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.list.entries[0].entry.id").value(linkedProcessInstance.getId()))
             .andExpect(jsonPath("$.list.entries[0].entry.status").value(linkedProcessInstance.getStatus().name()))
             .andExpect(
-                jsonPath("$.list.entries[0].entry.processDefinitionId")
-                    .value(linkedProcessInstance.getProcessDefinitionId())
+                jsonPath("$.list.entries[0].entry.processDefinitionId").value(
+                    linkedProcessInstance.getProcessDefinitionId()
+                )
             );
     }
 
     @Test
     void shouldReturnEmptyListWhenLinkedProcessInstances() throws Exception {
-        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class)))
-            .willReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 0));
+        given(processInstanceAdminService.searchLinkedProcesses(anySet(), any(Pageable.class))).willReturn(
+            new PageImpl<>(List.of(), PageRequest.of(0, 1), 0)
+        );
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses", "linkedProcessInstanceId")
-                    .accept(MediaType.APPLICATION_JSON)
+                get(
+                    "/admin/v1/process-instances/{linkedProcessInstanceId}/linkedprocesses",
+                    "linkedProcessInstanceId"
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())
@@ -288,15 +303,17 @@ class ProcessInstanceAdminControllerIT {
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
-                jsonPath("$.entry.message")
-                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+                jsonPath("$.entry.message").value(
+                    "Unable to find process instance for the given id:'" + processInstanceId + "'"
+                )
             );
     }
 
@@ -315,15 +332,17 @@ class ProcessInstanceAdminControllerIT {
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}", processInstanceId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.entry.code").value(404))
             .andExpect(
-                jsonPath("$.entry.message")
-                    .value("Unable to find process instance for the given id:'" + processInstanceId + "'")
+                jsonPath("$.entry.message").value(
+                    "Unable to find process instance for the given id:'" + processInstanceId + "'"
+                )
             );
     }
 }

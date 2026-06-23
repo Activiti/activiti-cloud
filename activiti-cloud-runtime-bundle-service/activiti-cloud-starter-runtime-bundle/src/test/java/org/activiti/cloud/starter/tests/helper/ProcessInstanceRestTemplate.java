@@ -74,8 +74,7 @@ public class ProcessInstanceRestTemplate {
         Map<String, Object> variables,
         String businessKey
     ) {
-        StartProcessPayload startProcess = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload startProcess = ProcessPayloadBuilder.start()
             .withProcessDefinitionId(processDefinitionId)
             .withVariables(variables)
             .withProcessDefinitionKey(processDefinitionKey)
@@ -90,8 +89,7 @@ public class ProcessInstanceRestTemplate {
         String processDefinitionId,
         String businessKey
     ) {
-        CreateProcessInstancePayload startProcess = ProcessPayloadBuilder
-            .create()
+        CreateProcessInstancePayload startProcess = ProcessPayloadBuilder.create()
             .withProcessDefinitionId(processDefinitionId)
             .withProcessDefinitionKey(processDefinitionKey)
             .withBusinessKey(businessKey)
@@ -382,8 +380,7 @@ public class ProcessInstanceRestTemplate {
     ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL
-                .concat("/")
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/")
                 .concat(processInstanceEntity.getBody().getId())
                 .concat("/destroy?force=" + force),
             HttpMethod.DELETE,
@@ -435,8 +432,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> setVariablesDoNotCheckStatus(String processInstanceId, Map<String, Object> variables) {
-        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder
-            .setVariables()
+        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
             .withVariables(variables)
             .build();
 
@@ -463,8 +459,7 @@ public class ProcessInstanceRestTemplate {
         String processInstanceId,
         Map<String, Object> variables
     ) {
-        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder
-            .setVariables()
+        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
             .withVariables(variables)
             .build();
 
@@ -486,8 +481,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<Void> adminRemoveVariables(String processId, List<String> variableNames) {
-        RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder
-            .removeVariables()
+        RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder.removeVariables()
             .withVariableNames(variableNames)
             .build();
 
@@ -507,8 +501,7 @@ public class ProcessInstanceRestTemplate {
         String businessKey,
         String name
     ) {
-        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder
-            .update()
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
             .withProcessInstanceId(processEntity.getBody().getId())
             .withBusinessKey(businessKey)
             .withName(name)
@@ -537,8 +530,7 @@ public class ProcessInstanceRestTemplate {
         String businessKey,
         String name
     ) {
-        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder
-            .update()
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
             .withProcessInstanceId(processEntity.getBody().getId())
             .withBusinessKey(businessKey)
             .withName(name)

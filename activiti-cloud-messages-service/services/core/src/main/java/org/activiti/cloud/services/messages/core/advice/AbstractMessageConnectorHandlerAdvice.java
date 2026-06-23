@@ -21,7 +21,8 @@ import org.springframework.messaging.Message;
 
 public abstract class AbstractMessageConnectorHandlerAdvice
     extends AbstractHandleMessageAdvice
-    implements MessageConnectorHandlerAdvice {
+    implements MessageConnectorHandlerAdvice
+{
 
     @Override
     protected Object doInvoke(MethodInvocation invocation, Message<?> message) throws Throwable {

@@ -190,30 +190,29 @@ class QueryBPMNActivityIT {
         //when
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(2);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(2);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        reviewTaskActivity.getElementId(),
+                        reviewTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
                     )
-                    .containsExactly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            reviewTaskActivity.getElementId(),
-                            reviewTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        )
-                    );
-            });
+                );
+        });
 
         BPMNSequenceFlowImpl sequenceFlow2 = new BPMNSequenceFlowImpl(
             "sf-2",
@@ -246,35 +245,34 @@ class QueryBPMNActivityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(3);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(3);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsOnly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        employeeTaskActivity.getElementId(),
+                        employeeTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        reviewTaskActivity.getElementId(),
+                        reviewTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.STARTED
                     )
-                    .containsOnly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            employeeTaskActivity.getElementId(),
-                            employeeTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            reviewTaskActivity.getElementId(),
-                            reviewTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.STARTED
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @Test
@@ -324,30 +322,29 @@ class QueryBPMNActivityIT {
 
         assertThat(startedSuccess).isTrue();
 
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(2);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(2);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        serviceTaskActivity.getElementId(),
+                        serviceTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.STARTED
                     )
-                    .containsExactly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            serviceTaskActivity.getElementId(),
-                            serviceTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.STARTED
-                        )
-                    );
-            });
+                );
+        });
 
         final var completedSuccess = withSupplyAsyncEventsSendResult(() ->
             new CloudRuntimeEvent[] {
@@ -357,30 +354,29 @@ class QueryBPMNActivityIT {
 
         assertThat(completedSuccess).isTrue();
 
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(2);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(2);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        serviceTaskActivity.getElementId(),
+                        serviceTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
                     )
-                    .containsExactly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            serviceTaskActivity.getElementId(),
-                            serviceTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @Test
@@ -420,30 +416,29 @@ class QueryBPMNActivityIT {
         //when
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(2);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(2);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        reviewTaskActivity.getElementId(),
+                        reviewTaskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
                     )
-                    .containsExactly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            reviewTaskActivity.getElementId(),
-                            reviewTaskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @Test
@@ -477,44 +472,41 @@ class QueryBPMNActivityIT {
         //then
         String processInstanceId = events.getFirst().getProcessInstanceId();
 
-        await()
-            .untilAsserted(() -> {
-                Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(processInstanceId);
-                assertThat(result)
-                    .isPresent()
-                    .get()
-                    .extracting(ProcessInstanceEntity::getStatus)
-                    .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        await().untilAsserted(() -> {
+            Optional<ProcessInstanceEntity> result = processInstanceRepository.findById(processInstanceId);
+            assertThat(result)
+                .isPresent()
+                .get()
+                .extracting(ProcessInstanceEntity::getStatus)
+                .isEqualTo(ProcessInstance.ProcessInstanceStatus.COMPLETED);
 
-                List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
+            List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
 
-                assertThat(serviceTasks)
-                    .hasSize(1)
-                    .extracting(ServiceTaskEntity::getActivityName, ServiceTaskEntity::getStatus)
-                    .containsOnly(tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
+            assertThat(serviceTasks)
+                .hasSize(1)
+                .extracting(ServiceTaskEntity::getActivityName, ServiceTaskEntity::getStatus)
+                .containsOnly(tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
 
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
 
-                assertThat(activities)
-                    .hasSize(4)
-                    .extracting(BPMNActivityEntity::getActivityName, BPMNActivityEntity::getStatus)
-                    .containsOnly(
-                        tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
-                        tuple("usertaskdmnoutputform", CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
-                        tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
-                        tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED)
-                    );
-            });
+            assertThat(activities)
+                .hasSize(4)
+                .extracting(BPMNActivityEntity::getActivityName, BPMNActivityEntity::getStatus)
+                .containsOnly(
+                    tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                    tuple("usertaskdmnoutputform", CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                    tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                    tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED)
+                );
+        });
     }
 
     private Boolean withSupplyAsyncEventsSendResult(Supplier<CloudRuntimeEvent[]> supplier) {
-        final List<CompletableFuture<Throwable>> completedServiceTasks = IntStream
-            .range(0, 100)
+        final List<CompletableFuture<Throwable>> completedServiceTasks = IntStream.range(0, 100)
             .mapToObj(i -> CompletableFuture.supplyAsync(() -> eventsAggregator.sendAll(supplier.get()).orElse(null)))
             .toList();
 
-        return CompletableFuture
-            .allOf(completedServiceTasks.toArray(CompletableFuture[]::new))
+        return CompletableFuture.allOf(completedServiceTasks.toArray(CompletableFuture[]::new))
             .thenApply(v -> completedServiceTasks.stream().map(CompletableFuture::join).allMatch(Objects::isNull))
             .join();
     }

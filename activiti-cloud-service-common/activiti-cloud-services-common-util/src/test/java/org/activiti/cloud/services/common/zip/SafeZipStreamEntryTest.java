@@ -56,8 +56,9 @@ class SafeZipStreamEntryTest {
 
         SafeZipStreamEntry streamEntry = SafeZipStreamEntry.from(zipEntry);
 
-        assertThat(streamEntry.getContent())
-            .hasValueSatisfying(bytes -> assertThat(bytes).isEqualTo("payload".getBytes(UTF_8)));
+        assertThat(streamEntry.getContent()).hasValueSatisfying(bytes ->
+            assertThat(bytes).isEqualTo("payload".getBytes(UTF_8))
+        );
     }
 
     @Test

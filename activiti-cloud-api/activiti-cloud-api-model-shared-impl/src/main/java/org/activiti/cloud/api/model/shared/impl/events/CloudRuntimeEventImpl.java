@@ -21,7 +21,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
     extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
-    implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
+    implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE>
+{
 
     private String appName;
     private String serviceFullName;

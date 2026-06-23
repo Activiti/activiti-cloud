@@ -21,7 +21,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class BPMNSequenceFlowRepresentationModelAssembler
-    implements RepresentationModelAssembler<BPMNSequenceFlowEntity, EntityModel<BPMNDiagramSequenceFlowEntry>> {
+    implements RepresentationModelAssembler<BPMNSequenceFlowEntity, EntityModel<BPMNDiagramSequenceFlowEntry>>
+{
 
     @Override
     public EntityModel<BPMNDiagramSequenceFlowEntry> toModel(BPMNSequenceFlowEntity entity) {

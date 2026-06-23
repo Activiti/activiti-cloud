@@ -64,8 +64,7 @@ public class MoviesDescriptionConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder
-            .withPayload(payload)
+        Message<?> message = MessageBuilder.withPayload(payload)
             .setHeader("connectorType", "Movies.getMovieDesc")
             .build();
 

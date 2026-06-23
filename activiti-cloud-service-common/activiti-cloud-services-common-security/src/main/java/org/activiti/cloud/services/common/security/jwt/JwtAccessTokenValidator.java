@@ -34,8 +34,7 @@ public class JwtAccessTokenValidator {
     }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
-        return Optional
-            .ofNullable(jwtAdapter)
+        return Optional.ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
             .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));

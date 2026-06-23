@@ -135,10 +135,10 @@ class ProcessInstanceTasksControllerImplIT {
         when(taskRuntime.tasks(any(), any())).thenReturn(tasks);
 
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1)
-                    .accept(MediaTypes.HAL_JSON_VALUE)
+            get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1).accept(
+                MediaTypes.HAL_JSON_VALUE
             )
-            .andExpect(status().isOk());
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -150,13 +150,11 @@ class ProcessInstanceTasksControllerImplIT {
         when(taskRuntime.tasks(any(), any())).thenReturn(taskPage);
 
         this.mockMvc.perform(
-                get(
-                    "/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
-                    task.getProcessInstanceId(),
-                    1
-                )
-                    .accept(MediaType.APPLICATION_JSON)
-            )
-            .andExpect(status().isOk());
+            get(
+                "/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
+                task.getProcessInstanceId(),
+                1
+            ).accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 }

@@ -48,11 +48,10 @@ public class FunctionBindingPropertySource extends PropertySource {
             return null;
         }
 
-        return Stream
-            .concat(
-                Stream.of(definition.split(";")).filter(StringUtils::hasText),
-                functions.stream().filter(StringUtils::hasText)
-            )
+        return Stream.concat(
+            Stream.of(definition.split(";")).filter(StringUtils::hasText),
+            functions.stream().filter(StringUtils::hasText)
+        )
             .distinct()
             .collect(Collectors.joining(";"));
     }

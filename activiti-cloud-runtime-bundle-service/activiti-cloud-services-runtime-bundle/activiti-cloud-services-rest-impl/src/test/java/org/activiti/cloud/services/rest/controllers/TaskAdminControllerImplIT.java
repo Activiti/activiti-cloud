@@ -138,8 +138,9 @@ class TaskAdminControllerImplIT {
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -148,8 +149,9 @@ class TaskAdminControllerImplIT {
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(
+            get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -161,19 +163,17 @@ class TaskAdminControllerImplIT {
     @Test
     void updateTask() throws Exception {
         given(taskAdminRuntime.update(any())).willReturn(buildDefaultAssignedTask());
-        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
-            .update()
+        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder.update()
             .withTaskId("1")
             .withName("update-task")
             .withDescription("update-description")
             .build();
 
         this.mockMvc.perform(
-                put("/admin/v1/tasks/{taskId}", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(updateTaskCmd))
-            )
-            .andExpect(status().isOk());
+            put("/admin/v1/tasks/{taskId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updateTaskCmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -188,27 +188,24 @@ class TaskAdminControllerImplIT {
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
         this.mockMvc.perform(
-                post("/admin/v1/tasks/{taskId}/assign", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(assignTaskCmd))
-            )
-            .andExpect(status().isOk());
+            post("/admin/v1/tasks/{taskId}/assign", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(assignTaskCmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
     void assignMultipleTasks() throws Exception {
         given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
-        AssignTasksPayload assignTasksCmd = TaskPayloadBuilder
-            .assignMultiple()
+        AssignTasksPayload assignTasksCmd = TaskPayloadBuilder.assignMultiple()
             .withTaskId("1")
             .withAssignee("assignee")
             .build();
 
         this.mockMvc.perform(
-                post("/admin/v1/tasks/assign")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(assignTasksCmd))
-            )
-            .andExpect(status().isOk());
+            post("/admin/v1/tasks/assign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(assignTasksCmd))
+        ).andExpect(status().isOk());
     }
 }

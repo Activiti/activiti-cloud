@@ -25,8 +25,9 @@ import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-public class CustomAuthorizationManager<RequestAuthorizationContext>
-    implements AuthorizationManager<RequestAuthorizationContext> {
+public class CustomAuthorizationManager<
+    RequestAuthorizationContext
+> implements AuthorizationManager<RequestAuthorizationContext> {
 
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String PERMISSION_PREFIX = "PERMISSION_";
@@ -35,13 +36,10 @@ public class CustomAuthorizationManager<RequestAuthorizationContext>
     private final Set<String> authoritiesWithAccess;
 
     public CustomAuthorizationManager(String[] roles, String[] permissions) {
-        this.authoritiesWithAccess =
-            Stream
-                .concat(
-                    Stream.of(roles).map(role -> ROLE_PREFIX + role),
-                    Stream.of(permissions).map(permission -> PERMISSION_PREFIX + permission)
-                )
-                .collect(Collectors.toSet());
+        this.authoritiesWithAccess = Stream.concat(
+            Stream.of(roles).map(role -> ROLE_PREFIX + role),
+            Stream.of(permissions).map(permission -> PERMISSION_PREFIX + permission)
+        ).collect(Collectors.toSet());
     }
 
     @Override

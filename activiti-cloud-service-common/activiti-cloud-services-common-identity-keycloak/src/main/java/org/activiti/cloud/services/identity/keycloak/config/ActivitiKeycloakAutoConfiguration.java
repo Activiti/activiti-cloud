@@ -129,18 +129,19 @@ public class ActivitiKeycloakAutoConfiguration {
         @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
         ObjectProvider<FeignHttpMessageConverters> messageConverters
     ) {
-        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
+        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration =
+            new ClientCredentialsAuthConfiguration();
         ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(
             clientRegistrationRepository,
             "keycloak"
         );
-        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
-            oAuth2AuthorizedClientService,
-            clientRegistrationRepository,
-            clientRegistration
-        );
-        return Feign
-            .builder()
+        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor =
+            clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
+                oAuth2AuthorizedClientService,
+                clientRegistrationRepository,
+                clientRegistration
+            );
+        return Feign.builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters))

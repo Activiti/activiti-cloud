@@ -41,7 +41,8 @@ public class ProcessCancelledEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ProcessCancelledAuditEventEntity processCancelledAuditEventEntity = (ProcessCancelledAuditEventEntity) auditEventEntity;
+        ProcessCancelledAuditEventEntity processCancelledAuditEventEntity =
+            (ProcessCancelledAuditEventEntity) auditEventEntity;
         CloudProcessCancelledEventImpl cloudEvent = new CloudProcessCancelledEventImpl(
             processCancelledAuditEventEntity.getEventId(),
             processCancelledAuditEventEntity.getTimestamp(),

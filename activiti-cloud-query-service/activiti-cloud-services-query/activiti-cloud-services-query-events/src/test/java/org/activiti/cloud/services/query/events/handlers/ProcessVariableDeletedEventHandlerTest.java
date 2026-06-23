@@ -81,8 +81,9 @@ class ProcessVariableDeletedEventHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
         processInstanceEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         handler.handle(event);
@@ -123,8 +124,9 @@ class ProcessVariableDeletedEventHandlerTest {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setStatus(ProcessInstanceStatus.COMPLETED);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         handler.handle(event);
@@ -170,8 +172,9 @@ class ProcessVariableDeletedEventHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
         // no variable added → getVariable("missing") returns empty
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when - should complete without throwing and without persisting anything
         handler.handle(event);
@@ -200,8 +203,9 @@ class ProcessVariableDeletedEventHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
         processInstanceEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
         doThrow(new RuntimeException("DB error")).when(entityManager).persist(any());
 
         //when - exception must be swallowed
@@ -230,8 +234,9 @@ class ProcessVariableDeletedEventHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
         processInstanceEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         handler.handle(event);
@@ -265,8 +270,9 @@ class ProcessVariableDeletedEventHandlerTest {
         processInstanceEntity.setStatus(ProcessInstanceStatus.RUNNING);
         processInstanceEntity.getVariables().add(variableEntity);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         handler.handle(event);

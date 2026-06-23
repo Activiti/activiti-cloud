@@ -83,8 +83,7 @@ public class AuthorizationConfigurer {
         List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
             if (!hasRoleOrPermissionConstraint(securityConstraint)) {
-                List<String> patterns = Arrays
-                    .stream(securityConstraint.getSecurityCollections())
+                List<String> patterns = Arrays.stream(securityConstraint.getSecurityCollections())
                     .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
                     .toList();
                 publicUrls.addAll(patterns);
@@ -101,14 +100,13 @@ public class AuthorizationConfigurer {
     private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
         if (hasRoleOrPermissionConstraint(securityConstraint)) {
-            authorizedUrlConsumer =
-                a ->
-                    a.access(
-                        new CustomAuthorizationManager<RequestAuthorizationContext>(
-                            securityConstraint.getAuthRoles(),
-                            securityConstraint.getAuthPermissions()
-                        )
-                    );
+            authorizedUrlConsumer = a ->
+                a.access(
+                    new CustomAuthorizationManager<RequestAuthorizationContext>(
+                        securityConstraint.getAuthRoles(),
+                        securityConstraint.getAuthPermissions()
+                    )
+                );
         } else {
             authorizedUrlConsumer = AuthorizeHttpRequestsConfigurer.AuthorizedUrl::permitAll;
         }
@@ -118,12 +116,10 @@ public class AuthorizationConfigurer {
                 "Setting access {} to {}",
                 securityConstraint.getSecurityCollections(),
                 hasRoleOrPermissionConstraint(securityConstraint)
-                    ? Stream
-                        .concat(
-                            Arrays.stream(securityConstraint.getAuthRoles()),
-                            Arrays.stream(securityConstraint.getAuthPermissions())
-                        )
-                        .collect(Collectors.joining(", "))
+                    ? Stream.concat(
+                          Arrays.stream(securityConstraint.getAuthRoles()),
+                          Arrays.stream(securityConstraint.getAuthPermissions())
+                      ).collect(Collectors.joining(", "))
                     : "anonymous"
             );
         }
@@ -174,8 +170,7 @@ public class AuthorizationConfigurer {
     }
 
     private String[] getPatterns(String[] patterns) {
-        return Stream
-            .of(patterns)
+        return Stream.of(patterns)
             .map(pattern -> pattern.endsWith("/*") ? pattern + "*" : pattern)
             .toArray(String[]::new);
     }

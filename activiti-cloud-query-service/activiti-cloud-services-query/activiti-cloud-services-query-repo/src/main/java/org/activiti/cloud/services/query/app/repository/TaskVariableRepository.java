@@ -31,7 +31,8 @@ public interface TaskVariableRepository
         PagingAndSortingRepository<TaskVariableEntity, Long>,
         QuerydslPredicateExecutor<TaskVariableEntity>,
         QuerydslBinderCustomizer<QTaskVariableEntity>,
-        CrudRepository<TaskVariableEntity, Long> {
+        CrudRepository<TaskVariableEntity, Long>
+{
     @Override
     default void customize(QuerydslBindings bindings, QTaskVariableEntity root) {
         whitelist(root).apply(bindings);

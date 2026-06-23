@@ -125,10 +125,11 @@ class CandidateUserControllerImplIT {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result =
-            this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = this.mockMvc.perform(
+                get("/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .inPath("list.entries[0].entry.user")
@@ -143,10 +144,11 @@ class CandidateUserControllerImplIT {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result =
-            this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = this.mockMvc.perform(
+                get("/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .inPath("_embedded.candidateUsers[0].user")

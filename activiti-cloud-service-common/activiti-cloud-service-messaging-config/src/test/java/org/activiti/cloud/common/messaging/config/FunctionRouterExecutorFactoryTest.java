@@ -104,20 +104,18 @@ class FunctionRouterExecutorFactoryTest {
 
         executor.submit(() -> {});
 
-        final var submitter = Thread
-            .ofPlatform()
-            .start(() -> {
-                try {
-                    Thread.currentThread().interrupt();
-                    executor.submit(() -> {});
-                    interrupted.set(Thread.currentThread().isInterrupted());
-                } catch (Throwable throwable) {
-                    thrown.set(throwable);
-                } finally {
-                    interrupted.set(Thread.currentThread().isInterrupted());
-                    submitterDone.countDown();
-                }
-            });
+        final var submitter = Thread.ofPlatform().start(() -> {
+            try {
+                Thread.currentThread().interrupt();
+                executor.submit(() -> {});
+                interrupted.set(Thread.currentThread().isInterrupted());
+            } catch (Throwable throwable) {
+                thrown.set(throwable);
+            } finally {
+                interrupted.set(Thread.currentThread().isInterrupted());
+                submitterDone.countDown();
+            }
+        });
 
         assertThat(submitterDone.await(1, TimeUnit.SECONDS)).isTrue();
         releaseTask.countDown();

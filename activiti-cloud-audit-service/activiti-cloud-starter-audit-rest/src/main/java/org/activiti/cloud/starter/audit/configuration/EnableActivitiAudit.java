@@ -30,5 +30,4 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableDiscoveryClient
 @EnableAutoConfiguration
 @EnableWebSecurity
-public @interface EnableActivitiAudit {
-}
+public @interface EnableActivitiAudit {}

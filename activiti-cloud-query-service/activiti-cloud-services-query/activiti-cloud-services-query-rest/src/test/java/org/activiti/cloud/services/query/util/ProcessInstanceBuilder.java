@@ -115,8 +115,7 @@ public class ProcessInstanceBuilder {
 
     public ProcessInstanceBuilder withVariables(QueryTestUtils.VariableInput... variables) {
         process.setVariables(
-            Arrays
-                .stream(variables)
+            Arrays.stream(variables)
                 .map(variable -> {
                     ProcessVariableEntity processVariable = new ProcessVariableEntity();
                     processVariable.setProcessInstanceId(process.getId());
@@ -153,9 +152,10 @@ public class ProcessInstanceBuilder {
 
     public ProcessInstanceBuilder subprocessOf(ProcessInstanceEntity processInstance) {
         process.setParentId(processInstance.getId());
-        String rootId = processInstance.getRootProcessInstanceId() != null
-            ? processInstance.getRootProcessInstanceId()
-            : processInstance.getId();
+        String rootId =
+            processInstance.getRootProcessInstanceId() != null
+                ? processInstance.getRootProcessInstanceId()
+                : processInstance.getId();
         process.setRootProcessInstanceId(rootId);
         return this;
     }

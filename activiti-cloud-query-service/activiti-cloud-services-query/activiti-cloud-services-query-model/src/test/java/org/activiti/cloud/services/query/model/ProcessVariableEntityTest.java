@@ -100,8 +100,9 @@ class ProcessVariableEntityTest {
         assertThat(processVariableEntity.getAppVersion()).isEqualTo(variableEvent.getAppVersion());
         assertThat(processVariableEntity.getType()).isEqualTo(variableEvent.getEntity().getType());
         assertThat(processVariableEntity.getName()).isEqualTo(variableEvent.getEntity().getName());
-        assertThat(processVariableEntity.getProcessInstanceId())
-            .isEqualTo(variableEvent.getEntity().getProcessInstanceId());
+        assertThat(processVariableEntity.getProcessInstanceId()).isEqualTo(
+            variableEvent.getEntity().getProcessInstanceId()
+        );
         assertThat(processVariableEntity.getCreateTime()).isEqualTo(new Date(variableEvent.getTimestamp()));
         assertThat(processVariableEntity.getLastUpdatedTime()).isEqualTo(new Date(variableEvent.getTimestamp()));
         assertThat(processVariableEntity.<String>getValue()).isEqualTo(variableEvent.getEntity().getValue());

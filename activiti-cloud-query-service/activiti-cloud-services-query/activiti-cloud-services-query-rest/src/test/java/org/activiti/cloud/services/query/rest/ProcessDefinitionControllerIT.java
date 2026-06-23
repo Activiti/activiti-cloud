@@ -136,8 +136,9 @@ public class ProcessDefinitionControllerIT {
         //given
         Predicate predicate = createPredicate();
         PageRequest pageRequest = PageRequest.of(0, 10);
-        given(processDefinitionRepository.findAll(predicate, pageRequest))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), pageRequest, 1));
+        given(processDefinitionRepository.findAll(predicate, pageRequest)).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), pageRequest, 1)
+        );
 
         //when
         mockMvc
@@ -150,10 +151,9 @@ public class ProcessDefinitionControllerIT {
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
         //given
         Predicate predicate = createPredicate();
-        given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
-            );
+        given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+        );
 
         //when
         mockMvc
@@ -164,17 +164,19 @@ public class ProcessDefinitionControllerIT {
 
     private Predicate createPredicate() {
         Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(predicate);
+        given(
+            processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(predicate);
 
-        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity.processDefinitionEntity.candidateStarterUsers
-            .any()
-            .userId.eq("user")
-            .or(
-                QProcessDefinitionEntity.processDefinitionEntity.candidateStarterGroups
-                    .any()
-                    .groupId.in(List.of(EVERYONE_GROUP))
-            );
+        BooleanExpression candidateStarterExpression =
+            QProcessDefinitionEntity.processDefinitionEntity.candidateStarterUsers
+                .any()
+                .userId.eq("user")
+                .or(
+                    QProcessDefinitionEntity.processDefinitionEntity.candidateStarterGroups
+                        .any()
+                        .groupId.in(List.of(EVERYONE_GROUP))
+                );
 
         return candidateStarterExpression.and(predicate);
     }

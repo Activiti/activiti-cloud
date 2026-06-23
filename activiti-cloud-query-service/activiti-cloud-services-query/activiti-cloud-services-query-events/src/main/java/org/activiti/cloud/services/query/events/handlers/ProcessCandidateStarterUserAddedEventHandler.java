@@ -33,8 +33,10 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCandidateStarterUserAddedEvent processCandidateStarterUserAddedEvent = (CloudProcessCandidateStarterUserAddedEvent) event;
-        org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserAddedEvent.getEntity();
+        CloudProcessCandidateStarterUserAddedEvent processCandidateStarterUserAddedEvent =
+            (CloudProcessCandidateStarterUserAddedEvent) event;
+        org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser =
+            processCandidateStarterUserAddedEvent.getEntity();
         ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(
             processCandidateStarterUser.getProcessDefinitionId(),
             processCandidateStarterUser.getUserId()
