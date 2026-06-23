@@ -33,7 +33,7 @@ class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
     }
 
     @Test
-    void verifyCoverage(){
+    void verifyCoverage() {
         dummyClassToTestITCoverage.directDummyMethod();
     }
 }

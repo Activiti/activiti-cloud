@@ -146,15 +146,13 @@ public class CustomizedProcessInstanceRepositoryImpl
             .fetch();
     }
 
-    public void dummyDirectMethodAddedToCheckUTCoverage(){
+    public void dummyDirectMethodAddedToCheckUTCoverage() {
         //explicit empty
     }
 
-    public void dummyInDirectMethodAddedToCheckUTCoverage(){
+    public void dummyInDirectMethodAddedToCheckUTCoverage() {
         //explicit empty
     }
 
-    public void dummyMethodNotCoveredInTests(){
-
-    }
+    public void dummyMethodNotCoveredInTests() {}
 }

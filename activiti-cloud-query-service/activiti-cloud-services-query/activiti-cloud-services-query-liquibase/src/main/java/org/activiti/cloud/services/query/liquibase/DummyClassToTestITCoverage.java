@@ -30,8 +30,6 @@ public class DummyClassToTestITCoverage {
         // This method is intentionally left blank to verify test coverage
     }
 
-    public void dummyMethodNotCoveredInTests(){
-
-    }
+    public void dummyMethodNotCoveredInTests() {}
 
 }
