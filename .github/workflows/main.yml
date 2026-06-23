@@ -208,8 +208,6 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: ./.github/actions/maven-setup
-
       - name: Write VERSION file
         shell: bash
         env:
@@ -221,22 +219,22 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         with:
           version: ${{ needs.resolve-version.outputs.version }}
-          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
-      - name: Install aggregated dependencies BOM
-        shell: bash
-        run: |
-          mvn -f activiti-cloud-dependencies/pom.xml install \
-            -DskipTests=true -DskipITs=true \
-            ${{ env.MAVEN_CLI_OPTS }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - uses: ./.github/actions/maven-m2-upload
         with:
-          artifact-name: m2-dependencies-bom
-          version: ${{ needs.resolve-version.outputs.version }}
+          java-version: '25'
+          java-distribution: 'corretto'
+          reuse-testcontainers: 'true'
+          maven-command: >-
+            install -T 1C -pl activiti-cloud-dependencies -am
+            -DskipTests=true -DskipITs=true
+          m2-current-build-upload-name: m2-dependencies-bom
+          target-folder-upload-name: target-dependencies-bom
+          m2-cache-exclusion-pattern: org/activiti
+          uploaded-artifacts-retention-days: '1'
 
   maven-test:
     needs:
