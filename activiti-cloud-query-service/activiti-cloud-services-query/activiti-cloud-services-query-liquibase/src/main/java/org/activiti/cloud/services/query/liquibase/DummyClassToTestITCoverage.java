@@ -31,5 +31,4 @@ public class DummyClassToTestITCoverage {
     }
 
     public void dummyMethodNotCoveredInTests() {}
-
 }
