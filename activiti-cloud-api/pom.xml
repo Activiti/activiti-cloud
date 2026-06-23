@@ -15,7 +15,7 @@
     <activiti.version>9.1.0-alpha.39</activiti.version>
     <!--
       Set via -Dskip.common.tests=true in per-service CI builds so common API modules
-      are compiled (-am) but tests run only once in build-common (process-services pattern).
+      are compiled (-am) but tests run only once in build-common.
     -->
     <skip.common.tests>false</skip.common.tests>
   </properties>

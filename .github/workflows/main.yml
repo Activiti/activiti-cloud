@@ -161,7 +161,8 @@ jobs:
           java-version: '25'
           java-distribution: 'corretto'
           reuse-testcontainers: 'true'
-          maven-command: verify -T 1C -pl activiti-cloud-build -am
+          maven-command: >-
+            verify -T 1C -pl activiti-cloud-build -am -Dmaven.install.skip=true
           jacoco-report-name: jacoco-common
           target-folder-upload-name: target-common
           m2-current-build-upload-name: m2-common

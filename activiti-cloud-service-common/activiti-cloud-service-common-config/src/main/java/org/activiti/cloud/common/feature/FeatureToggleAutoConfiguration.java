@@ -23,9 +23,8 @@ import org.springframework.core.env.Environment;
 /**
  * Registers the default {@link FeatureToggle} bean.
  *
- * <p>Downstream modules (e.g. the hxp-process-services adapter to the Hyland
- * FeatureFlags library) are expected to override this bean by contributing
- * their own {@code @Primary} {@link FeatureToggle} implementation, in which
+ * <p>Downstream modules may override this bean by contributing their own
+ * {@code @Primary} {@link FeatureToggle} implementation, in which case the
  * case the default {@link EnvironmentFeatureToggle} acts as a safety net but
  * is not injected.
  */

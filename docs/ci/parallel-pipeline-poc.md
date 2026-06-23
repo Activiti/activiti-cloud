@@ -33,7 +33,7 @@ flowchart TD
 
 Parallel graph: **build-common**, per-image **build** / **test**, and **BOM** all start after `create-tag` without waiting on each other. Playwright starts when per-image **build** (with Docker) completes.
 
-`main.yml` uses [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml) and [`maven-tag`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-tag/action.yml) from alfresco-build-tools. Docker/test matrices come from `scan-image-dirs` + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json). Playwright profiles: [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json). See [process-services alignment](process-services-alignment.md).
+`main.yml` uses [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml) and [`maven-tag`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-tag/action.yml) from alfresco-build-tools. Docker/test matrices come from `scan-image-dirs` + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json). Playwright profiles: [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json). See [build-tools alignment](build-tools-alignment.md).
 
 ## Job reference
 
@@ -43,9 +43,9 @@ Parallel graph: **build-common**, per-image **build** / **test**, and **BOM** al
 | `create-tag`                   | ✓                               | `maven-tag` on push; PR version ref for checkout / preview                                                                           |
 | `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                                                                          |
 | `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                                                                        |
-| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push                                                                              |
+| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -DskipTests -pl … -am` + Docker push                                                                  |
 | `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds                                                         |
-| `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                                                                             |
+| `maven-test`                   | 4 matrix cells                  | `mvn verify -Dmaven.install.skip=true` per docker image (tests without second install)                                               |
 | `sonar`                        | ✓                               | Download `target*` + `m2*`, `compile`, then `sonar:sonar` (test cells upload `target-test-*` so build `target-*` is not overwritten) |
 | `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                                                                      |
 | `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                                                                      |
@@ -84,12 +84,12 @@ Playwright starts after `maven-build` (Docker images pushed) and runs **in paral
 
 ## Artifacts vs cache vs local build
 
-| Mechanism                             | What                                      | Why                                                                                                  |
-| ------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps          | Restored by `maven-build` / `maven-configure`                                                        |
-| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`       | Sonar downloads `target*` (build + `target-test-*` JaCoCo) and `m2*`; `compile` before `sonar:sonar` |
-| **Artifact** `surefire-reports-*`     | On test failure only                      | Debug                                                                                                |
-| **Local in job**                      | `mvn install` / `verify` with `-pl … -am` | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds                |
+| Mechanism                             | What                                                                | Why                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps                                    | Restored by `maven-build` / `maven-configure`                                                        |
+| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`                                 | Sonar downloads `target*` (build + `target-test-*` JaCoCo) and `m2*`; `compile` before `sonar:sonar` |
+| **Artifact** `surefire-reports-*`     | On test failure only                                                | Debug                                                                                                |
+| **Local in job**                      | `mvn install` / `verify -Dmaven.install.skip=true` with `-pl … -am` | Build installs artifacts; test runs verify without install phase                                     |
 
 ## `needs` rationale
 
@@ -134,6 +134,6 @@ pre-commit run --files .github/workflows/main.yml .github/workflows/_reusable-*.
 - Workflow: [`.github/workflows/main.yml`](../../.github/workflows/main.yml)
 - Reusable: [`_reusable-maven-build.yml`](../../.github/workflows/_reusable-maven-build.yml), [`_reusable-maven-test.yml`](../../.github/workflows/_reusable-maven-test.yml), [`_reusable-playwright-tests.yml`](../../.github/workflows/_reusable-playwright-tests.yml)
 - Config: [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json), [`.github/ci/playwright-profiles.json`](../../.github/ci/playwright-profiles.json)
-- Alignment: [`docs/ci/process-services-alignment.md`](process-services-alignment.md)
+- Alignment: [`docs/ci/build-tools-alignment.md`](build-tools-alignment.md)
 - CI script: [`transform-docker-image-matrix.sh`](../../scripts/ci/transform-docker-image-matrix.sh)
 - Playwright env: [`load-acceptance-test-env`](../../.github/actions/load-acceptance-test-env)

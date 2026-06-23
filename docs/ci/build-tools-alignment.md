@@ -1,6 +1,6 @@
-# CI alignment with process-services / studio-services
+# CI alignment with alfresco-build-tools
 
-Aligned with [hxp-process-services](https://github.com/Alfresco/hxp-process-services) and Elias review on PR #2314.
+Aligned with [`alfresco-build-tools`](https://github.com/Alfresco/alfresco-build-tools) patterns (docker matrix, `maven-build`, `maven-tag`, `create-tag`).
 
 ## Build layout
 
@@ -11,6 +11,7 @@ Aligned with [hxp-process-services](https://github.com/Alfresco/hxp-process-serv
 | Build matrix   | [`docker-scan-image-dirs`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/docker-scan-image-dirs/action.yml) + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json) |
 | Test matrix    | Same docker matrix (audit + messages-graphql built with query cell)                                                                                                                                                                 |
 | Maven          | Root `mvn … -pl <modules> -am` via [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml)                                                                             |
+| Maven goals    | Per-image **build**: `install -DskipTests` (classes + Docker). **Test**: `verify -Dmaven.install.skip=true` (no second install). **Common**: `install` with tests, then JaCoCo only on build parent                                 |
 | Common tests   | Once in `maven-build-common`; skipped in service cells via `skip.common.tests`                                                                                                                                                      |
 | JaCoCo / Sonar | Per-cell `jacoco-report-name` + `target-*` / `target-test-*` uploads; `compile` then `sonar:sonar`                                                                                                                                  |
 | Docker         | `make docker/<short-name>` after image-dir build                                                                                                                                                                                    |

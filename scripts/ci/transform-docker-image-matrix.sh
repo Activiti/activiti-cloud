@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Merge docker-scan-image-dirs metadata with .github/ci/docker-image-services.json.
-# Output: process-services compatible matrix JSON for workflow strategy.include.
+# Output: workflow matrix JSON for GitHub Actions strategy.include.
 #
 # Usage (in CI after docker-scan-image-dirs):
 #   DIRS_AS_JSON='${{ steps.scan.outputs.image-dirs-with-metadata }}' \
