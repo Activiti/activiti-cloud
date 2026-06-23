@@ -52,7 +52,7 @@ Parallel graph (Elias review): **build-common**, per-image **build** / **test**,
 | `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds     |
 | `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                         |
 | `maven-test-libraries`         | 2 matrix cells                  | `mvn verify` per library module                                                  |
-| `sonar`                        | ✓                               | `sonar-scan-on-built-project` (downloads `target*` + `m2*`, per-cell JaCoCo XML) |
+| `sonar`                        | ✓                               | Download `target*` + `m2*`, `compile`, then `sonar:sonar` (test cells upload `target-test-*` so build `target-*` is not overwritten) |
 | `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                  |
 | `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                  |
 | `delete-test-images`           | ✓                               | Delete stale PR Docker tags before fresh push (parallel with builds)             |
@@ -93,7 +93,7 @@ Playwright starts after `maven-build` (Docker images pushed) and runs **in paral
 | Mechanism                             | What                                      | Why                                                                                   |
 | ------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps          | Restored by `maven-build` / `maven-configure`                                         |
-| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`       | Sonar (`sonar-scan-on-built-project`) and `publish` restore via pattern               |
+| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`       | Sonar downloads `target*` (build + `target-test-*` JaCoCo) and `m2*`; `compile` before `sonar:sonar` |
 | **Artifact** `surefire-reports-*`     | On test failure only                      | Debug                                                                                 |
 | **Local in job**                      | `mvn install` / `verify` with `-pl … -am` | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds |
 

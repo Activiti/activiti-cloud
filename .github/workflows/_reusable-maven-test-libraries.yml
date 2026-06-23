@@ -63,7 +63,7 @@ jobs:
             verify -Dskip.common.tests=true -pl ${{ steps.library.outputs.maven-modules }} -am
             -T 1C -DunitTests.parallel=true -U
           jacoco-report-name: jacoco-${{ matrix.library-id }}
-          target-folder-upload-name: target-${{ matrix.library-id }}
+          target-folder-upload-name: target-test-${{ matrix.library-id }}
           m2-current-build-upload-name: m2-test-${{ matrix.library-id }}
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
