@@ -66,8 +66,9 @@ public class AlfrescoPagedModelAssemblerTest {
 
         doReturn(basePagedModel).when(alfrescoPagedModelAssembler).toModel(page, resourceAssembler);
         ExtendedPageMetadata extendedPageMetadata = mock(ExtendedPageMetadata.class);
-        given(extendedPageMetadataConverter.toExtendedPageMetadata(alfrescoPageRequest.getOffset(), baseMetadata))
-            .willReturn(extendedPageMetadata);
+        given(
+            extendedPageMetadataConverter.toExtendedPageMetadata(alfrescoPageRequest.getOffset(), baseMetadata)
+        ).willReturn(extendedPageMetadata);
 
         //when
         PagedModel<RepresentationModel<?>> pagedCollectionModel = alfrescoPagedModelAssembler.toModel(

@@ -120,14 +120,14 @@ class ProcessVariableHistoryPersistenceIT {
                         processInstanceId,
                         "myVar"
                     )
-                )
-                    .hasSize(4)
+                ).hasSize(4)
             );
 
-        List<ProcessVariableHistoryEntity> history = historyRepository.findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
-            processInstanceId,
-            "myVar"
-        );
+        List<ProcessVariableHistoryEntity> history =
+            historyRepository.findByProcessInstanceIdAndVariableNameOrderByEventTimeAscSequenceNumberAsc(
+                processInstanceId,
+                "myVar"
+            );
 
         assertThat(history).hasSize(4);
 

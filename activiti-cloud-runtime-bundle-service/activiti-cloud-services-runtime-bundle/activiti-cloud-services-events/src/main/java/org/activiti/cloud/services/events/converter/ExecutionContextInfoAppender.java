@@ -42,11 +42,9 @@ public class ExecutionContextInfoAppender {
 
                 // Let's try extract parent info from super execution if exists
                 if (processInstance.getSuperExecutionId() != null) {
-                    Optional
-                        .ofNullable(processInstance.getSuperExecution())
-                        .ifPresent(superExecution ->
-                            event.setParentProcessInstanceId(superExecution.getProcessInstanceId())
-                        );
+                    Optional.ofNullable(processInstance.getSuperExecution()).ifPresent(superExecution ->
+                        event.setParentProcessInstanceId(superExecution.getProcessInstanceId())
+                    );
                 }
             }
 

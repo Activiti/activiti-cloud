@@ -35,8 +35,7 @@ public class JwtAccessTokenProvider {
     }
 
     public Optional<JwtAdapter> accessToken(@NonNull Principal principal) {
-        return Optional
-            .of(principal)
+        return Optional.of(principal)
             .filter(JwtAuthenticationToken.class::isInstance)
             .map(JwtAuthenticationToken.class::cast)
             .map(jwtAuthenticationToken -> accessToken(jwtAuthenticationToken.getToken()));

@@ -33,7 +33,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntity>
     extends VariableSelectionExpressionImpl<R, K>
-    implements VariableValueFilterCondition {
+    implements VariableValueFilterCondition
+{
 
     private final VariableFilter filter;
 
@@ -77,10 +78,10 @@ public class VariableValueFilterConditionImpl<R, K extends AbstractVariableEntit
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Illegal filter for variable type %s. Operator: %s, value: %s".formatted(
-                        filter.type(),
-                        filter.operator(),
-                        filter.value()
-                    )
+                    filter.type(),
+                    filter.operator(),
+                    filter.value()
+                )
             );
         }
     }

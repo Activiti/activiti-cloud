@@ -23,7 +23,8 @@ import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCance
 
 public class CloudMessageSubscriptionCancelledEventImpl
     extends CloudRuntimeEventImpl<MessageSubscription, MessageSubscriptionEvent.MessageSubscriptionEvents>
-    implements CloudMessageSubscriptionCancelledEvent {
+    implements CloudMessageSubscriptionCancelledEvent
+{
 
     private CloudMessageSubscriptionCancelledEventImpl(Builder builder) {
         this(builder.entity);

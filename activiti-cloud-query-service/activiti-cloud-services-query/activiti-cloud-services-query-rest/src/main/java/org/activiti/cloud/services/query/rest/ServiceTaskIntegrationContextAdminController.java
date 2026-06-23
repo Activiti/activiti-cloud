@@ -105,8 +105,8 @@ public class ServiceTaskIntegrationContextAdminController {
         if (split.length != 3) {
             throw new IllegalArgumentException(
                 "Invalid serviceTaskId format. Expected format: 'processInstanceId:clientId:executionId', but got: '" +
-                serviceTaskId +
-                "'"
+                    serviceTaskId +
+                    "'"
             );
         }
         return split;

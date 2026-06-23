@@ -38,9 +38,9 @@ public class TaskUpdatedEventHandler implements QueryEventHandler {
         CloudTaskUpdatedEvent taskUpdatedEvent = (CloudTaskUpdatedEvent) event;
         Task eventTask = taskUpdatedEvent.getEntity();
 
-        TaskEntity queryTaskEntity = Optional
-            .ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
-            .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity queryTaskEntity = Optional.ofNullable(
+            entityManager.find(TaskEntity.class, eventTask.getId())
+        ).orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
 
         queryTaskEntity.setName(eventTask.getName());
         queryTaskEntity.setDescription(eventTask.getDescription());

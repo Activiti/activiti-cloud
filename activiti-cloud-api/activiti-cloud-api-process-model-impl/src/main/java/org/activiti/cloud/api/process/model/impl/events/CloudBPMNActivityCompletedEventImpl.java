@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEve
 
 public class CloudBPMNActivityCompletedEventImpl
     extends CloudBPMNActivityEventImpl
-    implements CloudBPMNActivityCompletedEvent {
+    implements CloudBPMNActivityCompletedEvent
+{
 
     public CloudBPMNActivityCompletedEventImpl() {}
 

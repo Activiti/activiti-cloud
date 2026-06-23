@@ -66,11 +66,8 @@ class AssertZipContentTest {
         FileContent fileContent = zipWithJsonEntry("data.json", "{\"foo\":\"bar\"}");
         AssertZipContent zipAssert = new AssertZipContent(fileContent);
 
-        zipAssert.hasJsonContentSatisfying(
-            "data.json",
-            json -> {
-                json.node("foo").isEqualTo("bar");
-            }
-        );
+        zipAssert.hasJsonContentSatisfying("data.json", json -> {
+            json.node("foo").isEqualTo("bar");
+        });
     }
 }

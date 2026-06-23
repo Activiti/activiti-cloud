@@ -128,14 +128,13 @@ public class ProcessInstanceEntityTasksControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskLookupRestrictionService.restrictTaskQuery(any())).willReturn(restrictionPredicate);
-        given(taskRepository.findInProcessInstanceScope(any(), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(
-                    Collections.singletonList(taskEntity),
-                    new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
-                    12
-                )
-            );
+        given(taskRepository.findInProcessInstanceScope(any(), any(Pageable.class))).willReturn(
+            new PageImpl<>(
+                Collections.singletonList(taskEntity),
+                new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                12
+            )
+        );
 
         //when
         MvcResult result = mockMvc
@@ -143,8 +142,7 @@ public class ProcessInstanceEntityTasksControllerIT {
                 get(
                     "/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
                     taskEntity.getProcessInstanceId()
-                )
-                    .accept(MediaType.APPLICATION_JSON)
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())

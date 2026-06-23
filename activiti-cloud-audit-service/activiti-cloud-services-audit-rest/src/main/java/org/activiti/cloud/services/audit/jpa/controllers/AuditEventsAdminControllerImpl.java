@@ -61,7 +61,9 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<
+        CloudRuntimeEvent<?, CloudRuntimeEventType>
+    > pagedCollectionModelAssembler;
 
     private final APIEventToEntityConverters eventConverters;
 
@@ -92,12 +94,11 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
-                pageable =
-                    new AlfrescoPageRequest(
-                        alfrescoPageRequest.getOffset(),
-                        alfrescoPageRequest.getPageSize(),
-                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
-                    );
+                pageable = new AlfrescoPageRequest(
+                    alfrescoPageRequest.getOffset(),
+                    alfrescoPageRequest.getPageSize(),
+                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                );
             } else {
                 pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
             }

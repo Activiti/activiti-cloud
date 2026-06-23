@@ -44,7 +44,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessDefinitionRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessDefinition, EntityModel<CloudProcessDefinition>> {
+    implements RepresentationModelAssembler<ProcessDefinition, EntityModel<CloudProcessDefinition>>
+{
 
     private ToCloudProcessDefinitionConverter converter;
 
@@ -57,10 +58,10 @@ public class ProcessDefinitionRepresentationModelAssembler
         ExtendedCloudProcessDefinition cloudProcessDefinition = converter.from(processDefinition);
         Link selfRel = linkTo(
             methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())
-        )
-            .withSelfRel();
-        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null))
-            .withRel("startProcess");
+        ).withSelfRel();
+        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel(
+            "startProcess"
+        );
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return EntityModel.of(cloudProcessDefinition, selfRel, startProcessLink, homeLink);
     }

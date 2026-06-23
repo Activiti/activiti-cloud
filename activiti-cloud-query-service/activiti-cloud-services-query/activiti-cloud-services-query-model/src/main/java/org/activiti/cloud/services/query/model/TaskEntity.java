@@ -624,7 +624,10 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public Optional<TaskVariableEntity> getVariable(String variableName) {
-        return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
+        return getVariables()
+            .stream()
+            .filter(v -> v.getName().equals(variableName))
+            .findFirst();
     }
 
     public boolean isInFinalState() {

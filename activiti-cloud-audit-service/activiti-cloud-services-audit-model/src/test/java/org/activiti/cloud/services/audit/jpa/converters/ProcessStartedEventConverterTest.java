@@ -133,8 +133,9 @@ public class ProcessStartedEventConverterTest {
         doReturn(apiEvent).when(eventConverter).createAPIEvent(auditEventEntity);
 
         CloudProcessStartedEventImpl updatedApiEvent = new CloudProcessStartedEventImpl();
-        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity))
-            .willReturn(updatedApiEvent);
+        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity)).willReturn(
+            updatedApiEvent
+        );
 
         //when
         CloudRuntimeEvent convertedEvent = eventConverter.convertToAPI(auditEventEntity);

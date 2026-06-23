@@ -55,7 +55,9 @@ abstract class SpecificationFeatureToggleTestSupport {
         CriteriaQuery<?> query = mock(CriteriaQuery.class, Answers.RETURNS_DEEP_STUBS);
         CriteriaBuilder cb = mock(CriteriaBuilder.class, Answers.RETURNS_DEEP_STUBS);
         // toPredicate needs these to drive control flow without NPEs
-        lenient().when(query.getResultType()).thenAnswer(inv -> Object.class);
+        lenient()
+            .when(query.getResultType())
+            .thenAnswer(inv -> Object.class);
         lenient().when(query.getGroupList()).thenReturn(List.of());
         return new CriteriaContext<>(root, query, cb);
     }

@@ -100,16 +100,14 @@ public class ProcessDefinitionController {
         );
 
         String userId = securityManager.getAuthenticatedUserId();
-        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity.processDefinitionEntity.candidateStarterUsers
-            .any()
-            .userId.eq(userId);
+        BooleanExpression candidateStarterExpression =
+            QProcessDefinitionEntity.processDefinitionEntity.candidateStarterUsers.any().userId.eq(userId);
 
         List<String> groupIds = getCurrentUserGroupsIncludingEveryOneGroup();
         if (!groupIds.isEmpty()) {
-            candidateStarterExpression =
-                candidateStarterExpression.or(
-                    QProcessDefinitionEntity.processDefinitionEntity.candidateStarterGroups.any().groupId.in(groupIds)
-                );
+            candidateStarterExpression = candidateStarterExpression.or(
+                QProcessDefinitionEntity.processDefinitionEntity.candidateStarterGroups.any().groupId.in(groupIds)
+            );
         }
 
         return candidateStarterExpression.and(extendedPredicate);

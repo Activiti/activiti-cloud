@@ -98,7 +98,10 @@ class ConnectorIncidentEventHandlerTest {
 
         handler.accept(event);
 
-        verify(incidentService)
-            .createAndSendIncidentEvent((IntegrationContext) null, exception, IncidentSeverity.WARNING);
+        verify(incidentService).createAndSendIncidentEvent(
+            (IntegrationContext) null,
+            exception,
+            IncidentSeverity.WARNING
+        );
     }
 }

@@ -333,11 +333,17 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Que
     }
 
     public Optional<ProcessVariableEntity> getVariable(String variableName) {
-        return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
+        return getVariables()
+            .stream()
+            .filter(v -> v.getName().equals(variableName))
+            .findFirst();
     }
 
     public Optional<BPMNSequenceFlowEntity> getSequenceFlowByEventId(String eventId) {
-        return getSequenceFlows().stream().filter(v -> eventId.equals(v.getEventId())).findFirst();
+        return getSequenceFlows()
+            .stream()
+            .filter(v -> eventId.equals(v.getEventId()))
+            .findFirst();
     }
 
     @Override

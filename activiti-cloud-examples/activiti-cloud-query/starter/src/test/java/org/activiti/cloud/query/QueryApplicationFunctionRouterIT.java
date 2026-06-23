@@ -46,14 +46,23 @@ public class QueryApplicationFunctionRouterIT extends QueryApplicationIT {
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getFunctionRoutes())
-            .containsOnly("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
-        assertThat(functionRouter.destinations())
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
-        assertThat(functionRouter.destinations("functionRouterInput"))
-            .containsOnlyKeys("auditConsumer", "queryConsumer");
-        assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
-            .containsOnlyKeys("graphQLEngineEventsConsumerSource");
+        assertThat(functionRouter.getFunctionRoutes()).containsOnly(
+            "auditConsumer",
+            "queryConsumer",
+            "graphQLEngineEventsConsumerSource"
+        );
+        assertThat(functionRouter.destinations()).containsOnlyKeys(
+            "auditConsumer",
+            "queryConsumer",
+            "graphQLEngineEventsConsumerSource"
+        );
+        assertThat(functionRouter.destinations("functionRouterInput")).containsOnlyKeys(
+            "auditConsumer",
+            "queryConsumer"
+        );
+        assertThat(functionRouter.destinations("functionRouterAnonymousInput")).containsOnlyKeys(
+            "graphQLEngineEventsConsumerSource"
+        );
         assertThat(functionRouter.registrations())
             .containsOnlyKeys("engineEvents")
             .satisfies(registrations ->

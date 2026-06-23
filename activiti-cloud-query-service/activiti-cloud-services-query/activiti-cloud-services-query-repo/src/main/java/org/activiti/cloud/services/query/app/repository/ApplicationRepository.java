@@ -31,7 +31,8 @@ public interface ApplicationRepository
         PagingAndSortingRepository<ApplicationEntity, String>,
         QuerydslPredicateExecutor<ApplicationEntity>,
         QuerydslBinderCustomizer<QApplicationEntity>,
-        CrudRepository<ApplicationEntity, String> {
+        CrudRepository<ApplicationEntity, String>
+{
     boolean existsByNameAndVersion(String name, String version);
 
     @Override

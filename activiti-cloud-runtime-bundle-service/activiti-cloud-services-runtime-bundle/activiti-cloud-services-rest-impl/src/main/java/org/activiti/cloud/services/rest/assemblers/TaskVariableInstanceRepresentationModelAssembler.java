@@ -28,7 +28,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class TaskVariableInstanceRepresentationModelAssembler
-    implements RepresentationModelAssembler<VariableInstance, EntityModel<CloudVariableInstance>> {
+    implements RepresentationModelAssembler<VariableInstance, EntityModel<CloudVariableInstance>>
+{
 
     private ToCloudVariableInstanceConverter converter;
 
@@ -41,10 +42,10 @@ public class TaskVariableInstanceRepresentationModelAssembler
         CloudVariableInstance cloudVariableInstance = converter.from(taskVariable);
         Link globalVariables = linkTo(
             methodOn(TaskVariableControllerImpl.class).getVariables(cloudVariableInstance.getTaskId())
-        )
-            .withRel("variables");
-        Link taskRel = linkTo(methodOn(TaskControllerImpl.class).getTaskById(cloudVariableInstance.getTaskId()))
-            .withRel("task");
+        ).withRel("variables");
+        Link taskRel = linkTo(
+            methodOn(TaskControllerImpl.class).getTaskById(cloudVariableInstance.getTaskId())
+        ).withRel("task");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return EntityModel.of(cloudVariableInstance, globalVariables, taskRel, homeLink);
     }

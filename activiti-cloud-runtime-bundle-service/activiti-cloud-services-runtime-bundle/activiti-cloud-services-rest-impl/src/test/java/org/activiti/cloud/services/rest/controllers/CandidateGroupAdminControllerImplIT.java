@@ -125,10 +125,11 @@ class CandidateGroupAdminControllerImplIT {
         List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result =
-            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = this.mockMvc.perform(
+                get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .inPath("list.entries[0].entry.group")
@@ -143,10 +144,11 @@ class CandidateGroupAdminControllerImplIT {
         List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result =
-            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = this.mockMvc.perform(
+                get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .inPath("_embedded.candidateGroups[0].group")

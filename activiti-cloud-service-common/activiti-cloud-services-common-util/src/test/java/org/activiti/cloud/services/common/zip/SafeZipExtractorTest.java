@@ -83,8 +83,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldRejectDirectoryWithHiddenPayload() throws IOException {
         byte[] payload = ZipTestFixtures.incompressibleBytes(1024 * 1024);
         byte[] zip = ZipTestFixtures.zipBytesWithDirectoryPayload("trap/", payload);
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(512 * 1024)
             .maxTotalDecompressedBytes(MB)
@@ -104,8 +103,7 @@ class SafeZipExtractorTest {
             .appendFolder("assets")
             .appendFile("payload".getBytes(UTF_8), "assets", "file.json")
             .toZipBytes();
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -127,8 +125,7 @@ class SafeZipExtractorTest {
             ZipTestFixtures.directory("folder/"),
             ZipTestFixtures.entry("folder/file.json", "{}")
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -155,8 +152,7 @@ class SafeZipExtractorTest {
     @Test
     void extractEntries_shouldThrow_whenHierarchicalPathIsUnsafe() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("../evil.json", "{}"));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -172,8 +168,7 @@ class SafeZipExtractorTest {
     @Test
     void extractEntries_shouldThrow_whenHierarchicalPathUsesWindowsDriveLetter() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("C:/Windows/evil.json", "{}"));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -189,8 +184,7 @@ class SafeZipExtractorTest {
     @Test
     void extractEntries_shouldAcceptJson_whenAllowedExtensionsUseUpperCase() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("file.json", "{}"));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -235,8 +229,7 @@ class SafeZipExtractorTest {
     @Test
     void extractEntries_shouldAllowAnyExtension_whenFilterDisabled() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("data.bin", "ok"));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -321,8 +314,7 @@ class SafeZipExtractorTest {
     @Test
     void extractEntries_shouldThrow_whenEntryExceedsLimitDuringRead() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("big.json", new byte[64]));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(16)
             .maxTotalDecompressedBytes(1024)
@@ -350,8 +342,7 @@ class SafeZipExtractorTest {
             ZipTestFixtures.entry("data.json", "{}")
         );
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -384,8 +375,7 @@ class SafeZipExtractorTest {
         byte[] zip = ZipTestFixtures.zipBytes(
             ZipTestFixtures.entry("nested.zip", ZipTestFixtures.zipLocalFileHeaderBytes())
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -401,8 +391,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldNotTreatShortPayloadAsNestedZip() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("tiny.json", new byte[] { 0x50, 0x4b }));
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -418,8 +407,7 @@ class SafeZipExtractorTest {
             ZipTestFixtures.entry("data.json", new byte[] { 0x00, 0x01, 0x02, 0x03 })
         );
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -433,8 +421,7 @@ class SafeZipExtractorTest {
     void extractEntries_shouldThrow_whenFileExtensionIsMissing() throws IOException {
         byte[] zip = ZipTestFixtures.zipBytes(ZipTestFixtures.entry("README", "text"));
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -451,8 +438,7 @@ class SafeZipExtractorTest {
         byte[] zip = ZipTestFixtures.zipBytes(
             ZipTestFixtures.entry("bundle.zip", ZipTestFixtures.zipLocalFileHeaderBytes())
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(MB)
             .maxTotalDecompressedBytes(MB)
@@ -521,8 +507,7 @@ class SafeZipExtractorTest {
     }
 
     private static SafeZipLimits modelImportLimits(Predicate<byte[]> executableContentCheck) {
-        return SafeZipLimits
-            .builder()
+        return SafeZipLimits.builder()
             .maxEntries(2)
             .maxEntryDecompressedBytes(10 * MB)
             .maxTotalDecompressedBytes(10 * MB)

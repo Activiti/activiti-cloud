@@ -85,9 +85,9 @@ public class ProcessInstanceDiagramController extends ProcessInstanceDiagramCont
         ) {
             LOGGER.debug(
                 "User " +
-                securityManager.getAuthenticatedUserId() +
-                " not permitted to access definition " +
-                processInstanceEntity.getProcessDefinitionKey()
+                    securityManager.getAuthenticatedUserId() +
+                    " not permitted to access definition " +
+                    processInstanceEntity.getProcessDefinitionKey()
             );
             throw new ActivitiForbiddenException(
                 "Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey()

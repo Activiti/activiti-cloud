@@ -429,8 +429,9 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
             .isNotEmpty()
             .allSatisfy(proc -> {
                 assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
-                assertThat(proc.getServiceName().replace("-", ""))
-                    .isEqualToIgnoringCase("test-cmd-endpoint".replace("-", ""));
+                assertThat(proc.getServiceName().replace("-", "")).isEqualToIgnoringCase(
+                    "test-cmd-endpoint".replace("-", "")
+                );
             });
 
         assertThat(processInstanceRepository.findAllById(toIterable(result))).hasSize(2);
@@ -700,6 +701,10 @@ public class ActivitiRestrictedKeysSupplierProviderTest {
     }
 
     private <ID> Iterable<ID> toIterable(Optional<List<Object>> list) {
-        return list.get().stream().map(it -> (ID) it).toList();
+        return list
+            .get()
+            .stream()
+            .map(it -> (ID) it)
+            .toList();
     }
 }

@@ -118,14 +118,13 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
         //given
         TaskEntity taskEntity = buildDefaultTask();
 
-        given(taskRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(
-                    Collections.singletonList(taskEntity),
-                    new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
-                    12
-                )
-            );
+        given(taskRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            new PageImpl<>(
+                Collections.singletonList(taskEntity),
+                new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                12
+            )
+        );
 
         //when
         MvcResult result = mockMvc
@@ -133,8 +132,7 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
                 get(
                     "/admin/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
                     taskEntity.getProcessInstanceId()
-                )
-                    .accept(MediaType.APPLICATION_JSON)
+                ).accept(MediaType.APPLICATION_JSON)
             )
             //then
             .andExpect(status().isOk())

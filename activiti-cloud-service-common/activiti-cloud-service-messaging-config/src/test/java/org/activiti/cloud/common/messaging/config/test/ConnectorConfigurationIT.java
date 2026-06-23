@@ -297,11 +297,9 @@ public class ConnectorConfigurationIT {
         // when
         Object condition = AnnotationUtils.getDefaultValue(ConnectorBinding.class, "condition");
         // then
-        Assertions
-            .assertThat(condition)
-            .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)"
-            );
+        Assertions.assertThat(condition).isEqualTo(
+            "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and (T(Integer).valueOf(headers['appVersion']) <= ${application.max.version} or ${application.max.version} == -1)"
+        );
     }
 
     @Test
@@ -310,11 +308,9 @@ public class ConnectorConfigurationIT {
         String expression = resolveExpression(condition);
 
         // then
-        Assertions
-            .assertThat(expression)
-            .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= 17 or 17 == -1)"
-            );
+        Assertions.assertThat(expression).isEqualTo(
+            "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= 17 or 17 == -1)"
+        );
     }
 
     @Test
@@ -325,11 +321,9 @@ public class ConnectorConfigurationIT {
             .replace("${application.max.version}", "-1");
 
         // then
-        Assertions
-            .assertThat(expressionWithDisabledMax)
-            .isEqualTo(
-                "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= -1 or -1 == -1)"
-            );
+        Assertions.assertThat(expressionWithDisabledMax).isEqualTo(
+            "headers.containsKey('appVersion') and T(Integer).valueOf(headers['appVersion']) >= 1 and (T(Integer).valueOf(headers['appVersion']) <= -1 or -1 == -1)"
+        );
     }
 
     @Test
@@ -376,8 +370,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldDiscardMessageWithInvalidAppVersionCondition() {
         // given
-        Message<?> message = MessageBuilder
-            .withPayload(Map.of())
+        Message<?> message = MessageBuilder.withPayload(Map.of())
             .setHeader("appVersion", "20")
             .setHeader("resultDestination", "commandResults")
             .build();
@@ -391,8 +384,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldHandleMessageWithValidAppVersion() {
         // given
-        Message<?> message = MessageBuilder
-            .withPayload(Map.of())
+        Message<?> message = MessageBuilder.withPayload(Map.of())
             .setHeader("appVersion", "6")
             .setHeader("resultDestination", "commandResults")
             .setHeader("connectorType", "engineEvents")
@@ -413,8 +405,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldDiscardMessageWithInValidAppVersion() {
         // given
-        Message<?> message = MessageBuilder
-            .withPayload(Map.of())
+        Message<?> message = MessageBuilder.withPayload(Map.of())
             .setHeader("appVersion", "20")
             .setHeader("resultDestination", "commandResults")
             .build();
@@ -430,8 +421,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testConnectorsResolvesFunctionAndReplies() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("TestC")
+        Message<String> message = MessageBuilder.withPayload("TestC")
             .setHeader("type", "TestAuditConsumerC")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", "commandResults")
@@ -454,8 +444,7 @@ public class ConnectorConfigurationIT {
         connectorTestMyErrorHandlerCounter.set(0);
 
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("TestC")
+        Message<String> message = MessageBuilder.withPayload("TestC")
             .setHeader("type", "myErrorHandler")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", "commandResults")
@@ -469,9 +458,9 @@ public class ConnectorConfigurationIT {
         // then
         verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
 
-        Assertions
-            .assertThat(myErrorHandler.getReference().get().getPayload())
-            .hasRootCauseMessage("Test Audit Consumer Error");
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload()).hasRootCauseMessage(
+            "Test Audit Consumer Error"
+        );
 
         assertThat(connectorTestMyErrorHandlerCounter.get()).isEqualTo(1);
     }
@@ -479,8 +468,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testConnectorsDemultiplexGetRequests() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("GetRequest")
+        Message<String> message = MessageBuilder.withPayload("GetRequest")
             .setHeader("connectorType", "rest-connector.GET")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", INTEGRATION_RESULTS)
@@ -503,8 +491,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testConnectorsDemultiplexPostRequests() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("PostRequest")
+        Message<String> message = MessageBuilder.withPayload("PostRequest")
             .setHeader("connectorType", "rest-connector.POST")
             .setHeader("appVersion", "1")
             .setHeader("resultDestination", INTEGRATION_RESULTS)
@@ -528,8 +515,7 @@ public class ConnectorConfigurationIT {
     public void testShouldDiscardMessageWithInValidAppVersionWithRetryWithRepublishEvent() {
         // given
         byte[] payload = "Test retry".getBytes();
-        Message<?> message = MessageBuilder
-            .withPayload(payload)
+        Message<?> message = MessageBuilder.withPayload(payload)
             .setHeader("appVersion", "20")
             .setHeader("resultDestination", "commandResults")
             .setHeader("spring.cloud.function.destination", "script.EXECUTE")
@@ -540,27 +526,26 @@ public class ConnectorConfigurationIT {
         input.send(message, "script.EXECUTE");
 
         //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
-        await()
-            .untilAsserted(() -> {
-                // then
-                verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
-                List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
-                Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
-                Assertions
-                    .assertThat(retryMessages)
-                    .extracting("headers")
-                    .extracting("x-retry-count")
-                    .containsExactly(1, 2);
+        await().untilAsserted(() -> {
+            // then
+            verify(streamBridge, times(2)).send(eq("script.EXECUTE"), retryMessageCaptor.capture());
+            List<GenericMessage> retryMessages = retryMessageCaptor.getAllValues();
+            Assertions.assertThat(retryMessages).extracting("payload").containsExactly(payload, payload);
+            Assertions.assertThat(retryMessages)
+                .extracting("headers")
+                .extracting("x-retry-count")
+                .containsExactly(1, 2);
 
-                Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
-                assertThat(reply).isNull();
-            });
+            Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
+            assertThat(reply).isNull();
+        });
     }
 
     @Test
     void shouldUseCaseInsensitiveMatchForBindingsProperties() {
-        assertThat(bindingServiceProperties.getBindings().get("integrationRequests"))
-            .isEqualTo(bindingServiceProperties.getBindings().get("integrationrequests"));
+        assertThat(bindingServiceProperties.getBindings().get("integrationRequests")).isEqualTo(
+            bindingServiceProperties.getBindings().get("integrationrequests")
+        );
     }
 
     @Captor

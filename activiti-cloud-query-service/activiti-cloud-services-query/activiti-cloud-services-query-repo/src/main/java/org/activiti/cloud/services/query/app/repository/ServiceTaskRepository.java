@@ -33,7 +33,8 @@ public interface ServiceTaskRepository
         PagingAndSortingRepository<ServiceTaskEntity, String>,
         QuerydslPredicateExecutor<ServiceTaskEntity>,
         QuerydslBinderCustomizer<QServiceTaskEntity>,
-        CrudRepository<ServiceTaskEntity, String> {
+        CrudRepository<ServiceTaskEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QServiceTaskEntity root) {
         whitelist(root).apply(bindings);

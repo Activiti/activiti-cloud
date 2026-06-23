@@ -62,14 +62,13 @@ class AuditCommandIdIT {
 
         producer.send(event);
 
-        await()
-            .untilAsserted(() -> {
-                var entities = repository.findAllByOrderByTimestampDesc();
-                assertThat(entities)
-                    .hasSize(1)
-                    .first()
-                    .satisfies(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isEqualTo(commandId));
-            });
+        await().untilAsserted(() -> {
+            var entities = repository.findAllByOrderByTimestampDesc();
+            assertThat(entities)
+                .hasSize(1)
+                .first()
+                .satisfies(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isEqualTo(commandId));
+        });
     }
 
     @Test
@@ -83,14 +82,13 @@ class AuditCommandIdIT {
 
         producer.send(event);
 
-        await()
-            .untilAsserted(() -> {
-                var entities = repository.findAllByOrderByTimestampDesc();
-                assertThat(entities)
-                    .hasSize(1)
-                    .first()
-                    .satisfies(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isNull());
-            });
+        await().untilAsserted(() -> {
+            var entities = repository.findAllByOrderByTimestampDesc();
+            assertThat(entities)
+                .hasSize(1)
+                .first()
+                .satisfies(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isNull());
+        });
     }
 
     @Test
@@ -112,12 +110,11 @@ class AuditCommandIdIT {
 
         producer.send(firstEvent, secondEvent);
 
-        await()
-            .untilAsserted(() -> {
-                var entities = repository.findAllByOrderByTimestampDesc();
-                assertThat(entities)
-                    .hasSize(2)
-                    .allSatisfy(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isEqualTo(commandId));
-            });
+        await().untilAsserted(() -> {
+            var entities = repository.findAllByOrderByTimestampDesc();
+            assertThat(entities)
+                .hasSize(2)
+                .allSatisfy(entity -> assertThat(((AuditEventEntity) entity).getCommandId()).isEqualTo(commandId));
+        });
     }
 }

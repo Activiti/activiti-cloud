@@ -33,7 +33,8 @@ public interface TaskCandidateGroupRepository
         PagingAndSortingRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>,
         QuerydslPredicateExecutor<TaskCandidateGroupEntity>,
         QuerydslBinderCustomizer<QTaskCandidateGroupEntity>,
-        CrudRepository<TaskCandidateGroupEntity, TaskCandidateGroupId> {
+        CrudRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>
+{
     Set<TaskCandidateGroupEntity> findByTaskIdIn(Set<String> collect);
 
     @Override

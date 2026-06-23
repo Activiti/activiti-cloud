@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
 public class StartMessageDeployedEventMessageProducer
-    implements ProcessRuntimeEventListener<StartMessageDeployedEvent> {
+    implements ProcessRuntimeEventListener<StartMessageDeployedEvent>
+{
 
     private static final Logger logger = LoggerFactory.getLogger(BpmnMessageSentEventMessageProducer.class);
 
@@ -50,8 +51,9 @@ public class StartMessageDeployedEventMessageProducer
 
         StartMessageSubscription messageSubscription = event.getEntity().getMessageSubscription();
 
-        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder
-            .messageEvent(messageSubscription.getEventName())
+        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(
+            messageSubscription.getEventName()
+        )
             .withCorrelationKey(messageSubscription.getConfiguration())
             .build();
 

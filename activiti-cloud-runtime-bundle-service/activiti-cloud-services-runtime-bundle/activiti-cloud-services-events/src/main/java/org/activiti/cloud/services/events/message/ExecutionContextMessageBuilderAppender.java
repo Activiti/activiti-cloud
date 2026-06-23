@@ -79,26 +79,22 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
     protected <P> MessageBuilder<P> applyParent(ExecutionEntity processInstance, MessageBuilder<P> request) {
         // Let's do it lazy way
         if (processInstance.getSuperExecutionId() != null) {
-            Optional
-                .ofNullable(processInstance.getSuperExecution())
-                .ifPresent(superExecution -> {
-                    request.setHeader(
-                        ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID,
-                        superExecution.getProcessInstanceId()
-                    );
+            Optional.ofNullable(processInstance.getSuperExecution()).ifPresent(superExecution -> {
+                request.setHeader(
+                    ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID,
+                    superExecution.getProcessInstanceId()
+                );
 
-                    // Let's do it lazy way
-                    if (superExecution.getProcessInstanceId() != null) {
-                        Optional
-                            .ofNullable(superExecution.getProcessInstance())
-                            .ifPresent(parentInstance -> {
-                                request.setHeader(
-                                    ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME,
-                                    parentInstance.getName()
-                                );
-                            });
-                    }
-                });
+                // Let's do it lazy way
+                if (superExecution.getProcessInstanceId() != null) {
+                    Optional.ofNullable(superExecution.getProcessInstance()).ifPresent(parentInstance -> {
+                        request.setHeader(
+                            ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME,
+                            parentInstance.getName()
+                        );
+                    });
+                }
+            });
         }
 
         return request;

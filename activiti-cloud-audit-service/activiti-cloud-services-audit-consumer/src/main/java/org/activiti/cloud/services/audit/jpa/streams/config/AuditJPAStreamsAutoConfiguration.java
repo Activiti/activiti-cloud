@@ -51,8 +51,7 @@ public class AuditJPAStreamsAutoConfiguration {
         return message -> {
             handler.receiveCloudRuntimeEvent(
                 message.getHeaders(),
-                Optional
-                    .ofNullable(message.getPayload())
+                Optional.ofNullable(message.getPayload())
                     .orElse(Collections.emptyList())
                     .toArray(new CloudRuntimeEvent[0])
             );

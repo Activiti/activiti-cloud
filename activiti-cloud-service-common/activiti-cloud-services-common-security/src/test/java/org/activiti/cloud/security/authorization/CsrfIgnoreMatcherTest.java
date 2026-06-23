@@ -30,7 +30,8 @@ class CsrfIgnoreMatcherTest {
 
     @Test
     void should_matchPublicURLsPatterns() {
-        nonPublicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse()
+        nonPublicUrlsPatterns.forEach(url ->
+            assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse()
         );
     }
 

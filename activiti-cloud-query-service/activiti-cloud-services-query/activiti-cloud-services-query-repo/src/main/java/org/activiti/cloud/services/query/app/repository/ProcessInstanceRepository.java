@@ -39,7 +39,8 @@ public interface ProcessInstanceRepository
         QuerydslPredicateExecutor<ProcessInstanceEntity>,
         QuerydslBinderCustomizer<QProcessInstanceEntity>,
         CustomizedProcessInstanceRepository,
-        CrudRepository<ProcessInstanceEntity, String> {
+        CrudRepository<ProcessInstanceEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QProcessInstanceEntity root) {
         whitelist(root).apply(bindings);

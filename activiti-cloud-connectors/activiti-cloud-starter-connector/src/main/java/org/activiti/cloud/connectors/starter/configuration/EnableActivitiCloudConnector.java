@@ -28,5 +28,4 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @Inherited
 @EnableDiscoveryClient
 @EnableAutoConfiguration
-public @interface EnableActivitiCloudConnector {
-}
+public @interface EnableActivitiCloudConnector {}

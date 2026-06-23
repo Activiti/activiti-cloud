@@ -35,13 +35,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class ActivitiGraphQlFieldVisibilityProvider implements Supplier<GraphqlFieldVisibility> {
 
-    private static final BlockedFields blockAllFields = BlockedFields
-        .newBlock()
+    private static final BlockedFields blockAllFields = BlockedFields.newBlock()
         .addCompiledPattern(Pattern.compile(".*"))
         .build();
 
-    private static final GraphqlFieldVisibility allowAllFields = VisibleFields
-        .newFieldsVisibility()
+    private static final GraphqlFieldVisibility allowAllFields = VisibleFields.newFieldsVisibility()
         .addCompiledPattern(Pattern.compile(".*"))
         .build();
 
@@ -54,17 +52,16 @@ public class ActivitiGraphQlFieldVisibilityProvider implements Supplier<GraphqlF
     public ActivitiGraphQlFieldVisibilityProvider(ActivitiGraphQlJPASchemaProperties properties) {
         this.properties = properties.getFieldsVisibility();
 
-        Optional
-            .ofNullable(properties.getRestrictedKeysProvider())
+        Optional.ofNullable(properties.getRestrictedKeysProvider())
             .map(ActivitiGraphQlJPASchemaProperties.RestrictedKeysProviderProperties::getRolePrefix)
             .ifPresent(rolePrefix -> this.rolePrefix = rolePrefix);
     }
 
     @Override
     public GraphqlFieldVisibility get() {
-        var authenticationToken = Optional
-            .ofNullable(SecurityContextHolder.getContext())
-            .map(SecurityContext::getAuthentication);
+        var authenticationToken = Optional.ofNullable(SecurityContextHolder.getContext()).map(
+            SecurityContext::getAuthentication
+        );
 
         if (authenticationToken.isEmpty()) {
             throw new AccessDeniedException("User is not allowed to access this resource");
@@ -94,8 +91,7 @@ public class ActivitiGraphQlFieldVisibilityProvider implements Supplier<GraphqlF
 
     private Function<Set<Pattern>, GraphqlFieldVisibility> toGraphQlFieldVisibility() {
         return patterns ->
-            VisibleFields
-                .newFieldsVisibility()
+            VisibleFields.newFieldsVisibility()
                 .addCompiledPatterns(patterns)
                 .addCompiledPattern(Pattern.compile("(?!JPA\\.).*"))
                 .build();

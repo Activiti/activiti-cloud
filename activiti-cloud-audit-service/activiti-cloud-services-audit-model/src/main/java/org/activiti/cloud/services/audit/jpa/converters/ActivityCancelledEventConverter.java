@@ -41,7 +41,8 @@ public class ActivityCancelledEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ActivityCancelledAuditEventEntity activityCancelledAuditEventEntity = (ActivityCancelledAuditEventEntity) auditEventEntity;
+        ActivityCancelledAuditEventEntity activityCancelledAuditEventEntity =
+            (ActivityCancelledAuditEventEntity) auditEventEntity;
 
         return new CloudBPMNActivityCancelledEventImpl(
             activityCancelledAuditEventEntity.getEventId(),

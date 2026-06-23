@@ -34,7 +34,8 @@ public interface TaskCandidateUserRepository
         PagingAndSortingRepository<TaskCandidateUserEntity, TaskCandidateUserId>,
         QuerydslPredicateExecutor<TaskCandidateUserEntity>,
         QuerydslBinderCustomizer<QTaskCandidateUserEntity>,
-        CrudRepository<TaskCandidateUserEntity, TaskCandidateUserId> {
+        CrudRepository<TaskCandidateUserEntity, TaskCandidateUserId>
+{
     Set<TaskCandidateUserEntity> findByTaskIdIn(Collection<String> taskIds);
 
     @Override

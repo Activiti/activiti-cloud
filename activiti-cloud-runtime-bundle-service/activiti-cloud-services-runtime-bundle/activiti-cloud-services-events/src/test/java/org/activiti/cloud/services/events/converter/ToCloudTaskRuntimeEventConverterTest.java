@@ -133,8 +133,9 @@ class ToCloudTaskRuntimeEventConverterTest {
             .returns("service_user", e -> e.getActor());
 
         verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(this.taskAuditServiceInfoAppender, never())
-            .appendAuditServiceInfoTo(any(CloudTaskCompletedEventImpl.class));
+        verify(this.taskAuditServiceInfoAppender, never()).appendAuditServiceInfoTo(
+            any(CloudTaskCompletedEventImpl.class)
+        );
     }
 
     @Test

@@ -420,25 +420,33 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name) {
-        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name) {
-        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
     }
 
     @Override

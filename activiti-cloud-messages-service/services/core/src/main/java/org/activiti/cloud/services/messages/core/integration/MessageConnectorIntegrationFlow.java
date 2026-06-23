@@ -83,10 +83,8 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
                         .enrichHeaders(enricher ->
                             enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression())
                         )
-                        .filter(
-                            Message.class,
-                            this::filterMessage,
-                            filterSpec -> filterSpec.id(FILTER_MESSAGE).discardChannel(DISCARD_CHANNEL)
+                        .filter(Message.class, this::filterMessage, filterSpec ->
+                            filterSpec.id(FILTER_MESSAGE).discardChannel(DISCARD_CHANNEL)
                         )
                         .enrichHeaders(enricher ->
                             enricher.id(ENRICH_HEADERS).headerFunction(CORRELATION_ID, this::enrichHeaders)

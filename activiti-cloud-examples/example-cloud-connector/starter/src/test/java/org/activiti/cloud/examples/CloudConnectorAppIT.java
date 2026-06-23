@@ -118,10 +118,12 @@ public class CloudConnectorAppIT {
         assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(HEADERS_CONNECTOR_CONSUMER))).isNotNull();
         assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(MOVIES_DESCRIPTION_CONSUMER))).isNotNull();
         assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(MULTI_INSTANCE_CONSUMER))).isNotNull();
-        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_BPMN_ERROR_CONNECTOR_CONSUMER)))
-            .isNotNull();
-        assertThat(functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_ERROR_CONNECTOR_CONSUMER)))
-            .isNotNull();
+        assertThat(
+            functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_BPMN_ERROR_CONNECTOR_CONSUMER))
+        ).isNotNull();
+        assertThat(
+            functionCatalog.<Object>lookup(getRegisteredConnectorName(TEST_ERROR_CONNECTOR_CONSUMER))
+        ).isNotNull();
     }
 
     @Test
@@ -134,10 +136,12 @@ public class CloudConnectorAppIT {
 
     @Test
     void rabbitBinderCompression() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
-            .isEqualTo(9);
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
-            .isTrue();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class)
+        ).isEqualTo(9);
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class)
+        ).isTrue();
     }
 
     @Test
@@ -153,11 +157,13 @@ public class CloudConnectorAppIT {
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isNullOrEmpty();
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isNullOrEmpty();
     }
 
     private static String getRegisteredConnectorName(String functionName) {

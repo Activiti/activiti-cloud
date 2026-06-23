@@ -29,8 +29,9 @@ public class TestApplication {
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
-            .waitingFor(Wait.forListeningPort());
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine")).waitingFor(
+            Wait.forListeningPort()
+        );
     }
 
     public static void main(String[] args) {

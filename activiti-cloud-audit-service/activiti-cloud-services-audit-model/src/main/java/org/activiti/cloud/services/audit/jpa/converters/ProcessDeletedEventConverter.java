@@ -54,7 +54,8 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ProcessDeletedAuditEventEntity processDeletedAuditEventEntity = (ProcessDeletedAuditEventEntity) auditEventEntity;
+        ProcessDeletedAuditEventEntity processDeletedAuditEventEntity =
+            (ProcessDeletedAuditEventEntity) auditEventEntity;
 
         return new CloudProcessDeletedEventImpl(
             processDeletedAuditEventEntity.getEventId(),

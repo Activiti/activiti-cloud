@@ -82,8 +82,9 @@ public class CandidateUserControllerImpl implements CandidateUserController {
         return resourcesAssembler.toCollectionModel(
             toCandidateUserConverter.from(taskRuntime.userCandidates(taskId)),
             userCandidatesRepresentationModelAssembler,
-            linkTo(methodOn(this.getClass()).getUserCandidates(userCandidatesRepresentationModelAssembler.getTaskId()))
-                .withSelfRel()
+            linkTo(
+                methodOn(this.getClass()).getUserCandidates(userCandidatesRepresentationModelAssembler.getTaskId())
+            ).withSelfRel()
         );
     }
 }

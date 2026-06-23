@@ -117,8 +117,9 @@ public class ApplicationAdminControllerIT {
     public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(0, 10);
-        given(applicationRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()), pageRequest, 1));
+        given(applicationRepository.findAll(any(), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()), pageRequest, 1)
+        );
 
         //when
         mockMvc
@@ -130,10 +131,9 @@ public class ApplicationAdminControllerIT {
     @Test
     public void shouldReturnDeployedApplicationsWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        given(applicationRepository.findAll(any(), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()), PageRequest.of(1, 10), 11)
-            );
+        given(applicationRepository.findAll(any(), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultApplicationEntity()), PageRequest.of(1, 10), 11)
+        );
 
         //when
         mockMvc

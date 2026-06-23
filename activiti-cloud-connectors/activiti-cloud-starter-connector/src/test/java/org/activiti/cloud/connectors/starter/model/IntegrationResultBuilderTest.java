@@ -52,8 +52,7 @@ public class IntegrationResultBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationResult resultEvent = IntegrationResultBuilder
-            .resultFor(integrationRequestEvent, connectorProperties)
+        IntegrationResult resultEvent = IntegrationResultBuilder.resultFor(integrationRequestEvent, connectorProperties)
             .withOutboundVariables(Collections.singletonMap(VAR, VALUE))
             .build();
 
@@ -80,13 +79,13 @@ public class IntegrationResultBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        Message<IntegrationResult> message = IntegrationResultBuilder
-            .resultFor(integrationRequestEvent, connectorProperties)
-            .buildMessage();
+        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(
+            integrationRequestEvent,
+            connectorProperties
+        ).buildMessage();
 
         //then
-        Assertions
-            .assertThat(message.getHeaders())
+        Assertions.assertThat(message.getHeaders())
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
     }

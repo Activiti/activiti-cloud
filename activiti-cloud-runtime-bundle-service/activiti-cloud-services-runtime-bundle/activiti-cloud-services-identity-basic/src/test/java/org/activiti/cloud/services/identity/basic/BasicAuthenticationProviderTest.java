@@ -73,8 +73,9 @@ public class BasicAuthenticationProviderTest {
 
         when(userDetailsService.loadUserByUsername("differentuser")).thenReturn(user);
 
-        assertThatExceptionOfType(BadCredentialsException.class)
-            .isThrownBy(() -> basicAuthenticationProvider.authenticate(authentication));
+        assertThatExceptionOfType(BadCredentialsException.class).isThrownBy(() ->
+            basicAuthenticationProvider.authenticate(authentication)
+        );
     }
 
     @Test

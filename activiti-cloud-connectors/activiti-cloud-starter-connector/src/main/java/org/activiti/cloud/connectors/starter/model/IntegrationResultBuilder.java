@@ -31,8 +31,10 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
-        this.integrationResult =
-            new IntegrationResultImpl(integrationRequest, integrationRequest.getIntegrationContext());
+        this.integrationResult = new IntegrationResultImpl(
+            integrationRequest,
+            integrationRequest.getIntegrationContext()
+        );
         if (connectorProperties != null) {
             this.integrationResult.setAppName(connectorProperties.getAppName());
             this.integrationResult.setAppVersion(connectorProperties.getAppVersion());
@@ -64,8 +66,7 @@ public class IntegrationResultBuilder {
     }
 
     public MessageBuilder<IntegrationResult> getMessageBuilder() {
-        return MessageBuilder
-            .withPayload((IntegrationResult) integrationResult)
+        return MessageBuilder.withPayload((IntegrationResult) integrationResult)
             .setHeader("targetAppName", requestEvent.getAppName())
             .setHeader("targetService", requestEvent.getServiceFullName());
     }

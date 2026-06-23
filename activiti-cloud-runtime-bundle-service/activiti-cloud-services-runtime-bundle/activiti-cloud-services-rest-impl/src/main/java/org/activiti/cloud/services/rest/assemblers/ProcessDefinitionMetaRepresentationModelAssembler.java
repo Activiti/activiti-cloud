@@ -28,21 +28,22 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessDefinitionMetaRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessDefinitionMeta, EntityModel<ProcessDefinitionMeta>> {
+    implements RepresentationModelAssembler<ProcessDefinitionMeta, EntityModel<ProcessDefinitionMeta>>
+{
 
     @Override
     public EntityModel<ProcessDefinitionMeta> toModel(ProcessDefinitionMeta processDefinitionMeta) {
         Link metadata = linkTo(
-            methodOn(ProcessDefinitionMetaControllerImpl.class)
-                .getProcessDefinitionMetadata(processDefinitionMeta.getId())
-        )
-            .withRel("meta");
+            methodOn(ProcessDefinitionMetaControllerImpl.class).getProcessDefinitionMetadata(
+                processDefinitionMeta.getId()
+            )
+        ).withRel("meta");
         Link selfRel = linkTo(
             methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(processDefinitionMeta.getId())
-        )
-            .withSelfRel();
-        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null))
-            .withRel("startProcess");
+        ).withSelfRel();
+        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel(
+            "startProcess"
+        );
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
 
         return EntityModel.of(processDefinitionMeta, metadata, selfRel, startProcessLink, homeLink);

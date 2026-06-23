@@ -70,8 +70,9 @@ public class TaskControllerHelperIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Autowired
     TaskControllerHelper taskControllerHelper;
@@ -114,8 +115,7 @@ public class TaskControllerHelperIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<String> processVariableKeys = IntStream
-            .range(0, variables.size())
+        List<String> processVariableKeys = IntStream.range(0, variables.size())
             .filter(i -> i % 2 == 0)
             .mapToObj(i -> processInstanceEntity.getProcessDefinitionKey() + "/name" + i)
             .toList();
@@ -137,14 +137,16 @@ public class TaskControllerHelperIT {
                 taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
             );
 
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .allSatisfy(task ->
-                assertThat(task.getProcessVariables())
-                    .extracting("name")
-                    .containsExactlyInAnyOrder(
-                        IntStream.range(0, variables.size()).filter(i -> i % 2 == 0).mapToObj(i -> "name" + i).toArray()
-                    )
-            );
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).allSatisfy(task ->
+            assertThat(task.getProcessVariables())
+                .extracting("name")
+                .containsExactlyInAnyOrder(
+                    IntStream.range(0, variables.size())
+                        .filter(i -> i % 2 == 0)
+                        .mapToObj(i -> "name" + i)
+                        .toArray()
+                )
+        );
     }
 
     @Test
@@ -189,14 +191,13 @@ public class TaskControllerHelperIT {
 
         pageable = PageRequest.of(1, 30, Sort.by("createdDate").descending());
 
-        response =
-            taskControllerHelper.findAllWithProcessVariables(
-                predicate,
-                variableSearch,
-                pageable,
-                filters,
-                processVariableKeys
-            );
+        response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
 
         assertThat(response.getContent()).hasSize(pageable.getPageSize());
         assertThat(response.getPreviousLink()).isPresent();
@@ -204,14 +205,13 @@ public class TaskControllerHelperIT {
 
         pageable = PageRequest.of(3, 30, Sort.by("createdDate").descending());
 
-        response =
-            taskControllerHelper.findAllWithProcessVariables(
-                predicate,
-                variableSearch,
-                pageable,
-                filters,
-                processVariableKeys
-            );
+        response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
 
         assertThat(response.getContent()).hasSize(taskEntities.size() - pageable.getPageSize() * 3);
         assertThat(response.getPreviousLink()).isPresent();
@@ -320,8 +320,7 @@ public class TaskControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        List<String> processVariableKeys = Stream
-            .of("other-variable", "another-variable")
+        List<String> processVariableKeys = Stream.of("other-variable", "another-variable")
             .map(v -> processInstanceEntity1.getProcessDefinitionKey() + "/" + v)
             .toList();
 
@@ -367,8 +366,9 @@ public class TaskControllerHelperIT {
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size());
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .doesNotContainAnyElementsOf(tasksWithProcessInstance);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).doesNotContainAnyElementsOf(
+            tasksWithProcessInstance
+        );
     }
 
     @Test
@@ -401,8 +401,9 @@ public class TaskControllerHelperIT {
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size() + tasksWithProcessInstance.size());
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .containsAll(tasksWithProcessInstance);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(
+            tasksWithProcessInstance
+        );
     }
 
     @Test
@@ -448,8 +449,9 @@ public class TaskControllerHelperIT {
 
         assertThat(response.getContent()).hasSize(rootTasks.size());
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .doesNotContainAnyElementsOf(childTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).doesNotContainAnyElementsOf(
+            childTasks
+        );
     }
 
     @Test

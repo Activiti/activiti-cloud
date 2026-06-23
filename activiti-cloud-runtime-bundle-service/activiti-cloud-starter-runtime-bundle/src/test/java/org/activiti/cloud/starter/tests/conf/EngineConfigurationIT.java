@@ -179,11 +179,13 @@ class EngineConfigurationIT {
         );
 
         //then
-        assertThat(integrationResultsConsumer.getDestination())
-            .isEqualTo("namespace.integration-result.my-activiti-rb-app");
+        assertThat(integrationResultsConsumer.getDestination()).isEqualTo(
+            "namespace.integration-result.my-activiti-rb-app"
+        );
         assertThat(integrationResultsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(integrationErrorsConsumer.getDestination())
-            .isEqualTo("namespace.integration-error.my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo(
+            "namespace.integration-error.my-activiti-rb-app"
+        );
         assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
@@ -211,8 +213,9 @@ class EngineConfigurationIT {
     @Test
     void shouldConfigureProcessDefinitionCacheLimit() {
         assertThat(activitiProperties.getProcessDefinitionCacheLimit()).isEqualTo(70);
-        assertThat(cacheManagerProperties.getCaches().get("processDefinitions").getCaffeine().getSpec())
-            .isEqualTo("maximumSize=70, expireAfterAccess=10m, recordStats");
+        assertThat(cacheManagerProperties.getCaches().get("processDefinitions").getCaffeine().getSpec()).isEqualTo(
+            "maximumSize=70, expireAfterAccess=10m, recordStats"
+        );
     }
 
     @Test
@@ -226,7 +229,8 @@ class EngineConfigurationIT {
     void shouldCacheProcessDefinitionsLimit() {
         var springProcessDefinitionCache = (SpringProcessDefinitionCache) configuration.getProcessDefinitionCache();
 
-        assertThat(((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize())
-            .isEqualTo(Long.valueOf(activitiProperties.getProcessDefinitionCacheLimit()));
+        assertThat(
+            ((CaffeineCache) springProcessDefinitionCache.getDelegate()).getNativeCache().estimatedSize()
+        ).isEqualTo(Long.valueOf(activitiProperties.getProcessDefinitionCacheLimit()));
     }
 }

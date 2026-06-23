@@ -97,13 +97,18 @@ public class QueryAdminProcessServiceTasksIT {
 
     private static final String PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudServiceTask>>() {};
+    private static final ParameterizedTypeReference<PagedModel<CloudServiceTask>> PAGED_TASKS_RESPONSE_TYPE =
+        new ParameterizedTypeReference<PagedModel<CloudServiceTask>>() {};
 
-    private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE = new ParameterizedTypeReference<CloudServiceTask>() {};
+    private static final ParameterizedTypeReference<CloudServiceTask> SINGLE_TASK_RESPONSE_TYPE =
+        new ParameterizedTypeReference<CloudServiceTask>() {};
 
-    private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<CloudIntegrationContext>() {};
+    private static final ParameterizedTypeReference<CloudIntegrationContext> SINGLE_INT_CONTEXT_RESPONSE_TYPE =
+        new ParameterizedTypeReference<CloudIntegrationContext>() {};
 
-    private static final ParameterizedTypeReference<PagedModel<CloudIntegrationContext>> PAGED_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudIntegrationContext>>() {};
+    private static final ParameterizedTypeReference<
+        PagedModel<CloudIntegrationContext>
+    > PAGED_INT_CONTEXT_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<CloudIntegrationContext>>() {};
     public static final String SERVICE_TASKS_URL = "/admin/v1/service-tasks";
 
     @Autowired
@@ -182,29 +187,27 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getActivityType)
-                    .contains(SERVICE_TASK_TYPE);
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                PROC_URL + "/" + process.getId() + "/service-tasks",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getActivityType)
+                .contains(SERVICE_TASK_TYPE);
+        });
     }
 
     @Test
@@ -213,30 +216,28 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    CloudBPMNActivity.BPMNActivityStatus.STARTED
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE,
+                CloudBPMNActivity.BPMNActivityStatus.STARTED
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
+                .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
+        });
 
         // and given
         BPMNActivityImpl taskActivity = new BPMNActivityImpl(
@@ -250,24 +251,23 @@ public class QueryAdminProcessServiceTasksIT {
 
         sendActivityCompletedEvent(taskActivity, process);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    CloudBPMNActivity.BPMNActivityStatus.COMPLETED
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                PROC_URL + "/" + process.getId() + "/service-tasks?status={status}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE,
+                CloudBPMNActivity.BPMNActivityStatus.COMPLETED
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
+                .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
+        });
     }
 
     @Test
@@ -276,29 +276,27 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    SERVICE_TASKS_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getActivityType)
-                    .contains(SERVICE_TASK_TYPE);
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getActivityType)
+                .contains(SERVICE_TASK_TYPE);
+        });
     }
 
     @Test
@@ -319,30 +317,28 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks?status={status}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    CloudBPMNActivity.BPMNActivityStatus.STARTED
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                "/admin/v1/service-tasks?status={status}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE,
+                CloudBPMNActivity.BPMNActivityStatus.STARTED
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
+                .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.STARTED, SERVICE_TASK_TYPE));
+        });
 
         // and given
         BPMNActivityImpl taskActivity = new BPMNActivityImpl(
@@ -356,24 +352,23 @@ public class QueryAdminProcessServiceTasksIT {
 
         sendActivityCompletedEvent(taskActivity, process);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks?status={status}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE,
-                    CloudBPMNActivity.BPMNActivityStatus.COMPLETED
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .hasSize(1)
-                    .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
-                    .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                "/admin/v1/service-tasks?status={status}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE,
+                CloudBPMNActivity.BPMNActivityStatus.COMPLETED
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .hasSize(1)
+                .extracting(CloudServiceTask::getStatus, CloudServiceTask::getActivityType)
+                .contains(tuple(CloudBPMNActivity.BPMNActivityStatus.COMPLETED, SERVICE_TASK_TYPE));
+        });
     }
 
     @Test
@@ -382,43 +377,37 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange(
-                    SERVICE_TASKS_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
 
-                assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
+            assertThat(serviceTasksResponse.getBody().getContent()).isNotEmpty();
 
-                String serviceTaskId = serviceTasksResponse.getBody().getContent().iterator().next().getId();
+            String serviceTaskId = serviceTasksResponse.getBody().getContent().iterator().next().getId();
 
-                //when
-                ResponseEntity<CloudServiceTask> responseEntity = testRestTemplate.exchange(
-                    "/admin/v1/service-tasks/" + serviceTaskId,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    SINGLE_TASK_RESPONSE_TYPE
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody())
-                    .extracting(
-                        CloudServiceTask::getId,
-                        CloudServiceTask::getElementId,
-                        CloudServiceTask::getActivityType
-                    )
-                    .containsExactly(serviceTaskId, SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE);
-            });
+            //when
+            ResponseEntity<CloudServiceTask> responseEntity = testRestTemplate.exchange(
+                "/admin/v1/service-tasks/" + serviceTaskId,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                SINGLE_TASK_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody())
+                .extracting(CloudServiceTask::getId, CloudServiceTask::getElementId, CloudServiceTask::getActivityType)
+                .containsExactly(serviceTaskId, SERVICE_TASK_ELEMENT_ID, SERVICE_TASK_TYPE);
+        });
     }
 
     @Test
@@ -426,11 +415,10 @@ public class QueryAdminProcessServiceTasksIT {
         // given - Start process and wait until related entities are persisted
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         CloudServiceTask serviceTask = waitForServiceTask();
         final String rootProcessInstanceId = UUID.randomUUID().toString();
@@ -443,22 +431,21 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContext2);
 
         // then - Verify that the integration context counter is available
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    SERVICE_TASKS_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                SERVICE_TASKS_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
-                    .containsExactly(tuple(SERVICE_TASK_TYPE, 2));
-            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(CloudServiceTask::getActivityType, CloudServiceTask::getIntegrationContextCounter)
+                .containsExactly(tuple(SERVICE_TASK_TYPE, 2));
+        });
     }
 
     @Test
@@ -467,11 +454,10 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         ResponseEntity<PagedModel<CloudServiceTask>> serviceTasksResponse = testRestTemplate.exchange(
             SERVICE_TASKS_URL,
@@ -494,23 +480,22 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContext);
 
         //when
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        rootProcessInstanceId,
-                        IntegrationContextStatus.INTEGRATION_REQUESTED
-                    );
-            });
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    rootProcessInstanceId,
+                    IntegrationContextStatus.INTEGRATION_REQUESTED
+                );
+        });
 
         // and given
         Throwable cause = new RuntimeException(ERROR_MESSAGE);
@@ -527,29 +512,28 @@ public class QueryAdminProcessServiceTasksIT {
         );
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getStatus,
-                        CloudIntegrationContext::getErrorCode,
-                        CloudIntegrationContext::getErrorMessage,
-                        CloudIntegrationContext::getErrorClassName
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
-                        error.getErrorCode(),
-                        StringUtils.truncate(error.getMessage(), ERROR_MESSAGE_LENGTH),
-                        error.getClass().getName()
-                    );
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getStatus,
+                    CloudIntegrationContext::getErrorCode,
+                    CloudIntegrationContext::getErrorMessage,
+                    CloudIntegrationContext::getErrorClassName
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                    error.getErrorCode(),
+                    StringUtils.truncate(error.getMessage(), ERROR_MESSAGE_LENGTH),
+                    error.getClass().getName()
+                );
 
-                assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
-            });
+            assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
+        });
     }
 
     private IntegrationContextImpl buildIntegrationContext(
@@ -583,42 +567,40 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContext);
 
         //when
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        rootProcessInstanceId,
-                        IntegrationContextStatus.INTEGRATION_REQUESTED
-                    );
-            });
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    rootProcessInstanceId,
+                    IntegrationContextStatus.INTEGRATION_REQUESTED
+                );
+        });
 
         // and given
         sendIntegrationResultReceivedEvent(integrationContext);
 
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getStatus
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                    );
-            });
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getStatus
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                );
+        });
     }
 
     @Test
@@ -637,63 +619,57 @@ public class QueryAdminProcessServiceTasksIT {
         sendIntegrationRequestedEvent(integrationContext2);
 
         //then - verify that for the given service task we get both integration contexts
-        await()
-            .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
-                    serviceTask.getId()
-                );
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus
+        await().untilAsserted(() -> {
+            List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED
+                    ),
+                    tuple(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED
                     )
-                    .containsExactly(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_REQUESTED
-                        ),
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_REQUESTED
-                        )
-                    );
-            });
+                );
+        });
 
         sendIntegrationResultReceivedEvent(integrationContext);
 
-        await()
-            .untilAsserted(() -> {
-                List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(
-                    serviceTask.getId()
-                );
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus
+        await().untilAsserted(() -> {
+            List<CloudIntegrationContext> cloudIntegrationContext = retrieveAllIntegrationContexts(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus
+                )
+                .contains(
+                    tuple(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                    ),
+                    tuple(
+                        SERVICE_TASK_ELEMENT_ID,
+                        SERVICE_TASK_TYPE,
+                        rootProcessInstanceId,
+                        IntegrationContextStatus.INTEGRATION_REQUESTED
                     )
-                    .contains(
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                        ),
-                        tuple(
-                            SERVICE_TASK_ELEMENT_ID,
-                            SERVICE_TASK_TYPE,
-                            rootProcessInstanceId,
-                            IntegrationContextStatus.INTEGRATION_REQUESTED
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @Test
@@ -727,36 +703,34 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         // then - Verify that a new integration context was created with error status
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus,
-                        CloudIntegrationContext::getErrorCode,
-                        CloudIntegrationContext::getErrorClassName
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        rootProcessInstanceId,
-                        IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
-                        error.getErrorCode(),
-                        error.getClass().getName()
-                    );
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus,
+                    CloudIntegrationContext::getErrorCode,
+                    CloudIntegrationContext::getErrorClassName
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    rootProcessInstanceId,
+                    IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED,
+                    error.getErrorCode(),
+                    error.getClass().getName()
+                );
 
-                assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
-                assertThat(cloudIntegrationContext.getErrorDate()).isNotNull();
-            });
+            assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
+            assertThat(cloudIntegrationContext.getErrorDate()).isNotNull();
+        });
 
-        await()
-            .untilAsserted(() -> {
-                CloudServiceTask updatedServiceTask = retrieveServiceTask();
-                assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.ERROR);
-            });
+        await().untilAsserted(() -> {
+            CloudServiceTask updatedServiceTask = retrieveServiceTask();
+            assertThat(updatedServiceTask.getStatus()).isEqualTo(BPMNActivityStatus.ERROR);
+        });
     }
 
     @Test
@@ -780,27 +754,26 @@ public class QueryAdminProcessServiceTasksIT {
         eventsAggregator.sendAll();
 
         // then - Verify that a new integration context was created with result status
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext)
-                    .extracting(
-                        CloudIntegrationContext::getClientId,
-                        CloudIntegrationContext::getClientType,
-                        CloudIntegrationContext::getRootProcessInstanceId,
-                        CloudIntegrationContext::getStatus
-                    )
-                    .containsExactly(
-                        SERVICE_TASK_ELEMENT_ID,
-                        SERVICE_TASK_TYPE,
-                        rootProcessInstanceId,
-                        IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
-                    );
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext)
+                .extracting(
+                    CloudIntegrationContext::getClientId,
+                    CloudIntegrationContext::getClientType,
+                    CloudIntegrationContext::getRootProcessInstanceId,
+                    CloudIntegrationContext::getStatus
+                )
+                .containsExactly(
+                    SERVICE_TASK_ELEMENT_ID,
+                    SERVICE_TASK_TYPE,
+                    rootProcessInstanceId,
+                    IntegrationContextStatus.INTEGRATION_RESULT_RECEIVED
+                );
 
-                assertThat(cloudIntegrationContext.getResultDate()).isNotNull();
-                assertThat(cloudIntegrationContext.getOutBoundVariables()).containsEntry("resultKey", "resultValue");
-                assertThat(cloudIntegrationContext.getInBoundVariables()).containsEntry("key", "value");
-            });
+            assertThat(cloudIntegrationContext.getResultDate()).isNotNull();
+            assertThat(cloudIntegrationContext.getOutBoundVariables()).containsEntry("resultKey", "resultValue");
+            assertThat(cloudIntegrationContext.getInBoundVariables()).containsEntry("key", "value");
+        });
     }
 
     private CloudIntegrationContext retrieveIntegrationContext(String serviceTaskId) {
@@ -843,20 +816,19 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     private CloudServiceTask waitForServiceTask(BPMNActivityStatus status) {
-        await()
-            .untilAsserted(() -> {
-                final PagedModel<CloudServiceTask> page = testRestTemplate
-                    .exchange(
-                        SERVICE_TASKS_URL,
-                        HttpMethod.GET,
-                        identityTokenProducer.entityWithAuthorizationHeader(),
-                        PAGED_TASKS_RESPONSE_TYPE
-                    )
-                    .getBody();
-                assertThat(page).isNotEmpty();
-                final CloudServiceTask serviceTask = page.getContent().iterator().next();
-                assertThat(serviceTask.getStatus()).isEqualTo(status);
-            });
+        await().untilAsserted(() -> {
+            final PagedModel<CloudServiceTask> page = testRestTemplate
+                .exchange(
+                    SERVICE_TASKS_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKS_RESPONSE_TYPE
+                )
+                .getBody();
+            assertThat(page).isNotEmpty();
+            final CloudServiceTask serviceTask = page.getContent().iterator().next();
+            assertThat(serviceTask.getStatus()).isEqualTo(status);
+        });
         return retrieveServiceTask();
     }
 
@@ -933,11 +905,10 @@ public class QueryAdminProcessServiceTasksIT {
 
     // Get the newest Integration Context for given Service Task
     private void waitForIntegrationContext(CloudServiceTask serviceTask, IntegrationContextStatus status) {
-        await()
-            .untilAsserted(() -> {
-                CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
-                assertThat(cloudIntegrationContext.getStatus()).isEqualTo(status);
-            });
+        await().untilAsserted(() -> {
+            CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(serviceTask.getId());
+            assertThat(cloudIntegrationContext.getStatus()).isEqualTo(status);
+        });
     }
 
     private ProcessInstanceImpl sendEventsForStartSimpleProcessInstance() {
@@ -954,24 +925,22 @@ public class QueryAdminProcessServiceTasksIT {
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
-                    PROC_URL + "/" + process.getId() + "/service-tasks",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_TASKS_RESPONSE_TYPE
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<CloudServiceTask>> responseEntity = testRestTemplate.exchange(
+                PROC_URL + "/" + process.getId() + "/service-tasks",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_TASKS_RESPONSE_TYPE
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        });
     }
 
     private ProcessInstanceImpl startSimpleProcessInstance() {

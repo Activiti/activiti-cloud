@@ -46,12 +46,10 @@ public class GraphQLSchemaAutoConfigurationTest {
 
             @Override
             public void configure(GraphQLShemaRegistration registry) {
-                GraphQLObjectType query = GraphQLObjectType
-                    .newObject()
+                GraphQLObjectType query = GraphQLObjectType.newObject()
                     .name("query")
                     .field(
-                        GraphQLFieldDefinition
-                            .newFieldDefinition()
+                        GraphQLFieldDefinition.newFieldDefinition()
                             .name("hello")
                             .type(Scalars.GraphQLString)
                             .dataFetcher(environment -> {

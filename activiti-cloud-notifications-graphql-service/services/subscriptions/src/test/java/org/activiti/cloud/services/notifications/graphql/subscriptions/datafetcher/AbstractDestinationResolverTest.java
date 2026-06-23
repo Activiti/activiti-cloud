@@ -34,16 +34,15 @@ public class AbstractDestinationResolverTest {
         List<List<String>> product = AbstractDestinationResolver.crossJoin(Arrays.asList(a, b, c, d, e));
 
         assertThat(product).hasSize(8);
-        assertThat(product)
-            .containsOnly(
-                Arrays.asList("*", "a", "c", "e", "*"),
-                Arrays.asList("*", "a", "c", "f", "*"),
-                Arrays.asList("*", "a", "d", "e", "*"),
-                Arrays.asList("*", "a", "d", "f", "*"),
-                Arrays.asList("*", "b", "c", "e", "*"),
-                Arrays.asList("*", "b", "d", "f", "*"),
-                Arrays.asList("*", "b", "d", "e", "*"),
-                Arrays.asList("*", "b", "c", "f", "*")
-            );
+        assertThat(product).containsOnly(
+            Arrays.asList("*", "a", "c", "e", "*"),
+            Arrays.asList("*", "a", "c", "f", "*"),
+            Arrays.asList("*", "a", "d", "e", "*"),
+            Arrays.asList("*", "a", "d", "f", "*"),
+            Arrays.asList("*", "b", "c", "e", "*"),
+            Arrays.asList("*", "b", "d", "f", "*"),
+            Arrays.asList("*", "b", "d", "e", "*"),
+            Arrays.asList("*", "b", "c", "f", "*")
+        );
     }
 }

@@ -39,11 +39,11 @@ public class ProcessUpdatedEventHandler implements QueryEventHandler {
 
         ProcessInstance eventProcessInstance = updatedEvent.getEntity();
 
-        ProcessInstanceEntity processInstanceEntity = Optional
-            .ofNullable(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId()))
-            .orElseThrow(() ->
-                new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId())
-            );
+        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId())
+        ).orElseThrow(() ->
+            new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId())
+        );
 
         processInstanceEntity.setBusinessKey(eventProcessInstance.getBusinessKey());
         processInstanceEntity.setName(eventProcessInstance.getName());

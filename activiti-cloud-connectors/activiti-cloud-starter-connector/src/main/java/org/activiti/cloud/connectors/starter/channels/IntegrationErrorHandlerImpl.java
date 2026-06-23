@@ -68,8 +68,7 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     }
 
     private boolean isIntegrationRequest(Message<?> message) {
-        return Optional
-            .ofNullable(message)
+        return Optional.ofNullable(message)
             .map(Message::getHeaders)
             .map(headers -> headers.get(INTEGRATION_CONTEXT_ID))
             .isPresent();
@@ -79,16 +78,18 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         byte[] data = (byte[]) errorMessage.getOriginalMessage().getPayload();
         try {
             IntegrationRequest integrationRequest = objectMapper.readValue(data, IntegrationRequest.class);
-            Throwable cause = Optional
-                .ofNullable(errorMessage.getPayload().getCause())
-                .orElse(errorMessage.getPayload());
+            Throwable cause = Optional.ofNullable(errorMessage.getPayload().getCause()).orElse(
+                errorMessage.getPayload()
+            );
 
             // SC Stream 5.x wraps the original exception as suppressed in RetryException
             cause = unwrapRetryException(cause);
 
-            Message<IntegrationError> message = IntegrationErrorBuilder
-                .errorFor(integrationRequest, connectorProperties, cause)
-                .buildMessage();
+            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(
+                integrationRequest,
+                connectorProperties,
+                cause
+            ).buildMessage();
             integrationErrorSender.send(message);
         } catch (Throwable cause) {
             logger.error("Error sending IntegrationError for IntegrationRequest", cause);

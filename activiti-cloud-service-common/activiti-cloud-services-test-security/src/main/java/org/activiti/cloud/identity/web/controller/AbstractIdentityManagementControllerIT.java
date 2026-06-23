@@ -230,10 +230,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
-                        "    \"users\":[\"hradmin\"],\n" +
-                        "    \"groups\":[]}\n" +
-                        "  ]"
+                            "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                            "    \"users\":[\"hradmin\"],\n" +
+                            "    \"groups\":[]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isOk());
@@ -247,10 +247,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
-                        "    \"users\":[\"hradmin\"],\n" +
-                        "    \"groups\":[]}\n" +
-                        "  ]"
+                            "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                            "    \"users\":[\"hradmin\"],\n" +
+                            "    \"groups\":[]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isNotFound())
@@ -265,10 +265,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"fakeRole\",\n" +
-                        "    \"users\":[\"testUser\"],\n" +
-                        "    \"groups\":[]}\n" +
-                        "  ]"
+                            "    {\"role\":\"fakeRole\",\n" +
+                            "    \"users\":[\"testUser\"],\n" +
+                            "    \"groups\":[]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isBadRequest())
@@ -283,10 +283,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
-                        "    \"users\":[\"hruser\"],\n" +
-                        "    \"groups\":[]}\n" +
-                        "  ]"
+                            "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                            "    \"users\":[\"hruser\"],\n" +
+                            "    \"groups\":[]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isBadRequest())
@@ -303,10 +303,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
-                        "    \"users\":[\"testadmin\"],\n" +
-                        "    \"groups\":[\"fakeGroup\"]}\n" +
-                        "  ]"
+                            "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                            "    \"users\":[\"testadmin\"],\n" +
+                            "    \"groups\":[\"fakeGroup\"]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isBadRequest())
@@ -321,10 +321,10 @@ public abstract class AbstractIdentityManagementControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         "[\n" +
-                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
-                        "    \"users\":[\"testadmin\"],\n" +
-                        "    \"groups\":[\"hr\"]}\n" +
-                        "  ]"
+                            "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                            "    \"users\":[\"testadmin\"],\n" +
+                            "    \"groups\":[\"hr\"]}\n" +
+                            "  ]"
                     )
             )
             .andExpect(status().isBadRequest())
@@ -390,16 +390,18 @@ public abstract class AbstractIdentityManagementControllerIT {
         Cache cache = cacheManager.getCache("userSearch");
         if (cache != null) {
             assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null, null))).isNotNull();
-            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null, null)))
-                .isNotNull();
+            assertThat(
+                cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null, null))
+            ).isNotNull();
             assertThat(
                 cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null, null))
-            )
-                .isNotNull();
-            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null, null)))
-                .isNotNull();
-            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null, null)))
-                .isNotNull();
+            ).isNotNull();
+            assertThat(
+                cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null, null))
+            ).isNotNull();
+            assertThat(
+                cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null, null))
+            ).isNotNull();
         }
     }
 

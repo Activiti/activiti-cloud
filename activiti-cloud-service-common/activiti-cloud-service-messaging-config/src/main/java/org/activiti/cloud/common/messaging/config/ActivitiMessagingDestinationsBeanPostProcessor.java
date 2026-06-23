@@ -65,8 +65,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
             final var functionRouter = messagingProperties.getFunctionRouter();
 
             // See https://github.com/spring-cloud/spring-cloud-stream/commit/afc8fa29da421f41fa70cedc4acc3b6c07addcf0
-            Optional
-                .ofNullable(ReflectionUtils.findField(BindingServiceProperties.class, "bindings", Map.class))
+            Optional.ofNullable(ReflectionUtils.findField(BindingServiceProperties.class, "bindings", Map.class))
                 .map(field -> Map.entry(field, bindingServiceProperties.getBindings()))
                 .ifPresent(entry -> {
                     ReflectionUtils.makeAccessible(entry.getKey());
@@ -99,8 +98,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .forEach(bindingName -> {
                         var value = bindingServiceProperties.getBindings().remove(bindingName);
 
-                        Optional
-                            .ofNullable(value.getGroup())
+                        Optional.ofNullable(value.getGroup())
                             .filter(StringUtils::hasText)
                             .ifPresentOrElse(
                                 it -> {
@@ -121,8 +119,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                             value.getDestination()
                         );
 
-                        Optional
-                            .ofNullable(value.getGroup())
+                        Optional.ofNullable(value.getGroup())
                             .filter(it -> functionRouter.isExcludeRequiredProducerGroup(bindingName))
                             .ifPresent(group -> {
                                 bindingServiceProperties
@@ -137,8 +134,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                         var producer = entry.getValue().getProducer();
                                         var excludedGroups = value.getGroup();
                                         var producerGroups = producer.getRequiredGroups();
-                                        var requiredGroups = Stream
-                                            .of(producerGroups)
+                                        var requiredGroups = Stream.of(producerGroups)
                                             .filter(Predicate.not(excludedGroups::equals))
                                             .toList();
 
@@ -160,8 +156,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                     .filter(Predicate.not(functionRouter::isFunctionRoute))
                     .filter(functionRouter::isOverrideRequiredProducerGroup)
                     .forEach(bindingName -> {
-                        Optional
-                            .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
+                        Optional.ofNullable(bindingServiceProperties.getBindings().get(bindingName))
                             .map(BindingProperties::getProducer)
                             .ifPresent(producer -> {
                                 var overrideGroups = functionRouter
@@ -170,8 +165,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
                                     .getOverrideRequiredProducerGroups()
                                     .stream()
                                     .map(it ->
-                                        Optional
-                                            .ofNullable(messagingProperties.getRabbitmq().getPrefix())
+                                        Optional.ofNullable(messagingProperties.getRabbitmq().getPrefix())
                                             .map(prefix -> prefix.concat(it))
                                             .orElse(it)
                                     )

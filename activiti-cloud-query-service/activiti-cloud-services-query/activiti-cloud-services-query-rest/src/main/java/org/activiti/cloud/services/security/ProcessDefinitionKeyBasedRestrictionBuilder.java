@@ -66,8 +66,12 @@ public class ProcessDefinitionKeyBasedRestrictionBuilder {
         BooleanExpression securityExpression = null;
         for (String appName : restrictions.keySet()) {
             Set<String> defKeys = restrictions.get(appName);
-            securityExpression =
-                addProcessDefRestrictionToExpression(restrictionProperties, securityExpression, appName, defKeys);
+            securityExpression = addProcessDefRestrictionToExpression(
+                restrictionProperties,
+                securityExpression,
+                appName,
+                defKeys
+            );
         }
 
         //policies are defined but none are applicable

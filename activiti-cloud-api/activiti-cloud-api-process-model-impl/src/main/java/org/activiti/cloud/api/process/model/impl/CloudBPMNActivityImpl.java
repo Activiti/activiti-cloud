@@ -170,8 +170,7 @@ public class CloudBPMNActivityImpl extends CloudRuntimeEntityImpl implements Clo
         final int prime = 31;
         int result = super.hashCode();
         result =
-            prime *
-            result +
+            prime * result +
             Objects.hash(
                 activityName,
                 activityType,

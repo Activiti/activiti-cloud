@@ -26,5 +26,4 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(BinderFactoryListenerTestContext.class)
-public @interface EnableBinderFactoryListenerTestContext {
-}
+public @interface EnableBinderFactoryListenerTestContext {}

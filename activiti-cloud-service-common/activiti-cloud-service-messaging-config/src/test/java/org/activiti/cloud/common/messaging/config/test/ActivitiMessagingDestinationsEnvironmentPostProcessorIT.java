@@ -63,61 +63,74 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
 
     @Test
     public void testBindingServicePropertiesDefaults() {
-        assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getDestination())
-            .isEqualTo("quix.baz.commandconsumer.foo");
-        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput").getDestination())
-            .isEqualTo("quix.baz.commandconsumer.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getDestination()).isEqualTo(
+            "quix.baz.commandconsumer.foo"
+        );
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput").getDestination()).isEqualTo(
+            "quix.baz.commandconsumer.foo"
+        );
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getGroup()).isEqualTo("bar");
     }
 
     @Test
     public void testBindingServicePropertiesCustomValues() {
-        assertThat(bindingServiceProperties.getBindingProperties("commandResults").getDestination())
-            .isEqualTo("bar_command-results_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("commandResults").getDestination()).isEqualTo(
+            "bar_command-results_foo"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesMultiplexDestinations() {
-        assertThat(bindingServiceProperties.getBindingProperties("rest-connector").getDestination())
-            .isEqualTo("quix.baz.rest-connector.get,quix.baz.rest-connector.post");
+        assertThat(bindingServiceProperties.getBindingProperties("rest-connector").getDestination()).isEqualTo(
+            "quix.baz.rest-connector.get,quix.baz.rest-connector.post"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithMultipleBindings() {
-        assertThat(bindingServiceProperties.getBindingProperties("auditProducer").getDestination())
-            .isEqualTo("quix.baz.engine-events");
+        assertThat(bindingServiceProperties.getBindingProperties("auditProducer").getDestination()).isEqualTo(
+            "quix.baz.engine-events"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("auditConsumer").getDestination())
-            .isEqualTo("quix.baz.engine-events");
+        assertThat(bindingServiceProperties.getBindingProperties("auditConsumer").getDestination()).isEqualTo(
+            "quix.baz.engine-events"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("queryConsumer").getDestination())
-            .isEqualTo("quix.baz.engine-events");
+        assertThat(bindingServiceProperties.getBindingProperties("queryConsumer").getDestination()).isEqualTo(
+            "quix.baz.engine-events"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithConnectorDestinationOverride() {
-        assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer").getDestination())
-            .isEqualTo("quix.baz.camel_connector_invoke");
+        assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer").getDestination()).isEqualTo(
+            "quix.baz.camel_connector_invoke"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE").getDestination())
-            .isEqualTo("quix.baz.camel_connector_invoke");
+        assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE").getDestination()).isEqualTo(
+            "quix.baz.camel_connector_invoke"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithAsyncExecutorJobsOverride() {
-        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput").getDestination())
-            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput").getDestination()).isEqualTo(
+            "quix.baz.asyncexecutorjobs.foo"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput").getDestination())
-            .isEqualTo("quix.baz.asyncexecutorjobs.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput").getDestination()).isEqualTo(
+            "quix.baz.asyncexecutorjobs.foo"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithMessageEventsOverrides() {
-        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput").getDestination())
-            .isEqualTo("quix.baz.message-events.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput").getDestination()).isEqualTo(
+            "quix.baz.message-events.foo"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput").getDestination())
-            .isEqualTo("quix.baz.message-events.foo");
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput").getDestination()).isEqualTo(
+            "quix.baz.message-events.foo"
+        );
     }
 }

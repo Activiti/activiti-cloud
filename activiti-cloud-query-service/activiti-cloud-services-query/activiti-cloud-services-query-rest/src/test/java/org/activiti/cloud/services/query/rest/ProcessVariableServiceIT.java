@@ -42,8 +42,9 @@ class ProcessVariableServiceIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Autowired
     ProcessVariableService processVariableService;

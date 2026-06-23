@@ -22,7 +22,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEven
 
 public class CloudTaskCandidateGroupAddedEventImpl
     extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
-    implements CloudTaskCandidateGroupAddedEvent {
+    implements CloudTaskCandidateGroupAddedEvent
+{
 
     public CloudTaskCandidateGroupAddedEventImpl() {}
 

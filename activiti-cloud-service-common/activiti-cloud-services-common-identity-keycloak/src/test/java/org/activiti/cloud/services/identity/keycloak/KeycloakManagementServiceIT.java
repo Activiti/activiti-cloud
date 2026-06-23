@@ -55,7 +55,10 @@ class KeycloakManagementServiceIT {
 
         List<User> users = keycloakManagementService.findUsers(searchParams);
 
-        assertThat(users).hasSize(5).extracting(User::getUsername).allMatch(username -> username.contains("test"));
+        assertThat(users)
+            .hasSize(5)
+            .extracting(User::getUsername)
+            .allMatch(username -> username.contains("test"));
     }
 
     @Test

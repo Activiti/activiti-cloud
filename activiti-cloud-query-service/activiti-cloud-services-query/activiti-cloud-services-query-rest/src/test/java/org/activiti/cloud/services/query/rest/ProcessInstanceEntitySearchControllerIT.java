@@ -61,8 +61,9 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Override
     protected String getSearchEndpoint() {
@@ -172,8 +173,10 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
             .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
             .buildAndSave();
 
-        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withInitiators("user1", "user2");
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder().withInitiators(
+            "user1",
+            "user2"
+        );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

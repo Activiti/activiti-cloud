@@ -95,15 +95,17 @@ class ProcessInstanceAdminControllerHelperTest {
             Page<ProcessInstanceEntity> pageResult = new PageImpl<>(
                 Collections.singletonList(new ProcessInstanceEntity())
             );
-            given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable))
-                .willReturn(pageResult);
+            given(processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable)).willReturn(
+                pageResult
+            );
             given(processInstanceControllerHelper.mapAllSubprocesses(pageResult, pageable)).willReturn(pageResult);
 
-            Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
-                predicate,
-                variableKeys,
-                pageable
-            );
+            Page<ProcessInstanceEntity> result =
+                processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
+                    predicate,
+                    variableKeys,
+                    pageable
+                );
 
             assertThat(result).isEqualTo(pageResult);
         }
@@ -135,20 +137,20 @@ class ProcessInstanceAdminControllerHelperTest {
             entity.setId("pi-1");
             Page<ProcessInstanceEntity> pageResult = new PageImpl<>(List.of(entity));
 
-            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
-                .willReturn(pageResult);
-            given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of("pi-1")))
-                .willReturn(
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable))).willReturn(
+                pageResult
+            );
+            given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of("pi-1"))).willReturn(
+                Map.of(
+                    "pi-1",
                     Map.of(
-                        "pi-1",
-                        Map.of(
-                            ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS,
-                            4L,
-                            ProcessInstanceHierarchyEntity.RELATION_LINKED,
-                            7L
-                        )
+                        ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS,
+                        4L,
+                        ProcessInstanceHierarchyEntity.RELATION_LINKED,
+                        7L
                     )
-                );
+                )
+            );
 
             Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
                 new ProcessInstanceSearchRequest(),
@@ -169,8 +171,9 @@ class ProcessInstanceAdminControllerHelperTest {
             entity.setId("pi-1");
             Page<ProcessInstanceEntity> pageResult = new PageImpl<>(List.of(entity));
 
-            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
-                .willReturn(pageResult);
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable))).willReturn(
+                pageResult
+            );
             given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of("pi-1"))).willReturn(Map.of());
 
             Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(
@@ -189,8 +192,9 @@ class ProcessInstanceAdminControllerHelperTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<ProcessInstanceEntity> pageResult = new PageImpl<>(Collections.emptyList());
 
-            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable)))
-                .willReturn(pageResult);
+            given(processInstanceAdminService.search(any(ProcessInstanceSearchRequest.class), eq(pageable))).willReturn(
+                pageResult
+            );
             given(processInstanceSearchService.countRelatedProcessesByAncestor(Set.of())).willReturn(Map.of());
 
             Page<ProcessInstanceSearchResult> result = processInstanceAdminControllerHelper.searchProcessInstances(

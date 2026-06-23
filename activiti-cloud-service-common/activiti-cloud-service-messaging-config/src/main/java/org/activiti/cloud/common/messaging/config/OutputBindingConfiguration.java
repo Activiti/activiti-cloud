@@ -63,49 +63,46 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
-                    Optional
-                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
-                        .ifPresent(functionBinding -> {
-                            final String beanOutName = getOutBinding(beanName + OUTPUT_BINDING);
+                    Optional.ofNullable(
+                        functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class)
+                    ).ifPresent(functionBinding -> {
+                        final String beanOutName = getOutBinding(beanName + OUTPUT_BINDING);
 
-                            String outputBindings = bindingServiceProperties.getOutputBindings();
+                        String outputBindings = bindingServiceProperties.getOutputBindings();
 
-                            if (!StringUtils.hasText(outputBindings)) {
-                                outputBindings = beanOutName;
-                            } else {
-                                outputBindings += ";" + beanOutName;
-                            }
+                        if (!StringUtils.hasText(outputBindings)) {
+                            outputBindings = beanOutName;
+                        } else {
+                            outputBindings += ";" + beanOutName;
+                        }
 
-                            bindingServiceProperties.setOutputBindings(outputBindings);
+                        bindingServiceProperties.setOutputBindings(outputBindings);
 
-                            streamFunctionProperties.getBindings().put(beanOutName, beanName);
+                        streamFunctionProperties.getBindings().put(beanOutName, beanName);
 
-                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                getMessageConverterConfigurer()
-                                    .configureOutputChannel(MessageChannel.class.cast(bean), beanName);
-                            }
-
-                            CompositeMessageConverter messageConverter = getMessageConverter();
-
-                            BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(
+                        if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                            getMessageConverterConfigurer().configureOutputChannel(
+                                MessageChannel.class.cast(bean),
                                 beanName
                             );
+                        }
 
-                            Optional
-                                .ofNullable(bindingProperties.getProducer())
-                                .filter(ProducerProperties::isPartitioned)
-                                .ifPresent(isPartitioned -> {
-                                    InterceptableChannel.class.cast(bean)
-                                        .addInterceptor(
-                                            new DefaultPartitioningInterceptor(bindingProperties, beanFactory)
-                                        );
-                                });
+                        CompositeMessageConverter messageConverter = getMessageConverter();
 
-                            InterceptableChannel.class.cast(bean)
-                                .addInterceptor(
-                                    new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
+                        BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
+
+                        Optional.ofNullable(bindingProperties.getProducer())
+                            .filter(ProducerProperties::isPartitioned)
+                            .ifPresent(isPartitioned -> {
+                                InterceptableChannel.class.cast(bean).addInterceptor(
+                                    new DefaultPartitioningInterceptor(bindingProperties, beanFactory)
                                 );
-                        });
+                            });
+
+                        InterceptableChannel.class.cast(bean).addInterceptor(
+                            new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
+                        );
+                    });
                 }
 
                 return bean;
@@ -144,11 +141,13 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
             String contentTypeFromHeader = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)
                 ? message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
                 : null;
-            String contentTypeFromPayload = message.getPayload() instanceof String
-                ? JavaClassMimeTypeUtils
-                    .mimeTypeFromObject(message.getPayload(), ObjectUtils.nullSafeToString(contentTypeFromHeader))
-                    .toString()
-                : contentTypeFromHeader;
+            String contentTypeFromPayload =
+                message.getPayload() instanceof String
+                    ? JavaClassMimeTypeUtils.mimeTypeFromObject(
+                          message.getPayload(),
+                          ObjectUtils.nullSafeToString(contentTypeFromHeader)
+                      ).toString()
+                    : contentTypeFromHeader;
 
             MessageHeaders messageHeaders = getMessageHeaders(message);
 
@@ -203,9 +202,10 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
         }
 
         private Message<byte[]> getOutboundMessage(Message<?> message, MessageHeaders messageHeaders) {
-            Message<byte[]> outboundMessage = message.getPayload() instanceof byte[]
-                ? (Message<byte[]>) message
-                : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
+            Message<byte[]> outboundMessage =
+                message.getPayload() instanceof byte[]
+                    ? (Message<byte[]>) message
+                    : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
 
             if (outboundMessage == null) {
                 throw new IllegalStateException("Failed to convert message: '" + message + "' to outbound message.");

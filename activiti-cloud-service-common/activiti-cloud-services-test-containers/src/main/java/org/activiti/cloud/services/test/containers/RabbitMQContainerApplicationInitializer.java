@@ -30,7 +30,8 @@ import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.rabbitmq.RabbitMQContainer;
 
 public class RabbitMQContainerApplicationInitializer
-    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    implements ApplicationContextInitializer<ConfigurableApplicationContext>
+{
 
     private static final Object LOCK = new Object();
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQContainerApplicationInitializer.class);
@@ -68,16 +69,14 @@ public class RabbitMQContainerApplicationInitializer
     }
 
     private static void registerShutdownHook() {
-        Runtime
-            .getRuntime()
-            .addShutdownHook(
-                new Thread(() -> {
-                    String vhost;
-                    while ((vhost = trackedVhosts.poll()) != null) {
-                        deleteVhost(vhost);
-                    }
-                })
-            );
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(() -> {
+                String vhost;
+                while ((vhost = trackedVhosts.poll()) != null) {
+                    deleteVhost(vhost);
+                }
+            })
+        );
     }
 
     private static String[] buildProperties(String vhostName) {

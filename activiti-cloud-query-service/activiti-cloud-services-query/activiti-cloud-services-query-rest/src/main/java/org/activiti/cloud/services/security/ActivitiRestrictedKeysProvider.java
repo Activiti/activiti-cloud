@@ -115,16 +115,14 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
     }
 
     boolean isAnonymousUser() {
-        return Optional
-            .ofNullable(SecurityContextHolder.getContext())
+        return Optional.ofNullable(SecurityContextHolder.getContext())
             .map(SecurityContext::getAuthentication)
             .map(AnonymousAuthenticationToken.class::isInstance)
             .orElse(false);
     }
 
     Optional<List<Object>> ifUnrestrictedByUserRoles() {
-        return Optional
-            .ofNullable(SecurityContextHolder.getContext())
+        return Optional.ofNullable(SecurityContextHolder.getContext())
             .map(SecurityContext::getAuthentication)
             .filter(Authentication::isAuthenticated)
             .map(Authentication::getAuthorities)
@@ -147,14 +145,14 @@ public class ActivitiRestrictedKeysProvider implements RestrictedKeysProvider {
 
         RestrictedKeysSupplier(Class<?> entityClass) {
             this.entityClass = entityClass;
-            this.genericType =
-                (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+            this.genericType = (Class<T>) (
+                (ParameterizedType) getClass().getGenericSuperclass()
+            ).getActualTypeArguments()[0];
         }
 
         @Override
         public Optional<List<Object>> get() {
-            return Optional
-                .of(entityClass)
+            return Optional.of(entityClass)
                 .filter(this::isInstance)
                 .map(this::getKeys)
                 .filter(Predicate.not(Collection::isEmpty));

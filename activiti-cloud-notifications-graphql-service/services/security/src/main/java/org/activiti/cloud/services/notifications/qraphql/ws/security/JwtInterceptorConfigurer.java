@@ -58,8 +58,7 @@ public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigure
                     );
                     if (accessor != null) {
                         if (headerValues.contains(accessor.getHeader(headerName))) {
-                            Optional
-                                .ofNullable(accessor.getUser())
+                            Optional.ofNullable(accessor.getUser())
                                 .filter(JWSAuthentication.class::isInstance)
                                 .map(JWSAuthentication.class::cast)
                                 .ifPresent(jWSAuthentication -> {

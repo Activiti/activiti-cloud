@@ -103,8 +103,7 @@ class ProcessVariablesPayloadConverterTest {
     @Test
     void shouldConvertStartProcessPayloadWithLinkedProcess() {
         StartProcessPayload payload = subject.convert(
-            ProcessPayloadBuilder
-                .start()
+            ProcessPayloadBuilder.start()
                 .withLinkedProcessInstanceId("linkedProcessId")
                 .withLinkedProcessInstanceType("linkedProcessType")
                 .withVariables(variablesToConvert)

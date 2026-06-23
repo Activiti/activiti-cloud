@@ -120,8 +120,9 @@ public class ProcessDefinitionAdminControllerIT {
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(0, 10);
-        given(processDefinitionRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), pageRequest, 1));
+        given(processDefinitionRepository.findAll(any(), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), pageRequest, 1)
+        );
 
         //when
         mockMvc
@@ -133,10 +134,9 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
         //given
-        given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
-            );
+        given(processDefinitionRepository.findAll(any(), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+        );
 
         //when
         mockMvc
@@ -148,15 +148,15 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnLatestProcessDefinition() throws Exception {
         //given
-        given(processDefinitionRepository.findAll(any(), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
-            );
+        given(processDefinitionRepository.findAll(any(), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+        );
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-definitions?latestVersion=true&skipCount=10&maxItems=10")
-                    .accept(MediaTypes.HAL_JSON_VALUE)
+                get("/admin/v1/process-definitions?latestVersion=true&skipCount=10&maxItems=10").accept(
+                    MediaTypes.HAL_JSON_VALUE
+                )
             )
             //then
             .andExpect(status().isOk());

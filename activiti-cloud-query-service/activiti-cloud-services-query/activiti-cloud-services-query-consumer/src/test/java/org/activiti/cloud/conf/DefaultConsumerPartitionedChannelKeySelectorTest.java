@@ -24,13 +24,13 @@ import org.springframework.messaging.support.MessageBuilder;
 
 class DefaultConsumerPartitionedChannelKeySelectorTest {
 
-    private final DefaultConsumerPartitionedChannelKeySelector keySelector = new DefaultConsumerPartitionedChannelKeySelector();
+    private final DefaultConsumerPartitionedChannelKeySelector keySelector =
+        new DefaultConsumerPartitionedChannelKeySelector();
 
     @Test
     void shouldUseRootProcessInstanceIdHeaderWhenPresent() {
         String rootProcessInstanceId = "root-process-instance-id";
-        Message<String> message = MessageBuilder
-            .withPayload("payload")
+        Message<String> message = MessageBuilder.withPayload("payload")
             .setHeader(QueryConsumerPartitionedChannelKeySelector.ROOT_PROCESS_INSTANCE_ID, rootProcessInstanceId)
             .build();
 

@@ -30,18 +30,23 @@ public class QueryRestApplicationFunctionRouterRabbitmqPrefixIT extends QueryRes
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 
     @Test
     @Override
     void rabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getQueues())
-            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.consumer.")));
+        assertThat(binderFactoryListenerTestContext.getQueues()).satisfies(map ->
+            assertThat(map.keySet())
+                .isNotEmpty()
+                .allMatch(key -> key.startsWith("default-app.consumer."))
+        );
     }
 
     @Test

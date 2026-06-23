@@ -56,7 +56,8 @@ public class KeycloakCredentialRequestRepresentation {
         }
 
         public KeycloakCredentialRequestRepresentation build() {
-            KeycloakCredentialRequestRepresentation keycloakClientRepresentation = new KeycloakCredentialRequestRepresentation();
+            KeycloakCredentialRequestRepresentation keycloakClientRepresentation =
+                new KeycloakCredentialRequestRepresentation();
             keycloakClientRepresentation.setRealm(realm);
             keycloakClientRepresentation.setId(id);
             return keycloakClientRepresentation;

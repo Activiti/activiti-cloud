@@ -47,8 +47,10 @@ public class ProcessCandidateStarterUserRemovedEventEntity extends AuditEventEnt
     }
 
     public void setCandidateStarterUser(ProcessCandidateStarterUser candidateUser) {
-        this.candidateStarterUser =
-            new ProcessCandidateStarterUserImpl(candidateUser.getProcessDefinitionId(), candidateUser.getUserId());
+        this.candidateStarterUser = new ProcessCandidateStarterUserImpl(
+            candidateUser.getProcessDefinitionId(),
+            candidateUser.getUserId()
+        );
     }
 
     @Override

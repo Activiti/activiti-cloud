@@ -48,13 +48,15 @@ public class PagedModelConverterTest {
         PagedModel.PageMetadata basePageMetaData = new PagedModel.PageMetadata(10, 1, 100);
 
         PaginationMetadata alfrescoPageMetadata = new PaginationMetadata();
-        given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size()))
-            .willReturn(alfrescoPageMetadata);
+        given(pageMetadataConverter.toAlfrescoPageMetadata(basePageMetaData, elements.size())).willReturn(
+            alfrescoPageMetadata
+        );
 
         //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(
-            PagedModel.of(elements, basePageMetaData)
-        );
+        ListResponseContent<String> alfrescoPageContentListWrapper =
+            pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(
+                PagedModel.of(elements, basePageMetaData)
+            );
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();
@@ -70,9 +72,8 @@ public class PagedModelConverterTest {
         List<EntityModel<String>> elements = Collections.singletonList(EntityModel.of("any"));
 
         //when
-        ListResponseContent<String> alfrescoPageContentListWrapper = pagedCollectionModelConverter.resourcesToListResponseContent(
-            CollectionModel.of(elements)
-        );
+        ListResponseContent<String> alfrescoPageContentListWrapper =
+            pagedCollectionModelConverter.resourcesToListResponseContent(CollectionModel.of(elements));
 
         //then
         assertThat(alfrescoPageContentListWrapper).isNotNull();

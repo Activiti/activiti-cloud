@@ -164,11 +164,10 @@ class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
         this.mockMvc.perform(
-                get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
-                    .accept(MediaTypes.HAL_JSON_VALUE)
-                    .contentType(MediaType.APPLICATION_JSON)
-            )
-            .andExpect(status().isOk());
+            get("/v1/process-instances/{processInstanceId}/variables", 1, 1)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -183,19 +182,14 @@ class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.processInstance(any())).willReturn(processInstance);
 
         this.mockMvc.perform(
-                put("/v1/process-instances/{processInstanceId}/variables", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        mapper.writeValueAsString(
-                            ProcessPayloadBuilder
-                                .setVariables()
-                                .withProcessInstanceId("1")
-                                .withVariables(variables)
-                                .build()
-                        )
+            put("/v1/process-instances/{processInstanceId}/variables", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build()
                     )
-            )
-            .andExpect(status().isOk());
+                )
+        ).andExpect(status().isOk());
 
         verify(processRuntime).setVariables(any());
     }

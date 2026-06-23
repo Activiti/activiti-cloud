@@ -39,13 +39,11 @@ public class IgnoredTypesModelConverter implements ModelConverter {
     private static final Set<Class<?>> IGNORED_CLASSES;
 
     static {
-        IGNORED_CLASSES =
-            Stream
-                .of(IGNORED_CLASS_NAMES)
-                .map(IgnoredTypesModelConverter::forName)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+        IGNORED_CLASSES = Stream.of(IGNORED_CLASS_NAMES)
+            .map(IgnoredTypesModelConverter::forName)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toSet());
     }
 
     private static Optional<Class<?>> forName(String className) {

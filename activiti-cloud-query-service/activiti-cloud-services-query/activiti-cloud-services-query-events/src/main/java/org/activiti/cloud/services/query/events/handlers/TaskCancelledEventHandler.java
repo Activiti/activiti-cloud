@@ -38,9 +38,9 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
         CloudTaskCancelledEvent taskCancelledEvent = (CloudTaskCancelledEvent) event;
         Task eventTask = taskCancelledEvent.getEntity();
 
-        TaskEntity taskEntity = Optional
-            .ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
-            .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity taskEntity = Optional.ofNullable(
+            entityManager.find(TaskEntity.class, eventTask.getId())
+        ).orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
 
         taskEntity.setStatus(Task.TaskStatus.CANCELLED);
         taskEntity.setLastModified(new Date(taskCancelledEvent.getTimestamp()));

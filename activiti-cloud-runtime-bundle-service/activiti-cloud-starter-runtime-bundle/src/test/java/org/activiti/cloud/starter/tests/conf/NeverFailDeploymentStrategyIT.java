@@ -58,7 +58,8 @@ public class NeverFailDeploymentStrategyIT {
     @Test
     public void rb_should_startEven_when_itFailsToParseSomeProcessDefinition() {
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
 
         //then
         //spring.activiti.process-definition-location-prefix points to a folder containing only an invalid process definition

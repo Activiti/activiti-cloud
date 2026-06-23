@@ -163,11 +163,10 @@ public class QueryProcessDiagramIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         await()
             .atMost(Durations.ONE_MINUTE)
@@ -195,11 +194,10 @@ public class QueryProcessDiagramIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         await()
             .atMost(Durations.ONE_MINUTE)
@@ -262,49 +260,48 @@ public class QueryProcessDiagramIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
+        await().untilAsserted(() -> {
+            List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(process.getId());
 
-                assertThat(activities).hasSize(2);
-                assertThat(activities)
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityType,
-                        BPMNActivityEntity::getStatus
+            assertThat(activities).hasSize(2);
+            assertThat(activities)
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityType,
+                    BPMNActivityEntity::getStatus
+                )
+                .containsExactly(
+                    tuple(
+                        startActivity.getElementId(),
+                        startActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.COMPLETED
+                    ),
+                    tuple(
+                        taskActivity.getElementId(),
+                        taskActivity.getActivityType(),
+                        BPMNActivityEntity.BPMNActivityStatus.STARTED
                     )
-                    .containsExactly(
-                        tuple(
-                            startActivity.getElementId(),
-                            startActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.COMPLETED
-                        ),
-                        tuple(
-                            taskActivity.getElementId(),
-                            taskActivity.getActivityType(),
-                            BPMNActivityEntity.BPMNActivityStatus.STARTED
-                        )
-                    );
-
-                List<BPMNSequenceFlowEntity> sequenceFlows = bpmnSequenceFlowRepository.findByProcessInstanceId(
-                    process.getId()
                 );
 
-                assertThat(sequenceFlows).hasSize(1);
-                assertThat(sequenceFlows)
-                    .extracting(
-                        BPMNSequenceFlowEntity::getElementId,
-                        BPMNSequenceFlowEntity::getSourceActivityElementId,
-                        BPMNSequenceFlowEntity::getTargetActivityElementId
+            List<BPMNSequenceFlowEntity> sequenceFlows = bpmnSequenceFlowRepository.findByProcessInstanceId(
+                process.getId()
+            );
+
+            assertThat(sequenceFlows).hasSize(1);
+            assertThat(sequenceFlows)
+                .extracting(
+                    BPMNSequenceFlowEntity::getElementId,
+                    BPMNSequenceFlowEntity::getSourceActivityElementId,
+                    BPMNSequenceFlowEntity::getTargetActivityElementId
+                )
+                .containsExactly(
+                    tuple(
+                        sequenceFlow.getElementId(),
+                        sequenceFlow.getSourceActivityElementId(),
+                        sequenceFlow.getTargetActivityElementId()
                     )
-                    .containsExactly(
-                        tuple(
-                            sequenceFlow.getElementId(),
-                            sequenceFlow.getSourceActivityElementId(),
-                            sequenceFlow.getTargetActivityElementId()
-                        )
-                    );
-            });
+                );
+        });
     }
 
     protected ProcessInstanceImpl startSimpleProcessInstance() {

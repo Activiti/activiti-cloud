@@ -16,7 +16,8 @@
 package org.activiti.cloud.conf;
 
 public class RuntimeQueryConsumerPartitionedChannelCountProvider
-    implements QueryConsumerPartitionedChannelCountProvider {
+    implements QueryConsumerPartitionedChannelCountProvider
+{
 
     @Override
     public Integer get() {

@@ -66,8 +66,7 @@ public class TestErrorConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder
-            .withPayload(payload)
+        Message<?> message = MessageBuilder.withPayload(payload)
             .setHeader(IntegrationContextMessageHeaders.INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
             .setHeader("connectorType", "test-error-connector.throwError")
             .build();

@@ -22,7 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 
 public class CloudProcessDeployedEventImpl
     extends CloudRuntimeEventImpl<ProcessDefinition, ProcessDefinitionEvent.ProcessDefinitionEvents>
-    implements CloudProcessDeployedEvent {
+    implements CloudProcessDeployedEvent
+{
 
     private String processModelContent;
 

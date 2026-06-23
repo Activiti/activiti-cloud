@@ -120,14 +120,18 @@ public class ProcessDefinitionIT {
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions(String url) {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<
+            PagedModel<CloudProcessDefinition>
+        >() {};
         return restTemplate.exchange(url, HttpMethod.GET, null, responseType);
     }
 
     @Test
     void shouldReturnProcessDefinitionById() {
         //given
-        ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<CloudProcessDefinition>() {};
+        ParameterizedTypeReference<CloudProcessDefinition> responseType = new ParameterizedTypeReference<
+            CloudProcessDefinition
+        >() {};
 
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitionsEntity = getProcessDefinitions(
             PROCESS_DEFINITIONS_URL
@@ -154,7 +158,9 @@ public class ProcessDefinitionIT {
     @Test
     void shouldReturnProcessDefinitionMetadata() {
         //given
-        ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {};
+        ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<
+            ProcessDefinitionMeta
+        >() {};
 
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_WITH_VARIABLES_2);
 
@@ -178,7 +184,9 @@ public class ProcessDefinitionIT {
     @Test
     void shouldReturnProcessDefinitionMetadataForPoolLane() {
         //given
-        ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<ProcessDefinitionMeta>() {};
+        ParameterizedTypeReference<ProcessDefinitionMeta> responseType = new ParameterizedTypeReference<
+            ProcessDefinitionMeta
+        >() {};
 
         ProcessDefinition aProcessDefinition = getProcessDefinition(PROCESS_POOL_LANE);
 

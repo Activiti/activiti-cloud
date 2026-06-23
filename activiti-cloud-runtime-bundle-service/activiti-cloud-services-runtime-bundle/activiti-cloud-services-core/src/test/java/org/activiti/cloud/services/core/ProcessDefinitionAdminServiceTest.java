@@ -65,31 +65,33 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
-        )
-            .thenAnswer(call -> {
-                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
-                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
-                return cloudProcessDefinition;
-            });
+        ).thenAnswer(call -> {
+            CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+            cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+            return cloudProcessDefinition;
+        });
 
         List<ProcessDefinition> result = processDefinitionAdminService
             .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), false)
             .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions =
-            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions = (
+            (ExtendedCloudProcessDefinition) result.getFirst()
+        ).getVariableDefinitions();
         assertThat(variableDefinitions).hasSize(1);
         assertThat(variableDefinitions.getFirst()).isEqualTo(variableDefinition);
-        verify(processDefinitionDecorator)
-            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+        verify(processDefinitionDecorator).decorate(
+            argThat(argument -> argument.getId().equals(processDefinition.getId()))
+        );
     }
 
     @ParameterizedTest
@@ -99,8 +101,9 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
@@ -131,19 +134,19 @@ public class ProcessDefinitionAdminServiceTest {
             GetProcessDefinitionsPayload.class
         );
 
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
-        )
-            .thenAnswer(call -> {
-                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
-                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
-                return cloudProcessDefinition;
-            });
+        ).thenAnswer(call -> {
+            CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+            cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+            return cloudProcessDefinition;
+        });
 
         List<ProcessDefinition> result = processDefinitionAdminService
             .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"), true)

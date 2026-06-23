@@ -34,17 +34,19 @@ public class ProcessCandidateStarterGroupRemovedEventHandler implements QueryEve
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCandidateStarterGroupRemovedEvent processCandidateStarterGroupRemovedEvent = (CloudProcessCandidateStarterGroupRemovedEvent) event;
-        org.activiti.api.process.model.ProcessCandidateStarterGroup processCandidateStarterGroup = processCandidateStarterGroupRemovedEvent.getEntity();
+        CloudProcessCandidateStarterGroupRemovedEvent processCandidateStarterGroupRemovedEvent =
+            (CloudProcessCandidateStarterGroupRemovedEvent) event;
+        org.activiti.api.process.model.ProcessCandidateStarterGroup processCandidateStarterGroup =
+            processCandidateStarterGroupRemovedEvent.getEntity();
 
         ProcessCandidateStarterGroupId id = new ProcessCandidateStarterGroupId(
             processCandidateStarterGroup.getProcessDefinitionId(),
             processCandidateStarterGroup.getGroupId()
         );
         try {
-            Optional
-                .ofNullable(entityManager.find(ProcessCandidateStarterGroupEntity.class, id))
-                .ifPresent(entityManager::remove);
+            Optional.ofNullable(entityManager.find(ProcessCandidateStarterGroupEntity.class, id)).ifPresent(
+                entityManager::remove
+            );
         } catch (Exception cause) {
             throw new QueryException("Error handling ProcessCandidateStarterGroupRemovedEvent[" + event + "]", cause);
         }

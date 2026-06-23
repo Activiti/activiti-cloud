@@ -117,8 +117,7 @@ public class ProcessDefinitionValuesService {
     private record ExtensionsStartEventId(String id, Extension extensions) {}
 
     private String getProcessId(String processDefinitionId) {
-        return Optional
-            .ofNullable(processDefinitionId)
+        return Optional.ofNullable(processDefinitionId)
             .filter(StringUtils::isNotBlank)
             .map(id -> id.split(":")[0])
             .orElse(null);

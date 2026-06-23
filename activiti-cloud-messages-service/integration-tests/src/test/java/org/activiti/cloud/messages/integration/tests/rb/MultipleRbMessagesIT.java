@@ -121,36 +121,32 @@ class MultipleRbMessagesIT {
     static void setUp() {
         new KeycloakContainerApplicationInitializer().initialize();
         var rabbitMqProperties = RabbitMQContainerApplicationInitializer.initialize();
-        TestPropertyValues
-            .of(KeycloakContainerApplicationInitializer.getContainerProperties())
+        TestPropertyValues.of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(rabbitMqProperties)
             .applyToSystemProperties(() -> {
-                h2Context =
-                    new SpringApplicationBuilder(H2Application.class)
-                        .web(WebApplicationType.NONE)
-                        .properties("spring.main.banner-mode=off")
-                        .profiles("h2")
-                        .run();
+                h2Context = new SpringApplicationBuilder(H2Application.class)
+                    .web(WebApplicationType.NONE)
+                    .properties("spring.main.banner-mode=off")
+                    .profiles("h2")
+                    .run();
 
-                rb1Context =
-                    new SpringApplicationBuilder(RbApplication.class)
-                        .properties(
-                            "server.port=" + TestSocketUtils.findAvailableTcpPort(),
-                            "spring.main.banner-mode=off",
-                            "activiti.cloud.application.name=messages-app1",
-                            "spring.application.name=rb"
-                        )
-                        .run();
+                rb1Context = new SpringApplicationBuilder(RbApplication.class)
+                    .properties(
+                        "server.port=" + TestSocketUtils.findAvailableTcpPort(),
+                        "spring.main.banner-mode=off",
+                        "activiti.cloud.application.name=messages-app1",
+                        "spring.application.name=rb"
+                    )
+                    .run();
 
-                rb2Context =
-                    new SpringApplicationBuilder(RbApplication.class)
-                        .properties(
-                            "server.port=" + TestSocketUtils.findAvailableTcpPort(),
-                            "spring.main.banner-mode=off",
-                            "activiti.cloud.application.name=messages-app2",
-                            "spring.application.name=rb"
-                        )
-                        .run();
+                rb2Context = new SpringApplicationBuilder(RbApplication.class)
+                    .properties(
+                        "server.port=" + TestSocketUtils.findAvailableTcpPort(),
+                        "spring.main.banner-mode=off",
+                        "activiti.cloud.application.name=messages-app2",
+                        "spring.application.name=rb"
+                    )
+                    .run();
 
                 return true;
             });
@@ -173,14 +169,12 @@ class MultipleRbMessagesIT {
     @Test
     void shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles() {
         //given
-        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
             .withBusinessKey(BUSINESS_KEY)
             .build();
 
-        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
             .withBusinessKey(BUSINESS_KEY)
             .build();
@@ -214,14 +208,13 @@ class MultipleRbMessagesIT {
         StartMessageCmdExecutor startMessageCmdExecutor = context.getBean(StartMessageCmdExecutor.class);
         ReceiveMessageCmdExecutor receiveMessageCmdExecutor = context.getBean(ReceiveMessageCmdExecutor.class);
 
-        await()
-            .untilAsserted(() -> {
-                verify(bpmnMessageSentEventMessageProducer, times(1)).onEvent(any());
-                verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(any());
-                verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(any());
+        await().untilAsserted(() -> {
+            verify(bpmnMessageSentEventMessageProducer, times(1)).onEvent(any());
+            verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(any());
+            verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(any());
 
-                verify(receiveMessageCmdExecutor, times(1)).execute(any());
-                verify(startMessageCmdExecutor, never()).execute(any());
-            });
+            verify(receiveMessageCmdExecutor, times(1)).execute(any());
+            verify(startMessageCmdExecutor, never()).execute(any());
+        });
     }
 }

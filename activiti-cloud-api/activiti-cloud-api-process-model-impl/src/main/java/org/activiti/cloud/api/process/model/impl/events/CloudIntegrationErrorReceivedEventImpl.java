@@ -23,7 +23,8 @@ import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceived
 
 public class CloudIntegrationErrorReceivedEventImpl
     extends CloudIntegrationEventImpl
-    implements CloudIntegrationErrorReceivedEvent {
+    implements CloudIntegrationErrorReceivedEvent
+{
 
     private static final long serialVersionUID = 1L;
 

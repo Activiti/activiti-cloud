@@ -59,11 +59,11 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
         var eventProcessInstanceId = deletedEvent.getEntity().getId();
 
-        ProcessInstanceEntity processInstanceEntity = Optional
-            .ofNullable(entityManager.find(ProcessInstanceEntity.class, eventProcessInstanceId))
-            .orElseThrow(() ->
-                new QueryException("Unable to find process instance with the given id: " + eventProcessInstanceId)
-            );
+        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, eventProcessInstanceId)
+        ).orElseThrow(() ->
+            new QueryException("Unable to find process instance with the given id: " + eventProcessInstanceId)
+        );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
             remove(

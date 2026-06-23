@@ -141,17 +141,15 @@ class ProcessInstanceVariableAdminControllerImplIT {
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
 
-        this.mockMvc =
-            MockMvcBuilders
-                .standaloneSetup(
-                    new ProcessInstanceVariableAdminControllerImpl(
-                        variableRepresentationModelAssembler,
-                        processAdminRuntime,
-                        resourcesAssembler
-                    )
-                )
-                .setControllerAdvice(new RuntimeBundleExceptionHandler())
-                .build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(
+            new ProcessInstanceVariableAdminControllerImpl(
+                variableRepresentationModelAssembler,
+                processAdminRuntime,
+                resourcesAssembler
+            )
+        )
+            .setControllerAdvice(new RuntimeBundleExceptionHandler())
+            .build();
 
         given(processAdminRuntime.processInstance(any())).willReturn(processInstance);
     }
@@ -175,9 +173,8 @@ class ProcessInstanceVariableAdminControllerImplIT {
         given(processAdminRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
         this.mockMvc.perform(
-                get("/admin/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
-            )
-            .andExpect(status().isOk());
+            get("/admin/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -197,8 +194,7 @@ class ProcessInstanceVariableAdminControllerImplIT {
                     .contentType(MediaTypes.HAL_JSON_VALUE)
                     .content(
                         mapper.writeValueAsString(
-                            ProcessPayloadBuilder
-                                .setVariables()
+                            ProcessPayloadBuilder.setVariables()
                                 .withProcessInstanceId("1")
                                 .withVariables(variables)
                                 .build()
@@ -217,19 +213,17 @@ class ProcessInstanceVariableAdminControllerImplIT {
     @Test
     void deleteVariables() throws Exception {
         this.mockMvc.perform(
-                delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
-                    .accept(MediaTypes.HAL_JSON_VALUE)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        mapper.writeValueAsString(
-                            ProcessPayloadBuilder
-                                .removeVariables()
-                                .withVariableNames(Arrays.asList("varName1", "varName2"))
-                                .build()
-                        )
+            delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    mapper.writeValueAsString(
+                        ProcessPayloadBuilder.removeVariables()
+                            .withVariableNames(Arrays.asList("varName1", "varName2"))
+                            .build()
                     )
-            )
-            .andExpect(status().isOk());
+                )
+        ).andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());
     }
 }

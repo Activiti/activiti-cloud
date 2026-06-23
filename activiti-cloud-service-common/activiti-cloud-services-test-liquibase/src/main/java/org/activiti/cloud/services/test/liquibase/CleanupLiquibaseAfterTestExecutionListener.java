@@ -33,12 +33,11 @@ public class CleanupLiquibaseAfterTestExecutionListener extends AbstractTestExec
 
     @Override
     public void afterTestClass(TestContext testContext) {
-        Optional
-            .of(testContext.getTestClass())
+        Optional.of(testContext.getTestClass())
             .filter(testClass ->
-                Optional
-                    .ofNullable(AnnotationUtils.findAnnotation(testClass, EnableCleanupLiquibaseAfterTest.class))
-                    .isPresent()
+                Optional.ofNullable(
+                    AnnotationUtils.findAnnotation(testClass, EnableCleanupLiquibaseAfterTest.class)
+                ).isPresent()
             )
             .map(testClass -> testContext.getApplicationContext().getBeansOfType(SpringLiquibase.class))
             .map(Map::values)

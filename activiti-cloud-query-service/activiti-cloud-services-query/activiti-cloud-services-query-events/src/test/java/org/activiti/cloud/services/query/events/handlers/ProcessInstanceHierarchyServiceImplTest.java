@@ -57,8 +57,9 @@ class ProcessInstanceHierarchyServiceImplTest {
         TypedQuery<ProcessInstanceHierarchyEntity> tq = Mockito.mock(TypedQuery.class);
         given(entityManager.getCriteriaBuilder()).willReturn(cb);
         given(cb.createQuery(ProcessInstanceHierarchyEntity.class)).willReturn(cq);
-        given(cq.from(ProcessInstanceHierarchyEntity.class))
-            .willReturn(Mockito.mock(jakarta.persistence.criteria.Root.class));
+        given(cq.from(ProcessInstanceHierarchyEntity.class)).willReturn(
+            Mockito.mock(jakarta.persistence.criteria.Root.class)
+        );
         given(entityManager.createQuery(cq)).willReturn(tq);
         given(tq.getResultList()).willReturn(rows);
     }

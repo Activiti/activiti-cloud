@@ -114,13 +114,13 @@ public class ServiceTaskConsumerHandler {
             resultVariables.put(
                 "customPojoField1InConnector",
                 "Value of field1 on customPojo is " +
-                objectMapper.convertValue(customPojo, CustomPojo.class).getField1()
+                    objectMapper.convertValue(customPojo, CustomPojo.class).getField1()
             );
             //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
             resultVariables.put(
                 "customPojoAnnotatedTypeInConnector",
                 "Type of customPojoAnnotated var in connector is " +
-                requestVariables.get("customPojoAnnotated").getClass()
+                    requestVariables.get("customPojoAnnotated").getClass()
             );
 
             integrationContext.addOutBoundVariables(resultVariables);
@@ -161,15 +161,14 @@ public class ServiceTaskConsumerHandler {
             integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name", "outTest");
 
             try {
-                JsonNode value = new ObjectMapper()
-                    .readTree(
-                        "{\n" +
+                JsonNode value = new ObjectMapper().readTree(
+                    "{\n" +
                         "  \"city\": {\n" +
                         "    \"name\": \"London\",\n" +
                         "    \"place\": \"Tower of London\"\n" +
                         "  }\n" +
                         "}"
-                    );
+                );
 
                 integrationContext.addOutBoundVariable("sightSeeing", value);
                 integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
@@ -223,8 +222,7 @@ public class ServiceTaskConsumerHandler {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
         // Mandatory headers assertions
-        Assertions
-            .assertThat(headers)
+        Assertions.assertThat(headers)
             .containsKey(ROUTING_KEY)
             .containsKey(MESSAGE_PAYLOAD_TYPE)
             .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
@@ -247,9 +245,10 @@ public class ServiceTaskConsumerHandler {
 
         // conditional on existing parentProcessInstanceId in integration context
         if (integrationContext.getParentProcessInstanceId() != null) {
-            Assertions
-                .assertThat(headers)
-                .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
+            Assertions.assertThat(headers).containsEntry(
+                PARENT_PROCESS_INSTANCE_ID,
+                integrationContext.getParentProcessInstanceId()
+            );
         }
     }
 

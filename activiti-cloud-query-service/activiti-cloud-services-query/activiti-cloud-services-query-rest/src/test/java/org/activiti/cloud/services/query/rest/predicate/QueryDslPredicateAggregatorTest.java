@@ -38,8 +38,9 @@ public class QueryDslPredicateAggregatorTest {
 
         QueryDslPredicateFilter secondFilter = mock(QueryDslPredicateFilter.class);
         Predicate initialPredicatePlusFirstAndSecondFilters = mock(Predicate.class);
-        given(secondFilter.extend(initialPredicatePlusFirstFilter))
-            .willReturn(initialPredicatePlusFirstAndSecondFilters);
+        given(secondFilter.extend(initialPredicatePlusFirstFilter)).willReturn(
+            initialPredicatePlusFirstAndSecondFilters
+        );
 
         //when
         Predicate finalPredicate = predicateAggregator.applyFilters(

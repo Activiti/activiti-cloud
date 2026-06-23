@@ -184,19 +184,17 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
             Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
                 From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
-                orderByClause =
-                    new VariableSelectionExpressionImpl<>(
-                        joinRoot,
-                        Map.of(
-                            joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                            sort.processDefinitionKey(),
-                            joinRoot.get(ProcessVariableEntity_.name),
-                            sort.field()
-                        ),
-                        javaTypeMapping.get(sort.type()),
-                        criteriaBuilder
-                    )
-                        .getSelectionExpression();
+                orderByClause = new VariableSelectionExpressionImpl<>(
+                    joinRoot,
+                    Map.of(
+                        joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                        sort.processDefinitionKey(),
+                        joinRoot.get(ProcessVariableEntity_.name),
+                        sort.field()
+                    ),
+                    javaTypeMapping.get(sort.type()),
+                    criteriaBuilder
+                ).getSelectionExpression();
                 query.groupBy(root.get(getIdAttribute()));
             } else {
                 orderByClause = root.get(sort.field());

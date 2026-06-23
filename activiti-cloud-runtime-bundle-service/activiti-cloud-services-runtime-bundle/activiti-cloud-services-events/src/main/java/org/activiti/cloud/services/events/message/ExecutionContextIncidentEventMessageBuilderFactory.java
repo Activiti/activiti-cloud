@@ -20,7 +20,8 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.springframework.util.Assert;
 
 public class ExecutionContextIncidentEventMessageBuilderFactory
-    implements MessageBuilderChainFactory<ExecutionContext> {
+    implements MessageBuilderChainFactory<ExecutionContext>
+{
 
     private final RuntimeBundleProperties properties;
 

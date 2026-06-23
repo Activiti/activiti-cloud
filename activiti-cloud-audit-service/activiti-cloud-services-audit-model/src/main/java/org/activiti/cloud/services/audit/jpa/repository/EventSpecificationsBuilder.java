@@ -48,7 +48,8 @@ public class EventSpecificationsBuilder {
     ) {
         SearchOperation op = SearchOperation.getSimpleOperation(operation);
         if (op != null) {
-            if (op == SearchOperation.EQUALITY) { // the operation may be complex operation
+            if (op == SearchOperation.EQUALITY) {
+                // the operation may be complex operation
                 final boolean startWithAsterisk = prefix != null && prefix.contains(SearchOperation.ZERO_OR_MORE_REGEX);
                 final boolean endWithAsterisk = suffix != null && suffix.contains(SearchOperation.ZERO_OR_MORE_REGEX);
 
@@ -73,10 +74,9 @@ public class EventSpecificationsBuilder {
         Specification<AuditEventEntity> result = new EventSpecification(params.getFirst());
 
         for (int i = 1; i < params.size(); i++) {
-            result =
-                params.get(i).isOrPredicate()
-                    ? Specification.where(result).or(new EventSpecification(params.get(i)))
-                    : Specification.where(result).and(new EventSpecification(params.get(i)));
+            result = params.get(i).isOrPredicate()
+                ? Specification.where(result).or(new EventSpecification(params.get(i)))
+                : Specification.where(result).and(new EventSpecification(params.get(i)));
         }
 
         return result;
