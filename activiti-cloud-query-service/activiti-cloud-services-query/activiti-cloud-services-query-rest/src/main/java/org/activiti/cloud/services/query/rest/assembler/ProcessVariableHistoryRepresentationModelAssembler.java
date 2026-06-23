@@ -16,14 +16,29 @@
 package org.activiti.cloud.services.query.rest.assembler;
 
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
+import org.activiti.cloud.services.query.rest.dto.ProcessVariableHistoryEntry;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessVariableHistoryRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessVariableHistoryEntity, EntityModel<ProcessVariableHistoryEntity>> {
+    implements RepresentationModelAssembler<ProcessVariableHistoryEntity, EntityModel<ProcessVariableHistoryEntry>> {
 
     @Override
-    public EntityModel<ProcessVariableHistoryEntity> toModel(ProcessVariableHistoryEntity entity) {
-        return EntityModel.of(entity);
+    public EntityModel<ProcessVariableHistoryEntry> toModel(ProcessVariableHistoryEntity entity) {
+        return EntityModel.of(
+            new ProcessVariableHistoryEntry(
+                entity.getId(),
+                entity.getProcessInstanceId(),
+                entity.getVariableName(),
+                entity.getType(),
+                entity.getValue(),
+                entity.isDeleted(),
+                entity.getEventTime(),
+                entity.getRecordCreateTime(),
+                entity.getMessageId(),
+                entity.getCommandId(),
+                entity.getSequenceNumber()
+            )
+        );
     }
 }

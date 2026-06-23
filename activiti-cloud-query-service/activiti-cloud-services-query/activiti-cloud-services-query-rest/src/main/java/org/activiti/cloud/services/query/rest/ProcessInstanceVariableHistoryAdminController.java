@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessVariableHistoryRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.ProcessVariableHistoryEntry;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -52,7 +53,7 @@ public class ProcessInstanceVariableHistoryAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<ProcessVariableHistoryEntity>> getVariableHistory(
+    public PagedModel<EntityModel<ProcessVariableHistoryEntry>> getVariableHistory(
         @PathVariable String processInstanceId,
         Pageable pageable
     ) {
