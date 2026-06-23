@@ -177,7 +177,6 @@ jobs:
     needs:
       - pre-checks
       - resolve-version
-      - maven-build-common
       - scan-image-dirs
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     uses: ./.github/workflows/_reusable-maven-build.yml
@@ -195,7 +194,6 @@ jobs:
     needs:
       - pre-checks
       - resolve-version
-      - maven-build-common
     if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     uses: ./.github/workflows/_reusable-maven-library-build.yml
     with:
@@ -210,24 +208,13 @@ jobs:
     needs:
       - pre-checks
       - resolve-version
-      - maven-build-common
-      - maven-build
-      - maven-build-libraries
-    if: >-
-      needs.pre-checks.outputs.skip != 'true'
-      && needs.maven-build-common.result == 'success'
-      && needs.maven-build.result == 'success'
-      && needs.maven-build-libraries.result == 'success'
+    if: ${{ needs.pre-checks.outputs.skip != 'true' }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - uses: ./.github/actions/maven-setup
-
-      - uses: ./.github/actions/maven-m2-download
-        with:
-          prefer-dependencies-bom: 'false'
 
       - name: Write VERSION file
         shell: bash
@@ -261,18 +248,27 @@ jobs:
     needs:
       - pre-checks
       - resolve-version
-      - maven-build-common
-      - maven-build
-      - maven-build-libraries
-      - maven-build-dependencies-bom
+      - scan-image-dirs
     if: >-
       needs.pre-checks.outputs.skip != 'true'
       && needs.pre-checks.outputs.skip-tests != 'true'
-      && needs.maven-build-common.result == 'success'
-      && needs.maven-build.result == 'success'
-      && needs.maven-build-libraries.result == 'success'
-      && needs.maven-build-dependencies-bom.result == 'success'
     uses: ./.github/workflows/_reusable-maven-test.yml
+    with:
+      matrix-json: ${{ needs.scan-image-dirs.outputs.transformed-json }}
+      version: ${{ needs.resolve-version.outputs.version }}
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+      NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+  maven-test-libraries:
+    needs:
+      - pre-checks
+      - resolve-version
+    if: >-
+      needs.pre-checks.outputs.skip != 'true'
+      && needs.pre-checks.outputs.skip-tests != 'true'
+    uses: ./.github/workflows/_reusable-maven-test-libraries.yml
     with:
       version: ${{ needs.resolve-version.outputs.version }}
     secrets:
@@ -290,6 +286,7 @@ jobs:
       - maven-build-libraries
       - maven-build-dependencies-bom
       - maven-test
+      - maven-test-libraries
     if: >-
       always()
       && needs.pre-checks.outputs.skip != 'true'
@@ -299,6 +296,7 @@ jobs:
       && needs.maven-build-libraries.result == 'success'
       && needs.maven-build-dependencies-bom.result == 'success'
       && needs.maven-test.result == 'success'
+      && needs.maven-test-libraries.result == 'success'
     env:
       JACOCO_MERGED_FILE: ${{ github.workspace }}/target/jacoco-merged.exec
     steps:
@@ -510,6 +508,7 @@ jobs:
       - maven-build-libraries
       - maven-build-dependencies-bom
       - maven-test
+      - maven-test-libraries
       - maven-jacoco-merge
       - sonar
       - playwright-tests
@@ -527,6 +526,8 @@ jobs:
            || contains(needs.maven-build-dependencies-bom.result, 'cancelled')
            || contains(needs.maven-test.result, 'failure')
            || contains(needs.maven-test.result, 'cancelled')
+           || contains(needs.maven-test-libraries.result, 'failure')
+           || contains(needs.maven-test-libraries.result, 'cancelled')
            || contains(needs.maven-jacoco-merge.result, 'failure')
            || contains(needs.maven-jacoco-merge.result, 'cancelled')
            || contains(needs.sonar.result, 'failure')

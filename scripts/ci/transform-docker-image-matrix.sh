@@ -32,6 +32,7 @@ transformed="$(jq -c --slurpfile cfg "${CONFIG}" '
         else ($svc.extraModules + ",")
         end
       )
+    | .["test-maven-flags"] = ($svc.testMavenFlags // "-T 1C -DunitTests.parallel=true")
   )
 ' <<< "${DIRS_AS_JSON}")"
 

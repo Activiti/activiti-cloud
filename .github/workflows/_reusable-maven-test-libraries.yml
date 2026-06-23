@@ -1,11 +1,8 @@
-name: Maven test (docker images)
+name: Maven test (library modules)
 
 on:
   workflow_call:
     inputs:
-      matrix-json:
-        required: true
-        type: string
       version:
         required: true
         type: string
@@ -22,17 +19,28 @@ env:
 
 jobs:
   test:
-    name: maven-test (${{ matrix.short-name }})
+    name: maven-test-library (${{ matrix.library-id }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 2
       matrix:
-        include: ${{ fromJSON(inputs.matrix-json) }}
+        library-id: [messages-graphql, audit]
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - id: library
+        name: Load library module config (${{ matrix.library-id }})
+        shell: bash
+        env:
+          LIBRARY_ID: ${{ matrix.library-id }}
+        run: |
+          set -euo pipefail
+          CONFIG="${GITHUB_WORKSPACE}/.github/ci/library-modules.json"
+          modules="$(jq -r --arg id "${LIBRARY_ID}" '.[$id].mavenModules' "${CONFIG}")"
+          echo "maven-modules=${modules}" >> "${GITHUB_OUTPUT}"
 
       - name: Write VERSION file
         shell: bash
@@ -47,34 +55,31 @@ jobs:
           version: ${{ inputs.version }}
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
 
-      - name: Maven test (${{ matrix.short-name }})
+      - name: Maven test (${{ matrix.library-id }})
         shell: bash
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          PL_MODULES: ${{ matrix.extra-modules }}${{ matrix.path }}
-          TEST_MAVEN_FLAGS: ${{ matrix.test-maven-flags }}
         run: |
-          # shellcheck disable=SC2086
-          mvn verify -Dskip.common.tests=true -pl "${PL_MODULES}" -am \
-            ${TEST_MAVEN_FLAGS} -U ${{ env.MAVEN_CLI_OPTS }}
+          mvn verify -Dskip.common.tests=true -pl "${{ steps.library.outputs.maven-modules }}" -am \
+            -T 1C -DunitTests.parallel=true -U ${{ env.MAVEN_CLI_OPTS }}
 
-      - name: Upload JaCoCo data (${{ matrix.short-name }})
+      - name: Upload JaCoCo data (${{ matrix.library-id }})
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: jacoco-${{ matrix.short-name }}
+          name: jacoco-${{ matrix.library-id }}
           path: |
             **/jacoco.exec
             **/jacoco-it.exec
           retention-days: 1
           if-no-files-found: ignore
 
-      - name: Upload test reports (${{ matrix.short-name }})
+      - name: Upload test reports (${{ matrix.library-id }})
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
-          name: surefire-reports-${{ matrix.short-name }}
+          name: surefire-reports-${{ matrix.library-id }}
           path: '**/surefire-reports'
           retention-days: 7
           if-no-files-found: ignore
