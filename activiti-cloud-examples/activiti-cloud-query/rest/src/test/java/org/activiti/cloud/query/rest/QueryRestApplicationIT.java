@@ -226,7 +226,7 @@ public class QueryRestApplicationIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors()).isNull();
-        assertThat(result.getData().toString()).isEqualTo(
+        assertThat(result.getData()).hasToString(
             "{Tasks={select=[" +
                 "{name=task1, assignee=testuser, priority=5}, " +
                 "{name=task2, assignee=hruser, priority=10}, " +
@@ -256,9 +256,7 @@ public class QueryRestApplicationIT {
 
         assertThat(result).isNotNull();
         assertThat(result.getErrors()).isNull();
-        assertThat(result.getData().toString()).isEqualTo(
-            "{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}"
-        );
+        assertThat(result.getData()).hasToString("{Tasks={select=[{name=task1, assignee=testuser, priority=5}]}}");
     }
 
     @Test
@@ -300,7 +298,9 @@ public class QueryRestApplicationIT {
     @Test
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).satisfies(map ->
-            assertThat(map.keySet()).allMatch(key -> key.startsWith("engineEvents.anonymous."))
+            assertThat(map.keySet())
+                .isNotEmpty()
+                .allMatch(key -> key.startsWith("engineEvents.anonymous."))
         );
     }
 

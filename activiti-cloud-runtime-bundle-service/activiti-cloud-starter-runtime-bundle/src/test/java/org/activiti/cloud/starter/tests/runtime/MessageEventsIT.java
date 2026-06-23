@@ -590,7 +590,7 @@ public class MessageEventsIT {
                     .createProcessInstanceQuery()
                     .processDefinitionKey("BoundarySubprocessMessageEventProcess")
                     .list()
-            ).hasSize(0);
+            ).isEmpty();
         });
 
         verify(receiveMessageCmdExecutor).execute(any());

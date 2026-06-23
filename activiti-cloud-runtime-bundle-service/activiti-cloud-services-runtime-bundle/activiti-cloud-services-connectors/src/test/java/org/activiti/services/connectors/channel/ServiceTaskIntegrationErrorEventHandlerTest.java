@@ -202,12 +202,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         when(managementService.executeCommand(any())).thenAnswer(invocation -> {
             CompositeCommand arg = invocation.getArgument(0);
-            if (
-                arg
-                    .getCommands()
-                    .stream()
-                    .anyMatch(c -> c instanceof PropagateCloudBpmnErrorCmd)
-            ) {
+            if (arg.getCommands().stream().anyMatch(PropagateCloudBpmnErrorCmd.class::isInstance)) {
                 throw new BpmnError("some exception");
             }
             return arg;

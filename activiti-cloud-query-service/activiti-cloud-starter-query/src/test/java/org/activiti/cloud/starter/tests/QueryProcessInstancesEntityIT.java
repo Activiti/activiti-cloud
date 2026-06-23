@@ -656,8 +656,7 @@ public class QueryProcessInstancesEntityIT {
         );
 
         threeDaysAgo.setTime(now.getTime() - Duration.ofDays(3).toMillis());
-        ProcessInstance processInstanceStartedThreeDaysAgo =
-            processInstanceBuilder.aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
+        processInstanceBuilder.aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
 
         eventsAggregator.sendAll();
 

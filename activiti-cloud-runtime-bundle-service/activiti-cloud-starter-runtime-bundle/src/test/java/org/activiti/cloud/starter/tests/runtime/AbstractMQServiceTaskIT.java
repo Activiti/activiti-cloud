@@ -190,10 +190,12 @@ public abstract class AbstractMQServiceTaskIT {
         assertThat(updatedVariables.get("customPojo").getClass()).isEqualTo(CustomPojo.class);
         assertThat(updatedVariables.get("customPojoAnnotated").getClass()).isEqualTo(CustomPojoAnnotated.class);
 
-        assertThat(updatedVariables.get("customPojoTypeInConnector")).isEqualTo(
+        assertThat(updatedVariables).containsEntry(
+            "customPojoTypeInConnector",
             "Type of customPojo var in connector is " + LinkedHashMap.class
         );
-        assertThat(updatedVariables.get("customPojoField1InConnector")).isEqualTo(
+        assertThat(updatedVariables).containsEntry(
+            "customPojoField1InConnector",
             "Value of field1 on customPojo is field1"
         );
         assertThat(updatedVariables.get("customPojoAnnotatedTypeInConnector")).isEqualTo(

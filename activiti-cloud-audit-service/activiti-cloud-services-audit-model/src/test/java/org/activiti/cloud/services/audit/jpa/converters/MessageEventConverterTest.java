@@ -201,13 +201,11 @@ public class MessageEventConverterTest {
     }
 
     private MessageEventPayload createMessagePayload() {
-        MessageEventPayload messagePayload = MessagePayloadBuilder.event("messageName")
+        return MessagePayloadBuilder.event("messageName")
             .withBusinessKey("businessId")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
-
-        return messagePayload;
     }
 
     private void appendEventInfo(CloudBPMNMessageEventImpl event, ProcessInstance processInstance) {

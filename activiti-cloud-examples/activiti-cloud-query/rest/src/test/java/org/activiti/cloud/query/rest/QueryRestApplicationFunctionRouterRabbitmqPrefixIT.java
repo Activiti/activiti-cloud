@@ -43,7 +43,9 @@ public class QueryRestApplicationFunctionRouterRabbitmqPrefixIT extends QueryRes
     @Override
     void rabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getQueues()).satisfies(map ->
-            assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.consumer."))
+            assertThat(map.keySet())
+                .isNotEmpty()
+                .allMatch(key -> key.startsWith("default-app.consumer."))
         );
     }
 

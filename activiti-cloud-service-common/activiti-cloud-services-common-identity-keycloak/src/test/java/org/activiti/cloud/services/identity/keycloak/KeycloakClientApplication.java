@@ -81,13 +81,12 @@ public class KeycloakClientApplication {
                 clientRegistrationRepository,
                 clientRegistration
             );
-        TestKeycloakClient testKeycloakClient = Feign.builder()
+        return Feign.builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(TestKeycloakClient.class, url);
-        return testKeycloakClient;
     }
 
     public static void main(String[] args) {

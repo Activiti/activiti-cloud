@@ -253,9 +253,7 @@ public class JobExecutorIT {
         await("the async executions should complete and no more jobs should exist").untilAsserted(() -> {
             assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
 
-            assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count()).isEqualTo(
-                0
-            );
+            assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count()).isZero();
         });
 
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete all jobs").isTrue();
@@ -317,7 +315,7 @@ public class JobExecutorIT {
         await("the process instance should complete and no more jobs should exist").untilAsserted(() -> {
             assertThat(
                 runtimeService.createProcessInstanceQuery().processDefinitionKey(pi.getProcessDefinitionKey()).count()
-            ).isEqualTo(0);
+            ).isZero();
 
             assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
         });
@@ -490,7 +488,7 @@ public class JobExecutorIT {
 
             assertThat(
                 managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count()
-            ).isEqualTo(0);
+            ).isZero();
         });
 
         // timer event has been fired
@@ -552,7 +550,7 @@ public class JobExecutorIT {
         await("the process instance should complete and no more timer jobs should exist").untilAsserted(() -> {
             assertThat(
                 runtimeService.createProcessInstanceQuery().processDefinitionKey(pi.getProcessDefinitionKey()).count()
-            ).isEqualTo(0);
+            ).isZero();
 
             assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
         });
