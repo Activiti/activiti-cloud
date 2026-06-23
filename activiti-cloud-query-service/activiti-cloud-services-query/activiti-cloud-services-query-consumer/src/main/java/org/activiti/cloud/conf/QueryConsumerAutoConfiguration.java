@@ -181,8 +181,7 @@ public class QueryConsumerAutoConfiguration {
         PlatformTransactionManager platformTransactionManager,
         Trigger queryEventsPollerTrigger
     ) {
-        return IntegrationFlow
-            .from(queryEventsQueueChannel)
+        return IntegrationFlow.from(queryEventsQueueChannel)
             .log(LoggingHandler.Level.DEBUG)
             .handle(
                 message -> queryEventsProducer.send(message),
@@ -205,8 +204,7 @@ public class QueryConsumerAutoConfiguration {
             "${activiti.cloud.query.consumer.events.queue.headers-to-remove:sourceData,errorChannel,replyChannel,amqp_*,spring.cloud.function.definition}"
         ) String[] headersToRemove
     ) {
-        return IntegrationFlow
-            .from("queryEventsQueueIntegrationFlowInput")
+        return IntegrationFlow.from("queryEventsQueueIntegrationFlowInput")
             .headerFilter(headersToRemove)
             .channel(queryEventsChannel)
             .get();

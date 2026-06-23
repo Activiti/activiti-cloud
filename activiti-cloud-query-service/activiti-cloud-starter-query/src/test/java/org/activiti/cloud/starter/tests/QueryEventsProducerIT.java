@@ -102,8 +102,9 @@ public class QueryEventsProducerIT {
         producer.send(created, started);
 
         //then the projection commits and the listener forwards the events
-        await()
-            .untilAsserted(() -> assertThat(processInstanceRepository.findById(processInstance.getId())).isPresent());
+        await().untilAsserted(() ->
+            assertThat(processInstanceRepository.findById(processInstance.getId())).isPresent()
+        );
 
         await().untilAsserted(() -> verify(queryEventsProducer).send(any(Message.class)));
         await().untilAsserted(() -> assertThat(queryEventsChannel.getQueueSize()).isZero());
@@ -132,10 +133,10 @@ public class QueryEventsProducerIT {
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         doAnswer(arg -> {
-                countDownLatch.countDown();
+            countDownLatch.countDown();
 
-                throw new RuntimeException();
-            })
+            throw new RuntimeException();
+        })
             .when(queryEventsProducer)
             .send(any(Message.class));
 
