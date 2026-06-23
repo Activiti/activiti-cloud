@@ -9,7 +9,7 @@
   },
   "./activiti-cloud-examples/activiti-cloud-query": {
     "shortName": "activiti-cloud-query",
-    "extraModules": "activiti-cloud-query-service,activiti-cloud-examples/activiti-cloud-query/liquibase,activiti-cloud-examples/activiti-cloud-query/starter,activiti-cloud-examples/activiti-cloud-query/rest,activiti-cloud-examples/activiti-cloud-query/consumer",
+    "extraModules": "activiti-cloud-query-service,activiti-cloud-audit-service,activiti-cloud-messages-service,activiti-cloud-notifications-graphql-service,activiti-cloud-examples/activiti-cloud-query/liquibase,activiti-cloud-examples/activiti-cloud-query/starter,activiti-cloud-examples/activiti-cloud-query/rest,activiti-cloud-examples/activiti-cloud-query/consumer",
     "testMavenFlags": "-T 1 -DunitTests.parallel=false"
   },
   "./activiti-cloud-examples/activiti-cloud-identity-adapter": {

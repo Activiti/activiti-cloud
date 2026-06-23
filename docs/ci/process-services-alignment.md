@@ -6,12 +6,13 @@ Aligned with [hxp-process-services](https://github.com/Alfresco/hxp-process-serv
 
 | Area           | Implementation                                                                                                                                                                                                                      |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Parallel graph | `build-common`, per-image build/test, library build/test, and BOM start together after `resolve-version`                                                                                                                            |
+| Parallel graph | `build-common`, per-image build/test, and BOM start together after `create-tag`                                                                                                                                                     |
+| Versioning     | [`maven-tag`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-tag/action.yml) on push; PR preview via `maven-build` / `preview` label                                                            |
 | Build matrix   | [`docker-scan-image-dirs`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/docker-scan-image-dirs/action.yml) + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json) |
-| Test matrix    | Same docker matrix + [`.github/ci/library-modules.json`](../../.github/ci/library-modules.json)                                                                                                                                     |
+| Test matrix    | Same docker matrix (audit + messages-graphql built with query cell)                                                                                                                                                                 |
 | Maven          | Root `mvn … -pl <modules> -am` via [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml)                                                                             |
 | Common tests   | Once in `maven-build-common`; skipped in service cells via `skip.common.tests`                                                                                                                                                      |
-| JaCoCo / Sonar | Per-cell `jacoco-report-name` + `target-*` uploads; [`sonar-scan-on-built-project`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/sonar-scan-on-built-project/action.yml)                            |
+| JaCoCo / Sonar | Per-cell `jacoco-report-name` + `target-*` / `target-test-*` uploads; `compile` then `sonar:sonar`                                                                                                                                  |
 | Docker         | `make docker/<short-name>` after image-dir build                                                                                                                                                                                    |
 | Playwright     | Starts when per-image **build** (with Docker) completes                                                                                                                                                                             |
 
@@ -19,20 +20,17 @@ Aligned with [hxp-process-services](https://github.com/Alfresco/hxp-process-serv
 
 - `./activiti-cloud-examples/example-runtime-bundle`
 - `./activiti-cloud-examples/example-cloud-connector`
-- `./activiti-cloud-examples/activiti-cloud-query` (`testMavenFlags`: `-T 1 -DunitTests.parallel=false`)
+- `./activiti-cloud-examples/activiti-cloud-query` (`extraModules` includes audit + messages-graphql; `testMavenFlags`: `-T 1 -DunitTests.parallel=false`)
 - `./activiti-cloud-examples/activiti-cloud-identity-adapter`
 
 Merge script: [`scripts/ci/transform-docker-image-matrix.sh`](../../scripts/ci/transform-docker-image-matrix.sh).
 
-## Library-only modules
-
-- `messages-graphql`, `audit` — separate build/test reusable workflows
-
 ## `skip.common.tests`
 
-On `activiti-cloud-api` and `activiti-cloud-service-common` parent POMs. Service/library cells pass `-Dskip.common.tests=true`.
+On `activiti-cloud-api` and `activiti-cloud-service-common` parent POMs. Service cells pass `-Dskip.common.tests=true`.
 
 ## Removed (POC cleanup)
 
-- `maven-shards.json`, `maven-jacoco-merge`, custom `maven-setup` / `maven-m2-*` actions
+- `maven-shards.json`, `maven-jacoco-merge`, custom `maven-setup` / `maven-m2-*` / `resolve-version` actions
+- `library-modules.json`, library-only reusable workflows
 - `validate-ci-matrix-lists.sh` (matrix is generated from Dockerfiles)

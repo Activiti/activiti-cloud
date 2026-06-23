@@ -6,7 +6,7 @@ on:
       matrix-json:
         required: true
         type: string
-      version:
+      ref:
         required: true
         type: string
     secrets:
@@ -33,19 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          ref: ${{ inputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - name: Write VERSION file
-        shell: bash
-        env:
-          PROJECT_VERSION: ${{ inputs.version }}
-        run: |
-          echo "${PROJECT_VERSION}" > VERSION
-          echo "VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
-        with:
-          version: ${{ inputs.version }}
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
         env:
