@@ -20,7 +20,8 @@ import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListe
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 
 public class CloudMessageSubscriptionCancelledProducer
-    implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent> {
+    implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent>
+{
 
     private final ProcessEngineEventsAggregator eventsAggregator;
     private final ToCloudProcessRuntimeEventConverter eventConverter;

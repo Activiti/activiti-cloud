@@ -43,8 +43,11 @@ public class IntegrationErrorHandlerImplTest {
 
     @BeforeEach
     public void setUp() {
-        integrationErrorHandler =
-            new IntegrationErrorHandlerImpl(integrationErrorSender, connectorProperties, new ObjectMapper());
+        integrationErrorHandler = new IntegrationErrorHandlerImpl(
+            integrationErrorSender,
+            connectorProperties,
+            new ObjectMapper()
+        );
     }
 
     @Test
@@ -52,8 +55,7 @@ public class IntegrationErrorHandlerImplTest {
         //given
         ErrorMessage errorMessage = new ErrorMessage(
             new MessagingException(
-                MessageBuilder
-                    .withPayload("This is not an integration request".getBytes())
+                MessageBuilder.withPayload("This is not an integration request".getBytes())
                     .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
                     .build()
             )

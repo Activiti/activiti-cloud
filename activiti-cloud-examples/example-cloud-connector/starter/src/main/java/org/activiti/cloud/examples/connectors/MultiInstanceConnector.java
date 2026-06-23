@@ -65,8 +65,7 @@ public class MultiInstanceConnector implements ConsumerConnector<IntegrationRequ
 
         Map<String, Object> result = Collections.singletonMap("executionCount", counter.incrementAndGet());
 
-        Message<IntegrationResult> message = IntegrationResultBuilder
-            .resultFor(integrationRequest, connectorProperties)
+        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
             .withOutboundVariables(result)
             .buildMessage();
 

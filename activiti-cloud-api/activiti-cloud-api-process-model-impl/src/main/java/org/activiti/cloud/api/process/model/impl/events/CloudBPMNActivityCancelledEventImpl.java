@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCancelledEve
 
 public class CloudBPMNActivityCancelledEventImpl
     extends CloudBPMNActivityEventImpl
-    implements CloudBPMNActivityCancelledEvent {
+    implements CloudBPMNActivityCancelledEvent
+{
 
     private String cause;
 

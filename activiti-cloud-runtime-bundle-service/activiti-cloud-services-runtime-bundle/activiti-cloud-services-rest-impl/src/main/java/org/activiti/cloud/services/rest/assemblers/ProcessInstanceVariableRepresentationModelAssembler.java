@@ -28,7 +28,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessInstanceVariableRepresentationModelAssembler
-    implements RepresentationModelAssembler<VariableInstance, EntityModel<CloudVariableInstance>> {
+    implements RepresentationModelAssembler<VariableInstance, EntityModel<CloudVariableInstance>>
+{
 
     private ToCloudVariableInstanceConverter converter;
 
@@ -40,15 +41,15 @@ public class ProcessInstanceVariableRepresentationModelAssembler
     public EntityModel<CloudVariableInstance> toModel(VariableInstance variableInstance) {
         CloudVariableInstance cloudVariableInstance = converter.from(variableInstance);
         Link processVariables = linkTo(
-            methodOn(ProcessInstanceVariableControllerImpl.class)
-                .getVariables(cloudVariableInstance.getProcessInstanceId())
-        )
-            .withRel("processVariables");
+            methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(
+                cloudVariableInstance.getProcessInstanceId()
+            )
+        ).withRel("processVariables");
         Link processInstance = linkTo(
-            methodOn(ProcessInstanceControllerImpl.class)
-                .getProcessInstanceById(cloudVariableInstance.getProcessInstanceId())
-        )
-            .withRel("processInstance");
+            methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(
+                cloudVariableInstance.getProcessInstanceId()
+            )
+        ).withRel("processInstance");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
         return EntityModel.of(cloudVariableInstance, processVariables, processInstance, homeLink);
     }

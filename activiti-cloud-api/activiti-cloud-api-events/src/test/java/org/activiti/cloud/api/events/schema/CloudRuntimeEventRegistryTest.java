@@ -27,7 +27,9 @@ public class CloudRuntimeEventRegistryTest {
 
     @Test
     public void buildRegistry_should_createAMapWithEventTypeNameAsKeyAndEventInterfaceAsValue() {
-        assertThat(eventRegistry.buildRegistry())
-            .containsEntry(ACTIVITY_STARTED.name(), CloudBPMNActivityStartedEvent.class);
+        assertThat(eventRegistry.buildRegistry()).containsEntry(
+            ACTIVITY_STARTED.name(),
+            CloudBPMNActivityStartedEvent.class
+        );
     }
 }

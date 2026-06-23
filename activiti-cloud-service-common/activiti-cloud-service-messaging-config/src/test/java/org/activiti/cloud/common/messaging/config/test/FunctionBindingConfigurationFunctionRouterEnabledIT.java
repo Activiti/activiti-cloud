@@ -51,22 +51,22 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
     @Override
     void testInputBindingsDefinitions() {
         Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions
-            .assertThat(bindingServiceProperties.getInputBindings())
-            .doesNotContain(FUNCTION_COMMAND_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(
+            FUNCTION_COMMAND_CONSUMER_NAME
+        );
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME))
+        ).isNull();
         Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_AUDIT_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME))
+        ).isNull();
         Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_QUERY_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME))
+        ).isNull();
     }
 
     @Test
@@ -77,8 +77,7 @@ public class FunctionBindingConfigurationFunctionRouterEnabledIT extends Functio
         var bindings = bindingServiceProperties.getBindings();
 
         // then
-        AssertionsForClassTypes
-            .assertThat(bindings)
+        AssertionsForClassTypes.assertThat(bindings)
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys(
                 "auditProducer",

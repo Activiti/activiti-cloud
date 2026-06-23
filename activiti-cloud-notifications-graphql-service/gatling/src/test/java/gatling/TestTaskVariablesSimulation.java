@@ -46,24 +46,23 @@ public class TestTaskVariablesSimulation extends Simulation {
 
     ChainBuilder taskVariables = repeat(pages, "i")
         .on(
-            exec(session -> session.set("page", session.getInt("i") + 1).set("limit", limit))
-                .exec(
-                    http("query{Tasks(page:{start:${page},limit:${limit}})")
-                        .post("/graphql")
-                        .body(
-                            StringBody(
-                                """
-                                  {
-                                    "query": "query($page: Int!, $limit: Int!) {TaskVariables(page: {start: $page, limit: $limit}, where: {name: {EQ: \\"accountNumber\\"}}) {select {id,name,value(orderBy: ASC),taskId,task {assignee,name,description,completedTo,completedFrom,candidateUsers: taskCandidateUsers {userId},candidateGroups: taskCandidateGroups {groupId},variables {name,value,type},accountNumber: variables(where: {name: {EQ: \\"accountNumber\\"}}) {value},processVariables: processInstance {variables {name,value,type}}}}}}",
-                                    "variables": {"page": #{page}, "limit": #{limit}}
-                                  }
-                                """
-                            )
+            exec(session -> session.set("page", session.getInt("i") + 1).set("limit", limit)).exec(
+                http("query{Tasks(page:{start:${page},limit:${limit}})")
+                    .post("/graphql")
+                    .body(
+                        StringBody(
+                            """
+                              {
+                                "query": "query($page: Int!, $limit: Int!) {TaskVariables(page: {start: $page, limit: $limit}, where: {name: {EQ: \\"accountNumber\\"}}) {select {id,name,value(orderBy: ASC),taskId,task {assignee,name,description,completedTo,completedFrom,candidateUsers: taskCandidateUsers {userId},candidateGroups: taskCandidateGroups {groupId},variables {name,value,type},accountNumber: variables(where: {name: {EQ: \\"accountNumber\\"}}) {value},processVariables: processInstance {variables {name,value,type}}}}}}",
+                                "variables": {"page": #{page}, "limit": #{limit}}
+                              }
+                            """
                         )
-                        .header("Content-Type", "application/json")
-                        .check(status().is(200))
-                        .check(jsonPath("$..errors").notExists())
-                )
+                    )
+                    .header("Content-Type", "application/json")
+                    .check(status().is(200))
+                    .check(jsonPath("$..errors").notExists())
+            )
         )
         .exitHereIfFailed()
         .pause(1);

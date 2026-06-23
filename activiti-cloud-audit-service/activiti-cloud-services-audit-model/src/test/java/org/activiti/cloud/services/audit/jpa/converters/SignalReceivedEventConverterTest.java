@@ -37,9 +37,8 @@ public class SignalReceivedEventConverterTest {
         CloudBPMNSignalReceivedEventImpl event = createSignalReceivedEvent();
 
         //when
-        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(
-            event
-        );
+        SignalReceivedAuditEventEntity auditEventEntity =
+            (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(event);
 
         //then
         assertThat(auditEventEntity).isNotNull();
@@ -49,20 +48,22 @@ public class SignalReceivedEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getId())
-            .isEqualTo(event.getEntity().getSignalPayload().getId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getName())
-            .isEqualTo(event.getEntity().getSignalPayload().getName());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables())
-            .isEqualTo(event.getEntity().getSignalPayload().getVariables());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getId()).isEqualTo(
+            event.getEntity().getSignalPayload().getId()
+        );
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getName()).isEqualTo(
+            event.getEntity().getSignalPayload().getName()
+        );
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables()).isEqualTo(
+            event.getEntity().getSignalPayload().getVariables()
+        );
     }
 
     @Test
     public void checkConvertToAPISignalReceivedEvent() {
         //given
-        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(
-            createSignalReceivedEvent()
-        );
+        SignalReceivedAuditEventEntity auditEventEntity =
+            (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(createSignalReceivedEvent());
 
         //when
         CloudBPMNSignalReceivedEventImpl cloudEvent = (CloudBPMNSignalReceivedEventImpl) eventConverter.convertToAPI(
@@ -75,12 +76,15 @@ public class SignalReceivedEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(cloudEvent.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(cloudEvent.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getId())
-            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getName())
-            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getName());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables())
-            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getVariables());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getId()).isEqualTo(
+            cloudEvent.getEntity().getSignalPayload().getId()
+        );
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getName()).isEqualTo(
+            cloudEvent.getEntity().getSignalPayload().getName()
+        );
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables()).isEqualTo(
+            cloudEvent.getEntity().getSignalPayload().getVariables()
+        );
     }
 
     private CloudBPMNSignalReceivedEventImpl createSignalReceivedEvent() {
@@ -96,8 +100,7 @@ public class SignalReceivedEventConverterTest {
         signal.setProcessDefinitionId(processInstanceStarted.getProcessDefinitionId());
         signal.setProcessInstanceId(processInstanceStarted.getId());
 
-        SignalPayload signalPayload = ProcessPayloadBuilder
-            .signal()
+        SignalPayload signalPayload = ProcessPayloadBuilder.signal()
             .withName("SignalName")
             .withVariable("signal-variable", "test")
             .build();

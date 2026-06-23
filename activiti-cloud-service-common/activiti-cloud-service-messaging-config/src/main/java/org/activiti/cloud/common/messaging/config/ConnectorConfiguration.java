@@ -70,8 +70,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
-        return IntegrationFlow
-            .from(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+        return IntegrationFlow.from(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
             .log(DEBUG, CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
             .channel(NULL_CHANNEL)
             .get();
@@ -83,7 +82,10 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         IntegrationFlowContext integrationFlowContext,
         Function<String, String> resolveExpression,
         ActivitiCloudMessagingProperties messagingProperties,
-        Function<ConnectorBinding, Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>> connectorErrorHandlerDefinitionResolver,
+        Function<
+            ConnectorBinding,
+            Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
+        > connectorErrorHandlerDefinitionResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -95,160 +97,147 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     ConsumerConnector.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)
                 ) {
-                    Optional
-                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
-                        .ifPresent(connectorBinding -> {
-                            final Type functionType = discoverFunctionType(bean, beanName);
-                            final var functionRouter = messagingProperties.getFunctionRouter();
+                    Optional.ofNullable(
+                        functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class)
+                    ).ifPresent(connectorBinding -> {
+                        final Type functionType = discoverFunctionType(bean, beanName);
+                        final var functionRouter = messagingProperties.getFunctionRouter();
 
-                            FunctionRegistration<Object> functionRegistration = new FunctionRegistration<>(bean)
-                                .type(functionType);
+                        FunctionRegistration<Object> functionRegistration = new FunctionRegistration<>(bean).type(
+                            functionType
+                        );
 
-                            final var functionDefinition = functionRouter.isEnabled()
-                                ? beanName.concat("Target")
-                                : beanName;
+                        final var functionDefinition = functionRouter.isEnabled()
+                            ? beanName.concat("Target")
+                            : beanName;
 
-                            registerFunctionRegistration(functionDefinition, functionRegistration);
+                        registerFunctionRegistration(functionDefinition, functionRegistration);
 
-                            GenericHandler<Message> handler = (message, headers) -> {
-                                FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                function.setSkipOutputConversion(true);
+                        GenericHandler<Message> handler = (message, headers) -> {
+                            FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
+                            function.setSkipOutputConversion(true);
 
-                                Message<?> response = null;
+                            Message<?> response = null;
 
-                                try {
-                                    Object result = function.apply(message);
+                            try {
+                                Object result = function.apply(message);
 
-                                    if (result != null) {
-                                        if (result instanceof Message<?> msg) {
-                                            result = msg.getPayload();
-                                        }
-
-                                        response = MessageBuilder.withPayload(result).build();
-
-                                        String destination = headers.get(connectorBinding.outputHeader(), String.class);
-
-                                        if (StringUtils.hasText(destination)) {
-                                            getStreamBridge().send(destination, response);
-                                            return null;
-                                        }
+                                if (result != null) {
+                                    if (result instanceof Message<?> msg) {
+                                        result = msg.getPayload();
                                     }
-                                } catch (Exception connectorError) {
-                                    connectorErrorHandlerDefinitionResolver
-                                        .apply(connectorBinding)
-                                        .ifPresentOrElse(
-                                            errorHandlerDefinition -> {
-                                                final var errorMessage = (
-                                                        connectorError instanceof MessagingException messagingException
-                                                    )
-                                                    ? new ErrorMessage(messagingException, message)
-                                                    : new ErrorMessage(
-                                                        new MessagingException(message, connectorError),
-                                                        message
-                                                    );
 
-                                                errorHandlerDefinition.accept(errorMessage);
-                                            },
-                                            () -> {
-                                                throw connectorError;
-                                            }
-                                        );
+                                    response = MessageBuilder.withPayload(result).build();
+
+                                    String destination = headers.get(connectorBinding.outputHeader(), String.class);
+
+                                    if (StringUtils.hasText(destination)) {
+                                        getStreamBridge().send(destination, response);
+                                        return null;
+                                    }
                                 }
-
-                                return response;
-                            };
-
-                            GenericSelector<Message<?>> selector = Optional
-                                .ofNullable(connectorBinding)
-                                .map(ConnectorBinding::condition)
-                                .filter(StringUtils::hasText)
-                                .map(resolveExpression)
-                                .map(ExpressionEvaluatingSelector::new)
-                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
-
-                            GenericSelector<Message<?>> connectorType = Optional
-                                .ofNullable(connectorBinding)
-                                .map(ConnectorBinding::connectorType)
-                                .filter(StringUtils::hasText)
-                                .map(resolveExpression)
-                                .map(it ->
-                                    "headers.containsKey('connectorType') && headers['connectorType']=='" + it + "'"
-                                )
-                                .map(ExpressionEvaluatingSelector::new)
-                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
-
-                            IntegrationFlow connectorFlow = IntegrationFlow
-                                .from(
-                                    getGatewayInterface(Function.class.isInstance(bean)),
-                                    gateway -> gateway.replyTimeout(0L)
-                                )
-                                .log(DEBUG, beanName + ".integrationRequest")
-                                .filter(
-                                    selector,
-                                    filter -> {
-                                        int retry = connectorBinding.retry() != 0
-                                            ? connectorBinding.retry()
-                                            : defaultMaxRetry;
-                                        if (retry > 0) {
-                                            long retryDelay = connectorBinding.retryDelay() == 0
-                                                ? defaultRetryDelay
-                                                : connectorBinding.retryDelay();
-                                            LOGGER.info(
-                                                "Configure filter retry count to {} with delay {} for bean {}",
-                                                retry,
-                                                retryDelay,
-                                                beanName
-                                            );
-                                            filter
-                                                .discardFlow(flow -> handleRetryDiscardFlow(flow, retry, retryDelay))
-                                                .throwExceptionOnRejection(false);
-                                        } else {
-                                            LOGGER.debug("Configure default discard for bean {}", beanName);
-                                            filter
-                                                .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                                .throwExceptionOnRejection(false);
-                                        }
-                                    }
-                                )
-                                .filter(
-                                    connectorType,
-                                    filter ->
-                                        filter
-                                            .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                            .throwExceptionOnRejection(false)
-                                )
-                                .handle(Message.class, handler)
-                                .log(DEBUG, beanName + ".integrationResult")
-                                .bridge()
-                                .get();
-
-                            String inputChannel = connectorBinding.input();
-
-                            IntegrationFlow inputChannelFlow = IntegrationFlow
-                                .from(inputChannel)
-                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-                                .get();
-
-                            integrationFlowContext.registration(inputChannelFlow).register();
-
-                            if (functionRouter.isEnabled()) {
-                                final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
-
-                                Optional
-                                    .ofNullable(connectorBinding.connectorType())
-                                    .filter(StringUtils::hasText)
-                                    .map(resolveExpression)
+                            } catch (Exception connectorError) {
+                                connectorErrorHandlerDefinitionResolver
+                                    .apply(connectorBinding)
                                     .ifPresentOrElse(
-                                        connectorTypeName ->
-                                            functionRouter.register(
-                                                connectorBinding.input(),
-                                                functionBeanName,
-                                                connectorTypeName
-                                            ),
-                                        () -> functionRouter.register(connectorBinding.input(), functionBeanName)
+                                        errorHandlerDefinition -> {
+                                            final var errorMessage = (connectorError instanceof
+                                                    MessagingException messagingException)
+                                                ? new ErrorMessage(messagingException, message)
+                                                : new ErrorMessage(
+                                                      new MessagingException(message, connectorError),
+                                                      message
+                                                  );
+
+                                            errorHandlerDefinition.accept(errorMessage);
+                                        },
+                                        () -> {
+                                            throw connectorError;
+                                        }
                                     );
                             }
-                        });
+
+                            return response;
+                        };
+
+                        GenericSelector<Message<?>> selector = Optional.ofNullable(connectorBinding)
+                            .map(ConnectorBinding::condition)
+                            .filter(StringUtils::hasText)
+                            .map(resolveExpression)
+                            .map(ExpressionEvaluatingSelector::new)
+                            .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+
+                        GenericSelector<Message<?>> connectorType = Optional.ofNullable(connectorBinding)
+                            .map(ConnectorBinding::connectorType)
+                            .filter(StringUtils::hasText)
+                            .map(resolveExpression)
+                            .map(it -> "headers.containsKey('connectorType') && headers['connectorType']=='" + it + "'")
+                            .map(ExpressionEvaluatingSelector::new)
+                            .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+
+                        IntegrationFlow connectorFlow = IntegrationFlow.from(
+                            getGatewayInterface(Function.class.isInstance(bean)),
+                            gateway -> gateway.replyTimeout(0L)
+                        )
+                            .log(DEBUG, beanName + ".integrationRequest")
+                            .filter(selector, filter -> {
+                                int retry = connectorBinding.retry() != 0 ? connectorBinding.retry() : defaultMaxRetry;
+                                if (retry > 0) {
+                                    long retryDelay =
+                                        connectorBinding.retryDelay() == 0
+                                            ? defaultRetryDelay
+                                            : connectorBinding.retryDelay();
+                                    LOGGER.info(
+                                        "Configure filter retry count to {} with delay {} for bean {}",
+                                        retry,
+                                        retryDelay,
+                                        beanName
+                                    );
+                                    filter
+                                        .discardFlow(flow -> handleRetryDiscardFlow(flow, retry, retryDelay))
+                                        .throwExceptionOnRejection(false);
+                                } else {
+                                    LOGGER.debug("Configure default discard for bean {}", beanName);
+                                    filter
+                                        .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                        .throwExceptionOnRejection(false);
+                                }
+                            })
+                            .filter(connectorType, filter ->
+                                filter
+                                    .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                    .throwExceptionOnRejection(false)
+                            )
+                            .handle(Message.class, handler)
+                            .log(DEBUG, beanName + ".integrationResult")
+                            .bridge()
+                            .get();
+
+                        String inputChannel = connectorBinding.input();
+
+                        IntegrationFlow inputChannelFlow = IntegrationFlow.from(inputChannel)
+                            .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
+                            .get();
+
+                        integrationFlowContext.registration(inputChannelFlow).register();
+
+                        if (functionRouter.isEnabled()) {
+                            final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
+
+                            Optional.ofNullable(connectorBinding.connectorType())
+                                .filter(StringUtils::hasText)
+                                .map(resolveExpression)
+                                .ifPresentOrElse(
+                                    connectorTypeName ->
+                                        functionRouter.register(
+                                            connectorBinding.input(),
+                                            functionBeanName,
+                                            connectorTypeName
+                                        ),
+                                    () -> functionRouter.register(connectorBinding.input(), functionBeanName)
+                                );
+                        }
+                    });
                 }
                 return bean;
             }
@@ -256,20 +245,21 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     }
 
     @Bean
-    Function<ConnectorBinding, Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>> connectorErrorHandlerDefinitionResolver(
+    Function<
+        ConnectorBinding,
+        Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
+    > connectorErrorHandlerDefinitionResolver(
         ActivitiCloudMessagingProperties messagingProperties,
         BindingServiceProperties bindingServiceProperties,
         @Lazy FunctionCatalog functionCatalog
     ) {
         return connectorBinding ->
-            Optional
-                .of(messagingProperties.getFunctionRouter())
+            Optional.of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
                 .map(ActivitiCloudMessagingProperties.FunctionRouterProperties::getErrorHandlerDefinition)
                 .filter(StringUtils::hasText)
                 .or(() ->
-                    Optional
-                        .of(bindingServiceProperties.getBindings())
+                    Optional.of(bindingServiceProperties.getBindings())
                         .map(bindings -> bindings.get(connectorBinding.input()))
                         .map(BindingProperties::getErrorHandlerDefinition)
                         .filter(StringUtils::hasText)
@@ -280,8 +270,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     private void handleRetryDiscardFlow(IntegrationFlowDefinition<?> flow, int maxRetry, long retryDelay) {
         flow.handle((payload, headers) -> {
-            Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers)
-                .orElse(buildNewMessage(headers, payload));
+            Message<?> newMessage = handleMessagingExceptionIfPossible(payload, headers).orElse(
+                buildNewMessage(headers, payload)
+            );
             final var destination = headers.get("spring.cloud.function.destination", String.class);
             if (destination != null) {
                 int retryCount = getRetryCount(headers);
@@ -320,8 +311,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     private Message<?> buildNewMessage(MessageHeaders headers, Object payload) {
         int retryCount = handleRetryCount(headers);
-        Message<Object> message = MessageBuilder
-            .withPayload(payload)
+        Message<Object> message = MessageBuilder.withPayload(payload)
             .copyHeaders(headers)
             .setHeader(RETRY_COUNT, retryCount)
             .build();

@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.jupiter.api.Test;
 
-public class CloudProcessStartedEventImplTest {
+class CloudProcessStartedEventImplTest {
 
     @Test
-    public void shouldSetFlattenInfoBasedOnEntity() {
+    void shouldSetFlattenInfoBasedOnEntity() {
         //given
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("instId");

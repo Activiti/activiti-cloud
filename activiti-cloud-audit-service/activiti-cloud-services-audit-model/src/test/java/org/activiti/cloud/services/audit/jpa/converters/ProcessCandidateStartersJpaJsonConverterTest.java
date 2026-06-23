@@ -26,8 +26,10 @@ import org.junit.jupiter.api.Test;
 
 public class ProcessCandidateStartersJpaJsonConverterTest {
 
-    private ProcessCandidateStarterUserJpaJsonConverter candidateStarterUserConverter = new ProcessCandidateStarterUserJpaJsonConverter();
-    private ProcessCandidateStarterGroupJpaJsonConverter candidateStarterGroupConverter = new ProcessCandidateStarterGroupJpaJsonConverter();
+    private ProcessCandidateStarterUserJpaJsonConverter candidateStarterUserConverter =
+        new ProcessCandidateStarterUserJpaJsonConverter();
+    private ProcessCandidateStarterGroupJpaJsonConverter candidateStarterGroupConverter =
+        new ProcessCandidateStarterGroupJpaJsonConverter();
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentationForUserConverter() throws Exception {
@@ -67,9 +69,10 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = "{\"processDefinitionId\":\"aprocessId\"," + "\"userId\":\"auserId\"}";
 
         //when
-        ProcessCandidateStarterUserImpl candidateStarterUser = (ProcessCandidateStarterUserImpl) candidateStarterUserConverter.convertToEntityAttribute(
-            jsonRepresentation
-        );
+        ProcessCandidateStarterUserImpl candidateStarterUser =
+            (ProcessCandidateStarterUserImpl) candidateStarterUserConverter.convertToEntityAttribute(
+                jsonRepresentation
+            );
 
         //then
         assertThat(candidateStarterUser).isNotNull().hasUserId("auserId");
@@ -81,9 +84,10 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
         String jsonRepresentation = "{\"processDefinitionId\":\"aprocessId\"," + "\"groupId\":\"agroupId\"}";
 
         //when
-        ProcessCandidateStarterGroupImpl candidateStarterGroup = (ProcessCandidateStarterGroupImpl) candidateStarterGroupConverter.convertToEntityAttribute(
-            jsonRepresentation
-        );
+        ProcessCandidateStarterGroupImpl candidateStarterGroup =
+            (ProcessCandidateStarterGroupImpl) candidateStarterGroupConverter.convertToEntityAttribute(
+                jsonRepresentation
+            );
 
         //then
         assertThat(candidateStarterGroup).isNotNull().hasGroupId("agroupId");

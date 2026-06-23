@@ -28,8 +28,13 @@ public class ServiceTaskBuilder {
 
     public ServiceTaskBuilder(ServiceTaskRepository repository) {
         this.repository = repository;
-        this.serviceTask =
-            new ServiceTaskEntity("serviceName", "serviceFullName", "serviceVersion", "appName", "appVersion");
+        this.serviceTask = new ServiceTaskEntity(
+            "serviceName",
+            "serviceFullName",
+            "serviceVersion",
+            "appName",
+            "appVersion"
+        );
         this.serviceTask.setId(UUID.randomUUID().toString());
         this.serviceTask.setActivityType("serviceTask");
     }

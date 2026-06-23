@@ -31,9 +31,8 @@ class ApplicationRollbackEventConverterTest {
 
     @Test
     public void should_convertToAPIRollbackEvent() {
-        ApplicationDeployedAuditEventEntity auditEventEntity = (ApplicationDeployedAuditEventEntity) eventConverter.convertToEntity(
-            createRollbackEvent()
-        );
+        ApplicationDeployedAuditEventEntity auditEventEntity =
+            (ApplicationDeployedAuditEventEntity) eventConverter.convertToEntity(createRollbackEvent());
 
         CloudApplicationDeployedEventImpl event = (CloudApplicationDeployedEventImpl) eventConverter.convertToAPI(
             auditEventEntity

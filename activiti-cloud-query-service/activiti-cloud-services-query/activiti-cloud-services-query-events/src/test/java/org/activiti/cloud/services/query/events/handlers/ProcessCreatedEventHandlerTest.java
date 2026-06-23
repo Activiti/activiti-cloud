@@ -63,10 +63,12 @@ public class ProcessCreatedEventHandlerTest {
 
         assertThat(processInstanceEntity.getId()).isEqualTo(expectedEventEntity.getId());
         assertThat(processInstanceEntity.getName()).isEqualTo(expectedEventEntity.getName());
-        assertThat(processInstanceEntity.getProcessDefinitionId())
-            .isEqualTo(expectedEventEntity.getProcessDefinitionId());
-        assertThat(processInstanceEntity.getRootProcessInstanceId())
-            .isEqualTo(expectedEventEntity.getRootProcessInstanceId());
+        assertThat(processInstanceEntity.getProcessDefinitionId()).isEqualTo(
+            expectedEventEntity.getProcessDefinitionId()
+        );
+        assertThat(processInstanceEntity.getRootProcessInstanceId()).isEqualTo(
+            expectedEventEntity.getRootProcessInstanceId()
+        );
 
         verify(hierarchyService).registerProcess("id");
         verifyNoMoreInteractions(hierarchyService);

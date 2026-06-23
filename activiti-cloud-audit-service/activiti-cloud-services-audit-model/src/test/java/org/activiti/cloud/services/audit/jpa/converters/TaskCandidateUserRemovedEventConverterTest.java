@@ -33,8 +33,9 @@ class TaskCandidateUserRemovedEventConverterTest {
 
     @Test
     void should_returnTaskCandidateUserRemoved_when_getSupportedEvent() {
-        assertThat(eventConverter.getSupportedEvent())
-            .isEqualTo(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name());
+        assertThat(eventConverter.getSupportedEvent()).isEqualTo(
+            TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name()
+        );
     }
 
     @Test
@@ -49,13 +50,11 @@ class TaskCandidateUserRemovedEventConverterTest {
         assertThat(auditEventEntity)
             .isNotNull()
             .isInstanceOf(TaskCandidateUserRemovedEventEntity.class)
-            .returns(
-                event.getEntity().getTaskId(),
-                e -> ((TaskCandidateUserRemovedEventEntity) e).getCandidateUser().getTaskId()
+            .returns(event.getEntity().getTaskId(), e ->
+                ((TaskCandidateUserRemovedEventEntity) e).getCandidateUser().getTaskId()
             )
-            .returns(
-                event.getEntity().getUserId(),
-                e -> ((TaskCandidateUserRemovedEventEntity) e).getCandidateUser().getUserId()
+            .returns(event.getEntity().getUserId(), e ->
+                ((TaskCandidateUserRemovedEventEntity) e).getCandidateUser().getUserId()
             )
             .returns(event.getEntityId(), AuditEventEntity::getEntityId)
             .returns(event.getProcessInstanceId(), AuditEventEntity::getProcessInstanceId)
@@ -78,13 +77,11 @@ class TaskCandidateUserRemovedEventConverterTest {
         assertThat(cloudEvent)
             .isNotNull()
             .isInstanceOf(CloudTaskCandidateUserRemovedEventImpl.class)
-            .returns(
-                entity.getCandidateUser().getTaskId(),
-                e -> ((CloudTaskCandidateUserRemovedEventImpl) e).getEntity().getTaskId()
+            .returns(entity.getCandidateUser().getTaskId(), e ->
+                ((CloudTaskCandidateUserRemovedEventImpl) e).getEntity().getTaskId()
             )
-            .returns(
-                entity.getCandidateUser().getUserId(),
-                e -> ((CloudTaskCandidateUserRemovedEventImpl) e).getEntity().getUserId()
+            .returns(entity.getCandidateUser().getUserId(), e ->
+                ((CloudTaskCandidateUserRemovedEventImpl) e).getEntity().getUserId()
             )
             .returns(entity.getEntityId(), CloudRuntimeEvent::getEntityId)
             .returns(entity.getProcessInstanceId(), CloudRuntimeEvent::getProcessInstanceId)

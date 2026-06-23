@@ -84,13 +84,12 @@ public class CloudProcessDeployedProducerTest {
         final RuntimeBundleEventsProperties eventsProperties = new RuntimeBundleEventsProperties();
         eventsProperties.setChunkSize(2);
         properties.setEventsProperties(eventsProperties);
-        processDeployedProducer =
-            new CloudProcessDeployedProducer(
-                runtimeBundleInfoAppender,
-                producer,
-                runtimeBundleMessageBuilderFactory,
-                properties
-            );
+        processDeployedProducer = new CloudProcessDeployedProducer(
+            runtimeBundleInfoAppender,
+            producer,
+            runtimeBundleMessageBuilderFactory,
+            properties
+        );
     }
 
     @Test
@@ -104,8 +103,9 @@ public class CloudProcessDeployedProducerTest {
             new ProcessDeployedEventImpl(def2, "content2"),
             new ProcessDeployedEventImpl(def3, "content3")
         );
-        given(messageBuilderAppenderChain.withPayload(any()))
-            .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(
+            MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2])
+        );
 
         //when
         processDeployedProducer.sendProcessDeployedEvents(new ProcessDeployedEvents(processDeployedEventList));
@@ -116,8 +116,7 @@ public class CloudProcessDeployedProducerTest {
         verify(auditProducer, times(2)).send(any());
 
         List<CloudRuntimeEvent<?, ?>[]> values = messagePayloadCaptor.getAllValues();
-        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays
-            .stream(values.getFirst())
+        List<CloudProcessDeployedEvent> cloudProcessDeployedEvents = Arrays.stream(values.getFirst())
             .map(CloudProcessDeployedEvent.class::cast)
             .collect(Collectors.toList());
         assertThat(cloudProcessDeployedEvents)

@@ -62,8 +62,7 @@ public class HeadersConnector implements Consumer<Message<IntegrationRequest>> {
         result.put("processDefinitionKey", headers.get("processDefinitionKey"));
         result.put("processDefinitionId", headers.get("processDefinitionId"));
 
-        Message<IntegrationResult> message = IntegrationResultBuilder
-            .resultFor(integrationRequest, connectorProperties)
+        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
             .withOutboundVariables(result)
             .buildMessage();
 

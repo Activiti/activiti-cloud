@@ -132,8 +132,9 @@ class ProcessInstanceEntityAdminControllerIT {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
         //when
         mockMvc
@@ -155,8 +156,9 @@ class ProcessInstanceEntityAdminControllerIT {
             1
         );
 
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
@@ -166,8 +168,9 @@ class ProcessInstanceEntityAdminControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$._embedded.processInstances.[0].id").value(parentProcessInstance.getId()))
             .andExpect(
-                jsonPath("$._embedded.processInstances[0].processDefinitionId")
-                    .value(parentProcessInstance.getProcessDefinitionId())
+                jsonPath("$._embedded.processInstances[0].processDefinitionId").value(
+                    parentProcessInstance.getProcessDefinitionId()
+                )
             );
     }
 

@@ -50,8 +50,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
     public GroupedOpenApi runtimeBundleApi(@Value("${activiti.cloud.swagger.rb-base-path:}") String swaggerBasePath) {
-        return GroupedOpenApi
-            .builder()
+        return GroupedOpenApi.builder()
             .group("Runtime Bundle")
             .packagesToScan("org.activiti.cloud.services.rest")
             .addOpenApiCustomizer(openApi ->

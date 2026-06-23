@@ -145,8 +145,7 @@ public class QueryProcessDefinitionIT {
         );
         firstProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -157,8 +156,7 @@ public class QueryProcessDefinitionIT {
         );
         secondProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -175,15 +173,17 @@ public class QueryProcessDefinitionIT {
         ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml")
+        );
 
         //when
         responseEntity = restTemplate.getProcDefinitionModel(secondProcessDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml")
+        );
     }
 
     @Test
@@ -207,9 +207,8 @@ public class QueryProcessDefinitionIT {
         );
 
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey(
-            "mySecondProcess"
-        );
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+            restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
 
         //then
         assertThat(responseEntity.getBody())
@@ -267,8 +266,7 @@ public class QueryProcessDefinitionIT {
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
         firstProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -277,8 +275,7 @@ public class QueryProcessDefinitionIT {
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
         secondProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -294,8 +291,9 @@ public class QueryProcessDefinitionIT {
         ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(processDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml")
+        );
     }
 
     private CloudProcessCandidateStarterUserAddedEventImpl createCandidateStarterEventForProcess(

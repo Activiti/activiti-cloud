@@ -22,7 +22,8 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEv
 
 public class CloudTaskCandidateGroupRemovedEventImpl
     extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
-    implements CloudTaskCandidateGroupRemovedEvent {
+    implements CloudTaskCandidateGroupRemovedEvent
+{
 
     public CloudTaskCandidateGroupRemovedEventImpl() {}
 

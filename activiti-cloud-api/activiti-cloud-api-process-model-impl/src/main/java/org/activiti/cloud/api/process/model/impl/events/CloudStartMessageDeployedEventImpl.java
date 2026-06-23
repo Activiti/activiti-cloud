@@ -22,7 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudStartMessageDeployedEven
 
 public class CloudStartMessageDeployedEventImpl
     extends CloudRuntimeEventImpl<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>
-    implements CloudStartMessageDeployedEvent {
+    implements CloudStartMessageDeployedEvent
+{
 
     private CloudStartMessageDeployedEventImpl(Builder builder) {
         super.setEntity(builder.entity);

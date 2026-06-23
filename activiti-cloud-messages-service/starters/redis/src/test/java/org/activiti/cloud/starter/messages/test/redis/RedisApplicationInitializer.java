@@ -28,11 +28,9 @@ public class RedisApplicationInitializer implements ApplicationContextInitialize
     public void initialize(ConfigurableApplicationContext context) {
         container.start();
 
-        TestPropertyValues
-            .of(
-                "spring.data.redis.host=" + container.getHost(),
-                "spring.data.redis.port=" + container.getFirstMappedPort()
-            )
-            .applyTo(context.getEnvironment());
+        TestPropertyValues.of(
+            "spring.data.redis.host=" + container.getHost(),
+            "spring.data.redis.port=" + container.getFirstMappedPort()
+        ).applyTo(context.getEnvironment());
     }
 }

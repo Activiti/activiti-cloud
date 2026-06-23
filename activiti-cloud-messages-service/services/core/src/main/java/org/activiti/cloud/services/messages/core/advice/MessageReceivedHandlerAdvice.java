@@ -47,21 +47,18 @@ public class MessageReceivedHandlerAdvice extends AbstractMessageConnectorHandle
         Object groupId = correlationStrategy.getCorrelationKey(message);
         Object key = UUIDConverter.getUUID(groupId).toString();
 
-        lockTemplate.lockInterruptibly(
-            key,
-            () -> {
-                MessageGroup group = messageStore.getMessageGroup(groupId);
+        lockTemplate.lockInterruptibly(key, () -> {
+            MessageGroup group = messageStore.getMessageGroup(groupId);
 
-                group
-                    .getMessages()
-                    .stream()
-                    .filter(MESSAGE_WAITING)
-                    .min(TIMESTAMP)
-                    .ifPresent(result -> {
-                        messageStore.removeMessagesFromGroup(groupId, result);
-                    });
-            }
-        );
+            group
+                .getMessages()
+                .stream()
+                .filter(MESSAGE_WAITING)
+                .min(TIMESTAMP)
+                .ifPresent(result -> {
+                    messageStore.removeMessagesFromGroup(groupId, result);
+                });
+        });
 
         return null;
     }

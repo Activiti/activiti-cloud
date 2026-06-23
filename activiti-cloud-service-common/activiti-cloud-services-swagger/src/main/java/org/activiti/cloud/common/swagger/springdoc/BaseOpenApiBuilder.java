@@ -56,15 +56,14 @@ public class BaseOpenApiBuilder {
                     .title(title)
                     .version(buildProperties.getVersion())
                     .license(
-                        new License()
-                            .name(
-                                String.format(
-                                    "© %s-%s %s. All rights reserved",
-                                    buildProperties.get("inceptionYear"),
-                                    buildProperties.get("year"),
-                                    buildProperties.get("organization.name")
-                                )
+                        new License().name(
+                            String.format(
+                                "© %s-%s %s. All rights reserved",
+                                buildProperties.get("inceptionYear"),
+                                buildProperties.get("year"),
+                                buildProperties.get("organization.name")
                             )
+                        )
                     )
                     .termsOfService(buildProperties.get("organization.url"))
             )

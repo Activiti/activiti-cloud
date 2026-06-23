@@ -51,12 +51,10 @@ public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
                     taskCandidateUser.getTaskId(),
                     taskCandidateUser.getUserId()
                 );
-                Optional
-                    .ofNullable(entityManager.find(TaskCandidateUserEntity.class, id))
-                    .ifPresent(entity -> {
-                        findResult.get().getTaskCandidateUsers().remove(entity);
-                        entityManager.remove(entity);
-                    });
+                Optional.ofNullable(entityManager.find(TaskCandidateUserEntity.class, id)).ifPresent(entity -> {
+                    findResult.get().getTaskCandidateUsers().remove(entity);
+                    entityManager.remove(entity);
+                });
             } catch (Exception cause) {
                 LOGGER.debug("Error handling TaskCandidateUserRemovedEvent[" + event + "]", cause);
             }

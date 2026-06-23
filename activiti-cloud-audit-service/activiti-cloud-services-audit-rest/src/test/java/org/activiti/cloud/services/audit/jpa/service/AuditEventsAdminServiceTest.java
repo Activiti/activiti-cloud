@@ -44,9 +44,8 @@ class AuditEventsAdminServiceTest {
         LocalDate toDate = LocalDate.of(2019, 1, 1);
 
         // when
-        IllegalArgumentException thrown = assertThrows(
-            IllegalArgumentException.class,
-            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+            auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
         );
 
         // then
@@ -60,9 +59,8 @@ class AuditEventsAdminServiceTest {
         LocalDate toDate = LocalDate.of(2020, 3, 1);
 
         // when
-        IllegalArgumentException thrown = assertThrows(
-            IllegalArgumentException.class,
-            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+            auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
         );
 
         // then

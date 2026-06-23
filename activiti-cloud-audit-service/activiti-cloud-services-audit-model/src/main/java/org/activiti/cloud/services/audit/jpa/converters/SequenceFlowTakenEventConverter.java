@@ -41,7 +41,8 @@ public class SequenceFlowTakenEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity = (SequenceFlowAuditEventEntity) auditEventEntity;
+        SequenceFlowAuditEventEntity sequenceFlowTakenAuditEventEntity =
+            (SequenceFlowAuditEventEntity) auditEventEntity;
 
         return new CloudSequenceFlowTakenEventImpl(
             sequenceFlowTakenAuditEventEntity.getEventId(),

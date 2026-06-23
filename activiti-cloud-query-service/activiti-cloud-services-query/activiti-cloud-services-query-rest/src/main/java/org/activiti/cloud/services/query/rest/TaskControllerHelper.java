@@ -197,13 +197,12 @@ public class TaskControllerHelper {
 
         Page<TaskEntity> page;
         if (variableSearch.isSet()) {
-            page =
-                taskRepository.findByVariableNameAndValue(
-                    variableSearch.getName(),
-                    variableSearch.getValue(),
-                    extendedPredicate,
-                    pageable
-                );
+            page = taskRepository.findByVariableNameAndValue(
+                variableSearch.getName(),
+                variableSearch.getValue(),
+                extendedPredicate,
+                pageable
+            );
         } else {
             page = taskRepository.findAll(extendedPredicate, pageable);
         }

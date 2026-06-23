@@ -50,8 +50,7 @@ public class RestConnectorGET implements ConsumerConnector<IntegrationRequest> {
 
         result.put("restStatus", 200);
 
-        Message<IntegrationResult> message = IntegrationResultBuilder
-            .resultFor(integrationRequest, connectorProperties)
+        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
             .withOutboundVariables(result)
             .buildMessage();
 

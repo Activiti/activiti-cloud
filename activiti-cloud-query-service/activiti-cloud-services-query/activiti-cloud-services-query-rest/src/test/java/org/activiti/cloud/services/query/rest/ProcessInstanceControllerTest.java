@@ -148,10 +148,12 @@ class ProcessInstanceControllerTest {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(processInstancePage);
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(restrictedPredicate);
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            processInstancePage
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
@@ -163,12 +165,14 @@ class ProcessInstanceControllerTest {
             .andExpect(jsonPath("$.list.entries[0].entry.status").value(processInstanceEntity.getStatus().name()))
             .andExpect(jsonPath("$.list.entries[0].entry.serviceName").value(processInstanceEntity.getServiceName()))
             .andExpect(
-                jsonPath("$.list.entries[0].entry.linkedProcessInstanceId")
-                    .value(processInstanceEntity.getLinkedProcessInstanceId())
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceId").value(
+                    processInstanceEntity.getLinkedProcessInstanceId()
+                )
             )
             .andExpect(
-                jsonPath("$.list.entries[0].entry.linkedProcessInstanceType")
-                    .value(processInstanceEntity.getLinkedProcessInstanceType())
+                jsonPath("$.list.entries[0].entry.linkedProcessInstanceType").value(
+                    processInstanceEntity.getLinkedProcessInstanceType()
+                )
             );
     }
 
@@ -186,17 +190,20 @@ class ProcessInstanceControllerTest {
             PageRequest.of(1, 10),
             1
         );
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(restrictedPredicate);
-        given(processInstanceRepository.findByIdIsIn(ids, Sort.unsorted()))
-            .willReturn(Collections.singletonList(processInstanceEntity));
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(restrictedPredicate);
+        given(processInstanceRepository.findByIdIsIn(ids, Sort.unsorted())).willReturn(
+            Collections.singletonList(processInstanceEntity)
+        );
         given(processInstanceRepository.mapSubprocesses(any(), any(Pageable.class))).willReturn(processInstancePage);
 
         //when
         mockMvc
             .perform(
-                get("/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10", variableKeys)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/v1/process-instances?variableKeys={variableKeys}&skipCount=10&maxItems=10", variableKeys).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isOk())
@@ -212,8 +219,9 @@ class ProcessInstanceControllerTest {
         ProcessInstanceEntity processInstanceEntity = buildProcessInstanceEntity();
         String processInstanceId = processInstanceEntity.getId();
 
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
-            .willReturn(restrictedPredicate);
+        given(
+            processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ))
+        ).willReturn(restrictedPredicate);
         given(processInstanceService.findById(processInstanceId)).willReturn(processInstanceEntity);
         given(processInstanceRepository.mapSubprocesses(processInstanceEntity)).willReturn(processInstanceEntity);
 
@@ -236,8 +244,9 @@ class ProcessInstanceControllerTest {
             .andExpect(status().isBadRequest())
             .andReturn();
 
-        assertThat(result.getResponse().getContentAsString())
-            .contains(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
+        assertThat(result.getResponse().getContentAsString()).contains(
+            ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
+        );
     }
 
     @Test
@@ -253,11 +262,7 @@ class ProcessInstanceControllerTest {
                             "processInstanceIds": ["%s", "%s"],
                             "linkProcessInstanceType": "%s"
                         }
-                        """.formatted(
-                                "orphanProcessInstanceId1",
-                                "orphanProcessInstanceId2",
-                                "linkType"
-                            )
+                        """.formatted("orphanProcessInstanceId1", "orphanProcessInstanceId2", "linkType")
                     )
                     .with(csrf())
             )
@@ -287,11 +292,7 @@ class ProcessInstanceControllerTest {
                             "processInstanceIds": ["%s", "%s"],
                             "linkProcessInstanceType": "%s"
                         }
-                        """.formatted(
-                                "orphanProcessInstanceId1",
-                                "orphanProcessInstanceId2",
-                                "linkType"
-                            )
+                        """.formatted("orphanProcessInstanceId1", "orphanProcessInstanceId2", "linkType")
                     )
                     .with(csrf())
             )
@@ -312,11 +313,7 @@ class ProcessInstanceControllerTest {
                             "processInstanceIds": ["%s", "%s"],
                             "linkProcessInstanceType": "%s"
                         }
-                        """.formatted(
-                                "orphanProcessInstanceId1",
-                                "orphanProcessInstanceId2",
-                                "linkType"
-                            )
+                        """.formatted("orphanProcessInstanceId1", "orphanProcessInstanceId2", "linkType")
                     )
                     .with(csrf())
             )
@@ -337,8 +334,9 @@ class ProcessInstanceControllerTest {
         //when
         mockMvc
             .perform(
-                get("/v1/process-instances/{processInstanceId}/subprocesses", processInstanceId)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/v1/process-instances/{processInstanceId}/subprocesses", processInstanceId).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isNotFound())

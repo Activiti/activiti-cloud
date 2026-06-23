@@ -110,10 +110,8 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
         JPQLQuery<TaskEntity> tasks = buildLeftJoin(taskEntity).select(taskEntity).where(taskEntity.id.in(taskIds));
 
-        return PageableExecutionUtils.getPage(
-            querydsl.applySorting(pageable.getSort(), tasks).fetch(),
-            pageable,
-            () -> totalElements
+        return PageableExecutionUtils.getPage(querydsl.applySorting(pageable.getSort(), tasks).fetch(), pageable, () ->
+            totalElements
         );
     }
 

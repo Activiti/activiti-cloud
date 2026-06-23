@@ -117,8 +117,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
             )
             .toList();
 
-        return CompletableFuture
-            .allOf(cfs.toArray(CompletableFuture[]::new))
+        return CompletableFuture.allOf(cfs.toArray(CompletableFuture[]::new))
             .thenApply(v -> cfs.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals))
             .join();
     }

@@ -62,14 +62,13 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         ActivitiCloudMessagingProperties messagingProperties
     ) {
         return bindingName ->
-            Optional
-                .of(messagingProperties.getFunctionRouter())
+            Optional.of(messagingProperties.getFunctionRouter())
                 .filter(ActivitiCloudMessagingProperties.FunctionRouterProperties::isEnabled)
                 .map(functionRouter -> functionRouter.destinations().get(bindingName))
                 .or(() ->
-                    Optional
-                        .ofNullable(bindingServiceProperties.getBindings().get(bindingName))
-                        .map(BindingProperties::getDestination)
+                    Optional.ofNullable(bindingServiceProperties.getBindings().get(bindingName)).map(
+                        BindingProperties::getDestination
+                    )
                 )
                 .orElse(bindingName);
     }
@@ -105,8 +104,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
 
     @Bean(name = FUNCTION_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
-        return IntegrationFlow
-            .from(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+        return IntegrationFlow.from(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
             .log(DEBUG, FUNCTION_BINDING_SELECTOR_DISCARD_FLOW)
             .channel(NULL_CHANNEL)
             .get();
@@ -134,94 +132,86 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                     Function.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)
                 ) {
-                    Optional
-                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
-                        .ifPresent(functionBinding -> {
-                            final Type functionType = discoverFunctionType(bean, beanName);
-                            final var functionRouter = messagingProperties.getFunctionRouter();
+                    Optional.ofNullable(
+                        functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class)
+                    ).ifPresent(functionBinding -> {
+                        final Type functionType = discoverFunctionType(bean, beanName);
+                        final var functionRouter = messagingProperties.getFunctionRouter();
 
-                            FunctionRegistration functionRegistration = new FunctionRegistration(bean)
-                                .type(functionType);
+                        FunctionRegistration functionRegistration = new FunctionRegistration(bean).type(functionType);
 
-                            final var functionDefinition = functionRouter.isEnabled()
-                                ? beanName.concat("Target")
-                                : beanName;
+                        final var functionDefinition = functionRouter.isEnabled()
+                            ? beanName.concat("Target")
+                            : beanName;
 
-                            registerFunctionRegistration(functionDefinition, functionRegistration);
+                        registerFunctionRegistration(functionDefinition, functionRegistration);
 
-                            GenericSelector<Message<?>> selector = Optional
-                                .ofNullable(functionBinding)
-                                .map(FunctionBinding::condition)
-                                .filter(StringUtils::hasText)
-                                .map(resolveExpression)
-                                .map(ExpressionEvaluatingSelector::new)
-                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+                        GenericSelector<Message<?>> selector = Optional.ofNullable(functionBinding)
+                            .map(FunctionBinding::condition)
+                            .filter(StringUtils::hasText)
+                            .map(resolveExpression)
+                            .map(ExpressionEvaluatingSelector::new)
+                            .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            if (bean instanceof Supplier) {
-                                FunctionInvocationWrapper supplier = functionFromDefinition(functionDefinition);
+                        if (bean instanceof Supplier) {
+                            FunctionInvocationWrapper supplier = functionFromDefinition(functionDefinition);
 
-                                IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow
-                                    .fromSupplier(supplier)
-                                    .filter(
-                                        selector,
-                                        filter ->
-                                            filter
-                                                .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                                .throwExceptionOnRejection(false)
-                                    )
+                            IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow.fromSupplier(supplier)
+                                .filter(selector, filter ->
+                                    filter
+                                        .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                        .throwExceptionOnRejection(false)
+                                )
+                                .log(DEBUG, beanName + "." + functionBinding.output())
+                                .channel(functionBinding.output());
+                            integrationFlowContext.registration(supplierFlowBuilder.get()).register();
+                        } else {
+                            String expectedContentType = Optional.ofNullable(
+                                bindingServiceProperties.getBindings().get(functionBinding.input())
+                            )
+                                .map(BindingProperties::getContentType)
+                                .orElse(null);
+                            GenericHandler<Message> handler = (message, headers) -> {
+                                FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
+                                function.setSkipOutputConversion(false);
+                                return function.apply(
+                                    messageContentTypeNormalizer.normalizeToExpected(message, expectedContentType)
+                                );
+                            };
+
+                            IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow.from(
+                                getGatewayInterface(bean instanceof Function),
+                                gateway -> gateway.replyTimeout(0L)
+                            )
+                                .log(DEBUG, beanName + "." + functionBinding.input())
+                                .filter(selector, filter ->
+                                    filter
+                                        .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                        .throwExceptionOnRejection(false)
+                                )
+                                .handle(Message.class, handler);
+                            if (Function.class.isInstance(bean)) {
+                                functionFlowBuilder
+                                    .bridge()
                                     .log(DEBUG, beanName + "." + functionBinding.output())
                                     .channel(functionBinding.output());
-                                integrationFlowContext.registration(supplierFlowBuilder.get()).register();
-                            } else {
-                                String expectedContentType = Optional
-                                    .ofNullable(bindingServiceProperties.getBindings().get(functionBinding.input()))
-                                    .map(BindingProperties::getContentType)
-                                    .orElse(null);
-                                GenericHandler<Message> handler = (message, headers) -> {
-                                    FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
-                                    function.setSkipOutputConversion(false);
-                                    return function.apply(
-                                        messageContentTypeNormalizer.normalizeToExpected(message, expectedContentType)
-                                    );
-                                };
-
-                                IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
-                                    .from(
-                                        getGatewayInterface(bean instanceof Function),
-                                        gateway -> gateway.replyTimeout(0L)
-                                    )
-                                    .log(DEBUG, beanName + "." + functionBinding.input())
-                                    .filter(
-                                        selector,
-                                        filter ->
-                                            filter
-                                                .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
-                                                .throwExceptionOnRejection(false)
-                                    )
-                                    .handle(Message.class, handler);
-                                if (Function.class.isInstance(bean)) {
-                                    functionFlowBuilder
-                                        .bridge()
-                                        .log(DEBUG, beanName + "." + functionBinding.output())
-                                        .channel(functionBinding.output());
-                                }
-
-                                final var connectorFlow = functionFlowBuilder.get();
-
-                                IntegrationFlow inputChannelFlow = IntegrationFlow
-                                    .from(functionBinding.input())
-                                    .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-                                    .get();
-
-                                integrationFlowContext.registration(inputChannelFlow).register();
-
-                                if (functionRouter.isEnabled()) {
-                                    final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
-
-                                    functionRouter.register(functionBinding.input(), functionBeanName);
-                                }
                             }
-                        });
+
+                            final var connectorFlow = functionFlowBuilder.get();
+
+                            IntegrationFlow inputChannelFlow = IntegrationFlow.from(functionBinding.input())
+                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
+                                .get();
+
+                            integrationFlowContext.registration(inputChannelFlow).register();
+
+                            if (functionRouter.isEnabled()) {
+                                final var functionBeanName = registerConnectorFlowFunction(connectorFlow, beanName);
+
+                                functionRouter.register(functionBinding.input(), functionBeanName);
+                            }
+                        }
+                    });
                 }
 
                 return bean;

@@ -57,10 +57,12 @@ public class CloudConnectorAppRabbitmqPrefixIT extends CloudConnectorAppIT {
     @Test
     @Override
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 }

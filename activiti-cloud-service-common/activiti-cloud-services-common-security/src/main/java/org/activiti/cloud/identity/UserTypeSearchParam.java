@@ -23,8 +23,7 @@ public enum UserTypeSearchParam {
     INTERACTIVE;
 
     public static UserTypeSearchParam convertFromStringOrThrow(String stringValue) {
-        return Arrays
-            .stream(UserTypeSearchParam.values())
+        return Arrays.stream(UserTypeSearchParam.values())
             .filter(ut -> ut.name().equals(stringValue))
             .findAny()
             .orElseThrow(() -> new IdentityInvalidUserTypeException(stringValue));

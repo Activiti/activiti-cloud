@@ -53,55 +53,67 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorDisabledIT {
 
     @Test
     public void testBindingServicePropertiesDefaults() {
-        assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getDestination())
-            .isEqualTo("commandConsumer_foo");
-        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput").getDestination())
-            .isEqualTo("commandConsumer_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getDestination()).isEqualTo(
+            "commandConsumer_foo"
+        );
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorOutput").getDestination()).isEqualTo(
+            "commandConsumer_foo"
+        );
         assertThat(bindingServiceProperties.getBindingProperties("commandConsumer").getGroup()).isEqualTo("bar");
     }
 
     @Test
     public void testBindingServicePropertiesCustomValues() {
-        assertThat(bindingServiceProperties.getBindingProperties("commandResults").getDestination())
-            .isEqualTo("bar_commandResults_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("commandResults").getDestination()).isEqualTo(
+            "bar_commandResults_foo"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithMultipleBindings() {
-        assertThat(bindingServiceProperties.getBindingProperties("auditProducer").getDestination())
-            .isEqualTo("engineEvents");
+        assertThat(bindingServiceProperties.getBindingProperties("auditProducer").getDestination()).isEqualTo(
+            "engineEvents"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("auditConsumer").getDestination())
-            .isEqualTo("engineEvents");
+        assertThat(bindingServiceProperties.getBindingProperties("auditConsumer").getDestination()).isEqualTo(
+            "engineEvents"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("queryConsumer").getDestination())
-            .isEqualTo("engineEvents");
+        assertThat(bindingServiceProperties.getBindingProperties("queryConsumer").getDestination()).isEqualTo(
+            "engineEvents"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithConnectorDestinationOverride() {
-        assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer").getDestination())
-            .isEqualTo("camel_connector_invoke");
+        assertThat(bindingServiceProperties.getBindingProperties("camelConnectorConsumer").getDestination()).isEqualTo(
+            "camel_connector_invoke"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE").getDestination())
-            .isEqualTo("camel_connector_invoke");
+        assertThat(bindingServiceProperties.getBindingProperties("camel-connector.INVOKE").getDestination()).isEqualTo(
+            "camel_connector_invoke"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithAsyncExecutorJobsOverride() {
-        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput").getDestination())
-            .isEqualTo("asyncExecutorJobs_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput").getDestination()).isEqualTo(
+            "asyncExecutorJobs_foo"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput").getDestination())
-            .isEqualTo("asyncExecutorJobs_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput").getDestination()).isEqualTo(
+            "asyncExecutorJobs_foo"
+        );
     }
 
     @Test
     public void testBindingServicePropertiesWithMessageEventsOverrides() {
-        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput").getDestination())
-            .isEqualTo("messageEvents_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput").getDestination()).isEqualTo(
+            "messageEvents_foo"
+        );
 
-        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput").getDestination())
-            .isEqualTo("messageEvents_foo");
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput").getDestination()).isEqualTo(
+            "messageEvents_foo"
+        );
     }
 }

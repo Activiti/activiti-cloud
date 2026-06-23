@@ -33,8 +33,9 @@ class TaskCandidateGroupRemovedEventConverterTest {
 
     @Test
     void should_returnTaskCandidateGroupRemoved_when_getSupportedEvent() {
-        assertThat(eventConverter.getSupportedEvent())
-            .isEqualTo(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name());
+        assertThat(eventConverter.getSupportedEvent()).isEqualTo(
+            TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name()
+        );
     }
 
     @Test
@@ -49,13 +50,11 @@ class TaskCandidateGroupRemovedEventConverterTest {
         assertThat(auditEventEntity)
             .isNotNull()
             .isInstanceOf(TaskCandidateGroupRemovedEventEntity.class)
-            .returns(
-                event.getEntity().getTaskId(),
-                e -> ((TaskCandidateGroupRemovedEventEntity) e).getCandidateGroup().getTaskId()
+            .returns(event.getEntity().getTaskId(), e ->
+                ((TaskCandidateGroupRemovedEventEntity) e).getCandidateGroup().getTaskId()
             )
-            .returns(
-                event.getEntity().getGroupId(),
-                e -> ((TaskCandidateGroupRemovedEventEntity) e).getCandidateGroup().getGroupId()
+            .returns(event.getEntity().getGroupId(), e ->
+                ((TaskCandidateGroupRemovedEventEntity) e).getCandidateGroup().getGroupId()
             )
             .returns(event.getEntityId(), AuditEventEntity::getEntityId)
             .returns(event.getProcessInstanceId(), AuditEventEntity::getProcessInstanceId)
@@ -78,13 +77,11 @@ class TaskCandidateGroupRemovedEventConverterTest {
         assertThat(cloudEvent)
             .isNotNull()
             .isInstanceOf(CloudTaskCandidateGroupRemovedEventImpl.class)
-            .returns(
-                entity.getCandidateGroup().getTaskId(),
-                e -> ((CloudTaskCandidateGroupRemovedEventImpl) e).getEntity().getTaskId()
+            .returns(entity.getCandidateGroup().getTaskId(), e ->
+                ((CloudTaskCandidateGroupRemovedEventImpl) e).getEntity().getTaskId()
             )
-            .returns(
-                entity.getCandidateGroup().getGroupId(),
-                e -> ((CloudTaskCandidateGroupRemovedEventImpl) e).getEntity().getGroupId()
+            .returns(entity.getCandidateGroup().getGroupId(), e ->
+                ((CloudTaskCandidateGroupRemovedEventImpl) e).getEntity().getGroupId()
             )
             .returns(entity.getEntityId(), CloudRuntimeEvent::getEntityId)
             .returns(entity.getProcessInstanceId(), CloudRuntimeEvent::getProcessInstanceId)
@@ -97,11 +94,12 @@ class TaskCandidateGroupRemovedEventConverterTest {
     private CloudTaskCandidateGroupRemovedEventImpl createTaskCandidateGroupRemovedEvent() {
         TaskCandidateGroupImpl taskCandidateGroup = new TaskCandidateGroupImpl("groupId", "1234-abc-5678-def");
 
-        CloudTaskCandidateGroupRemovedEventImpl candidateGroupRemovedEvent = new CloudTaskCandidateGroupRemovedEventImpl(
-            "TaskCandidateGroupRemovedEventId",
-            System.currentTimeMillis(),
-            taskCandidateGroup
-        );
+        CloudTaskCandidateGroupRemovedEventImpl candidateGroupRemovedEvent =
+            new CloudTaskCandidateGroupRemovedEventImpl(
+                "TaskCandidateGroupRemovedEventId",
+                System.currentTimeMillis(),
+                taskCandidateGroup
+            );
         candidateGroupRemovedEvent.setEntityId("entityId");
         candidateGroupRemovedEvent.setProcessInstanceId("processInstanceId");
         candidateGroupRemovedEvent.setProcessDefinitionId("processDefinitionId");

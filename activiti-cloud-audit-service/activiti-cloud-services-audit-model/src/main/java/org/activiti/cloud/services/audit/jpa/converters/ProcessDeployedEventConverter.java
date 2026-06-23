@@ -41,7 +41,8 @@ public class ProcessDeployedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ProcessDeployedAuditEventEntity processDeployedAuditEventEntity = (ProcessDeployedAuditEventEntity) auditEventEntity;
+        ProcessDeployedAuditEventEntity processDeployedAuditEventEntity =
+            (ProcessDeployedAuditEventEntity) auditEventEntity;
 
         return new CloudProcessDeployedEventImpl(
             processDeployedAuditEventEntity.getEventId(),

@@ -276,25 +276,33 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name) {
-        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name) {
-        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
     }
 
     @Override
@@ -312,8 +320,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
         final int prime = 31;
         int result = super.hashCode();
         result =
-            prime *
-            result +
+            prime * result +
             Objects.hash(
                 businessKey,
                 clientId,

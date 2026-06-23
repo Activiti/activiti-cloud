@@ -110,9 +110,10 @@ public class QueryProcessDefinitionCandidateStartersIT {
         ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
         secondProcessDefinition.setId(UUID.randomUUID().toString());
 
-        CloudProcessCandidateStarterUserAddedEventImpl candidateStarterUserAddedEvent = new CloudProcessCandidateStarterUserAddedEventImpl(
-            new ProcessCandidateStarterUserImpl(firstProcessDefinition.getId(), "hruser")
-        );
+        CloudProcessCandidateStarterUserAddedEventImpl candidateStarterUserAddedEvent =
+            new CloudProcessCandidateStarterUserAddedEventImpl(
+                new ProcessCandidateStarterUserImpl(firstProcessDefinition.getId(), "hruser")
+            );
 
         producer.send(
             new CloudProcessDeployedEventImpl(firstProcessDefinition),
@@ -139,9 +140,10 @@ public class QueryProcessDefinitionCandidateStartersIT {
         ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
         secondProcessDefinition.setId(UUID.randomUUID().toString());
 
-        CloudProcessCandidateStarterGroupAddedEventImpl candidateStarterGroupAddedEvent = new CloudProcessCandidateStarterGroupAddedEventImpl(
-            new ProcessCandidateStarterGroupImpl(firstProcessDefinition.getId(), "hr")
-        );
+        CloudProcessCandidateStarterGroupAddedEventImpl candidateStarterGroupAddedEvent =
+            new CloudProcessCandidateStarterGroupAddedEventImpl(
+                new ProcessCandidateStarterGroupImpl(firstProcessDefinition.getId(), "hr")
+            );
 
         producer.send(
             new CloudProcessDeployedEventImpl(firstProcessDefinition),

@@ -38,9 +38,9 @@ public class TaskSuspendedEventHandler implements QueryEventHandler {
         CloudTaskSuspendedEvent taskSuspendedEvent = (CloudTaskSuspendedEvent) event;
         Task eventTask = taskSuspendedEvent.getEntity();
 
-        TaskEntity taskEntity = Optional
-            .ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
-            .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity taskEntity = Optional.ofNullable(
+            entityManager.find(TaskEntity.class, eventTask.getId())
+        ).orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
 
         taskEntity.setStatus(Task.TaskStatus.SUSPENDED);
         taskEntity.setLastModified(new Date(taskSuspendedEvent.getTimestamp()));

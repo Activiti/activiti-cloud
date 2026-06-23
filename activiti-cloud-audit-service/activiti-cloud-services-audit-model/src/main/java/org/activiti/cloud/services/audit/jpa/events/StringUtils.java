@@ -29,8 +29,7 @@ class StringUtils {
      *   value truncated to length.
      */
     public static String truncate(String value, Integer length) {
-        return Optional
-            .ofNullable(value)
+        return Optional.ofNullable(value)
             .filter(it -> it.length() > length)
             .map(it -> it.substring(0, length))
             .orElse(value);

@@ -52,8 +52,7 @@ public class StartMessagePayloadGroupProcessor extends AbstractMessageGroupProce
     protected Message<?> buildOutputMessage(Message<?> message) {
         StartMessagePayload startPayload = StartMessagePayloadTransformer.from(message);
 
-        return MessageBuilder
-            .withPayload(startPayload)
+        return MessageBuilder.withPayload(startPayload)
             .setHeader(MESSAGE_PAYLOAD_TYPE, StartMessagePayload.class.getSimpleName())
             .build();
     }

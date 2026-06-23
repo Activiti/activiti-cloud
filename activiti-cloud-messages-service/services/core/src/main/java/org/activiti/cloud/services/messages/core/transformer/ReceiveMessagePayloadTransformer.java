@@ -23,7 +23,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 
 public class ReceiveMessagePayloadTransformer
-    extends AbstractPayloadTransformer<MessageEventPayload, ReceiveMessagePayload> {
+    extends AbstractPayloadTransformer<MessageEventPayload, ReceiveMessagePayload>
+{
 
     private static final ReceiveMessagePayloadTransformer INSTANCE = new ReceiveMessagePayloadTransformer();
 
@@ -42,8 +43,7 @@ public class ReceiveMessagePayloadTransformer
 
     @Override
     protected ReceiveMessagePayload transformPayload(MessageEventPayload eventPayload) {
-        return MessagePayloadBuilder
-            .receive(eventPayload.getName())
+        return MessagePayloadBuilder.receive(eventPayload.getName())
             .withCorrelationKey(eventPayload.getCorrelationKey())
             .withVariables(eventPayload.getVariables())
             .build();

@@ -39,134 +39,154 @@ import org.junit.jupiter.api.Test;
 public class ProcessCandidateStarterUserEventConverterTest {
 
     private EventContextInfoAppender eventContextInfoAppender = new EventContextInfoAppender();
-    private ProcessCandidateStarterUserAddedEventConverter candidateStarterUserAddedEventConverter = new ProcessCandidateStarterUserAddedEventConverter(
-        eventContextInfoAppender
-    );
-    private ProcessCandidateStarterUserRemovedEventConverter candidateStarterUserRemovedEventConverter = new ProcessCandidateStarterUserRemovedEventConverter(
-        eventContextInfoAppender
-    );
-    private ProcessCandidateStarterGroupAddedEventConverter candidateStarterGroupAddedEventConverter = new ProcessCandidateStarterGroupAddedEventConverter(
-        eventContextInfoAppender
-    );
-    private ProcessCandidateStarterGroupRemovedEventConverter candidateStarterGroupRemovedEventConverter = new ProcessCandidateStarterGroupRemovedEventConverter(
-        eventContextInfoAppender
-    );
+    private ProcessCandidateStarterUserAddedEventConverter candidateStarterUserAddedEventConverter =
+        new ProcessCandidateStarterUserAddedEventConverter(eventContextInfoAppender);
+    private ProcessCandidateStarterUserRemovedEventConverter candidateStarterUserRemovedEventConverter =
+        new ProcessCandidateStarterUserRemovedEventConverter(eventContextInfoAppender);
+    private ProcessCandidateStarterGroupAddedEventConverter candidateStarterGroupAddedEventConverter =
+        new ProcessCandidateStarterGroupAddedEventConverter(eventContextInfoAppender);
+    private ProcessCandidateStarterGroupRemovedEventConverter candidateStarterGroupRemovedEventConverter =
+        new ProcessCandidateStarterGroupRemovedEventConverter(eventContextInfoAppender);
 
     @Test
     public void convertToEntityProcessCandidateStarterUserAddedEvent() {
         CloudProcessCandidateStarterUserAddedEvent event = createProcessCandidateUserAddedEvent();
-        ProcessCandidateStarterUserAddedEventEntity auditEventEntity = (ProcessCandidateStarterUserAddedEventEntity) candidateStarterUserAddedEventConverter.convertToEntity(
-            event
-        );
+        ProcessCandidateStarterUserAddedEventEntity auditEventEntity =
+            (ProcessCandidateStarterUserAddedEventEntity) candidateStarterUserAddedEventConverter.convertToEntity(
+                event
+            );
 
         assertEvent(auditEventEntity, event);
-        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getCandidateStarterUser().getUserId()).isEqualTo(event.getEntity().getUserId());
     }
 
     @Test
     public void convertToEntityProcessCandidateStarterUserRemovedEvent() {
         CloudProcessCandidateStarterUserRemovedEvent event = createProcessCandidateUserRemovedEvent();
-        ProcessCandidateStarterUserRemovedEventEntity auditEventEntity = (ProcessCandidateStarterUserRemovedEventEntity) candidateStarterUserRemovedEventConverter.convertToEntity(
-            event
-        );
+        ProcessCandidateStarterUserRemovedEventEntity auditEventEntity =
+            (ProcessCandidateStarterUserRemovedEventEntity) candidateStarterUserRemovedEventConverter.convertToEntity(
+                event
+            );
 
         assertEvent(auditEventEntity, event);
-        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getCandidateStarterUser().getUserId()).isEqualTo(event.getEntity().getUserId());
     }
 
     @Test
     public void convertToEntityProcessCandidateStarterGroupAddedEvent() {
         CloudProcessCandidateStarterGroupAddedEvent event = createProcessCandidateGroupAddedEvent();
-        ProcessCandidateStarterGroupAddedEventEntity auditEventEntity = (ProcessCandidateStarterGroupAddedEventEntity) candidateStarterGroupAddedEventConverter.convertToEntity(
-            event
-        );
+        ProcessCandidateStarterGroupAddedEventEntity auditEventEntity =
+            (ProcessCandidateStarterGroupAddedEventEntity) candidateStarterGroupAddedEventConverter.convertToEntity(
+                event
+            );
 
         assertEvent(auditEventEntity, event);
-        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId()).isEqualTo(event.getEntity().getGroupId());
     }
 
     @Test
     public void convertToEntityProcessCandidateStarterGroupRemovedEvent() {
         CloudProcessCandidateStarterGroupRemovedEvent event = createProcessCandidateGroupRemovedEvent();
-        ProcessCandidateStarterGroupRemovedEventEntity auditEventEntity = (ProcessCandidateStarterGroupRemovedEventEntity) candidateStarterGroupRemovedEventConverter.convertToEntity(
-            event
-        );
+        ProcessCandidateStarterGroupRemovedEventEntity auditEventEntity =
+            (ProcessCandidateStarterGroupRemovedEventEntity) candidateStarterGroupRemovedEventConverter.convertToEntity(
+                event
+            );
 
         assertEvent(auditEventEntity, event);
-        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId()).isEqualTo(event.getEntity().getGroupId());
     }
 
     @Test
     public void convertToAPITaskCandidateUserAddedEvent() {
-        ProcessCandidateStarterUserAddedEventEntity auditEventEntity = (ProcessCandidateStarterUserAddedEventEntity) candidateStarterUserAddedEventConverter.convertToEntity(
-            createProcessCandidateUserAddedEvent()
-        );
-        CloudProcessCandidateStarterUserAddedEvent cloudEvent = (CloudProcessCandidateStarterUserAddedEvent) candidateStarterUserAddedEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        ProcessCandidateStarterUserAddedEventEntity auditEventEntity =
+            (ProcessCandidateStarterUserAddedEventEntity) candidateStarterUserAddedEventConverter.convertToEntity(
+                createProcessCandidateUserAddedEvent()
+            );
+        CloudProcessCandidateStarterUserAddedEvent cloudEvent =
+            (CloudProcessCandidateStarterUserAddedEvent) candidateStarterUserAddedEventConverter.convertToAPI(
+                auditEventEntity
+            );
 
         assertEvent(auditEventEntity, cloudEvent);
-        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId())
-            .isEqualTo(cloudEvent.getEntity().getProcessDefinitionId());
-        assertThat(auditEventEntity.getCandidateStarterUser().getUserId())
-            .isEqualTo(cloudEvent.getEntity().getUserId());
+        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId()).isEqualTo(
+            cloudEvent.getEntity().getProcessDefinitionId()
+        );
+        assertThat(auditEventEntity.getCandidateStarterUser().getUserId()).isEqualTo(
+            cloudEvent.getEntity().getUserId()
+        );
     }
 
     @Test
     public void convertToAPITaskCandidateUserRemovedEvent() {
-        ProcessCandidateStarterUserRemovedEventEntity auditEventEntity = (ProcessCandidateStarterUserRemovedEventEntity) candidateStarterUserRemovedEventConverter.convertToEntity(
-            createProcessCandidateUserRemovedEvent()
-        );
-        CloudProcessCandidateStarterUserRemovedEvent cloudEvent = (CloudProcessCandidateStarterUserRemovedEvent) candidateStarterUserRemovedEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        ProcessCandidateStarterUserRemovedEventEntity auditEventEntity =
+            (ProcessCandidateStarterUserRemovedEventEntity) candidateStarterUserRemovedEventConverter.convertToEntity(
+                createProcessCandidateUserRemovedEvent()
+            );
+        CloudProcessCandidateStarterUserRemovedEvent cloudEvent =
+            (CloudProcessCandidateStarterUserRemovedEvent) candidateStarterUserRemovedEventConverter.convertToAPI(
+                auditEventEntity
+            );
 
         assertEvent(auditEventEntity, cloudEvent);
-        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId())
-            .isEqualTo(cloudEvent.getEntity().getProcessDefinitionId());
-        assertThat(auditEventEntity.getCandidateStarterUser().getUserId())
-            .isEqualTo(cloudEvent.getEntity().getUserId());
+        assertThat(auditEventEntity.getCandidateStarterUser().getProcessDefinitionId()).isEqualTo(
+            cloudEvent.getEntity().getProcessDefinitionId()
+        );
+        assertThat(auditEventEntity.getCandidateStarterUser().getUserId()).isEqualTo(
+            cloudEvent.getEntity().getUserId()
+        );
     }
 
     @Test
     public void convertToAPITaskCandidateGroupAddedEvent() {
-        ProcessCandidateStarterGroupAddedEventEntity auditEventEntity = (ProcessCandidateStarterGroupAddedEventEntity) candidateStarterGroupAddedEventConverter.convertToEntity(
-            createProcessCandidateGroupAddedEvent()
-        );
-        CloudProcessCandidateStarterGroupAddedEvent cloudEvent = (CloudProcessCandidateStarterGroupAddedEvent) candidateStarterGroupAddedEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        ProcessCandidateStarterGroupAddedEventEntity auditEventEntity =
+            (ProcessCandidateStarterGroupAddedEventEntity) candidateStarterGroupAddedEventConverter.convertToEntity(
+                createProcessCandidateGroupAddedEvent()
+            );
+        CloudProcessCandidateStarterGroupAddedEvent cloudEvent =
+            (CloudProcessCandidateStarterGroupAddedEvent) candidateStarterGroupAddedEventConverter.convertToAPI(
+                auditEventEntity
+            );
 
         assertEvent(auditEventEntity, cloudEvent);
-        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId())
-            .isEqualTo(cloudEvent.getEntity().getProcessDefinitionId());
-        assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId())
-            .isEqualTo(cloudEvent.getEntity().getGroupId());
+        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId()).isEqualTo(
+            cloudEvent.getEntity().getProcessDefinitionId()
+        );
+        assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId()).isEqualTo(
+            cloudEvent.getEntity().getGroupId()
+        );
     }
 
     @Test
     public void convertToAPITaskCandidateGroupRemovedEvent() {
-        ProcessCandidateStarterGroupRemovedEventEntity auditEventEntity = (ProcessCandidateStarterGroupRemovedEventEntity) candidateStarterGroupRemovedEventConverter.convertToEntity(
-            createProcessCandidateGroupRemovedEvent()
-        );
-        CloudProcessCandidateStarterGroupRemovedEvent cloudEvent = (CloudProcessCandidateStarterGroupRemovedEvent) candidateStarterGroupRemovedEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        ProcessCandidateStarterGroupRemovedEventEntity auditEventEntity =
+            (ProcessCandidateStarterGroupRemovedEventEntity) candidateStarterGroupRemovedEventConverter.convertToEntity(
+                createProcessCandidateGroupRemovedEvent()
+            );
+        CloudProcessCandidateStarterGroupRemovedEvent cloudEvent =
+            (CloudProcessCandidateStarterGroupRemovedEvent) candidateStarterGroupRemovedEventConverter.convertToAPI(
+                auditEventEntity
+            );
 
         //then
         assertEvent(auditEventEntity, cloudEvent);
-        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId())
-            .isEqualTo(cloudEvent.getEntity().getProcessDefinitionId());
-        assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId())
-            .isEqualTo(cloudEvent.getEntity().getGroupId());
+        assertThat(auditEventEntity.getCandidateStarterGroup().getProcessDefinitionId()).isEqualTo(
+            cloudEvent.getEntity().getProcessDefinitionId()
+        );
+        assertThat(auditEventEntity.getCandidateStarterGroup().getGroupId()).isEqualTo(
+            cloudEvent.getEntity().getGroupId()
+        );
     }
 
     private CloudProcessCandidateStarterUserAddedEventImpl createProcessCandidateUserAddedEvent() {
@@ -174,11 +194,12 @@ public class ProcessCandidateStarterUserEventConverterTest {
             "processId",
             "userId"
         );
-        CloudProcessCandidateStarterUserAddedEventImpl candidateUserAddedEvent = new CloudProcessCandidateStarterUserAddedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            candidateStarterUser
-        );
+        CloudProcessCandidateStarterUserAddedEventImpl candidateUserAddedEvent =
+            new CloudProcessCandidateStarterUserAddedEventImpl(
+                "eventId",
+                System.currentTimeMillis(),
+                candidateStarterUser
+            );
         setEventDetails(candidateUserAddedEvent);
         return candidateUserAddedEvent;
     }
@@ -188,11 +209,12 @@ public class ProcessCandidateStarterUserEventConverterTest {
             "processId",
             "userId"
         );
-        CloudProcessCandidateStarterUserRemovedEventImpl candidateUserRemovedEvent = new CloudProcessCandidateStarterUserRemovedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            candidateStarterUser
-        );
+        CloudProcessCandidateStarterUserRemovedEventImpl candidateUserRemovedEvent =
+            new CloudProcessCandidateStarterUserRemovedEventImpl(
+                "eventId",
+                System.currentTimeMillis(),
+                candidateStarterUser
+            );
         setEventDetails(candidateUserRemovedEvent);
         return candidateUserRemovedEvent;
     }
@@ -202,11 +224,12 @@ public class ProcessCandidateStarterUserEventConverterTest {
             "processId",
             "groupId"
         );
-        CloudProcessCandidateStarterGroupAddedEventImpl candidateGroupAddedEvent = new CloudProcessCandidateStarterGroupAddedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            candidateStarterGroup
-        );
+        CloudProcessCandidateStarterGroupAddedEventImpl candidateGroupAddedEvent =
+            new CloudProcessCandidateStarterGroupAddedEventImpl(
+                "eventId",
+                System.currentTimeMillis(),
+                candidateStarterGroup
+            );
         setEventDetails(candidateGroupAddedEvent);
         return candidateGroupAddedEvent;
     }
@@ -216,11 +239,12 @@ public class ProcessCandidateStarterUserEventConverterTest {
             "processId",
             "groupId"
         );
-        CloudProcessCandidateStarterGroupRemovedEventImpl candidateGroupRemovedEvent = new CloudProcessCandidateStarterGroupRemovedEventImpl(
-            "eventId",
-            System.currentTimeMillis(),
-            candidateStarterGroup
-        );
+        CloudProcessCandidateStarterGroupRemovedEventImpl candidateGroupRemovedEvent =
+            new CloudProcessCandidateStarterGroupRemovedEventImpl(
+                "eventId",
+                System.currentTimeMillis(),
+                candidateStarterGroup
+            );
         setEventDetails(candidateGroupRemovedEvent);
         return candidateGroupRemovedEvent;
     }

@@ -38,8 +38,7 @@ public class SyncProcessDefinitionsCmdExecutorTest {
 
     @Test
     public void syncProcessDefinitionsCmdExecutorTest() {
-        SyncCloudProcessDefinitionsPayload payload = SyncCloudProcessDefinitionsPayload
-            .builder()
+        SyncCloudProcessDefinitionsPayload payload = SyncCloudProcessDefinitionsPayload.builder()
             .processDefinitionKeys(List.of("key1", "key2"))
             .excludedProcessDefinitionIds(List.of("1", "2", "3"))
             .build();

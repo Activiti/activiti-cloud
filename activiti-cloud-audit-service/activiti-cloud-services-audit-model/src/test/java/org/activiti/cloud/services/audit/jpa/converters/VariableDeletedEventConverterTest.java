@@ -31,8 +31,9 @@ class VariableDeletedEventConverterTest {
 
     @Test
     void should_supportVariableDeletedEvent() {
-        assertThat(variableDeletedEventConverter.getSupportedEvent())
-            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_DELETED.name());
+        assertThat(variableDeletedEventConverter.getSupportedEvent()).isEqualTo(
+            VariableEvent.VariableEvents.VARIABLE_DELETED.name()
+        );
     }
 
     @Test
@@ -115,9 +116,8 @@ class VariableDeletedEventConverterTest {
         variableDeletedEventEntity.setTimestamp(System.currentTimeMillis());
         variableDeletedEventEntity.setVariableInstance(buildVariableInstance());
 
-        CloudVariableDeletedEventImpl event = (CloudVariableDeletedEventImpl) variableDeletedEventConverter.createAPIEvent(
-            variableDeletedEventEntity
-        );
+        CloudVariableDeletedEventImpl event =
+            (CloudVariableDeletedEventImpl) variableDeletedEventConverter.createAPIEvent(variableDeletedEventEntity);
 
         assertThat(event).isNotNull();
         assertThat(event.getId()).isEqualTo(variableDeletedEventEntity.getEventId());
@@ -134,9 +134,8 @@ class VariableDeletedEventConverterTest {
         variableDeletedEventEntity.setEventId("eventId");
         variableDeletedEventEntity.setTimestamp(System.currentTimeMillis());
 
-        CloudVariableDeletedEventImpl event = (CloudVariableDeletedEventImpl) variableDeletedEventConverter.createAPIEvent(
-            variableDeletedEventEntity
-        );
+        CloudVariableDeletedEventImpl event =
+            (CloudVariableDeletedEventImpl) variableDeletedEventConverter.createAPIEvent(variableDeletedEventEntity);
 
         assertThat(event).isNotNull();
         assertThat(event.getId()).isEqualTo(variableDeletedEventEntity.getEventId());

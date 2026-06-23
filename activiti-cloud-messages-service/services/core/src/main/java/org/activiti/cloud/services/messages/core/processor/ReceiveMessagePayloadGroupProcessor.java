@@ -47,8 +47,7 @@ public class ReceiveMessagePayloadGroupProcessor extends AbstractMessageGroupPro
     protected Message<?> buildOutputMessage(Message<?> message) {
         ReceiveMessagePayload payload = ReceiveMessagePayloadTransformer.from(message);
 
-        return MessageBuilder
-            .withPayload(payload)
+        return MessageBuilder.withPayload(payload)
             .setHeader(MESSAGE_PAYLOAD_TYPE, ReceiveMessagePayload.class.getSimpleName())
             .build();
     }

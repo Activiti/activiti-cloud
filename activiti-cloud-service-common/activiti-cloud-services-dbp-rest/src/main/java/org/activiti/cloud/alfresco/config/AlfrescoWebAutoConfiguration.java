@@ -123,9 +123,8 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
          */
 
         return builder ->
-            builder.withConfigOverride(
-                BigDecimal.class,
-                o -> o.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING))
+            builder.withConfigOverride(BigDecimal.class, o ->
+                o.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING))
             );
     }
 }

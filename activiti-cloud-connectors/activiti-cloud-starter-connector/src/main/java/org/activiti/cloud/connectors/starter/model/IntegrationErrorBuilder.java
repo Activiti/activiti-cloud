@@ -78,8 +78,7 @@ public class IntegrationErrorBuilder {
     public MessageBuilder<IntegrationError> getMessageBuilder() {
         IntegrationError integrationError = build();
 
-        return MessageBuilder
-            .withPayload(integrationError)
+        return MessageBuilder.withPayload(integrationError)
             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
             .setHeader("targetAppName", integrationRequest.getAppName())
             .setHeader("targetService", integrationRequest.getServiceFullName());

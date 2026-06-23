@@ -34,11 +34,10 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
         String errorDestinationOverride = connectorProperties.getErrorDestinationOverride();
 
         String destination = ObjectUtils.isEmpty(errorDestinationOverride)
-            ? Optional
-                .of(event)
-                .map(IntegrationRequest::getErrorDestination)
-                .filter(Predicate.not(ObjectUtils::isEmpty))
-                .orElseGet(() -> this.getServiceDestination(event))
+            ? Optional.of(event)
+                  .map(IntegrationRequest::getErrorDestination)
+                  .filter(Predicate.not(ObjectUtils::isEmpty))
+                  .orElseGet(() -> this.getServiceDestination(event))
             : errorDestinationOverride;
 
         return destination;

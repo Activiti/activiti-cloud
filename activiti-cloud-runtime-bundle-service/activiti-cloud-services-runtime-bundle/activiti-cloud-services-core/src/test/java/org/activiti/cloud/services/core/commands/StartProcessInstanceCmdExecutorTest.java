@@ -41,8 +41,7 @@ public class StartProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder
-            .start()
+        StartProcessPayload startProcessInstanceCmd = ProcessPayloadBuilder.start()
             .withProcessDefinitionKey("def key")
             .withName("name")
             .withBusinessKey("business key")

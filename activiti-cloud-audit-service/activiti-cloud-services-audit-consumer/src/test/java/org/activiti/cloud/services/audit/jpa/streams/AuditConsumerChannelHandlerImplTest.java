@@ -66,8 +66,9 @@ class AuditConsumerChannelHandlerImplTest {
         CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEventImpl.class);
         when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
         EventToEntityConverter converter = mock(EventToEntityConverter.class);
-        when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()))
-            .thenReturn(converter);
+        when(
+            converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())
+        ).thenReturn(converter);
         ProcessCreatedAuditEventEntity entity = mock(ProcessCreatedAuditEventEntity.class);
         when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 
@@ -94,8 +95,9 @@ class AuditConsumerChannelHandlerImplTest {
         CloudRuntimeEvent cloudRuntimeEvent = mock(CloudRuntimeEventImpl.class);
         when(cloudRuntimeEvent.getEventType()).thenReturn(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED);
         EventToEntityConverter converter = mock(EventToEntityConverter.class);
-        when(converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()))
-            .thenReturn(converter);
+        when(
+            converters.getConverterByEventTypeName(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())
+        ).thenReturn(converter);
         AuditEventEntity entity = mock(AuditEventEntity.class);
         when(converter.convertToEntity(cloudRuntimeEvent)).thenReturn(entity);
 

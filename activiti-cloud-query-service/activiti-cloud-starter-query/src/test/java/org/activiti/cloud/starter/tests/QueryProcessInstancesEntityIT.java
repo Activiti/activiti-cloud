@@ -100,7 +100,9 @@ public class QueryProcessInstancesEntityIT {
     private static final String PROC_URL = "/v1/process-instances";
     private static final String ADMIN_PROC_URL = "/admin/v1/process-instances";
 
-    private static final ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>> PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>() {};
+    private static final ParameterizedTypeReference<
+        PagedModel<ProcessInstanceEntity>
+    > PAGED_PROCESS_INSTANCE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessInstanceEntity>>() {};
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -178,57 +180,55 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
 
-                //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-                assertThat(processInstanceEntities)
-                    .extracting(
-                        ProcessInstanceEntity::getId,
-                        ProcessInstanceEntity::getName,
-                        ProcessInstanceEntity::getStatus,
-                        ProcessInstanceEntity::getProcessDefinitionName
-                    )
-                    .contains(
-                        tuple(
-                            completedProcess.getId(),
-                            "first",
-                            ProcessInstance.ProcessInstanceStatus.COMPLETED,
-                            completedProcess.getProcessDefinitionName()
-                        ),
-                        tuple(runningProcess.getId(), "second", RUNNING, runningProcess.getProcessDefinitionName())
-                    );
-            });
-
-        await()
-            .untilAsserted(() -> {
-                //and filter by status
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?status={status}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-                    ProcessInstance.ProcessInstanceStatus.COMPLETED
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                .extracting(
+                    ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getName,
+                    ProcessInstanceEntity::getStatus,
+                    ProcessInstanceEntity::getProcessDefinitionName
+                )
+                .contains(
+                    tuple(
+                        completedProcess.getId(),
+                        "first",
+                        ProcessInstance.ProcessInstanceStatus.COMPLETED,
+                        completedProcess.getProcessDefinitionName()
+                    ),
+                    tuple(runningProcess.getId(), "second", RUNNING, runningProcess.getProcessDefinitionName())
                 );
+        });
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+        await().untilAsserted(() -> {
+            //and filter by status
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?status={status}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
+                ProcessInstance.ProcessInstanceStatus.COMPLETED
+            );
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(completedProcess.getId(), ProcessInstance.ProcessInstanceStatus.COMPLETED));
-            });
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(completedProcess.getId(), ProcessInstance.ProcessInstanceStatus.COMPLETED));
+        });
     }
 
     @Test
@@ -238,20 +238,19 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
 
-                //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-                assertThat(processInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .contains(tuple(process.getId(), RUNNING));
-            });
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
+                .contains(tuple(process.getId(), RUNNING));
+        });
 
         //when
         ProcessInstanceImpl updatedProcess = new ProcessInstanceImpl();
@@ -261,12 +260,11 @@ public class QueryProcessInstancesEntityIT {
 
         producer.send(new CloudProcessUpdatedEventImpl(updatedProcess));
 
-        await()
-            .untilAsserted(() -> {
-                ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
-                assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
-                assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
-            });
+        await().untilAsserted(() -> {
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+            assertThat(responseProcess.getBusinessKey()).isEqualTo(updatedProcess.getBusinessKey());
+            assertThat(responseProcess.getName()).isEqualTo(updatedProcess.getName());
+        });
     }
 
     @Test
@@ -276,24 +274,23 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstances();
 
-                //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-                assertThat(processInstanceEntities)
-                    .extracting(
-                        ProcessInstanceEntity::getId,
-                        ProcessInstanceEntity::getStatus,
-                        ProcessInstanceEntity::getRootProcessInstanceId
-                    )
-                    .contains(tuple(process.getId(), RUNNING, process.getRootProcessInstanceId()));
-            });
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                .extracting(
+                    ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getStatus,
+                    ProcessInstanceEntity::getRootProcessInstanceId
+                )
+                .contains(tuple(process.getId(), RUNNING, process.getRootProcessInstanceId()));
+        });
     }
 
     @Test
@@ -303,24 +300,23 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                identityTokenProducer.withTestUser("hradmin");
+        await().untilAsserted(() -> {
+            identityTokenProducer.withTestUser("hradmin");
 
-                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "/" + process.getId(),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<ProcessInstance>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getId()).isNotNull();
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "/" + process.getId(),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<ProcessInstance>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
 
-                ProcessInstance responseProcess = responseEntity.getBody();
-                assertThat(responseProcess.getId()).isEqualTo(process.getId());
-            });
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getId()).isEqualTo(process.getId());
+        });
     }
 
     @Test
@@ -337,61 +333,59 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                identityTokenProducer.withTestUser("hradmin");
+        await().untilAsserted(() -> {
+            identityTokenProducer.withTestUser("hradmin");
 
-                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "/" + process.getId(),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getId()).isNotNull();
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "/" + process.getId(),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getId()).isNotNull();
 
-                ProcessInstance responseProcess = responseEntity.getBody();
-                assertThat(responseProcess.getId()).isEqualTo(process.getId());
+            ProcessInstance responseProcess = responseEntity.getBody();
+            assertThat(responseProcess.getId()).isEqualTo(process.getId());
 
-                assertThat(taskRepository.findAll()).isNotEmpty();
-                assertThat(taskVariableRepository.findAll()).isNotEmpty();
-                assertThat(activityRepository.findAll()).isNotEmpty();
-                assertThat(sequenceFlowRepository.findAll()).isNotEmpty();
-                assertThat(variableRepository.findAll()).isNotEmpty();
-                assertThat(processInstanceRepository.findAll()).isNotEmpty();
-                assertThat(taskCandidateGroupRepository.findAll()).isNotEmpty();
-                assertThat(taskCandidateUserRepository.findAll()).isNotEmpty();
+            assertThat(taskRepository.findAll()).isNotEmpty();
+            assertThat(taskVariableRepository.findAll()).isNotEmpty();
+            assertThat(activityRepository.findAll()).isNotEmpty();
+            assertThat(sequenceFlowRepository.findAll()).isNotEmpty();
+            assertThat(variableRepository.findAll()).isNotEmpty();
+            assertThat(processInstanceRepository.findAll()).isNotEmpty();
+            assertThat(taskCandidateGroupRepository.findAll()).isNotEmpty();
+            assertThat(taskCandidateUserRepository.findAll()).isNotEmpty();
 
-                eventsAggregator.addEvents(new CloudProcessCancelledEventImpl(responseProcess));
-                eventsAggregator.addEvents(new CloudProcessDeletedEventImpl(responseProcess));
-            });
+            eventsAggregator.addEvents(new CloudProcessCancelledEventImpl(responseProcess));
+            eventsAggregator.addEvents(new CloudProcessDeletedEventImpl(responseProcess));
+        });
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                identityTokenProducer.withTestUser("hradmin");
+        await().untilAsserted(() -> {
+            identityTokenProducer.withTestUser("hradmin");
 
-                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "/" + process.getId(),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "/" + process.getId(),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
-                assertThat(taskRepository.findAll()).isEmpty();
-                assertThat(taskVariableRepository.findAll()).isEmpty();
-                assertThat(activityRepository.findAll()).isEmpty();
-                assertThat(sequenceFlowRepository.findAll()).isEmpty();
-                assertThat(variableRepository.findAll()).isEmpty();
-                assertThat(processInstanceRepository.findAll()).isEmpty();
-                assertThat(taskCandidateGroupRepository.findAll()).isEmpty();
-                assertThat(taskCandidateUserRepository.findAll()).isEmpty();
-            });
+            assertThat(taskRepository.findAll()).isEmpty();
+            assertThat(taskVariableRepository.findAll()).isEmpty();
+            assertThat(activityRepository.findAll()).isEmpty();
+            assertThat(sequenceFlowRepository.findAll()).isEmpty();
+            assertThat(variableRepository.findAll()).isEmpty();
+            assertThat(processInstanceRepository.findAll()).isEmpty();
+            assertThat(taskCandidateGroupRepository.findAll()).isEmpty();
+            assertThat(taskCandidateUserRepository.findAll()).isEmpty();
+        });
     }
 
     @Test
@@ -413,12 +407,11 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
-                assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
-                assertThat(responseProcess.getProcessDefinitionName()).isEqualTo("process-definition-name");
-            });
+        await().untilAsserted(() -> {
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionName()).isEqualTo("process-definition-name");
+        });
     }
 
     @Test
@@ -439,37 +432,34 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
-                assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
-            });
+        await().untilAsserted(() -> {
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+        });
 
         eventsAggregator.addEvents(new CloudProcessSuspendedEventImpl(process));
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+        await().untilAsserted(() -> {
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
 
-                assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
-                assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
-                assertThat(responseProcess.getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
-            });
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseProcess.getStatus()).isEqualTo(ProcessInstanceStatus.SUSPENDED);
+        });
 
         eventsAggregator.addEvents(new CloudProcessResumedEventImpl(process));
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
+        await().untilAsserted(() -> {
+            ProcessInstance responseProcess = shouldGetProcessInstance(process.getId());
 
-                assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
-                assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
-                assertThat(responseProcess.getStatus()).isEqualTo(RUNNING);
-            });
+            assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
+            assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
+            assertThat(responseProcess.getStatus()).isEqualTo(RUNNING);
+        });
     }
 
     @Test
@@ -480,33 +470,32 @@ public class QueryProcessInstancesEntityIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered(
-                    "for filter",
-                    null
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntity = executeRequestGetProcInstancesFiltered(
+                "for filter",
+                null
+            );
 
-                //then
-                assertThat(responseEntity).isNotNull();
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntity).isNotNull();
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
-                assertThat(processInstanceEntities)
-                    .extracting(
-                        ProcessInstanceEntity::getId,
-                        ProcessInstanceEntity::getName,
-                        ProcessInstanceEntity::getStatus
+            Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
+            assertThat(processInstanceEntities)
+                .extracting(
+                    ProcessInstanceEntity::getId,
+                    ProcessInstanceEntity::getName,
+                    ProcessInstanceEntity::getStatus
+                )
+                .contains(
+                    tuple(
+                        completedProcess.getId(),
+                        completedProcess.getName(),
+                        ProcessInstance.ProcessInstanceStatus.COMPLETED
                     )
-                    .contains(
-                        tuple(
-                            completedProcess.getId(),
-                            completedProcess.getName(),
-                            ProcessInstance.ProcessInstanceStatus.COMPLETED
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @Test
@@ -518,38 +507,37 @@ public class QueryProcessInstancesEntityIT {
         eventsAggregator.sendAll();
 
         identityTokenProducer.withTestUser("hradmin");
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "?page=0&size=10",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<PagedModel<CloudProcessInstance>>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody())
-                    .extracting(
-                        CloudProcessInstance::getId,
-                        CloudProcessInstance::getName,
-                        CloudProcessInstance::getStatus,
-                        CloudProcessInstance::getProcessDefinitionName
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<CloudProcessInstance>> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "?page=0&size=10",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<PagedModel<CloudProcessInstance>>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody())
+                .extracting(
+                    CloudProcessInstance::getId,
+                    CloudProcessInstance::getName,
+                    CloudProcessInstance::getStatus,
+                    CloudProcessInstance::getProcessDefinitionName
+                )
+                .containsExactly(
+                    tuple(
+                        completedProcess.getId(),
+                        completedProcess.getName(),
+                        ProcessInstanceStatus.COMPLETED,
+                        completedProcess.getProcessDefinitionName()
+                    ),
+                    tuple(
+                        runningProcess.getId(),
+                        runningProcess.getName(),
+                        RUNNING,
+                        runningProcess.getProcessDefinitionName()
                     )
-                    .containsExactly(
-                        tuple(
-                            completedProcess.getId(),
-                            completedProcess.getName(),
-                            ProcessInstanceStatus.COMPLETED,
-                            completedProcess.getProcessDefinitionName()
-                        ),
-                        tuple(
-                            runningProcess.getId(),
-                            runningProcess.getName(),
-                            RUNNING,
-                            runningProcess.getProcessDefinitionName()
-                        )
-                    );
-            });
+                );
+        });
     }
 
     @ParameterizedTest
@@ -569,18 +557,17 @@ public class QueryProcessInstancesEntityIT {
         eventsAggregator.sendAll();
 
         identityTokenProducer.withTestUser("hradmin");
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "/appVersions?" + queryParameters,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).containsExactly(expectedResult.split(";"));
-            });
+        await().untilAsserted(() -> {
+            ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "/appVersions?" + queryParameters,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isInstanceOf(Set.class).containsExactly(expectedResult.split(";"));
+        });
     }
 
     @Test
@@ -591,18 +578,17 @@ public class QueryProcessInstancesEntityIT {
         eventsAggregator.sendAll();
 
         identityTokenProducer.withTestUser("hradmin");
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
-                    ADMIN_PROC_URL + "/appVersions?status=CREATED",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    new ParameterizedTypeReference<>() {}
-                );
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).isEmpty();
-            });
+        await().untilAsserted(() -> {
+            ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                ADMIN_PROC_URL + "/appVersions?status=CREATED",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<>() {}
+            );
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody()).isInstanceOf(Set.class).isEmpty();
+        });
     }
 
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstances() {
@@ -670,63 +656,58 @@ public class QueryProcessInstancesEntityIT {
         );
 
         threeDaysAgo.setTime(now.getTime() - Duration.ofDays(3).toMillis());
-        ProcessInstance processInstanceStartedThreeDaysAgo = processInstanceBuilder.aRunningProcessInstanceWithStartDate(
-            "third",
-            threeDaysAgo
-        );
+        processInstanceBuilder.aRunningProcessInstanceWithStartDate("third", threeDaysAgo);
 
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await()
-            .untilAsserted(() -> {
-                //when
-                //set from date to current date
-                Date fromDate = now;
-                // to date, from date plus 2 days
-                Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf.format(toDate),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            //set from date to current date
+            Date fromDate = now;
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?startFrom=" + sdf.format(fromDate) + "&startTo=" + sdf.format(toDate),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
+        });
 
         // Filter using static date
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?startDate=" + sdf.format(nextDay),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?startDate=" + sdf.format(nextDay),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
+                .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
+        });
     }
 
     @Test
@@ -768,55 +749,53 @@ public class QueryProcessInstancesEntityIT {
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await()
-            .untilAsserted(() -> {
-                //when
-                //set from date to yesterday date
-                Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
-                // to date, from date plus 2 days
-                Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf.format(toDate),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?completedFrom=" + sdf.format(fromDate) + "&completedTo=" + sdf.format(toDate),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getName)
-                    .containsExactly(processInstanceCompletedToday.getName());
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceCompletedToday.getName());
+        });
 
         // Filter using static date
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?completedDate=" + sdf.format(completedDateToday),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?completedDate=" + sdf.format(completedDateToday),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getName)
-                    .containsExactly(processInstanceCompletedToday.getName());
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceCompletedToday.getName());
+        });
     }
 
     private ResponseEntity<PagedModel<ProcessInstanceEntity>> executeRequestGetProcInstancesFiltered(
@@ -848,10 +827,8 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesInitiatedByCurrentUser() {
-        ProcessInstance processInstanceCurrentUserInitiator = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "currentUser",
-            "testuser"
-        );
+        ProcessInstance processInstanceCurrentUserInitiator =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("currentUser", "testuser");
         processInstanceBuilder.aRunningProcessInstanceWithInitiator("first", "User1");
         processInstanceBuilder.aRunningProcessInstanceWithInitiator("second", "User2");
         eventsAggregator.sendAll();
@@ -869,10 +846,8 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstanceInitiatedByCurrentUser() {
-        ProcessInstance processInstanceCurrentUserInitiator = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "currentUser",
-            "testuser"
-        );
+        ProcessInstance processInstanceCurrentUserInitiator =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("currentUser", "testuser");
         ProcessInstance processInstanceInitiatedByUser1 = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "first",
             "User1"
@@ -885,24 +860,18 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesWhenCurrentUserIsTaskAssignee() {
-        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
 
-        ProcessInstance secondProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance secondProcessInstanceWithTestUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "testuser", secondProcessInstanceWithTestUserAssignedToATask);
 
-        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToTask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToTask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToTask);
 
@@ -918,24 +887,18 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesWhenCurrentUserIsTaskCandidate() {
-        ProcessInstance firstProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance firstProcessInstanceWithTestUserCandidateOfATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", firstProcessInstanceWithTestUserCandidateOfATask);
 
-        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
 
-        ProcessInstance thirdProcessInstanceWithRandomUserCandidateOfATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance thirdProcessInstanceWithRandomUserCandidateOfATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.aTaskWithUserCandidate(
             "ATask",
@@ -955,24 +918,18 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesWhenCurrentUserIsTaskAssigneeOrCandidate() {
-        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
 
-        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
 
-        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToATask);
 
@@ -988,31 +945,23 @@ public class QueryProcessInstancesEntityIT {
 
     @Test
     public void shouldGetProcessInstancesWhenCurrentUserIsInitiatorOrTaskAssigneeOrCandidate() {
-        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance firstProcessInstanceWithTestUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "testuser", firstProcessInstanceWithTestUserAssignedToATask);
 
-        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance secondProcessInstanceWithTestUserCandidateOfATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.aTaskWithUserCandidate("ATask", "testuser", secondProcessInstanceWithTestUserCandidateOfATask);
 
-        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "arandomuser"
-        );
+        ProcessInstance thirdProcessInstanceWithRandomUserAssignedToATask =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "arandomuser");
 
         taskEventBuilder.anAssignedTask("ATask", "arandomuser", thirdProcessInstanceWithRandomUserAssignedToATask);
 
-        ProcessInstance fourthProcessInstanceWithTestUserAsInitiator = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
-            "process",
-            "testuser"
-        );
+        ProcessInstance fourthProcessInstanceWithTestUserAsInitiator =
+            processInstanceBuilder.aRunningProcessInstanceWithInitiator("process", "testuser");
 
         eventsAggregator.sendAll();
 
@@ -1142,55 +1091,53 @@ public class QueryProcessInstancesEntityIT {
         eventsAggregator.sendAll();
 
         // Filter using date range
-        await()
-            .untilAsserted(() -> {
-                //when
-                //set from date to yesterday date
-                Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
-                // to date, from date plus 2 days
-                Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf.format(toDate),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            //set from date to yesterday date
+            Date fromDate = new Date(now.getTime() - Duration.ofDays(1).toMillis());
+            // to date, from date plus 2 days
+            Date toDate = new Date(now.getTime() + Duration.ofDays(2).toMillis());
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?suspendedFrom=" + sdf.format(fromDate) + "&suspendedTo=" + sdf.format(toDate),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getName)
-                    .containsExactly(processInstanceSuspendedToday.getName());
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceSuspendedToday.getName());
+        });
 
         // Filter using static date
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    PROC_URL + "?suspendedDate=" + sdf.format(suspendedDateToday),
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                PROC_URL + "?suspendedDate=" + sdf.format(suspendedDateToday),
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                //then
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            //then
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getName)
-                    .containsExactly(processInstanceSuspendedToday.getName());
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getName)
+                .containsExactly(processInstanceSuspendedToday.getName());
+        });
     }
 
     private void shouldGetProcessInstancesFilteredBySingleValue(String processId, String queryString) {
@@ -1198,25 +1145,24 @@ public class QueryProcessInstancesEntityIT {
     }
 
     private void shouldGetProcessInstancesList(List<String> processInstanceIds, String url) {
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
-                );
+        await().untilAsserted(() -> {
+            ResponseEntity<PagedModel<ProcessInstanceEntity>> responseEntityFiltered = testRestTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_PROCESS_INSTANCE_RESPONSE_TYPE
+            );
 
-                assertThat(responseEntityFiltered).isNotNull();
-                assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntityFiltered).isNotNull();
+            assertThat(responseEntityFiltered.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-                Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
-                    .getBody()
-                    .getContent();
-                assertThat(filteredProcessInstanceEntities)
-                    .extracting(ProcessInstanceEntity::getId)
-                    .containsExactly(processInstanceIds.toArray(String[]::new));
-            });
+            Collection<ProcessInstanceEntity> filteredProcessInstanceEntities = responseEntityFiltered
+                .getBody()
+                .getContent();
+            assertThat(filteredProcessInstanceEntities)
+                .extracting(ProcessInstanceEntity::getId)
+                .containsExactly(processInstanceIds.toArray(String[]::new));
+        });
     }
 
     private void shouldGetProcessInstancesList(List<String> processInstanceIds) {
@@ -1318,8 +1264,9 @@ public class QueryProcessInstancesEntityIT {
             new ParameterizedTypeReference<EntryResponseContent<ActivitiErrorMessageImpl>>() {}
         );
 
-        assertThat(responseEntity.getBody().getEntry().getMessage())
-            .isEqualTo(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
+        assertThat(responseEntity.getBody().getEntry().getMessage()).isEqualTo(
+            ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
+        );
     }
 
     @Test
@@ -1332,42 +1279,41 @@ public class QueryProcessInstancesEntityIT {
         var sentEvents = eventsAggregator.sendAll();
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(eventsAggregator.getException()).isNull();
-                assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
-                    .isNotEmpty()
-                    .get()
-                    .extracting(ProcessInstanceEntity::getStatus)
-                    .isEqualTo(RUNNING);
+        await().untilAsserted(() -> {
+            assertThat(eventsAggregator.getException()).isNull();
+            assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+                .isNotEmpty()
+                .get()
+                .extracting(ProcessInstanceEntity::getStatus)
+                .isEqualTo(RUNNING);
 
-                assertThat(sequenceFlowRepository.findAll())
-                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-                    .extracting(
-                        BPMNSequenceFlowEntity::getElementId,
-                        BPMNSequenceFlowEntity::getSourceActivityElementId,
-                        BPMNSequenceFlowEntity::getTargetActivityElementId
+            assertThat(sequenceFlowRepository.findAll())
+                .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                .extracting(
+                    BPMNSequenceFlowEntity::getElementId,
+                    BPMNSequenceFlowEntity::getSourceActivityElementId,
+                    BPMNSequenceFlowEntity::getTargetActivityElementId
+                )
+                .containsExactly(
+                    tuple(
+                        "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
+                        "startEvent1",
+                        "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
                     )
-                    .containsExactly(
-                        tuple(
-                            "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
-                            "startEvent1",
-                            "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
-                        )
-                    );
+                );
 
-                assertThat(activityRepository.findAll())
-                    .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
-                    .extracting(
-                        BPMNActivityEntity::getElementId,
-                        BPMNActivityEntity::getActivityName,
-                        BPMNActivityEntity::getActivityType
-                    )
-                    .containsExactly(
-                        tuple("startEvent1", "", "startEvent"),
-                        tuple("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask")
-                    );
-            });
+            assertThat(activityRepository.findAll())
+                .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+                .extracting(
+                    BPMNActivityEntity::getElementId,
+                    BPMNActivityEntity::getActivityName,
+                    BPMNActivityEntity::getActivityType
+                )
+                .containsExactly(
+                    tuple("startEvent1", "", "startEvent"),
+                    tuple("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask")
+                );
+        });
 
         // and when duplicates are sent
         eventsAggregator.addEvents(sentEvents).sendAll();

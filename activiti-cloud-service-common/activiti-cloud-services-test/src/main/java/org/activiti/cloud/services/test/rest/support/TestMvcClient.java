@@ -299,8 +299,7 @@ public class TestMvcClient {
     public Link discoverUnique(Link root, String rel, MediaType mediaType) throws Exception {
         MockHttpServletResponse response = mvc
             .perform(
-                get(root.expand().getHref()) //
-                    .accept(mediaType)
+                get(root.expand().getHref()).accept(mediaType) //
             )
             .andExpect(status().isOk()) //
             .andExpect(hasLinkWithRel(rel)) //

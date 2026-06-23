@@ -89,8 +89,9 @@ class EntityManagerFinderTest {
         //given
         when(entityManager.createEntityGraph(ProcessInstanceEntity.class)).thenReturn(mock(EntityGraph.class));
         final ProcessInstanceEntity processInstance = mock(ProcessInstanceEntity.class);
-        when(entityManager.find(eq(ProcessInstanceEntity.class), eq("procId"), any(Map.class)))
-            .thenReturn(processInstance);
+        when(entityManager.find(eq(ProcessInstanceEntity.class), eq("procId"), any(Map.class))).thenReturn(
+            processInstance
+        );
 
         //when
         Optional<ProcessInstanceEntity> result = subject.findProcessInstanceWithVariables("procId");

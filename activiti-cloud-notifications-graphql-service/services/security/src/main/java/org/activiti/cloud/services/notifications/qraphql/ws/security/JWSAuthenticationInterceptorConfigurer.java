@@ -61,8 +61,7 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
                         SimpMessageHeaderAccessor.class
                     );
                     if (accessor != null && messageSelector.test(accessor)) {
-                        Optional
-                            .ofNullable(accessor.getHeader(X_AUTHORIZATION))
+                        Optional.ofNullable(accessor.getHeader(X_AUTHORIZATION))
                             .map(String.class::cast)
                             .map(header -> header.replace(BEARER, "").trim())
                             .ifPresent(bearer -> {

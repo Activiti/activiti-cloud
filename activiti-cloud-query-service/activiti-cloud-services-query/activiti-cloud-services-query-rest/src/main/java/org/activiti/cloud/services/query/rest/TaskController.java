@@ -213,10 +213,10 @@ public class TaskController extends TaskControllerAdvice {
         }
         return taskEntity.getTaskCandidateUsers() != null
             ? taskEntity
-                .getTaskCandidateUsers()
-                .stream()
-                .map(TaskCandidateUserEntity::getUserId)
-                .collect(Collectors.toList())
+                  .getTaskCandidateUsers()
+                  .stream()
+                  .map(TaskCandidateUserEntity::getUserId)
+                  .collect(Collectors.toList())
             : null;
     }
 
@@ -238,10 +238,10 @@ public class TaskController extends TaskControllerAdvice {
         }
         return taskEntity.getTaskCandidateGroups() != null
             ? taskEntity
-                .getTaskCandidateGroups()
-                .stream()
-                .map(TaskCandidateGroupEntity::getGroupId)
-                .collect(Collectors.toList())
+                  .getTaskCandidateGroups()
+                  .stream()
+                  .map(TaskCandidateGroupEntity::getGroupId)
+                  .collect(Collectors.toList())
             : null;
     }
 

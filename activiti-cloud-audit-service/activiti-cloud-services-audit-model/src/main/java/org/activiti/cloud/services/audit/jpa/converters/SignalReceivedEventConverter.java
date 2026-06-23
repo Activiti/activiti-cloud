@@ -41,7 +41,8 @@ public class SignalReceivedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        SignalReceivedAuditEventEntity signalReceivedAuditEventEntity = (SignalReceivedAuditEventEntity) auditEventEntity;
+        SignalReceivedAuditEventEntity signalReceivedAuditEventEntity =
+            (SignalReceivedAuditEventEntity) auditEventEntity;
 
         return new CloudBPMNSignalReceivedEventImpl(
             signalReceivedAuditEventEntity.getEventId(),

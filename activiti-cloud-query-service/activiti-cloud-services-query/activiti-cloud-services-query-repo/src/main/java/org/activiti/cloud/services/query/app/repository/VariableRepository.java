@@ -33,7 +33,8 @@ public interface VariableRepository
         JpaSpecificationExecutor<ProcessVariableEntity>,
         QuerydslPredicateExecutor<ProcessVariableEntity>,
         QuerydslBinderCustomizer<QProcessVariableEntity>,
-        CrudRepository<ProcessVariableEntity, Long> {
+        CrudRepository<ProcessVariableEntity, Long>
+{
     @Override
     default void customize(QuerydslBindings bindings, QProcessVariableEntity root) {
         whitelist(root).apply(bindings);

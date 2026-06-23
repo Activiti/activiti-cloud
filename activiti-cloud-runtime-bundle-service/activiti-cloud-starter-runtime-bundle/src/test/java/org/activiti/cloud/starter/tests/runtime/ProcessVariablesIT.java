@@ -138,7 +138,8 @@ public class ProcessVariablesIT {
     public void setUp() {
         identityTokenProducer.withTestUser("hruser");
 
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getKey(), pd.getId());
@@ -162,29 +163,27 @@ public class ProcessVariablesIT {
             variables
         );
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(
-                    startResponse
-                );
-                Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity =
+                processInstanceRestTemplate.getVariables(startResponse);
+            Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
 
-                assertThat(variableCollection).isNotEmpty();
-                assertThat(variablesContainEntry("firstName", "Pedro", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("lastName", "Silva", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("age", 15, variableCollection)).isTrue();
-                assertThat(variablesContainEntry("boolVar", true, variableCollection)).isTrue();
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName", "Pedro", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName", "Silva", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age", 15, variableCollection)).isTrue();
+            assertThat(variablesContainEntry("boolVar", true, variableCollection)).isTrue();
 
-                assertThat(variableCollection)
-                    .filteredOn("name", "customPojo")
-                    .hasSize(1)
-                    .extracting("value")
-                    .hasOnlyElementsOfType(LinkedHashMap.class)
-                    .first()
-                    .toString()
-                    .equalsIgnoreCase("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}");
-            });
+            assertThat(variableCollection)
+                .filteredOn("name", "customPojo")
+                .hasSize(1)
+                .extracting("value")
+                .hasOnlyElementsOfType(LinkedHashMap.class)
+                .first()
+                .toString()
+                .equalsIgnoreCase("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}");
+        });
     }
 
     private boolean variablesContainEntry(
@@ -248,21 +247,19 @@ public class ProcessVariablesIT {
         //when
         processInstanceRestTemplate.setVariables(startResponse.getBody().getId(), variables);
 
-        await()
-            .untilAsserted(() -> {
-                // when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
-                    startResponse
-                );
+        await().untilAsserted(() -> {
+            // when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse =
+                processInstanceRestTemplate.getVariables(startResponse);
 
-                // then
-                Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
+            // then
+            Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
 
-                assertThat(variableCollection).isNotEmpty();
-                assertThat(variablesContainEntry("firstName", "Kermit", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("lastName", "Frog", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("age", 100, variableCollection)).isTrue();
-            });
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName", "Kermit", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName", "Frog", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age", 100, variableCollection)).isTrue();
+        });
     }
 
     @Test
@@ -286,21 +283,19 @@ public class ProcessVariablesIT {
         //when
         processInstanceRestTemplate.adminSetVariables(startResponse.getBody().getId(), variables);
 
-        await()
-            .untilAsserted(() -> {
-                // when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
-                    startResponse
-                );
+        await().untilAsserted(() -> {
+            // when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse =
+                processInstanceRestTemplate.getVariables(startResponse);
 
-                // then
-                Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
+            // then
+            Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
 
-                assertThat(variableCollection).isNotEmpty();
-                assertThat(variablesContainEntry("firstName", "Kermit", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("lastName", "Frog", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("age", 100, variableCollection)).isTrue();
-            });
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName", "Kermit", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName", "Frog", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age", 100, variableCollection)).isTrue();
+        });
     }
 
     @Test
@@ -318,13 +313,11 @@ public class ProcessVariablesIT {
         //testuser doesn't have permission according to access-control.properties
         identityTokenProducer.withTestUser("testuser");
 
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<ActivitiErrorMessageImpl> variablesResponse = processInstanceRestTemplate.callGetVariablesWithErrorResponse(
-                    startResponse.getBody().getId()
-                );
-                assertThat(variablesResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-            });
+        await().untilAsserted(() -> {
+            ResponseEntity<ActivitiErrorMessageImpl> variablesResponse =
+                processInstanceRestTemplate.callGetVariablesWithErrorResponse(startResponse.getBody().getId());
+            assertThat(variablesResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        });
     }
 
     @Test
@@ -342,21 +335,19 @@ public class ProcessVariablesIT {
         identityTokenProducer.withTestUser("testadmin");
 
         //should see at /{processInstanceId}/variables
-        await()
-            .untilAsserted(() -> {
-                // when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.adminGetVariables(
-                    startResponse
-                );
+        await().untilAsserted(() -> {
+            // when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse =
+                processInstanceRestTemplate.adminGetVariables(startResponse);
 
-                // then
-                Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
+            // then
+            Collection<CloudVariableInstance> variableCollection = variablesResponse.getBody().getContent();
 
-                assertThat(variableCollection).isNotEmpty();
-                assertThat(variablesContainEntry("firstName", "Rowlf", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("lastName", "Dog", variableCollection)).isTrue();
-                assertThat(variablesContainEntry("age", 5, variableCollection)).isTrue();
-            });
+            assertThat(variableCollection).isNotEmpty();
+            assertThat(variablesContainEntry("firstName", "Rowlf", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("lastName", "Dog", variableCollection)).isTrue();
+            assertThat(variablesContainEntry("age", 5, variableCollection)).isTrue();
+        });
     }
 
     @Test
@@ -390,19 +381,17 @@ public class ProcessVariablesIT {
 
         setVariables(processInstanceId, isAdmin, variables);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceId
-                );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
-                    .contains(tuple("variableInt", 2), tuple("variableStr", "new value"), tuple("variableBool", false));
-            });
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceId);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                .contains(tuple("variableInt", 2), tuple("variableStr", "new value"), tuple("variableBool", false));
+        });
     }
 
     private void updateDateVariableWithADate(boolean isAdmin, String processInstanceId) {
@@ -415,27 +404,25 @@ public class ProcessVariablesIT {
 
         setVariables(processInstanceId, isAdmin, variables);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceId
-                );
-                assertThat(responseEntity.getBody()).isNotNull();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceId);
+            assertThat(responseEntity.getBody()).isNotNull();
 
-                CloudVariableInstance var = responseEntity
-                    .getBody()
-                    .getContent()
-                    .stream()
-                    .filter(v -> v.getName().equals("variableDate"))
-                    .findAny()
-                    .get();
+            CloudVariableInstance var = responseEntity
+                .getBody()
+                .getContent()
+                .stream()
+                .filter(v -> v.getName().equals("variableDate"))
+                .findAny()
+                .get();
 
-                assertThat(var.getType()).isEqualTo("date");
+            assertThat(var.getType()).isEqualTo("date");
 
-                String dStr = format.format(date);
-                assertThat(dStr).isEqualTo(var.getValue());
-            });
+            String dStr = format.format(date);
+            assertThat(dStr).isEqualTo(var.getValue());
+        });
     }
 
     private void updateDateVariableWithAFormattedString(boolean isAdmin, String processInstanceId) throws Exception {
@@ -447,55 +434,50 @@ public class ProcessVariablesIT {
 
         setVariables(processInstanceId, isAdmin, variables);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceId
-                );
-                assertThat(responseEntity.getBody()).isNotNull();
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceId);
+            assertThat(responseEntity.getBody()).isNotNull();
 
-                CloudVariableInstance variable = responseEntity
-                    .getBody()
-                    .getContent()
-                    .stream()
-                    .filter(var -> var.getName().equals("variableDate"))
-                    .findAny()
-                    .get();
+            CloudVariableInstance variable = responseEntity
+                .getBody()
+                .getContent()
+                .stream()
+                .filter(var -> var.getName().equals("variableDate"))
+                .findAny()
+                .get();
 
-                assertThat(variable.getType()).isEqualTo("date");
-                assertThat(variablesUtil.getExpectedDateTimeFormattedString(date)).isEqualTo(variable.getValue());
-            });
+            assertThat(variable.getType()).isEqualTo("date");
+            assertThat(variablesUtil.getExpectedDateTimeFormattedString(date)).isEqualTo(variable.getValue());
+        });
     }
 
     private void checkProcessVariables(boolean isAdmin) throws Exception {
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
-            ProcessPayloadBuilder
-                .start()
+            ProcessPayloadBuilder.start()
                 .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
                 .withBusinessKey("businessKey")
                 .build()
         );
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
+                .containsOnly(
+                    tuple("variableInt", INTEGER),
+                    tuple("variableStr", STRING),
+                    tuple("variableBool", BOOLEAN),
+                    tuple("variableDateTime", "date"),
+                    tuple("variableDate", "date")
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getType)
-                    .containsOnly(
-                        tuple("variableInt", INTEGER),
-                        tuple("variableStr", STRING),
-                        tuple("variableBool", BOOLEAN),
-                        tuple("variableDateTime", "date"),
-                        tuple("variableDate", "date")
-                    );
-            });
+        });
 
         //when update simple existing variables
         updateSimpleVariables(isAdmin, processInstanceResponseEntity.getBody().getId());
@@ -532,52 +514,46 @@ public class ProcessVariablesIT {
 
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity;
         if (isAdmin) {
-            processInstanceResponseEntity =
-                processInstanceRestTemplate.adminStartProcess(
-                    ProcessPayloadBuilder
-                        .start()
-                        .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
-                        .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
-                        .withBusinessKey("businessKey")
-                        .withVariables(variables)
-                        .build()
-                );
+            processInstanceResponseEntity = processInstanceRestTemplate.adminStartProcess(
+                ProcessPayloadBuilder.start()
+                    .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
+                    .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
+                    .withBusinessKey("businessKey")
+                    .withVariables(variables)
+                    .build()
+            );
         } else {
-            processInstanceResponseEntity =
-                processInstanceRestTemplate.startProcess(
-                    ProcessPayloadBuilder
-                        .start()
-                        .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
-                        .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
-                        .withBusinessKey("businessKey")
-                        .withVariables(variables)
-                        .build()
-                );
+            processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
+                ProcessPayloadBuilder.start()
+                    .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
+                    .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
+                    .withBusinessKey("businessKey")
+                    .withVariables(variables)
+                    .build()
+            );
         }
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = processInstanceRestTemplate.getVariables(
-                    processInstanceResponseEntity
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity =
+                processInstanceRestTemplate.getVariables(processInstanceResponseEntity);
+            //then
+            assertThat(responseEntity.getBody()).isNotNull();
+            assertThat(responseEntity.getBody().getContent())
+                .isNotNull()
+                .extracting(
+                    CloudVariableInstance::getName,
+                    CloudVariableInstance::getType,
+                    CloudVariableInstance::getValue
+                )
+                .contains(
+                    tuple("variableInt", INTEGER, 2),
+                    tuple("variableStr", STRING, "new value"),
+                    tuple("variableBool", BOOLEAN, false),
+                    tuple("variableDateTime", "date", variablesUtil.getExpectedDateTimeFormattedString(date)),
+                    tuple("variableDate", "date", variablesUtil.getExpectedDateFormattedString(date))
                 );
-                //then
-                assertThat(responseEntity.getBody()).isNotNull();
-                assertThat(responseEntity.getBody().getContent())
-                    .isNotNull()
-                    .extracting(
-                        CloudVariableInstance::getName,
-                        CloudVariableInstance::getType,
-                        CloudVariableInstance::getValue
-                    )
-                    .contains(
-                        tuple("variableInt", INTEGER, 2),
-                        tuple("variableStr", STRING, "new value"),
-                        tuple("variableBool", BOOLEAN, false),
-                        tuple("variableDateTime", "date", variablesUtil.getExpectedDateTimeFormattedString(date)),
-                        tuple("variableDate", "date", variablesUtil.getExpectedDateFormattedString(date))
-                    );
-            });
+        });
 
         processInstanceRestTemplate.delete(processInstanceResponseEntity);
     }
@@ -603,32 +579,29 @@ public class ProcessVariablesIT {
 
         ResponseEntity<EntryResponseContent<ActivitiErrorMessageImpl>> responseEntity;
         if (isAdmin) {
-            responseEntity =
-                processInstanceRestTemplate.adminStartProcessWithErrorResponse(
-                    ProcessPayloadBuilder
-                        .start()
-                        .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
-                        .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
-                        .withBusinessKey("businessKey")
-                        .withVariables(variables)
-                        .build()
-                );
+            responseEntity = processInstanceRestTemplate.adminStartProcessWithErrorResponse(
+                ProcessPayloadBuilder.start()
+                    .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
+                    .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
+                    .withBusinessKey("businessKey")
+                    .withVariables(variables)
+                    .build()
+            );
         } else {
-            responseEntity =
-                processInstanceRestTemplate.startProcessWithErrorResponse(
-                    ProcessPayloadBuilder
-                        .start()
-                        .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
-                        .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
-                        .withBusinessKey("businessKey")
-                        .withVariables(variables)
-                        .build()
-                );
+            responseEntity = processInstanceRestTemplate.startProcessWithErrorResponse(
+                ProcessPayloadBuilder.start()
+                    .withProcessDefinitionKey(PROCESS_WITH_EXTENSION_VARIABLES)
+                    .withProcessDefinitionId(processDefinitionIds.get(PROCESS_WITH_EXTENSION_VARIABLES))
+                    .withBusinessKey("businessKey")
+                    .withVariables(variables)
+                    .build()
+            );
         }
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(responseEntity.getBody().getEntry().getMessage())
-            .isEqualTo("Variables fail type validation: variableDate, variableDateTime");
+        assertThat(responseEntity.getBody().getEntry().getMessage()).isEqualTo(
+            "Variables fail type validation: variableDate, variableDateTime"
+        );
     }
 
     @Test
@@ -716,16 +689,14 @@ public class ProcessVariablesIT {
     }
 
     private StartMessagePayload testStartMessagePayload() {
-        return MessagePayloadBuilder
-            .start(START_MESSAGE)
+        return MessagePayloadBuilder.start(START_MESSAGE)
             .withVariables(testProcessVariableValues())
             .withVariable("correlationKey", "12345")
             .build();
     }
 
     private StartProcessPayload testStartProcessPayload() {
-        return ProcessPayloadBuilder
-            .start()
+        return ProcessPayloadBuilder.start()
             .withProcessDefinitionKey(SIMPLE_PROCESS)
             .withVariables(testProcessVariableValues())
             .build();

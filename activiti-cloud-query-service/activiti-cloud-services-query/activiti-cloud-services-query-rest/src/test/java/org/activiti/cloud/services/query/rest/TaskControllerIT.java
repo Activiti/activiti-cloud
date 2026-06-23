@@ -57,8 +57,9 @@ class TaskControllerIT extends AbstractTaskControllerIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Override
     protected String getSearchEndpointHttpGet() {

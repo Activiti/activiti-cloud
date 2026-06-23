@@ -39,37 +39,29 @@ public class CachingExecutionContext extends ExecutionContext {
 
     @Override
     public DeploymentEntity getDeployment() {
-        return Optional
-            .ofNullable(deploymentEntity)
-            .orElseGet(() -> {
-                return (this.deploymentEntity = super.getDeployment());
-            });
+        return Optional.ofNullable(deploymentEntity).orElseGet(() -> {
+            return (this.deploymentEntity = super.getDeployment());
+        });
     }
 
     @Override
     public ExecutionEntity getExecution() {
-        return Optional
-            .ofNullable(execution)
-            .orElseGet(() -> {
-                return (this.execution = super.getExecution());
-            });
+        return Optional.ofNullable(execution).orElseGet(() -> {
+            return (this.execution = super.getExecution());
+        });
     }
 
     @Override
     public ExecutionEntity getProcessInstance() {
-        return Optional
-            .ofNullable(processInstance)
-            .orElseGet(() -> {
-                return (this.processInstance = super.getProcessInstance());
-            });
+        return Optional.ofNullable(processInstance).orElseGet(() -> {
+            return (this.processInstance = super.getProcessInstance());
+        });
     }
 
     @Override
     public ProcessDefinition getProcessDefinition() {
-        return Optional
-            .ofNullable(processDefinition)
-            .orElseGet(() -> {
-                return (this.processDefinition = super.getProcessDefinition());
-            });
+        return Optional.ofNullable(processDefinition).orElseGet(() -> {
+            return (this.processDefinition = super.getProcessDefinition());
+        });
     }
 }

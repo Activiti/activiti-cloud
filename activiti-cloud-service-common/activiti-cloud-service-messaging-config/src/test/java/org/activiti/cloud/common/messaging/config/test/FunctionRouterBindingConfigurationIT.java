@@ -224,8 +224,7 @@ public class FunctionRouterBindingConfigurationIT {
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
                 assertThat(message).isNotNull();
-                Message<?> outMessage = MessageBuilder
-                    .withPayload(message.getPayload())
+                Message<?> outMessage = MessageBuilder.withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
                     .build();
                 channels.auditProducer().send(outMessage);
@@ -326,8 +325,9 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void producerGroups() {
-        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups())
-            .containsOnly("consumer");
+        assertThat(bindingServiceProperties.getProducerProperties("auditProducer").getRequiredGroups()).containsOnly(
+            "consumer"
+        );
     }
 
     @Test
@@ -409,8 +409,8 @@ public class FunctionRouterBindingConfigurationIT {
             bindings
                 .entrySet()
                 .stream()
-                .filter(entry ->
-                    entry.getValue().getConsumer() == null || entry.getValue().getConsumer().isAutoStartup()
+                .filter(
+                    entry -> entry.getValue().getConsumer() == null || entry.getValue().getConsumer().isAutoStartup()
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         )
@@ -430,48 +430,51 @@ public class FunctionRouterBindingConfigurationIT {
         // then
         assertThat(context.getBean(TestBindingsChannels.AUDIT_PRODUCER, MessageChannel.class)).isNotNull();
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_NAME);
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .isEqualTo(Arrays.asList(TestBindingsChannels.AUDIT_PRODUCER));
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).isEqualTo(
+            Arrays.asList(TestBindingsChannels.AUDIT_PRODUCER)
+        );
 
         assertThat(context.getBean(TestBindingsChannels.COMMAND_RESULTS, MessageChannel.class)).isNotNull();
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_COMMAND_SUPPLIER_NAME);
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .isEqualTo(Arrays.asList(TestBindingsChannels.COMMAND_RESULTS));
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).isEqualTo(
+            Arrays.asList(TestBindingsChannels.COMMAND_RESULTS)
+        );
 
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME);
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
-            .isEqualTo(Arrays.asList(AUDIT_PRODUCER_INCIDENTS));
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME)).isEqualTo(
+            Arrays.asList(AUDIT_PRODUCER_INCIDENTS)
+        );
     }
 
     @Test
     void testInputBindingsDefinitions() {
         Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
-        Assertions
-            .assertThat(bindingServiceProperties.getInputBindings())
-            .doesNotContain(FUNCTION_COMMAND_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(
+            FUNCTION_COMMAND_CONSUMER_NAME
+        );
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME))
+        ).isNull();
 
         Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_AUDIT_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME))
+        ).isNull();
 
         Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(FUNCTION_QUERY_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
-            .isNull();
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME))
+        ).isNull();
 
         Assertions.assertThat(context.getBean(INTEGRATION_REQUESTS, MessageChannel.class)).isNotNull();
-        Assertions
-            .assertThat(bindingServiceProperties.getInputBindings())
-            .doesNotContain(FUNCTION_INTEGRATION_REQUESTS_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_INTEGRATION_REQUESTS_NAME)))
-            .isNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).doesNotContain(
+            FUNCTION_INTEGRATION_REQUESTS_NAME
+        );
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_INTEGRATION_REQUESTS_NAME))
+        ).isNull();
     }
 
     @Test
@@ -484,30 +487,40 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void testStreamBindings() {
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.AUDIT_PRODUCER));
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).matches(
+            bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.AUDIT_PRODUCER)
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).matches(
+            bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS)
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(AUDIT_PRODUCER_INCIDENTS));
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_INCIDENTS_NAME)).matches(
+            bindings -> bindings.size() == 1 && bindings.contains(AUDIT_PRODUCER_INCIDENTS)
+        );
     }
 
     @Test
@@ -516,8 +529,7 @@ public class FunctionRouterBindingConfigurationIT {
         TypedPayload expected = new TypedPayload("foo", 42);
         byte[] jsonBytes = new ObjectMapper().writeValueAsBytes(expected);
 
-        Message<byte[]> message = MessageBuilder
-            .withPayload(jsonBytes)
+        Message<byte[]> message = MessageBuilder.withPayload(jsonBytes)
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
             .setHeader(FUNCTION_DESTINATION, "integration-result-typed")
             .build();
@@ -541,8 +553,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void testConsumerBindings() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("Test")
+        Message<String> message = MessageBuilder.withPayload("Test")
             .setHeader("type", "Test Consumer")
             .setHeader(FUNCTION_DESTINATION, "engine-events")
             .build();
@@ -551,21 +562,20 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "engine-events");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(queryMessage.get())
-                    .isNotNull()
-                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-                    .isEqualTo("queryConsumerHandler_registration");
-                assertThat(auditMessage.get())
-                    .isNotNull()
-                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-                    .isEqualTo("auditConsumerHandler_registration");
-                assertThat(engineEventsMessage.get())
-                    .isNotNull()
-                    .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
-                    .isEqualTo("engineEventsConsumerHandler_registration");
-            });
+        await().untilAsserted(() -> {
+            assertThat(queryMessage.get())
+                .isNotNull()
+                .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                .isEqualTo("queryConsumerHandler_registration");
+            assertThat(auditMessage.get())
+                .isNotNull()
+                .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                .isEqualTo("auditConsumerHandler_registration");
+            assertThat(engineEventsMessage.get())
+                .isNotNull()
+                .extracting(msg -> msg.getHeaders().get("spring.cloud.function.definition", String.class))
+                .isEqualTo("engineEventsConsumerHandler_registration");
+        });
 
         assertThat(auditRetries.get()).isEqualTo(4);
     }
@@ -573,8 +583,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void testFunctionBindings() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("Test")
+        Message<String> message = MessageBuilder.withPayload("Test")
             .setHeader("type", "Test Consumer")
             .setHeader(FUNCTION_DESTINATION, "command-consumer")
             .build();
@@ -583,34 +592,31 @@ public class FunctionRouterBindingConfigurationIT {
         channels.commandConsumer().send(message);
 
         // then
-        await()
-            .untilAsserted(() -> {
-                Message<?> outputMessage = output.receive(
-                    1000,
-                    bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
-                );
-                assertThat(outputMessage).isNotNull();
-                assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
-            });
+        await().untilAsserted(() -> {
+            Message<?> outputMessage = output.receive(
+                1000,
+                bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
+            );
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
+        });
 
         // then
-        await()
-            .untilAsserted(() -> {
-                Message<?> outputMessage = output.receive(
-                    1000,
-                    bindingResolver.getBindingDestination(TestBindingsChannels.AUDIT_PRODUCER)
-                );
+        await().untilAsserted(() -> {
+            Message<?> outputMessage = output.receive(
+                1000,
+                bindingResolver.getBindingDestination(TestBindingsChannels.AUDIT_PRODUCER)
+            );
 
-                assertThat(outputMessage).isNotNull();
-                assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
-            });
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+        });
     }
 
     @Test
     void testConnectorBindings() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("run_test();")
+        Message<String> message = MessageBuilder.withPayload("run_test();")
             .setHeader(FUNCTION_DESTINATION, "script.EXECUTE")
             .build();
 
@@ -618,17 +624,15 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "script.EXECUTE");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
-            });
+        await().untilAsserted(() -> {
+            assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+        });
     }
 
     @Test
     void testGetConnectorBindings() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("GET http://localhost:8080")
+        Message<String> message = MessageBuilder.withPayload("GET http://localhost:8080")
             .setHeader(FUNCTION_DESTINATION, "rest.GET")
             .setHeader("connectorType", "rest.GET")
             .build();
@@ -637,18 +641,16 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "rest.GET");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(getPayload.get()).isNotNull().isEqualTo("GET http://localhost:8080");
-                assertThat(postPayload.get()).isNull();
-            });
+        await().untilAsserted(() -> {
+            assertThat(getPayload.get()).isNotNull().isEqualTo("GET http://localhost:8080");
+            assertThat(postPayload.get()).isNull();
+        });
     }
 
     @Test
     void testPostConnectorBindings() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("POST http://localhost:8080")
+        Message<String> message = MessageBuilder.withPayload("POST http://localhost:8080")
             .setHeader(FUNCTION_DESTINATION, "rest.POST")
             .setHeader("connectorType", "rest.POST")
             .build();
@@ -657,18 +659,16 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "rest.GET");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(postPayload.get()).isNotNull().isEqualTo("POST http://localhost:8080");
-                assertThat(getPayload.get()).isNull();
-            });
+        await().untilAsserted(() -> {
+            assertThat(postPayload.get()).isNotNull().isEqualTo("POST http://localhost:8080");
+            assertThat(getPayload.get()).isNull();
+        });
     }
 
     @Test
     void testConnectorBindingsAmqpHeaders() {
         // given
-        Message<String> message = MessageBuilder
-            .withPayload("run_test();")
+        Message<String> message = MessageBuilder.withPayload("run_test();")
             .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, "script.EXECUTE")
             .build();
 
@@ -676,33 +676,27 @@ public class FunctionRouterBindingConfigurationIT {
         input.send(message, "script.EXECUTE");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
-            });
+        await().untilAsserted(() -> {
+            assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+        });
     }
 
     @Test
     void testConnectorBindingsAmqpHeadersWithPrefix() {
-        withRabbitMqPrefix(
-            "myapp.",
-            prefix -> {
-                // given
-                Message<String> message = MessageBuilder
-                    .withPayload("run_test();")
-                    .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, prefix.concat("script.EXECUTE"))
-                    .build();
+        withRabbitMqPrefix("myapp.", prefix -> {
+            // given
+            Message<String> message = MessageBuilder.withPayload("run_test();")
+                .setHeader(AmqpHeaders.RECEIVED_EXCHANGE, prefix.concat("script.EXECUTE"))
+                .build();
 
-                // when
-                input.send(message, "script.EXECUTE");
+            // when
+            input.send(message, "script.EXECUTE");
 
-                // then
-                await()
-                    .untilAsserted(() -> {
-                        assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
-                    });
-            }
-        );
+            // then
+            await().untilAsserted(() -> {
+                assertThat(connectorPayload.get()).isNotNull().isEqualTo("run_test();");
+            });
+        });
     }
 
     @Test
@@ -714,95 +708,87 @@ public class FunctionRouterBindingConfigurationIT {
 
     @Test
     void functionRoutes() {
-        Assertions
-            .assertThat(messagingProperties.getFunctionRouter().getFunctionRoutes())
-            .containsOnly(
-                "commandConsumer",
-                "queryConsumer",
-                "auditConsumer",
-                "integrationRequests",
-                "scriptRuntimeConsumer",
-                "engineEventsConsumer",
-                "restConsumer",
-                "integrationResultTypedConsumer"
-            );
+        Assertions.assertThat(messagingProperties.getFunctionRouter().getFunctionRoutes()).containsOnly(
+            "commandConsumer",
+            "queryConsumer",
+            "auditConsumer",
+            "integrationRequests",
+            "scriptRuntimeConsumer",
+            "engineEventsConsumer",
+            "restConsumer",
+            "integrationResultTypedConsumer"
+        );
     }
 
     @Test
     void functionRouterRegistrations() {
-        Assertions
-            .assertThat(messagingProperties.getFunctionRouter().registrations())
-            .containsOnly(
-                Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
-                Map.entry(
-                    "engine-events",
-                    List.of(
-                        "queryConsumerHandler_registration",
-                        "auditConsumerHandler_registration",
-                        "engineEventsConsumerHandler_registration"
-                    )
-                ),
-                Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
-                Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
-                Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
-                Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
-            );
+        Assertions.assertThat(messagingProperties.getFunctionRouter().registrations()).containsOnly(
+            Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
+            Map.entry(
+                "engine-events",
+                List.of(
+                    "queryConsumerHandler_registration",
+                    "auditConsumerHandler_registration",
+                    "engineEventsConsumerHandler_registration"
+                )
+            ),
+            Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
+            Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
+            Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
+            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
+        );
     }
 
     @Test
     void functionRouterInputRegistrations() {
-        Assertions
-            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_INPUT))
-            .containsOnly(
-                Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
-                Map.entry(
-                    "engine-events",
-                    List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
-                ),
-                Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
-                Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
-                Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
-                Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
-            );
+        Assertions.assertThat(
+            messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_INPUT)
+        ).containsOnly(
+            Map.entry("command-consumer", List.of("commandProcessorHandler_registration")),
+            Map.entry(
+                "engine-events",
+                List.of("queryConsumerHandler_registration", "auditConsumerHandler_registration")
+            ),
+            Map.entry("script.EXECUTE", List.of("scriptRuntimeExecutor_registration")),
+            Map.entry("rest.GET", List.of("restConsumerGetHandler_registration")),
+            Map.entry("rest.POST", List.of("restConsumerPostHandler_registration")),
+            Map.entry("integration-result-typed", List.of("integrationResultTypedConsumerHandler_registration"))
+        );
     }
 
     @Test
     void functionRouterInputDestinations() {
-        Assertions
-            .assertThat(bindingServiceProperties.getBindingDestination(FUNCTION_ROUTER_INPUT))
-            .satisfies(destination ->
-                assertThat(destination.split(","))
-                    .containsOnlyOnce(
-                        "command-consumer",
-                        "script.EXECUTE",
-                        "engine-events",
-                        "integration-requests",
-                        "integration-result-typed"
-                    )
-            );
+        Assertions.assertThat(bindingServiceProperties.getBindingDestination(FUNCTION_ROUTER_INPUT)).satisfies(
+            destination ->
+                assertThat(destination.split(",")).containsOnlyOnce(
+                    "command-consumer",
+                    "script.EXECUTE",
+                    "engine-events",
+                    "integration-requests",
+                    "integration-result-typed"
+                )
+        );
     }
 
     @Test
     void functionRouterAnonymousInputRegistrations() {
-        Assertions
-            .assertThat(messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_ANONYMOUS_INPUT))
-            .containsOnly(Map.entry("engine-events", List.of("engineEventsConsumerHandler_registration")));
+        Assertions.assertThat(
+            messagingProperties.getFunctionRouter().registrations(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+        ).containsOnly(Map.entry("engine-events", List.of("engineEventsConsumerHandler_registration")));
     }
 
     @Test
     void functionRouterDestinations() {
-        Assertions
-            .assertThat(messagingProperties.getFunctionRouter().destinations())
-            .containsOnly(
-                Map.entry("auditConsumer", "engine-events"),
-                Map.entry("commandConsumer", "command-consumer"),
-                Map.entry("integrationRequests", "integration-requests"),
-                Map.entry("queryConsumer", "engine-events"),
-                Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
-                Map.entry("engineEventsConsumer", "engine-events"),
-                Map.entry("restConsumer", "rest.GET,rest.POST"),
-                Map.entry("integrationResultTypedConsumer", "integration-result-typed")
-            );
+        Assertions.assertThat(messagingProperties.getFunctionRouter().destinations()).containsOnly(
+            Map.entry("auditConsumer", "engine-events"),
+            Map.entry("commandConsumer", "command-consumer"),
+            Map.entry("integrationRequests", "integration-requests"),
+            Map.entry("queryConsumer", "engine-events"),
+            Map.entry("scriptRuntimeConsumer", "script.EXECUTE"),
+            Map.entry("engineEventsConsumer", "engine-events"),
+            Map.entry("restConsumer", "rest.GET,rest.POST"),
+            Map.entry("integrationResultTypedConsumer", "integration-result-typed")
+        );
     }
 
     @Test
@@ -825,55 +811,48 @@ public class FunctionRouterBindingConfigurationIT {
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.durable-subscription",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.exclusive",
                 Boolean.class
             )
-        )
-            .isFalse();
+        ).isFalse();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.durable-subscription",
                 Boolean.class
             )
-        )
-            .isFalse();
+        ).isFalse();
 
         assertThat(
             environment.getProperty(
                 "spring.cloud.stream.rabbit.bindings.functionRouterAnonymousInput.consumer.exclusive",
                 Boolean.class
             )
-        )
-            .isFalse();
+        ).isFalse();
     }
 
     @Test
     void functionExecutorSelectorShouldExecuteFunctionInTheNamedThread() {
         //given
-        final Message<String> message = MessageBuilder
-            .withPayload("foo")
+        final Message<String> message = MessageBuilder.withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
             .build();
 
@@ -885,10 +864,9 @@ public class FunctionRouterBindingConfigurationIT {
         functionExecutor.submit(() -> threadHolder.set(Thread.currentThread()));
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).isEqualTo("foo_registration");
-            });
+        await().untilAsserted(() -> {
+            assertThat(threadHolder.get()).isNotNull().extracting(Thread::getName).isEqualTo("foo_registration");
+        });
     }
 
     @Test
@@ -898,8 +876,7 @@ public class FunctionRouterBindingConfigurationIT {
         final List<Integer> executionOrder = new LinkedList<>();
 
         //when
-        final var executions = IntStream
-            .range(0, 100)
+        final var executions = IntStream.range(0, 100)
             .mapToObj(i -> MessageBuilder.withPayload(i).setHeader(FUNCTION_DEFINITION, "foo_registration").build())
             .map(m ->
                 CompletableFuture.runAsync(
@@ -922,8 +899,7 @@ public class FunctionRouterBindingConfigurationIT {
     @Test
     void functionExecutorShouldAwaitTerminatingTasksOnDestroy() throws InterruptedException, ExecutionException {
         //given
-        final Message<String> message = MessageBuilder
-            .withPayload("foo")
+        final Message<String> message = MessageBuilder.withPayload("foo")
             .setHeader(FUNCTION_DEFINITION, "foo_registration")
             .build();
 

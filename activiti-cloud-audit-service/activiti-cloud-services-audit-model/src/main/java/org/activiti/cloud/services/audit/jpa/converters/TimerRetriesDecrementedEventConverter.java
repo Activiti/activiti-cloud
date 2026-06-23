@@ -41,7 +41,8 @@ public class TimerRetriesDecrementedEventConverter extends BaseEventToEntityConv
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        TimerRetriesDecrementedAuditEventEntity timerEventEntity = (TimerRetriesDecrementedAuditEventEntity) auditEventEntity;
+        TimerRetriesDecrementedAuditEventEntity timerEventEntity =
+            (TimerRetriesDecrementedAuditEventEntity) auditEventEntity;
 
         return new CloudBPMNTimerRetriesDecrementedEventImpl(
             timerEventEntity.getEventId(),

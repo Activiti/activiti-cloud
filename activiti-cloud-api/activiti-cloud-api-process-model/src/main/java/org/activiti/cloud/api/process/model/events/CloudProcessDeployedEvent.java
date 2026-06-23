@@ -22,4 +22,5 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public interface CloudProcessDeployedEvent
     extends
-        CloudRuntimeEvent<ProcessDefinition, ProcessDefinitionEvent.ProcessDefinitionEvents>, ProcessDeployedEvent {}
+        CloudRuntimeEvent<ProcessDefinition, ProcessDefinitionEvent.ProcessDefinitionEvents>,
+        ProcessDeployedEvent {}

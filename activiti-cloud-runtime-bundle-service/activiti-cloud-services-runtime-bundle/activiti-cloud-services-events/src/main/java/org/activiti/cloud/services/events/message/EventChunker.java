@@ -71,9 +71,8 @@ public class EventChunker {
         List<CloudRuntimeEventImpl<?, ?>> currentChunk
     ) {
         return (
-            currentChunkSize +
-            eventSizeInBytes >
-            this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener() &&
+            currentChunkSize + eventSizeInBytes >
+                this.runtimeBundleProperties.getEventsProperties().getChunkSizeInBytesCloseListener() &&
             !currentChunk.isEmpty()
         );
     }

@@ -111,7 +111,9 @@ public class InclusiveGatewayAuditProducerIT {
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<
+            PagedModel<CloudProcessDefinition>
+        >() {};
 
         return restTemplate.exchange(PROCESS_DEFINITIONS_URL, HttpMethod.GET, null, responseType);
     }
@@ -163,35 +165,34 @@ public class InclusiveGatewayAuditProducerIT {
         assertThat(task1).isNotNull();
         assertThat(task2).isNotNull();
 
-        await()
-            .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getEntityId
-                    )
-                    .contains(
-                        tuple(TASK_COMPLETED, processInstanceId, taskId),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "task0"),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow2"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGateway"),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "inclusiveGateway"),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow3"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "theTask1"),
-                        tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
-                        tuple(TASK_CREATED, processInstanceId, task1.getId()),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow4"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "theTask2"),
-                        tuple(VARIABLE_CREATED, processInstanceId, "input"),
-                        tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
-                        tuple(TASK_CREATED, processInstanceId, task2.getId())
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId
+                )
+                .contains(
+                    tuple(TASK_COMPLETED, processInstanceId, taskId),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "task0"),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow2"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGateway"),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "inclusiveGateway"),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow3"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "theTask1"),
+                    tuple(VARIABLE_CREATED, processInstanceId, "input"),
+                    tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
+                    tuple(TASK_CREATED, processInstanceId, task1.getId()),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow4"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "theTask2"),
+                    tuple(VARIABLE_CREATED, processInstanceId, "input"),
+                    tuple(TASK_CANDIDATE_USER_ADDED, processInstanceId, "hruser"),
+                    tuple(TASK_CREATED, processInstanceId, task2.getId())
+                );
+        });
 
         streamHandler.getAllReceivedEvents().clear();
 
@@ -205,26 +206,25 @@ public class InclusiveGatewayAuditProducerIT {
         assertThat(completeTask.getBody().getStatus()).isEqualTo(TaskStatus.COMPLETED);
 
         //then - first task should be completed, second should be available
-        await()
-            .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getEntityId
-                    )
-                    .contains(
-                        tuple(TASK_ASSIGNED, processInstanceId, task1.getId()),
-                        tuple(TASK_UPDATED, processInstanceId, task1.getId()),
-                        tuple(TASK_COMPLETED, processInstanceId, task1.getId()),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "theTask1"),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow6"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGatewayEnd")
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId
+                )
+                .contains(
+                    tuple(TASK_ASSIGNED, processInstanceId, task1.getId()),
+                    tuple(TASK_UPDATED, processInstanceId, task1.getId()),
+                    tuple(TASK_COMPLETED, processInstanceId, task1.getId()),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "theTask1"),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow6"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGatewayEnd")
+                );
+        });
 
         tasks = processInstanceRestTemplate.getTasks(processInstance).getBody().getContent().iterator();
         assertThat(tasks).toIterable().hasSize(1);
@@ -241,30 +241,29 @@ public class InclusiveGatewayAuditProducerIT {
         assertThat(completeTask.getBody().getStatus()).isEqualTo(TaskStatus.COMPLETED);
 
         //then - second task should be completed, process should be completed
-        await()
-            .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getEntityId
-                    )
-                    .contains(
-                        tuple(TASK_ASSIGNED, processInstanceId, task2.getId()),
-                        tuple(TASK_UPDATED, processInstanceId, task2.getId()),
-                        tuple(TASK_COMPLETED, processInstanceId, task2.getId()),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "theTask2"),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow7"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGatewayEnd"),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "inclusiveGatewayEnd"),
-                        tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow9"),
-                        tuple(ACTIVITY_STARTED, processInstanceId, "theEnd"),
-                        tuple(ACTIVITY_COMPLETED, processInstanceId, "theEnd"),
-                        tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
-                    );
-            });
+            assertThat(receivedEvents)
+                .extracting(
+                    CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId
+                )
+                .contains(
+                    tuple(TASK_ASSIGNED, processInstanceId, task2.getId()),
+                    tuple(TASK_UPDATED, processInstanceId, task2.getId()),
+                    tuple(TASK_COMPLETED, processInstanceId, task2.getId()),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "theTask2"),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow7"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "inclusiveGatewayEnd"),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "inclusiveGatewayEnd"),
+                    tuple(SEQUENCE_FLOW_TAKEN, processInstanceId, "flow9"),
+                    tuple(ACTIVITY_STARTED, processInstanceId, "theEnd"),
+                    tuple(ACTIVITY_COMPLETED, processInstanceId, "theEnd"),
+                    tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
+                );
+        });
     }
 }

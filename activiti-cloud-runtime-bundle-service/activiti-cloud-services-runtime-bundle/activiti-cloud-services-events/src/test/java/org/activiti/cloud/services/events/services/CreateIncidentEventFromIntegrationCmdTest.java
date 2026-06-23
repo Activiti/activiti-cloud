@@ -76,9 +76,8 @@ class CreateIncidentEventFromIntegrationCmdTest {
     };
 
     @Spy
-    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory = new ExecutionContextIncidentEventMessageBuilderFactory(
-        properties
-    );
+    private ExecutionContextIncidentEventMessageBuilderFactory messageBuilderChainIncidentFactory =
+        new ExecutionContextIncidentEventMessageBuilderFactory(properties);
 
     private IllegalArgumentException testException = new IllegalArgumentException("Test exception");
 
@@ -92,16 +91,15 @@ class CreateIncidentEventFromIntegrationCmdTest {
     void setUp() {
         var integrationContext = mock(IntegrationContext.class);
 
-        this.createIncidentEventFromIntegrationCmd =
-            spy(
-                new CreateIncidentEventFromIntegrationCmd(
-                    integrationContext,
-                    this.testException,
-                    this.runtimeService,
-                    this.messageBuilderChainIncidentFactory,
-                    this.runtimeBundleInfoAppender
-                )
-            );
+        this.createIncidentEventFromIntegrationCmd = spy(
+            new CreateIncidentEventFromIntegrationCmd(
+                integrationContext,
+                this.testException,
+                this.runtimeService,
+                this.messageBuilderChainIncidentFactory,
+                this.runtimeBundleInfoAppender
+            )
+        );
     }
 
     @Test
@@ -109,16 +107,15 @@ class CreateIncidentEventFromIntegrationCmdTest {
         var integrationContext = mock(IntegrationContext.class);
         when(integrationContext.getExecutionId()).thenReturn(EXECUTION_ID);
 
-        this.createIncidentEventFromIntegrationCmd =
-            spy(
-                new CreateIncidentEventFromIntegrationCmd(
-                    integrationContext,
-                    this.testException,
-                    this.runtimeService,
-                    this.messageBuilderChainIncidentFactory,
-                    this.runtimeBundleInfoAppender
-                )
-            );
+        this.createIncidentEventFromIntegrationCmd = spy(
+            new CreateIncidentEventFromIntegrationCmd(
+                integrationContext,
+                this.testException,
+                this.runtimeService,
+                this.messageBuilderChainIncidentFactory,
+                this.runtimeBundleInfoAppender
+            )
+        );
 
         var executionEntity = mockExecutionEntity();
         mockExecutionQuery(executionEntity);
@@ -128,23 +125,29 @@ class CreateIncidentEventFromIntegrationCmdTest {
 
         this.createIncidentEventFromIntegrationCmd.execute(null);
 
-        verify(this.createIncidentEventFromIntegrationCmd)
-            .createMessage(this.executionContextArgumentCaptor.capture(), this.exceptionCaptor.capture());
+        verify(this.createIncidentEventFromIntegrationCmd).createMessage(
+            this.executionContextArgumentCaptor.capture(),
+            this.exceptionCaptor.capture()
+        );
 
         assertThat(this.exceptionCaptor.getValue()).isEqualTo(testException);
         var executionContext = this.executionContextArgumentCaptor.getValue();
-        assertThat(executionContext.getExecution().getProcessInstanceId())
-            .isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
-        assertThat(executionContext.getExecution().getProcessDefinitionId())
-            .isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
+        assertThat(executionContext.getExecution().getProcessInstanceId()).isEqualTo(
+            TestUtils.MOCK_PROCESS_INSTANCE_ID
+        );
+        assertThat(executionContext.getExecution().getProcessDefinitionId()).isEqualTo(
+            TestUtils.MOCK_PROCESS_DEFINITION_ID
+        );
     }
 
     @Test
     void shouldCreateIncidentEventFromIntegration() {
         var executionContext = TestUtils.mockExecutionContext();
 
-        Message<ArrayList<Object>> message =
-            this.createIncidentEventFromIntegrationCmd.createMessage(executionContext, this.testException);
+        Message<ArrayList<Object>> message = this.createIncidentEventFromIntegrationCmd.createMessage(
+            executionContext,
+            this.testException
+        );
 
         var payload = (List) message.getPayload();
         assertThat(payload).hasSize(1);
@@ -164,19 +167,20 @@ class CreateIncidentEventFromIntegrationCmdTest {
         assertThat(incident.getProcessInstanceId()).isEqualTo(TestUtils.MOCK_PROCESS_INSTANCE_ID);
         assertThat(incident.getProcessDefinitionId()).isEqualTo(TestUtils.MOCK_PROCESS_DEFINITION_ID);
 
-        assertThat(message.getHeaders())
-            .contains(
-                entry("routingKey", "engineEvents.springAppName.appName"),
-                entry("messagePayloadType", "java.util.ArrayList")
-            );
+        assertThat(message.getHeaders()).contains(
+            entry("routingKey", "engineEvents.springAppName.appName"),
+            entry("messagePayloadType", "java.util.ArrayList")
+        );
     }
 
     @Test
     void shouldDefaultSeverityToError() {
         var executionContext = TestUtils.mockExecutionContext();
 
-        Message<ArrayList<Object>> message =
-            this.createIncidentEventFromIntegrationCmd.createMessage(executionContext, this.testException);
+        Message<ArrayList<Object>> message = this.createIncidentEventFromIntegrationCmd.createMessage(
+            executionContext,
+            this.testException
+        );
 
         var incident = (CloudIncidentCreatedEventImpl) ((List) message.getPayload()).get(0);
         assertThat(incident.getSeverity()).isEqualTo(IncidentSeverity.ERROR);

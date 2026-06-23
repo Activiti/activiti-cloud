@@ -66,9 +66,8 @@ public class AlfrescoWebAutoConfigurationTest {
         //given
 
         //when
-        TypeConstrainedJacksonJsonHttpMessageConverter halConverter = new TypeConstrainedJacksonJsonHttpMessageConverter(
-            EntityModel.class
-        );
+        TypeConstrainedJacksonJsonHttpMessageConverter halConverter =
+            new TypeConstrainedJacksonJsonHttpMessageConverter(EntityModel.class);
         halConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
         configurer.extendMessageConverters(Collections.singletonList(halConverter));
 

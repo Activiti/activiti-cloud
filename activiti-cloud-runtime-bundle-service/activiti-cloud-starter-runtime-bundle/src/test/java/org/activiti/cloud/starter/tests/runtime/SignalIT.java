@@ -86,7 +86,8 @@ public class SignalIT {
 
     @BeforeEach
     public void setUp() {
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
@@ -103,21 +104,19 @@ public class SignalIT {
             "broadcastSignalEventProcess"
         );
 
-        await("Broadcast Signals")
-            .untilAsserted(() -> {
-                List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
-                    .createProcessInstanceQuery()
-                    .processInstanceId(catchEventProcessInstance.getId())
-                    .list();
-                assertThat(processInstances).isEmpty();
+        await("Broadcast Signals").untilAsserted(() -> {
+            List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
+                .createProcessInstanceQuery()
+                .processInstanceId(catchEventProcessInstance.getId())
+                .list();
+            assertThat(processInstances).isEmpty();
 
-                processInstances =
-                    runtimeService
-                        .createProcessInstanceQuery()
-                        .processInstanceId(signalEventProcessInstance.getId())
-                        .list();
-                assertThat(processInstances).isEmpty();
-            });
+            processInstances = runtimeService
+                .createProcessInstanceQuery()
+                .processInstanceId(signalEventProcessInstance.getId())
+                .list();
+            assertThat(processInstances).isEmpty();
+        });
     }
 
     @Test
@@ -139,14 +138,13 @@ public class SignalIT {
         SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal().withName("Test").build();
         signalRestTemplate.signal(signalProcessInstancesCmd);
 
-        await("Broadcast Signals")
-            .untilAsserted(() -> {
-                List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
-                    .createProcessInstanceQuery()
-                    .processInstanceId(processInstance.getId())
-                    .list();
-                assertThat(processInstances).isEmpty();
-            });
+        await("Broadcast Signals").untilAsserted(() -> {
+            List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
+                .createProcessInstanceQuery()
+                .processInstanceId(processInstance.getId())
+                .list();
+            assertThat(processInstances).isEmpty();
+        });
 
         //then
         List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
@@ -167,14 +165,13 @@ public class SignalIT {
             Collections.singletonMap("myVar", "myContent")
         );
 
-        await("Broadcast Signals")
-            .untilAsserted(() -> {
-                org.activiti.engine.task.Task task = taskService
-                    .createTaskQuery()
-                    .processInstanceId(procInst1.getId())
-                    .singleResult();
-                assertThat(task.getTaskDefinitionKey()).isEqualTo("usertask1");
-            });
+        await("Broadcast Signals").untilAsserted(() -> {
+            org.activiti.engine.task.Task task = taskService
+                .createTaskQuery()
+                .processInstanceId(procInst1.getId())
+                .singleResult();
+            assertThat(task.getTaskDefinitionKey()).isEqualTo("usertask1");
+        });
 
         //then
         assertThat(runtimeService.getVariables(procInst1.getId()).get("myVar")).isEqualTo("myContent");
@@ -192,14 +189,13 @@ public class SignalIT {
         assertThat(procInst1).isNotNull();
         assertThat(procInst2).isNotNull();
 
-        await("Broadcast Signals")
-            .untilAsserted(() -> {
-                List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
-                    .createProcessInstanceQuery()
-                    .processInstanceId(procInst1.getId())
-                    .list();
-                assertThat(processInstances).isEmpty();
-            });
+        await("Broadcast Signals").untilAsserted(() -> {
+            List<org.activiti.engine.runtime.ProcessInstance> processInstances = runtimeService
+                .createProcessInstanceQuery()
+                .processInstanceId(procInst1.getId())
+                .list();
+            assertThat(processInstances).isEmpty();
+        });
 
         //then
         List<org.activiti.engine.runtime.ProcessInstance> processInstances1 = runtimeService
@@ -217,15 +213,14 @@ public class SignalIT {
         assertThat(procInst3).isNotNull();
         assertThat(procInst4).isNotNull();
 
-        await("Broadcast Signals")
-            .untilAsserted(() -> {
-                String taskName = taskService
-                    .createTaskQuery()
-                    .processInstanceId(procInst3.getId())
-                    .singleResult()
-                    .getName();
-                assertThat(taskName).isEqualTo("Boundary target");
-            });
+        await("Broadcast Signals").untilAsserted(() -> {
+            String taskName = taskService
+                .createTaskQuery()
+                .processInstanceId(procInst3.getId())
+                .singleResult()
+                .getName();
+            assertThat(taskName).isEqualTo("Boundary target");
+        });
 
         //then
         String taskName = taskService.createTaskQuery().processInstanceId(procInst3.getId()).singleResult().getName();
@@ -254,8 +249,7 @@ public class SignalIT {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIGNAL_PROCESS)
         );
-        SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder
-            .signal()
+        SignalPayload signalProcessInstancesCmd = ProcessPayloadBuilder.signal()
             .withName("go")
             .withVariables(Collections.singletonMap("myVar", "myContent"))
             .build();
@@ -267,16 +261,14 @@ public class SignalIT {
         ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(
-                    startProcessEntity
-                );
-                Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
-                VariableInstance variable = variableCollection.iterator().next();
-                assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
-                assertThat(variable.<Object>getValue()).isEqualTo("myContent");
-            });
+        await().untilAsserted(() -> {
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity =
+                processInstanceRestTemplate.getVariables(startProcessEntity);
+            Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
+            VariableInstance variable = variableCollection.iterator().next();
+            assertThat(variable.getName()).isEqualToIgnoringCase("myVar");
+            assertThat(variable.<Object>getValue()).isEqualTo("myContent");
+        });
     }
 
     @Test
@@ -285,8 +277,7 @@ public class SignalIT {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIGNAL_PROCESS)
         );
-        SignalPayload signalPayload = ProcessPayloadBuilder
-            .signal()
+        SignalPayload signalPayload = ProcessPayloadBuilder.signal()
             .withName("go")
             .withVariables(Collections.singletonMap("numbertest", null))
             .build();
@@ -298,19 +289,17 @@ public class SignalIT {
         ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
         assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
 
-        await()
-            .untilAsserted(() -> {
-                ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity = processInstanceRestTemplate.getVariables(
-                    startProcessEntity
-                );
-                Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
-                Optional<CloudVariableInstance> nullVar = variableCollection
-                    .stream()
-                    .filter(v -> v.getName().equals("numbertest"))
-                    .findFirst();
-                assertThat(nullVar).isPresent();
-                Object value = nullVar.get().getValue();
-                assertThat(value).isNull();
-            });
+        await().untilAsserted(() -> {
+            ResponseEntity<CollectionModel<CloudVariableInstance>> variablesEntity =
+                processInstanceRestTemplate.getVariables(startProcessEntity);
+            Collection<CloudVariableInstance> variableCollection = variablesEntity.getBody().getContent();
+            Optional<CloudVariableInstance> nullVar = variableCollection
+                .stream()
+                .filter(v -> v.getName().equals("numbertest"))
+                .findFirst();
+            assertThat(nullVar).isPresent();
+            Object value = nullVar.get().getValue();
+            assertThat(value).isNull();
+        });
     }
 }

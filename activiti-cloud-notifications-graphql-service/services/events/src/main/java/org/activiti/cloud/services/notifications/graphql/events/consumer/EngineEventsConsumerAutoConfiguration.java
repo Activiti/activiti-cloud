@@ -118,8 +118,7 @@ public class EngineEventsConsumerAutoConfiguration {
             EngineEventsConsumerMessageHandler engineEventsMessageHandler,
             MessageChannel engineEventsPublisherInput
         ) {
-            return IntegrationFlow
-                .from(engineEventsPublisherInput)
+            return IntegrationFlow.from(engineEventsPublisherInput)
                 .log(LoggingHandler.Level.DEBUG)
                 .gateway(
                     gatewayFlow -> gatewayFlow.transform(engineEventsMessageHandler),
@@ -134,8 +133,7 @@ public class EngineEventsConsumerAutoConfiguration {
             Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
             Scheduler engineEventsScheduler
         ) {
-            return Flux
-                .from(engineEventsPublisher)
+            return Flux.from(engineEventsPublisher)
                 .doOnError(error -> logger.error("Error while publishing engine events: {}", error.getMessage(), error))
                 .onErrorResume(e -> Mono.empty())
                 .publish()

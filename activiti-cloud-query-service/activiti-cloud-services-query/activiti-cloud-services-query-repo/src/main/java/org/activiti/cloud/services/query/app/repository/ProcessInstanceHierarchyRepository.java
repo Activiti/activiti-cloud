@@ -24,7 +24,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ProcessInstanceHierarchyRepository
-    extends JpaRepository<ProcessInstanceHierarchyEntity, ProcessInstanceHierarchyId> {
+    extends JpaRepository<ProcessInstanceHierarchyEntity, ProcessInstanceHierarchyId>
+{
     List<ProcessInstanceHierarchyEntity> findByDescendantId(String descendantId);
 
     List<ProcessInstanceHierarchyEntity> findByAncestorIdInAndDepthGreaterThan(
@@ -34,9 +35,9 @@ public interface ProcessInstanceHierarchyRepository
 
     @Query(
         "select h.ancestorId as ancestorId, h.relationType as relationType, count(h) as relatedCount " +
-        "from ProcessInstanceHierarchy h " +
-        "where h.ancestorId in :ancestorIds and h.depth > 0 " +
-        "group by h.ancestorId, h.relationType"
+            "from ProcessInstanceHierarchy h " +
+            "where h.ancestorId in :ancestorIds and h.depth > 0 " +
+            "group by h.ancestorId, h.relationType"
     )
     List<RelatedProcessCountProjection> countRelatedByAncestor(@Param("ancestorIds") Collection<String> ancestorIds);
 

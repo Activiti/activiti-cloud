@@ -121,40 +121,39 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Test
     void activitiGraphQlJPASchemaProperties() {
-        assertThat(activitiGraphQlJPASchemaProperties.getEntities())
-            .containsOnly(
-                ProcessInstanceEntity.class,
-                TaskEntity.class,
-                ProcessDefinitionEntity.class,
-                ProcessVariableEntity.class,
-                TaskVariableEntity.class,
-                ServiceTaskEntity.class,
-                ProcessModelEntity.class,
-                ApplicationEntity.class
-            );
+        assertThat(activitiGraphQlJPASchemaProperties.getEntities()).containsOnly(
+            ProcessInstanceEntity.class,
+            TaskEntity.class,
+            ProcessDefinitionEntity.class,
+            ProcessVariableEntity.class,
+            TaskVariableEntity.class,
+            ServiceTaskEntity.class,
+            ProcessModelEntity.class,
+            ApplicationEntity.class
+        );
         assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().isEnabled()).isTrue();
         assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().getRolePrefix()).isEqualTo("ROLE_");
-        assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().getUnrestrictedRoles())
-            .containsOnly("ACTIVITI_ADMIN", "APPLICATION_MANAGER");
+        assertThat(activitiGraphQlJPASchemaProperties.getRestrictedKeysProvider().getUnrestrictedRoles()).containsOnly(
+            "ACTIVITI_ADMIN",
+            "APPLICATION_MANAGER"
+        );
         assertThat(activitiGraphQlJPASchemaProperties.getAggregate().isEnabled()).isTrue();
         assertThat(activitiGraphQlJPASchemaProperties.getFieldsVisibility().isEnabled()).isTrue();
-        assertThat(activitiGraphQlJPASchemaProperties.getFieldsVisibility().getPatterns().toString())
-            .isEqualTo(
-                "{" +
+        assertThat(activitiGraphQlJPASchemaProperties.getFieldsVisibility().getPatterns().toString()).isEqualTo(
+            "{" +
                 "ACTIVITI_MODELER=[JPA.(ProcessModel|ProcessModels)], " +
                 "APPLICATION_MANAGER=[.*], " +
                 "ACTIVITI_USER=[JPA.(Task|Tasks|ProcessInstance|ProcessInstances|ProcessDefinition|ProcessDefinitions|ProcessVariable|ProcessVariables|TaskVariable|TaskVariables)], " +
                 "ACTIVITI_ADMIN=[.*]" +
                 "}"
-            );
+        );
     }
 
     @Test
     @WithMockUser(roles = "ACTIVITI_USER")
     public void testGraphqlFieldVisibilityForActivitiUser() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -196,8 +195,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser(roles = "ACTIVITI_MODELER")
     public void testGraphqlFieldVisibilityForModelerUser() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -247,8 +245,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser(roles = { "ACTIVITI_MODELER", "ACTIVITI_USER" })
     public void testGraphqlFieldVisibilityForCompositeRolesUser() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -288,8 +285,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithAnonymousUser
     public void testGraphqlFieldVisibilityAnonymous() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -340,8 +336,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @Test
     public void testGraphqlFieldVisibilityUnauthenticated() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -373,8 +368,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser
     public void testGraphqlFieldVisibilityEmptyRoles() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -426,8 +420,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser(roles = "FOO")
     public void testGraphqlFieldVisibilityNoMatchingRoles() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -479,8 +472,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser(roles = { "ACTIVITI_ADMIN", "ACTIVITI_USER" })
     public void testGraphqlFieldVisibilityAdmin() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -512,8 +504,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
     @WithMockUser(roles = { "APPLICATION_MANAGER", "ACTIVITI_USER" })
     public void testGraphqlFieldVisibilityManager() {
         //given
-        String query =
-            """
+        String query = """
             {
                 Task(id: "1") { id }
                 Tasks { select { id } }
@@ -559,8 +550,9 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .hasSize(1);
 
         //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance").getArgument("id").getType())
-            .isEqualTo(Scalars.GraphQLString);
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance").getArgument("id").getType()).isEqualTo(
+            Scalars.GraphQLString
+        );
 
         //then
         assertThat(schema.getQueryType().getFieldDefinition("ProcessInstance").getArguments())
@@ -568,8 +560,9 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             .hasSize(1);
 
         //then
-        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable").getArgument("id").getType())
-            .isEqualTo(ExtendedScalars.GraphQLLong);
+        assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable").getArgument("id").getType()).isEqualTo(
+            ExtendedScalars.GraphQLLong
+        );
 
         //then
         assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable").getArguments())

@@ -56,8 +56,9 @@ class ProcessInstanceAdminControllerHelperIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Autowired
     ProcessInstanceAdminControllerHelper processInstanceAdminControllerHelper;
@@ -119,11 +120,11 @@ class ProcessInstanceAdminControllerHelperIT {
         );
 
         assertThat(returnedParentProcessInstance).isNotNull();
-        assertThat(returnedParentProcessInstance.getSubprocesses())
-            .anyMatch(subprocess ->
+        assertThat(returnedParentProcessInstance.getSubprocesses()).anyMatch(
+            subprocess ->
                 subprocess.getId().equals(subprocessInstance.getId()) &&
                 subprocess.getProcessDefinitionName().equals(subprocessInstance.getProcessDefinitionName())
-            );
+        );
     }
 
     @Test
@@ -137,11 +138,12 @@ class ProcessInstanceAdminControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = getPageableSortedByLastModifiedDescending(pageSize);
 
-        Page<ProcessInstanceEntity> result = processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
-            predicate,
-            variableKeys,
-            pageable
-        );
+        Page<ProcessInstanceEntity> result =
+            processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
+                predicate,
+                variableKeys,
+                pageable
+            );
 
         assertThat(result.getContent()).contains(processInstanceEntity);
     }
@@ -163,8 +165,7 @@ class ProcessInstanceAdminControllerHelperIT {
                 .getSubprocesses()
                 .stream()
                 .anyMatch(subprocess -> subprocess.getId().equals(subprocessInstance.getId()))
-        )
-            .isTrue();
+        ).isTrue();
     }
 
     private ProcessInstanceEntity buildSubprocessInstance(ProcessInstanceEntity parentProcessInstance) {

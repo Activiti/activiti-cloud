@@ -41,7 +41,8 @@ public class ActivityCompletedEventConverter extends BaseEventToEntityConverter 
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
-        ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity = (ActivityCompletedAuditEventEntity) auditEventEntity;
+        ActivityCompletedAuditEventEntity activityCompletedAuditEventEntity =
+            (ActivityCompletedAuditEventEntity) auditEventEntity;
 
         return new CloudBPMNActivityCompletedEventImpl(
             activityCompletedAuditEventEntity.getEventId(),

@@ -45,25 +45,24 @@ public class TestProcessVariablesSimulation extends Simulation {
         .header("Content-Type", "application/json")
         .check(status().is(200));
 
-    ChainBuilder processVariables = repeat(pages, "i")
-        .on(
-            exec(
-                http("query(ProcessInstances.variables(${i}))")
-                    .post("/graphql")
-                    .body(
-                        StringBody(
-                            """
+    ChainBuilder processVariables = repeat(pages, "i").on(
+        exec(
+            http("query(ProcessInstances.variables(${i}))")
+                .post("/graphql")
+                .body(
+                    StringBody(
+                        """
                           {
                             "query": "{ ProcessInstances(where: {businessKey: {EQ: \\"232951752337576\\"}}) { select { businessKey variables(where: {name: {EQ: \\"applicationDate\\"}}) { name value }}}}"
                           }
                         """
-                        )
                     )
-                    .check(jsonPath("$..errors").notExists())
-                    .check(jsonPath("$..data.ProcessInstances.select[0].variables[0].name").exists())
-                    .check(bodyString().saveAs("response"))
-            )
-        );
+                )
+                .check(jsonPath("$..errors").notExists())
+                .check(jsonPath("$..data.ProcessInstances.select[0].variables[0].name").exists())
+                .check(bodyString().saveAs("response"))
+        )
+    );
 
     ScenarioBuilder scn = scenario("Query Process Variables").exec(processVariables);
 

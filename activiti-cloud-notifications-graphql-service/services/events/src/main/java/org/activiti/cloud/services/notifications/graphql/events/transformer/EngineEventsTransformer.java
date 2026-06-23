@@ -35,7 +35,11 @@ public class EngineEventsTransformer implements Transformer {
 
     @Override
     public List<EngineEvent> transform(List<Map<String, Object>> events) {
-        return events.stream().filter(this::isValid).map(it -> new EngineEvent(it)).collect(Collectors.toList());
+        return events
+            .stream()
+            .filter(this::isValid)
+            .map(it -> new EngineEvent(it))
+            .collect(Collectors.toList());
     }
 
     private boolean isValid(Map<String, Object> event) {

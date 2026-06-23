@@ -170,8 +170,9 @@ class TaskControllerImplIT {
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/v1/tasks?page=10&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(get("/v1/tasks?page=10&size=10").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -180,8 +181,9 @@ class TaskControllerImplIT {
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(get("/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(get("/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -204,17 +206,17 @@ class TaskControllerImplIT {
         when(taskRuntime.nextTask(strategy)).thenReturn(buildDefaultAssignedTask());
 
         this.mockMvc.perform(
-                post("/v1/tasks/next").param("strategy", strategy.name()).accept(MediaTypes.HAL_JSON_VALUE)
-            )
-            .andExpect(status().isOk());
+            post("/v1/tasks/next").param("strategy", strategy.name()).accept(MediaTypes.HAL_JSON_VALUE)
+        ).andExpect(status().isOk());
     }
 
     @Test
     void nextTaskReturnsNoContentWhenNoTaskIsAvailable() throws Exception {
         when(taskRuntime.nextTask(null)).thenReturn(null);
 
-        this.mockMvc.perform(post("/v1/tasks/next").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isNoContent());
+        this.mockMvc.perform(post("/v1/tasks/next").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
+            status().isNoContent()
+        );
     }
 
     @Test
@@ -243,11 +245,10 @@ class TaskControllerImplIT {
         SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
 
         this.mockMvc.perform(
-                post("/v1/tasks/{taskId}/save", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(saveTask))
-            )
-            .andExpect(status().isOk());
+            post("/v1/tasks/{taskId}/save", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(saveTask))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -268,18 +269,14 @@ class TaskControllerImplIT {
         TaskImpl task = buildStandAloneTask("new-task", "New task to be performed");
         given(taskRuntime.create(any())).willReturn(task);
 
-        CreateTaskPayload createTask = TaskPayloadBuilder
-            .create()
+        CreateTaskPayload createTask = TaskPayloadBuilder.create()
             .withName("new-task")
             .withDescription("description")
             .build();
         createTask.setPriority(50);
         this.mockMvc.perform(
-                post("/v1/tasks", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(createTask))
-            )
-            .andExpect(status().isOk());
+            post("/v1/tasks", 1).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(createTask))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -288,18 +285,16 @@ class TaskControllerImplIT {
         Task subTask = buildSubTask("new-subtask", "subtask description", parentTaskId);
         given(taskRuntime.create(any())).willReturn(subTask);
 
-        CreateTaskPayload createTaskCmd = TaskPayloadBuilder
-            .create()
+        CreateTaskPayload createTaskCmd = TaskPayloadBuilder.create()
             .withName("new-task")
             .withDescription("description")
             .build();
         createTaskCmd.setPriority(50);
         this.mockMvc.perform(
-                post("/v1/tasks", parentTaskId)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(createTaskCmd))
-            )
-            .andExpect(status().isOk());
+            post("/v1/tasks", parentTaskId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(createTaskCmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -311,26 +306,25 @@ class TaskControllerImplIT {
         when(taskPage.getContent()).thenReturn(Arrays.asList(subtask1, subtask2));
         when(taskRuntime.tasks(any(), any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(get("/v1/tasks/{taskId}/subtasks", "parentTaskId").contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(
+            get("/v1/tasks/{taskId}/subtasks", "parentTaskId").contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
     @Test
     void updateTask() throws Exception {
         given(taskRuntime.update(any())).willReturn(buildDefaultAssignedTask());
-        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
-            .update()
+        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder.update()
             .withTaskId("1")
             .withName("update-task")
             .withDescription("update-description")
             .build();
 
         this.mockMvc.perform(
-                put("/v1/tasks/{taskId}", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(updateTaskCmd))
-            )
-            .andExpect(status().isOk());
+            put("/v1/tasks/{taskId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(updateTaskCmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -339,10 +333,9 @@ class TaskControllerImplIT {
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
         this.mockMvc.perform(
-                post("/v1/tasks/{taskId}/assign", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(assignTaskCmd))
-            )
-            .andExpect(status().isOk());
+            post("/v1/tasks/{taskId}/assign", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(assignTaskCmd))
+        ).andExpect(status().isOk());
     }
 }

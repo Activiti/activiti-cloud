@@ -85,8 +85,9 @@ class VariableEntityCreatedEventHandlerTest {
         event.setVariableDefinitionId("variableDefId");
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId())).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -97,8 +98,7 @@ class VariableEntityCreatedEventHandlerTest {
         List<Object> persisted = captor.getAllValues();
 
         ProcessVariableEntity variableEntity = (ProcessVariableEntity) persisted.get(0);
-        Assertions
-            .assertThat(variableEntity)
+        Assertions.assertThat(variableEntity)
             .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
             .hasName(event.getEntity().getName())
             .hasTaskId(event.getEntity().getTaskId())
@@ -121,8 +121,9 @@ class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable(), true);
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId())).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -144,8 +145,9 @@ class VariableEntityCreatedEventHandlerTest {
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
-        when(entityManager.getReference(ProcessInstanceEntity.class, event.getEntity().getProcessInstanceId()))
-            .thenReturn(processInstanceEntity);
+        when(
+            entityManager.getReference(ProcessInstanceEntity.class, event.getEntity().getProcessInstanceId())
+        ).thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
         when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.of(taskEntity));
@@ -158,8 +160,7 @@ class VariableEntityCreatedEventHandlerTest {
 
         TaskVariableEntity variableEntity = captor.getValue();
 
-        Assertions
-            .assertThat(variableEntity)
+        Assertions.assertThat(variableEntity)
             .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
             .hasName(event.getEntity().getName())
             .hasTaskId(event.getEntity().getTaskId())
@@ -205,8 +206,9 @@ class VariableEntityCreatedEventHandlerTest {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.getVariables().add(existing);
 
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -222,8 +224,9 @@ class VariableEntityCreatedEventHandlerTest {
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariable());
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
 
         TaskEntity taskEntity = new TaskEntity();
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of(taskEntity));
@@ -249,8 +252,9 @@ class VariableEntityCreatedEventHandlerTest {
         taskEntity.getProcessVariables().add(existingInTask);
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-            .thenReturn(Optional.of(processInstanceEntity));
+        when(entityManagerFinder.findProcessInstanceWithVariables("procInstId")).thenReturn(
+            Optional.of(processInstanceEntity)
+        );
         when(entityManagerFinder.findTasksWithProcessVariables("procInstId")).thenReturn(Set.of(taskEntity));
 
         //when
@@ -305,8 +309,9 @@ class VariableEntityCreatedEventHandlerTest {
     void handleShouldThrowWhenTaskNotFound() {
         //given
         CloudVariableCreatedEventImpl event = new CloudVariableCreatedEventImpl(buildVariableWithTaskId());
-        when(entityManager.getReference(ProcessInstanceEntity.class, "procInstId"))
-            .thenReturn(new ProcessInstanceEntity());
+        when(entityManager.getReference(ProcessInstanceEntity.class, "procInstId")).thenReturn(
+            new ProcessInstanceEntity()
+        );
         when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.empty());
 
         //when / then
@@ -326,8 +331,9 @@ class VariableEntityCreatedEventHandlerTest {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.getVariables().add(existingVar);
 
-        when(entityManager.getReference(ProcessInstanceEntity.class, "procInstId"))
-            .thenReturn(new ProcessInstanceEntity());
+        when(entityManager.getReference(ProcessInstanceEntity.class, "procInstId")).thenReturn(
+            new ProcessInstanceEntity()
+        );
         when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.of(taskEntity));
 
         //when

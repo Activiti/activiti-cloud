@@ -62,7 +62,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class QueryProcessInstanceEntityVariablesIT {
 
     private static final String VARIABLES_URL = "/v1/process-instances/{processInstanceId}/variables";
-    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {};
+    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_VARIABLE_RESPONSE_TYPE =
+        new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {};
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -134,27 +135,26 @@ public class QueryProcessInstanceEntityVariablesIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
-                    VARIABLES_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_VARIABLE_RESPONSE_TYPE,
-                    runningProcessInstance.getId()
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
+                VARIABLES_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_VARIABLE_RESPONSE_TYPE,
+                runningProcessInstance.getId()
+            );
 
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                        ProcessVariableEntity::getName,
-                        ProcessVariableEntity::getValue,
-                        ProcessVariableEntity::getMarkedAsDeleted
-                    )
-                    .containsExactly(tuple("varCreated", "v1", false), tuple("varUpdated", "v2-up", false));
-            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(
+                    ProcessVariableEntity::getName,
+                    ProcessVariableEntity::getValue,
+                    ProcessVariableEntity::getMarkedAsDeleted
+                )
+                .containsExactly(tuple("varCreated", "v1", false), tuple("varUpdated", "v2-up", false));
+        });
     }
 
     @Test
@@ -170,23 +170,22 @@ public class QueryProcessInstanceEntityVariablesIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
-                    VARIABLES_URL,
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_VARIABLE_RESPONSE_TYPE,
-                    runningProcessInstance.getId()
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
+                VARIABLES_URL,
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_VARIABLE_RESPONSE_TYPE,
+                runningProcessInstance.getId()
+            );
 
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody().getContent())
-                    .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
-                    .containsExactly(tuple("intVar", 10));
-            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                .containsExactly(tuple("intVar", 10));
+        });
     }
 
     @Test
@@ -210,24 +209,23 @@ public class QueryProcessInstanceEntityVariablesIT {
 
         eventsAggregator.sendAll();
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
-                    VARIABLES_URL + "?name={varName}",
-                    HttpMethod.GET,
-                    identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_VARIABLE_RESPONSE_TYPE,
-                    runningProcessInstance.getId(),
-                    "var2"
-                );
+        await().untilAsserted(() -> {
+            //when
+            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
+                VARIABLES_URL + "?name={varName}",
+                HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                PAGED_VARIABLE_RESPONSE_TYPE,
+                runningProcessInstance.getId(),
+                "var2"
+            );
 
-                //then
-                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-                assertThat(responseEntity.getBody().getContent())
-                    .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
-                    .containsExactly(tuple("var2", "v2"));
-            });
+            //then
+            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(responseEntity.getBody().getContent())
+                .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                .containsExactly(tuple("var2", "v2"));
+        });
     }
 
     @Test
@@ -274,9 +272,8 @@ public class QueryProcessInstanceEntityVariablesIT {
         eventsAggregator.addEvents(sentEvents).sendAll();
 
         // and then
-        await()
-            .untilAsserted(() -> {
-                assertThat(eventsAggregator.getException()).isNull();
-            });
+        await().untilAsserted(() -> {
+            assertThat(eventsAggregator.getException()).isNull();
+        });
     }
 }

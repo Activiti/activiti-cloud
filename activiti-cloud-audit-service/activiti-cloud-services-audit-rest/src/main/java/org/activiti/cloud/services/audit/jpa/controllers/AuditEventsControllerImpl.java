@@ -72,7 +72,9 @@ public class AuditEventsControllerImpl implements AuditEventsController {
 
     private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
 
-    private final AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<
+        CloudRuntimeEvent<?, CloudRuntimeEventType>
+    > pagedCollectionModelAssembler;
 
     private SecurityPoliciesApplicationServiceImpl securityPoliciesApplicationService;
 
@@ -126,12 +128,11 @@ public class AuditEventsControllerImpl implements AuditEventsController {
             Sort defaultSort = Sort.by(Sort.Direction.DESC, "timestamp");
             if (pageable instanceof AlfrescoPageRequest alfrescoPageRequest) {
                 Pageable inner = alfrescoPageRequest.getPageable();
-                pageable =
-                    new AlfrescoPageRequest(
-                        alfrescoPageRequest.getOffset(),
-                        alfrescoPageRequest.getPageSize(),
-                        PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
-                    );
+                pageable = new AlfrescoPageRequest(
+                    alfrescoPageRequest.getOffset(),
+                    alfrescoPageRequest.getPageSize(),
+                    PageRequest.of(inner.getPageNumber(), inner.getPageSize(), defaultSort)
+                );
             } else {
                 pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
             }
@@ -166,8 +167,7 @@ public class AuditEventsControllerImpl implements AuditEventsController {
         EventSpecificationsBuilder builder = new EventSpecificationsBuilder();
         String search = searchParams.search();
         if (search != null && !search.isEmpty()) {
-            String operationSetExpr = Arrays
-                .asList(SearchOperation.SIMPLE_OPERATION_SET)
+            String operationSetExpr = Arrays.asList(SearchOperation.SIMPLE_OPERATION_SET)
                 .stream()
                 .collect(joining("|"));
             Pattern pattern = Pattern.compile(

@@ -65,18 +65,22 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
         assertThat(messagingProperties.getRabbitmq().isCompress()).isTrue();
         assertThat(messagingProperties.getRabbitmq().getCompressionLevel()).isEqualTo(9);
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
-            .isEqualTo(9);
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
-            .isTrue();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class)
+        ).isEqualTo(9);
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class)
+        ).isTrue();
     }
 
     @Test
     public void rabbitMqPrefixConfiguration() {
         assertThat(messagingProperties.getRabbitmq().getPrefix()).isEqualTo("myapp.");
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("myapp.");
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("myapp.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("myapp.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("myapp.");
     }
 }

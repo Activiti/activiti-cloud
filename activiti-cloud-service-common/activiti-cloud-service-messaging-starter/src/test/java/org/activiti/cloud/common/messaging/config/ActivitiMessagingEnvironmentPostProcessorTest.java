@@ -93,8 +93,7 @@ public class ActivitiMessagingEnvironmentPostProcessorTest {
                 MessagingBroker.class,
                 MessagingBroker.rabbitmq
             )
-        )
-            .willReturn(broker);
+        ).willReturn(broker);
         given(environment.getPropertySources()).willReturn(propertySources);
         return environment;
     }

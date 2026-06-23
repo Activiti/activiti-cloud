@@ -26,7 +26,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class TaskRepresentationModelAssembler
-    implements RepresentationModelAssembler<TaskEntity, EntityModel<QueryCloudTask>> {
+    implements RepresentationModelAssembler<TaskEntity, EntityModel<QueryCloudTask>>
+{
 
     @Override
     public EntityModel<QueryCloudTask> toModel(TaskEntity entity) {

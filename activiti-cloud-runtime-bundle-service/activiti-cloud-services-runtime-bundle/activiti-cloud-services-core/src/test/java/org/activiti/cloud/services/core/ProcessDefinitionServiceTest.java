@@ -75,31 +75,31 @@ class ProcessDefinitionServiceTest {
                 any(GetProcessDefinitionsPayload.class),
                 eq(List.of(VARIABLES))
             )
-        )
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
-        )
-            .thenAnswer(call -> {
-                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
-                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
-                return cloudProcessDefinition;
-            });
+        ).thenAnswer(call -> {
+            CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+            cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+            return cloudProcessDefinition;
+        });
 
         List<ProcessDefinition> result = processDefinitionService
             .getProcessDefinitions(Pageable.of(0, 50), List.of(VARIABLES))
             .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions =
-            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions = (
+            (ExtendedCloudProcessDefinition) result.getFirst()
+        ).getVariableDefinitions();
         assertThat(variableDefinitions).hasSize(1);
         assertThat(variableDefinitions.getFirst()).isEqualTo(variableDefinition);
-        verify(processDefinitionDecorator)
-            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+        verify(processDefinitionDecorator).decorate(
+            argThat(argument -> argument.getId().equals(processDefinition.getId()))
+        );
     }
 
     @ParameterizedTest
@@ -109,8 +109,9 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), any()))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(
+            processRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class), any())
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
 
@@ -134,19 +135,17 @@ class ProcessDefinitionServiceTest {
                 any(GetProcessDefinitionsPayload.class),
                 eq(List.of(VARIABLES, NO_USER_STARTABLE_PROCESSES))
             )
-        )
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(true);
         when(
             processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
-        )
-            .thenAnswer(call -> {
-                CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
-                cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
-                return cloudProcessDefinition;
-            });
+        ).thenAnswer(call -> {
+            CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
+            cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
+            return cloudProcessDefinition;
+        });
 
         var pageable = Pageable.of(0, 50);
 
@@ -155,15 +154,20 @@ class ProcessDefinitionServiceTest {
             .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions =
-            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions = (
+            (ExtendedCloudProcessDefinition) result.getFirst()
+        ).getVariableDefinitions();
         assertThat(variableDefinitions).containsExactly(variableDefinition);
-        verify(processDefinitionDecorator)
-            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+        verify(processDefinitionDecorator).decorate(
+            argThat(argument -> argument.getId().equals(processDefinition.getId()))
+        );
 
         ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
-        verify(processRuntime)
-            .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
+        verify(processRuntime).processDefinitions(
+            eq(pageable),
+            any(GetProcessDefinitionsPayload.class),
+            includeParameter.capture()
+        );
         assertThat(includeParameter.getValue()).containsExactly(VARIABLES, NO_USER_STARTABLE_PROCESSES);
     }
 
@@ -179,8 +183,7 @@ class ProcessDefinitionServiceTest {
                 any(GetProcessDefinitionsPayload.class),
                 eq(List.of(NO_USER_STARTABLE_PROCESSES))
             )
-        )
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        ).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         when(processDefinitionDecorator.applies(VARIABLES)).thenReturn(false);
 
@@ -191,15 +194,19 @@ class ProcessDefinitionServiceTest {
             .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions =
-            ((ExtendedCloudProcessDefinition) result.getFirst()).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions = (
+            (ExtendedCloudProcessDefinition) result.getFirst()
+        ).getVariableDefinitions();
         assertThat(variableDefinitions).isEmpty();
 
         verify(processDefinitionDecorator, never()).decorate(any());
 
         ArgumentCaptor<List<String>> includeParameter = ArgumentCaptor.forClass(List.class);
-        verify(processRuntime)
-            .processDefinitions(eq(pageable), any(GetProcessDefinitionsPayload.class), includeParameter.capture());
+        verify(processRuntime).processDefinitions(
+            eq(pageable),
+            any(GetProcessDefinitionsPayload.class),
+            includeParameter.capture()
+        );
         assertThat(includeParameter.getValue()).containsExactly(NO_USER_STARTABLE_PROCESSES);
     }
 

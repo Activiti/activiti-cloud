@@ -100,7 +100,8 @@ public class TasksIT {
     public void setUp() {
         identityTokenProducer.withTestUser("hruser");
 
-        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions =
+            processDefinitionRestTemplate.getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
@@ -155,8 +156,7 @@ public class TasksIT {
         CloudTask task = tasks.iterator().next();
         taskRestTemplate.claim(task);
 
-        UpdateTaskPayload updateTask = TaskPayloadBuilder
-            .update()
+        UpdateTaskPayload updateTask = TaskPayloadBuilder.update()
             .withTaskId(task.getId())
             .withName("Updated name")
             .withDescription("Updated description")
@@ -172,8 +172,10 @@ public class TasksIT {
         assertThat(taskResponseEntity.getBody().getDescription()).isEqualTo("Updated description");
 
         //Check UpdateTaskPayload without taskId
-        updateTask =
-            TaskPayloadBuilder.update().withName("New Updated name").withDescription("New Updated description").build();
+        updateTask = TaskPayloadBuilder.update()
+            .withName("New Updated name")
+            .withDescription("New Updated description")
+            .build();
 
         //when
         taskRestTemplate.updateTask(task.getId(), updateTask);
@@ -200,8 +202,7 @@ public class TasksIT {
 
         identityTokenProducer.withTestUser("testadmin");
 
-        UpdateTaskPayload updateTask = TaskPayloadBuilder
-            .update()
+        UpdateTaskPayload updateTask = TaskPayloadBuilder.update()
             .withTaskId(task.getId())
             .withName("Updated name")
             .withDescription("Updated description")
@@ -220,8 +221,10 @@ public class TasksIT {
 
         //Check UpdateTaskPayload without taskId
         identityTokenProducer.withTestUser("testadmin");
-        updateTask =
-            TaskPayloadBuilder.update().withName("New Updated name").withDescription("New Updated description").build();
+        updateTask = TaskPayloadBuilder.update()
+            .withName("New Updated name")
+            .withDescription("New Updated description")
+            .build();
 
         //when
         taskRestTemplate.adminUpdateTask(task.getId(), updateTask);
@@ -305,8 +308,7 @@ public class TasksIT {
             TaskPayloadBuilder.create().withName("parent task").withDescription("This is my parent task").build()
         );
 
-        CreateTaskPayload createSubTask = TaskPayloadBuilder
-            .create()
+        CreateTaskPayload createSubTask = TaskPayloadBuilder.create()
             .withName("sub task")
             .withDescription("This is my sub-task")
             .withParentTaskId(parentTask.getId())
@@ -343,8 +345,7 @@ public class TasksIT {
     public void shouldBeAbleToDeleteTask() {
         //given
         CloudTask standaloneTask = taskRestTemplate.createTask(
-            TaskPayloadBuilder
-                .create()
+            TaskPayloadBuilder.create()
                 .withName("parent task")
                 .withDescription("This is my parent task")
                 .withAssignee("hruser")
@@ -481,8 +482,7 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
         taskRestTemplate.claim(task);
 
-        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder
-            .complete()
+        CompleteTaskPayload completeTaskPayload = TaskPayloadBuilder.complete()
             .withTaskId(task.getId())
             .withVariables(Collections.singletonMap("myVar", "any"))
             .build();
@@ -513,8 +513,7 @@ public class TasksIT {
 
         //when
         identityTokenProducer.withTestUser("testadmin");
-        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
-            .assign()
+        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder.assign()
             .withTaskId(task.getId())
             .withAssignee("hruser")
             .build();
@@ -544,13 +543,11 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(
             userCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateUser::getUser)
-        )
-            .containsExactly("hruser");
+        ).containsExactly("hruser");
         taskRestTemplate.claim(task);
 
         //when
-        CandidateUsersPayload candidateusers = TaskPayloadBuilder
-            .addCandidateUsers()
+        CandidateUsersPayload candidateusers = TaskPayloadBuilder.addCandidateUsers()
             .withTaskId(task.getId())
             .withCandidateUser("testuser")
             .build();
@@ -567,8 +564,7 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(
             userCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateUser::getUser)
-        )
-            .containsExactly("hruser", "testuser");
+        ).containsExactly("hruser", "testuser");
 
         //when
         taskRestTemplate.release(task);
@@ -600,14 +596,12 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(
             userCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateUser::getUser)
-        )
-            .containsExactly("hruser");
+        ).containsExactly("hruser");
 
         taskRestTemplate.claim(task);
 
         //when
-        CandidateUsersPayload candidateusers = TaskPayloadBuilder
-            .addCandidateUsers()
+        CandidateUsersPayload candidateusers = TaskPayloadBuilder.addCandidateUsers()
             .withTaskId(task.getId())
             .withCandidateUser("testuser")
             .build();
@@ -625,11 +619,12 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(2);
         assertThat(
             userCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateUser::getUser)
-        )
-            .containsExactly("hruser", "testuser");
+        ).containsExactly("hruser", "testuser");
 
-        candidateusers =
-            TaskPayloadBuilder.addCandidateUsers().withTaskId(task.getId()).withCandidateUser("testuser").build();
+        candidateusers = TaskPayloadBuilder.addCandidateUsers()
+            .withTaskId(task.getId())
+            .withCandidateUser("testuser")
+            .build();
         responseEntity = taskRestTemplate.deleteUserCandidates(candidateusers);
 
         //then
@@ -643,8 +638,7 @@ public class TasksIT {
         assertThat(userCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(
             userCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateUser::getUser)
-        )
-            .containsExactly("hruser");
+        ).containsExactly("hruser");
     }
 
     @Test
@@ -656,22 +650,19 @@ public class TasksIT {
         Task task = processInstanceRestTemplate.getTasks(processInstanceEntity).getBody().iterator().next();
 
         //then check that we have no group candidate
-        ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> groupCandidates = taskRestTemplate.getGroupCandidates(
-            task.getId()
-        );
+        ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> groupCandidates =
+            taskRestTemplate.getGroupCandidates(task.getId());
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(
             groupCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateGroup::getGroup)
-        )
-            .containsExactly("hr");
+        ).containsExactly("hr");
 
         taskRestTemplate.claim(task);
 
         //when
-        CandidateGroupsPayload candidategroups = TaskPayloadBuilder
-            .deleteCandidateGroups()
+        CandidateGroupsPayload candidategroups = TaskPayloadBuilder.deleteCandidateGroups()
             .withTaskId(task.getId())
             .withCandidateGroup("hr")
             .build();
@@ -684,8 +675,10 @@ public class TasksIT {
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
 
         //when
-        candidategroups =
-            TaskPayloadBuilder.addCandidateGroups().withTaskId(task.getId()).withCandidateGroup("hr").build();
+        candidategroups = TaskPayloadBuilder.addCandidateGroups()
+            .withTaskId(task.getId())
+            .withCandidateGroup("hr")
+            .build();
 
         responseEntity = taskRestTemplate.addGroupCandidates(candidategroups);
 
@@ -697,8 +690,7 @@ public class TasksIT {
         assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(1);
         assertThat(
             groupCandidates.getBody().getContent().stream().map(EntityModel::getContent).map(CandidateGroup::getGroup)
-        )
-            .containsExactly("hr");
+        ).containsExactly("hr");
     }
 
     @Test
@@ -719,8 +711,7 @@ public class TasksIT {
         variables.put("variableDateTime", variablesUtil.getDateTimeFormattedString(date));
         variables.put("variableDate", variablesUtil.getDateFormattedString(date));
 
-        SaveTaskPayload saveTaskPayload = TaskPayloadBuilder
-            .save()
+        SaveTaskPayload saveTaskPayload = TaskPayloadBuilder.save()
             .withTaskId(task.getId())
             .withVariables(variables)
             .build();
@@ -780,8 +771,7 @@ public class TasksIT {
         taskRestTemplate.claim(standaloneTask);
 
         //when
-        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder
-            .assign()
+        AssignTaskPayload assignTaskPayload = TaskPayloadBuilder.assign()
             .withTaskId(standaloneTask.getId())
             .withAssignee("testuser")
             .build();
@@ -807,11 +797,12 @@ public class TasksIT {
         );
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
-            startProcessResponse
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse =
+            processInstanceRestTemplate.getVariables(startProcessResponse);
+        Optional<CloudVariableInstance> optionalVariableInstance = this.getVariableInstance(
+            "numbertest",
+            variablesResponse.getBody()
         );
-        Optional<CloudVariableInstance> optionalVariableInstance =
-            this.getVariableInstance("numbertest", variablesResponse.getBody());
 
         //then
         assertThat(optionalVariableInstance).isPresent();
@@ -830,11 +821,12 @@ public class TasksIT {
         );
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = processInstanceRestTemplate.getVariables(
-            startProcessResponse
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse =
+            processInstanceRestTemplate.getVariables(startProcessResponse);
+        Optional<CloudVariableInstance> optionalVariableInstance = this.getVariableInstance(
+            "numbertest",
+            variablesResponse.getBody()
         );
-        Optional<CloudVariableInstance> optionalVariableInstance =
-            this.getVariableInstance("numbertest", variablesResponse.getBody());
 
         //then
         assertThat(optionalVariableInstance).isPresent();
@@ -859,8 +851,10 @@ public class TasksIT {
         ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(
             taskId
         );
-        Optional<CloudVariableInstance> optionalVariableInstance =
-            this.getVariableInstance("numbertest", variablesResponse.getBody());
+        Optional<CloudVariableInstance> optionalVariableInstance = this.getVariableInstance(
+            "numbertest",
+            variablesResponse.getBody()
+        );
 
         //then
         assertThat(optionalVariableInstance).isPresent();
@@ -874,6 +868,10 @@ public class TasksIT {
         String name,
         CollectionModel<CloudVariableInstance> variables
     ) {
-        return variables.getContent().stream().filter(v -> v.getName().equals(name)).findAny();
+        return variables
+            .getContent()
+            .stream()
+            .filter(v -> v.getName().equals(name))
+            .findAny();
     }
 }

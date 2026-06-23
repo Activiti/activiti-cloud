@@ -48,14 +48,13 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         boolean isNewEntity = (entity == null);
 
         if (entity == null) {
-            entity =
-                new IntegrationContextEntity(
-                    event.getServiceName(),
-                    event.getServiceFullName(),
-                    event.getServiceVersion(),
-                    event.getAppName(),
-                    event.getAppVersion()
-                );
+            entity = new IntegrationContextEntity(
+                event.getServiceName(),
+                event.getServiceFullName(),
+                event.getServiceVersion(),
+                event.getAppName(),
+                event.getAppVersion()
+            );
             entity.setId(entityId);
             entity.setClientId(integrationContext.getClientId());
         }

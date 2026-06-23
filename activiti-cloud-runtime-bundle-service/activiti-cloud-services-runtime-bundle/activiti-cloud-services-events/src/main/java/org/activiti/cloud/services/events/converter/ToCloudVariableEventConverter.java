@@ -74,8 +74,7 @@ public class ToCloudVariableEventConverter {
     }
 
     private String getVariableDefinitionId(VariableCreatedEvent event) {
-        return Optional
-            .ofNullable(event.getProcessDefinitionId())
+        return Optional.ofNullable(event.getProcessDefinitionId())
             .map(processExtensionService::getExtensionsForId)
             .map(Extension::getProperties)
             .map(Map::values)

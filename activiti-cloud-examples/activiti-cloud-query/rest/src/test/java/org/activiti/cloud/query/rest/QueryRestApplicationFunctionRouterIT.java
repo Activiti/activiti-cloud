@@ -37,13 +37,17 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
 
         assertThat(functionRouter.isEnabled()).isTrue();
 
-        assertThat(functionRouter.getRoutes())
-            .containsOnlyKeys("auditConsumer", "queryConsumer", "graphQLEngineEventsConsumerSource");
+        assertThat(functionRouter.getRoutes()).containsOnlyKeys(
+            "auditConsumer",
+            "queryConsumer",
+            "graphQLEngineEventsConsumerSource"
+        );
 
         assertThat(functionRouter.destinations("functionRouterInput")).isEmpty();
 
-        assertThat(functionRouter.destinations("functionRouterAnonymousInput"))
-            .containsOnly(Map.entry("graphQLEngineEventsConsumerSource", "engineEvents"));
+        assertThat(functionRouter.destinations("functionRouterAnonymousInput")).containsOnly(
+            Map.entry("graphQLEngineEventsConsumerSource", "engineEvents")
+        );
 
         assertThat(functionRouter.registrations("functionRouterInput")).isEmpty();
 
@@ -58,8 +62,11 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
 
     @Test
     void rabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getQueues())
-            .satisfies(map -> assertThat(map.keySet()).allMatch(key -> key.startsWith("consumer.")));
+        assertThat(binderFactoryListenerTestContext.getQueues()).satisfies(map ->
+            assertThat(map.keySet())
+                .isNotEmpty()
+                .allMatch(key -> key.startsWith("consumer."))
+        );
     }
 
     @Test

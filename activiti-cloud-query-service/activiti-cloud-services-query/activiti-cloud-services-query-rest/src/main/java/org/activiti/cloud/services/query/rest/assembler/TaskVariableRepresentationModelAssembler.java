@@ -21,7 +21,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class TaskVariableRepresentationModelAssembler
-    implements RepresentationModelAssembler<TaskVariableEntity, EntityModel<CloudVariableInstance>> {
+    implements RepresentationModelAssembler<TaskVariableEntity, EntityModel<CloudVariableInstance>>
+{
 
     @Override
     public EntityModel<CloudVariableInstance> toModel(TaskVariableEntity entity) {

@@ -79,11 +79,11 @@ public class TaskControllerHelperTest {
                 extendedPredicate,
                 pageable
             )
-        )
-            .willReturn(pageResult);
+        ).willReturn(pageResult);
 
-        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler))
-            .willReturn(cloudTaskPagedModel);
+        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler)).willReturn(
+            cloudTaskPagedModel
+        );
 
         //when
         PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
@@ -110,8 +110,9 @@ public class TaskControllerHelperTest {
         PageImpl<TaskEntity> pageResult = new PageImpl<>(Collections.singletonList(new TaskEntity()));
         given(taskRepository.findAll(extendedPredicate, pageable)).willReturn(pageResult);
 
-        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler))
-            .willReturn(cloudTaskPagedModel);
+        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler)).willReturn(
+            cloudTaskPagedModel
+        );
 
         //when
         PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(

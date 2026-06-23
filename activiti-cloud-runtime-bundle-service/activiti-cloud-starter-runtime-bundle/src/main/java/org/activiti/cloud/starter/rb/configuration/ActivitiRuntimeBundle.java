@@ -32,5 +32,4 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableDiscoveryClient
 @EnableWebSecurity
 @EnableAutoConfiguration(exclude = { TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class })
-public @interface ActivitiRuntimeBundle {
-}
+public @interface ActivitiRuntimeBundle {}

@@ -106,19 +106,18 @@ class MQServiceTaskBehaviorTest {
 
     @BeforeEach
     void setUp() {
-        behavior =
-            spy(
-                new MQServiceTaskBehavior(
-                    integrationContextManager,
-                    integrationRequestSender,
-                    integrationContextBuilder,
-                    defaultServiceTaskBehavior,
-                    processEngineEventsAggregator,
-                    runtimeBundleProperties,
-                    integrationRequestBuilder,
-                    Set.of(integrationContextEnricher)
-                )
-            );
+        behavior = spy(
+            new MQServiceTaskBehavior(
+                integrationContextManager,
+                integrationRequestSender,
+                integrationContextBuilder,
+                defaultServiceTaskBehavior,
+                processEngineEventsAggregator,
+                runtimeBundleProperties,
+                integrationRequestBuilder,
+                Set.of(integrationContextEnricher)
+            )
+        );
     }
 
     @Test
@@ -193,19 +192,18 @@ class MQServiceTaskBehaviorTest {
     @Test
     void should_notThrow_whenEnrichersCollectionIsNull() {
         //given
-        behavior =
-            spy(
-                new MQServiceTaskBehavior(
-                    integrationContextManager,
-                    integrationRequestSender,
-                    integrationContextBuilder,
-                    defaultServiceTaskBehavior,
-                    processEngineEventsAggregator,
-                    runtimeBundleProperties,
-                    integrationRequestBuilder,
-                    null
-                )
-            );
+        behavior = spy(
+            new MQServiceTaskBehavior(
+                integrationContextManager,
+                integrationRequestSender,
+                integrationContextBuilder,
+                defaultServiceTaskBehavior,
+                processEngineEventsAggregator,
+                runtimeBundleProperties,
+                integrationRequestBuilder,
+                null
+            )
+        );
         DelegateExecution execution = mock(DelegateExecution.class);
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         given(integrationContextManager.create()).willReturn(entity);

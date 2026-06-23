@@ -27,8 +27,9 @@ import org.springframework.context.annotation.Primary;
 
 class FeatureToggleAutoConfigurationTest {
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-        .withConfiguration(AutoConfigurations.of(FeatureToggleAutoConfiguration.class));
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
+        AutoConfigurations.of(FeatureToggleAutoConfiguration.class)
+    );
 
     @AfterEach
     void tearDown() {

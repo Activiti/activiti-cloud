@@ -31,8 +31,7 @@ public class QuerySwaggerConfig implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(name = "queryApi")
     public GroupedOpenApi queryApi(@Value("${activiti.cloud.swagger.query-base-path:}") String querySwaggerBasePath) {
-        return GroupedOpenApi
-            .builder()
+        return GroupedOpenApi.builder()
             .group("Query")
             .packagesToScan("org.activiti.cloud.services.query.rest")
             .addOpenApiCustomizer(openApi ->

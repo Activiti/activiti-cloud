@@ -84,8 +84,7 @@ public class ProcessCandidateStarterGroupAddedEventHandlerTest {
                 ProcessCandidateStarterGroupEntity.class,
                 new ProcessCandidateStarterGroupId(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId())
             )
-        )
-            .thenReturn(new ProcessCandidateStarterGroupEntity());
+        ).thenReturn(new ProcessCandidateStarterGroupEntity());
         handler.handle(event);
 
         //then
@@ -98,9 +97,8 @@ public class ProcessCandidateStarterGroupAddedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent)
-            .isEqualTo(
-                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name()
-            );
+        assertThat(handledEvent).isEqualTo(
+            ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name()
+        );
     }
 }
