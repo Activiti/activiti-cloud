@@ -21,6 +21,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetu
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Date;
@@ -112,8 +113,8 @@ class ProcessInstanceVariableHistoryAdminControllerIT {
             .get("/admin/v1/process-instances/{processInstanceId}/variables/history", processInstanceId)
             .then()
             .statusCode(200)
-            .body("_embedded", org.hamcrest.Matchers.notNullValue())
-            .body("_links", org.hamcrest.Matchers.notNullValue());
+            .body("_embedded", notNullValue())
+            .body("_links", notNullValue());
     }
 
     @Test
