@@ -4,12 +4,12 @@ This document describes the job layout in [`.github/workflows/main.yml`](../../.
 
 ## Goals
 
-| Goal                      | How                                                                       |
-| ------------------------- | ------------------------------------------------------------------------- |
-| Short feedback loop       | Validation, builds, unit tests, and Playwright overlap where safe         |
-| Rerun-friendly            | One failed image cell → rerun one matrix job                              |
-| Full coverage             | Per-image unit tests + Playwright on 7 broker profiles                    |
-| Maintainability           | `maven-build` from alfresco-build-tools + docker-scan matrix              |
+| Goal                | How                                                               |
+| ------------------- | ----------------------------------------------------------------- |
+| Short feedback loop | Validation, builds, unit tests, and Playwright overlap where safe |
+| Rerun-friendly      | One failed image cell → rerun one matrix job                      |
+| Full coverage       | Per-image unit tests + Playwright on 7 broker profiles            |
+| Maintainability     | `maven-build` from alfresco-build-tools + docker-scan matrix      |
 
 ## Architecture
 
@@ -41,22 +41,22 @@ Parallel graph (Elias review): **build-common**, per-image **build** / **test**,
 
 ## Job reference
 
-| Job                            | Runs exactly once per workflow? | Purpose                                                                                         |
-| ------------------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `pre-checks`                   | ✓                               | Lint/pre-commit, dependabot gate, SHA pins                                                      |
-| `resolve-version`              | ✓                               | PR snapshot / release version                                                                   |
-| `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                                     |
-| `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                                   |
-| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push (no m2-common download)                 |
-| `maven-build-libraries`        | 2 matrix cells                  | Library-only modules (messages-graphql, audit)                                                  |
-| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds                      |
-| `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                                        |
-| `maven-test-libraries`         | 2 matrix cells                  | `mvn verify` per library module                                                                 |
-| `sonar`                        | ✓                               | `sonar-scan-on-built-project` (downloads `target*` + `m2*`, per-cell JaCoCo XML)                |
-| `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                                 |
-| `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                                 |
-| `delete-test-images`           | ✓                               | Delete stale PR Docker tags before fresh push (parallel with builds)                            |
-| `publish`                      | ✓ (push / preview PR)           | Maven deploy after `build-summary` green                                                        |
+| Job                            | Runs exactly once per workflow? | Purpose                                                                          |
+| ------------------------------ | ------------------------------- | -------------------------------------------------------------------------------- |
+| `pre-checks`                   | ✓                               | Lint/pre-commit, dependabot gate, SHA pins                                       |
+| `resolve-version`              | ✓                               | PR snapshot / release version                                                    |
+| `maven-build-common`           | ✓                               | Shared foundations + common tests (`api`, `service-common`)                      |
+| `scan-image-dirs`              | ✓                               | Discover Docker image dirs; build matrix JSON                                    |
+| `maven-build`                  | 4 matrix cells                  | Per docker image: `mvn install -pl … -am` + Docker push (no m2-common download)  |
+| `maven-build-libraries`        | 2 matrix cells                  | Library-only modules (messages-graphql, audit)                                   |
+| `maven-build-dependencies-bom` | ✓                               | Aggregated BOM (`-pl activiti-cloud-dependencies -am`), parallel with builds     |
+| `maven-test`                   | 4 matrix cells                  | `mvn verify` per docker image (parallel, root `-pl -am`)                         |
+| `maven-test-libraries`         | 2 matrix cells                  | `mvn verify` per library module                                                  |
+| `sonar`                        | ✓                               | `sonar-scan-on-built-project` (downloads `target*` + `m2*`, per-cell JaCoCo XML) |
+| `playwright-tests`             | 7 matrix cells                  | Helm + full Playwright suite per broker profile                                  |
+| `build-summary`                | ✓                               | Merge gate (build, tests, coverage, Playwright)                                  |
+| `delete-test-images`           | ✓                               | Delete stale PR Docker tags before fresh push (parallel with builds)             |
+| `publish`                      | ✓ (push / preview PR)           | Maven deploy after `build-summary` green                                         |
 
 Legacy monolithic `acceptance-tests` job is **removed** — Playwright runs on the same broker profiles instead.
 
@@ -90,43 +90,43 @@ Playwright starts after `maven-build` (Docker images pushed) and runs **in paral
 
 ## Artifacts vs cache vs local build
 
-| Mechanism                               | What                                                | Why                                                                      |
-| --------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ |
-| **Cache** `~/.m2` (hash of `pom.xml`)   | Third-party + warm Activiti deps                    | Restored by `maven-build` / `maven-configure`                            |
-| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`                 | Sonar (`sonar-scan-on-built-project`) and `publish` restore via pattern |
-| **Artifact** `surefire-reports-*`       | On test failure only                                | Debug                                                                    |
-| **Local in job**                        | `mvn install` / `verify` with `-pl … -am`           | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds |
+| Mechanism                             | What                                      | Why                                                                                   |
+| ------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Cache** `~/.m2` (hash of `pom.xml`) | Third-party + warm Activiti deps          | Restored by `maven-build` / `maven-configure`                                         |
+| **Artifact** `m2-*` / `target-*`      | Per-cell outputs from `maven-build`       | Sonar (`sonar-scan-on-built-project`) and `publish` restore via pattern               |
+| **Artifact** `surefire-reports-*`     | On test failure only                      | Debug                                                                                 |
+| **Local in job**                      | `mvn install` / `verify` with `-pl … -am` | Common rebuilt in each cell (`skip.common.tests`); no cross-job M2 download in builds |
 
 ## `needs` rationale
 
-| Dependent                      | Needs                                                 | Reason                                                                                          |
-| ------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `maven-build`                  | `pre-checks`, `resolve-version`, `scan-image-dirs`  | Per-image compile + Docker; parallel with common                         |
-| `maven-test`                   | `pre-checks`, `resolve-version`, `scan-image-dirs`  | Per-image verify; parallel with builds                                   |
-| `playwright-tests`             | `maven-build`                                         | Docker images required for Helm                                          |
-| `sonar`                        | all build + test jobs                                 | Needs per-cell `target*` and JaCoCo XML artifacts                        |
-| `publish`                      | builds, BOM, `build-summary`                          | `maven-build deploy` after gate                                          |
+| Dependent          | Needs                                              | Reason                                            |
+| ------------------ | -------------------------------------------------- | ------------------------------------------------- |
+| `maven-build`      | `pre-checks`, `resolve-version`, `scan-image-dirs` | Per-image compile + Docker; parallel with common  |
+| `maven-test`       | `pre-checks`, `resolve-version`, `scan-image-dirs` | Per-image verify; parallel with builds            |
+| `playwright-tests` | `maven-build`                                      | Docker images required for Helm                   |
+| `sonar`            | all build + test jobs                              | Needs per-cell `target*` and JaCoCo XML artifacts |
+| `publish`          | builds, BOM, `build-summary`                       | `maven-build deploy` after gate                   |
 
 ## Rerun scenarios
 
 | Failure                                      | Rerun                                         |
 | -------------------------------------------- | --------------------------------------------- |
 | pre-commit / lint                            | `pre-checks` only                             |
-| compile in query service                     | `maven-build (activiti-cloud-query)`                  |
-| unit test in RB                              | `maven-test (example-runtime-bundle)`                 |
-| Docker push connector                        | `maven-build (example-cloud-connector)`               |
-| Playwright profile kafka-partitioned-default | `playwright (kafka-partitioned-default)` only       |
-| Sonar                                        | `sonar`                                               |
+| compile in query service                     | `maven-build (activiti-cloud-query)`          |
+| unit test in RB                              | `maven-test (example-runtime-bundle)`         |
+| Docker push connector                        | `maven-build (example-cloud-connector)`       |
+| Playwright profile kafka-partitioned-default | `playwright (kafka-partitioned-default)` only |
+| Sonar                                        | `sonar`                                       |
 
 ## Expected impact (vs monolithic `develop` job)
 
-| Metric           | Before (develop)                                       | After (this branch)                                                  |
-| ---------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| Metric           | Before (develop)                                       | After (this branch)                                              |
+| ---------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
 | Critical path    | ~30 min sequential `mvn install` + Docker + acceptance | `max(parallel build/test cells)` ∥ Playwright after image builds |
-| Unit test start  | After entire build                                     | After all builds + BOM                                               |
-| Acceptance start | After full build + all tests                           | After shard builds — Playwright ×7 profiles (max 4 parallel)         |
-| Rerun cost       | Full `build` job (~30 min)                             | Targeted shard (~5–12 min)                                           |
-| Runner cost      | 1 heavy runner for Maven + 7 Helm installs             | More Maven runners; 7 self-contained Playwright matrix cells         |
+| Unit test start  | After entire build                                     | After all builds + BOM                                           |
+| Acceptance start | After full build + all tests                           | After shard builds — Playwright ×7 profiles (max 4 parallel)     |
+| Rerun cost       | Full `build` job (~30 min)                             | Targeted shard (~5–12 min)                                       |
+| Runner cost      | 1 heavy runner for Maven + 7 Helm installs             | More Maven runners; 7 self-contained Playwright matrix cells     |
 
 ## Local checks
 

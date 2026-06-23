@@ -4,16 +4,16 @@ Aligned with [hxp-process-services](https://github.com/Alfresco/hxp-process-serv
 
 ## Build layout
 
-| Area | Implementation |
-| ---- | -------------- |
-| Parallel graph | `build-common`, per-image build/test, library build/test, and BOM start together after `resolve-version` |
-| Build matrix | [`docker-scan-image-dirs`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/docker-scan-image-dirs/action.yml) + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json) |
-| Test matrix | Same docker matrix + [`.github/ci/library-modules.json`](../../.github/ci/library-modules.json) |
-| Maven | Root `mvn … -pl <modules> -am` via [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml) |
-| Common tests | Once in `maven-build-common`; skipped in service cells via `skip.common.tests` |
-| JaCoCo / Sonar | Per-cell `jacoco-report-name` + `target-*` uploads; [`sonar-scan-on-built-project`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/sonar-scan-on-built-project/action.yml) |
-| Docker | `make docker/<short-name>` after image-dir build |
-| Playwright | Starts when per-image **build** (with Docker) completes |
+| Area           | Implementation                                                                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel graph | `build-common`, per-image build/test, library build/test, and BOM start together after `resolve-version`                                                                                                                            |
+| Build matrix   | [`docker-scan-image-dirs`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/docker-scan-image-dirs/action.yml) + [`.github/ci/docker-image-services.json`](../../.github/ci/docker-image-services.json) |
+| Test matrix    | Same docker matrix + [`.github/ci/library-modules.json`](../../.github/ci/library-modules.json)                                                                                                                                     |
+| Maven          | Root `mvn … -pl <modules> -am` via [`maven-build`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/maven-build/action.yml)                                                                             |
+| Common tests   | Once in `maven-build-common`; skipped in service cells via `skip.common.tests`                                                                                                                                                      |
+| JaCoCo / Sonar | Per-cell `jacoco-report-name` + `target-*` uploads; [`sonar-scan-on-built-project`](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/sonar-scan-on-built-project/action.yml)                            |
+| Docker         | `make docker/<short-name>` after image-dir build                                                                                                                                                                                    |
+| Playwright     | Starts when per-image **build** (with Docker) completes                                                                                                                                                                             |
 
 ## Docker image matrix (4 services)
 
