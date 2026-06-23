@@ -4,7 +4,7 @@
  */
 
 import '../config/load-env';
-import { RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS, verifyAcceptanceProcessCatalog } from '../helpers/process-deployment';
+import { RUNTIME_ACCEPTANCE_REQUIRED_PROCESS_KEYS, verifyAcceptanceProcessCatalog } from '../helpers/process-deployment-keys';
 
 async function main(): Promise<void> {
     await verifyAcceptanceProcessCatalog();

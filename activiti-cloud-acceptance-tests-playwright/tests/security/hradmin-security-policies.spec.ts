@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
-import { CloudProcessInstance } from '../models/runtime-bundle.models';
-import {
-    expectNoAuditEventsForProcessInstance,
-    expectProcessInstancesAdminForKey,
-    expectProcessInstancesForKey,
-    expectQueryDoesNotIncludeProcessInstance,
-    expectQueryProcessInstancesAdminForKey,
-} from '../helpers/security-policies.assertions';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessInstance } from '../../models/runtime-bundle.models';
 
 activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () => {
     activiti.describe('Admin Access to Process with Variables', () => {
@@ -37,27 +30,22 @@ activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () 
             });
 
             await activiti.step('Then the user can access the instance from the admin APIs', async () => {
-                const adminProcessInstances = await expectProcessInstancesAdminForKey(
-                    securityPoliciesServiceProcessAdmin,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    true
-                );
-
+                const adminProcessInstances =
+                    await securityPoliciesServiceProcessAdmin.waitForFilteredRuntimeAdminInstancesByName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
                 expect(adminProcessInstances.length).toBeGreaterThan(0);
             });
 
             await activiti.step('And the user can access query admin endpoints', async () => {
-                const adminQueryProcessInstances = await expectQueryProcessInstancesAdminForKey(
-                    securityPoliciesServiceProcessAdmin,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    true
-                );
+                const adminQueryProcessInstances =
+                    await securityPoliciesServiceProcessAdmin.waitForFilteredQueryAdminInstancesByName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
                 expect(adminQueryProcessInstances.length).toBeGreaterThan(0);
             });
 
             await activiti.step('And the user can access audit admin endpoints', async () => {
-                // Note: /audit/admin/v1/events does not support filtering by process instance.
-                // We only validate the endpoint is reachable and returns data.
                 const adminEvents = await securityPoliciesServiceProcessAdmin.getEventsByEntityIdAdmin(
                     processWithVariablesInstance.id
                 );
@@ -79,27 +67,27 @@ activiti.describe('Security Policies - HR Admin Actions', { tag: '@smoke' }, () 
             });
 
             await activiti.step('Then the user cannot get process with variables instances (through user endpoints)', async () => {
-                const userProcessInstances = await expectProcessInstancesForKey(
-                    securityPoliciesServiceHradmin,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    false
-                );
+                const userProcessInstances =
+                    await securityPoliciesServiceHradmin.getFilteredAllRuntimeInstancesByName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
                 expect(userProcessInstances).toHaveLength(0);
             });
 
             await activiti.step('And the user cannot query process with variables instances (through user endpoints)', async () => {
-                await expectQueryDoesNotIncludeProcessInstance(
-                    securityPoliciesServiceHradmin,
-                    processWithVariablesInstance.id,
-                    'PROCESS_INSTANCE_WITH_VARIABLES'
-                );
+                const queryInstances =
+                    await securityPoliciesServiceHradmin.getQueryInstancesByProcessName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
+                expect(queryInstances.map((pi) => pi.id)).not.toContain(processWithVariablesInstance.id);
             });
 
             await activiti.step('And the user cannot get events for process with variables instances (through user endpoints)', async () => {
-                await expectNoAuditEventsForProcessInstance(
-                    securityPoliciesServiceHradmin,
-                    processWithVariablesInstance.id
-                );
+                const events =
+                    await securityPoliciesServiceHradmin.getAuditEventsByProcessInstanceFiltered(
+                        processWithVariablesInstance.id
+                    );
+                expect(events).toHaveLength(0);
             });
         });
     });

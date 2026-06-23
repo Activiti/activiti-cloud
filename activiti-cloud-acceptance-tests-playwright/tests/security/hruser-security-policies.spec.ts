@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-import { activiti, expect } from '../fixtures/services.fixture';
-import { CloudProcessInstance } from '../models/runtime-bundle.models';
-import {
-    expectEventsForKey,
-    expectProcessInstancesForKey,
-    expectQueryProcessInstancesForKey,
-} from '../helpers/security-policies.assertions';
+import { activiti, expect } from '../../fixtures/services.fixture';
+import { CloudProcessInstance } from '../../models/runtime-bundle.models';
 
 activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () => {
     activiti.describe('Simple Process Instance Operations', () => {
@@ -41,19 +36,16 @@ activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () =
             });
 
             await activiti.step('And the user can query simple process instances', async () => {
-                const queryProcessInstances = await expectQueryProcessInstancesForKey(
-                    securityPoliciesServiceHrUser,
-                    'SIMPLE_PROCESS_INSTANCE',
-                    true
-                );
+                const queryProcessInstances =
+                    await securityPoliciesServiceHrUser.waitForQueryInstancesByProcessName(
+                        'SIMPLE_PROCESS_INSTANCE'
+                    );
                 expect(queryProcessInstances.length).toBeGreaterThan(0);
             });
 
             await activiti.step('And the user can get events for simple process instances', async () => {
-                const events = await expectEventsForKey(
-                    securityPoliciesServiceHrUser,
-                    'SIMPLE_PROCESS_INSTANCE',
-                    true
+                const events = await securityPoliciesServiceHrUser.waitForFilteredEventsByName(
+                    'SIMPLE_PROCESS_INSTANCE'
                 );
                 expect(events.length).toBeGreaterThan(0);
             });
@@ -71,32 +63,28 @@ activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () =
 
         activiti('should restrict hruser from accessing process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot get process with variables instances', async () => {
-                const processInstances = await expectProcessInstancesForKey(
-                    securityPoliciesServiceHrUser,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    false
-                );
+                const processInstances =
+                    await securityPoliciesServiceHrUser.getFilteredAllRuntimeInstancesByName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
                 expect(processInstances).toHaveLength(0);
             });
         });
 
         activiti('should restrict hruser from querying process with variables instances', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot query process with variables instances', async () => {
-                const queryProcessInstances = await expectQueryProcessInstancesForKey(
-                    securityPoliciesServiceHrUser,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    false
-                );
+                const queryProcessInstances =
+                    await securityPoliciesServiceHrUser.getFilteredAllQueryInstancesByName(
+                        'PROCESS_INSTANCE_WITH_VARIABLES'
+                    );
                 expect(queryProcessInstances).toHaveLength(0);
             });
         });
 
         activiti('should restrict hruser from accessing events for process with variables', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user cannot get events for process with variables instances', async () => {
-                const events = await expectEventsForKey(
-                    securityPoliciesServiceHrUser,
-                    'PROCESS_INSTANCE_WITH_VARIABLES',
-                    false
+                const events = await securityPoliciesServiceHrUser.getFilteredEventsByName(
+                    'PROCESS_INSTANCE_WITH_VARIABLES'
                 );
                 expect(events).toHaveLength(0);
             });

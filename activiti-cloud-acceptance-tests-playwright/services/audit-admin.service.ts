@@ -63,4 +63,22 @@ export class AuditAdminService extends BaseService {
         const response = await this.delete(`${this.basePath}/events`);
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
+
+    async waitForAllEventsAdminCount(expectedCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditAdminService.waitFor(
+            () => this.getAllEventsAdmin(),
+            (events) => events.length === expectedCount,
+            'auditEvents',
+            `admin events count to equal ${expectedCount}`
+        );
+    }
+
+    async waitForAllEventsAdminCountGreaterThan(minCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditAdminService.waitFor(
+            () => this.getAllEventsAdmin(),
+            (events) => events.length > minCount,
+            'querySync',
+            `admin events count > ${minCount}`
+        );
+    }
 }

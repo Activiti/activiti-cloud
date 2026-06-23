@@ -59,6 +59,13 @@ public class IntegrationErrorImpl extends CloudRuntimeEntityImpl implements Inte
         this.stackTraceElements = Arrays.asList(cause.getStackTrace());
     }
 
+    public IntegrationErrorImpl(IntegrationRequest integrationRequest, Throwable error, String customErrorMessage) {
+        this(integrationRequest, error);
+        if (StringUtils.hasText(customErrorMessage)) {
+            this.errorMessage = customErrorMessage;
+        }
+    }
+
     @Override
     public IntegrationContext getIntegrationContext() {
         return integrationContext;

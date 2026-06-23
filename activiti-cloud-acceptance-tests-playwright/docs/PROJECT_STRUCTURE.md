@@ -5,7 +5,12 @@ activiti-cloud-acceptance-tests-playwright/
 ├── playwright.config.ts       # Playwright projects, reporters, global setup
 ├── README.md                  # Quick start (links here for detail)
 ├── docs/                      # All extended documentation
-├── tests/                     # Spec files (*.spec.ts)
+├── tests/                     # Spec files (*.spec.ts) grouped by domain folder
+│   ├── identity/              # Identity adapter (Keycloak)
+│   ├── security/              # HR user / HR admin security policies
+│   ├── runtime-process/       # Process instance, definition, BPMN element specs
+│   ├── runtime-task/          # Task and task-variable specs
+│   └── runtime/               # Cross-cutting runtime (application, swagger, notifications, delete)
 ├── fixtures/
 │   ├── context.models.ts      # CustomAPIRequest, token types
 │   ├── context-factory.ts     # Keycloak + wrapAuthenticatedApiContext (Proxy)

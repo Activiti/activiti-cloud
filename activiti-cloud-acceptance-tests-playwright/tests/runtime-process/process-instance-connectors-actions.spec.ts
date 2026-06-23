@@ -15,7 +15,6 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { pollOptions } from '../../config/runtime/timeouts';
 import { EventType } from '../../models/audit.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 
@@ -49,40 +48,30 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'Then the process instance has a variable named movieToRank with value The Lord of The Rings',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const variables = await runtimeBundleServiceTestUser.getProcessInstanceVariables(
-                            processInstanceId
-                        );
-                        const match = variables.find((variable) => variable.name === 'movieToRank');
-                        return match ? String(match.value) : undefined;
-                    }, pollOptions('querySync'))
-                    .toBe(movieToRank);
+                const value = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                    processInstanceId,
+                    'movieToRank',
+                    movieToRank
+                );
+                expect(value).toBe(movieToRank);
             }
         );
 
         await activiti.step(
             'And the process instance has a variable named movieDesc with value The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const variables = await runtimeBundleServiceTestUser.getProcessInstanceVariables(
-                            processInstanceId
-                        );
-                        const match = variables.find((variable) => variable.name === 'movieDesc');
-                        return match ? String(match.value) : undefined;
-                    }, pollOptions('querySync'))
-                    .toBe(expectedMovieDesc);
+                const value = await runtimeBundleServiceTestUser.waitForProcessInstanceVariableValue(
+                    processInstanceId,
+                    'movieDesc',
+                    expectedMovieDesc
+                );
+                expect(value).toBe(expectedMovieDesc);
             }
         );
 
         await activiti.step('And the process instance has a task named Add Rating', async () => {
-            await expect
-                .poll(async () => {
-                    const tasks = await taskServiceTestUser.getTasksByProcessInstanceId(processInstanceId);
-                    return tasks.some((task) => task.name === 'Add Rating');
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const task = await taskServiceTestUser.waitForTaskByName(processInstanceId, 'Add Rating');
+            expect(task.name).toBe('Add Rating');
         });
     });
 
@@ -108,15 +97,12 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         await activiti.step(
             'Then the query process instance has an integer variable named instanceCount with value 3',
             async () => {
-                await expect
-                    .poll(async () => {
-                        const variables = await queryServiceTestUser.getProcessInstanceVariables(
-                            processInstanceId
-                        );
-                        const match = variables.find((variable) => variable.name === 'instanceCount');
-                        return match ? Number(match.value) : undefined;
-                    }, pollOptions('querySync'))
-                    .toBe(instanceCount);
+                const variable = await queryServiceTestUser.waitForVariable(
+                    processInstanceId,
+                    'instanceCount',
+                    (v) => Number(v.value) === instanceCount
+                );
+                expect(Number(variable.value)).toBe(instanceCount);
             }
         );
 
@@ -129,38 +115,24 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
                     { executionCount: 3 },
                 ];
 
-                await expect
-                    .poll(async () => {
-                        const variables = await queryServiceTestUser.getProcessInstanceVariables(
-                            processInstanceId
-                        );
-                        const match = variables.find((variable) => variable.name === 'miResult');
-                        if (!match || !Array.isArray(match.value)) {
-                            return undefined;
-                        }
-                        return [...(match.value as Array<Record<string, number>>)].sort(
-                            (a, b) => Number(a.executionCount) - Number(b.executionCount)
-                        );
-                    }, pollOptions('querySync'))
-                    .toEqual(expectedEntries);
+                const variable = await queryServiceTestUser.waitForVariable(
+                    processInstanceId,
+                    'miResult',
+                    (v) => Array.isArray(v.value) && (v.value as unknown[]).length === expectedEntries.length
+                );
+                const entries = [...(variable.value as Array<Record<string, number>>)].sort(
+                    (a, b) => Number(a.executionCount) - Number(b.executionCount)
+                );
+                expect(entries).toEqual(expectedEntries);
             }
         );
 
         await activiti.step('And the status of the process is changed to completed', async () => {
-            await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.COMPLETED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.COMPLETED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
         });
     });
 
@@ -183,17 +155,15 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         );
 
         await activiti.step('Then integration error event is emitted for the process', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-                    return events.some(
-                        (event) =>
-                            event.eventType === EventType.INTEGRATION_ERROR_RECEIVED &&
-                            event.errorMessage === 'TestErrorConnector' &&
-                            event.errorClassName === 'java.lang.RuntimeException'
-                    );
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const event = await auditServiceTestUser.waitForEventMatching(
+                processInstanceId,
+                (event) =>
+                    event.eventType === EventType.INTEGRATION_ERROR_RECEIVED &&
+                    event.errorMessage === 'TestErrorConnector' &&
+                    event.errorClassName === 'java.lang.RuntimeException',
+                `INTEGRATION_ERROR_RECEIVED for TestErrorConnector on ${processInstanceId}`
+            );
+            expect(event.eventType).toBe(EventType.INTEGRATION_ERROR_RECEIVED);
         });
     });
 
@@ -232,45 +202,45 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
         );
 
         await activiti.step('Then cloud bpmn error event is emitted for the process', async () => {
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-
-                    const hasBpmnErrorReceived = events.some((event) => {
-                        if (event.eventType !== EventType.ERROR_RECEIVED) {
-                            return false;
-                        }
-                        const entity = event.entity as
-                            | {
-                                  processDefinitionId?: string;
-                                  processInstanceId?: string;
-                                  errorCode?: string;
-                                  errorId?: string;
-                              }
-                            | undefined;
-                        return (
-                            event.processDefinitionId === processDefinitionId &&
-                            event.processInstanceId === processInstanceId &&
-                            event.processDefinitionKey === processDefinitionKey &&
-                            event.businessKey === businessKey &&
-                            entity?.processDefinitionId === processDefinitionId &&
-                            entity?.processInstanceId === processInstanceId &&
-                            entity?.errorCode === 'CLOUD_BPMN_ERROR' &&
-                            entity?.errorId === 'CLOUD_BPMN_ERROR'
-                        );
-                    });
-
-                    const hasIntegrationError = events.some(
-                        (event) =>
-                            event.eventType === EventType.INTEGRATION_ERROR_RECEIVED &&
-                            event.errorMessage === 'CLOUD_BPMN_ERROR' &&
-                            event.errorClassName ===
-                                'org.activiti.cloud.api.process.model.CloudBpmnError'
+            const event = await auditServiceTestUser.waitForEventMatching(
+                processInstanceId,
+                (event) => {
+                    if (event.eventType !== EventType.ERROR_RECEIVED) {
+                        return false;
+                    }
+                    const entity = event.entity as
+                        | {
+                              processDefinitionId?: string;
+                              processInstanceId?: string;
+                              errorCode?: string;
+                              errorId?: string;
+                          }
+                        | undefined;
+                    return (
+                        event.processDefinitionId === processDefinitionId &&
+                        event.processInstanceId === processInstanceId &&
+                        event.processDefinitionKey === processDefinitionKey &&
+                        event.businessKey === businessKey &&
+                        entity?.processDefinitionId === processDefinitionId &&
+                        entity?.processInstanceId === processInstanceId &&
+                        entity?.errorCode === 'CLOUD_BPMN_ERROR' &&
+                        entity?.errorId === 'CLOUD_BPMN_ERROR'
                     );
+                },
+                `ERROR_RECEIVED CLOUD_BPMN_ERROR on ${processInstanceId}`
+            );
+            expect(event.eventType).toBe(EventType.ERROR_RECEIVED);
 
-                    return hasBpmnErrorReceived && hasIntegrationError;
-                }, pollOptions('querySync'))
-                .toBe(true);
+            const integrationError = await auditServiceTestUser.waitForEventMatching(
+                processInstanceId,
+                (event) =>
+                    event.eventType === EventType.INTEGRATION_ERROR_RECEIVED &&
+                    event.errorMessage === 'CLOUD_BPMN_ERROR' &&
+                    event.errorClassName ===
+                        'org.activiti.cloud.api.process.model.CloudBpmnError',
+                `INTEGRATION_ERROR_RECEIVED CloudBpmnError on ${processInstanceId}`
+            );
+            expect(integrationError.eventType).toBe(EventType.INTEGRATION_ERROR_RECEIVED);
         });
 
         await activiti.step('And the status of the process is changed to cancelled', async () => {
@@ -278,27 +248,17 @@ activiti.describe('Process Instance Connectors Actions', { tag: '@slow' }, () =>
                 await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
 
-            await expect
-                .poll(async () => {
-                    try {
-                        const instance = await queryServiceTestUser.getProcessInstance(processInstanceId);
-                        return instance.status;
-                    } catch (error) {
-                        const message = error instanceof Error ? error.message : String(error);
-                        if (message.includes('Unable to find process instance')) {
-                            return 'SYNC_PENDING';
-                        }
-                        throw error;
-                    }
-                }, pollOptions('querySync'))
-                .toBe(ProcessInstanceStatus.CANCELLED);
+            const instance = await queryServiceTestUser.waitForProcessInstanceStatus(
+                processInstanceId,
+                ProcessInstanceStatus.CANCELLED
+            );
+            expect(instance.status).toBe(ProcessInstanceStatus.CANCELLED);
 
-            await expect
-                .poll(async () => {
-                    const events = await auditServiceTestUser.getEventsByProcessInstanceId(processInstanceId);
-                    return events.some((event) => event.eventType === EventType.PROCESS_CANCELLED);
-                }, pollOptions('auditEvents'))
-                .toBe(true);
+            const event = await auditServiceTestUser.waitForEventOfTypeForProcessInstance(
+                processInstanceId,
+                EventType.PROCESS_CANCELLED
+            );
+            expect(event.eventType).toBe(EventType.PROCESS_CANCELLED);
         });
     });
 });
