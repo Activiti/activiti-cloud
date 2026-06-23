@@ -228,7 +228,7 @@ public class QueryAdminProcessDefinitionIT {
     }
 
     @Test
-    public void shouldReturnDeduplicatedLatestVersionsWhenLatestVersionIsTrue() {
+    void shouldReturnDeduplicatedLatestVersionsWhenLatestVersionIsTrue() {
         //given
         ProcessDefinitionImpl firstKeyV1 = new ProcessDefinitionImpl();
         firstKeyV1.setId(UUID.randomUUID().toString());

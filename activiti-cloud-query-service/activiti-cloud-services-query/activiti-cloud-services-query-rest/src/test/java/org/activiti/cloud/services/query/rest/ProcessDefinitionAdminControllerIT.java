@@ -162,7 +162,7 @@ public class ProcessDefinitionAdminControllerIT {
     }
 
     @Test
-    public void shouldReturnDeduplicatedListWhenLatestVersionIsTrue() throws Exception {
+    void shouldReturnDeduplicatedListWhenLatestVersionIsTrue() throws Exception {
         //given
         ProcessDefinitionEntity processOne = buildDefaultProcessDefinition();
         processOne.setKey("processOne");
@@ -182,7 +182,7 @@ public class ProcessDefinitionAdminControllerIT {
     }
 
     @Test
-    public void shouldIgnorePaginationWhenLatestVersionIsTrue() throws Exception {
+    void shouldIgnorePaginationWhenLatestVersionIsTrue() throws Exception {
         //given
         given(processDefinitionRepository.findAllLatestVersions(any()))
             .willReturn(Collections.singletonList(buildDefaultProcessDefinition()));
