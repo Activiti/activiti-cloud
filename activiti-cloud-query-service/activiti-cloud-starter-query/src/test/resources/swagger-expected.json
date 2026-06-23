@@ -5603,12 +5603,12 @@
             "content": {
               "application/hal+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntity"
+                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntry"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntity"
+                  "$ref": "#/components/schemas/ListResponseContentProcessVariableHistoryEntry"
                 }
               }
             }
@@ -8048,11 +8048,11 @@
         },
         "title" : "EntriesResponseContentProcessInstanceSearchResult_ProcessVariables"
       },
-      "EntriesResponseContentProcessVariableHistoryEntity": {
+      "EntriesResponseContentProcessVariableHistoryEntry": {
         "properties": {
           "entries": {
             "items": {
-              "$ref": "#/components/schemas/EntryResponseContentProcessVariableHistoryEntity"
+              "$ref": "#/components/schemas/EntryResponseContentProcessVariableHistoryEntry"
             },
             "type": "array"
           },
@@ -8060,7 +8060,7 @@
             "$ref": "#/components/schemas/PaginationMetadata"
           }
         },
-        "title": "EntriesResponseContentProcessVariableHistoryEntity",
+        "title": "EntriesResponseContentProcessVariableHistoryEntry",
         "type": "object"
       },
       "EntryResponseContentProcessInstanceSearchResult_ProcessVariables" : {
@@ -8072,13 +8072,13 @@
         },
         "title" : "EntryResponseContentProcessInstanceSearchResult_ProcessVariables"
       },
-      "EntryResponseContentProcessVariableHistoryEntity": {
+      "EntryResponseContentProcessVariableHistoryEntry": {
         "properties": {
           "entry": {
-            "$ref": "#/components/schemas/ProcessVariableHistoryEntity"
+            "$ref": "#/components/schemas/ProcessVariableHistoryEntry"
           }
         },
-        "title": "EntryResponseContentProcessVariableHistoryEntity",
+        "title": "EntryResponseContentProcessVariableHistoryEntry",
         "type": "object"
       },
       "ListResponseContentProcessInstanceSearchResult_ProcessVariables" : {
@@ -8090,13 +8090,13 @@
         },
         "title" : "ListResponseContentProcessInstanceSearchResult_ProcessVariables"
       },
-      "ListResponseContentProcessVariableHistoryEntity": {
+      "ListResponseContentProcessVariableHistoryEntry": {
         "properties": {
           "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentProcessVariableHistoryEntity"
+            "$ref": "#/components/schemas/EntriesResponseContentProcessVariableHistoryEntry"
           }
         },
-        "title": "ListResponseContentProcessVariableHistoryEntity",
+        "title": "ListResponseContentProcessVariableHistoryEntry",
         "type": "object"
       },
       "ProcessInstanceSearchResult_ProcessVariables" : {
@@ -8187,7 +8187,7 @@
         },
         "title" : "ProcessInstanceSearchResult_ProcessVariables"
       },
-      "ProcessVariableHistoryEntity": {
+      "ProcessVariableHistoryEntry": {
         "properties": {
           "commandId": {
             "type": "string"
@@ -8225,7 +8225,7 @@
             "type": "string"
           }
         },
-        "title": "ProcessVariableHistoryEntity",
+        "title": "ProcessVariableHistoryEntry",
         "type": "object"
       },
       "QueryCloudVariableInstance_ProcessVariables" : {
