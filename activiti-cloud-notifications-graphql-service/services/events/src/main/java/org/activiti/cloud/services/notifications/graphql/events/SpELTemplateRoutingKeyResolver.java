@@ -18,7 +18,6 @@ package org.activiti.cloud.services.notifications.graphql.events;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -32,18 +31,17 @@ public class SpELTemplateRoutingKeyResolver implements RoutingKeyResolver {
 
     private final ParserContext parserContext = new TemplateParserContext();
 
-    private final Map<String, Expression> expressionCacheByName = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Expression> expressionCacheByName = new ConcurrentHashMap<>();
 
     @Override
     public String resolveRoutingKey(Object object) {
         return expressionCacheByName
-            .computeIfAbsent(object.getClass().getName(), computeExpression(object.getClass()))
+            .computeIfAbsent(object.getClass(), this::computeExpression)
             .getValue(object)
             .toString();
     }
 
-    private Function<String, Expression> computeExpression(Class<?> clazz) {
-        return name -> {
+    private Expression computeExpression(Class<?> clazz) {
             Annotation annotation = AnnotationUtils.findAnnotation(clazz, SpELTemplateRoutingKey.class);
 
             if (annotation == null) throw new RuntimeException("Cannot resolve routing key for class: " + clazz);
@@ -51,6 +49,5 @@ public class SpELTemplateRoutingKeyResolver implements RoutingKeyResolver {
             String value = AnnotationUtils.getValue(annotation).toString();
 
             return parser.parseExpression(value, parserContext);
-        };
     }
 }
