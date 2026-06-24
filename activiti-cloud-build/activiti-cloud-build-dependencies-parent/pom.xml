@@ -12,7 +12,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2025.1.1</spring-cloud.version>
+    <spring-cloud.version>2025.1.2</spring-cloud.version>
     <testcontainers.version>2.0.3</testcontainers.version>
     <graphql-java.version>25.0</graphql-java.version>
     <postgresql.version>42.7.11</postgresql.version>
@@ -60,42 +60,6 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <!-- AAE-46198 temporary Tomcat version overrides. Remove when upgrading to Spring Boot 4.1.x -->
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>tomcat-annotations-api</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>tomcat-jdbc</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>tomcat-jsp-api</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-core</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-el</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-jasper</artifactId>
-        <version>${tomcat.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-websocket</artifactId>
-        <version>${tomcat.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>

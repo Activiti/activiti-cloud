@@ -193,9 +193,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2026</project.year>
 
-    <spring-boot.version>4.0.6</spring-boot.version>
-    <!-- AAE-46198 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
-    <tomcat.version>11.0.22</tomcat.version>
+    <spring-boot.version>4.1.0</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>

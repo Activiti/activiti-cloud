@@ -801,7 +801,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         assertThat(queue.getArguments())
             .asInstanceOf(InstanceOfAssertFactories.MAP)
-            .containsEntry("x-queue-master-locator", "client-local");
+            .containsEntry("x-queue-leader-locator", "client-local");
     }
 
     @Test
