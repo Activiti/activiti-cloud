@@ -73,7 +73,7 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-tag@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         if: github.event_name == 'push'
         id: tag
         env:
@@ -120,7 +120,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -130,7 +130,7 @@ jobs:
           reuse-testcontainers: 'true'
           maven-command: install -N -DskipTests=true -DskipITs=true
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -142,7 +142,7 @@ jobs:
             install -T 1C -pl activiti-cloud-build -am
             -DskipTests=true -DskipITs=true
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -153,7 +153,7 @@ jobs:
           maven-command: >-
             install -T 1C -pl activiti-cloud-api,activiti-cloud-service-common -am
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -184,7 +184,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - id: scan
-        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
 
       - id: transform
         name: Transform docker image matrix
@@ -222,7 +222,7 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -289,7 +289,7 @@ jobs:
           merge-multiple: true
           path: ~/.m2/repository/org/activiti/cloud
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -300,7 +300,7 @@ jobs:
           ghcr-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           ghcr-password: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -446,7 +446,7 @@ jobs:
           merge-multiple: true
           path: ~/.m2/repository/org/activiti/cloud
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
