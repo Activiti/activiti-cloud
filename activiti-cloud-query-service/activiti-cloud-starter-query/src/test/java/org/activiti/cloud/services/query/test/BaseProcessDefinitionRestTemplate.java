@@ -79,4 +79,15 @@ public abstract class BaseProcessDefinitionRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
+
+    public ResponseEntity<PagedModel<CloudProcessDefinition>> getProcDefinitionsLatestVersion() {
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.exchange(
+            getProcessDefinitionsURL() + "?latestVersion=true",
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_PROCESS_DEFINITION_RESPONSE_TYPE
+        );
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
 }
