@@ -255,7 +255,8 @@ public class QueryAdminProcessDefinitionIT {
         );
 
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.getProcDefinitionsLatestVersion();
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+            testRestTemplate.getProcDefinitionsLatestVersion();
 
         //then
         assertThat(responseEntity.getBody())

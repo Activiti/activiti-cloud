@@ -33,13 +33,13 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
-import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceHierarchyRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -152,8 +152,9 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     public void shouldReturnLatestProcessDefinition() throws Exception {
         //given
-        given(processDefinitionRepository.findAllLatestVersions(any()))
-            .willReturn(Collections.singletonList(buildDefaultProcessDefinition()));
+        given(processDefinitionRepository.findAllLatestVersions(any())).willReturn(
+            Collections.singletonList(buildDefaultProcessDefinition())
+        );
         //when
         mockMvc
             .perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
@@ -170,8 +171,7 @@ public class ProcessDefinitionAdminControllerIT {
         ProcessDefinitionEntity processTwo = buildDefaultProcessDefinition();
         processTwo.setKey("processTwo");
         processTwo.setVersion(7);
-        given(processDefinitionRepository.findAllLatestVersions(any()))
-            .willReturn(List.of(processOne, processTwo));
+        given(processDefinitionRepository.findAllLatestVersions(any())).willReturn(List.of(processOne, processTwo));
 
         //when
         mockMvc
@@ -184,8 +184,9 @@ public class ProcessDefinitionAdminControllerIT {
     @Test
     void shouldIgnorePaginationWhenLatestVersionIsTrue() throws Exception {
         //given
-        given(processDefinitionRepository.findAllLatestVersions(any()))
-            .willReturn(Collections.singletonList(buildDefaultProcessDefinition()));
+        given(processDefinitionRepository.findAllLatestVersions(any())).willReturn(
+            Collections.singletonList(buildDefaultProcessDefinition())
+        );
 
         //when
         mockMvc

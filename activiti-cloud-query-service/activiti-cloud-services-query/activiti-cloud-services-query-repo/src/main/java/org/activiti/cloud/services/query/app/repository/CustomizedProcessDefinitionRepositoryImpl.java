@@ -26,7 +26,8 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 public class CustomizedProcessDefinitionRepositoryImpl
     extends QuerydslRepositorySupport
-    implements CustomizedProcessDefinitionRepository {
+    implements CustomizedProcessDefinitionRepository
+{
 
     private final JPAQueryFactory queryFactory;
 
@@ -44,9 +45,7 @@ public class CustomizedProcessDefinitionRepositoryImpl
             .selectFrom(pd)
             .where(
                 predicate,
-                pd.version.eq(
-                    JPAExpressions.select(pdInner.version.max()).from(pdInner).where(pdInner.key.eq(pd.key))
-                )
+                pd.version.eq(JPAExpressions.select(pdInner.version.max()).from(pdInner).where(pdInner.key.eq(pd.key)))
             )
             .fetch();
     }

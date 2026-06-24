@@ -53,8 +53,9 @@ class CustomizedProcessDefinitionRepositoryImplIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Autowired
     private ProcessDefinitionRepository processDefinitionRepository;
@@ -86,7 +87,11 @@ class CustomizedProcessDefinitionRepositoryImplIT {
         List<ProcessDefinitionEntity> result = processDefinitionRepository.findAllLatestVersions(new BooleanBuilder());
 
         assertThat(result)
-            .extracting(ProcessDefinitionEntity::getId, ProcessDefinitionEntity::getKey, ProcessDefinitionEntity::getVersion)
+            .extracting(
+                ProcessDefinitionEntity::getId,
+                ProcessDefinitionEntity::getKey,
+                ProcessDefinitionEntity::getVersion
+            )
             .containsExactlyInAnyOrder(
                 tuple(firstKeyV3.getId(), "myFirstProcess", 3),
                 tuple(secondKeyV1.getId(), "mySecondProcess", 1)
@@ -106,7 +111,11 @@ class CustomizedProcessDefinitionRepositoryImplIT {
         );
 
         assertThat(result)
-            .extracting(ProcessDefinitionEntity::getId, ProcessDefinitionEntity::getKey, ProcessDefinitionEntity::getVersion)
+            .extracting(
+                ProcessDefinitionEntity::getId,
+                ProcessDefinitionEntity::getKey,
+                ProcessDefinitionEntity::getVersion
+            )
             .containsExactly(tuple(firstKeyV2.getId(), "myFirstProcess", 2));
     }
 
