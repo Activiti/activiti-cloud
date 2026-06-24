@@ -16,6 +16,9 @@
 package org.activiti.cloud.services.notifications.graphql.events;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -25,22 +28,29 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 public class SpELTemplateRoutingKeyResolver implements RoutingKeyResolver {
 
-    private ExpressionParser parser = new SpelExpressionParser();
+    private final ExpressionParser parser = new SpelExpressionParser();
 
-    private ParserContext parserContext = new TemplateParserContext();
+    private final ParserContext parserContext = new TemplateParserContext();
+
+    private final Map<String, Expression> expressionCacheByName = new ConcurrentHashMap<>();
 
     @Override
     public String resolveRoutingKey(Object object) {
-        Annotation annotation = AnnotationUtils.findAnnotation(object.getClass(), SpELTemplateRoutingKey.class);
+        return expressionCacheByName
+            .computeIfAbsent(object.getClass().getName(), computeExpression(object.getClass()))
+            .getValue(object)
+            .toString();
+    }
 
-        if (annotation == null) throw new RuntimeException(
-            "Cannot resolve routing key for class: " + object.getClass()
-        );
+    private Function<String, Expression> computeExpression(Class<?> clazz) {
+        return name -> {
+            Annotation annotation = AnnotationUtils.findAnnotation(clazz, SpELTemplateRoutingKey.class);
 
-        String value = AnnotationUtils.getValue(annotation).toString();
+            if (annotation == null) throw new RuntimeException("Cannot resolve routing key for class: " + clazz);
 
-        Expression expression = parser.parseExpression(value, parserContext);
+            String value = AnnotationUtils.getValue(annotation).toString();
 
-        return expression.getValue(object).toString();
+            return parser.parseExpression(value, parserContext);
+        };
     }
 }
