@@ -42,12 +42,12 @@ public class SpELTemplateRoutingKeyResolver implements RoutingKeyResolver {
     }
 
     private Expression computeExpression(Class<?> clazz) {
-            Annotation annotation = AnnotationUtils.findAnnotation(clazz, SpELTemplateRoutingKey.class);
+        Annotation annotation = AnnotationUtils.findAnnotation(clazz, SpELTemplateRoutingKey.class);
 
-            if (annotation == null) throw new RuntimeException("Cannot resolve routing key for class: " + clazz);
+        if (annotation == null) throw new RuntimeException("Cannot resolve routing key for class: " + clazz);
 
-            String value = AnnotationUtils.getValue(annotation).toString();
+        String value = AnnotationUtils.getValue(annotation).toString();
 
-            return parser.parseExpression(value, parserContext);
+        return parser.parseExpression(value, parserContext);
     }
 }

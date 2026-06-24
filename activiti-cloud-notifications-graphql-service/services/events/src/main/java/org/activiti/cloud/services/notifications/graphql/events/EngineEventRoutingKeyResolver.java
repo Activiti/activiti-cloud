@@ -35,7 +35,9 @@ public class EngineEventRoutingKeyResolver implements RoutingKeyResolver {
             );
         }
 
-        throw new IllegalArgumentException("Cannot resolve routing key for class: " + (object == null ? "null" : object.getClass()));
+        throw new IllegalArgumentException(
+            "Cannot resolve routing key for class: " + (object == null ? "null" : object.getClass())
+        );
     }
 
     private static String segment(EngineEvent engineEvent, String key) {

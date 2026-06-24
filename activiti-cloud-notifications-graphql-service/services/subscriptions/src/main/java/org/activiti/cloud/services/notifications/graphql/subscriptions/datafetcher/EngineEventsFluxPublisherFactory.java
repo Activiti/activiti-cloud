@@ -44,9 +44,10 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
         Predicate<? super EngineEvent> predicate = predicateFactory.getPredicate(environment);
 
         return Flux.from(
-            engineEventsFlux.map(Message::getPayload)
-                    .map(engineEvents -> engineEvents.stream().filter(predicate).toList())
-                    .filter(Predicate.not(List::isEmpty))
+            engineEventsFlux
+                .map(Message::getPayload)
+                .map(engineEvents -> engineEvents.stream().filter(predicate).toList())
+                .filter(Predicate.not(List::isEmpty))
         );
     }
 }
