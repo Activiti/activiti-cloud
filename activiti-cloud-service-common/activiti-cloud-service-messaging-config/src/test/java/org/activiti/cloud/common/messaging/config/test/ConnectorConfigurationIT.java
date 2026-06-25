@@ -23,6 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -271,6 +272,7 @@ public class ConnectorConfigurationIT {
 
                     TimeUnit.of(ChronoUnit.SECONDS).sleep(2);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     connectorTimeoutCounter.incrementAndGet();
                 }
             };
@@ -293,8 +295,7 @@ public class ConnectorConfigurationIT {
                     Thread.sleep(Duration.ofSeconds(5).toMillis());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt(); // Restores flag
-
-                    throw new InterruptedException();
+                    throw e;
                 }
             };
         }
@@ -304,6 +305,8 @@ public class ConnectorConfigurationIT {
     public void setUp() {
         expression = resolveExpression(condition);
         output.clear();
+        connectorWorkerThread.set(null);
+        clearInvocations(myErrorHandler);
         myErrorHandler.reset();
     }
 
