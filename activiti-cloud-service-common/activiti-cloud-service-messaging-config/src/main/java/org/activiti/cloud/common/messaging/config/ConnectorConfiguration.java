@@ -139,23 +139,34 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             Message<?> response = null;
 
                             try {
-                                final var timeout = Duration.parse(
-                                    headers
-                                        .getOrDefault(
-                                            "integrationResultTimeout",
-                                            connectorBinding.integrationResultTimeout()
-                                        )
-                                        .toString()
-                                );
-
                                 Future<Object> future = connectorAsyncTaskExecutor.submit(() ->
                                     function.apply(message)
                                 );
 
-                                Object result;
+                                final var resultTimeout = Optional.ofNullable(
+                                    headers.get("integrationResultTimeout", String.class)
+                                )
+                                    .or(() -> Optional.of(connectorBinding.integrationResultTimeout()))
+                                    .map(Duration::parse)
+                                    .get();
 
                                 try {
-                                    result = future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                                    Object result = future.get(resultTimeout.toMillis(), TimeUnit.MILLISECONDS);
+
+                                    if (result != null) {
+                                        if (result instanceof Message<?> msg) {
+                                            result = msg.getPayload();
+                                        }
+
+                                        response = MessageBuilder.withPayload(result).build();
+
+                                        String destination = headers.get(connectorBinding.outputHeader(), String.class);
+
+                                        if (StringUtils.hasText(destination)) {
+                                            getStreamBridge().send(destination, response);
+                                            return null;
+                                        }
+                                    }
                                 } catch (InterruptedException interruptedException) {
                                     Thread.currentThread().interrupt();
                                     throw new RuntimeException(
@@ -165,7 +176,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 } catch (TimeoutException timeoutException) {
                                     future.cancel(true);
                                     throw new RuntimeException(
-                                        "Timeout after " + timeout + " while waiting for result",
+                                        "Timeout after " + resultTimeout + " while waiting for result",
                                         timeoutException
                                     );
                                 } catch (ExecutionException executionException) {
@@ -173,21 +184,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         executionException.getMessage(),
                                         executionException.getCause()
                                     );
-                                }
-
-                                if (result != null) {
-                                    if (result instanceof Message<?> msg) {
-                                        result = msg.getPayload();
-                                    }
-
-                                    response = MessageBuilder.withPayload(result).build();
-
-                                    String destination = headers.get(connectorBinding.outputHeader(), String.class);
-
-                                    if (StringUtils.hasText(destination)) {
-                                        getStreamBridge().send(destination, response);
-                                        return null;
-                                    }
                                 }
                             } catch (Exception connectorError) {
                                 connectorErrorHandlerDefinitionResolver
