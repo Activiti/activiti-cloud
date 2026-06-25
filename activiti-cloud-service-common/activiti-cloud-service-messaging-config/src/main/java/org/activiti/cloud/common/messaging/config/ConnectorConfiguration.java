@@ -84,8 +84,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "connectorTaskAsyncExecutor")
-    AsyncTaskExecutor connectorTaskAsyncExecutor() {
+    @ConditionalOnMissingBean(name = "connectorAsyncTaskExecutor")
+    AsyncTaskExecutor connectorAsyncTaskExecutor() {
         return new SimpleAsyncTaskExecutorBuilder()
             .concurrencyLimit(Runtime.getRuntime().availableProcessors())
             .cancelRemainingTasksOnClose(true)
@@ -104,7 +104,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             ConnectorBinding,
             Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
         > connectorErrorHandlerDefinitionResolver,
-        AsyncTaskExecutor connectorTaskAsyncExecutor,
+        AsyncTaskExecutor connectorAsyncTaskExecutor,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -148,7 +148,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         .toString()
                                 );
 
-                                Future<Object> future = connectorTaskAsyncExecutor.submit(() ->
+                                Future<Object> future = connectorAsyncTaskExecutor.submit(() ->
                                     function.apply(message)
                                 );
 
