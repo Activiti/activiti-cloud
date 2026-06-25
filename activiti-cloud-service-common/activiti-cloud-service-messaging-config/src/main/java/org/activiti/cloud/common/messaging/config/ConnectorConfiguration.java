@@ -172,7 +172,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         timeoutException
                                     );
                                 } catch (ExecutionException executionException) {
-                                    throw new RuntimeException("Failed to execute connector task", executionException);
+                                    throw new RuntimeException(executionException.getMessage(), executionException);
                                 }
 
                                 if (result != null) {
