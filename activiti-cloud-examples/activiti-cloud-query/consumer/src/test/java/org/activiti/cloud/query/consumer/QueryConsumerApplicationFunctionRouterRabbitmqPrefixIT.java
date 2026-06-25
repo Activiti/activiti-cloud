@@ -50,6 +50,6 @@ public class QueryConsumerApplicationFunctionRouterRabbitmqPrefixIT extends Quer
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents");
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }
