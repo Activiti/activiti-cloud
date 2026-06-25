@@ -15,20 +15,16 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_REQUESTS;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.INTEGRATION_RESULTS;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +72,7 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.util.function.ThrowingConsumer;
 
 @SpringBootTest(
     properties = {
@@ -107,11 +104,13 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_ERROR = "connectorTestMyErrorHandler";
     private static final String FUNCTION_NAME_RETRY = "connectorWithRetry";
     private static final String FUNCTION_NAME_TIMEOUT = "connectorWithTimeout";
+    private static final String FUNCTION_NAME_INTERRUPT = "connectorWithInterrupt";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
     private static final AtomicInteger connectorTestMyErrorHandlerCounter = new AtomicInteger(0);
     private static final AtomicInteger connectorTimeoutCounter = new AtomicInteger(0);
+    private static final AtomicReference<Thread> connectorWorkerThread = new AtomicReference<>();
 
     @Autowired
     private StandardEvaluationContext evaluationContext;
@@ -265,9 +264,32 @@ public class ConnectorConfigurationIT {
                 try {
                     assertThat(payload).isNotNull().isEqualTo("TestTimeout");
 
-                    TimeUnit.of(ChronoUnit.SECONDS).sleep(2000L);
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(2);
                 } catch (InterruptedException e) {
                     connectorTimeoutCounter.incrementAndGet();
+                }
+            };
+        }
+
+        @Bean(FUNCTION_NAME_INTERRUPT)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestInterrupt'",
+            integrationResultTimeout = "PT5S"
+        )
+        public ThrowingConsumer<String> consumerInterrupt() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("TestInterrupt");
+                connectorWorkerThread.set(Thread.currentThread());
+
+                try {
+                    Thread.sleep(Duration.ofSeconds(5).toMillis());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restores flag
+
+                    throw new InterruptedException();
                 }
             };
         }
@@ -277,6 +299,7 @@ public class ConnectorConfigurationIT {
     public void setUp() {
         expression = resolveExpression(condition);
         output.clear();
+        myErrorHandler.reset();
     }
 
     @Test
@@ -547,7 +570,6 @@ public class ConnectorConfigurationIT {
             .build();
 
         // when
-        long start = System.currentTimeMillis();
         input.send(message, "script.EXECUTE");
 
         //Check delay execution = (retries -1) * delay time. It is a bit greater because some operation overload
@@ -567,7 +589,7 @@ public class ConnectorConfigurationIT {
     }
 
     @Test
-    public void testShouldDiscardMessageOnExecutionTimeout() {
+    public void testShouldHandleErrorOnExecutionTimeout() {
         // given
         connectorTimeoutCounter.set(0);
 
@@ -580,8 +602,7 @@ public class ConnectorConfigurationIT {
             .build();
 
         // when
-        long start = System.currentTimeMillis();
-        input.send(message, "script.EXECUTE");
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
 
         await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
 
@@ -595,6 +616,34 @@ public class ConnectorConfigurationIT {
             .isEqualTo("Timeout after PT1S while waiting for result");
 
         assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void testShouldHandleErrorOnExecutionInterrupt() {
+        // given
+        byte[] payload = "TestInterrupt".getBytes();
+        Message<?> message = MessageBuilder.withPayload(payload)
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestInterrupt")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .build();
+
+        // when
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
+
+        await().untilAtomic(connectorWorkerThread, Matchers.notNullValue());
+
+        connectorWorkerThread.get().interrupt();
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload()).hasRootCauseInstanceOf(
+            InterruptedException.class
+        );
     }
 
     @Test
@@ -635,6 +684,10 @@ public class ConnectorConfigurationIT {
 
         public AtomicReference<ErrorMessage> getReference() {
             return reference;
+        }
+
+        public void reset() {
+            reference.set(null);
         }
     }
 }
