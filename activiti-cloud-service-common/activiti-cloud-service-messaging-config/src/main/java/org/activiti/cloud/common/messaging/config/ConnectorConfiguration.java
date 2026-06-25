@@ -18,8 +18,12 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -32,6 +36,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
@@ -42,6 +48,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -76,6 +83,17 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             .get();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    AsyncTaskExecutor connectorTaskExecutor() {
+        return new SimpleAsyncTaskExecutorBuilder()
+            .concurrencyLimit(Runtime.getRuntime().availableProcessors())
+            .cancelRemainingTasksOnClose(true)
+            .threadNamePrefix("connector-executor-")
+            .virtualThreads(true)
+            .build();
+    }
+
     @Bean(name = "connectorBindingPostProcessor")
     public BeanPostProcessor connectorBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
@@ -86,6 +104,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             ConnectorBinding,
             Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
         > connectorErrorHandlerDefinitionResolver,
+        AsyncTaskExecutor connectorTaskExecutor,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -120,7 +139,36 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             Message<?> response = null;
 
                             try {
-                                Object result = function.apply(message);
+                                final var timeout = Duration.parse(
+                                    headers
+                                        .getOrDefault(
+                                            "integrationResultTimeout",
+                                            connectorBinding.integrationResultTimeout()
+                                        )
+                                        .toString()
+                                );
+
+                                Future<Object> future = connectorTaskExecutor.submit(() -> function.apply(message));
+
+                                Object result;
+
+                                try {
+                                    result = future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                                } catch (InterruptedException interruptedException) {
+                                    Thread.currentThread().interrupt();
+                                    throw new RuntimeException(
+                                        "Interrupted while waiting for result",
+                                        interruptedException
+                                    );
+                                } catch (TimeoutException timeoutException) {
+                                    future.cancel(true);
+                                    throw new RuntimeException(
+                                        "Timeout after " + timeout + " while waiting for result",
+                                        timeoutException
+                                    );
+                                } catch (ExecutionException executionException) {
+                                    throw new RuntimeException("Failed to execute connector task", executionException);
+                                }
 
                                 if (result != null) {
                                     if (result instanceof Message<?> msg) {

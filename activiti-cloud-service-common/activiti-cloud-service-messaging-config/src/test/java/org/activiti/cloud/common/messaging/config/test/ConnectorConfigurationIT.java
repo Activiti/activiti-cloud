@@ -29,8 +29,11 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -103,10 +106,12 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
     private static final String FUNCTION_NAME_ERROR = "connectorTestMyErrorHandler";
     private static final String FUNCTION_NAME_RETRY = "connectorWithRetry";
+    private static final String FUNCTION_NAME_TIMEOUT = "connectorWithTimeout";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
     private static final AtomicInteger connectorTestMyErrorHandlerCounter = new AtomicInteger(0);
+    private static final AtomicInteger connectorTimeoutCounter = new AtomicInteger(0);
 
     @Autowired
     private StandardEvaluationContext evaluationContext;
@@ -244,6 +249,26 @@ public class ConnectorConfigurationIT {
         public ConsumerConnector<?> consumerRetry() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestRetry");
+            };
+        }
+
+        @Bean(FUNCTION_NAME_TIMEOUT)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestTimeout'",
+            integrationResultTimeout = "PT1S"
+        )
+        public ConsumerConnector<String> consumerTimeout() {
+            return payload -> {
+                try {
+                    assertThat(payload).isNotNull().isEqualTo("TestTimeout");
+
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(2000L);
+                } catch (InterruptedException e) {
+                    connectorTimeoutCounter.incrementAndGet();
+                }
             };
         }
     }
@@ -539,6 +564,37 @@ public class ConnectorConfigurationIT {
             Message<byte[]> reply = output.receive(2000, bindingResolver.getBindingDestination(COMMAND_RESULTS));
             assertThat(reply).isNull();
         });
+    }
+
+    @Test
+    public void testShouldDiscardMessageOnExecutionTimeout() {
+        // given
+        connectorTimeoutCounter.set(0);
+
+        byte[] payload = "TestTimeout".getBytes();
+        Message<?> message = MessageBuilder.withPayload(payload)
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestTimeout")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .build();
+
+        // when
+        long start = System.currentTimeMillis();
+        input.send(message, "script.EXECUTE");
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload())
+            .hasRootCauseInstanceOf(TimeoutException.class)
+            .extracting(Throwable::getCause)
+            .extracting(Throwable::getMessage)
+            .isEqualTo("Timeout after PT1S while waiting for result");
+
+        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
     }
 
     @Test

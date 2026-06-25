@@ -40,4 +40,6 @@ public @interface ConnectorBinding {
 
     // Time to wait before retry in second
     long retryDelay() default 0;
+
+    String integrationResultTimeout() default "PT25M";
 }
