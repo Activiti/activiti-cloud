@@ -24,8 +24,7 @@
     <plexus-utils.version>4.0.3</plexus-utils.version>
     <!-- Security fix: CVE in BouncyCastle 1.81 https://hyland.atlassian.net/browse/AAE-44983 -->
     <bcprov.version>1.84</bcprov.version>
-    <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version.
-         Remove when Spring Boot update brings spring-kafka >= 4.0.6 transitively. -->
+    <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
     <spring-kafka.version>4.0.6</spring-kafka.version>
   </properties>
   <dependencyManagement>
@@ -131,8 +130,7 @@
         <version>${bcprov.version}</version>
       </dependency>
 
-      <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version.
-           Remove when Spring Boot update brings spring-kafka >= 4.0.6 transitively. -->
+      <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
       <dependency>
         <groupId>org.springframework.kafka</groupId>
         <artifactId>spring-kafka</artifactId>
