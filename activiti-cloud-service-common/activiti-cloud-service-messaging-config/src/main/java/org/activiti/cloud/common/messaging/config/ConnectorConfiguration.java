@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -85,13 +86,15 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     @Bean
     @ConditionalOnMissingBean
-    AsyncTaskExecutor connectorTaskExecutor() {
-        return new SimpleAsyncTaskExecutorBuilder()
+    Supplier<AsyncTaskExecutor> connectorTaskExecutorProvider() {
+        final var executor = new SimpleAsyncTaskExecutorBuilder()
             .concurrencyLimit(Runtime.getRuntime().availableProcessors())
             .cancelRemainingTasksOnClose(true)
             .threadNamePrefix("connector-executor-")
             .virtualThreads(true)
             .build();
+
+        return () -> executor;
     }
 
     @Bean(name = "connectorBindingPostProcessor")
@@ -104,7 +107,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             ConnectorBinding,
             Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
         > connectorErrorHandlerDefinitionResolver,
-        AsyncTaskExecutor connectorTaskExecutor,
+        Supplier<AsyncTaskExecutor> connectorTaskExecutorProvider,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -148,7 +151,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         .toString()
                                 );
 
-                                Future<Object> future = connectorTaskExecutor.submit(() -> function.apply(message));
+                                Future<Object> future = connectorTaskExecutorProvider
+                                    .get()
+                                    .submit(() -> function.apply(message));
 
                                 Object result;
 
