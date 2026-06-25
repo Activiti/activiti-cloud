@@ -145,7 +145,6 @@ jobs:
             -pl ${{ steps.common-modules.outputs.modules }} -am
           jacoco-report-name: jacoco-common
           target-folder-upload-name: target-common
-          m2-current-build-upload-name: m2-common
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
 
@@ -205,12 +204,10 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
-          reuse-testcontainers: 'true'
           maven-command: >-
             install -T 1C -pl activiti-cloud-dependencies -am
             -DskipTests=true -DskipITs=true
           m2-current-build-upload-name: m2-dependencies-bom
-          target-folder-upload-name: target-dependencies-bom
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
 
@@ -252,46 +249,18 @@ jobs:
         with:
           ref: ${{ needs.create-tag.outputs.ref }}
 
-      - name: Download target
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          pattern: target*
-          merge-multiple: true
-
-      - name: Download M2 build artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          pattern: m2*
-          merge-multiple: true
-          path: ~/.m2/repository/org/activiti/cloud
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         with:
-          java-version: '25'
-          java-distribution: 'corretto'
-          maven-command: compile -DskipTests=true -DskipITs=true -T 1C
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-project: Activiti_activiti-cloud
+          sonar-organization: activiti
+          m2-uploaded-group-path: ~/.m2/repository/org/activiti/cloud
           ghcr-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           ghcr-password: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
           java-version: '25'
-          java-distribution: 'corretto'
-          maven-command: >-
-            sonar:sonar
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.organization=activiti
-            -Dsonar.projectKey=Activiti_activiti-cloud
-            -Dsonar.coverage.jacoco.xmlReportPaths=**/target/site/jacoco-*/jacoco.xml
-          ghcr-username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          ghcr-password: ${{ secrets.BOT_GITHUB_TOKEN }}
 
   playwright-tests:
     needs:
@@ -415,13 +384,6 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - name: Download M2 build artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          pattern: m2*
-          merge-multiple: true
-          path: ~/.m2/repository/org/activiti/cloud
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -430,7 +392,7 @@ jobs:
           java-version: '25'
           java-distribution: 'corretto'
           maven-command: >-
-            deploy -DskipTests
+            deploy -DskipTests -Dskip.common.tests=true
             -Dhttp.keepAlive=false
             -Dmaven.wagon.http.pool=false
             -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
