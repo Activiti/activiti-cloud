@@ -47,7 +47,9 @@ public class EngineEventsDestinationsPredicateFactory implements EngineEventsPre
         return engineEvent -> {
             String routingKey = routingKeyResolver.resolveRoutingKey(engineEvent);
 
-            logger.debug("Resolved routing key {} for {}", routingKey, engineEvent);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Resolved routing key {} for {}", routingKey, engineEvent);
+            }
 
             return destinations.stream().anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
         };

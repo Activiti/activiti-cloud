@@ -22,12 +22,15 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -37,6 +40,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -69,9 +73,20 @@ public class ProcessDefinitionAdminController {
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessDefinitionEntity.class
         ) Predicate predicate,
+        @RequestParam(value = "latestVersion", required = false, defaultValue = "false") boolean latestVersion,
         Pageable pageable
     ) {
         predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
+
+        if (latestVersion) {
+            List<ProcessDefinitionEntity> latest = repository.findAllLatestVersions(predicate);
+            Pageable singlePage = PageRequest.of(0, Math.max(latest.size(), 1));
+            return pagedCollectionModelAssembler.toModel(
+                singlePage,
+                new PageImpl<>(latest, singlePage, latest.size()),
+                processDefinitionRepresentationModelAssembler
+            );
+        }
 
         return pagedCollectionModelAssembler.toModel(
             pageable,

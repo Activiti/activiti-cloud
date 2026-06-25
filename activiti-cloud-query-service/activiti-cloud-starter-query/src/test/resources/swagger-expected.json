@@ -6768,6 +6768,14 @@
         "summary" : "Find all Process Admin",
         "operationId" : "findAllProcessAdmin",
         "parameters" : [ {
+          "name" : "latestVersion",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
           "name" : "maxItems",
           "in" : "query",
           "required" : false,

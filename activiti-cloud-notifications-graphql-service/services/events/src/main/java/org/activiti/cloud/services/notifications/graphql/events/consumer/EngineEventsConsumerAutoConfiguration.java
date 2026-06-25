@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.services.notifications.graphql.events.EngineEventRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
-import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.EngineEventsTransformer;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
@@ -81,7 +81,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public RoutingKeyResolver routingKeyResolver() {
-            return new SpELTemplateRoutingKeyResolver();
+            return new EngineEventRoutingKeyResolver();
         }
 
         @Bean
@@ -138,9 +138,7 @@ public class EngineEventsConsumerAutoConfiguration {
                 .onErrorResume(e -> Mono.empty())
                 .publish()
                 .autoConnect()
-                .parallel()
-                .runOn(engineEventsScheduler)
-                .sequential()
+                .publishOn(engineEventsScheduler)
                 .onBackpressureLatest();
         }
 
