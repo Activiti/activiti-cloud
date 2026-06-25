@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -106,7 +107,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         > connectorErrorHandlerDefinitionResolver,
         AsyncTaskExecutor connectorAsyncTaskExecutor,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
+        @Value("${activiti.connector.integration.resultTimeout:25m}") Duration defaultResultTimeout
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -147,8 +149,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     headers.get("integrationResultTimeout", String.class)
                                 )
                                     .or(() -> Optional.of(connectorBinding.integrationResultTimeout()))
+                                    .filter(Predicate.not(String::isEmpty))
                                     .map(Duration::parse)
-                                    .get();
+                                    .orElse(defaultResultTimeout);
 
                                 try {
                                     Object result = future.get(resultTimeout.toMillis(), TimeUnit.MILLISECONDS);
