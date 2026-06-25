@@ -120,15 +120,16 @@ jobs:
           ref: ${{ needs.create-tag.outputs.ref }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        with:
-          java-version: '25'
-          java-distribution: 'corretto'
-          reuse-testcontainers: 'true'
-          maven-command: install -N -DskipTests=true -DskipITs=true
+      # -pl <aggregator> does NOT include its submodules in a filtered reactor.
+      # Enumerate every pom.xml under common parents so leaf modules (and tests) are in the reactor.
+      - name: Resolve common parent modules
+        id: common-modules
+        run: |
+          MODULES=$(find activiti-cloud-build activiti-cloud-api activiti-cloud-service-common -name 'pom.xml' \
+            -not -path '*/target/*' \
+            -exec dirname {} \; \
+            | sort -u | tr '\n' ',' | sed 's/,$//')
+          echo "modules=$MODULES" >> $GITHUB_OUTPUT
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
         env:
@@ -137,41 +138,16 @@ jobs:
         with:
           java-version: '25'
           java-distribution: 'corretto'
+          maven-version: '3.9.9'
           reuse-testcontainers: 'true'
           maven-command: >-
-            install -T 1C -pl activiti-cloud-build -am
-            -DskipTests=true -DskipITs=true
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        with:
-          java-version: '25'
-          java-distribution: 'corretto'
-          reuse-testcontainers: 'true'
-          maven-command: >-
-            install -T 1C -pl activiti-cloud-api,activiti-cloud-service-common -am
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        with:
-          java-version: '25'
-          java-distribution: 'corretto'
-          reuse-testcontainers: 'true'
-          maven-command: >-
-            verify -T 1C -pl activiti-cloud-build -am -Dmaven.install.skip=true
+            install -T 1C -DunitTests.parallel=true
+            -pl ${{ steps.common-modules.outputs.modules }} -am
           jacoco-report-name: jacoco-common
           target-folder-upload-name: target-common
           m2-current-build-upload-name: m2-common
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
-
-      - name: Remove running docker containers
-        run: docker rm -f $(docker ps -a -q) || true
-        continue-on-error: true
 
   scan-image-dirs:
     runs-on: ubuntu-latest
