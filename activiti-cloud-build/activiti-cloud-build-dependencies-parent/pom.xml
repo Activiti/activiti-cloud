@@ -18,7 +18,7 @@
     <postgresql.version>42.7.11</postgresql.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <netty.version>4.2.15.Final</netty.version>
-    <jackson.version>3.0.4</jackson.version>
+    <jackson.version>3.1.4</jackson.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <!-- AAE-43864 temporary update for security issue -->
     <plexus-utils.version>4.0.3</plexus-utils.version>
@@ -68,6 +68,14 @@
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>2.21.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AAE-47587 Jackson 3.x BOM override -->
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>3.1.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -143,6 +151,18 @@
         <groupId>org.springframework.kafka</groupId>
         <artifactId>spring-kafka</artifactId>
         <version>${spring-kafka.version}</version>
+      </dependency>
+
+      <!-- AAE-47587 Jackson 3.x core dependencies override (managed by jackson-bom) -->
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>3.1.4</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>3.1.4</version>
       </dependency>
 
       <dependency>
