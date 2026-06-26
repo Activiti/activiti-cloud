@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import com.jayway.jsonpath.JsonPath;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,21 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.name)].name", containsInAnyOrder("testgroup", "salesgroup")));
+    }
+
+    @Test
+    public void should_returnGroup_when_searchById() throws Exception {
+        String content = this.mockMvc.perform(get("/v1/groups?search=testgroup"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        String groupId = JsonPath.read(content, "$[0].id");
+
+        this.mockMvc.perform(get("/v1/groups/{id}", groupId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(groupId)))
+            .andExpect(jsonPath("$.name", is("testgroup")));
     }
 
     @Test
