@@ -140,6 +140,10 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                         registerFunctionRegistration(functionDefinition, functionRegistration);
 
+                        final var integrationResultTimeout = Optional.of(connectorBinding.integrationResultTimeout())
+                            .filter(Predicate.not(String::isBlank))
+                            .map(resolveExpression);
+
                         GenericHandler<Message> handler = (message, headers) -> {
                             FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                             function.setSkipOutputConversion(true);
@@ -154,8 +158,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 final var resultTimeout = Optional.ofNullable(
                                     headers.get("integrationResultTimeout", String.class)
                                 )
-                                    .or(() -> Optional.of(connectorBinding.integrationResultTimeout()))
-                                    .filter(Predicate.not(String::isEmpty))
+                                    .filter(Predicate.not(String::isBlank))
+                                    .or(() -> integrationResultTimeout)
                                     .map(Duration::parse)
                                     .orElse(defaultResultTimeout);
 

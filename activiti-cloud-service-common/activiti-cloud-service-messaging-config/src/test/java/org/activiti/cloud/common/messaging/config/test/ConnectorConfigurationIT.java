@@ -284,7 +284,7 @@ public class ConnectorConfigurationIT {
             output = INTEGRATION_RESULTS,
             connectorType = "script.EXECUTE",
             condition = "headers['type']=='TestInterrupt'",
-            integrationResultTimeout = "PT10S"
+            integrationResultTimeout = "${SCRIPT_TIMEOUT:PT10S}"
         )
         public ThrowingConsumer<String> consumerInterrupt() {
             return payload -> {
