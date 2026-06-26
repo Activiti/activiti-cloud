@@ -50,6 +50,7 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
@@ -198,10 +199,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         timeoutException
                                     );
                                 } catch (ExecutionException executionException) {
-                                    throw new RuntimeException(
-                                        executionException.getMessage(),
-                                        executionException.getCause()
-                                    );
+                                    final var cause = NestedExceptionUtils.getMostSpecificCause(executionException);
+                                    throw new RuntimeException(cause.getMessage(), cause);
                                 }
                             } catch (Exception connectorError) {
                                 connectorErrorHandlerDefinitionResolver
