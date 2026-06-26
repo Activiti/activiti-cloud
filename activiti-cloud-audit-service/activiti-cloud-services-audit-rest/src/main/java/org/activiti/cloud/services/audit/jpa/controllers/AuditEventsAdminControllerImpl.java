@@ -18,7 +18,6 @@ package org.activiti.cloud.services.audit.jpa.controllers;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
