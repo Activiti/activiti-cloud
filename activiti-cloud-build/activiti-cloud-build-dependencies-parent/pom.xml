@@ -56,6 +56,14 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- AAE-47587 Jackson 3.x BOM override -->
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>3.1.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -71,14 +79,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- AAE-47587 Jackson 3.x BOM override -->
-      <dependency>
-        <groupId>tools.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>3.1.4</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
       <!-- AAE-46198 temporary Tomcat version overrides. Remove when upgrading to Spring Boot 4.1.x -->
       <dependency>
         <groupId>org.apache.tomcat</groupId>
@@ -151,18 +152,6 @@
         <groupId>org.springframework.kafka</groupId>
         <artifactId>spring-kafka</artifactId>
         <version>${spring-kafka.version}</version>
-      </dependency>
-
-      <!-- AAE-47587 Jackson 3.x core dependencies override (managed by jackson-bom) -->
-      <dependency>
-        <groupId>tools.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>3.1.4</version>
-      </dependency>
-      <dependency>
-        <groupId>tools.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>3.1.4</version>
       </dependency>
 
       <dependency>
