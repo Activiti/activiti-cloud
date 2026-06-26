@@ -43,7 +43,7 @@ import tools.jackson.databind.ObjectMapper;
     properties = {
         "logging.level.org.activiti.cloud=DEBUG",
         "logging.level.org.springframework.cloud.stream=DEBUG",
-        "logging.level.org.springframework.cloud.function=DEBUG"
+        "logging.level.org.springframework.cloud.function=DEBUG",
     }
 )
 public class TestBpmnErrorConnectorIT {
