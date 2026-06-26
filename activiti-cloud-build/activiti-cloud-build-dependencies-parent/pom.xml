@@ -79,7 +79,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
       <!-- AAE-46198 temporary Tomcat version overrides. Remove when upgrading to Spring Boot 4.1.x -->
       <dependency>
         <groupId>org.apache.tomcat</groupId>
