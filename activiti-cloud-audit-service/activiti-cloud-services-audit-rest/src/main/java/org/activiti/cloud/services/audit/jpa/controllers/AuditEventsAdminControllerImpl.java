@@ -131,9 +131,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
             auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
 
-            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(
-                auditPage.getContent()
-            );
+            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
 
             auditEventsExporter.exportCsvStreaming(events, fileName, response, isFirstChunk);
 
