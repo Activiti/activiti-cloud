@@ -17,7 +17,9 @@
 package org.activiti.cloud.services;
 
 public class IndirectIT {
-    private org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository = new org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl(null);
+
+    private org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository =
+        new org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl(null);
 
     @org.junit.jupiter.api.Test
     public void indirectITCoverage() {

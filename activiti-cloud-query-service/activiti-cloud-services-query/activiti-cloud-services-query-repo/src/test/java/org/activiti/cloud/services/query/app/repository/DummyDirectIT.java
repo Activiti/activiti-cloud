@@ -19,7 +19,10 @@ package org.activiti.cloud.services.query.app.repository;
 import org.junit.jupiter.api.Test;
 
 public class DummyDirectIT {
-    private CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository = new CustomizedProcessInstanceRepositoryImpl(null);
+
+    private CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository =
+        new CustomizedProcessInstanceRepositoryImpl(null);
+
     @Test
     public void directITCoverage() {
         customizedProcessInstanceRepository.dummyDirectMethodAddedToCheckITCoverage();

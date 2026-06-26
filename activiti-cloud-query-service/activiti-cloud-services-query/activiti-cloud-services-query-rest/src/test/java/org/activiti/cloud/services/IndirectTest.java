@@ -19,7 +19,9 @@ package org.activiti.cloud.services;
 import org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl;
 
 public class IndirectTest {
-    private CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository = new CustomizedProcessInstanceRepositoryImpl(null);
+
+    private CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository =
+        new CustomizedProcessInstanceRepositoryImpl(null);
 
     @org.junit.jupiter.api.Test
     public void indirectUTCoverage() {
