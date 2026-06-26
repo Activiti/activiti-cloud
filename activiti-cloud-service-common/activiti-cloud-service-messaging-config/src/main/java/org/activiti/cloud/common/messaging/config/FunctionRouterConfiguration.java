@@ -144,8 +144,8 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    FunctionRouterShutdownState functionRouterShutdownState() {
-        return new FunctionRouterShutdownState();
+    FunctionRouterShutdownState functionRouterShutdownState(ActivitiCloudMessagingProperties messagingProperties) {
+        return new FunctionRouterShutdownState(messagingProperties.getFunctionRouter().getShutdownDrainTimeout());
     }
 
     @Bean
@@ -188,6 +188,11 @@ public class FunctionRouterConfiguration {
                 );
                 throw new ImmediateRequeueAmqpException("Function router is shutting down");
             }
+            log.debug(
+                "Function router dispatching message {} (integrationContextId={})",
+                message.getHeaders().getId(),
+                message.getHeaders().get("integrationContextId")
+            );
             Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
@@ -261,7 +266,7 @@ public class FunctionRouterConfiguration {
                             Stream.of(functions).map(CompletableFuture::join).toList()
                         );
 
-                        completed.thenAccept(results -> {
+                        var drained = completed.thenAccept(results -> {
                             var errors = results
                                 .stream()
                                 .map(Map.Entry.class::cast)
@@ -303,6 +308,7 @@ public class FunctionRouterConfiguration {
                                 log.debug("Successfully completed function route message request {}", message);
                             }
                         });
+                        shutdownState.register(drained);
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);
