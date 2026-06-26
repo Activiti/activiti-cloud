@@ -36,6 +36,7 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -142,6 +143,12 @@ public class FunctionRouterConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    FunctionRouterShutdownState functionRouterShutdownState() {
+        return new FunctionRouterShutdownState();
+    }
+
+    @Bean
     Function<Message<?>, String> functionRegistrationSelector() {
         return message ->
             Optional.ofNullable(message.getHeaders().get(FunctionProperties.FUNCTION_DEFINITION, String.class))
@@ -168,11 +175,19 @@ public class FunctionRouterConfiguration {
         FunctionCatalog functionCatalog,
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
-        BindingServiceProperties bindingServiceProperties
+        BindingServiceProperties bindingServiceProperties,
+        FunctionRouterShutdownState shutdownState
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
         return (message, routingContext) -> {
+            if (shutdownState.isShuttingDown()) {
+                log.warn(
+                    "Function router is shutting down; requeueing message {} for redelivery to another instance",
+                    message.getHeaders().getId()
+                );
+                throw new ImmediateRequeueAmqpException("Function router is shutting down");
+            }
             Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
