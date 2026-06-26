@@ -44,7 +44,7 @@ jobs:
           java-distribution: 'corretto'
           reuse-testcontainers: 'true'
           maven-command: >-
-            install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true
+            install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true -Dswagger.skip
             -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
           m2-current-build-upload-name: m2-${{ matrix.short-name }}
           m2-cache-exclusion-pattern: org/activiti

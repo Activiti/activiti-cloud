@@ -40,7 +40,7 @@ jobs:
           java-distribution: 'corretto'
           reuse-testcontainers: 'true'
           maven-command: >-
-            verify -Dskip.common.tests=true -Dmaven.install.skip=true
+            verify -Dskip.common.tests=true -Dmaven.install.skip=true -Dswagger.skip
             -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
             ${{ matrix.test-maven-flags }} -U
           jacoco-report-name: jacoco-${{ matrix.short-name }}
