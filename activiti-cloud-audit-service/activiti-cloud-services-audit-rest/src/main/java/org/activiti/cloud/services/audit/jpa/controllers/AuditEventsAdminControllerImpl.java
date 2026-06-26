@@ -122,11 +122,26 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         @RequestParam(value = "to", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
         HttpServletResponse response
     ) throws Exception {
-        Collection<AuditEventEntity> audits = auditEventsAdminService.findAuditsBetweenDates(from, to);
+        final int PAGE_SIZE = 1000;
+        int pageNumber = 0;
+        boolean isFirstChunk = true;
+        Page<AuditEventEntity> auditPage;
 
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(audits);
+        do {
+            Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+            auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
 
-        auditEventsExporter.exportCsv(events, fileName, response);
+            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(
+                auditPage.getContent()
+            );
+
+            auditEventsExporter.exportCsvStreaming(events, fileName, response, isFirstChunk);
+
+            isFirstChunk = false;
+            pageNumber++;
+        } while (auditPage.hasNext());
+
+        response.getWriter().close();
     }
 
     private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(

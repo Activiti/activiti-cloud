@@ -48,6 +48,18 @@ public class AuditEventsExporter {
         writeEventsAsCsv(events, response);
     }
 
+    public void exportCsvStreaming(
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
+        String fileName,
+        HttpServletResponse response,
+        boolean isFirstChunk
+    ) throws Exception {
+        if (isFirstChunk) {
+            setHttpHeaders(fileName, response);
+        }
+        writeEventsAsCsvChunk(events, response, isFirstChunk);
+    }
+
     private void setHttpHeaders(String fileName, HttpServletResponse response) {
         response.setContentType(CSV_CONTENT_TYPE);
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
@@ -65,6 +77,34 @@ public class AuditEventsExporter {
             .build();
         beanToCsv.write(entries);
         writer.close();
+    }
+
+    private void writeEventsAsCsvChunk(
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
+        HttpServletResponse response,
+        boolean isFirstChunk
+    ) throws Exception {
+        if (events.isEmpty()) {
+            return;
+        }
+
+        List<CsvLogEntry> entries = toCsvLogEntryList(events);
+
+        PrintWriter writer = response.getWriter();
+        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
+            .withMappingStrategy(objectToJsonStrategy)
+            .withApplyQuotesToAll(false)
+            .build();
+
+        if (isFirstChunk) {
+            beanToCsv.write(entries);
+        } else {
+            for (CsvLogEntry entry : entries) {
+                beanToCsv.write(entry);
+            }
+        }
+
+        writer.flush();
     }
 
     private List<CsvLogEntry> toCsvLogEntryList(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events) {

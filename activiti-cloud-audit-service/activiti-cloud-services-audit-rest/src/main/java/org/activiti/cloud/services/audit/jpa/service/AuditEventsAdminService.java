@@ -21,6 +21,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public class AuditEventsAdminService {
 
@@ -31,6 +33,16 @@ public class AuditEventsAdminService {
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {
+        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
+        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1]);
+    }
+
+    public Page<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
+        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1], pageable);
+    }
+
+    private Long[] validateAndConvertDates(LocalDate fromDate, LocalDate toDate) {
         if (fromDate.isAfter(toDate)) {
             throw new IllegalArgumentException("From date cannot be after to date");
         }
@@ -44,6 +56,6 @@ public class AuditEventsAdminService {
         Long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
         Long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(startDateTime, endDateTime);
+        return new Long[] { startDateTime, endDateTime };
     }
 }
