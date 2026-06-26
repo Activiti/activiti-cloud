@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.liquibase;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
+package org.activiti.cloud.services;
 
-@SpringBootTest
-@SpringBootApplication
-class ActivitiCloudQueryLiquibaseAutoConfigurationIT {
+public class IndirectIT {
+    private org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository = new org.activiti.cloud.services.query.app.repository.CustomizedProcessInstanceRepositoryImpl(null);
 
-    @Test
-    void contextLoads() {
-        // application context loads successfully
+    @org.junit.jupiter.api.Test
+    public void indirectITCoverage() {
+        customizedProcessInstanceRepository.dummyInDirectMethodAddedToCheckITCoverage();
     }
-
 }

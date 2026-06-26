@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2026 Hyland Software, Inc. and its affiliates.
+ * Copyright 2017-2026 Alfresco Software, Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.query.liquibase;
+package org.activiti.cloud.services.query.app.repository;
 
-import org.springframework.stereotype.Service;
+import org.junit.jupiter.api.Test;
 
-@Service
-public class DummyClassToTestITCoverage {
-
-    public void directDummyMethod() {
-        inDirectDummyMethod();
-        // This method is intentionally left blank to verify test coverage
+public class DummyDirectIT {
+    private CustomizedProcessInstanceRepositoryImpl customizedProcessInstanceRepository = new CustomizedProcessInstanceRepositoryImpl(null);
+    @Test
+    public void directITCoverage() {
+        customizedProcessInstanceRepository.dummyDirectMethodAddedToCheckITCoverage();
     }
-
-    public void inDirectDummyMethod() {
-        // This method is intentionally left blank to verify test coverage
-    }
-
-    public void dummyMethodNotCoveredInTests() {}
 }
