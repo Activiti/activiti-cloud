@@ -47,7 +47,6 @@ jobs:
             install -T 1C -Dskip.common.tests=true -DskipTests=true -DskipITs=true
             -pl ${{ matrix.extra-modules }}${{ matrix.path }} -am
           m2-current-build-upload-name: m2-${{ matrix.short-name }}
-          target-folder-upload-name: target-${{ matrix.short-name }}
           m2-cache-exclusion-pattern: org/activiti
           uploaded-artifacts-retention-days: '1'
           docker-username: ${{ secrets.DOCKERHUB_USERNAME }}

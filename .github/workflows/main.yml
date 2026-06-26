@@ -122,13 +122,26 @@ jobs:
 
       # -pl <aggregator> does NOT include its submodules in a filtered reactor.
       # Enumerate every pom.xml under common parents so leaf modules (and tests) are in the reactor.
+      # Also include standalone library modules not pulled in by any docker-image cell (-pl -am).
+      # TODO: split these into a dedicated maven-build-libraries job when the graph grows further.
       - name: Resolve common parent modules
         id: common-modules
         run: |
-          MODULES=$(find activiti-cloud-build activiti-cloud-api activiti-cloud-service-common -name 'pom.xml' \
-            -not -path '*/target/*' \
-            -exec dirname {} \; \
-            | sort -u | tr '\n' ',' | sed 's/,$//')
+          STANDALONE_MODULES=(
+            activiti-cloud-messages-service/starters/hazelcast
+            activiti-cloud-messages-service/starters/redis
+            activiti-cloud-notifications-graphql-service/gatling
+            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-services-identity-basic
+            activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-runtime-bundle-rest-client
+          )
+          MODULES=$(
+            {
+              find activiti-cloud-build activiti-cloud-api activiti-cloud-service-common -name 'pom.xml' \
+                -not -path '*/target/*' \
+                -exec dirname {} \;
+              printf '%s\n' "${STANDALONE_MODULES[@]}"
+            } | sort -u | tr '\n' ',' | sed 's/,$//'
+          )
           echo "modules=$MODULES" >> $GITHUB_OUTPUT
 
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
