@@ -86,12 +86,18 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
     @Bean
     @ConditionalOnMissingBean(name = "connectorAsyncTaskExecutor")
-    AsyncTaskExecutor connectorAsyncTaskExecutor() {
+    AsyncTaskExecutor connectorAsyncTaskExecutor(
+        @Value("${activiti.connector.async-executor.task-termination-timeout:20s}") Duration taskTerminationTimeout,
+        @Value(
+            "${activiti.connector.async-executor.cancel-remaining-tasks-on-close:true}"
+        ) Boolean cancelRemainingTasksOnClose,
+        @Value("${activiti.connector.async-executor.virutal-threads:true}") Boolean virtualThreads
+    ) {
         return new SimpleAsyncTaskExecutorBuilder()
-            .concurrencyLimit(Runtime.getRuntime().availableProcessors())
-            .cancelRemainingTasksOnClose(true)
-            .threadNamePrefix("connector-executor-")
-            .virtualThreads(true)
+            .threadNamePrefix("connectorAsyncTaskExecutor-")
+            .taskTerminationTimeout(taskTerminationTimeout)
+            .cancelRemainingTasksOnClose(cancelRemainingTasksOnClose)
+            .virtualThreads(virtualThreads)
             .build();
     }
 
@@ -108,7 +114,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         AsyncTaskExecutor connectorAsyncTaskExecutor,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
-        @Value("${activiti.connector.integration.resultTimeout:25m}") Duration defaultResultTimeout
+        @Value("${activiti.connector.integration-result-timeout:25m}") Duration defaultResultTimeout
     ) {
         return new BeanPostProcessor() {
             @Override
