@@ -26,15 +26,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextClosedEvent;
 
-public class FunctionRouterShutdownState implements SmartLifecycle, ApplicationListener<ContextClosedEvent> {
+public class FunctionRouterShutdownState implements ApplicationListener<ContextClosedEvent> {
 
     private static final Logger log = LoggerFactory.getLogger(FunctionRouterShutdownState.class);
 
     private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
-    private final AtomicBoolean running = new AtomicBoolean(false);
     private final Set<CompletableFuture<?>> inFlight = ConcurrentHashMap.newKeySet();
     private final Duration drainTimeout;
 
@@ -57,28 +55,10 @@ public class FunctionRouterShutdownState implements SmartLifecycle, ApplicationL
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         shuttingDown.set(true);
+        drainInFlight();
     }
 
-    @Override
-    public void start() {
-        running.set(true);
-    }
-
-    @Override
-    public boolean isRunning() {
-        return running.get();
-    }
-
-    @Override
-    public int getPhase() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public void stop() {
-        shuttingDown.set(true);
-        running.set(false);
-
+    private void drainInFlight() {
         var pending = inFlight.toArray(CompletableFuture[]::new);
         if (pending.length == 0) {
             return;
