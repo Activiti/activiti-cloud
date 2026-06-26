@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -70,6 +71,7 @@ import org.springframework.util.StringUtils;
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorConfiguration.class);
+    private static final Pattern ISO8601DurationPattern = Pattern.compile("^PT(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
 
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW = "connectorBindingSelectorDiscardFlow";
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
@@ -142,7 +144,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                         final var integrationResultTimeout = Optional.of(connectorBinding.integrationResultTimeout())
                             .filter(Predicate.not(String::isBlank))
-                            .map(resolveExpression);
+                            .map(resolveExpression)
+                            .filter(it -> ISO8601DurationPattern.matcher(it).matches())
+                            .map(Duration::parse);
 
                         GenericHandler<Message> handler = (message, headers) -> {
                             FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
@@ -159,8 +163,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                     headers.get("integrationResultTimeout", String.class)
                                 )
                                     .filter(Predicate.not(String::isBlank))
-                                    .or(() -> integrationResultTimeout)
+                                    .filter(it -> ISO8601DurationPattern.matcher(it).matches())
                                     .map(Duration::parse)
+                                    .or(() -> integrationResultTimeout)
                                     .orElse(defaultResultTimeout);
 
                                 try {

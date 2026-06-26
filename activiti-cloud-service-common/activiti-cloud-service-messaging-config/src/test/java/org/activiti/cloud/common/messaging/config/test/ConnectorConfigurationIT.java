@@ -111,6 +111,7 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_RETRY = "connectorWithRetry";
     private static final String FUNCTION_NAME_TIMEOUT = "connectorWithTimeout";
     private static final String FUNCTION_NAME_INTERRUPT = "connectorWithInterrupt";
+    private static final String FUNCTION_NAME_TIMEOUT_HEADER = "connectorWithTimeoutHeader";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
     public static final String MY_ERROR_HANDLER = "myErrorHandler";
@@ -296,6 +297,33 @@ public class ConnectorConfigurationIT {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt(); // Restores flag
                     throw e;
+                }
+            };
+        }
+
+        @Bean(FUNCTION_NAME_TIMEOUT_HEADER)
+        @ConnectorBinding(
+            input = INTEGRATION_REQUESTS,
+            output = INTEGRATION_RESULTS,
+            connectorType = "script.EXECUTE",
+            condition = "headers['type']=='TestTimeoutHeader'"
+        )
+        public Consumer<Message<String>> consumerTimeoutHeader() {
+            return message -> {
+                try {
+                    final var integrationResultTimeout = assertThat(
+                        message.getHeaders().get("integrationResultTimeout", String.class)
+                    )
+                        .isNotNull()
+                        .isEqualTo("PT1S")
+                        .actual();
+
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(
+                        Duration.parse(integrationResultTimeout).plusSeconds(5).toSeconds()
+                    );
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    connectorTimeoutCounter.incrementAndGet();
                 }
             };
         }
@@ -652,6 +680,36 @@ public class ConnectorConfigurationIT {
         Assertions.assertThat(myErrorHandler.getReference().get().getPayload()).hasRootCauseInstanceOf(
             InterruptedException.class
         );
+    }
+
+    @Test
+    public void testShouldHandleErrorOnExecutionTimeoutHeader() {
+        // given
+        connectorTimeoutCounter.set(0);
+
+        Message<?> message = MessageBuilder.withPayload("TestTimeoutHeader".getBytes())
+            .setHeader("appVersion", "20")
+            .setHeader("type", "TestTimeoutHeader")
+            .setHeader("resultDestination", "commandResults")
+            .setHeader("connectorType", "script.EXECUTE")
+            .setHeader("integrationResultTimeout", "PT1S")
+            .build();
+
+        // when
+        new Thread(() -> input.send(message, "script.EXECUTE")).start();
+
+        await().untilAtomic(myErrorHandler.getReference(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        Assertions.assertThat(myErrorHandler.getReference().get().getPayload())
+            .hasRootCauseInstanceOf(TimeoutException.class)
+            .extracting(Throwable::getCause)
+            .extracting(Throwable::getMessage)
+            .isEqualTo("Timeout after PT1S while waiting for result");
+
+        assertThat(connectorTimeoutCounter.get()).isEqualTo(1);
     }
 
     @Test
