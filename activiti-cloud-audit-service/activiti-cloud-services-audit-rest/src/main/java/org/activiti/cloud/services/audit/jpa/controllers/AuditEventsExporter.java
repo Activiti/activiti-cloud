@@ -93,7 +93,6 @@ public class AuditEventsExporter {
         PrintWriter writer = response.getWriter();
         StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
             .withMappingStrategy(objectToJsonStrategy)
-            .withApplyQuotesToAll(false)
             .build();
 
         if (isFirstChunk) {
