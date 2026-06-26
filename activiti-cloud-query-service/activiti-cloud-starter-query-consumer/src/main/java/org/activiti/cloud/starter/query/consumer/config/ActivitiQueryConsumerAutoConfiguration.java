@@ -43,6 +43,7 @@ import org.springframework.integration.support.json.JacksonJsonObjectMapper;
 import org.springframework.integration.support.json.JacksonMessagingUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import tools.jackson.databind.DeserializationFeature;
 
 @AutoConfiguration(before = QueryConsumerAutoConfiguration.class, after = DataSourceAutoConfiguration.class)
 @PropertySource("classpath:query-messaging.properties")
@@ -91,6 +92,10 @@ public class ActivitiQueryConsumerAutoConfiguration {
     ) {
         final var jsonObjectMapper = new JacksonJsonObjectMapper(
             JacksonMessagingUtils.messagingAwareMapper(trustedPackages)
+                .rebuild()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+                .build()
         );
 
         return () -> jsonObjectMapper;
