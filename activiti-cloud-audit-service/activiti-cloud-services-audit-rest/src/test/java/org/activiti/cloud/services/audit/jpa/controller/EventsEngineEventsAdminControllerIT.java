@@ -56,8 +56,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -179,7 +182,10 @@ class EventsEngineEventsAdminControllerIT {
         List<AuditEventEntity> events = buildEventsData(1);
         events.add(buildVariableAuditEventEntity(2));
 
-        given(eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong())).willReturn(events);
+        Page<AuditEventEntity> page = new PageImpl<>(events);
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(page);
 
         MvcResult response = mockMvc
             .perform(

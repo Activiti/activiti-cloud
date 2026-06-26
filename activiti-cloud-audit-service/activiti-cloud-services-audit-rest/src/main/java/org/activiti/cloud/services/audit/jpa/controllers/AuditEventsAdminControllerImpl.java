@@ -124,11 +124,15 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         final int PAGE_SIZE = 1000;
         int pageNumber = 0;
         boolean isFirstChunk = true;
-        Page<AuditEventEntity> auditPage;
 
+        Page<AuditEventEntity> auditPage;
         do {
             Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
             auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
+
+            if (auditPage == null || !auditPage.hasContent()) {
+                break;
+            }
 
             List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
 
