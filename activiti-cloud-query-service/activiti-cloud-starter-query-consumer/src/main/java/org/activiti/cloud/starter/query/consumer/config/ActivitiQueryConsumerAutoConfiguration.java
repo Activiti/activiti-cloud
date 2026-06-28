@@ -44,6 +44,7 @@ import org.springframework.integration.support.json.JacksonMessagingUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.cfg.ConstructorDetector;
 
 @AutoConfiguration(before = QueryConsumerAutoConfiguration.class, after = DataSourceAutoConfiguration.class)
 @PropertySource("classpath:query-messaging.properties")
@@ -93,6 +94,15 @@ public class ActivitiQueryConsumerAutoConfiguration {
         final var jsonObjectMapper = new JacksonJsonObjectMapper(
             JacksonMessagingUtils.messagingAwareMapper(trustedPackages)
                 .rebuild()
+                // Jackson 3 auto-promotes a single all-args constructor to a properties-based
+                // creator. Event impls are serialized via their getters (e.g. the isPublic() getter
+                // emits the property as "public"), so the creator parameter names never match the
+                // JSON and every primitive arrives absent. EXPLICIT_ONLY keeps that auto-promotion
+                // off, so deserialization falls back to the no-arg constructor + setters and the
+                // values round-trip intact. See AAE-41740.
+                .constructorDetector(ConstructorDetector.EXPLICIT_ONLY)
+                // Outbox forward-compat: tolerate properties the consumer no longer knows about,
+                // and keep absent primitives at their defaults rather than throwing.
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
                 .build()
