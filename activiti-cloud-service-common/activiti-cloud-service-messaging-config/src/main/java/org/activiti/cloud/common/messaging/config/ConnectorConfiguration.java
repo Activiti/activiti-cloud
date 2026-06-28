@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -72,12 +73,12 @@ import org.springframework.util.StringUtils;
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectorConfiguration.class);
-    private static final Pattern ISO8601DurationPattern = Pattern.compile("^PT(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
 
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW = "connectorBindingSelectorDiscardFlow";
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
     public static final String NULL_CHANNEL = "nullChannel";
     public static final String RETRY_COUNT = "x-retry-count";
+    public static final String INTEGRATION_RESULT_TIMEOUT = "integrationResultTimeout";
 
     @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
@@ -115,9 +116,9 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
         > connectorErrorHandlerDefinitionResolver,
         AsyncTaskExecutor connectorAsyncTaskExecutor,
+        BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
-        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay,
-        @Value("${activiti.connector.integration-result-timeout:25m}") Duration defaultResultTimeout
+        @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
         return new BeanPostProcessor() {
             @Override
@@ -143,34 +144,31 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                         registerFunctionRegistration(functionDefinition, functionRegistration);
 
-                        final var integrationResultTimeout = Optional.of(connectorBinding.integrationResultTimeout())
-                            .filter(Predicate.not(String::isBlank))
-                            .map(resolveExpression)
-                            .filter(it -> ISO8601DurationPattern.matcher(it).matches())
-                            .map(Duration::parse);
-
                         GenericHandler<Message> handler = (message, headers) -> {
                             FunctionInvocationWrapper function = functionFromDefinition(functionDefinition);
                             function.setSkipOutputConversion(true);
 
                             Message<?> response = null;
 
+                            final var integrationResultTimeout = connectorIntegrationResultTimeoutResolver.apply(
+                                message,
+                                connectorBinding
+                            );
+
                             try {
                                 Future<Object> future = connectorAsyncTaskExecutor.submit(() ->
-                                    function.apply(message)
+                                    function.apply(
+                                        MessageBuilder.fromMessage(message)
+                                            .setHeader(INTEGRATION_RESULT_TIMEOUT, integrationResultTimeout.toString())
+                                            .build()
+                                    )
                                 );
 
-                                final var resultTimeout = Optional.ofNullable(
-                                    headers.get("integrationResultTimeout", String.class)
-                                )
-                                    .filter(Predicate.not(String::isBlank))
-                                    .filter(it -> ISO8601DurationPattern.matcher(it).matches())
-                                    .map(Duration::parse)
-                                    .or(() -> integrationResultTimeout)
-                                    .orElse(defaultResultTimeout);
-
                                 try {
-                                    Object result = future.get(resultTimeout.toMillis(), TimeUnit.MILLISECONDS);
+                                    Object result = future.get(
+                                        integrationResultTimeout.toMillis(),
+                                        TimeUnit.MILLISECONDS
+                                    );
 
                                     if (result != null) {
                                         if (result instanceof Message<?> msg) {
@@ -195,7 +193,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 } catch (TimeoutException timeoutException) {
                                     future.cancel(true);
                                     throw new RuntimeException(
-                                        "Timeout after " + resultTimeout + " while waiting for result",
+                                        "Timeout after " + integrationResultTimeout + " while waiting for result",
                                         timeoutException
                                     );
                                 } catch (ExecutionException executionException) {
@@ -308,6 +306,28 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 return bean;
             }
         };
+    }
+
+    @Bean
+    BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver(
+        @Value("${activiti.connector.integration-result-timeout:PT25M}") Duration defaultResultTimeout,
+        Function<String, String> resolveExpression
+    ) {
+        final var ISO8601DurationPattern = Pattern.compile("^PT(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
+        final Function<String, Duration> toDuration = value ->
+            Optional.of(value)
+                .filter(Predicate.not(String::isBlank))
+                .map(resolveExpression)
+                .filter(it -> ISO8601DurationPattern.matcher(it).matches())
+                .map(Duration::parse)
+                .orElse(null);
+
+        return (message, connectorBinding) ->
+            Optional.ofNullable(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT, String.class))
+                .map(toDuration)
+                .or(() -> Optional.of(connectorBinding.integrationResultTimeout()).map(toDuration))
+                .filter(it -> it.compareTo(defaultResultTimeout) <= 0)
+                .orElse(defaultResultTimeout);
     }
 
     @Bean
