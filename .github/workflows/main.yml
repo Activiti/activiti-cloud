@@ -128,11 +128,15 @@ jobs:
         id: common-modules
         run: |
           STANDALONE_MODULES=(
+            activiti-cloud-messages-service/integration-tests
             activiti-cloud-messages-service/starters/hazelcast
+            activiti-cloud-messages-service/starters/jdbc
             activiti-cloud-messages-service/starters/redis
             activiti-cloud-notifications-graphql-service/gatling
+            activiti-cloud-notifications-graphql-service/starter
             activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-services-identity-basic
             activiti-cloud-runtime-bundle-service/activiti-cloud-services-runtime-bundle/activiti-cloud-runtime-bundle-rest-client
+            activiti-cloud-runtime-bundle-service/activiti-cloud-starter-runtime-bundle-it
           )
           MODULES=$(
             {
