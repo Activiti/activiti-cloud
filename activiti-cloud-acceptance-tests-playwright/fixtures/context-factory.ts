@@ -100,6 +100,45 @@ export class ContextFactory {
         return wrapAuthenticatedApiContext(context, accessToken, expiresAt, username);
     }
 
+    static async getAnonymousGatewayContext(): Promise<CustomAPIRequest> {
+        const { baseURL, hostHeader } = resolveGatewayConnection();
+
+        const extraHeaders: Record<string, string> = {
+            accept: 'application/json, text/plain, */*',
+        };
+
+        if (hostHeader) {
+            extraHeaders.Host = hostHeader;
+        }
+
+        const context = await request.newContext({
+            baseURL,
+            extraHTTPHeaders: extraHeaders,
+        });
+
+        return wrapAuthenticatedApiContext(context, '', new Date(0), 'anonymous');
+    }
+
+    static async getInvalidTokenGatewayContext(): Promise<CustomAPIRequest> {
+        const { baseURL, hostHeader } = resolveGatewayConnection();
+
+        const extraHeaders: Record<string, string> = {
+            accept: 'application/json, text/plain, */*',
+            Authorization: 'Bearer invalid.acceptance.token',
+        };
+
+        if (hostHeader) {
+            extraHeaders.Host = hostHeader;
+        }
+
+        const context = await request.newContext({
+            baseURL,
+            extraHTTPHeaders: extraHeaders,
+        });
+
+        return wrapAuthenticatedApiContext(context, 'invalid', new Date(0), 'invalid-token');
+    }
+
     private static cleanSensitiveAuthFromData(authFormData: AuthFormData): AuthFormData {
         const data = { form: { ...authFormData.form } };
         if (data.form.password) {

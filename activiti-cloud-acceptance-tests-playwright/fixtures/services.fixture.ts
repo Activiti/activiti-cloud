@@ -67,6 +67,13 @@ interface ServicesFixture {
     auditServiceHrUser: AuditService;
     auditServiceTestAdmin: AuditService;
     auditAdminServiceTestAdmin: AuditAdminService;
+    auditAdminServiceHrUser: AuditAdminService;
+    anonymousQueryService: QueryService;
+    anonymousQueryAdminService: QueryAdminService;
+    anonymousAuditService: AuditService;
+    anonymousAuditAdminService: AuditAdminService;
+    invalidTokenQueryService: QueryService;
+    invalidTokenQueryAdminService: QueryAdminService;
     queryAdminServiceTestAdmin: QueryAdminService;
     securityPoliciesServiceTestUser: SecurityPoliciesService;
     securityPoliciesServiceHrUser: SecurityPoliciesService;
@@ -157,6 +164,27 @@ const activiti = contexts.extend<ServicesFixture>({
     },
     auditAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createAuditAdminService(testAdminUserContext));
+    },
+    auditAdminServiceHrUser: async ({ hrUserContext }, use) => {
+        await use(createAuditAdminService(hrUserContext));
+    },
+    anonymousQueryService: async ({ anonymousGatewayContext }, use) => {
+        await use(createQueryService(anonymousGatewayContext));
+    },
+    anonymousQueryAdminService: async ({ anonymousGatewayContext }, use) => {
+        await use(createQueryAdminService(anonymousGatewayContext));
+    },
+    anonymousAuditService: async ({ anonymousGatewayContext }, use) => {
+        await use(createAuditService(anonymousGatewayContext));
+    },
+    anonymousAuditAdminService: async ({ anonymousGatewayContext }, use) => {
+        await use(createAuditAdminService(anonymousGatewayContext));
+    },
+    invalidTokenQueryService: async ({ invalidTokenGatewayContext }, use) => {
+        await use(createQueryService(invalidTokenGatewayContext));
+    },
+    invalidTokenQueryAdminService: async ({ invalidTokenGatewayContext }, use) => {
+        await use(createQueryAdminService(invalidTokenGatewayContext));
     },
     queryAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryAdminService(testAdminUserContext));

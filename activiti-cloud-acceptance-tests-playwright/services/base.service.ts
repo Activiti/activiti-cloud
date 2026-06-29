@@ -156,6 +156,16 @@ export abstract class BaseService {
         return this.request('delete', endpoint, options);
     }
 
+    async getHttpStatus(endpoint: string, options?: Options): Promise<number> {
+        const response = await this.requestRaw('get', endpoint, options);
+        return response.status();
+    }
+
+    async postHttpStatus(endpoint: string, options?: Options): Promise<number> {
+        const response = await this.requestRaw('post', endpoint, options);
+        return response.status();
+    }
+
     private async request(httpMethod: string, endpoint: string, overriddenOptions?: Options): Promise<RequestResponse> {
         const startTime = Date.now();
         const response = await this.requestRaw(httpMethod, endpoint, overriddenOptions);

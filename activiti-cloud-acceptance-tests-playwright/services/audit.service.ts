@@ -17,6 +17,7 @@
 import { CloudRuntimeEvent, EventQueryParams, EventType } from '../models/audit.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
+import { SearchPageParams, HttpStatusCheck } from '../models/base-service.models';
 
 const INTEGRATION_EVENT_TYPES: readonly string[] = [
     EventType.INTEGRATION_REQUESTED,
@@ -53,7 +54,7 @@ export class AuditService extends BaseService {
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
     }
 
-    async getEvents(params?: EventQueryParams): Promise<CloudRuntimeEvent[]> {
+    async getEvents(params?: EventQueryParams, page?: SearchPageParams): Promise<CloudRuntimeEvent[]> {
         const searchParams = new URLSearchParams();
         searchParams.append('sort', 'timestamp,desc');
         searchParams.append('sort', 'id,desc');
@@ -62,10 +63,21 @@ export class AuditService extends BaseService {
         if (search) {
             searchParams.append('search', search);
         }
+        if (page?.skipCount !== undefined) {
+            searchParams.set('skipCount', String(page.skipCount));
+        }
+        if (page?.maxItems !== undefined) {
+            searchParams.set('maxItems', String(page.maxItems));
+        }
 
         const response = await this.get(`${this.basePath}/events?${searchParams.toString()}`);
 
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+    }
+
+    async getEventById(eventId: string): Promise<CloudRuntimeEvent> {
+        const response = await this.get(`${this.basePath}/events/${encodeURIComponent(eventId)}`);
+        return this.unwrapEntity<CloudRuntimeEvent>(response);
     }
 
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
@@ -412,4 +424,27 @@ export class AuditService extends BaseService {
         const root = this.basePath.replace(/\/v1$/, '');
         return this.getText(`${root}/v3/api-docs/${encodeURIComponent(group)}`);
     }
+
+    async getAllEventsHttpStatus(): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/events`);
+    }
+
+    async getEventHttpStatus(eventId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/events/${encodeURIComponent(eventId)}`);
+    }
+}
+
+export type AuditHttpStatusCheck = HttpStatusCheck<AuditService>;
+
+export function buildAuditUnauthenticatedGetStatusChecks(
+    fakeResourceId: string
+): readonly AuditHttpStatusCheck[] {
+    return [
+        { label: 'events list', run: (service) => service.getAllEventsHttpStatus() },
+        { label: 'event by id', run: (service) => service.getEventHttpStatus(fakeResourceId) },
+    ];
+}
+
+export function buildAuditForbiddenGetStatusChecks(eventId: string): readonly AuditHttpStatusCheck[] {
+    return [{ label: 'event by id', run: (service) => service.getEventHttpStatus(eventId) }];
 }

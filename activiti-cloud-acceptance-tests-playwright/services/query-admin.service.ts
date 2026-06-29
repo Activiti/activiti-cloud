@@ -18,16 +18,19 @@ import {
     CloudIntegrationContext,
     CloudProcessInstance,
     CloudServiceTask,
+    ProcessInstanceSearchRequest,
     ProcessInstanceStatus,
     ProcessQueryParams,
     ServiceTaskStatus,
 } from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
-import { CloudTask } from '../models/task.models';
+import { CloudVariableInstance } from '../models/process-variable.models';
+import { CloudTask, TaskSearchRequest } from '../models/task.models';
 import { BaseService } from './base.service';
 import { RuntimeBundleService } from './runtime-bundle.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { isDiagramShown } from '../helpers/diagram-utils';
+import { SearchPageParams, HttpStatusCheck } from '../models/base-service.models';
 
 export class QueryAdminService extends BaseService {
     private readonly basePath = '/query/admin/v1';
@@ -77,6 +80,94 @@ export class QueryAdminService extends BaseService {
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstancesAdminWithVariableKeys(variableKeys: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances?variableKeys=${encodeURIComponent(variableKeys)}`
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async searchProcessInstancesAdmin(
+        searchRequest: ProcessInstanceSearchRequest = {},
+        page?: SearchPageParams
+    ): Promise<CloudProcessInstance[]> {
+        const response = await this.post(
+            QueryAdminService.searchEndpoint(`${this.basePath}/process-instances/search`, page),
+            { data: searchRequest }
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async countProcessInstancesAdmin(
+        searchRequest: ProcessInstanceSearchRequest = {},
+        page?: SearchPageParams
+    ): Promise<number> {
+        const response = await this.post(
+            QueryAdminService.searchEndpoint(`${this.basePath}/process-instances/count`, page),
+            { data: searchRequest }
+        );
+        return QueryAdminService.parseCountResponse(response);
+    }
+
+    async getProcessInstanceVariablesAdmin(processInstanceId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/variables`);
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async getSubprocessesAdmin(processInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/subprocesses`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getSequenceFlowsAdmin(processInstanceId: string): Promise<Record<string, unknown>[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/sequence-flows`);
+        return this.unwrapList<Record<string, unknown>>(response, 'list');
+    }
+
+    async getBpmnActivitiesAdmin(processInstanceId: string): Promise<Record<string, unknown>[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/bpmn-activities`);
+        return this.unwrapList<Record<string, unknown>>(response, 'list');
+    }
+
+    async getLinkedProcessesAdmin(linkedProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${linkedProcessInstanceId}/linkedprocesses`
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstanceAppVersionsAdmin(): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/process-instances/appVersions`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        return [];
+    }
+
+    async waitForLinkedProcessAdmin(
+        mainProcessInstanceId: string,
+        linkedProcessInstanceId: string
+    ): Promise<CloudProcessInstance[]> {
+        return QueryAdminService.waitFor(
+            () => this.getLinkedProcessesAdmin(mainProcessInstanceId),
+            (instances) => instances.some((instance) => instance.id === linkedProcessInstanceId),
+            'querySync',
+            `linked process ${linkedProcessInstanceId} under ${mainProcessInstanceId}`
+        );
+    }
+
+    private static parseCountResponse(response: { body?: string }): number {
+        const raw = response.body;
+        if (raw === undefined || raw === '') {
+            throw new Error('Unexpected empty count response');
+        }
+        const count = Number(raw);
+        if (Number.isNaN(count)) {
+            throw new Error(`Unexpected count response: ${raw}`);
+        }
+        return count;
     }
 
     async waitForProcessInstancesAdminCountGreaterThan(
@@ -255,6 +346,16 @@ export class QueryAdminService extends BaseService {
         );
     }
 
+    async waitForProcessInstanceAdminSynced(processInstanceId: string): Promise<CloudProcessInstance> {
+        const instance = await QueryAdminService.waitFor(
+            () => this.getProcessInstanceAdminWhenSynced(processInstanceId),
+            (value) => value !== undefined,
+            'querySync',
+            `admin process ${processInstanceId} to be synced to query`
+        );
+        return instance!;
+    }
+
     async waitForProcessInstanceAdminStatus(
         processInstanceId: string,
         expectedStatus: ProcessInstanceStatus
@@ -297,6 +398,186 @@ export class QueryAdminService extends BaseService {
     async getAllTasksAdmin(): Promise<CloudTask[]> {
         const response = await this.get(`${this.basePath}/tasks`);
         return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTasksAdminWithVariableKeys(variableKeys: string): Promise<CloudTask[]> {
+        const response = await this.get(
+            `${this.basePath}/tasks?variableKeys=${encodeURIComponent(variableKeys)}`
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTasksAdminFiltered(filters: {
+        processInstanceId?: string;
+        status?: string;
+        id?: string;
+        skipCount?: number;
+        maxItems?: number;
+        sort?: string[];
+    }): Promise<CloudTask[]> {
+        const params = new URLSearchParams();
+        if (filters.processInstanceId) {
+            params.set('processInstanceId', filters.processInstanceId);
+        }
+        if (filters.status) {
+            params.set('status', filters.status);
+        }
+        if (filters.id) {
+            params.set('id', filters.id);
+        }
+        if (filters.skipCount !== undefined) {
+            params.set('skipCount', String(filters.skipCount));
+        }
+        if (filters.maxItems !== undefined) {
+            params.set('maxItems', String(filters.maxItems));
+        }
+        for (const sort of filters.sort ?? []) {
+            params.append('sort', sort);
+        }
+        const response = await this.get(`${this.basePath}/tasks?${params.toString()}`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getProcessInstancesAdminFiltered(filters: {
+        status?: ProcessInstanceStatus;
+        skipCount?: number;
+        maxItems?: number;
+    }): Promise<CloudProcessInstance[]> {
+        const params = new URLSearchParams();
+        if (filters.status) {
+            params.set('status', filters.status);
+        }
+        if (filters.skipCount !== undefined) {
+            params.set('skipCount', String(filters.skipCount));
+        }
+        if (filters.maxItems !== undefined) {
+            params.set('maxItems', String(filters.maxItems));
+        }
+        const response = await this.get(`${this.basePath}/process-instances?${params.toString()}`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async searchTasksAdmin(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<CloudTask[]> {
+        const response = await this.post(
+            QueryAdminService.searchEndpoint(`${this.basePath}/tasks/search`, page),
+            {
+                data: QueryAdminService.toTaskSearchBody(searchRequest),
+            }
+        );
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async countTasksAdmin(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<number> {
+        const response = await this.post(
+            QueryAdminService.searchEndpoint(`${this.basePath}/tasks/count`, page),
+            {
+                data: QueryAdminService.toTaskSearchBody(searchRequest),
+            }
+        );
+        return QueryAdminService.parseCountResponse(response);
+    }
+
+    async getTaskAdminById(taskId: string): Promise<CloudTask> {
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}`);
+        return this.unwrapEntity<CloudTask>(response);
+    }
+
+    async getTaskAdminByIdWhenSynced(taskId: string): Promise<CloudTask | undefined> {
+        try {
+            return await this.getTaskAdminById(taskId);
+        } catch {
+            return undefined;
+        }
+    }
+
+    async waitForTaskAdminSynced(taskId: string): Promise<CloudTask> {
+        const task = await QueryAdminService.waitFor(
+            () => this.getTaskAdminByIdWhenSynced(taskId),
+            (value) => value !== undefined,
+            'querySync',
+            `admin task ${taskId} to be synced to query`
+        );
+        return task!;
+    }
+
+    async getTaskCandidateUsersAdmin(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-users`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        if (Array.isArray(response.body)) {
+            return response.body as string[];
+        }
+        return [];
+    }
+
+    async getTaskCandidateGroupsAdmin(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-groups`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        if (Array.isArray(response.body)) {
+            return response.body as string[];
+        }
+        return [];
+    }
+
+    async getTaskVariablesAdmin(taskId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/variables`);
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async waitForTaskVariablesAdmin(
+        taskId: string,
+        expected: Record<string, unknown>
+    ): Promise<CloudVariableInstance[]> {
+        return QueryAdminService.waitFor(
+            () => this.getTaskVariablesAdmin(taskId),
+            (variables) => {
+                const map = Object.fromEntries(variables.map((variable) => [variable.name, variable.value]));
+                return Object.keys(expected).every((name) => map[name] === expected[name]);
+            },
+            'querySync',
+            `admin task ${taskId} variables to match ${JSON.stringify(expected)}`
+        );
+    }
+
+    async getApplicationsAdmin(): Promise<{ name: string; [key: string]: unknown }[]> {
+        const response = await this.get(`${this.basePath}/applications`);
+        return this.unwrapList<{ name: string; [key: string]: unknown }>(response, 'applications');
+    }
+
+    async getIntegrationContextAdmin(integrationContextId: string): Promise<CloudIntegrationContext> {
+        const response = await this.get(
+            `${this.basePath}/integration-contexts/${encodeURIComponent(integrationContextId)}`
+        );
+        return this.unwrapEntity<CloudIntegrationContext>(response);
+    }
+
+    private static toTaskSearchBody(searchRequest: TaskSearchRequest): TaskSearchRequest {
+        return {
+            onlyStandalone: false,
+            onlyRoot: false,
+            ...searchRequest,
+        };
+    }
+
+    private static searchEndpoint(path: string, page?: SearchPageParams): string {
+        if (!page) {
+            return path;
+        }
+        const params = new URLSearchParams();
+        if (page.skipCount !== undefined) {
+            params.set('skipCount', String(page.skipCount));
+        }
+        if (page.maxItems !== undefined) {
+            params.set('maxItems', String(page.maxItems));
+        }
+        for (const sort of page.sort ?? []) {
+            params.append('sort', sort);
+        }
+        const query = params.toString();
+        return query ? `${path}?${query}` : path;
     }
 
     async deleteAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
@@ -344,4 +625,249 @@ export class QueryAdminService extends BaseService {
             `admin tasks count > ${minCount}`
         );
     }
+
+    async getApplicationsAdminHttpStatus(): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/applications`);
+    }
+
+    async getAllTasksAdminHttpStatus(): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks`);
+    }
+
+    async getAllProcessInstancesAdminHttpStatus(): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances`);
+    }
+
+    async getProcessInstancesAdminWithVariableKeysHttpStatus(variableKeys: string): Promise<number> {
+        return this.getHttpStatus(
+            `${this.basePath}/process-instances?variableKeys=${encodeURIComponent(variableKeys)}`
+        );
+    }
+
+    async getProcessInstanceAdminHttpStatus(processInstanceId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances/${processInstanceId}`);
+    }
+
+    async getTaskAdminHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks/${encodeURIComponent(taskId)}`);
+    }
+
+    async getTaskCandidateGroupsAdminHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-groups`);
+    }
+
+    async getTaskCandidateUsersAdminHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-users`);
+    }
+
+    async getTaskVariablesAdminHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/variables`);
+    }
+
+    async getProcessInstanceVariablesAdminHttpStatus(processInstanceId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances/${processInstanceId}/variables`);
+    }
+
+    async getSequenceFlowsAdminHttpStatus(processInstanceId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances/${processInstanceId}/sequence-flows`);
+    }
+
+    async getSubprocessesAdminHttpStatus(processInstanceId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances/${processInstanceId}/subprocesses`);
+    }
+
+    async getIntegrationContextAdminHttpStatus(integrationContextId: string): Promise<number> {
+        return this.getHttpStatus(
+            `${this.basePath}/integration-contexts/${encodeURIComponent(integrationContextId)}`
+        );
+    }
+
+    async postTaskSearchAdminRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/tasks/search`, { data: body });
+    }
+
+    async postTaskCountAdminRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/tasks/count`, { data: body });
+    }
+
+    async postProcessInstanceSearchAdminRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/process-instances/search`, { data: body });
+    }
+
+    async postProcessInstanceCountAdminRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/process-instances/count`, { data: body });
+    }
+
+    async postTaskSearchAdminMissingBooleansHttpStatus(resourceId: string): Promise<number> {
+        return this.postTaskSearchAdminRawHttpStatus({ id: [resourceId] });
+    }
+
+    async postTaskCountAdminMissingBooleansHttpStatus(resourceId: string): Promise<number> {
+        return this.postTaskCountAdminRawHttpStatus({ id: [resourceId] });
+    }
+
+    async postProcessInstanceSearchAdminInvalidBodyHttpStatus(): Promise<number> {
+        return this.postProcessInstanceSearchAdminRawHttpStatus({ id: 'not-an-array' });
+    }
+
+    async postTaskSearchAdminByIdHttpStatus(taskId: string): Promise<number> {
+        return this.postTaskSearchAdminRawHttpStatus({
+            onlyStandalone: false,
+            onlyRoot: false,
+            id: [taskId],
+        });
+    }
+
+    async postTaskCountAdminByIdHttpStatus(taskId: string): Promise<number> {
+        return this.postTaskCountAdminRawHttpStatus({
+            onlyStandalone: false,
+            onlyRoot: false,
+            id: [taskId],
+        });
+    }
+}
+
+export type QueryAdminHttpStatusCheck = HttpStatusCheck<QueryAdminService>;
+
+export function buildQueryAdminUnauthenticatedGetStatusChecks(
+    fakeResourceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    return [
+        { label: 'tasks list', run: (service) => service.getAllTasksAdminHttpStatus() },
+        { label: 'process instances list', run: (service) => service.getAllProcessInstancesAdminHttpStatus() },
+        {
+            label: 'process instances with variable keys',
+            run: (service) => service.getProcessInstancesAdminWithVariableKeysHttpStatus('start1'),
+        },
+        {
+            label: 'process instance by id',
+            run: (service) => service.getProcessInstanceAdminHttpStatus(fakeResourceId),
+        },
+        { label: 'task by id', run: (service) => service.getTaskAdminHttpStatus(fakeResourceId) },
+        {
+            label: 'task candidate groups',
+            run: (service) => service.getTaskCandidateGroupsAdminHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'task candidate users',
+            run: (service) => service.getTaskCandidateUsersAdminHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'task variables',
+            run: (service) => service.getTaskVariablesAdminHttpStatus(fakeResourceId),
+        },
+        { label: 'applications list', run: (service) => service.getApplicationsAdminHttpStatus() },
+        {
+            label: 'integration context by id',
+            run: (service) => service.getIntegrationContextAdminHttpStatus(fakeResourceId),
+        },
+    ];
+}
+
+export function buildQueryAdminUnauthenticatedPostStatusChecks(
+    fakeResourceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    const taskSearchBody = { onlyStandalone: false, onlyRoot: false, id: [fakeResourceId] };
+    return [
+        {
+            label: 'process instance search',
+            run: (service) => service.postProcessInstanceSearchAdminRawHttpStatus({ id: [fakeResourceId] }),
+        },
+        {
+            label: 'process instance count',
+            run: (service) => service.postProcessInstanceCountAdminRawHttpStatus({ id: [fakeResourceId] }),
+        },
+        { label: 'task search', run: (service) => service.postTaskSearchAdminRawHttpStatus(taskSearchBody) },
+        { label: 'task count', run: (service) => service.postTaskCountAdminRawHttpStatus(taskSearchBody) },
+    ];
+}
+
+export function buildQueryAdminNotFoundGetStatusChecks(
+    fakeResourceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    return [
+        {
+            label: 'process instance by id',
+            run: (service) => service.getProcessInstanceAdminHttpStatus(fakeResourceId),
+        },
+        { label: 'task by id', run: (service) => service.getTaskAdminHttpStatus(fakeResourceId) },
+        {
+            label: 'task candidate groups',
+            run: (service) => service.getTaskCandidateGroupsAdminHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'task candidate users',
+            run: (service) => service.getTaskCandidateUsersAdminHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'integration context by id',
+            run: (service) => service.getIntegrationContextAdminHttpStatus(fakeResourceId),
+        },
+    ];
+}
+
+export function buildQueryAdminBadRequestPostStatusChecks(
+    fakeResourceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    return [
+        {
+            label: 'task search',
+            run: (service) => service.postTaskSearchAdminMissingBooleansHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'task count',
+            run: (service) => service.postTaskCountAdminMissingBooleansHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'process instance search',
+            run: (service) => service.postProcessInstanceSearchAdminInvalidBodyHttpStatus(),
+        },
+    ];
+}
+
+export function buildQueryAdminForbiddenGetStatusChecks(
+    taskId: string,
+    processInstanceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    return [
+        { label: 'applications list', run: (service) => service.getApplicationsAdminHttpStatus() },
+        { label: 'tasks list', run: (service) => service.getAllTasksAdminHttpStatus() },
+        { label: 'process instances list', run: (service) => service.getAllProcessInstancesAdminHttpStatus() },
+        {
+            label: 'process instances with variable keys',
+            run: (service) => service.getProcessInstancesAdminWithVariableKeysHttpStatus('start1'),
+        },
+        { label: 'task by id', run: (service) => service.getTaskAdminHttpStatus(taskId) },
+        { label: 'task variables', run: (service) => service.getTaskVariablesAdminHttpStatus(taskId) },
+        {
+            label: 'process instance variables',
+            run: (service) => service.getProcessInstanceVariablesAdminHttpStatus(processInstanceId),
+        },
+        {
+            label: 'process instance sequence flows',
+            run: (service) => service.getSequenceFlowsAdminHttpStatus(processInstanceId),
+        },
+        {
+            label: 'process instance subprocesses',
+            run: (service) => service.getSubprocessesAdminHttpStatus(processInstanceId),
+        },
+    ];
+}
+
+export function buildQueryAdminForbiddenPostStatusChecks(
+    taskId: string,
+    fakeResourceId: string
+): readonly QueryAdminHttpStatusCheck[] {
+    return [
+        { label: 'task search', run: (service) => service.postTaskSearchAdminByIdHttpStatus(taskId) },
+        { label: 'task count', run: (service) => service.postTaskCountAdminByIdHttpStatus(taskId) },
+        {
+            label: 'process instance search',
+            run: (service) => service.postProcessInstanceSearchAdminRawHttpStatus({ id: [fakeResourceId] }),
+        },
+        {
+            label: 'process instance count',
+            run: (service) => service.postProcessInstanceCountAdminRawHttpStatus({ id: [fakeResourceId] }),
+        },
+    ];
 }

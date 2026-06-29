@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import { CloudProcessInstance, ProcessInstanceStatus, ProcessQueryParams } from '../models/runtime-bundle.models';
+import {
+    CloudProcessInstance,
+    ProcessInstanceSearchRequest,
+    ProcessInstanceStatus,
+    ProcessQueryParams,
+} from '../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../models/process-definition.models';
 import { CloudVariableInstance } from '../models/process-variable.models';
-import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
+import { CloudTask, TaskQueryParams, TaskSearchRequest, TaskStatus } from '../models/task.models';
 import { BaseService } from './base.service';
 import { RuntimeBundleService } from './runtime-bundle.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { isDiagramShown } from '../helpers/diagram-utils';
 import { PollProfile } from '../config/runtime/timeouts';
+import { SearchPageParams, HttpStatusCheck } from '../models/base-service.models';
 
 export class QueryService extends BaseService {
     private readonly basePath = '/query/v1';
@@ -258,6 +264,27 @@ export class QueryService extends BaseService {
         return tasks[0];
     }
 
+    async getTask(taskId: string): Promise<CloudTask> {
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}`);
+        return this.unwrapEntity<CloudTask>(response);
+    }
+
+    async getSubprocesses(processInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${processInstanceId}/subprocesses`
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async waitForSubprocesses(processInstanceId: string): Promise<CloudProcessInstance[]> {
+        return QueryService.waitFor(
+            () => this.getSubprocesses(processInstanceId),
+            (subprocesses) => subprocesses.length > 0,
+            'querySync',
+            `query subprocesses of process ${processInstanceId}`
+        );
+    }
+
     async getTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[]> {
         const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/tasks`);
         return this.unwrapList<CloudTask>(response, 'tasks');
@@ -470,6 +497,96 @@ export class QueryService extends BaseService {
         return this.unwrapList<{ name: string; [key: string]: unknown }>(response, 'applications');
     }
 
+    async searchTasks(
+        searchRequest: TaskSearchRequest = {},
+        page?: SearchPageParams
+    ): Promise<CloudTask[]> {
+        const response = await this.post(QueryService.searchEndpoint(`${this.basePath}/tasks/search`, page), {
+            data: QueryService.toTaskSearchBody(searchRequest),
+        });
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async countTasks(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<number> {
+        const response = await this.post(QueryService.searchEndpoint(`${this.basePath}/tasks/count`, page), {
+            data: QueryService.toTaskSearchBody(searchRequest),
+        });
+        return QueryService.parseCountResponse(response);
+    }
+
+    async searchProcessInstances(
+        searchRequest: ProcessInstanceSearchRequest = {},
+        page?: SearchPageParams
+    ): Promise<CloudProcessInstance[]> {
+        const response = await this.post(
+            QueryService.searchEndpoint(`${this.basePath}/process-instances/search`, page),
+            { data: searchRequest }
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async countProcessInstances(
+        searchRequest: ProcessInstanceSearchRequest = {},
+        page?: SearchPageParams
+    ): Promise<number> {
+        const response = await this.post(
+            QueryService.searchEndpoint(`${this.basePath}/process-instances/count`, page),
+            { data: searchRequest }
+        );
+        return QueryService.parseCountResponse(response);
+    }
+
+    async linkProcessInstances(
+        mainProcessInstanceId: string,
+        processInstanceIds: string[],
+        linkProcessInstanceType: string
+    ): Promise<void> {
+        await this.post(`${this.basePath}/process-instances/${mainProcessInstanceId}/link`, {
+            data: {
+                processInstanceIds,
+                linkProcessInstanceType,
+            },
+        });
+    }
+
+    private static toTaskSearchBody(searchRequest: TaskSearchRequest): TaskSearchRequest {
+        return {
+            onlyStandalone: false,
+            onlyRoot: false,
+            ...searchRequest,
+        };
+    }
+
+    private static searchEndpoint(path: string, page?: SearchPageParams): string {
+        if (!page) {
+            return path;
+        }
+        const params = new URLSearchParams();
+        if (page.skipCount !== undefined) {
+            params.set('skipCount', String(page.skipCount));
+        }
+        if (page.maxItems !== undefined) {
+            params.set('maxItems', String(page.maxItems));
+        }
+        for (const sort of page.sort ?? []) {
+            params.append('sort', sort);
+        }
+        const query = params.toString();
+        return query ? `${path}?${query}` : path;
+    }
+
+    private static parseCountResponse(response: { body?: string }): number {
+        const raw = response.body;
+        if (raw === undefined || raw === '') {
+            throw new Error('Unexpected empty count response');
+        }
+        const count = Number(raw);
+        if (Number.isNaN(count)) {
+            throw new Error(`Unexpected count response: ${raw}`);
+        }
+        return count;
+    }
+
     async checkServicesHealth(): Promise<void> {
         const response = await this.get('/query/actuator/health');
         const status = (response as { status?: string }).status;
@@ -477,4 +594,186 @@ export class QueryService extends BaseService {
             throw new Error(`Query service health check failed: status=${status}`);
         }
     }
+
+    async getAllTasksHttpStatus(): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks`);
+    }
+
+    async getTaskHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/tasks/${encodeURIComponent(taskId)}`);
+    }
+
+    async getTaskCandidateUsersHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(
+            `${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-users`
+        );
+    }
+
+    async getTaskCandidateGroupsHttpStatus(taskId: string): Promise<number> {
+        return this.getHttpStatus(
+            `${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-groups`
+        );
+    }
+
+    async getProcessInstanceSubprocessesHttpStatus(processInstanceId: string): Promise<number> {
+        return this.getHttpStatus(`${this.basePath}/process-instances/${processInstanceId}/subprocesses`);
+    }
+
+    async postLinkProcessInstancesHttpStatus(mainProcessInstanceId: string, data: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/process-instances/${mainProcessInstanceId}/link`, {
+            data,
+        });
+    }
+
+    async postTaskSearchRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/tasks/search`, { data: body });
+    }
+
+    async postTaskCountRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/tasks/count`, { data: body });
+    }
+
+    async postProcessInstanceSearchRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/process-instances/search`, { data: body });
+    }
+
+    async postProcessInstanceCountRawHttpStatus(body: unknown): Promise<number> {
+        return this.postHttpStatus(`${this.basePath}/process-instances/count`, { data: body });
+    }
+
+    async postTaskSearchMissingBooleansHttpStatus(resourceId: string): Promise<number> {
+        return this.postTaskSearchRawHttpStatus({ id: [resourceId] });
+    }
+
+    async postTaskCountMissingBooleansHttpStatus(resourceId: string): Promise<number> {
+        return this.postTaskCountRawHttpStatus({ id: [resourceId] });
+    }
+
+    async postProcessInstanceSearchInvalidBodyHttpStatus(): Promise<number> {
+        return this.postProcessInstanceSearchRawHttpStatus({ id: 'not-an-array' });
+    }
+
+    async postLinkProcessInstancesInvalidBodyHttpStatus(
+        mainProcessInstanceId: string,
+        linkProcessInstanceType: string
+    ): Promise<number> {
+        return this.postLinkProcessInstancesHttpStatus(mainProcessInstanceId, {
+            processInstanceIds: 'invalid',
+            linkProcessInstanceType,
+        });
+    }
+}
+
+export type QueryHttpStatusCheck = HttpStatusCheck<QueryService>;
+
+export function buildQueryUnauthenticatedGetStatusChecks(
+    fakeResourceId: string
+): readonly QueryHttpStatusCheck[] {
+    return [
+        { label: 'tasks list', run: (service) => service.getAllTasksHttpStatus() },
+        { label: 'task by id', run: (service) => service.getTaskHttpStatus(fakeResourceId) },
+        {
+            label: 'process instance subprocesses',
+            run: (service) => service.getProcessInstanceSubprocessesHttpStatus(fakeResourceId),
+        },
+    ];
+}
+
+export function buildQueryUnauthenticatedPostStatusChecks(
+    fakeResourceId: string,
+    linkType: string
+): readonly QueryHttpStatusCheck[] {
+    const taskSearchBody = { onlyStandalone: false, onlyRoot: false, id: [fakeResourceId] };
+    return [
+        { label: 'task search', run: (service) => service.postTaskSearchRawHttpStatus(taskSearchBody) },
+        { label: 'task count', run: (service) => service.postTaskCountRawHttpStatus(taskSearchBody) },
+        {
+            label: 'process instance search',
+            run: (service) => service.postProcessInstanceSearchRawHttpStatus({ id: [fakeResourceId] }),
+        },
+        {
+            label: 'process instance count',
+            run: (service) => service.postProcessInstanceCountRawHttpStatus({ id: [fakeResourceId] }),
+        },
+        {
+            label: 'process instance link',
+            run: (service) =>
+                service.postLinkProcessInstancesHttpStatus(fakeResourceId, {
+                    processInstanceIds: [fakeResourceId],
+                    linkProcessInstanceType: linkType,
+                }),
+        },
+    ];
+}
+
+export function buildQueryNotFoundGetStatusChecks(
+    fakeResourceId: string
+): readonly QueryHttpStatusCheck[] {
+    return [
+        { label: 'task by id', run: (service) => service.getTaskHttpStatus(fakeResourceId) },
+        {
+            label: 'process instance subprocesses',
+            run: (service) => service.getProcessInstanceSubprocessesHttpStatus(fakeResourceId),
+        },
+    ];
+}
+
+export function buildQueryNotFoundPostStatusChecks(
+    fakeResourceId: string,
+    linkType: string
+): readonly QueryHttpStatusCheck[] {
+    return [
+        {
+            label: 'process instance link',
+            run: (service) =>
+                service.postLinkProcessInstancesHttpStatus(fakeResourceId, {
+                    processInstanceIds: [fakeResourceId],
+                    linkProcessInstanceType: linkType,
+                }),
+        },
+    ];
+}
+
+export function buildQueryBadRequestPostStatusChecks(
+    fakeResourceId: string,
+    linkProcessInstanceType: string
+): readonly QueryHttpStatusCheck[] {
+    return [
+        {
+            label: 'task search',
+            run: (service) => service.postTaskSearchMissingBooleansHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'task count',
+            run: (service) => service.postTaskCountMissingBooleansHttpStatus(fakeResourceId),
+        },
+        {
+            label: 'process instance search',
+            run: (service) => service.postProcessInstanceSearchInvalidBodyHttpStatus(),
+        },
+    ];
+}
+
+export function buildQueryForbiddenGetStatusChecks(taskId: string): readonly QueryHttpStatusCheck[] {
+    return [
+        { label: 'task by id', run: (service) => service.getTaskHttpStatus(taskId) },
+        { label: 'task candidate users', run: (service) => service.getTaskCandidateUsersHttpStatus(taskId) },
+        { label: 'task candidate groups', run: (service) => service.getTaskCandidateGroupsHttpStatus(taskId) },
+    ];
+}
+
+export function buildQueryBadRequestLinkStatusChecks(
+    mainProcessInstanceId: string,
+    linkProcessInstanceType: string
+): readonly QueryHttpStatusCheck[] {
+    return [
+        {
+            label: 'process instance link',
+            run: (service) =>
+                service.postLinkProcessInstancesInvalidBodyHttpStatus(
+                    mainProcessInstanceId,
+                    linkProcessInstanceType
+                ),
+        },
+    ];
 }

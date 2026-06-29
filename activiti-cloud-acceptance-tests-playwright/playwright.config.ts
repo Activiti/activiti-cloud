@@ -35,10 +35,6 @@ const reportPortalReporter = isCi
 /** Serial projects (subscriptions, admin bulk-delete). */
 const serial = { workers: 1, fullyParallel: false } as const;
 
-/**
- * CI suite (`npm run test`) selects acceptance → notifications → destructive-last.
- * `dependencies` enforce that order; slice scripts pass a single `--project=…`.
- */
 export default defineConfig({
   testDir: './tests',
   timeout: timeouts.test,
@@ -49,7 +45,7 @@ export default defineConfig({
   fullyParallel: true,
   retries: isCi ? 2 : 0,
   forbidOnly: isCi,
-  workers,
+  workers: 4,
   projects: [
     {
       name: 'acceptance',

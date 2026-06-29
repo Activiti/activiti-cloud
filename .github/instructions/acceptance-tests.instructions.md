@@ -99,6 +99,8 @@ When a new API operation is needed:
 
 Do not wrap service calls in test-level utility functions.
 
+**Specs must never contain REST paths or URLs** (e.g. `/query/v1/tasks`, `/audit/admin/v1/events`). Status-code checks, pagination, and filters belong in `services/*.service.ts` — add typed methods or exported `build*StatusChecks()` helpers that return `{ label, run }` pairs. Specs call those methods/builders via the `activiti` fixture only; test titles may use the human-readable `label`, not the path.
+
 ### 4. Keep test data in `resources/`
 
 Static BPMN/DMN and modeling project files belong in `resources/modeling-projects/` — not inline in spec files.
@@ -367,3 +369,4 @@ npm run lint:fix
 | 11  | WebSocket cleanup in test body                     | `afterEach` with describe-scoped handle              |
 | 12  | Wrong GraphQL WS subprotocol                       | `graphql-transport-ws` via `services/notifications/` |
 | 13  | Inline `activiti.skip()` without ticket            | `pickScenarioTest` + Jira URL                        |
+| 14  | Hardcoded `/query/...` or `/audit/...` in specs    | Service methods or `build*StatusChecks()` in services |
