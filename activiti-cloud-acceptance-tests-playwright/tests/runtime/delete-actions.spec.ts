@@ -25,17 +25,21 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
 
-type DeleteScenario = AcceptanceScenarioMeta & { id: 'audit' | 'query' };
+type DeleteScenario = AcceptanceScenarioMeta & { id: 'audit' | 'query-tasks' | 'query-process-instances' };
 
 const scenarios: DeleteScenario[] = [
     { id: 'audit', title: 'delete records in audit service' },
     {
-        id: 'query',
-        title: 'delete records in query service',
-        // FIXME upstream: DELETE /query/admin/v1/tasks → 500 when Jackson serializes TaskEntity
-        // lazy collections after the persistence context closes. Re-enable when query-service fixes bulk delete.
+        id: 'query-tasks',
+        title: 'delete all tasks in query service',
         exclude:
             'upstream DELETE /query/admin/v1/tasks returns 500 (Cannot lazily initialize collection on JSON response)',
+    },
+    {
+        id: 'query-process-instances',
+        title: 'delete all process instances in query service',
+        exclude:
+            'upstream DELETE /query/admin/v1/process-instances returns 500 (technical error on bulk delete)',
     },
 ];
 
@@ -81,49 +85,74 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 return;
             }
 
-            await activiti.step(
-                'Given the user is authenticated as testuser ' +
-                    'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
-                async () => {
-                    const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestUser,
-                        'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                    );
-                    expect(processInstance.id).toBeTruthy();
-                }
-            );
+            if (scenario.id === 'query-tasks') {
+                await activiti.step(
+                    'Given the user is authenticated as testuser ' +
+                        'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
+                    async () => {
+                        const processInstance = await startCatalogProcess(
+                            runtimeBundleServiceTestUser,
+                            'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+                        );
+                        expect(processInstance.id).toBeTruthy();
+                    }
+                );
 
-            await activiti.step('And the user creates a standalone task', async () => {
-                const task = await taskServiceTestUser.createStandaloneTask();
-                expect(task.id).toBeTruthy();
-            });
+                await activiti.step('And the user creates a standalone task', async () => {
+                    const task = await taskServiceTestUser.createStandaloneTask();
+                    expect(task.id).toBeTruthy();
+                });
 
-            await activiti.step('And query service has synced process instances and tasks', async () => {
-                const instances = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCountGreaterThan(0);
-                expect(instances.length).toBeGreaterThan(0);
-                const tasks = await queryAdminServiceTestAdmin.waitForAllTasksAdminCountGreaterThan(0);
-                expect(tasks.length).toBeGreaterThan(0);
-            });
+                await activiti.step('And query service has synced tasks', async () => {
+                    const tasks = await queryAdminServiceTestAdmin.waitForAllTasksAdminCountGreaterThan(0);
+                    expect(tasks.length).toBeGreaterThan(0);
+                });
 
-            await activiti.step(
-                'And another user is authenticated as testadmin ' +
-                    'Then the user is able to delete all tasks in query service',
-                async () => {
-                    const before = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
-                    expect(before.length).toBeGreaterThan(0);
-                    await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
-                    const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
-                    expect(after.length).toBe(0);
-                }
-            );
+                await activiti.step(
+                    'And another user is authenticated as testadmin ' +
+                        'Then the user is able to delete all tasks in query service',
+                    async () => {
+                        const before = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
+                        expect(before.length).toBeGreaterThan(0);
+                        await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
+                        const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
+                        expect(after.length).toBe(0);
+                    }
+                );
+                return;
+            }
 
-            await activiti.step('And the user is able to delete all process instances in query service', async () => {
-                const before = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
-                expect(before.length).toBeGreaterThan(0);
-                await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
-                const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
-                expect(after.length).toBe(0);
-            });
+            if (scenario.id === 'query-process-instances') {
+                await activiti.step(
+                    'Given the user is authenticated as testuser ' +
+                        'When the user starts an instance of the process called PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED',
+                    async () => {
+                        const processInstance = await startCatalogProcess(
+                            runtimeBundleServiceTestUser,
+                            'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+                        );
+                        expect(processInstance.id).toBeTruthy();
+                    }
+                );
+
+                await activiti.step('And query service has synced process instances', async () => {
+                    const instances =
+                        await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCountGreaterThan(0);
+                    expect(instances.length).toBeGreaterThan(0);
+                });
+
+                await activiti.step(
+                    'And another user is authenticated as testadmin ' +
+                        'Then the user is able to delete all process instances in query service',
+                    async () => {
+                        const before = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
+                        expect(before.length).toBeGreaterThan(0);
+                        await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
+                        const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
+                        expect(after.length).toBe(0);
+                    }
+                );
+            }
         });
     }
 });

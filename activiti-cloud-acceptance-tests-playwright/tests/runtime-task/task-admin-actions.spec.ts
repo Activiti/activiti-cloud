@@ -19,16 +19,16 @@ import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with
 
 activiti.describe('Runtime — Task Admin Actions', () => {
     activiti('should list, fetch, and assign tasks via RB admin endpoints', async ({
-        runtimeBundleServiceTestAdmin,
-        taskServiceTestAdmin,
+        runtimeBundleServiceTestUser,
+        taskServiceTestUser,
         taskAdminServiceTestAdmin,
     }) => {
         let taskId = '';
 
         await activiti.step('Given a running process with an unassigned task', async () => {
             const { task } = await startCatalogProcessWithFirstTask(
-                runtimeBundleServiceTestAdmin,
-                taskServiceTestAdmin,
+                runtimeBundleServiceTestUser,
+                taskServiceTestUser,
                 'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES'
             );
             taskId = task.id;

@@ -73,7 +73,7 @@ activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }
     });
 
     activiti('should cover RB admin subprocess and message endpoints', async ({
-        runtimeBundleServiceTestAdmin,
+        runtimeBundleServiceTestUser,
         runtimeAdminServiceTestAdmin,
     }) => {
         const businessId = randomUUID();
@@ -82,11 +82,11 @@ activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }
 
         await activiti.step('Given a parent process with call activities', async () => {
             const parentProcess = await startCatalogProcess(
-                runtimeBundleServiceTestAdmin,
+                runtimeBundleServiceTestUser,
                 'PROCESS_INSTANCE_WITH_CALL_ACTIVITIES'
             );
             parentProcessInstanceId = parentProcess.id;
-            await runtimeBundleServiceTestAdmin.waitForSubProcesses(parentProcessInstanceId);
+            await runtimeBundleServiceTestUser.waitForSubProcesses(parentProcessInstanceId);
         });
 
         await activiti.step('When the admin lists subprocesses', async () => {

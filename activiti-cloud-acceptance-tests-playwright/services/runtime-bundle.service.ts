@@ -111,18 +111,23 @@ export class RuntimeBundleService extends BaseService {
 
     async getProcessDefinitionStaticValues(processDefinitionId: string): Promise<Record<string, unknown>> {
         const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}/static-values`);
-        if (response.httpStatus && response.httpStatus >= 400) {
-            throw new Error(`Failed to get static values (${response.httpStatus})`);
-        }
-        return response as Record<string, unknown>;
+        return this.unwrapMappingResponse(response);
     }
 
     async getProcessDefinitionConstantValues(processDefinitionId: string): Promise<Record<string, unknown>> {
         const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}/constant-values`);
-        if (response.httpStatus && response.httpStatus >= 400) {
-            throw new Error(`Failed to get constant values (${response.httpStatus})`);
+        return this.unwrapMappingResponse(response);
+    }
+
+    private unwrapMappingResponse(response: RequestResponse): Record<string, unknown> {
+        const { httpStatus, body, ...rest } = response;
+        if (httpStatus && httpStatus >= 400) {
+            throw new Error(`Mapping values request failed (${httpStatus})`);
         }
-        return response as Record<string, unknown>;
+        if (body && typeof body === 'object' && !Array.isArray(body)) {
+            return body as Record<string, unknown>;
+        }
+        return rest as Record<string, unknown>;
     }
 
     async getConnectorDefinitions(): Promise<ConnectorDefinition[]> {

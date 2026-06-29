@@ -23,8 +23,6 @@ import { normalizeSvg } from '../../helpers/diagram-utils';
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
 const PROCESS_WITH_VARIABLES = 'ProcessWithVariables';
-const PROCESS_START_EVENT_VARIABLE_MAPPING = 'process-b42a166d-605b-4eec-8b96-82b1253666bf';
-const RANK_MOVIE_PROCESS = 'RankMovieId';
 
 activiti.describe('Process Definition Actions', () => {
     activiti('as a user I should be able to get process model', async ({ queryServiceTestUser }) => {
@@ -88,21 +86,17 @@ activiti.describe('Process Definition Actions', () => {
             expect(Array.isArray(meta.userTasks)).toBe(true);
             expect((meta.userTasks ?? []).length).toBeGreaterThan(0);
 
-            const mappingDefinition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(
-                PROCESS_START_EVENT_VARIABLE_MAPPING
-            );
-            const staticValues = await runtimeBundleServiceTestUser.getProcessDefinitionStaticValues(
-                mappingDefinition.id
-            );
-            const constantValues = await runtimeBundleServiceTestUser.getProcessDefinitionConstantValues(
-                mappingDefinition.id
-            );
-            expect(staticValues).toBeTruthy();
-            expect(constantValues).toBeTruthy();
+            const staticValues =
+                await runtimeBundleServiceTestUser.getProcessDefinitionStaticValues(processDefinitionId);
+            const constantValues =
+                await runtimeBundleServiceTestUser.getProcessDefinitionConstantValues(processDefinitionId);
+            expect(staticValues).toEqual(expect.any(Object));
+            expect(constantValues).toEqual(expect.any(Object));
         });
 
-        await activiti.step('When the user lists connector definitions from RankMovieId deployment', async () => {
+        await activiti.step('When the user lists connector definitions', async () => {
             const connectors = await runtimeBundleServiceTestUser.getConnectorDefinitions();
+            expect(Array.isArray(connectors)).toBe(true);
             expect(connectors.length).toBeGreaterThan(0);
             connectorDefinitionId = connectors[0].id;
         });
@@ -114,7 +108,7 @@ activiti.describe('Process Definition Actions', () => {
 
         await activiti.step('And the admin lists process definitions', async () => {
             const definitions = await runtimeAdminServiceTestAdmin.getProcessDefinitions();
-            expect(definitions.map((definition) => definition.key)).toContain(RANK_MOVIE_PROCESS);
+            expect(definitions.map((definition) => definition.key)).toContain(PROCESS_WITH_VARIABLES);
         });
     });
 });

@@ -624,4 +624,16 @@ export class QueryService extends BaseService {
             `admin tasks count > ${minCount}`
         );
     }
+
+    async postTasksAdminQuery(body: {
+        standalone?: boolean;
+        rootTasksOnly?: boolean;
+        variableKeys?: string[];
+    } = {}): Promise<CloudTask[]> {
+        return this.adminTasks.postTasksListQuery(body);
+    }
+
+    async postProcessInstancesAdminQuery(body: { variableKeys?: string[] } = {}): Promise<CloudProcessInstance[]> {
+        return this.adminProcessInstances.postProcessInstancesListQuery(body);
+    }
 }
