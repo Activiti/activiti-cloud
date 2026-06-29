@@ -16,11 +16,11 @@
 
 import { RuntimeBundleService } from './runtime-bundle.service';
 import { TaskService } from './task.service';
-import { QueryService } from './query.service';
-import { AuditService } from './audit.service';
-import { AuditAdminService } from './audit-admin.service';
+import { QueryService } from './query/query.service';
+import { AuditService } from './audit/audit.service';
+import { AuditAdminService } from './audit/admin/audit-admin.service';
 import { RuntimeAdminService } from './runtime-admin.service';
-import { QueryAdminService } from './query-admin.service';
+import { QueryAdminService } from './query/admin/query-admin.service';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudTask } from '../models/task.models';
 import { CloudRuntimeEvent } from '../models/audit.models';

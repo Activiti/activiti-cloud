@@ -9,7 +9,7 @@ import { APIResponse } from '@playwright/test';
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { scopedBusinessKey, scopedName, TestScope } from '../helpers/test-isolation';
-import { Options } from '../models/base-service.models';
+import { Options, HttpStatusCheck } from '../models/base-service.models';
 import { Logger } from '../helpers/logging/logger';
 import { PollProfile, pollOptions } from '../config/runtime/timeouts';
 
@@ -435,5 +435,17 @@ export abstract class BaseService {
             'message' in entry &&
             typeof (entry as { code: unknown }).code === 'number'
         );
+    }
+
+    static getStatusCheck<T extends BaseService>(label: string, path: string): HttpStatusCheck<T> {
+        return { label, run: (service) => service.getHttpStatus(path) };
+    }
+
+    static postStatusCheck<T extends BaseService>(
+        label: string,
+        path: string,
+        data: unknown
+    ): HttpStatusCheck<T> {
+        return { label, run: (service) => service.postHttpStatus(path, { data }) };
     }
 }

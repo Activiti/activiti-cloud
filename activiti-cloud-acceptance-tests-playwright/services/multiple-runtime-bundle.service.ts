@@ -18,7 +18,7 @@ import { timeouts } from '../config/runtime/timeouts';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import { TestScope } from '../helpers/test-isolation';
 import { RuntimeBundleService } from './runtime-bundle.service';
-import { QueryService } from './query.service';
+import { QueryService } from './query/query.service';
 import { CloudProcessInstance, ProcessInstanceStatus } from '../models/runtime-bundle.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';

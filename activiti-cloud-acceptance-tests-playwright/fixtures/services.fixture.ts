@@ -32,13 +32,13 @@ import {
 import { getTestScope, TestScope } from '../helpers/test-isolation';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
-import { QueryService } from '../services/query.service';
-import { QueryAdminService } from '../services/query-admin.service';
+import { QueryService } from '../services/query/query.service';
+import { QueryAdminService } from '../services/query/admin/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskService } from '../services/task.service';
 import { TaskAdminService } from '../services/task-admin.service';
-import { AuditAdminService } from '../services/audit-admin.service';
-import { AuditService } from '../services/audit.service';
+import { AuditAdminService } from '../services/audit/admin/audit-admin.service';
+import { AuditService } from '../services/audit/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
 import { contexts, expect } from './context.fixture';
