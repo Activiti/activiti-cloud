@@ -36,7 +36,6 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -183,14 +182,6 @@ public class FunctionRouterConfiguration {
         return (message, routingContext) -> {
             final var messageId = message.getHeaders().getId();
             final var integrationContextId = message.getHeaders().get("integrationContextId");
-            if (shutdownState.isShuttingDown()) {
-                log.warn(
-                    "FN-ROUTER-TRACE requeue msgId={} integrationContextId={} reason=shutting-down",
-                    messageId,
-                    integrationContextId
-                );
-                throw new ImmediateRequeueAmqpException("Function router is shutting down");
-            }
             log.info("FN-ROUTER-TRACE received msgId={} integrationContextId={}", messageId, integrationContextId);
             Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
