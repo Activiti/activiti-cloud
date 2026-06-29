@@ -46,15 +46,15 @@ public class QueryRestApplicationFunctionRouterIT extends QueryRestApplicationIT
         assertThat(functionRouter.destinations("functionRouterInput")).isEmpty();
 
         assertThat(functionRouter.destinations("functionRouterAnonymousInput")).containsOnly(
-            Map.entry("graphQLEngineEventsConsumerSource", "queryEvents")
+            Map.entry("graphQLEngineEventsConsumerSource", "engineEvents")
         );
 
         assertThat(functionRouter.registrations("functionRouterInput")).isEmpty();
 
         assertThat(functionRouter.registrations("functionRouterAnonymousInput"))
-            .containsOnlyKeys("queryEvents")
+            .containsOnlyKeys("engineEvents")
             .satisfies(registrations ->
-                assertThat(registrations.get("queryEvents"))
+                assertThat(registrations.get("engineEvents"))
                     .containsOnly("engineEventsGraphQlSourceConsumer_registration")
                     .isNotEmpty()
             );
