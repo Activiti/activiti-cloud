@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
+import {
+    CloudProcessInstance,
+    ProcessQueryParams,
+    UpdateProcessPayload,
+} from '../models/runtime-bundle.models';
+import { CloudProcessDefinition } from '../models/process-definition.models';
+import { CloudVariableInstance } from '../models/process-variable.models';
 import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -43,6 +49,87 @@ export class RuntimeAdminService extends BaseService {
         );
 
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}`);
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async updateProcessInstance(
+        processInstanceId: string,
+        payload: Omit<UpdateProcessPayload, 'payloadType'>
+    ): Promise<CloudProcessInstance> {
+        const response = await this.put(`${this.basePath}/process-instances/${processInstanceId}`, {
+            data: {
+                payloadType: 'UpdateProcessPayload',
+                processInstanceId,
+                ...payload,
+            },
+        });
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    async suspendProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.post(`${this.basePath}/process-instances/${processInstanceId}/suspend`, {
+            data: {},
+        });
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async resumeProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.post(`${this.basePath}/process-instances/${processInstanceId}/resume`, {
+            data: {},
+        });
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async getSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances/${parentProcessInstanceId}/subprocesses`
+        );
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async sendStartMessage(payload: {
+        name: string;
+        businessKey?: string;
+        variables?: Record<string, unknown>;
+    }): Promise<CloudProcessInstance> {
+        const body = {
+            payloadType: 'StartMessagePayload' as const,
+            ...payload,
+        };
+        const response = await this.post(`${this.basePath}/process-instances/message`, { data: body });
+        const processInstance = this.unwrapEntity<CloudProcessInstance>(response);
+        if (processInstance.id) {
+            this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
+        }
+        return processInstance;
+    }
+
+    async sendReceiveMessage(payload: {
+        name: string;
+        correlationKey?: string;
+        variables?: Record<string, unknown>;
+    }): Promise<RequestResponse> {
+        const body = {
+            payloadType: 'ReceiveMessagePayload' as const,
+            ...payload,
+        };
+        return this.put(`${this.basePath}/process-instances/message`, { data: body });
+    }
+
+    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
+        const response = await this.get(`${this.basePath}/process-definitions`);
+        return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
     }
 
     async deleteProcessInstance(processInstanceId: string): Promise<void> {

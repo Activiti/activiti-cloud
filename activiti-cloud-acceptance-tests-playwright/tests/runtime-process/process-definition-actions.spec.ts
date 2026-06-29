@@ -22,6 +22,9 @@ import { normalizeSvg } from '../../helpers/diagram-utils';
 
 const SINGLE_TASK_PROCESS = 'SingleTaskProcess';
 const BIG_PROCESS = 'bigProcess';
+const PROCESS_WITH_VARIABLES = 'ProcessWithVariables';
+const PROCESS_START_EVENT_VARIABLE_MAPPING = 'process-b42a166d-605b-4eec-8b96-82b1253666bf';
+const RANK_MOVIE_PROCESS = 'RankMovieId';
 
 activiti.describe('Process Definition Actions', () => {
     activiti('as a user I should be able to get process model', async ({ queryServiceTestUser }) => {
@@ -57,5 +60,61 @@ activiti.describe('Process Definition Actions', () => {
                 expect(normalizeSvg(processDiagram)).toBe(normalizeSvg(expected));
             }
         );
+    });
+
+    activiti('should cover RB process definition metadata, home, and connector endpoints', async ({
+        runtimeBundleServiceTestUser,
+        runtimeAdminServiceTestAdmin,
+    }) => {
+        let processDefinitionId = '';
+        let connectorDefinitionId = '';
+
+        await activiti.step('When the user fetches RB home info', async () => {
+            const home = await runtimeBundleServiceTestUser.getHomeInfo();
+            expect(home).toBeTruthy();
+        });
+
+        await activiti.step('And resolves a deployed process definition', async () => {
+            const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(PROCESS_WITH_VARIABLES);
+            processDefinitionId = definition.id;
+            expect(processDefinitionId).toBeTruthy();
+        });
+
+        await activiti.step('Then the user can fetch definition by id, meta, and mapping values', async () => {
+            const byId = await runtimeBundleServiceTestUser.getProcessDefinitionById(processDefinitionId);
+            expect(byId.id).toBe(processDefinitionId);
+
+            const meta = await runtimeBundleServiceTestUser.getProcessDefinitionMeta(processDefinitionId);
+            expect(Array.isArray(meta.userTasks)).toBe(true);
+            expect((meta.userTasks ?? []).length).toBeGreaterThan(0);
+
+            const mappingDefinition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(
+                PROCESS_START_EVENT_VARIABLE_MAPPING
+            );
+            const staticValues = await runtimeBundleServiceTestUser.getProcessDefinitionStaticValues(
+                mappingDefinition.id
+            );
+            const constantValues = await runtimeBundleServiceTestUser.getProcessDefinitionConstantValues(
+                mappingDefinition.id
+            );
+            expect(staticValues).toBeTruthy();
+            expect(constantValues).toBeTruthy();
+        });
+
+        await activiti.step('When the user lists connector definitions from RankMovieId deployment', async () => {
+            const connectors = await runtimeBundleServiceTestUser.getConnectorDefinitions();
+            expect(connectors.length).toBeGreaterThan(0);
+            connectorDefinitionId = connectors[0].id;
+        });
+
+        await activiti.step('Then the user fetches a connector definition by id', async () => {
+            const connector = await runtimeBundleServiceTestUser.getConnectorDefinitionById(connectorDefinitionId);
+            expect(connector.id).toBe(connectorDefinitionId);
+        });
+
+        await activiti.step('And the admin lists process definitions', async () => {
+            const definitions = await runtimeAdminServiceTestAdmin.getProcessDefinitions();
+            expect(definitions.map((definition) => definition.key)).toContain(RANK_MOVIE_PROCESS);
+        });
     });
 });

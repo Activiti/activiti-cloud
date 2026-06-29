@@ -271,6 +271,71 @@ export class TaskService extends BaseService {
         });
     }
 
+    async getCandidateUsers(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-users`);
+        return this.unwrapCandidateNames(response, 'user');
+    }
+
+    async getCandidateGroups(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-groups`);
+        return this.unwrapCandidateNames(response, 'group');
+    }
+
+    async addCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/tasks/${taskId}/candidate-users`, {
+            data: {
+                payloadType: 'CandidateUsersPayload',
+                taskId,
+                candidateUsers,
+            },
+        });
+    }
+
+    async deleteCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
+        return this.delete(`${this.basePath}/tasks/${taskId}/candidate-users`, {
+            data: {
+                payloadType: 'CandidateUsersPayload',
+                taskId,
+                candidateUsers,
+            },
+        });
+    }
+
+    async addCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/tasks/${taskId}/candidate-groups`, {
+            data: {
+                payloadType: 'CandidateGroupsPayload',
+                taskId,
+                candidateGroups,
+            },
+        });
+    }
+
+    async deleteCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
+        return this.delete(`${this.basePath}/tasks/${taskId}/candidate-groups`, {
+            data: {
+                payloadType: 'CandidateGroupsPayload',
+                taskId,
+                candidateGroups,
+            },
+        });
+    }
+
+    async getNextTask(): Promise<CloudTask | undefined> {
+        const response = await this.post(`${this.basePath}/tasks/next`, { data: {} });
+        if (response.httpStatus === 204) {
+            return undefined;
+        }
+        return this.unwrapEntity<CloudTask>(response);
+    }
+
+    private unwrapCandidateNames(response: RequestResponse, field: 'user' | 'group'): string[] {
+        const items = this.unwrapList<Record<string, unknown>>(response, 'list');
+        return items
+            .map((item) => item[field])
+            .filter((value): value is string => typeof value === 'string');
+    }
+
     async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`, {
             headers: { 'Content-Type': 'application/json' },

@@ -20,8 +20,10 @@ import {
     StartProcessPayload,
     ProcessQueryParams,
     UpdateProcessPayload,
+    CreateProcessInstancePayload,
+    SignalPayload,
 } from '../models/runtime-bundle.models';
-import { CloudProcessDefinition } from '../models/process-definition.models';
+import { CloudProcessDefinition, ConnectorDefinition, ProcessDefinitionMeta } from '../models/process-definition.models';
 import { CloudVariableInstance } from '../models/process-variable.models';
 import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
@@ -35,10 +37,14 @@ export class RuntimeBundleService extends BaseService {
     }
 
     async startProcess(payload: Omit<StartProcessPayload, 'payloadType'>): Promise<CloudProcessInstance> {
-        const { name, businessKey, ...rest } = payload;
+        const { name, businessKey, processDefinitionKey, ...rest } = payload;
+        if (!processDefinitionKey && !rest.processDefinitionId) {
+            throw new Error('startProcess requires processDefinitionKey or processDefinitionId');
+        }
         const body = {
             payloadType: 'StartProcessPayload' as const,
             ...rest,
+            ...(processDefinitionKey ? { processDefinitionKey } : {}),
             name: name ?? this.defaultProcessInstanceName(),
             businessKey: businessKey ?? this.defaultBusinessKey(),
         };
@@ -50,6 +56,83 @@ export class RuntimeBundleService extends BaseService {
             this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
         }
         return processInstance;
+    }
+
+    async createProcess(payload: Omit<CreateProcessInstancePayload, 'payloadType'>): Promise<CloudProcessInstance> {
+        const { name, businessKey, processDefinitionKey, ...rest } = payload;
+        const body = {
+            payloadType: 'CreateProcessInstancePayload' as const,
+            ...rest,
+            ...(processDefinitionKey ? { processDefinitionKey } : {}),
+            name: name ?? this.defaultProcessInstanceName(),
+            businessKey: businessKey ?? this.defaultBusinessKey(),
+        };
+
+        const response = await this.post(`${this.basePath}/process-instances/create`, { data: body });
+        const processInstance = this.unwrapEntity<CloudProcessInstance>(response);
+        if (processInstance.id) {
+            this.trackCreatedResource(`${this.basePath}/process-instances/${processInstance.id}`);
+        }
+        return processInstance;
+    }
+
+    async startCreatedProcess(processInstanceId: string): Promise<CloudProcessInstance> {
+        const response = await this.post(`${this.basePath}/process-instances/${processInstanceId}/start`, {
+            data: {
+                payloadType: 'StartProcessPayload',
+            },
+        });
+        return this.unwrapEntity<CloudProcessInstance>(response);
+    }
+
+    async sendSignal(name: string, variables?: Record<string, unknown>): Promise<RequestResponse> {
+        const body: Omit<SignalPayload, 'payloadType'> & { payloadType: 'SignalPayload' } = {
+            payloadType: 'SignalPayload',
+            name,
+            ...(variables ? { variables } : {}),
+        };
+        return this.post(`${this.basePath}/process-instances/signal`, { data: body });
+    }
+
+    async getHomeInfo(): Promise<Record<string, unknown>> {
+        const response = await this.get(this.basePath);
+        return this.unwrapEntity<Record<string, unknown>>(response);
+    }
+
+    async getProcessDefinitionById(processDefinitionId: string): Promise<CloudProcessDefinition> {
+        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}`);
+        return this.unwrapEntity<CloudProcessDefinition>(response);
+    }
+
+    async getProcessDefinitionMeta(processDefinitionId: string): Promise<ProcessDefinitionMeta> {
+        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}/meta`);
+        return this.unwrapEntity<ProcessDefinitionMeta>(response);
+    }
+
+    async getProcessDefinitionStaticValues(processDefinitionId: string): Promise<Record<string, unknown>> {
+        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}/static-values`);
+        if (response.httpStatus && response.httpStatus >= 400) {
+            throw new Error(`Failed to get static values (${response.httpStatus})`);
+        }
+        return response as Record<string, unknown>;
+    }
+
+    async getProcessDefinitionConstantValues(processDefinitionId: string): Promise<Record<string, unknown>> {
+        const response = await this.get(`${this.basePath}/process-definitions/${processDefinitionId}/constant-values`);
+        if (response.httpStatus && response.httpStatus >= 400) {
+            throw new Error(`Failed to get constant values (${response.httpStatus})`);
+        }
+        return response as Record<string, unknown>;
+    }
+
+    async getConnectorDefinitions(): Promise<ConnectorDefinition[]> {
+        const response = await this.get(`${this.basePath}/connector-definitions`);
+        return this.unwrapList<ConnectorDefinition>(response, 'list');
+    }
+
+    async getConnectorDefinitionById(connectorDefinitionId: string): Promise<ConnectorDefinition> {
+        const response = await this.get(`${this.basePath}/connector-definitions/${connectorDefinitionId}`);
+        return this.unwrapEntity<ConnectorDefinition>(response);
     }
 
     async startProcessWithVariables(

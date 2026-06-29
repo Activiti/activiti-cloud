@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BaseService } from './base.service';
+import { CloudTask } from '../models/task.models';
+import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 import { CloudVariableInstance } from '../models/process-variable.models';
 
@@ -23,6 +24,88 @@ export class TaskAdminService extends BaseService {
 
     constructor(context: CustomAPIRequest) {
         super(context);
+    }
+
+    async getAllTasks(): Promise<CloudTask[]> {
+        const response = await this.get(`${this.basePath}/tasks`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTaskById(taskId: string): Promise<CloudTask> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}`);
+        return this.unwrapEntity<CloudTask>(response);
+    }
+
+    async assignTask(taskId: string, assignee: string): Promise<CloudTask> {
+        const response = await this.post(`${this.basePath}/tasks/${taskId}/assign`, {
+            data: {
+                payloadType: 'AssignTaskPayload',
+                taskId,
+                assignee,
+            },
+        });
+        return this.unwrapEntity<CloudTask>(response);
+    }
+
+    async assignTasks(taskIds: string[], assignee: string): Promise<CloudTask[]> {
+        const response = await this.post(`${this.basePath}/tasks/assign`, {
+            data: {
+                payloadType: 'AssignTasksPayload',
+                taskIds,
+                assignee,
+            },
+        });
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getCandidateUsers(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-users`);
+        return this.unwrapCandidateNames(response, 'user');
+    }
+
+    async getCandidateGroups(taskId: string): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-groups`);
+        return this.unwrapCandidateNames(response, 'group');
+    }
+
+    async addCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/tasks/${taskId}/candidate-users`, {
+            data: {
+                payloadType: 'CandidateUsersPayload',
+                taskId,
+                candidateUsers,
+            },
+        });
+    }
+
+    async deleteCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
+        return this.delete(`${this.basePath}/tasks/${taskId}/candidate-users`, {
+            data: {
+                payloadType: 'CandidateUsersPayload',
+                taskId,
+                candidateUsers,
+            },
+        });
+    }
+
+    async addCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/tasks/${taskId}/candidate-groups`, {
+            data: {
+                payloadType: 'CandidateGroupsPayload',
+                taskId,
+                candidateGroups,
+            },
+        });
+    }
+
+    async deleteCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
+        return this.delete(`${this.basePath}/tasks/${taskId}/candidate-groups`, {
+            data: {
+                payloadType: 'CandidateGroupsPayload',
+                taskId,
+                candidateGroups,
+            },
+        });
     }
 
     async completeTask(taskId: string): Promise<void> {
@@ -77,5 +160,12 @@ export class TaskAdminService extends BaseService {
             headers: { 'Content-Type': 'application/json' },
         });
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
+    }
+
+    private unwrapCandidateNames(response: RequestResponse, field: 'user' | 'group'): string[] {
+        const items = this.unwrapList<Record<string, unknown>>(response, 'list');
+        return items
+            .map((item) => item[field])
+            .filter((value): value is string => typeof value === 'string');
     }
 }
