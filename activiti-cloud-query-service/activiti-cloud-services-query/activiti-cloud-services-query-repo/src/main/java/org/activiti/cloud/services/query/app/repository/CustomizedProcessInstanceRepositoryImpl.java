@@ -142,22 +142,4 @@ public class CustomizedProcessInstanceRepositoryImpl
             .where(processInstanceEntity.parentId.eq(parentId))
             .fetch();
     }
-
-    public void dummyDirectMethodAddedToCheckUTCoverage() {
-        //explicit empty
-    }
-
-    public void dummyInDirectMethodAddedToCheckUTCoverage() {
-        //explicit empty
-    }
-
-    public void dummyDirectMethodAddedToCheckITCoverage() {
-        //explicit empty
-    }
-
-    public void dummyInDirectMethodAddedToCheckITCoverage() {
-        //explicit empty
-    }
-
-    public void dummyMethodNotCoveredInTests() {}
 }
