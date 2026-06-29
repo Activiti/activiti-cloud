@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from '@michalfidor/playswag';
 import type { UserKey } from '../config/users';
 import { AuthCache } from './auth-cache';
+import { wrapAuthenticatedApiContext } from './context-factory';
 import { CustomAPIRequest } from './context.models';
 
 interface UserContexts {
@@ -37,8 +38,13 @@ interface WorkerFixtures {
 }
 
 function userContext(userKey: UserKey) {
-    return async ({ authCache }: { authCache: AuthCache }, use: (context: CustomAPIRequest) => Promise<void>) => {
-        await use(await authCache.getContext(userKey));
+    return async (
+        { authCache, trackRequest }: { authCache: AuthCache; trackRequest: (ctx: CustomAPIRequest) => CustomAPIRequest },
+        use: (context: CustomAPIRequest) => Promise<void>
+    ) => {
+        const cached = await authCache.getContext(userKey);
+        const tracked = trackRequest(cached);
+        await use(wrapAuthenticatedApiContext(tracked, cached.token, cached.expires_in, cached.username));
     };
 }
 

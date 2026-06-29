@@ -15,6 +15,8 @@ export const paths = {
     packageRoot,
     rootFolder,
     reporter: path.join(packageRoot, 'reporter'),
+    playswagCoverage: path.join(packageRoot, 'playswag-coverage'),
+    openapiSpecs: path.join(packageRoot, 'playswag-coverage', 'specs'),
     resources: path.join(packageRoot, 'resources'),
     modelingProjects: {
         /** BPMN + extensions mounted when chart RB image lacks a process (see docs/MODELING_PROJECTS.md). */
