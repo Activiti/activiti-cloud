@@ -24,8 +24,6 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.InputDestination;
@@ -34,21 +32,11 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.context.TestPropertySource;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestChannelBinderConfiguration.class)
-@TestPropertySource(
-    properties = {
-        "logging.level.org.activiti.cloud=DEBUG",
-        "logging.level.org.springframework.cloud.stream=DEBUG",
-        "logging.level.org.springframework.cloud.function=DEBUG",
-    }
-)
 public class TestBpmnErrorConnectorIT {
-
-    private static final Logger logger = LoggerFactory.getLogger(TestBpmnErrorConnectorIT.class);
 
     @Autowired
     private InputDestination input;
@@ -82,17 +70,10 @@ public class TestBpmnErrorConnectorIT {
             .build();
 
         //when
-        logger.info("AAE-DEBUG sending integration request, message id {}", message.getHeaders().getId());
         input.send(message, "test-bpmn-error-connector.throwError");
 
         //then
-        long startMillis = System.currentTimeMillis();
         Message<?> outputMessage = output.receive(10000, "integrationError_myApp");
-        logger.info(
-            "AAE-DEBUG receive on integrationError_myApp returned {} after {} ms",
-            outputMessage,
-            System.currentTimeMillis() - startMillis
-        );
         assertThat(outputMessage).isNotNull();
         IntegrationError integrationError = objectMapper.readValue(
             (byte[]) outputMessage.getPayload(),
