@@ -44,7 +44,7 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
         });
 
         await activiti.step('When the user fetches the task by path', async () => {
-            const task = await queryServiceTestUser.getTask(taskId);
+            const task = await queryServiceTestUser.tasks.getTask(taskId);
             expect(task.id).toBe(taskId);
         });
 
@@ -66,7 +66,7 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
             });
             linkedOrphanProcessInstanceId = orphanProcess.id;
             await queryServiceTestUser.waitForProcessInstanceSynced(linkedOrphanProcessInstanceId);
-            await queryServiceTestUser.linkProcessInstances(
+            await queryServiceTestUser.processInstances.linkProcessInstances(
                 parentProcessInstanceId,
                 [linkedOrphanProcessInstanceId],
                 LINK_TYPE
@@ -89,7 +89,7 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
         let integrationContextId = '';
 
         await activiti.step('When the admin lists applications', async () => {
-            const applications = await queryAdminServiceTestAdmin.getApplicationsAdmin();
+            const applications = await queryAdminServiceTestAdmin.adminApplications.getApplications();
             expect(applications.map((application) => application.name)).toContain('default-app');
         });
 
@@ -114,7 +114,7 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
 
         await activiti.step('Then the admin can fetch the integration context by id', async () => {
             const integrationContext =
-                await queryAdminServiceTestAdmin.getIntegrationContextAdmin(integrationContextId);
+                await queryAdminServiceTestAdmin.adminIntegrationContexts.getIntegrationContext(integrationContextId);
             expect(integrationContext.id).toBe(integrationContextId);
             expect(integrationContext.clientType).toBe('ServiceTask');
         });

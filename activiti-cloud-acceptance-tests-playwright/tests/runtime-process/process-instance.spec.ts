@@ -111,7 +111,7 @@ activiti.describe('Runtime — Process Instance Actions', () => {
     }) => {
         await activiti.step('When the user gets the process definitions', async () => {
             const runtimeDefinitions = await runtimeBundleServiceTestUser.getProcessDefinitions();
-            const queryDefinitions = await queryServiceTestUser.getProcessDefinitions();
+            const queryDefinitions = await queryServiceTestUser.processDefinitions.getProcessDefinitions();
             const runtimeKeys = runtimeDefinitions.map((def) => def.key);
             const queryKeys = queryDefinitions.map((def) => def.key);
 

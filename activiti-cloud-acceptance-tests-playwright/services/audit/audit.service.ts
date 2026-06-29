@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams, EventType } from '../../models/audit.models';
+import { CloudRuntimeEvent, EventType } from '../../models/audit.models';
 import { BaseService } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
-import { HttpStatusCheck, SearchPageParams } from '../../models/base-service.models';
+import { HttpStatusCheck } from '../../models/base-service.models';
 import { AUDIT_ADMIN_V1_BASE, AUDIT_V1_BASE, AuditEventsEndpoint } from './endpoints/index';
 
 const INTEGRATION_EVENT_TYPES: readonly string[] = [
@@ -36,28 +36,12 @@ export class AuditService extends BaseService {
         this.adminEvents = new AuditEventsEndpoint(context, true);
     }
 
-    async getAllEvents(): Promise<CloudRuntimeEvent[]> {
-        return this.events.getAllEvents();
-    }
-
-    async getEvents(params?: EventQueryParams, page?: SearchPageParams): Promise<CloudRuntimeEvent[]> {
-        return this.events.getEvents(params, page);
-    }
-
-    async getEventById(eventId: string): Promise<CloudRuntimeEvent> {
-        return this.events.getEventById(eventId);
-    }
-
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ entityId });
-    }
-
-    async getAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
-        return this.adminEvents.getAllEvents();
+        return this.events.getEvents({ entityId });
     }
 
     async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
-        const byProcessInstance = await this.getEventsAdmin({ processInstanceId: entityId });
+        const byProcessInstance = await this.adminEvents.getEvents({ processInstanceId: entityId });
         if (byProcessInstance.length > 0) {
             return byProcessInstance;
         }
@@ -66,18 +50,6 @@ export class AuditService extends BaseService {
         searchParams.append('search', `entityId:${entityId},processInstanceId:${entityId}`);
         const response = await this.get(`${AUDIT_ADMIN_V1_BASE}/events?${searchParams.toString()}`);
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
-    }
-
-    async getEventsAdmin(params?: EventQueryParams, page?: SearchPageParams): Promise<CloudRuntimeEvent[]> {
-        return this.adminEvents.getEvents(params, page);
-    }
-
-    async exportEvents(fileName: string, from: string, to: string): Promise<string> {
-        return this.adminEvents.exportEvents(fileName, from, to);
-    }
-
-    async deleteAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
-        return this.adminEvents.deleteAllEvents();
     }
 
     async waitForEventOfTypeForEntity(entityId: string, eventType: EventType): Promise<CloudRuntimeEvent> {
@@ -92,7 +64,7 @@ export class AuditService extends BaseService {
 
     async waitForEventOfTypeForProcessInstance(processInstanceId: string, eventType: EventType): Promise<CloudRuntimeEvent> {
         const events = await AuditService.waitFor(
-            () => this.getEvents({ processInstanceId, eventType }),
+            () => this.events.getEvents({ processInstanceId, eventType }),
             (list) => list.some((event) => event.eventType === eventType && event.processInstanceId === processInstanceId),
             'auditEvents',
             `event ${eventType} for process ${processInstanceId}`
@@ -101,7 +73,7 @@ export class AuditService extends BaseService {
     }
 
     async getEventsByProcessInstanceId(processInstanceId: string): Promise<CloudRuntimeEvent[]> {
-        return this.getEvents({ processInstanceId });
+        return this.events.getEvents({ processInstanceId });
     }
 
     async waitForEventsCount(
@@ -204,7 +176,7 @@ export class AuditService extends BaseService {
         entityId: string,
         eventType: EventType
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processInstanceId, entityId });
+        const events = await this.events.getEvents({ processInstanceId, entityId });
         return events.filter(
             (event) =>
                 event.eventType === eventType &&
@@ -251,7 +223,7 @@ export class AuditService extends BaseService {
         variableNames: readonly string[]
     ): Promise<CloudRuntimeEvent[]> {
         return AuditService.waitFor(
-            () => this.getEvents({ processInstanceId, eventType: EventType.VARIABLE_CREATED }),
+            () => this.events.getEvents({ processInstanceId, eventType: EventType.VARIABLE_CREATED }),
             (events) => {
                 const names = new Set(
                     events
@@ -305,7 +277,7 @@ export class AuditService extends BaseService {
         eventType: EventType,
         messageName: string
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processInstanceId, eventType });
+        const events = await this.events.getEvents({ processInstanceId, eventType });
         return events.filter((event) => {
             const entity = event.entity as { messagePayload?: { name?: string } } | undefined;
             return (
@@ -335,7 +307,7 @@ export class AuditService extends BaseService {
         eventType: EventType,
         messageName: string
     ): Promise<CloudRuntimeEvent[]> {
-        const events = await this.getEvents({ processDefinitionKey });
+        const events = await this.events.getEvents({ processDefinitionKey });
         return events.filter((event) => {
             if (event.businessKey !== businessKey || event.eventType !== eventType) {
                 return false;
@@ -361,7 +333,7 @@ export class AuditService extends BaseService {
 
     async waitForAllEventsAdminCount(expectedCount: number): Promise<CloudRuntimeEvent[]> {
         return AuditService.waitFor(
-            () => this.getAllEventsAdmin(),
+            () => this.adminEvents.getAllEvents(),
             (events) => events.length === expectedCount,
             'auditEvents',
             `admin events count to equal ${expectedCount}`
@@ -370,7 +342,7 @@ export class AuditService extends BaseService {
 
     async waitForAllEventsAdminCountGreaterThan(minCount: number): Promise<CloudRuntimeEvent[]> {
         return AuditService.waitFor(
-            () => this.getAllEventsAdmin(),
+            () => this.adminEvents.getAllEvents(),
             (events) => events.length > minCount,
             'auditEvents',
             `admin events count > ${minCount}`
@@ -383,10 +355,6 @@ export class AuditService extends BaseService {
         if (status !== 'UP') {
             throw new Error(`Audit service health check failed: status=${status}`);
         }
-    }
-
-    async getSwaggerSpecification(group: string = 'Audit'): Promise<string> {
-        return this.events.getSwaggerSpecification(group);
     }
 
     buildUnauthenticatedGetStatusChecks(): readonly HttpStatusCheck<AuditService>[];

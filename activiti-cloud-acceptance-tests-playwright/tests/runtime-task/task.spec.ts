@@ -100,7 +100,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
 
         await activiti.step('Then the standalone task is deleted', async () => {
             expect(await taskServiceTestUser.isTaskNotFoundInRuntime(taskId)).toBe(true);
-            const queryTask = await queryServiceTestUser.getTaskById(taskId);
+            const queryTask = await queryServiceTestUser.tasks.getTaskById(taskId);
             expect(queryTask?.status).toBe(TaskStatus.CANCELLED);
         });
     });
@@ -123,7 +123,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
         await activiti.step('Then the subtask is created and references another task', async () => {
             const created = await taskServiceTestUser.getTaskById(subtaskId);
             expect(created.parentTaskId?.toLowerCase()).toBe(parentTaskId.toLowerCase());
-            const querySubtask = await queryServiceTestUser.getTaskById(subtaskId);
+            const querySubtask = await queryServiceTestUser.tasks.getTaskById(subtaskId);
             expect(querySubtask?.parentTaskId?.toLowerCase()).toBe(parentTaskId.toLowerCase());
         });
     });
@@ -346,7 +346,7 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
                 expect(response.httpStatus).toBeGreaterThanOrEqual(400);
             expect(response.httpStatus).toBeLessThan(500);
             expect(JSON.stringify(response)).toContain('Unable to find task');
-                const hrTasks = await queryServiceHrUser.getAllTasks();
+                const hrTasks = await queryServiceHrUser.tasks.getAllTasks();
                 expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
             }
         );

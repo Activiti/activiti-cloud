@@ -25,14 +25,14 @@ activiti.describe('Runtime — Application Actions', () => {
         });
 
         await activiti.step('Then application deployed events are emitted on start', async () => {
-            const events = await auditServiceHrUser.getEvents({ eventType: EventType.APPLICATION_DEPLOYED });
+            const events = await auditServiceHrUser.events.getEvents({ eventType: EventType.APPLICATION_DEPLOYED });
             expect(Array.isArray(events)).toBe(true);
         });
     });
 
     activiti('getting applications', async ({ queryServiceHrUser }) => {
         await activiti.step('Then the user can get applications', async () => {
-            const applications = await queryServiceHrUser.getApplications();
+            const applications = await queryServiceHrUser.applications.getApplications();
             expect(applications.map(a => a.name)).toContain('default-app');
         });
     });

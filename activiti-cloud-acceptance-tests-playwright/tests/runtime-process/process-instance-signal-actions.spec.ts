@@ -46,7 +46,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
                 'Given the user is authenticated as testadmin ' +
                     'Then query number of processes with processDefinitionKey SignalStartEventProcess',
                 async () => {
-                    const instances = await queryAdminServiceTestAdmin.getProcessInstancesAdminWithParams({
+                    const instances = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstances({
                         processDefinitionKey: SIGNAL_START_EVENT_PROCESS,
                     });
                     initialSignalStartCount = instances.length;

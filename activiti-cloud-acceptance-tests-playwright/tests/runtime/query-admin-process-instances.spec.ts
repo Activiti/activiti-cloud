@@ -38,40 +38,40 @@ activiti.describe('Runtime — Query Admin Process Instances', () => {
         });
 
         await activiti.step('When the admin lists process instances with variable keys via GET', async () => {
-            const instances = await queryAdminServiceTestAdmin.getProcessInstancesAdminWithVariableKeys('start1');
+            const instances = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstancesWithVariableKeys('start1');
             expect(Array.isArray(instances)).toBe(true);
         });
 
         await activiti.step('And searches process instances by id via POST', async () => {
-            const instances = await queryAdminServiceTestAdmin.searchProcessInstancesAdmin({
+            const instances = await queryAdminServiceTestAdmin.adminProcessInstances.searchProcessInstances({
                 id: [processInstanceId],
             });
             expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
         });
 
         await activiti.step('Then the admin process instance count matches', async () => {
-            const count = await queryAdminServiceTestAdmin.countProcessInstancesAdmin({
+            const count = await queryAdminServiceTestAdmin.adminProcessInstances.countProcessInstances({
                 id: [processInstanceId],
             });
             expect(count).toBeGreaterThanOrEqual(1);
         });
 
         await activiti.step('When the admin reads process instance variables', async () => {
-            const variables = await queryAdminServiceTestAdmin.getProcessInstanceVariablesAdmin(processInstanceId);
+            const variables = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstanceVariables(processInstanceId);
             expect(variables.map((variable) => variable.name)).toEqual(
                 expect.arrayContaining(['start1', 'start2'])
             );
         });
 
         await activiti.step('Then sequence flows and BPMN activities are returned', async () => {
-            const sequenceFlows = await queryAdminServiceTestAdmin.getSequenceFlowsAdmin(processInstanceId);
-            const activities = await queryAdminServiceTestAdmin.getBpmnActivitiesAdmin(processInstanceId);
+            const sequenceFlows = await queryAdminServiceTestAdmin.adminProcessInstances.getSequenceFlows(processInstanceId);
+            const activities = await queryAdminServiceTestAdmin.adminProcessInstances.getBpmnActivities(processInstanceId);
             expect(Array.isArray(sequenceFlows)).toBe(true);
             expect(Array.isArray(activities)).toBe(true);
         });
 
         await activiti.step('And application versions are listed', async () => {
-            const appVersions = await queryAdminServiceTestAdmin.getProcessInstanceAppVersionsAdmin();
+            const appVersions = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstanceAppVersions();
             expect(Array.isArray(appVersions)).toBe(true);
         });
     });
@@ -96,7 +96,7 @@ activiti.describe('Runtime — Query Admin Process Instances', () => {
         });
 
         await activiti.step('When the admin lists subprocesses for the parent process instance', async () => {
-            const subprocesses = await queryAdminServiceTestAdmin.getSubprocessesAdmin(parentProcessInstanceId);
+            const subprocesses = await queryAdminServiceTestAdmin.adminProcessInstances.getSubprocesses(parentProcessInstanceId);
             expect(subprocesses.length).toBeGreaterThan(0);
         });
 
@@ -115,7 +115,7 @@ activiti.describe('Runtime — Query Admin Process Instances', () => {
         });
 
         await activiti.step('When the user links the orphan to the main process instance', async () => {
-            await queryServiceTestUser.linkProcessInstances(
+            await queryServiceTestUser.processInstances.linkProcessInstances(
                 parentProcessInstanceId,
                 [linkedOrphanProcessInstanceId],
                 LINK_TYPE

@@ -64,40 +64,40 @@ activiti.describe('Runtime — Query Admin Task Actions', () => {
         });
 
         await activiti.step('When the admin lists tasks via GET', async () => {
-            const tasks = await queryAdminServiceTestAdmin.getAllTasksAdmin();
+            const tasks = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
             expect(tasks.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And lists tasks with process variable keys via GET', async () => {
-            const tasks = await queryAdminServiceTestAdmin.getTasksAdminWithVariableKeys(
+            const tasks = await queryAdminServiceTestAdmin.adminTasks.getTasksWithVariableKeys(
                 'ProcessWithVariables/start1'
             );
             expect(Array.isArray(tasks)).toBe(true);
         });
 
         await activiti.step('And searches tasks by id via POST', async () => {
-            const tasks = await queryAdminServiceTestAdmin.searchTasksAdmin({ id: [groupTaskId] });
+            const tasks = await queryAdminServiceTestAdmin.adminTasks.searchTasks({ id: [groupTaskId] });
             expect(tasks.map((task) => task.id)).toContain(groupTaskId);
         });
 
         await activiti.step('Then the admin task count matches', async () => {
-            const count = await queryAdminServiceTestAdmin.countTasksAdmin({ id: [groupTaskId] });
+            const count = await queryAdminServiceTestAdmin.adminTasks.countTasks({ id: [groupTaskId] });
             expect(count).toBe(1);
         });
 
         await activiti.step('When the admin fetches task details and candidates', async () => {
-            const groupTask = await queryAdminServiceTestAdmin.getTaskAdminById(groupTaskId);
+            const groupTask = await queryAdminServiceTestAdmin.adminTasks.getTask(groupTaskId);
             expect(groupTask.id).toBe(groupTaskId);
 
-            const groups = await queryAdminServiceTestAdmin.getTaskCandidateGroupsAdmin(groupTaskId);
+            const groups = await queryAdminServiceTestAdmin.adminTasks.getCandidateGroups(groupTaskId);
             expect(groups.length).toBeGreaterThan(0);
 
-            const users = await queryAdminServiceTestAdmin.getTaskCandidateUsersAdmin(userTaskId);
+            const users = await queryAdminServiceTestAdmin.adminTasks.getCandidateUsers(userTaskId);
             expect(users.length).toBeGreaterThan(0);
         });
 
         await activiti.step('Then process-scoped task variables are readable via admin API', async () => {
-            const variables = await queryAdminServiceTestAdmin.getTaskVariablesAdmin(variableTaskId);
+            const variables = await queryAdminServiceTestAdmin.adminTasks.getTaskVariables(variableTaskId);
             expect(Array.isArray(variables)).toBe(true);
         });
     });

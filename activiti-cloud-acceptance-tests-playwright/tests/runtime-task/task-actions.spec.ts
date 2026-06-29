@@ -79,7 +79,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             expect(rbTask.formKey).toBe('taskForm');
             expect(rbTask.processDefinitionId).toBe(processFromQuery.processDefinitionId);
 
-            const queryTask = await queryServiceTestUser.getTaskById(taskId);
+            const queryTask = await queryServiceTestUser.tasks.getTaskById(taskId);
             expect(queryTask?.formKey).toBe('taskForm');
             expect(queryTask?.processDefinitionId).toBe(processFromQuery.processDefinitionId);
             expect(queryTask?.processDefinitionVersion).toBe(processFromQuery.processDefinitionVersion);
@@ -119,7 +119,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And task variable start1 has value start1', async () => {
-            const vars = await queryServiceTestUser.getTaskVariables(taskId);
+            const vars = await queryServiceTestUser.tasks.getTaskVariables(taskId);
             expect(String(vars.find(v => v.name === 'start1')?.value)).toBe('start1');
         });
 
@@ -165,12 +165,12 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         );
 
         await activiti.step('And a task variable was created with name start2', async () => {
-            const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
+            const vars = await queryServiceHrUser.tasks.getTaskVariables(hruserTaskId);
             expect(vars.some(v => v.name === 'start2')).toBe(true);
         });
 
         await activiti.step('Then task variable start1 has value start1', async () => {
-            const vars = await queryServiceHrUser.getTaskVariables(hruserTaskId);
+            const vars = await queryServiceHrUser.tasks.getTaskVariables(hruserTaskId);
             expect(String(vars.find(v => v.name === 'start1')?.value)).toBe('start1');
         });
     });
@@ -522,7 +522,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the task contains candidate groups hr,testgroup in Query', async () => {
-            const groups = await queryServiceTestUser.getCandidateGroups(taskId);
+            const groups = await queryServiceTestUser.tasks.getCandidateGroups(taskId);
             expect(groups).toEqual(expect.arrayContaining(['hr', 'testgroup']));
         });
     });
@@ -584,7 +584,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('When the task does not contain candidate user hruser in Query', async () => {
-            const users = await queryServiceTestUser.getCandidateUsers(taskId);
+            const users = await queryServiceTestUser.tasks.getCandidateUsers(taskId);
             expect(users).not.toContain('hruser');
         });
 

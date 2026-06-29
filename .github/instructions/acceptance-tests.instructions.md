@@ -107,6 +107,7 @@ Query and audit services follow the hxp-process-services layout:
 - `services/query/endpoints/*.endpoint.ts`, `services/audit/endpoints/*.endpoint.ts` — one class per REST resource area; user/admin share an endpoint class via an `admin: boolean` constructor flag where applicable
 - Admin-only query resources (`service-tasks`, `integration-contexts`) use dedicated endpoint classes under `endpoints/`
 - Admin fixtures use the same service type with `createQueryService(context, true)` for admin status-check builders; audit admin methods live on `AuditService.adminEvents`
+- **Specs call `service.<endpoint>.<method>()` for raw HTTP** (e.g. `queryServiceTestUser.tasks.getTask(id)`, `auditAdminServiceTestAdmin.adminEvents.exportEvents(...)`). Use facade methods only for orchestration: `waitFor*`, `find*`, `getProcessDefinitionByKey`, `checkServicesHealth`, and `build*StatusChecks`.
 
 **Specs must never contain REST paths or URLs or import service classes for status checks.** Call `build*StatusChecks()` on the fixture service instance.
 

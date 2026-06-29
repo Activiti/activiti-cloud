@@ -71,9 +71,9 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                     'And another user is authenticated as testadmin ' +
                         'Then the user is able to delete all events in audit service',
                     async () => {
-                        const before = await auditAdminServiceTestAdmin.getAllEventsAdmin();
+                        const before = await auditAdminServiceTestAdmin.adminEvents.getAllEvents();
                         expect(before.length).toBeGreaterThan(0);
-                        await auditAdminServiceTestAdmin.deleteAllEventsAdmin();
+                        await auditAdminServiceTestAdmin.adminEvents.deleteAllEvents();
                         const after = await auditAdminServiceTestAdmin.waitForAllEventsAdminCount(0);
                         expect(after.length).toBe(0);
                     }
@@ -109,18 +109,18 @@ activiti.describe('Runtime — Delete Actions', { tag: ['@slow', '@destructive']
                 'And another user is authenticated as testadmin ' +
                     'Then the user is able to delete all tasks in query service',
                 async () => {
-                    const before = await queryAdminServiceTestAdmin.getAllTasksAdmin();
+                    const before = await queryAdminServiceTestAdmin.adminTasks.getAllTasks();
                     expect(before.length).toBeGreaterThan(0);
-                    await queryAdminServiceTestAdmin.deleteAllTasksAdmin();
+                    await queryAdminServiceTestAdmin.adminTasks.deleteAllTasks();
                     const after = await queryAdminServiceTestAdmin.waitForAllTasksAdminCount(0);
                     expect(after.length).toBe(0);
                 }
             );
 
             await activiti.step('And the user is able to delete all process instances in query service', async () => {
-                const before = await queryAdminServiceTestAdmin.getAllProcessInstancesAdmin();
+                const before = await queryAdminServiceTestAdmin.adminProcessInstances.getAllProcessInstances();
                 expect(before.length).toBeGreaterThan(0);
-                await queryAdminServiceTestAdmin.deleteAllProcessInstancesAdmin();
+                await queryAdminServiceTestAdmin.adminProcessInstances.deleteAllProcessInstances();
                 const after = await queryAdminServiceTestAdmin.waitForAllProcessInstancesAdminCount(0);
                 expect(after.length).toBe(0);
             });

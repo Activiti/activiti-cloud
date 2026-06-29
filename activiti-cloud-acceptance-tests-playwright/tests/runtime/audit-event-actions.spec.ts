@@ -40,7 +40,7 @@ activiti.describe('Runtime — Audit Event Actions', () => {
         });
 
         await activiti.step('When the user fetches the event by id', async () => {
-            const event = await auditServiceTestUser.getEventById(eventId);
+            const event = await auditServiceTestUser.events.getEventById(eventId);
             expect(event.id).toBe(eventId);
             expect(event.eventType).toBe(EventType.PROCESS_STARTED);
         });
@@ -59,7 +59,7 @@ activiti.describe('Runtime — Audit Event Actions', () => {
         });
 
         await activiti.step('When testadmin exports events for the date range', async () => {
-            const csv = await auditAdminServiceTestAdmin.exportEvents(fileName, from, to);
+            const csv = await auditAdminServiceTestAdmin.adminEvents.exportEvents(fileName, from, to);
             expect(csv.length).toBeGreaterThan(0);
             expect(csv).toContain('EVENTTYPE');
         });

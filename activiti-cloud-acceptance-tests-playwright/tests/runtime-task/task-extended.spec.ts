@@ -57,7 +57,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
             expect(response.httpStatus).toBeGreaterThanOrEqual(400);
             expect(response.httpStatus).toBeLessThan(500);
             expect(JSON.stringify(response)).toContain('Unable to find task');
-            const hrTasks = await queryServiceHrUser.getAllTasks();
+            const hrTasks = await queryServiceHrUser.tasks.getAllTasks();
             expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
         });
     });
@@ -93,7 +93,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
             });
 
             await activiti.step('Then hruser does not see tasks for that process definition', async () => {
-                const hrTasks = await queryServiceHrUser.getAllTasks();
+                const hrTasks = await queryServiceHrUser.tasks.getAllTasks();
                 const processDefinitionIds = hrTasks
                     .map((task) => task.processDefinitionKey ?? task.processDefinitionId)
                     .filter(Boolean);

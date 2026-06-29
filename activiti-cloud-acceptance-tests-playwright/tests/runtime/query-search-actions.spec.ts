@@ -39,26 +39,26 @@ activiti.describe('Runtime — Query Search Actions', () => {
         });
 
         await activiti.step('When the user searches process instances by id', async () => {
-            const processInstances = await queryServiceTestUser.searchProcessInstances({
+            const processInstances = await queryServiceTestUser.processInstances.searchProcessInstances({
                 id: [processInstanceId],
             });
             expect(processInstances.map((instance) => instance.id)).toContain(processInstanceId);
         });
 
         await activiti.step('Then the process instance count matches', async () => {
-            const count = await queryServiceTestUser.countProcessInstances({ id: [processInstanceId] });
+            const count = await queryServiceTestUser.processInstances.countProcessInstances({ id: [processInstanceId] });
             expect(count).toBeGreaterThanOrEqual(1);
         });
 
         await activiti.step('When the user searches tasks by id', async () => {
-            const tasks = await queryServiceTestUser.searchTasks({
+            const tasks = await queryServiceTestUser.tasks.searchTasks({
                 id: [taskId],
             });
             expect(tasks.map((task) => task.id)).toContain(taskId);
         });
 
         await activiti.step('Then the task count matches', async () => {
-            const count = await queryServiceTestUser.countTasks({
+            const count = await queryServiceTestUser.tasks.countTasks({
                 id: [taskId],
             });
             expect(count).toBe(1);

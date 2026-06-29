@@ -18,20 +18,19 @@ import {
     CloudIntegrationContext,
     CloudProcessInstance,
     CloudServiceTask,
-    ProcessInstanceSearchRequest,
     ProcessInstanceStatus,
     ProcessQueryParams,
     ServiceTaskStatus,
 } from '../../models/runtime-bundle.models';
 import { CloudProcessDefinition } from '../../models/process-definition.models';
 import { CloudVariableInstance } from '../../models/process-variable.models';
-import { CloudTask, TaskQueryParams, TaskSearchRequest, TaskStatus } from '../../models/task.models';
+import { CloudTask, TaskStatus } from '../../models/task.models';
 import { BaseService } from '../base.service';
 import { RuntimeBundleService } from '../runtime-bundle.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { isDiagramShown } from '../../helpers/diagram-utils';
 import { PollProfile } from '../../config/runtime/timeouts';
-import { HttpStatusCheck, SearchPageParams } from '../../models/base-service.models';
+import { HttpStatusCheck } from '../../models/base-service.models';
 import {
     QUERY_ADMIN_V1_BASE,
     QUERY_V1_BASE,
@@ -75,17 +74,9 @@ export class QueryService extends BaseService {
         this.openApiSpec = new QueryOpenApiSpecEndpoint(context);
     }
 
-    async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        return this.processInstances.getAllProcessInstances();
-    }
-
-    async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.processInstances.getProcessInstance(processInstanceId);
-    }
-
     async getProcessInstanceWhenSynced(processInstanceId: string): Promise<CloudProcessInstance | undefined> {
         try {
-            return await this.getProcessInstance(processInstanceId);
+            return await this.processInstances.getProcessInstance(processInstanceId);
         } catch (error) {
             if (QueryService.isProcessInstanceNotFoundError(error)) {
                 return undefined;
@@ -96,7 +87,7 @@ export class QueryService extends BaseService {
 
     async getProcessInstanceWhenGone(processInstanceId: string): Promise<CloudProcessInstance | undefined> {
         try {
-            return await this.getProcessInstance(processInstanceId);
+            return await this.processInstances.getProcessInstance(processInstanceId);
         } catch (error) {
             if (QueryService.isProcessInstanceGoneError(error)) {
                 return undefined;
@@ -115,54 +106,21 @@ export class QueryService extends BaseService {
         return message.includes('Unable to find process instance') || message.includes('Operation not permitted');
     }
 
-    async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        return this.processInstances.getProcessInstances(params);
-    }
-
-    async getAllTasks(): Promise<CloudTask[]> {
-        return this.tasks.getAllTasks();
-    }
-
-    async getTasks(params?: TaskQueryParams): Promise<CloudTask[]> {
-        return this.tasks.getTasks(params);
-    }
-
-    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        return this.processDefinitions.getProcessDefinitions();
-    }
-
     async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
         const definitions = this.adminMode
             ? await this.adminProcessDefinitions.getProcessDefinitions()
-            : await this.getProcessDefinitions();
+            : await this.processDefinitions.getProcessDefinitions();
         return RuntimeBundleService.pickHighestVersionByKey(definitions, processDefinitionKey);
     }
 
-    async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
-        const endpoint = this.adminMode ? this.adminProcessInstances : this.processInstances;
-        return endpoint.getProcessInstanceDiagram(processInstanceId);
-    }
-
     async waitForProcessInstanceDiagram(processInstanceId: string): Promise<string> {
+        const endpoint = this.adminMode ? this.adminProcessInstances : this.processInstances;
         return QueryService.waitFor(
-            () => this.getProcessInstanceDiagram(processInstanceId),
+            () => endpoint.getProcessInstanceDiagram(processInstanceId),
             (diagram) => isDiagramShown(diagram),
             'querySync',
             `process instance diagram for ${processInstanceId}`
         );
-    }
-
-    async getProcessModel(processDefinitionId: string): Promise<string> {
-        const endpoint = this.adminMode ? this.adminProcessInstances : this.processInstances;
-        return endpoint.getProcessModel(processDefinitionId);
-    }
-
-    async getSwaggerSpecification(group: string = 'Query'): Promise<string> {
-        return this.openApiSpec.getSwaggerSpecification(group);
-    }
-
-    async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
-        return this.processInstances.getProcessInstanceVariables(processInstanceId);
     }
 
     async waitForVariable(
@@ -171,7 +129,7 @@ export class QueryService extends BaseService {
         predicate: (variable: CloudVariableInstance) => boolean = () => true
     ): Promise<CloudVariableInstance> {
         const variables = await QueryService.waitFor(
-            () => this.getProcessInstanceVariables(processInstanceId),
+            () => this.processInstances.getProcessInstanceVariables(processInstanceId),
             (list) => {
                 const found = list.find((v) => v.name === variableName);
                 return found !== undefined && predicate(found);
@@ -199,7 +157,7 @@ export class QueryService extends BaseService {
         variableNames: readonly string[]
     ): Promise<CloudVariableInstance[]> {
         return QueryService.waitFor(
-            () => this.getProcessInstanceVariables(processInstanceId),
+            () => this.processInstances.getProcessInstanceVariables(processInstanceId),
             (variables) => {
                 const names = new Set(variables.map((variable) => variable.name));
                 return variableNames.every((name) => names.has(name));
@@ -233,10 +191,6 @@ export class QueryService extends BaseService {
         return instance!;
     }
 
-    async getProcessInstancesByName(namePattern: string): Promise<CloudProcessInstance[]> {
-        return this.getProcessInstances({ name: namePattern });
-    }
-
     async waitForProcessInstanceName(processInstanceId: string, expectedName: string): Promise<CloudProcessInstance> {
         const instance = await QueryService.waitFor(
             () => this.getProcessInstanceWhenSynced(processInstanceId),
@@ -258,41 +212,25 @@ export class QueryService extends BaseService {
 
     async waitForProcessInstanceByNamePrefix(namePrefix: string): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getProcessInstancesByName(namePrefix),
+            () => this.processInstances.getProcessInstances({ name: namePrefix }),
             (instances) => instances.some((instance) => instance.name?.includes(namePrefix)),
             'querySync',
             `process instances with name containing ${namePrefix}`
         );
     }
 
-    async getTaskById(taskId: string): Promise<CloudTask | undefined> {
-        return this.tasks.getTaskById(taskId);
-    }
-
-    async getTask(taskId: string): Promise<CloudTask> {
-        return this.tasks.getTask(taskId);
-    }
-
-    async getSubprocesses(processInstanceId: string): Promise<CloudProcessInstance[]> {
-        return this.processInstances.getSubprocesses(processInstanceId);
-    }
-
     async waitForSubprocesses(processInstanceId: string): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getSubprocesses(processInstanceId),
+            () => this.processInstances.getSubprocesses(processInstanceId),
             (subprocesses) => subprocesses.length > 0,
             'querySync',
             `query subprocesses of process ${processInstanceId}`
         );
     }
 
-    async getTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[]> {
-        return this.processInstances.getTasksByProcessInstanceId(processInstanceId);
-    }
-
     async waitForTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask> {
         const tasks = await QueryService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
+            () => this.processInstances.getTasksByProcessInstanceId(processInstanceId),
             (list) => list.some((t) => t.name === taskName),
             'querySync',
             `task named ${taskName} on process ${processInstanceId}`
@@ -302,27 +240,19 @@ export class QueryService extends BaseService {
 
     async findTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[] | undefined> {
         try {
-            return await this.getTasksByProcessInstanceId(processInstanceId);
+            return await this.processInstances.getTasksByProcessInstanceId(processInstanceId);
         } catch {
             return undefined;
         }
     }
 
-    async getStandaloneTasks(): Promise<CloudTask[]> {
-        return this.tasks.getStandaloneTasks();
-    }
-
     async waitForStandaloneTask(taskId: string): Promise<CloudTask[]> {
         return QueryService.waitFor(
-            () => this.getStandaloneTasks(),
+            () => this.tasks.getStandaloneTasks(),
             (tasks) => tasks.some((task) => task.id === taskId),
             'querySync',
             `standalone task ${taskId} to appear in query`
         );
-    }
-
-    async getTasksByNameAndDescription(namePrefix: string, descriptionPrefix: string): Promise<CloudTask[]> {
-        return this.tasks.getTasksByNameAndDescription(namePrefix, descriptionPrefix);
     }
 
     async waitForQueriedTaskByNameAndDescription(
@@ -331,23 +261,11 @@ export class QueryService extends BaseService {
         taskId: string
     ): Promise<CloudTask[]> {
         return QueryService.waitFor(
-            () => this.getTasksByNameAndDescription(namePrefix, descriptionPrefix),
+            () => this.tasks.getTasksByNameAndDescription(namePrefix, descriptionPrefix),
             (tasks) => tasks.some((task) => task.id === taskId),
             'querySync',
             `task ${taskId} to appear by name=${namePrefix} description=${descriptionPrefix}`
         );
-    }
-
-    async getCandidateUsers(taskId: string): Promise<string[]> {
-        return this.tasks.getCandidateUsers(taskId);
-    }
-
-    async getCandidateGroups(taskId: string): Promise<string[]> {
-        return this.tasks.getCandidateGroups(taskId);
-    }
-
-    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
-        return this.tasks.getTaskVariables(taskId);
     }
 
     async waitForTaskVariable(
@@ -356,7 +274,7 @@ export class QueryService extends BaseService {
         predicate: (variable: CloudVariableInstance) => boolean = () => true
     ): Promise<CloudVariableInstance> {
         const variables = await QueryService.waitFor(
-            () => this.getTaskVariables(taskId),
+            () => this.tasks.getTaskVariables(taskId),
             (list) => {
                 const found = list.find((v) => v.name === variableName);
                 return found !== undefined && predicate(found);
@@ -369,7 +287,7 @@ export class QueryService extends BaseService {
 
     async waitForTaskVariableValues(taskId: string, expected: Record<string, unknown>): Promise<CloudVariableInstance[]> {
         return QueryService.waitFor(
-            () => this.getTaskVariables(taskId),
+            () => this.tasks.getTaskVariables(taskId),
             (variables) => {
                 const map = Object.fromEntries(variables.map((v) => [v.name, v.value]));
                 return (
@@ -384,7 +302,7 @@ export class QueryService extends BaseService {
 
     async waitForTaskById(taskId: string, predicate: (task: CloudTask) => boolean): Promise<CloudTask> {
         const task = await QueryService.waitFor(
-            () => this.getTaskById(taskId),
+            () => this.tasks.getTaskById(taskId),
             (value) => value !== undefined && predicate(value),
             'querySync',
             `task ${taskId} matching predicate`
@@ -430,7 +348,7 @@ export class QueryService extends BaseService {
 
     async waitForCandidateGroups(taskId: string, expectedGroups: string[]): Promise<string[]> {
         return QueryService.waitFor(
-            () => this.getCandidateGroups(taskId),
+            () => this.tasks.getCandidateGroups(taskId),
             (groups) => expectedGroups.every((g) => groups.includes(g)),
             'querySync',
             `candidate groups [${expectedGroups.join(',')}] on task ${taskId}`
@@ -439,7 +357,7 @@ export class QueryService extends BaseService {
 
     async waitForCandidateUser(taskId: string, expectedUser: string): Promise<string[]> {
         return QueryService.waitFor(
-            () => this.getCandidateUsers(taskId),
+            () => this.tasks.getCandidateUsers(taskId),
             (users) => users.includes(expectedUser),
             'querySync',
             `candidate user ${expectedUser} on task ${taskId}`
@@ -448,50 +366,15 @@ export class QueryService extends BaseService {
 
     async waitForRootTasks(processInstanceId: string): Promise<CloudTask[]> {
         return QueryService.waitFor(
-            () => this.getRootTasksByProcessInstance(processInstanceId),
+            () => this.tasks.getRootTasksByProcessInstance(processInstanceId),
             (tasks) => tasks.length > 0 && tasks.every((t) => !t.parentTaskId),
             'querySync',
             `root tasks on process ${processInstanceId}`
         );
     }
 
-    async getRootTasksByProcessInstance(processInstanceId: string): Promise<CloudTask[]> {
-        return this.tasks.getRootTasksByProcessInstance(processInstanceId);
-    }
-
-    async getApplications(): Promise<{ name: string; [key: string]: unknown }[]> {
-        return this.applications.getApplications();
-    }
-
-    async searchTasks(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<CloudTask[]> {
-        return this.tasks.searchTasks(searchRequest, page);
-    }
-
-    async countTasks(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<number> {
-        return this.tasks.countTasks(searchRequest, page);
-    }
-
-    async searchProcessInstances(
-        searchRequest: ProcessInstanceSearchRequest = {},
-        page?: SearchPageParams
-    ): Promise<CloudProcessInstance[]> {
-        return this.processInstances.searchProcessInstances(searchRequest, page);
-    }
-
-    async countProcessInstances(searchRequest: ProcessInstanceSearchRequest = {}, page?: SearchPageParams): Promise<number> {
-        return this.processInstances.countProcessInstances(searchRequest, page);
-    }
-
-    async linkProcessInstances(
-        mainProcessInstanceId: string,
-        processInstanceIds: string[],
-        linkProcessInstanceType: string
-    ): Promise<void> {
-        await this.processInstances.linkProcessInstances(mainProcessInstanceId, processInstanceIds, linkProcessInstanceType);
-    }
-
     async getLinkedProcesses(mainProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        const results = await this.searchProcessInstances({ id: [mainProcessInstanceId] });
+        const results = await this.processInstances.searchProcessInstances({ id: [mainProcessInstanceId] });
         const mainProcess = results.find((instance) => instance.id === mainProcessInstanceId);
         return (mainProcess?.linkedProcesses as CloudProcessInstance[] | undefined) ?? [];
     }
@@ -516,17 +399,9 @@ export class QueryService extends BaseService {
         }
     }
 
-    async getAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.getAllProcessInstances();
-    }
-
-    async getProcessInstanceAdmin(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.adminProcessInstances.getProcessInstance(processInstanceId);
-    }
-
     async getProcessInstanceAdminWhenSynced(processInstanceId: string): Promise<CloudProcessInstance | undefined> {
         try {
-            return await this.getProcessInstanceAdmin(processInstanceId);
+            return await this.adminProcessInstances.getProcessInstance(processInstanceId);
         } catch (error) {
             if (QueryService.isProcessInstanceNotFoundError(error)) {
                 return undefined;
@@ -535,55 +410,12 @@ export class QueryService extends BaseService {
         }
     }
 
-    async getProcessInstancesAdminWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.getProcessInstances(params);
-    }
-
-    async getProcessInstancesAdminWithVariableKeys(variableKeys: string): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.getProcessInstancesWithVariableKeys(variableKeys);
-    }
-
-    async searchProcessInstancesAdmin(
-        searchRequest: ProcessInstanceSearchRequest = {},
-        page?: SearchPageParams
-    ): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.searchProcessInstances(searchRequest, page);
-    }
-
-    async countProcessInstancesAdmin(searchRequest: ProcessInstanceSearchRequest = {}, page?: SearchPageParams): Promise<number> {
-        return this.adminProcessInstances.countProcessInstances(searchRequest, page);
-    }
-
-    async getProcessInstanceVariablesAdmin(processInstanceId: string): Promise<CloudVariableInstance[]> {
-        return this.adminProcessInstances.getProcessInstanceVariables(processInstanceId);
-    }
-
-    async getSubprocessesAdmin(processInstanceId: string): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.getSubprocesses(processInstanceId);
-    }
-
-    async getSequenceFlowsAdmin(processInstanceId: string): Promise<Record<string, unknown>[]> {
-        return this.adminProcessInstances.getSequenceFlows(processInstanceId);
-    }
-
-    async getBpmnActivitiesAdmin(processInstanceId: string): Promise<Record<string, unknown>[]> {
-        return this.adminProcessInstances.getBpmnActivities(processInstanceId);
-    }
-
-    async getLinkedProcessesAdmin(linkedProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.getLinkedProcesses(linkedProcessInstanceId);
-    }
-
-    async getProcessInstanceAppVersionsAdmin(): Promise<string[]> {
-        return this.adminProcessInstances.getProcessInstanceAppVersions();
-    }
-
     async waitForLinkedProcessAdmin(
         mainProcessInstanceId: string,
         linkedProcessInstanceId: string
     ): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getLinkedProcessesAdmin(mainProcessInstanceId),
+            () => this.adminProcessInstances.getLinkedProcesses(mainProcessInstanceId),
             (instances) => instances.some((instance) => instance.id === linkedProcessInstanceId),
             'querySync',
             `linked process ${linkedProcessInstanceId} under ${mainProcessInstanceId}`
@@ -595,7 +427,7 @@ export class QueryService extends BaseService {
         minCount: number
     ): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getProcessInstancesAdminWithParams(params),
+            () => this.adminProcessInstances.getProcessInstances(params),
             (instances) => instances.length > minCount,
             'querySync',
             `admin process instances ${JSON.stringify(params)} count > ${minCount}`
@@ -606,7 +438,7 @@ export class QueryService extends BaseService {
         processDefinitionKey: string,
         businessKey: string
     ): Promise<ProcessInstanceStatus[]> {
-        const instances = await this.getProcessInstancesAdminWithParams({ processDefinitionKey });
+        const instances = await this.adminProcessInstances.getProcessInstances({ processDefinitionKey });
         return instances.filter((instance) => instance.businessKey === businessKey).map((instance) => instance.status);
     }
 
@@ -623,36 +455,17 @@ export class QueryService extends BaseService {
         );
     }
 
-    async getProcessInstanceDiagramStatus(processInstanceId: string): Promise<number> {
-        return this.adminProcessInstances.getProcessInstanceDiagramStatus(processInstanceId);
-    }
-
-    async getAllProcessDefinitionsAdmin(): Promise<CloudProcessDefinition[]> {
-        return this.adminProcessDefinitions.getProcessDefinitions();
-    }
-
-    async getServiceTasksForProcessInstance(processInstanceId: string): Promise<CloudServiceTask[]> {
-        return this.adminServiceTasks.getServiceTasksForProcessInstance(processInstanceId);
-    }
-
     async waitForServiceTasksForProcessInstance(
         processInstanceId: string,
         predicate: (tasks: CloudServiceTask[]) => boolean,
         description: string
     ): Promise<CloudServiceTask[]> {
         return QueryService.waitFor(
-            () => this.getServiceTasksForProcessInstance(processInstanceId),
+            () => this.adminServiceTasks.getServiceTasksForProcessInstance(processInstanceId),
             predicate,
             'querySync',
             description
         );
-    }
-
-    async getServiceTasksByStatusForProcessInstance(
-        processInstanceId: string,
-        status: ServiceTaskStatus | string
-    ): Promise<CloudServiceTask[]> {
-        return this.adminServiceTasks.getServiceTasksByStatusForProcessInstance(processInstanceId, status);
     }
 
     async waitForServiceTasksByStatusForProcessInstance(
@@ -661,46 +474,27 @@ export class QueryService extends BaseService {
         predicate: (tasks: CloudServiceTask[]) => boolean = (tasks) => tasks.length > 0
     ): Promise<CloudServiceTask[]> {
         return QueryService.waitFor(
-            () => this.getServiceTasksByStatusForProcessInstance(processInstanceId, status),
+            () => this.adminServiceTasks.getServiceTasksByStatusForProcessInstance(processInstanceId, status),
             predicate,
             'querySync',
             `service tasks status ${status} for process ${processInstanceId}`
         );
     }
 
-    async getServiceTaskById(serviceTaskId: string): Promise<CloudServiceTask> {
-        return this.adminServiceTasks.getServiceTaskById(serviceTaskId);
-    }
-
-    async getServiceTaskIntegrationContext(serviceTaskId: string): Promise<CloudIntegrationContext> {
-        return this.adminServiceTasks.getServiceTaskIntegrationContext(serviceTaskId);
-    }
-
     async findServiceTaskIntegrationContext(serviceTaskId: string): Promise<CloudIntegrationContext | undefined> {
         try {
-            return await this.getServiceTaskIntegrationContext(serviceTaskId);
+            return await this.adminServiceTasks.getServiceTaskIntegrationContext(serviceTaskId);
         } catch {
             return undefined;
         }
-    }
-
-    async getServiceTaskIntegrationContexts(serviceTaskId: string): Promise<CloudIntegrationContext[]> {
-        return this.adminServiceTasks.getServiceTaskIntegrationContexts(serviceTaskId);
     }
 
     async findServiceTaskIntegrationContexts(serviceTaskId: string): Promise<CloudIntegrationContext[] | undefined> {
         try {
-            return await this.getServiceTaskIntegrationContexts(serviceTaskId);
+            return await this.adminServiceTasks.getServiceTaskIntegrationContexts(serviceTaskId);
         } catch {
             return undefined;
         }
-    }
-
-    async getServiceTasksByQuery(params: {
-        processDefinitionKey?: string;
-        status?: ServiceTaskStatus | string;
-    }): Promise<CloudServiceTask[]> {
-        return this.adminServiceTasks.getServiceTasksByQuery(params);
     }
 
     async waitForServiceTasksByQuery(
@@ -708,7 +502,7 @@ export class QueryService extends BaseService {
         predicate: (tasks: CloudServiceTask[]) => boolean = (tasks) => tasks.length > 0
     ): Promise<CloudServiceTask[]> {
         return QueryService.waitFor(
-            () => this.getServiceTasksByQuery(params),
+            () => this.adminServiceTasks.getServiceTasksByQuery(params),
             predicate,
             'querySync',
             `service tasks query ${JSON.stringify(params)}`
@@ -764,48 +558,9 @@ export class QueryService extends BaseService {
         return contexts!;
     }
 
-    async getAllTasksAdmin(): Promise<CloudTask[]> {
-        return this.adminTasks.getAllTasks();
-    }
-
-    async getTasksAdminWithVariableKeys(variableKeys: string): Promise<CloudTask[]> {
-        return this.adminTasks.getTasksWithVariableKeys(variableKeys);
-    }
-
-    async getTasksAdminFiltered(filters: {
-        processInstanceId?: string;
-        status?: string;
-        id?: string;
-        skipCount?: number;
-        maxItems?: number;
-        sort?: string[];
-    }): Promise<CloudTask[]> {
-        return this.adminTasks.getTasksFiltered(filters);
-    }
-
-    async getProcessInstancesAdminFiltered(filters: {
-        status?: ProcessInstanceStatus;
-        skipCount?: number;
-        maxItems?: number;
-    }): Promise<CloudProcessInstance[]> {
-        return this.getProcessInstancesAdminWithParams(filters);
-    }
-
-    async searchTasksAdmin(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<CloudTask[]> {
-        return this.adminTasks.searchTasks(searchRequest, page);
-    }
-
-    async countTasksAdmin(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<number> {
-        return this.adminTasks.countTasks(searchRequest, page);
-    }
-
-    async getTaskAdminById(taskId: string): Promise<CloudTask> {
-        return this.adminTasks.getTask(taskId);
-    }
-
     async getTaskAdminByIdWhenSynced(taskId: string): Promise<CloudTask | undefined> {
         try {
-            return await this.getTaskAdminById(taskId);
+            return await this.adminTasks.getTask(taskId);
         } catch {
             return undefined;
         }
@@ -821,21 +576,9 @@ export class QueryService extends BaseService {
         return task!;
     }
 
-    async getTaskCandidateUsersAdmin(taskId: string): Promise<string[]> {
-        return this.adminTasks.getCandidateUsers(taskId);
-    }
-
-    async getTaskCandidateGroupsAdmin(taskId: string): Promise<string[]> {
-        return this.adminTasks.getCandidateGroups(taskId);
-    }
-
-    async getTaskVariablesAdmin(taskId: string): Promise<CloudVariableInstance[]> {
-        return this.adminTasks.getTaskVariables(taskId);
-    }
-
     async waitForTaskVariablesAdmin(taskId: string, expected: Record<string, unknown>): Promise<CloudVariableInstance[]> {
         return QueryService.waitFor(
-            () => this.getTaskVariablesAdmin(taskId),
+            () => this.adminTasks.getTaskVariables(taskId),
             (variables) => {
                 const map = Object.fromEntries(variables.map((variable) => [variable.name, variable.value]));
                 return Object.keys(expected).every((name) => map[name] === expected[name]);
@@ -845,25 +588,9 @@ export class QueryService extends BaseService {
         );
     }
 
-    async getApplicationsAdmin(): Promise<{ name: string; [key: string]: unknown }[]> {
-        return this.adminApplications.getApplications();
-    }
-
-    async getIntegrationContextAdmin(integrationContextId: string): Promise<CloudIntegrationContext> {
-        return this.adminIntegrationContexts.getIntegrationContext(integrationContextId);
-    }
-
-    async deleteAllProcessInstancesAdmin(): Promise<CloudProcessInstance[]> {
-        return this.adminProcessInstances.deleteAllProcessInstances();
-    }
-
-    async deleteAllTasksAdmin(): Promise<CloudTask[]> {
-        return this.adminTasks.deleteAllTasks();
-    }
-
     async waitForAllProcessInstancesAdminCount(expectedCount: number): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getAllProcessInstancesAdmin(),
+            () => this.adminProcessInstances.getAllProcessInstances(),
             (instances) => instances.length === expectedCount,
             'querySync',
             `admin process instances count to equal ${expectedCount}`
@@ -872,7 +599,7 @@ export class QueryService extends BaseService {
 
     async waitForAllProcessInstancesAdminCountGreaterThan(minCount: number): Promise<CloudProcessInstance[]> {
         return QueryService.waitFor(
-            () => this.getAllProcessInstancesAdmin(),
+            () => this.adminProcessInstances.getAllProcessInstances(),
             (instances) => instances.length > minCount,
             'querySync',
             `admin process instances count > ${minCount}`
@@ -881,7 +608,7 @@ export class QueryService extends BaseService {
 
     async waitForAllTasksAdminCount(expectedCount: number): Promise<CloudTask[]> {
         return QueryService.waitFor(
-            () => this.getAllTasksAdmin(),
+            () => this.adminTasks.getAllTasks(),
             (tasks) => tasks.length === expectedCount,
             'querySync',
             `admin tasks count to equal ${expectedCount}`
@@ -890,7 +617,7 @@ export class QueryService extends BaseService {
 
     async waitForAllTasksAdminCountGreaterThan(minCount: number): Promise<CloudTask[]> {
         return QueryService.waitFor(
-            () => this.getAllTasksAdmin(),
+            () => this.adminTasks.getAllTasks(),
             (tasks) => tasks.length > minCount,
             'querySync',
             `admin tasks count > ${minCount}`

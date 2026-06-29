@@ -52,19 +52,19 @@ activiti.describe('Runtime — Query and Audit Query Parameters', () => {
         });
 
         await activiti.step('When the user searches tasks with pagination query parameters', async () => {
-            const tasks = await queryServiceTestUser.searchTasks({ id: [taskId] }, TASK_PAGE);
+            const tasks = await queryServiceTestUser.tasks.searchTasks({ id: [taskId] }, TASK_PAGE);
             expect(tasks.map((task) => task.id)).toContain(taskId);
-            const count = await queryServiceTestUser.countTasks({ id: [taskId] }, TASK_PAGE);
+            const count = await queryServiceTestUser.tasks.countTasks({ id: [taskId] }, TASK_PAGE);
             expect(count).toBe(1);
         });
 
         await activiti.step('And searches process instances with pagination query parameters', async () => {
-            const instances = await queryServiceTestUser.searchProcessInstances(
+            const instances = await queryServiceTestUser.processInstances.searchProcessInstances(
                 { id: [processInstanceId] },
                 PROCESS_PAGE
             );
             expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
-            const count = await queryServiceTestUser.countProcessInstances(
+            const count = await queryServiceTestUser.processInstances.countProcessInstances(
                 { id: [processInstanceId] },
                 PROCESS_PAGE
             );
@@ -72,12 +72,12 @@ activiti.describe('Runtime — Query and Audit Query Parameters', () => {
         });
 
         await activiti.step('When the user lists tasks filtered by process instance id', async () => {
-            const tasks = await queryServiceTestUser.getTasks({ processInstanceId });
+            const tasks = await queryServiceTestUser.tasks.getTasks({ processInstanceId });
             expect(tasks.map((task) => task.id)).toContain(taskId);
         });
 
         await activiti.step('When the admin lists and searches tasks with query parameters', async () => {
-            const listed = await queryAdminServiceTestAdmin.getTasksAdminFiltered({
+            const listed = await queryAdminServiceTestAdmin.adminTasks.getTasksFiltered({
                 processInstanceId,
                 status: TaskStatus.ASSIGNED,
                 id: taskId,
@@ -87,26 +87,24 @@ activiti.describe('Runtime — Query and Audit Query Parameters', () => {
             });
             expect(listed.map((task) => task.id)).toContain(taskId);
 
-            const searched = await queryAdminServiceTestAdmin.searchTasksAdmin({ id: [taskId] }, TASK_PAGE);
+            const searched = await queryAdminServiceTestAdmin.adminTasks.searchTasks({ id: [taskId] }, TASK_PAGE);
             expect(searched.map((task) => task.id)).toContain(taskId);
-            const count = await queryAdminServiceTestAdmin.countTasksAdmin({ id: [taskId] }, TASK_PAGE);
+            const count = await queryAdminServiceTestAdmin.adminTasks.countTasks({ id: [taskId] }, TASK_PAGE);
             expect(count).toBe(1);
         });
 
         await activiti.step('And the admin lists and searches process instances with query parameters', async () => {
-            const listed = await queryAdminServiceTestAdmin.getProcessInstancesAdminFiltered({
+            const listed = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstances({
                 status: ProcessInstanceStatus.RUNNING,
-                skipCount: 0,
-                maxItems: 10,
             });
             expect(listed.map((instance) => instance.id)).toContain(processInstanceId);
 
-            const searched = await queryAdminServiceTestAdmin.searchProcessInstancesAdmin(
+            const searched = await queryAdminServiceTestAdmin.adminProcessInstances.searchProcessInstances(
                 { id: [processInstanceId] },
                 PROCESS_PAGE
             );
             expect(searched.map((instance) => instance.id)).toContain(processInstanceId);
-            const count = await queryAdminServiceTestAdmin.countProcessInstancesAdmin(
+            const count = await queryAdminServiceTestAdmin.adminProcessInstances.countProcessInstances(
                 { id: [processInstanceId] },
                 PROCESS_PAGE
             );
@@ -114,14 +112,14 @@ activiti.describe('Runtime — Query and Audit Query Parameters', () => {
         });
 
         await activiti.step('Then audit events can be listed with filters and pagination', async () => {
-            const userEvents = await auditServiceTestUser.getEvents(
+            const userEvents = await auditServiceTestUser.events.getEvents(
                 { processInstanceId, eventType: EventType.PROCESS_STARTED },
                 { skipCount: 0, maxItems: 5, sort: ['timestamp,desc'] }
             );
             expect(userEvents.length).toBeGreaterThan(0);
             expect(userEvents.every((event) => event.processInstanceId === processInstanceId)).toBe(true);
 
-            const adminEvents = await auditAdminServiceTestAdmin.getEventsAdmin(
+            const adminEvents = await auditAdminServiceTestAdmin.adminEvents.getEvents(
                 { processInstanceId, eventType: EventType.PROCESS_STARTED },
                 { skipCount: 0, maxItems: 5, sort: ['timestamp,desc'] }
             );
