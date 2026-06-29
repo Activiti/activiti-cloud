@@ -5,6 +5,22 @@ import { paths } from './paths';
 
 const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
+const PLAYSWAG_ACKNOWLEDGED_SERVICES = [
+    { pattern: '**/identity-adapter-service/**', label: 'identity-adapter' },
+    { pattern: '**/auth/**', label: 'keycloak' },
+    { pattern: '**/realms/**', label: 'keycloak' },
+] as const;
+
+const PLAYSWAG_EXCLUDE_PATTERNS = ['**/v3/api-docs/**', '**/actuator/**'];
+
+const PLAYSWAG_CONSOLE_OUTPUT = {
+    showOperations: false,
+    showUncoveredOnly: false,
+    showParams: false,
+    showBodyProperties: false,
+    showStatusCodeBreakdown: true,
+} as const;
+
 function gatewayBaseUrl(): string {
     return resolveGatewayConnection().baseURL.replace(/\/$/, '');
 }
@@ -23,17 +39,16 @@ function buildPlayswagSpecs(): string[] {
     return getCachedOpenApiSpecPaths();
 }
 
-export function buildPlayswagProjectUse() {
+function sharedPlayswagOptions() {
     return {
         playswagEnabled: process.env.PLAYSWAG_ENABLED !== 'false',
         playswagBaseURL: gatewayBaseUrl(),
-        playswagSpecs: buildPlayswagSpecs(),
-        playswagAcknowledgedServices: [
-            { pattern: '**/identity-adapter-service/**', label: 'identity-adapter' },
-            { pattern: '**/auth/**', label: 'keycloak' },
-            { pattern: '**/realms/**', label: 'keycloak' },
-        ],
+        playswagAcknowledgedServices: [...PLAYSWAG_ACKNOWLEDGED_SERVICES],
     };
+}
+
+export function buildPlayswagProjectUse() {
+    return sharedPlayswagOptions();
 }
 
 export function buildPlayswagReporterConfig(): PlayswagConfiguration {
@@ -44,21 +59,14 @@ export function buildPlayswagReporterConfig(): PlayswagConfiguration {
         outputFormats: isCi ? ['console', 'json', 'html', 'markdown'] : ['console', 'json', 'html'],
         allowedSpecHosts: allowedSpecHosts(),
         allowPrivateHosts: !isCi,
-        acknowledgedServices: [
-            { pattern: '**/identity-adapter-service/**', label: 'identity-adapter' },
-            { pattern: '**/auth/**', label: 'keycloak' },
-            { pattern: '**/realms/**', label: 'keycloak' },
-        ],
+        excludePatterns: PLAYSWAG_EXCLUDE_PATTERNS,
+        acknowledgedServices: [...PLAYSWAG_ACKNOWLEDGED_SERVICES],
         failOnThreshold: false,
         failOnSpecError: isCi,
-        consoleOutput: {
-            showUncoveredOnly: false,
-            showOperations: true,
-            showTags: true,
-        },
+        consoleOutput: PLAYSWAG_CONSOLE_OUTPUT,
         githubActionsOutput: {
-            showUncoveredOperations: isCi,
-            showUnmatchedHits: isCi,
+            showUncoveredOperations: false,
+            showUnmatchedHits: false,
         },
     };
 }
