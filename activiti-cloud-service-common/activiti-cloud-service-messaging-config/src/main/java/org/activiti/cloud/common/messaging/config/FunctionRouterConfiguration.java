@@ -309,6 +309,7 @@ public class FunctionRouterConfiguration {
                             }
                         });
                         shutdownState.register(drained);
+                        drained.join();
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);

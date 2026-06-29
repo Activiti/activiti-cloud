@@ -17,24 +17,16 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import static org.activiti.cloud.common.messaging.config.FunctionRouterConfiguration.FUNCTION_DESTINATION;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-public class IntegrationErrorSenderImpl implements IntegrationErrorSender, ApplicationListener<ContextClosedEvent> {
-
-    private static final Logger logger = LoggerFactory.getLogger(IntegrationErrorSenderImpl.class);
+public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
     private final StreamBridge streamBridge;
     private final IntegrationErrorChannelResolver resolver;
-    private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
     public IntegrationErrorSenderImpl(StreamBridge streamBridge, IntegrationErrorChannelResolver resolver) {
         this.streamBridge = streamBridge;
@@ -42,19 +34,7 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender, Appli
     }
 
     @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
-        shuttingDown.set(true);
-    }
-
-    @Override
     public void send(Message<IntegrationError> message) {
-        if (shuttingDown.get()) {
-            logger.warn(
-                "Application is shutting down; skipping IntegrationError send so the request can be redelivered to another instance"
-            );
-            return;
-        }
-
         IntegrationRequest request = message.getPayload().getIntegrationRequest();
 
         String destination = resolver.resolveDestination(request);
