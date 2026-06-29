@@ -18,6 +18,7 @@
     "verify:process-catalog": "tsx activiti-cloud-acceptance-tests-playwright/scripts/verify-acceptance-process-catalog.ts",
     "pw": "playwright test --config=$npm_package_config_pw_root/playwright.config.ts",
     "test": "npm run pw -- $npm_package_config_pw_suite",
+    "test:all": "npm run test",
     "test:no-destructive": "npm run pw -- --project=acceptance --project=notifications",
     "test:destructive": "npm run pw -- --project=destructive-last --no-deps",
     "test:smoke": "npm run pw -- --project=smoke",

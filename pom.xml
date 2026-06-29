@@ -192,6 +192,7 @@
     <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2026</project.year>
+    <jacoco-report-dir-suffix></jacoco-report-dir-suffix>
 
     <spring-boot.version>4.0.6</spring-boot.version>
     <!-- AAE-46198 temporary Tomcat version override. Remove when upgrading to Spring Boot 4.1.x -->
@@ -546,11 +547,11 @@ limitations under the License.]]>
             <fileSet>
               <directory>${project.basedir}</directory>
               <includes>
-                <include>**/jacoco.exec</include>
-                <include>**/jacoco-it.exec</include>
+                <include>**/*.exec</include>
               </includes>
             </fileSet>
           </fileSets>
+          <outputDirectory> ${project.reporting.outputDirectory}/jacoco-${jacoco-report-dir-suffix}</outputDirectory>
         </configuration>
         <executions>
           <!-- Unit tests configuration-->

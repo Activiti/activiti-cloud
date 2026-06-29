@@ -43,7 +43,7 @@ public class QueryRestApplicationRabbitmqPrefixIT extends QueryRestApplicationIT
     @Override
     void anonymousRabbitQueues() {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).satisfies(map ->
-            assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.engineEvents.anonymous."))
+            assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
         );
     }
 
@@ -52,6 +52,6 @@ public class QueryRestApplicationRabbitmqPrefixIT extends QueryRestApplicationIT
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents");
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }

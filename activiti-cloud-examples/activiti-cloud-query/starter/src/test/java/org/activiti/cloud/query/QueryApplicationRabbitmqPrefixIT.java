@@ -55,7 +55,7 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
             .isNotEmpty()
             .hasSize(1)
             .satisfies(map ->
-                assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.engineEvents.anonymous."))
+                assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
             );
     }
 
@@ -64,6 +64,6 @@ public class QueryApplicationRabbitmqPrefixIT extends QueryApplicationIT {
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents");
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }

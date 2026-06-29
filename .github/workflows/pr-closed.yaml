@@ -16,10 +16,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        messaging-broker: [rabbitmq, kafka]
-        messaging-partitioned: [partitioned, non-partitioned]
-        messaging-destinations: [default-destinations, override-destinations]
+        profile:
+          - rabbitmq-partitioned-default
+          - rabbitmq-non-partitioned-default
+          - kafka-partitioned-default
+          - kafka-non-partitioned-default
+          - kafka-partitioned-override
+          - rabbitmq-non-partitioned-pdb
+          - rabbitmq-prefix-pdb
     steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
         with:
@@ -33,20 +40,28 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - name: Set PREVIEW_NAME env variable
-        id: set-preview-name
-        env:
-          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
-          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
-          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
-        run: |
-          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
-          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
+      - id: pw-profile
+        uses: ./.github/actions/load-playwright-profile-config
+        with:
+          profile: ${{ matrix.profile }}
 
-      - name: Delete preview for ${{ matrix.messaging-broker }}
+      - name: Delete preview namespace (${{ matrix.profile }})
+        shell: bash
+        env:
+          MESSAGING_BROKER: ${{ steps.pw-profile.outputs.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ steps.pw-profile.outputs.messaging-partitioned }}
+          MESSAGING_DESTINATIONS: ${{ steps.pw-profile.outputs.messaging-destinations }}
         run: |
-          echo PR #${{ github.event.pull_request.number }} has been closed
-          kubectl delete ns $PREVIEW_NAME || true
+          # shellcheck source=scripts/lib/preview-env.sh
+          source "${GITHUB_WORKSPACE}/scripts/lib/preview-env.sh"
+          PREVIEW_NAME="$(preview_name_from_ci_matrix \
+            "${GITHUB_PR_NUMBER}" \
+            "${GITHUB_RUN_NUMBER}" \
+            "${MESSAGING_BROKER}" \
+            "${MESSAGING_PARTITIONED}" \
+            "${MESSAGING_DESTINATIONS}")"
+          echo "PR #${{ github.event.pull_request.number }} closed — deleting ${PREVIEW_NAME}"
+          kubectl delete ns "${PREVIEW_NAME}" || true
 
   cleanup-test-images:
     runs-on: ubuntu-latest
@@ -54,21 +69,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Set PREVIEW_NAME env variable
-        id: set-preview-name
-        run: |
-          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
-          echo set PREVIEW_NAME=$PREVIEW_NAME
-          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
-
       - name: Set preview version
-        run: |
-          echo 0.0.1-$PREVIEW_NAME-SNAPSHOT > VERSION
+        run: echo "0.0.1-PR-${GITHUB_PR_NUMBER}-SNAPSHOT" > VERSION
 
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: |
-          echo "Delete Docker images"
+          echo "Delete Docker images for $(cat VERSION)"
           make docker-delete-all

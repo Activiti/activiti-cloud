@@ -1,0 +1,70 @@
+name: Load acceptance test user env
+description: Exports preview Keycloak user credentials to GITHUB_ENV for Playwright CI.
+
+inputs:
+  testuser-username:
+    description: Preview test user username
+    required: false
+    default: testuser
+  testuser-password:
+    description: Preview test user password
+    required: true
+  hruser-username:
+    description: Preview HR user username
+    required: false
+    default: hruser
+  hruser-password:
+    description: Preview HR user password
+    required: true
+  hradmin-username:
+    description: Preview HR admin username
+    required: false
+    default: hradmin
+  hradmin-password:
+    description: Preview HR admin password
+    required: true
+  processadminuser-username:
+    description: Preview process admin user username
+    required: false
+    default: processadminuser
+  processadminuser-password:
+    description: Preview process admin user password
+    required: true
+  testadmin-username:
+    description: Preview test admin username
+    required: false
+    default: testadmin
+  testadmin-password:
+    description: Preview test admin password
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Export acceptance test users
+      shell: bash
+      env:
+        INPUT_TESTUSER_USERNAME: ${{ inputs.testuser-username }}
+        INPUT_TESTUSER_PASSWORD: ${{ inputs.testuser-password }}
+        INPUT_HRUSER_USERNAME: ${{ inputs.hruser-username }}
+        INPUT_HRUSER_PASSWORD: ${{ inputs.hruser-password }}
+        INPUT_HRADMIN_USERNAME: ${{ inputs.hradmin-username }}
+        INPUT_HRADMIN_PASSWORD: ${{ inputs.hradmin-password }}
+        INPUT_PROCESSADMINUSER_USERNAME: ${{ inputs.processadminuser-username }}
+        INPUT_PROCESSADMINUSER_PASSWORD: ${{ inputs.processadminuser-password }}
+        INPUT_TESTADMIN_USERNAME: ${{ inputs.testadmin-username }}
+        INPUT_TESTADMIN_PASSWORD: ${{ inputs.testadmin-password }}
+      run: |
+        set -euo pipefail
+        {
+          echo "TESTUSER_USERNAME=${INPUT_TESTUSER_USERNAME}"
+          echo "TESTUSER_PASSWORD=${INPUT_TESTUSER_PASSWORD}"
+          echo "HRUSER_USERNAME=${INPUT_HRUSER_USERNAME}"
+          echo "HRUSER_PASSWORD=${INPUT_HRUSER_PASSWORD}"
+          echo "HRADMIN_USERNAME=${INPUT_HRADMIN_USERNAME}"
+          echo "HRADMIN_PASSWORD=${INPUT_HRADMIN_PASSWORD}"
+          echo "PROCESSADMINUSER_USERNAME=${INPUT_PROCESSADMINUSER_USERNAME}"
+          echo "PROCESSADMINUSER_PASSWORD=${INPUT_PROCESSADMINUSER_PASSWORD}"
+          echo "TESTADMIN_USERNAME=${INPUT_TESTADMIN_USERNAME}"
+          echo "TESTADMIN_PASSWORD=${INPUT_TESTADMIN_PASSWORD}"
+        } >> "${GITHUB_ENV}"
