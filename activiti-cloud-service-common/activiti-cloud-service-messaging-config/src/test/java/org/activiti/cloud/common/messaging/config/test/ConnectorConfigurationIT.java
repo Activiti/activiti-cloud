@@ -278,7 +278,9 @@ public class ConnectorConfigurationIT {
         public Consumer<Message<String>> consumerTimeout() {
             return message -> {
                 try {
-                    assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT)).isNotNull().isEqualTo("PT1S");
+                    assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                        .isNotNull()
+                        .isEqualTo(Duration.ofSeconds(1));
 
                     TimeUnit.of(ChronoUnit.SECONDS).sleep(2);
                 } catch (InterruptedException e) {
@@ -299,7 +301,9 @@ public class ConnectorConfigurationIT {
         public Consumer<Message<String>> consumerInterrupt() {
             return message -> {
                 assertThat(message.getPayload()).isNotNull().isEqualTo("TestInterrupt");
-                assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT)).isNotNull().isEqualTo("PT10S");
+                assertThat(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                    .isNotNull()
+                    .isEqualTo(Duration.ofSeconds(10));
 
                 connectorWorkerThread.set(Thread.currentThread());
 
@@ -323,15 +327,13 @@ public class ConnectorConfigurationIT {
             return message -> {
                 try {
                     final var integrationResultTimeout = assertThat(
-                        message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT, String.class)
+                        message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT, Duration.class)
                     )
                         .isNotNull()
-                        .isEqualTo("PT1S")
+                        .isEqualTo(Duration.ofSeconds(1))
                         .actual();
 
-                    TimeUnit.of(ChronoUnit.SECONDS).sleep(
-                        Duration.parse(integrationResultTimeout).plusSeconds(5).toSeconds()
-                    );
+                    TimeUnit.of(ChronoUnit.SECONDS).sleep(integrationResultTimeout.plusSeconds(5).toSeconds());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     connectorTimeoutCounter.incrementAndGet();

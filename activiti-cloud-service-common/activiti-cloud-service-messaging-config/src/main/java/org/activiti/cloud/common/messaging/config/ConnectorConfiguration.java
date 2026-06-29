@@ -159,7 +159,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 Future<Object> future = connectorAsyncTaskExecutor.submit(() ->
                                     function.apply(
                                         MessageBuilder.fromMessage(message)
-                                            .setHeader(INTEGRATION_RESULT_TIMEOUT, integrationResultTimeout.toString())
+                                            .setHeader(INTEGRATION_RESULT_TIMEOUT, integrationResultTimeout)
                                             .build()
                                     )
                                 );
