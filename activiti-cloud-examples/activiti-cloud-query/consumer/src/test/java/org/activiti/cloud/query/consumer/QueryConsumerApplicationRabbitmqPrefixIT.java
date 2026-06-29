@@ -30,11 +30,13 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 
     @Test
@@ -50,6 +52,6 @@ public class QueryConsumerApplicationRabbitmqPrefixIT extends QueryConsumerAppli
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents");
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }

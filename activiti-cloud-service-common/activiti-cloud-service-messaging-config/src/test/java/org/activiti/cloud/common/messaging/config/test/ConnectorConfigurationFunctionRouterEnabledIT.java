@@ -46,13 +46,13 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
     @Test
     @Override
     void defaultErrorHandlerDefinition() {
-        AssertionsForClassTypes
-            .assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_INPUT))
+        AssertionsForClassTypes.assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_INPUT))
             .extracting(BindingProperties::getErrorHandlerDefinition)
             .isEqualTo(MY_ERROR_HANDLER);
 
-        AssertionsForClassTypes
-            .assertThat(bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_ANONYMOUS_INPUT))
+        AssertionsForClassTypes.assertThat(
+            bindingServiceProperties.getBindingProperties(FUNCTION_ROUTER_ANONYMOUS_INPUT)
+        )
             .extracting(BindingProperties::getErrorHandlerDefinition)
             .isEqualTo(MY_ERROR_HANDLER);
     }
@@ -65,8 +65,7 @@ public class ConnectorConfigurationFunctionRouterEnabledIT extends ConnectorConf
         var bindings = bindingServiceProperties.getBindings();
 
         // then
-        AssertionsForClassTypes
-            .assertThat(bindings)
+        AssertionsForClassTypes.assertThat(bindings)
             .asInstanceOf(InstanceOfAssertFactories.map(String.class, BindingProperties.class))
             .containsOnlyKeys(
                 "functionRouterInput",

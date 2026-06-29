@@ -33,7 +33,8 @@ import org.springframework.util.CollectionUtils;
 
 public class CustomizedJpaSpecificationExecutorImpl<T, I extends Serializable>
     extends SimpleJpaRepository<T, I>
-    implements CustomizedJpaSpecificationExecutor<T> {
+    implements CustomizedJpaSpecificationExecutor<T>
+{
 
     private final EntityManager entityManager;
 

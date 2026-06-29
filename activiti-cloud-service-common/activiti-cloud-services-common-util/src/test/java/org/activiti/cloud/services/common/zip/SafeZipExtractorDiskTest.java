@@ -72,8 +72,7 @@ class SafeZipExtractorDiskTest {
         );
         Path target = tempDir.resolve("out");
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)
@@ -108,8 +107,7 @@ class SafeZipExtractorDiskTest {
             ZipTestFixtures.entry("b.txt", "2"),
             ZipTestFixtures.entry("c.txt", "3")
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(2)
             .maxEntryDecompressedBytes(1024)
             .maxTotalDecompressedBytes(2048)
@@ -124,8 +122,7 @@ class SafeZipExtractorDiskTest {
     void extractToDirectory_shouldThrow_whenEntryMetadataExceedsMaxSize() throws IOException {
         byte[] payload = new byte[1024];
         Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "big-meta.zip", ZipTestFixtures.entry("big.txt", payload));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1)
             .maxTotalDecompressedBytes(2048)
@@ -144,8 +141,7 @@ class SafeZipExtractorDiskTest {
             ZipTestFixtures.entry("a.txt", "aaaa"),
             ZipTestFixtures.entry("b.txt", "bbbb")
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024)
             .maxTotalDecompressedBytes(6)
@@ -189,8 +185,7 @@ class SafeZipExtractorDiskTest {
             "windows.zip",
             ZipTestFixtures.entry("C:/Windows/evil.txt", "x")
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024)
             .maxTotalDecompressedBytes(2048)
@@ -209,8 +204,7 @@ class SafeZipExtractorDiskTest {
             "executable.zip",
             ZipTestFixtures.entry("payload.txt", "data")
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)
@@ -229,8 +223,7 @@ class SafeZipExtractorDiskTest {
             "nested.zip",
             ZipTestFixtures.entry("inner.zip", ZipTestFixtures.zipLocalFileHeaderBytes())
         );
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)
@@ -270,8 +263,7 @@ class SafeZipExtractorDiskTest {
     void extractToDirectory_shouldThrow_whenFileEntryIsEmptyAndEmptyEntriesRejected() throws IOException {
         Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "empty.zip", ZipTestFixtures.entry("empty.txt", ""));
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)
@@ -293,8 +285,7 @@ class SafeZipExtractorDiskTest {
         );
         Path target = tempDir.resolve("out");
 
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)
@@ -321,8 +312,7 @@ class SafeZipExtractorDiskTest {
     @Test
     void extractToDirectory_shouldThrow_whenHierarchicalPathIsUnsafe() throws IOException {
         Path zipPath = ZipTestFixtures.writeZipFile(tempDir, "unsafe.zip", ZipTestFixtures.entry("../evil.txt", "x"));
-        SafeZipLimits limits = SafeZipLimits
-            .builder()
+        SafeZipLimits limits = SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024)
             .maxTotalDecompressedBytes(2048)
@@ -335,8 +325,7 @@ class SafeZipExtractorDiskTest {
     }
 
     private static SafeZipLimits permissiveLimits() {
-        return SafeZipLimits
-            .builder()
+        return SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * KB)
             .maxTotalDecompressedBytes(1024 * KB)

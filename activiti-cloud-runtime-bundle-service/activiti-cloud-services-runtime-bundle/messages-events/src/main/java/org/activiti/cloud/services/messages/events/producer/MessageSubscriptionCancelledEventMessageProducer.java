@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 
 public class MessageSubscriptionCancelledEventMessageProducer
-    implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent> {
+    implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent>
+{
 
     private static final Logger logger = LoggerFactory.getLogger(
         MessageSubscriptionCancelledEventMessageProducer.class
@@ -52,8 +53,9 @@ public class MessageSubscriptionCancelledEventMessageProducer
 
         MessageSubscription messageSubscription = event.getEntity();
 
-        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder
-            .messageEvent(messageSubscription.getEventName())
+        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(
+            messageSubscription.getEventName()
+        )
             .withCorrelationKey(messageSubscription.getConfiguration())
             .build();
 

@@ -185,8 +185,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @Test
     public void shouldConfigureHeaderChannelsTimeToLiveExpression() {
-        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression())
-            .contains("headers['headerChannelsTTL']?:60000");
+        assertThat(messageAggregatorProperties.getHeaderChannelsTimeToLiveExpression()).contains(
+            "headers['headerChannelsTTL']?:60000"
+        );
     }
 
     @Test
@@ -220,8 +221,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
 
         // then
-        IntStream
-            .range(0, count)
+        IntStream.range(0, count)
             .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(1))))
             .forEach(out -> assertThat(out).isNotNull());
 
@@ -263,8 +263,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(startMessage);
 
         // then
-        IntStream
-            .range(0, count)
+        IntStream.range(0, count)
             .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3))))
             .forEach(out -> assertThat(out).isNotNull());
 
@@ -661,8 +660,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     @Test
     public void testMessageFilterDiscardChannel() throws Exception {
         // given
-        Message<String> invalidMessage = MessageBuilder
-            .withPayload("message")
+        Message<String> invalidMessage = MessageBuilder.withPayload("message")
             .setHeader(CONTENT_TYPE, "text/plain")
             .build();
         // when
@@ -679,8 +677,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     @Test
     public void testInvalidMessagePayloadDiscardChannel() throws Exception {
         // given
-        Message<String> invalidMessage = MessageBuilder
-            .withPayload("payload")
+        Message<String> invalidMessage = MessageBuilder.withPayload("payload")
             .setHeader(CONTENT_TYPE, "text/plain")
             .setHeader(MESSAGE_EVENT_TYPE, MessageEvents.MESSAGE_SENT.name())
             .build();
@@ -747,14 +744,12 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         String correlationKey,
         String businessKey
     ) {
-        MessageEventPayload payload = MessageEventPayloadBuilder
-            .messageEvent(messageName)
+        MessageEventPayload payload = MessageEventPayloadBuilder.messageEvent(messageName)
             .withCorrelationKey(correlationKey)
             .withBusinessKey(businessKey)
             .withVariables(Collections.singletonMap("key", businessKey))
             .build();
-        return MessageBuilder
-            .withPayload(payload)
+        return MessageBuilder.withPayload(payload)
             .setHeader(MESSAGE_EVENT_NAME, messageName)
             .setHeader(MESSAGE_EVENT_CORRELATION_KEY, correlationKey)
             .setHeader(MESSAGE_EVENT_ID, UUID.randomUUID())
@@ -854,8 +849,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected <T> Message<T> poll(long timeout) {
         Message<T> message = (Message<T>) this.outputDestination.receive(timeout);
 
-        return (Message<T>) Optional
-            .ofNullable(message)
+        return (Message<T>) Optional.ofNullable(message)
             .map(it -> MessageBuilder.withPayload(messageEventPayload(it)).copyHeaders(it.getHeaders()).build())
             .orElse(null);
     }

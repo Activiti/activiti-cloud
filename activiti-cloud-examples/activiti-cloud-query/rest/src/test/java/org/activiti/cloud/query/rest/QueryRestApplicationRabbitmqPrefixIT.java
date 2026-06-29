@@ -30,20 +30,21 @@ public class QueryRestApplicationRabbitmqPrefixIT extends QueryRestApplicationIT
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isEqualTo("default-app.");
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isEqualTo("default-app.");
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isEqualTo("default-app.");
     }
 
     @Test
     @Override
     void anonymousRabbitQueues() {
-        assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
-            .satisfies(map ->
-                assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.engineEvents.anonymous."))
-            );
+        assertThat(binderFactoryListenerTestContext.getAnonymousQueues()).satisfies(map ->
+            assertThat(map.keySet()).allMatch(key -> key.startsWith("default-app.queryEvents.anonymous."))
+        );
     }
 
     @Test
@@ -51,6 +52,6 @@ public class QueryRestApplicationRabbitmqPrefixIT extends QueryRestApplicationIT
     void rabbitExchanges() {
         assertThat(binderFactoryListenerTestContext.getExchanges())
             .isNotEmpty()
-            .containsOnlyKeys("default-app.engineEvents");
+            .containsOnlyKeys("default-app.engineEvents", "default-app.queryEvents");
     }
 }

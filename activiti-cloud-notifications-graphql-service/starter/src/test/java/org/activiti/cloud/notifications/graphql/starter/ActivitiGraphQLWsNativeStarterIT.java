@@ -120,8 +120,7 @@ class ActivitiGraphQLWsNativeStarterIT {
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
     private static final Duration WEB_SOCKET_STOP_TIMEOUT = Duration.ofSeconds(5);
 
-    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec
-        .builder()
+    private static final WebsocketClientSpec graphqlWsClientSpec = WebsocketClientSpec.builder()
         .protocols(GRAPHQL_WS)
         .build();
 
@@ -176,8 +175,7 @@ class ActivitiGraphQLWsNativeStarterIT {
 
         var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
 
-        HttpClient
-            .create()
+        HttpClient.create()
             .baseUrl("ws://localhost:" + port)
             .wiretap(true)
             .websocket(graphqlWsClientSpec)
@@ -217,8 +215,7 @@ class ActivitiGraphQLWsNativeStarterIT {
 
         var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
 
-        HttpClient
-            .create()
+        HttpClient.create()
             .baseUrl("ws://localhost:" + port)
             .wiretap(true)
             .websocket(graphqlWsClientSpec)
@@ -258,11 +255,9 @@ class ActivitiGraphQLWsNativeStarterIT {
         @BeforeEach
         void setUpGraphQlTester() throws Exception {
             URI url = getUrl(WS_GRAPHQL_URI);
-            graphQlTester =
-                WebSocketGraphQlTester
-                    .builder(url, new ReactorNettyWebSocketClient())
-                    .interceptor(new JwtGraphQlClientInterceptor(identityTokenProducer.withTestUser(TESTADMIN)))
-                    .build();
+            graphQlTester = WebSocketGraphQlTester.builder(url, new ReactorNettyWebSocketClient())
+                .interceptor(new JwtGraphQlClientInterceptor(identityTokenProducer.withTestUser(TESTADMIN)))
+                .build();
             graphQlTester.start().block(TIMEOUT);
         }
 
@@ -280,8 +275,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventTypes: [EngineEventType!]) {
                   engineEvents(appName: [$appName], eventType: $eventTypes) {
                     processInstanceId
@@ -331,8 +325,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
 
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1, event2))
@@ -346,8 +339,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 producerChannel
                     .output()
                     .send(
-                        MessageBuilder
-                            .withPayload(Arrays.array(events))
+                        MessageBuilder.withPayload(Arrays.array(events))
                             .setHeader("routingKey", "eventProducer")
                             .build()
                     );
@@ -357,8 +349,7 @@ class ActivitiGraphQLWsNativeStarterIT {
         void testGraphqlSubscriptionPROCESS_DEPLOYED() {
             Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!) {
                   engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
                     processDefinitionKey
@@ -394,8 +385,7 @@ class ActivitiGraphQLWsNativeStarterIT {
             var messages = List.of(
                 Map.of("processDefinitionKey", "processDefinitionKey", "eventType", "PROCESS_DEPLOYED")
             );
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1))
@@ -411,8 +401,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .put("eventType", "SIGNAL_RECEIVED")
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventType: EngineEventType!) {
                   engineEvents(appName: [$appName], eventType: [$eventType]) {
                     processInstanceId
@@ -456,8 +445,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                     "SIGNAL_RECEIVED"
                 )
             );
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1))
@@ -473,8 +461,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .put("eventType", "PROCESS_STARTED")
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventType: EngineEventType!) {
                   engineEvents(appName: [$appName], eventType: [$eventType]) {
                     processInstanceId
@@ -508,8 +495,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1))
@@ -535,8 +521,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 )
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventTypes: [EngineEventType!]) {
                   engineEvents(appName: [$appName], eventType: $eventTypes) {
                     processInstanceId
@@ -736,8 +721,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .variables(variables)
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1, event2, event3, event4, event5, event6))
@@ -753,8 +737,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .put("eventTypes", Arrays.array("MESSAGE_SENT", "MESSAGE_WAITING", "MESSAGE_RECEIVED"))
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventTypes: [EngineEventType!]) {
                   engineEvents(appName: [$appName], eventType: $eventTypes) {
                     processInstanceId
@@ -857,8 +840,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
 
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(500))
                 .then(sendEvents(event1, event2, event3))
@@ -893,8 +875,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .put("actor", "bob")
                 .get();
 
-            var document =
-                """
+            var document = """
                 subscription($appName: String!, $eventTypes: [EngineEventType!], $actor: String!) {
                   engineEvents(appName: [$appName], eventType: $eventTypes, actor: [$actor]) {
                     processInstanceId
@@ -964,8 +945,7 @@ class ActivitiGraphQLWsNativeStarterIT {
                 .executeSubscription()
                 .toFlux("engineEvents", List.class);
 
-            StepVerifier
-                .create(flux)
+            StepVerifier.create(flux)
                 .expectSubscription()
                 .thenAwait(Duration.ofMillis(300))
                 .then(sendEvents(event1, event2, event3))
@@ -981,8 +961,7 @@ class ActivitiGraphQLWsNativeStarterIT {
 
         var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(null));
 
-        HttpClient
-            .create()
+        HttpClient.create()
             .baseUrl("ws://localhost:" + port)
             .wiretap(true)
             .websocket(graphqlWsClientSpec)

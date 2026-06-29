@@ -59,8 +59,9 @@ class MultipleRbJobExecutorIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @SpringBootApplication
     @ActivitiRuntimeBundle
@@ -82,20 +83,17 @@ class MultipleRbJobExecutorIT {
             "spring.datasource.password=" + postgres.getPassword(),
         };
 
-        TestPropertyValues
-            .of(KeycloakContainerApplicationInitializer.getContainerProperties())
+        TestPropertyValues.of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(rabbitMqProperties)
             .and(datasource)
             .applyToSystemProperties(() -> {
-                rbCtx1 =
-                    new SpringApplicationBuilder(RbApplication.class)
-                        .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
-                        .run();
+                rbCtx1 = new SpringApplicationBuilder(RbApplication.class)
+                    .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
+                    .run();
 
-                rbCtx2 =
-                    new SpringApplicationBuilder(RbApplication.class)
-                        .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
-                        .run();
+                rbCtx2 = new SpringApplicationBuilder(RbApplication.class)
+                    .properties("server.port=" + TestSocketUtils.findAvailableTcpPort())
+                    .run();
                 return true;
             });
     }
@@ -154,12 +152,10 @@ class MultipleRbJobExecutorIT {
             .as("should distribute and complete all jobs between rb replicas")
             .isTrue();
 
-        await("the async executions should complete and no more jobs should exist")
-            .untilAsserted(() -> {
-                assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isZero();
-                assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count())
-                    .isZero();
-            });
+        await("the async executions should complete and no more jobs should exist").untilAsserted(() -> {
+            assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isZero();
+            assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count()).isZero();
+        });
         // rb1 message handler is invoked
         verify(jobMessageHandler1, atLeastOnce()).handleMessage(any());
 

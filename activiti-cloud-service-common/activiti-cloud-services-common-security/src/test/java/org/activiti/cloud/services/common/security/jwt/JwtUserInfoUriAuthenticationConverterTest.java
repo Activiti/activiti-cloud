@@ -72,8 +72,9 @@ class JwtUserInfoUriAuthenticationConverterTest {
         assertThat(oAuth2UserCaptor.getValue().getName()).isEqualTo(sub);
 
         //verify that user is cached and no call to underlying service is made
-        assertThat(oAuth2UserServiceCacheable.loadUser(mock(OAuth2UserRequest.class), sub).getName())
-            .isEqualTo(principal);
+        assertThat(oAuth2UserServiceCacheable.loadUser(mock(OAuth2UserRequest.class), sub).getName()).isEqualTo(
+            principal
+        );
         verifyNoInteractions(oAuth2UserService);
     }
 }

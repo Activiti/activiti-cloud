@@ -22,7 +22,8 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 
 public class CloudBPMNErrorReceivedEventImpl
     extends CloudRuntimeEventImpl<BPMNError, BPMNErrorReceivedEvent.ErrorEvents>
-    implements CloudBPMNErrorReceivedEvent {
+    implements CloudBPMNErrorReceivedEvent
+{
 
     public CloudBPMNErrorReceivedEventImpl() {}
 

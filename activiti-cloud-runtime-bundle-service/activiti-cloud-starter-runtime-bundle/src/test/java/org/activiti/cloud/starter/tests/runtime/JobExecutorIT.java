@@ -250,18 +250,18 @@ public class JobExecutorIT {
         }
 
         // then
-        await("the async executions should complete and no more jobs should exist")
-            .untilAsserted(() -> {
-                assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
+        await("the async executions should complete and no more jobs should exist").untilAsserted(() -> {
+            assertThat(runtimeService.createExecutionQuery().processDefinitionKey(ASYNC_TASK).count()).isEqualTo(0);
 
-                assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count())
-                    .isEqualTo(0);
-            });
+            assertThat(managementService.createJobQuery().processDefinitionId(processDefinitionId).count()).isZero();
+        });
 
         assertThat(jobsCompleted.await(1, TimeUnit.MINUTES)).as("should complete all jobs").isTrue();
         // message is sent
-        verify(jobMessageProducer, times(jobCount))
-            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
+        verify(jobMessageProducer, times(jobCount)).sendMessage(
+            eq(messageBasedJobManager.getOutputChannelName()),
+            any(Job.class)
+        );
         // message handler is invoked
         verify(jobMessageHandler, times(jobCount)).handleMessage(any(Message.class));
     }
@@ -301,10 +301,9 @@ public class JobExecutorIT {
         // then
         assertThat(pi).isNotNull();
 
-        await("the timer job should be created")
-            .untilAsserted(() -> {
-                assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(1);
-            });
+        await("the timer job should be created").untilAsserted(() -> {
+            assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(1);
+        });
 
         // After setting the clock to time '5 minutes and 5 seconds', the timer should fire
         processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
@@ -313,18 +312,13 @@ public class JobExecutorIT {
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer").isTrue();
 
         // then
-        await("the process instance should complete and no more jobs should exist")
-            .untilAsserted(() -> {
-                assertThat(
-                    runtimeService
-                        .createProcessInstanceQuery()
-                        .processDefinitionKey(pi.getProcessDefinitionKey())
-                        .count()
-                )
-                    .isEqualTo(0);
+        await("the process instance should complete and no more jobs should exist").untilAsserted(() -> {
+            assertThat(
+                runtimeService.createProcessInstanceQuery().processDefinitionKey(pi.getProcessDefinitionKey()).count()
+            ).isZero();
 
-                assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
-            });
+            assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
+        });
 
         // timer event has been fired
         assertThat(timerFired.await(1, TimeUnit.MINUTES)).as("should fire timer").isTrue();
@@ -362,30 +356,29 @@ public class JobExecutorIT {
         // then
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 5 times every 1 sec").isTrue();
 
-        await("the async executions should exists with job exception")
-            .untilAsserted(() -> {
-                assertThat(
-                    runtimeService
-                        .createExecutionQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .activityId("failingJobTask")
-                        .count()
-                )
-                    .isEqualTo(1);
+        await("the async executions should exists with job exception").untilAsserted(() -> {
+            assertThat(
+                runtimeService
+                    .createExecutionQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .activityId("failingJobTask")
+                    .count()
+            ).isEqualTo(1);
 
-                assertThat(
-                    managementService
-                        .createDeadLetterJobQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .withException()
-                        .count()
-                )
-                    .isEqualTo(1);
-            });
+            assertThat(
+                managementService
+                    .createDeadLetterJobQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .withException()
+                    .count()
+            ).isEqualTo(1);
+        });
 
         // message is sent
-        verify(jobMessageProducer, times(retryCount))
-            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
+        verify(jobMessageProducer, times(retryCount)).sendMessage(
+            eq(messageBasedJobManager.getOutputChannelName()),
+            any(Job.class)
+        );
         // message handler is invoked
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
     }
@@ -413,30 +406,29 @@ public class JobExecutorIT {
         // then
         assertThat(jobRetries.await(1, TimeUnit.MINUTES)).as("should retry failed jobs 2 times every 1 sec").isTrue();
 
-        await("the async executions should exists with job exception")
-            .untilAsserted(() -> {
-                assertThat(
-                    runtimeService
-                        .createExecutionQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .activityId("timerCatchEvent")
-                        .count()
-                )
-                    .isEqualTo(1);
+        await("the async executions should exists with job exception").untilAsserted(() -> {
+            assertThat(
+                runtimeService
+                    .createExecutionQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .activityId("timerCatchEvent")
+                    .count()
+            ).isEqualTo(1);
 
-                assertThat(
-                    managementService
-                        .createDeadLetterJobQuery()
-                        .processDefinitionId(processDefinitionId)
-                        .withException()
-                        .count()
-                )
-                    .isEqualTo(1);
-            });
+            assertThat(
+                managementService
+                    .createDeadLetterJobQuery()
+                    .processDefinitionId(processDefinitionId)
+                    .withException()
+                    .count()
+            ).isEqualTo(1);
+        });
 
         // timer job message is sent with 2 retries
-        verify(jobMessageProducer, times(retryCount))
-            .sendMessage(eq(messageBasedJobManager.getOutputChannelName()), any(Job.class));
+        verify(jobMessageProducer, times(retryCount)).sendMessage(
+            eq(messageBasedJobManager.getOutputChannelName()),
+            any(Job.class)
+        );
         // message handler is invoked
         verify(jobMessageHandler, times(retryCount)).handleMessage(any(Message.class));
     }
@@ -480,23 +472,24 @@ public class JobExecutorIT {
         // then
         assertThat(pi).isNull();
 
-        await("the timer job should be created")
-            .untilAsserted(() -> {
-                assertThat(managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count())
-                    .isEqualTo(1);
-            });
+        await("the timer job should be created").untilAsserted(() -> {
+            assertThat(
+                managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count()
+            ).isEqualTo(1);
+        });
 
         // After setting the clock to time '1 hour and 5 seconds', the timer should fire
         processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
         // then
-        await("the process should start and no more timer jobs should exist")
-            .untilAsserted(() -> {
-                assertThat(runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinitionId).count())
-                    .isEqualTo(1);
+        await("the process should start and no more timer jobs should exist").untilAsserted(() -> {
+            assertThat(
+                runtimeService.createProcessInstanceQuery().processDefinitionId(processDefinitionId).count()
+            ).isEqualTo(1);
 
-                assertThat(managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count())
-                    .isEqualTo(0);
-            });
+            assertThat(
+                managementService.createTimerJobQuery().processDefinitionId(processDefinitionId).count()
+            ).isZero();
+        });
 
         // timer event has been fired
         assertThat(timerFired.await(1, TimeUnit.MINUTES)).as("should fire timer").isTrue();
@@ -543,10 +536,9 @@ public class JobExecutorIT {
         // then
         assertThat(pi).isNotNull();
 
-        await("the timer job should be created")
-            .untilAsserted(() -> {
-                assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(1);
-            });
+        await("the timer job should be created").untilAsserted(() -> {
+            assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(1);
+        });
 
         // After setting the clock to time '5 minutes and 5 seconds', the timer should fire
         processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((5 * 60 * 1000) + 5000)));
@@ -555,18 +547,13 @@ public class JobExecutorIT {
         assertThat(timerScheduled.await(1, TimeUnit.MINUTES)).as("should schedule timer").isTrue();
 
         // then
-        await("the process instance should complete and no more timer jobs should exist")
-            .untilAsserted(() -> {
-                assertThat(
-                    runtimeService
-                        .createProcessInstanceQuery()
-                        .processDefinitionKey(pi.getProcessDefinitionKey())
-                        .count()
-                )
-                    .isEqualTo(0);
+        await("the process instance should complete and no more timer jobs should exist").untilAsserted(() -> {
+            assertThat(
+                runtimeService.createProcessInstanceQuery().processDefinitionKey(pi.getProcessDefinitionKey()).count()
+            ).isZero();
 
-                assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
-            });
+            assertThat(managementService.createTimerJobQuery().processInstanceId(pi.getId()).count()).isEqualTo(0);
+        });
 
         // timer event has been fired
         assertThat(timerFired.await(1, TimeUnit.MINUTES)).as("should fire timer").isTrue();
@@ -592,15 +579,14 @@ public class JobExecutorIT {
         doReturn(false).when(spyJobMessageChannel).send(any(Message.class));
 
         // when
-        new TransactionTemplate(transactionManager)
-            .execute(
-                new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-                        jobMessageProducer.sendMessage(destination, new TestJobEntity("jobId"));
-                    }
+        new TransactionTemplate(transactionManager).execute(
+            new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    jobMessageProducer.sendMessage(destination, new TestJobEntity("jobId"));
                 }
-            );
+            }
+        );
 
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageFailedEvent").isTrue();
@@ -631,15 +617,14 @@ public class JobExecutorIT {
         doReturn(true).when(spyJobMessageChannel).send(any(Message.class));
 
         // when
-        new TransactionTemplate(transactionManager)
-            .execute(
-                new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-                        jobMessageProducer.sendMessage(destination, new TestJobEntity("jobId"));
-                    }
+        new TransactionTemplate(transactionManager).execute(
+            new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    jobMessageProducer.sendMessage(destination, new TestJobEntity("jobId"));
                 }
-            );
+            }
+        );
 
         // then
         assertThat(eventPublished.await(1, TimeUnit.SECONDS)).as("should publish JobMessageSentEvent").isTrue();
@@ -665,15 +650,14 @@ public class JobExecutorIT {
         doReturn(true).when(spyJobMessageChannel).send(any(Message.class));
 
         // when
-        new TransactionTemplate(transactionManager)
-            .execute(
-                new TransactionCallbackWithoutResult() {
-                    @Override
-                    protected void doInTransactionWithoutResult(TransactionStatus status) {
-                        jobMessageProducer.sendMessage(destination, job);
-                    }
+        new TransactionTemplate(transactionManager).execute(
+            new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    jobMessageProducer.sendMessage(destination, job);
                 }
-            );
+            }
+        );
 
         // then
         verify(spyJobMessageChannel).send(messageArgumentCaptor.capture());

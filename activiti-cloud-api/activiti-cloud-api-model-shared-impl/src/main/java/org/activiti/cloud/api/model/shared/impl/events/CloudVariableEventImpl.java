@@ -19,7 +19,8 @@ import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 
 public abstract class CloudVariableEventImpl
-    extends CloudRuntimeEventImpl<VariableInstance, VariableEvent.VariableEvents> {
+    extends CloudRuntimeEventImpl<VariableInstance, VariableEvent.VariableEvents>
+{
 
     private boolean isEphemeralVariable;
 

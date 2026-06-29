@@ -90,10 +90,10 @@ public class CloudConnectorAppFunctionRouterIT extends CloudConnectorAppIT {
                 "spring.cloud.stream.rabbit.bindings.functionRouterInput.consumer.queue-name-group-only",
                 Boolean.class
             )
-        )
-            .isTrue();
+        ).isTrue();
 
-        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class))
-            .isEqualTo("processing-connector");
+        assertThat(environment.getProperty("activiti.cloud.messaging.function-router.group", String.class)).isEqualTo(
+            "processing-connector"
+        );
     }
 }

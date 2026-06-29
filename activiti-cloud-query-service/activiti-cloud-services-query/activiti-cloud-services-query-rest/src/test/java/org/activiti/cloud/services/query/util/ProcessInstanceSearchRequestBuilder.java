@@ -30,8 +30,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 public class ProcessInstanceSearchRequestBuilder {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper
-        .builder()
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
         .changeDefaultVisibility((VisibilityChecker checker) ->
             checker.withFieldVisibility(JsonAutoDetect.Visibility.ANY)
         )
@@ -160,14 +159,13 @@ public class ProcessInstanceSearchRequestBuilder {
 
     public ProcessInstanceSearchRequestBuilder invertSort() {
         if (sort != null) {
-            sort =
-                new CloudRuntimeEntitySort(
-                    sort.field(),
-                    sort.direction().isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC,
-                    sort.isProcessVariable(),
-                    sort.processDefinitionKey(),
-                    sort.type()
-                );
+            sort = new CloudRuntimeEntitySort(
+                sort.field(),
+                sort.direction().isAscending() ? Sort.Direction.DESC : Sort.Direction.ASC,
+                sort.isProcessVariable(),
+                sort.processDefinitionKey(),
+                sort.type()
+            );
         }
         return this;
     }

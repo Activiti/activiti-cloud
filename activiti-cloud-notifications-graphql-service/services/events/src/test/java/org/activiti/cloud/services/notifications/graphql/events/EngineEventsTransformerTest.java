@@ -321,8 +321,10 @@ public class EngineEventsTransformerTest {
     @Test
     public void testJson() throws StreamReadException, DatabindException, IOException {
         // given
-        List<Map<String, Object>> events = new ObjectMapper()
-            .readValue(json, new TypeReference<List<Map<String, Object>>>() {});
+        List<Map<String, Object>> events = new ObjectMapper().readValue(
+            json,
+            new TypeReference<List<Map<String, Object>>>() {}
+        );
         JsonNode jsonNode = new ObjectMapper().readTree(json);
 
         // when

@@ -115,7 +115,8 @@ public class SyncCloudProcessDefinitionsPayload implements Payload {
         }
 
         public SyncCloudProcessDefinitionsPayload build() {
-            SyncCloudProcessDefinitionsPayload syncCloudProcessDefinitionsPayload = new SyncCloudProcessDefinitionsPayload();
+            SyncCloudProcessDefinitionsPayload syncCloudProcessDefinitionsPayload =
+                new SyncCloudProcessDefinitionsPayload();
             syncCloudProcessDefinitionsPayload.excludedProcessDefinitionIds = this.excludedProcessDefinitionIds;
             syncCloudProcessDefinitionsPayload.processDefinitionKeys = this.processDefinitionKeys;
             return syncCloudProcessDefinitionsPayload;

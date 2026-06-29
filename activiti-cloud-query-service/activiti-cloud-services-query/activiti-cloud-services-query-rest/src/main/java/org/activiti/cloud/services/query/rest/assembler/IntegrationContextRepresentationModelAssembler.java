@@ -26,7 +26,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class IntegrationContextRepresentationModelAssembler
-    implements RepresentationModelAssembler<IntegrationContextEntity, EntityModel<CloudIntegrationContext>> {
+    implements RepresentationModelAssembler<IntegrationContextEntity, EntityModel<CloudIntegrationContext>>
+{
 
     @Override
     public EntityModel<CloudIntegrationContext> toModel(IntegrationContextEntity entity) {

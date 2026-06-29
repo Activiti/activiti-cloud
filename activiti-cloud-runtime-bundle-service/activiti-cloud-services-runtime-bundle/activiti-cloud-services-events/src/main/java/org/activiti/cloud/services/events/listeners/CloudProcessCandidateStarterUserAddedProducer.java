@@ -60,9 +60,8 @@ public class CloudProcessCandidateStarterUserAddedProducer {
     }
 
     public CloudProcessCandidateStarterGroupAddedEvent toCloudEvent(ProcessCandidateStarterGroupAddedEvent event) {
-        CloudProcessCandidateStarterGroupAddedEventImpl cloudProcessCandidateStarterGroupAddedEvent = new CloudProcessCandidateStarterGroupAddedEventImpl(
-            event.getEntity()
-        );
+        CloudProcessCandidateStarterGroupAddedEventImpl cloudProcessCandidateStarterGroupAddedEvent =
+            new CloudProcessCandidateStarterGroupAddedEventImpl(event.getEntity());
         cloudProcessCandidateStarterGroupAddedEvent.setProcessDefinitionId(
             cloudProcessCandidateStarterGroupAddedEvent.getEntity().getProcessDefinitionId()
         );

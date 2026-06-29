@@ -53,13 +53,12 @@ class ProcessInstanceSearchServiceTest {
 
     @BeforeEach
     void setUp() {
-        service =
-            new ProcessInstanceSearchService(
-                processInstanceRepository,
-                processVariableService,
-                securityManager,
-                processInstanceHierarchyRepository
-            );
+        service = new ProcessInstanceSearchService(
+            processInstanceRepository,
+            processVariableService,
+            securityManager,
+            processInstanceHierarchyRepository
+        );
     }
 
     @Nested
@@ -84,14 +83,13 @@ class ProcessInstanceSearchServiceTest {
         @Test
         void should_groupByAncestorAndRelationType() {
             Set<String> ancestorIds = Set.of("a1", "a2");
-            given(processInstanceHierarchyRepository.countRelatedByAncestor(ancestorIds))
-                .willReturn(
-                    List.of(
-                        projection("a1", ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 3L),
-                        projection("a1", ProcessInstanceHierarchyEntity.RELATION_LINKED, 2L),
-                        projection("a2", ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 1L)
-                    )
-                );
+            given(processInstanceHierarchyRepository.countRelatedByAncestor(ancestorIds)).willReturn(
+                List.of(
+                    projection("a1", ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 3L),
+                    projection("a1", ProcessInstanceHierarchyEntity.RELATION_LINKED, 2L),
+                    projection("a2", ProcessInstanceHierarchyEntity.RELATION_SUBPROCESS, 1L)
+                )
+            );
 
             Map<String, Map<String, Long>> result = service.countRelatedProcessesByAncestor(ancestorIds);
 

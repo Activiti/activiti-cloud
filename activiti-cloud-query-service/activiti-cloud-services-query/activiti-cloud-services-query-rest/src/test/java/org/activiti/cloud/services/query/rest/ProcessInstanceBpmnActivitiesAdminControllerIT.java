@@ -120,19 +120,19 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
     void shouldReturnActivitiesJsonWhenAcceptIsApplicationJson() throws Exception {
         BPMNActivityEntity activity = buildActivity();
 
-        given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(
-                    Collections.singletonList(activity),
-                    new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
-                    1
-                )
-            );
+        given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            new PageImpl<>(
+                Collections.singletonList(activity),
+                new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)),
+                1
+            )
+        );
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             .andExpect(status().isOk())
             .andReturn();
@@ -168,15 +168,15 @@ class ProcessInstanceBpmnActivitiesAdminControllerIT {
 
     @Test
     void shouldReturnEmptyActivitiesListWhenNoneExist() throws Exception {
-        given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class)))
-            .willReturn(
-                new PageImpl<>(Collections.emptyList(), new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)), 0)
-            );
+        given(bpmnActivityRepository.findAll(any(Predicate.class), any(Pageable.class))).willReturn(
+            new PageImpl<>(Collections.emptyList(), new AlfrescoPageRequest(0, 10, PageRequest.of(0, 10)), 0)
+        );
 
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID)
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/process-instances/{processInstanceId}/bpmn-activities", PROCESS_INSTANCE_ID).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             .andExpect(status().isOk())
             .andReturn();

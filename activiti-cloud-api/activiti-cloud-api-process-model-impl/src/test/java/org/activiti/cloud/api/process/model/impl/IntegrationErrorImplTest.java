@@ -154,8 +154,7 @@ class IntegrationErrorImplTest {
     }
 
     static Stream<Arguments> jsonMessagesProvider() {
-        var jsonError =
-            """
+        var jsonError = """
             {"message":"Dmn table notDefined-v2.dmn not valid or not found","severity":"ERROR"}
             """;
         return Stream.of(Arguments.of(jsonError, "Error", jsonError), Arguments.of("ERROR", jsonError, jsonError));
@@ -259,5 +258,28 @@ class IntegrationErrorImplTest {
         var result = new IntegrationErrorImpl(integrationRequest, error);
 
         assertThat(result.getErrorMessage()).isEqualTo("actual error");
+    }
+
+    @Test
+    void should_returnCustomMessage_when_customMessageIsProvided() {
+        var rootCause = new RuntimeException("Root cause message");
+        var error = new RuntimeException("Error message", rootCause);
+        String customMessage = "Request content violates guardrail policy";
+
+        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
+
+        assertThat(result.getErrorMessage()).isEqualTo(customMessage);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = { "", "   " })
+    void should_fallbackToDetailedErrorMessage_when_customMessageIsNullOrBlank(String customMessage) {
+        var rootCause = new RuntimeException("Root cause message");
+        var error = new RuntimeException("Error message", rootCause);
+
+        var result = new IntegrationErrorImpl(integrationRequest, error, customMessage);
+
+        assertThat(result.getErrorMessage()).isEqualTo("Error message caused by: Root cause message");
     }
 }

@@ -35,9 +35,9 @@ class PropagateCloudBpmnErrorCmd implements Command<Void> {
     @Override
     public Void execute(CommandContext commandContext) {
         // Fallback to error message for backward compatibility
-        String errorCode = Optional
-            .ofNullable(integrationError.getErrorCode())
-            .orElse(integrationError.getErrorMessage());
+        String errorCode = Optional.ofNullable(integrationError.getErrorCode()).orElse(
+            integrationError.getErrorMessage()
+        );
 
         propagateError(errorCode);
 

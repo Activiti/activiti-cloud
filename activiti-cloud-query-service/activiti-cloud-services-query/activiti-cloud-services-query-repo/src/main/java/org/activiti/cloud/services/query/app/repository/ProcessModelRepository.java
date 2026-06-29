@@ -31,7 +31,8 @@ public interface ProcessModelRepository
         PagingAndSortingRepository<ProcessModelEntity, String>,
         QuerydslPredicateExecutor<ProcessModelEntity>,
         QuerydslBinderCustomizer<QProcessModelEntity>,
-        CrudRepository<ProcessModelEntity, String> {
+        CrudRepository<ProcessModelEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QProcessModelEntity root) {
         whitelist(root).apply(bindings);

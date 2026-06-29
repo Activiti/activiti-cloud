@@ -54,10 +54,10 @@ public class TaskVariableDeletedEventHandler {
                         () -> {
                             LOGGER.debug(
                                 "Unable to find variableEntity with name '" +
-                                variableName +
-                                "' for task instance '" +
-                                taskId +
-                                "'"
+                                    variableName +
+                                    "' for task instance '" +
+                                    taskId +
+                                    "'"
                             );
                         }
                     );

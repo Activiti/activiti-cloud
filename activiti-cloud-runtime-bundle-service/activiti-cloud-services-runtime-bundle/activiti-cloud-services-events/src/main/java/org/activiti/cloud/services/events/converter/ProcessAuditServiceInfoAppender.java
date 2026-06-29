@@ -35,8 +35,7 @@ public class ProcessAuditServiceInfoAppender {
     public CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> appendAuditServiceInfoTo(
         CloudRuntimeEventImpl cloudRuntimeEvent
     ) {
-        Optional
-            .ofNullable(commandContext)
+        Optional.ofNullable(commandContext)
             .map(Supplier::get)
             .map(CommandContext::getExecutionEntityManager)
             .map(it -> it.findById(cloudRuntimeEvent.getProcessInstanceId()))

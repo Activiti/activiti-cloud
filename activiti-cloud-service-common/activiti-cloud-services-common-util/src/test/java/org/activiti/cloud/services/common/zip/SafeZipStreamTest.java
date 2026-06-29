@@ -37,9 +37,9 @@ class SafeZipStreamTest {
         );
         List<String> names = new ArrayList<>();
 
-        SafeZipStream
-            .of(new ByteArrayInputStream(zip), permissiveLimits())
-            .forEach(entry -> names.add(entry.getName()));
+        SafeZipStream.of(new ByteArrayInputStream(zip), permissiveLimits()).forEach(entry ->
+            names.add(entry.getName())
+        );
 
         assertThat(names).containsExactly("a.txt", "b.txt");
     }
@@ -67,8 +67,7 @@ class SafeZipStreamTest {
     }
 
     private static SafeZipLimits permissiveLimits() {
-        return SafeZipLimits
-            .builder()
+        return SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024 * 1024)
             .maxTotalDecompressedBytes(1024 * 1024)
@@ -76,8 +75,7 @@ class SafeZipStreamTest {
     }
 
     private static SafeZipLimits flatLimits() {
-        return SafeZipLimits
-            .builder()
+        return SafeZipLimits.builder()
             .maxEntries(10)
             .maxEntryDecompressedBytes(1024)
             .maxTotalDecompressedBytes(2048)

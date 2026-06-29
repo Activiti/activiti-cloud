@@ -18,7 +18,6 @@ package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetc
 import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
@@ -46,14 +45,9 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
 
         return Flux.from(
             engineEventsFlux
-                .log(logger, Level.CONFIG, true)
-                .flatMapSequential(message ->
-                    Flux
-                        .fromIterable(message.getPayload())
-                        .filter(predicate)
-                        .collectList()
-                        .filter(list -> !list.isEmpty())
-                )
+                .map(Message::getPayload)
+                .map(engineEvents -> engineEvents.stream().filter(predicate).toList())
+                .filter(Predicate.not(List::isEmpty))
         );
     }
 }

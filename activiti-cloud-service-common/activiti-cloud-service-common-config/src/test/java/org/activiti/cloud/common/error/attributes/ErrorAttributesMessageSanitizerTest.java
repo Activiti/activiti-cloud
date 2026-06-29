@@ -43,11 +43,10 @@ class ErrorAttributesMessageSanitizerTest {
 
         errorAttributes = sanitizer.customize(errorAttributes, null);
 
-        assertThat(errorAttributes)
-            .containsEntry(
-                ErrorAttributesMessageSanitizer.MESSAGE,
-                ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
-            );
+        assertThat(errorAttributes).containsEntry(
+            ErrorAttributesMessageSanitizer.MESSAGE,
+            ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE
+        );
     }
 
     @ParameterizedTest

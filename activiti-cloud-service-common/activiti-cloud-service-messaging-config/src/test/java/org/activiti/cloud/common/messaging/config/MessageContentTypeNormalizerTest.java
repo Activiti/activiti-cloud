@@ -34,40 +34,40 @@ class MessageContentTypeNormalizerTest {
 
         Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
-        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE)).hasToString(
+            MimeTypeUtils.APPLICATION_JSON_VALUE
+        );
     }
 
     @Test
     void shouldOverrideOctetStreamWithExpected() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
             .build();
 
         Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
-        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE)).hasToString(
+            MimeTypeUtils.APPLICATION_JSON_VALUE
+        );
     }
 
     @Test
     void shouldOverrideMismatchedContentTypeWithExpected() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN_VALUE)
             .build();
 
         Message<?> normalized = normalizer.normalizeToExpected(message, MimeTypeUtils.APPLICATION_JSON_VALUE);
 
-        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE)).hasToString(
+            MimeTypeUtils.APPLICATION_JSON_VALUE
+        );
     }
 
     @Test
     void shouldReturnSameInstanceWhenContentTypeMatchesExpected() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
             .build();
 
@@ -78,8 +78,7 @@ class MessageContentTypeNormalizerTest {
 
     @Test
     void shouldReturnSameInstanceWhenContentTypeIsCompatibleWithExpected() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
             .build();
 
@@ -90,15 +89,15 @@ class MessageContentTypeNormalizerTest {
 
     @Test
     void shouldDefaultToJsonWhenExpectedIsNull() {
-        Message<byte[]> message = MessageBuilder
-            .withPayload("payload".getBytes())
+        Message<byte[]> message = MessageBuilder.withPayload("payload".getBytes())
             .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)
             .build();
 
         Message<?> normalized = normalizer.normalizeToExpected(message, null);
 
-        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE)).hasToString(
+            MimeTypeUtils.APPLICATION_JSON_VALUE
+        );
     }
 
     @Test
@@ -107,7 +106,8 @@ class MessageContentTypeNormalizerTest {
 
         Message<?> normalized = normalizer.normalizeToExpected(message, "   ");
 
-        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE))
-            .hasToString(MimeTypeUtils.APPLICATION_JSON_VALUE);
+        assertThat(normalized.getHeaders().get(MessageHeaders.CONTENT_TYPE)).hasToString(
+            MimeTypeUtils.APPLICATION_JSON_VALUE
+        );
     }
 }

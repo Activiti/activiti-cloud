@@ -1,0 +1,37 @@
+{
+  "rabbitmq-partitioned-default": {
+    "messagingBroker": "rabbitmq",
+    "messagingPartitioned": "partitioned",
+    "messagingDestinations": "default-destinations"
+  },
+  "rabbitmq-non-partitioned-default": {
+    "messagingBroker": "rabbitmq",
+    "messagingPartitioned": "non-partitioned",
+    "messagingDestinations": "default-destinations"
+  },
+  "kafka-partitioned-default": {
+    "messagingBroker": "kafka",
+    "messagingPartitioned": "partitioned",
+    "messagingDestinations": "default-destinations"
+  },
+  "kafka-non-partitioned-default": {
+    "messagingBroker": "kafka",
+    "messagingPartitioned": "non-partitioned",
+    "messagingDestinations": "default-destinations"
+  },
+  "kafka-partitioned-override": {
+    "messagingBroker": "kafka",
+    "messagingPartitioned": "partitioned",
+    "messagingDestinations": "override-destinations"
+  },
+  "rabbitmq-non-partitioned-pdb": {
+    "messagingBroker": "rabbitmq",
+    "messagingPartitioned": "non-partitioned",
+    "messagingDestinations": "pdb"
+  },
+  "rabbitmq-prefix-pdb": {
+    "messagingBroker": "rabbitmq",
+    "messagingPartitioned": "prefix",
+    "messagingDestinations": "pdb"
+  }
+}

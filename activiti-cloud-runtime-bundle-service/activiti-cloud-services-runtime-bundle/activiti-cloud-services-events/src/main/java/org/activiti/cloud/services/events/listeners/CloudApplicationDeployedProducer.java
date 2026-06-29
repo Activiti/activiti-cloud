@@ -51,12 +51,13 @@ public class CloudApplicationDeployedProducer {
                             .getApplicationDeployedEvents()
                             .stream()
                             .map(applicationDeployedEvent -> {
-                                CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
-                                    applicationDeployedEvent.getId(),
-                                    applicationDeployedEvent.getTimestamp(),
-                                    applicationDeployedEvent.getEntity(),
-                                    applicationDeployedEvent.getEventType()
-                                );
+                                CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent =
+                                    new CloudApplicationDeployedEventImpl(
+                                        applicationDeployedEvent.getId(),
+                                        applicationDeployedEvent.getTimestamp(),
+                                        applicationDeployedEvent.getEntity(),
+                                        applicationDeployedEvent.getEventType()
+                                    );
                                 runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudApplicationDeployedEvent);
                                 return cloudApplicationDeployedEvent;
                             })

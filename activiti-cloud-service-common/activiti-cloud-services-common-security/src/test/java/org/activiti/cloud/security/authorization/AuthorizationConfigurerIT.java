@@ -165,8 +165,10 @@ public class AuthorizationConfigurerIT {
         when(jwtAdapterMock.getRoles()).thenReturn(List.of("OTHER_DUMMY_ROLE"));
         mockMvc
             .perform(
-                get(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
-                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+                get(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED).header(
+                    AUTH_HEADER_NAME,
+                    DUMMY_BEARER
+                )
             )
             .andExpect(status().isOk());
         mockMvc
@@ -182,15 +184,19 @@ public class AuthorizationConfigurerIT {
         when(jwtAdapterMock.getPermissions()).thenReturn(List.of("DUMMY_PERMISSION"));
         mockMvc
             .perform(
-                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
-                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED).header(
+                    AUTH_HEADER_NAME,
+                    DUMMY_BEARER
+                )
             )
             .andExpect(status().isOk());
         when(jwtAdapterMock.getPermissions()).thenReturn(List.of("OTHER_DUMMY_PERMISSION"));
         mockMvc
             .perform(
-                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
-                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED).header(
+                    AUTH_HEADER_NAME,
+                    DUMMY_BEARER
+                )
             )
             .andExpect(status().isForbidden());
     }
@@ -201,15 +207,19 @@ public class AuthorizationConfigurerIT {
         when(jwtAdapterMock.getRoles()).thenReturn(List.of("DUMMY_ROLE"));
         mockMvc
             .perform(
-                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED)
-                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED).header(
+                    AUTH_HEADER_NAME,
+                    DUMMY_BEARER
+                )
             )
             .andExpect(status().isOk());
         when(jwtAdapterMock.getRoles()).thenReturn(List.of("OTHER_DUMMY_ROLE"));
         mockMvc
             .perform(
-                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED)
-                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED).header(
+                    AUTH_HEADER_NAME,
+                    DUMMY_BEARER
+                )
             )
             .andExpect(status().isForbidden());
     }

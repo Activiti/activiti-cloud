@@ -142,14 +142,16 @@ public class VariableEntityAdminControllerIT {
         );
         variableEntity.setValue("John");
 
-        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest))).willReturn(
+            new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12)
+        );
 
         //when
         MvcResult result = mockMvc
             .perform(
-                get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10", variableEntity.getTaskId())
-                    .accept(MediaType.APPLICATION_JSON)
+                get("/admin/v1/tasks/{taskId}/variables?skipCount=11&maxItems=10", variableEntity.getTaskId()).accept(
+                    MediaType.APPLICATION_JSON
+                )
             )
             //then
             .andExpect(status().isOk())

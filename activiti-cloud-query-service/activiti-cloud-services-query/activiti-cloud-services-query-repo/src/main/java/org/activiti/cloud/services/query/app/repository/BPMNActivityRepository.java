@@ -33,7 +33,8 @@ public interface BPMNActivityRepository
         PagingAndSortingRepository<BPMNActivityEntity, String>,
         QuerydslPredicateExecutor<BPMNActivityEntity>,
         QuerydslBinderCustomizer<QBPMNActivityEntity>,
-        CrudRepository<BPMNActivityEntity, String> {
+        CrudRepository<BPMNActivityEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QBPMNActivityEntity root) {
         whitelist(root).apply(bindings);

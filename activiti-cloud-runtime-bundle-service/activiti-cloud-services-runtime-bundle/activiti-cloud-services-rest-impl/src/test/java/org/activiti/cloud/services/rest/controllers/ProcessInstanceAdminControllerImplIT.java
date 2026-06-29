@@ -156,8 +156,9 @@ class ProcessInstanceAdminControllerImplIT {
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
 
-        this.mockMvc.perform(get("/admin/v1/process-instances?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(
+            get("/admin/v1/process-instances?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE)
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -167,9 +168,8 @@ class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
 
         this.mockMvc.perform(
-                get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON)
-            )
-            .andExpect(status().isOk());
+            get("/admin/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
     }
 
     @Test
@@ -180,8 +180,9 @@ class ProcessInstanceAdminControllerImplIT {
 
         when(processAdminRuntime.resume(any())).thenReturn(defaultProcessInstance());
 
-        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/resume", 1))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/resume", 1)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -189,8 +190,9 @@ class ProcessInstanceAdminControllerImplIT {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/suspend", 1))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/suspend", 1)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -203,8 +205,9 @@ class ProcessInstanceAdminControllerImplIT {
 
     @Test
     void destroyProcessInstance() throws Exception {
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1)).andExpect(
+            status().isOk()
+        );
 
         verify(cloudProcessDeletedService, never()).delete(any());
         verify(cloudProcessDeletedService).sendDeleteEvent("1");
@@ -216,8 +219,9 @@ class ProcessInstanceAdminControllerImplIT {
         when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.CANCELLED);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1)).andExpect(
+            status().isOk()
+        );
 
         verify(cloudProcessDeletedService, never()).delete(any());
         verify(cloudProcessDeletedService).sendDeleteEvent("1");
@@ -229,8 +233,9 @@ class ProcessInstanceAdminControllerImplIT {
         when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy?force=true", 1))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy?force=true", 1)).andExpect(
+            status().isOk()
+        );
 
         verify(cloudProcessDeletedService).delete("1");
         verify(cloudProcessDeletedService, never()).sendDeleteEvent("1");
@@ -243,8 +248,9 @@ class ProcessInstanceAdminControllerImplIT {
         when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
-            .andExpect(status().isBadRequest());
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1)).andExpect(
+            status().isBadRequest()
+        );
 
         verify(cloudProcessDeletedService, never()).delete(any());
         verify(cloudProcessDeletedService, never()).sendDeleteEvent(any());
@@ -256,25 +262,22 @@ class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.update(any())).thenReturn(defaultProcessInstance());
 
-        UpdateProcessPayload cmd = ProcessPayloadBuilder
-            .update()
+        UpdateProcessPayload cmd = ProcessPayloadBuilder.update()
             .withProcessInstanceId("1")
             .withBusinessKey("businessKey")
             .withName("name")
             .build();
 
         this.mockMvc.perform(
-                put("/admin/v1/process-instances/{processInstanceId}", 1)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-            )
-            .andExpect(status().isOk());
+            put("/admin/v1/process-instances/{processInstanceId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(cmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
     void startMessage() throws Exception {
-        StartMessagePayload cmd = MessagePayloadBuilder
-            .start("messageName")
+        StartMessagePayload cmd = MessagePayloadBuilder.start("messageName")
             .withBusinessKey("buisinessId")
             .withVariable("name", "value")
             .build();
@@ -282,26 +285,23 @@ class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.start(any(StartMessagePayload.class))).thenReturn(defaultProcessInstance());
 
         this.mockMvc.perform(
-                post("/admin/v1/process-instances/message")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-            )
-            .andExpect(status().isOk());
+            post("/admin/v1/process-instances/message")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(cmd))
+        ).andExpect(status().isOk());
     }
 
     @Test
     void receiveMessage() throws Exception {
-        ReceiveMessagePayload cmd = MessagePayloadBuilder
-            .receive("messageName")
+        ReceiveMessagePayload cmd = MessagePayloadBuilder.receive("messageName")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
 
         this.mockMvc.perform(
-                put("/admin/v1/process-instances/message")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-            )
-            .andExpect(status().isOk());
+            put("/admin/v1/process-instances/message")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(cmd))
+        ).andExpect(status().isOk());
     }
 }

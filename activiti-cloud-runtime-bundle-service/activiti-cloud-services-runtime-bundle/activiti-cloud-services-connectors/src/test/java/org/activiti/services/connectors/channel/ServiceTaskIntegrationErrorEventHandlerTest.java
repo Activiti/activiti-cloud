@@ -84,14 +84,16 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     public void should_propagateErrorAndAggregateEvent_when_clientIdMatches() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId()))
-            .willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
 
-        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
-            .thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list()).thenReturn(
+            Collections.singletonList(executionEntity)
+        );
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
@@ -108,22 +110,25 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(compositeCommand.getCommands()).hasSize(3);
         assertThat(compositeCommand.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
-        assertThat(compositeCommand.getCommands().get(2))
-            .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
+        assertThat(compositeCommand.getCommands().get(2)).isInstanceOf(
+            AggregateIntegrationErrorReceivedClosingEventCmd.class
+        );
     }
 
     @Test
     public void should_AggregateEventButNotPropagateError_when_clientIdDoesNotMatch() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId()))
-            .willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn("idDifferentFromExpected");
 
-        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
-            .thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list()).thenReturn(
+            Collections.singletonList(executionEntity)
+        );
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
@@ -146,13 +151,15 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     public void should_AggregateEventButNotPropagateError_when_errorClassNameDoesNotMatch() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId()))
-            .willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
 
-        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
-            .thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list()).thenReturn(
+            Collections.singletonList(executionEntity)
+        );
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
@@ -176,14 +183,16 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     public void should_throwException_when_propagating_cloudBpmnError() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId()))
-            .willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(
+            integrationContextEntity
+        );
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
 
-        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
-            .thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list()).thenReturn(
+            Collections.singletonList(executionEntity)
+        );
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
         IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
@@ -191,14 +200,13 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             new CloudBpmnError("Test Error")
         );
 
-        when(managementService.executeCommand(any()))
-            .thenAnswer(invocation -> {
-                CompositeCommand arg = invocation.getArgument(0);
-                if (arg.getCommands().stream().anyMatch(c -> c instanceof PropagateCloudBpmnErrorCmd)) {
-                    throw new BpmnError("some exception");
-                }
-                return arg;
-            });
+        when(managementService.executeCommand(any())).thenAnswer(invocation -> {
+            CompositeCommand arg = invocation.getArgument(0);
+            if (arg.getCommands().stream().anyMatch(PropagateCloudBpmnErrorCmd.class::isInstance)) {
+                throw new BpmnError("some exception");
+            }
+            return arg;
+        });
 
         //when
         handler.receive(integrationErrorEvent);
@@ -210,8 +218,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(propagateCloudBpmnErrorCmd.getCommands()).hasSize(3);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().getFirst()).isInstanceOf(DeleteIntegrationContextCmd.class);
         assertThat(propagateCloudBpmnErrorCmd.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
-        assertThat(propagateCloudBpmnErrorCmd.getCommands().get(2))
-            .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
+        assertThat(propagateCloudBpmnErrorCmd.getCommands().get(2)).isInstanceOf(
+            AggregateIntegrationErrorReceivedClosingEventCmd.class
+        );
 
         var compositeCommand = compositeCommands.get(1);
         assertThat(compositeCommand.getCommands()).hasSize(2);

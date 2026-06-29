@@ -46,13 +46,12 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
     @BeforeEach
     public void setUp() {
-        this.alfrescoPageArgumentMethodResolver =
-            new AlfrescoPageArgumentMethodResolver(
-                pageParameterParser,
-                pageableHandlerMethodArgumentResolver,
-                1000,
-                true
-            );
+        this.alfrescoPageArgumentMethodResolver = new AlfrescoPageArgumentMethodResolver(
+            pageParameterParser,
+            pageableHandlerMethodArgumentResolver,
+            1000,
+            true
+        );
     }
 
     @Test
@@ -102,13 +101,11 @@ public class AlfrescoPageArgumentMethodResolverTest {
                 webRequest,
                 binderFactory
             )
-        )
-            .willReturn(basePageable);
+        ).willReturn(basePageable);
 
-        given(pageParameterParser.parseParameters(webRequest))
-            .willReturn(
-                new AlfrescoQueryParameters(new SkipCountParameter(true, 40L), new MaxItemsParameter(true, 20))
-            );
+        given(pageParameterParser.parseParameters(webRequest)).willReturn(
+            new AlfrescoQueryParameters(new SkipCountParameter(true, 40L), new MaxItemsParameter(true, 20))
+        );
 
         //when
         Pageable resolvedPageable = alfrescoPageArgumentMethodResolver.resolveArgument(
@@ -120,8 +117,7 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
         //then
         assertThat(resolvedPageable).isInstanceOf(AlfrescoPageRequest.class);
-        Assertions
-            .assertThat((AlfrescoPageRequest) resolvedPageable)
+        Assertions.assertThat((AlfrescoPageRequest) resolvedPageable)
             .hasOffset(40)
             .hasPageSize(20)
             .hasPageable(basePageable);
@@ -143,12 +139,10 @@ public class AlfrescoPageArgumentMethodResolverTest {
                 webRequest,
                 binderFactory
             )
-        )
-            .willReturn(basePageable);
-        given(pageParameterParser.parseParameters(webRequest))
-            .willReturn(
-                new AlfrescoQueryParameters(new SkipCountParameter(false, 0), new MaxItemsParameter(false, 100))
-            );
+        ).willReturn(basePageable);
+        given(pageParameterParser.parseParameters(webRequest)).willReturn(
+            new AlfrescoQueryParameters(new SkipCountParameter(false, 0), new MaxItemsParameter(false, 100))
+        );
 
         //when
         Pageable resolvedPageable = alfrescoPageArgumentMethodResolver.resolveArgument(

@@ -29,6 +29,7 @@ public class IntegrationErrorBuilder {
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
+    private String customErrorMessage;
 
     private IntegrationErrorBuilder(
         IntegrationRequest integrationRequest,
@@ -48,11 +49,17 @@ public class IntegrationErrorBuilder {
         return new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
     }
 
+    public IntegrationErrorBuilder withCustomErrorMessage(String customErrorMessage) {
+        this.customErrorMessage = customErrorMessage;
+        return this;
+    }
+
     public IntegrationError build() {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
+
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
             integrationError.setServiceFullName(connectorProperties.getServiceFullName());
@@ -71,8 +78,7 @@ public class IntegrationErrorBuilder {
     public MessageBuilder<IntegrationError> getMessageBuilder() {
         IntegrationError integrationError = build();
 
-        return MessageBuilder
-            .withPayload(integrationError)
+        return MessageBuilder.withPayload(integrationError)
             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
             .setHeader("targetAppName", integrationRequest.getAppName())
             .setHeader("targetService", integrationRequest.getServiceFullName());

@@ -136,11 +136,11 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
         final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
         IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
-        assertThat(sanitizedContext.getInBoundVariables())
-            .containsExactlyInAnyOrderEntriesOf(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
-        assertThat(sanitizedContext.getOutBoundVariables())
-            .containsExactlyInAnyOrderEntriesOf(
-                Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
-            );
+        assertThat(sanitizedContext.getInBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2")
+        );
+        assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+        );
     }
 }

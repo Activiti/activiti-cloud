@@ -51,9 +51,9 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         Set<String> globalRoles = Sets.newSet(annotation.roles());
         Set<String> groups = Sets.newSet(annotation.groups());
         String username = annotation.username();
-        Map<String, String[]> resourceRoles = Arrays
-            .stream(annotation.resourcesRoles())
-            .collect(Collectors.toMap(ResourceRoles::resource, ResourceRoles::roles));
+        Map<String, String[]> resourceRoles = Arrays.stream(annotation.resourcesRoles()).collect(
+            Collectors.toMap(ResourceRoles::resource, ResourceRoles::roles)
+        );
 
         Map<String, Object> claims = prepareClaims(globalRoles, groups, username, resourceRoles);
 
@@ -67,8 +67,7 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
 
         byte[] secret = new Base64("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=").decode();
         Algorithm algorithm = Algorithm.HMAC256(secret);
-        String token = JWT
-            .create()
+        String token = JWT.create()
             .withIssuer("Activiti Cloud")
             .withSubject(annotation.username())
             .withIssuedAt(Date.from(Instant.now()))

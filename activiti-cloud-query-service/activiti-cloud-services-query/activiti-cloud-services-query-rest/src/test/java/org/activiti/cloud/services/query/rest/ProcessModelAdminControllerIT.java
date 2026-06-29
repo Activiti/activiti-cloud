@@ -123,14 +123,16 @@ public class ProcessModelAdminControllerIT {
         //given
         String processDefinitionId = UUID.randomUUID().toString();
 
-        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-            .willReturn(new ProcessModelEntity(new ProcessDefinitionEntity(), "<model/>"));
+        given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString())).willReturn(
+            new ProcessModelEntity(new ProcessDefinitionEntity(), "<model/>")
+        );
 
         //when
         mockMvc
             .perform(
-                get("/admin/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
-                    .accept(MediaType.APPLICATION_XML_VALUE)
+                get("/admin/v1/process-definitions/{processDefinitionId}/model", processDefinitionId).accept(
+                    MediaType.APPLICATION_XML_VALUE
+                )
             )
             //then
             .andExpect(status().isOk())

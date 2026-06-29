@@ -85,8 +85,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
         Execution executionEntity = buildExecutionEntity();
         when(executionEntity.getActivityId()).thenReturn("differentActivityId");
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
-            .thenReturn(List.of(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(
+            List.of(executionEntity)
+        );
 
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
@@ -106,16 +107,16 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
         Execution executionEntity = buildExecutionEntity();
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
-            .thenReturn(List.of(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(
+            List.of(executionEntity)
+        );
 
         ActivitiOptimisticLockingException ex = new ActivitiOptimisticLockingException("concurrent update");
         doThrow(ex).when(managementService).executeCommand(any());
 
         assertThatThrownBy(() ->
-                handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
-            )
-            .isSameAs(ex);
+            handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext))
+        ).isSameAs(ex);
     }
 
     @Test
@@ -124,8 +125,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
         Execution executionEntity = buildExecutionEntity();
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
-            .thenReturn(List.of(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(
+            List.of(executionEntity)
+        );
 
         RuntimeException generic = new RuntimeException("boom");
         doThrow(generic).when(managementService).executeCommand(any());
@@ -134,8 +136,10 @@ class ServiceTaskIntegrationResultEventHandlerTest {
 
         // verify delegation to external completion handler
         ArgumentCaptor<IntegrationErrorImpl> errorCaptor = ArgumentCaptor.forClass(IntegrationErrorImpl.class);
-        verify(serviceTaskIntegrationCompletionHandler)
-            .handlePropagationFailure(errorCaptor.capture(), eq(integrationContextEntity));
+        verify(serviceTaskIntegrationCompletionHandler).handlePropagationFailure(
+            errorCaptor.capture(),
+            eq(integrationContextEntity)
+        );
         assertThat(errorCaptor.getValue()).isNotNull();
     }
 
@@ -147,8 +151,9 @@ class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
-            .thenReturn(executions);
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(
+            executions
+        );
 
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));

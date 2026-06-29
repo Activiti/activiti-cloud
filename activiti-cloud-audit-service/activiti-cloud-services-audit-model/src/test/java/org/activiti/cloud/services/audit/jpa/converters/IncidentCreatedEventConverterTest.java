@@ -36,8 +36,9 @@ class IncidentCreatedEventConverterTest {
 
     @Test
     void verifySupportedEvent() {
-        assertThat(this.incidentCreatedEventConverter.getSupportedEvent())
-            .isEqualTo(IncidentEventType.INCIDENT_CREATED.name());
+        assertThat(this.incidentCreatedEventConverter.getSupportedEvent()).isEqualTo(
+            IncidentEventType.INCIDENT_CREATED.name()
+        );
     }
 
     @Test

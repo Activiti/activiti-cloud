@@ -34,8 +34,10 @@ public class ProcessCandidateStarterUserRemovedEventHandler implements QueryEven
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessCandidateStarterUserRemovedEvent processCandidateStarterUserRemovedEvent = (CloudProcessCandidateStarterUserRemovedEvent) event;
-        org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserRemovedEvent.getEntity();
+        CloudProcessCandidateStarterUserRemovedEvent processCandidateStarterUserRemovedEvent =
+            (CloudProcessCandidateStarterUserRemovedEvent) event;
+        org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser =
+            processCandidateStarterUserRemovedEvent.getEntity();
 
         ProcessCandidateStarterUserId id = new ProcessCandidateStarterUserId(
             processCandidateStarterUser.getProcessDefinitionId(),
@@ -43,9 +45,9 @@ public class ProcessCandidateStarterUserRemovedEventHandler implements QueryEven
         );
 
         try {
-            Optional
-                .ofNullable(entityManager.find(ProcessCandidateStarterUserEntity.class, id))
-                .ifPresent(entityManager::remove);
+            Optional.ofNullable(entityManager.find(ProcessCandidateStarterUserEntity.class, id)).ifPresent(
+                entityManager::remove
+            );
         } catch (Exception cause) {
             throw new QueryException("Error handling ProcessCandidateStarterUserRemovedEvent[" + event + "]", cause);
         }

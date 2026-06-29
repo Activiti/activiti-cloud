@@ -31,8 +31,9 @@ class VariableUpdatedEventConverterTest {
 
     @Test
     void should_supportVariableUpdatedEvent() {
-        assertThat(variableUpdatedEventConverter.getSupportedEvent())
-            .isEqualTo(VariableEvent.VariableEvents.VARIABLE_UPDATED.name());
+        assertThat(variableUpdatedEventConverter.getSupportedEvent()).isEqualTo(
+            VariableEvent.VariableEvents.VARIABLE_UPDATED.name()
+        );
     }
 
     @Test
@@ -119,9 +120,9 @@ class VariableUpdatedEventConverterTest {
         variableUpdatedEventEntity.setTimestamp(System.currentTimeMillis());
         variableUpdatedEventEntity.setVariableInstance(buildVariableInstance());
 
-        CloudVariableUpdatedEventImpl<String> event = (CloudVariableUpdatedEventImpl<String>) variableUpdatedEventConverter.createAPIEvent(
-            variableUpdatedEventEntity
-        );
+        CloudVariableUpdatedEventImpl<String> event = (CloudVariableUpdatedEventImpl<
+            String
+        >) variableUpdatedEventConverter.createAPIEvent(variableUpdatedEventEntity);
 
         assertThat(event).isNotNull();
         assertThat(event.getId()).isEqualTo(variableUpdatedEventEntity.getEventId());
@@ -142,9 +143,8 @@ class VariableUpdatedEventConverterTest {
         variableUpdatedEventEntity.setEventId("eventId");
         variableUpdatedEventEntity.setTimestamp(System.currentTimeMillis());
 
-        CloudVariableUpdatedEventImpl event = (CloudVariableUpdatedEventImpl) variableUpdatedEventConverter.createAPIEvent(
-            variableUpdatedEventEntity
-        );
+        CloudVariableUpdatedEventImpl event =
+            (CloudVariableUpdatedEventImpl) variableUpdatedEventConverter.createAPIEvent(variableUpdatedEventEntity);
 
         assertThat(event).isNotNull();
         assertThat(event.getId()).isEqualTo(variableUpdatedEventEntity.getEventId());

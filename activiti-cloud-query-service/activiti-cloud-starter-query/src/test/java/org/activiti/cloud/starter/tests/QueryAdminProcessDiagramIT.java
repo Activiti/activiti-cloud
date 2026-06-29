@@ -147,11 +147,10 @@ public class QueryAdminProcessDiagramIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         await()
             .atMost(Durations.ONE_MINUTE)
@@ -181,11 +180,10 @@ public class QueryAdminProcessDiagramIT {
         eventsAggregator.sendAll();
 
         //then
-        await()
-            .untilAsserted(() -> {
-                assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
-                assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
-            });
+        await().untilAsserted(() -> {
+            assertThat(bpmnActivityRepository.findByProcessInstanceId(process.getId())).hasSize(2);
+            assertThat(bpmnSequenceFlowRepository.findByProcessInstanceId(process.getId())).hasSize(1);
+        });
 
         await()
             .atMost(Durations.ONE_MINUTE)

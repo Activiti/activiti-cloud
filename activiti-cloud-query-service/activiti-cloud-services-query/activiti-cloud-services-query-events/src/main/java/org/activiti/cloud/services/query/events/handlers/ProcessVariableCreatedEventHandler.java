@@ -18,21 +18,30 @@ package org.activiti.cloud.services.query.events.handlers;
 import jakarta.persistence.EntityManager;
 import java.util.Set;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.activiti.cloud.common.feature.FeatureToggle;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableHistoryEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProcessVariableCreatedEventHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProcessVariableCreatedEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessVariableCreatedEventHandler.class);
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
+    private final FeatureToggle featureToggle;
 
-    public ProcessVariableCreatedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
+    public ProcessVariableCreatedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder,
+        FeatureToggle featureToggle
+    ) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
+        this.featureToggle = featureToggle;
     }
 
     public void handle(CloudVariableCreatedEvent variableCreatedEvent) {
@@ -41,15 +50,16 @@ public class ProcessVariableCreatedEventHandler {
 
         entityManagerFinder
             .findProcessInstanceWithVariables(processInstanceId)
-            .ifPresent(processInstanceEntity -> {
+            .ifPresent(processInstanceEntity ->
                 processInstanceEntity
                     .getVariable(variableName)
                     .ifPresentOrElse(
-                        variableEntity -> {
+                        variableEntity ->
                             LOGGER.warn(
-                                "Variable " + variableName + " already exists in the process " + processInstanceId + "!"
-                            );
-                        },
+                                "Variable {} already exists in the process {}!",
+                                variableName,
+                                processInstanceId
+                            ),
                         () -> {
                             ProcessVariableEntity variableEntity = createProcessVariableEntity(
                                 variableCreatedEvent,
@@ -58,8 +68,8 @@ public class ProcessVariableCreatedEventHandler {
                             processInstanceEntity.getVariables().add(variableEntity);
                             assignToTasks(processInstanceId, variableName, variableEntity);
                         }
-                    );
-            });
+                    )
+            );
     }
 
     private ProcessVariableEntity createProcessVariableEntity(
@@ -73,6 +83,14 @@ public class ProcessVariableCreatedEventHandler {
         variableEntity.setProcessInstance(processInstanceEntity);
         entityManager.persist(variableEntity);
 
+        if (
+            !variableCreatedEvent.isEphemeralVariable() &&
+            featureToggle.isEnabled(QueryFeatureToggles.PROCESS_VARIABLE_HISTORY)
+        ) {
+            ProcessVariableHistoryEntity history = ProcessVariableHistoryEntityFactory.forCreate(variableCreatedEvent);
+            entityManager.persist(history);
+        }
+
         return variableEntity;
     }
 
@@ -82,9 +100,7 @@ public class ProcessVariableCreatedEventHandler {
             .forEach(taskEntity -> {
                 Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
                 if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
-                    LOGGER.warn(
-                        "Process variable " + variableName + " already exists in the task " + taskEntity.getId() + "!"
-                    );
+                    LOGGER.warn("Process variable {} already exists in the task {}!", variableName, taskEntity.getId());
                 } else {
                     taskEntity.getProcessVariables().add(variableEntity);
                 }

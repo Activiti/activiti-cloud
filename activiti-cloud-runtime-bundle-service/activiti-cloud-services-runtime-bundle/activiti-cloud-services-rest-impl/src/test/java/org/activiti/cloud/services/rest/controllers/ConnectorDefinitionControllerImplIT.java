@@ -114,17 +114,15 @@ class ConnectorDefinitionControllerImplIT {
         connectorDefinitions.add(connectorDefinition1);
         connectorDefinitions.add(connectorDefinition2);
 
-        this.mockMvc =
-            MockMvcBuilders
-                .standaloneSetup(
-                    new ConnectorDefinitionControllerImpl(
-                        connectorDefinitions,
-                        new ConnectorDefinitionRepresentationModelAssembler(),
-                        representationModelAssembler
-                    )
-                )
-                .setControllerAdvice(new RuntimeBundleExceptionHandler())
-                .build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(
+            new ConnectorDefinitionControllerImpl(
+                connectorDefinitions,
+                new ConnectorDefinitionRepresentationModelAssembler(),
+                representationModelAssembler
+            )
+        )
+            .setControllerAdvice(new RuntimeBundleExceptionHandler())
+            .build();
     }
 
     @Test
@@ -147,7 +145,8 @@ class ConnectorDefinitionControllerImplIT {
 
     @Test
     void getConnectorDefinitionNotFound() throws Exception {
-        this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
+            status().isNotFound()
+        );
     }
 }

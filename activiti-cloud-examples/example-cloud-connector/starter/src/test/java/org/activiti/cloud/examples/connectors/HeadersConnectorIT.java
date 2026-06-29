@@ -59,8 +59,7 @@ public class HeadersConnectorIT {
 
         byte[] payload = objectMapper.writeValueAsBytes(integrationRequest);
 
-        Message<?> message = MessageBuilder
-            .withPayload(payload)
+        Message<?> message = MessageBuilder.withPayload(payload)
             .setHeader("processDefinitionVersion", "1")
             .setHeader("connectorType", "headers.GET")
             .build();
@@ -75,16 +74,17 @@ public class HeadersConnectorIT {
             (byte[]) outputMessage.getPayload(),
             IntegrationResultImpl.class
         );
-        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables())
-            .containsEntry("processDefinitionVersion", "1");
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).containsEntry(
+            "processDefinitionVersion",
+            "1"
+        );
     }
 
     @Test
     public void headersConnectorShouldNotSendIntegrationResult() {
         //given
         IntegrationRequest integrationRequest = buildIntegrationRequest();
-        Message<IntegrationRequest> message = MessageBuilder
-            .withPayload(integrationRequest)
+        Message<IntegrationRequest> message = MessageBuilder.withPayload(integrationRequest)
             .setHeader("processDefinitionVersion", null)
             .setHeader("connectorType", "headers.GET")
             .build();

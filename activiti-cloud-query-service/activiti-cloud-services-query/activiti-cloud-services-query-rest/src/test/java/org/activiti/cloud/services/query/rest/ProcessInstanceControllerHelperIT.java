@@ -66,8 +66,9 @@ class ProcessInstanceControllerHelperIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
-        .waitingFor(Wait.forListeningPort());
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
+        Wait.forListeningPort()
+    );
 
     @Autowired
     private ProcessInstanceControllerHelper processInstanceControllerHelper;
@@ -97,8 +98,7 @@ class ProcessInstanceControllerHelperIT {
                 processInstanceEntity.getProcessDefinitionKey(),
                 processInstanceEntity.getServiceName()
             )
-        )
-            .willReturn(true);
+        ).willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         Predicate predicate = null;
@@ -132,8 +132,7 @@ class ProcessInstanceControllerHelperIT {
                 processInstanceEntity.getProcessDefinitionKey(),
                 processInstanceEntity.getServiceName()
             )
-        )
-            .willReturn(true);
+        ).willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity, 8);
@@ -166,8 +165,7 @@ class ProcessInstanceControllerHelperIT {
                 parentProcessInstance.getProcessDefinitionKey(),
                 parentProcessInstance.getServiceName()
             )
-        )
-            .willReturn(true);
+        ).willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn(TEST_USER);
 
         String processInstanceId = parentProcessInstance.getId();
@@ -276,8 +274,9 @@ class ProcessInstanceControllerHelperIT {
                 .findById(orphanProcessInstanceWithSameRequestType.getId())
                 .orElseThrow();
 
-            assertThat(updatedOrphanWithSameRequestType.getLinkedProcessInstanceId())
-                .isEqualTo(mainProcessInstance.getId());
+            assertThat(updatedOrphanWithSameRequestType.getLinkedProcessInstanceId()).isEqualTo(
+                mainProcessInstance.getId()
+            );
         }
 
         @Test
@@ -372,8 +371,8 @@ class ProcessInstanceControllerHelperIT {
             String invalidMainProcessInstanceId = UUID.randomUUID().toString();
 
             assertThatThrownBy(() ->
-                    processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
-                )
+                processInstanceControllerHelper.linkProcessInstances(request, invalidMainProcessInstanceId)
+            )
                 .isInstanceOf(QueryEntityNotFoundException.class)
                 .hasMessage("Unable to find process for the given id:'" + invalidMainProcessInstanceId + "'");
         }

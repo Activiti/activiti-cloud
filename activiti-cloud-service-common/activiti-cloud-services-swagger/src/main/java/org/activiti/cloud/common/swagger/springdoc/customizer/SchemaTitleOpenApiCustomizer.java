@@ -24,8 +24,7 @@ public class SchemaTitleOpenApiCustomizer implements DefaultOpenApiCustomizer {
 
     @Override
     public void customise(OpenAPI openApi) {
-        Optional
-            .ofNullable(openApi.getComponents())
+        Optional.ofNullable(openApi.getComponents())
             .map(Components::getSchemas)
             .ifPresent(schemas ->
                 schemas.forEach((schemaName, schema) -> {

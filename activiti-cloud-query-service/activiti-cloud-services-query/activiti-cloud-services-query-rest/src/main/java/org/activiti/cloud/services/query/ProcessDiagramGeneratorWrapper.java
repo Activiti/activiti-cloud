@@ -167,9 +167,9 @@ public class ProcessDiagramGeneratorWrapper {
             return false;
         }
 
-        boolean available = Arrays
-            .stream(getAvailableFonts())
-            .anyMatch(availbleFontName -> availbleFontName.toLowerCase().startsWith(fontName.toLowerCase()));
+        boolean available = Arrays.stream(getAvailableFonts()).anyMatch(availbleFontName ->
+            availbleFontName.toLowerCase().startsWith(fontName.toLowerCase())
+        );
 
         if (!available) {
             LOGGER.debug("Font not available while generating process diagram: " + fontName);

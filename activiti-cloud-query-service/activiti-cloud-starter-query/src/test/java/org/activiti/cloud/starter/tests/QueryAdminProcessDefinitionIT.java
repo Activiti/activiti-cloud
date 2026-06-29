@@ -127,8 +127,7 @@ public class QueryAdminProcessDefinitionIT {
         );
         firstProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -139,8 +138,7 @@ public class QueryAdminProcessDefinitionIT {
         );
         secondProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -152,15 +150,17 @@ public class QueryAdminProcessDefinitionIT {
         ResponseEntity<String> responseEntity = testRestTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml")
+        );
 
         //when
         responseEntity = testRestTemplate.getProcDefinitionModel(secondProcessDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml")
+        );
     }
 
     @Test
@@ -181,9 +181,8 @@ public class QueryAdminProcessDefinitionIT {
         );
 
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = testRestTemplate.getProcDefinitionsFilteredOnKey(
-            "mySecondProcess"
-        );
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+            testRestTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
 
         //then
         assertThat(responseEntity.getBody())
@@ -229,6 +228,47 @@ public class QueryAdminProcessDefinitionIT {
     }
 
     @Test
+    void shouldReturnDeduplicatedLatestVersionsWhenLatestVersionIsTrue() {
+        //given
+        ProcessDefinitionImpl firstKeyV1 = new ProcessDefinitionImpl();
+        firstKeyV1.setId(UUID.randomUUID().toString());
+        firstKeyV1.setKey("myFirstProcess");
+        firstKeyV1.setName("My First Process v1");
+        firstKeyV1.setVersion(1);
+
+        ProcessDefinitionImpl firstKeyV2 = new ProcessDefinitionImpl();
+        firstKeyV2.setId(UUID.randomUUID().toString());
+        firstKeyV2.setKey("myFirstProcess");
+        firstKeyV2.setName("My First Process v2");
+        firstKeyV2.setVersion(2);
+
+        ProcessDefinitionImpl secondKeyV1 = new ProcessDefinitionImpl();
+        secondKeyV1.setId(UUID.randomUUID().toString());
+        secondKeyV1.setKey("mySecondProcess");
+        secondKeyV1.setName("My Second Process v1");
+        secondKeyV1.setVersion(1);
+
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstKeyV1),
+            new CloudProcessDeployedEventImpl(firstKeyV2),
+            new CloudProcessDeployedEventImpl(secondKeyV1)
+        );
+
+        //when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity =
+            testRestTemplate.getProcDefinitionsLatestVersion();
+
+        //then
+        assertThat(responseEntity.getBody())
+            .isNotNull()
+            .extracting(ProcessDefinition::getId, ProcessDefinition::getKey, ProcessDefinition::getName)
+            .containsExactlyInAnyOrder(
+                tuple(firstKeyV2.getId(), "myFirstProcess", "My First Process v2"),
+                tuple(secondKeyV1.getId(), "mySecondProcess", "My Second Process v1")
+            );
+    }
+
+    @Test
     public void shouldUpdateProcessModelOnDuplicate() throws Exception {
         //given
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
@@ -239,8 +279,7 @@ public class QueryAdminProcessDefinitionIT {
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
         firstProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -249,8 +288,7 @@ public class QueryAdminProcessDefinitionIT {
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
         secondProcessDeployedEvent.setProcessModelContent(
             StreamUtils.copyToString(
-                Thread
-                    .currentThread()
+                Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
                 StandardCharsets.UTF_8
@@ -262,7 +300,8 @@ public class QueryAdminProcessDefinitionIT {
         ResponseEntity<String> responseEntity = testRestTemplate.getProcDefinitionModel(processDefinition.getId());
 
         //then
-        assertThat(responseEntity.getBody())
-            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+        assertThat(responseEntity.getBody()).isXmlEqualToContentOf(
+            new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml")
+        );
     }
 }

@@ -174,11 +174,13 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture()))
-            .thenReturn(processDefinitionPage);
+        when(processAdminRuntime.processDefinitions(any(Pageable.class), payloadCaptor.capture())).thenReturn(
+            processDefinitionPage
+        );
 
-        this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(
+            status().isOk()
+        );
     }
 
     @Test
@@ -196,17 +198,16 @@ class ProcessDefinitionAdminControllerImplIT {
         processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
 
-        given(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .willReturn(processDefinitionPage);
+        given(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).willReturn(processDefinitionPage);
 
         //when
-        MvcResult result =
-            this.mockMvc.perform(
-                    get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
-                        .accept(MediaType.APPLICATION_JSON_VALUE)
-                )
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = this.mockMvc.perform(
+                get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
 
         //then
         String responseContent = result.getResponse().getContentAsString();
@@ -234,8 +235,9 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList,
             processDefinitionList.size()
         );
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(processDefinitionPage);
+        when(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var givenVariableDefinition = new VariableDefinition();
@@ -275,8 +277,9 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList.size()
         );
 
-        when(processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class)))
-            .thenReturn(processDefinitionPage);
+        when(
+            processAdminRuntime.processDefinitions(any(Pageable.class), any(GetProcessDefinitionsPayload.class))
+        ).thenReturn(processDefinitionPage);
 
         var extension = new Extension();
         var processConstantMapping = new ProcessConstantsMapping();
@@ -337,7 +340,8 @@ class ProcessDefinitionAdminControllerImplIT {
             processDefinitionList.size()
         );
         when(processAdminRuntime.processDefinitions(any(), any())).thenReturn(processDefinitionPage);
-        this.mockMvc.perform(get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE))
-            .andExpect(status().isOk());
+        this.mockMvc.perform(
+            get("/admin/v1/process-definitions?latestVersion=true").accept(MediaTypes.HAL_JSON_VALUE)
+        ).andExpect(status().isOk());
     }
 }

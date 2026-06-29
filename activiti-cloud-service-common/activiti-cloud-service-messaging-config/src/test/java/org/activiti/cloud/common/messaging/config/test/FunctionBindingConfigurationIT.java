@@ -125,8 +125,7 @@ public class FunctionBindingConfigurationIT {
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
                 assertThat(message).isNotNull();
-                Message outMessage = MessageBuilder
-                    .withPayload(message.getPayload())
+                Message outMessage = MessageBuilder.withPayload(message.getPayload())
                     .setHeader("type", "Test Send")
                     .build();
                 channels.auditProducer().send(outMessage);
@@ -153,13 +152,12 @@ public class FunctionBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions)
-            .doesNotContain(
-                FUNCTION_AUDIT_SUPPLIER_NAME,
-                FUNCTION_COMMAND_SUPPLIER_NAME,
-                FUNCTION_HANDLER_NAME,
-                FUNCTION_PROCESSOR_NAME
-            );
+        assertThat(functions).doesNotContain(
+            FUNCTION_AUDIT_SUPPLIER_NAME,
+            FUNCTION_COMMAND_SUPPLIER_NAME,
+            FUNCTION_HANDLER_NAME,
+            FUNCTION_PROCESSOR_NAME
+        );
     }
 
     @Test
@@ -167,34 +165,36 @@ public class FunctionBindingConfigurationIT {
         // then
         assertThat(context.getBean(TestBindingsChannels.AUDIT_PRODUCER, MessageChannel.class)).isNotNull();
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_NAME);
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .isEqualTo(Arrays.asList(TestBindingsChannels.AUDIT_PRODUCER));
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).isEqualTo(
+            Arrays.asList(TestBindingsChannels.AUDIT_PRODUCER)
+        );
 
         assertThat(context.getBean(TestBindingsChannels.COMMAND_RESULTS, MessageChannel.class)).isNotNull();
         assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_COMMAND_SUPPLIER_NAME);
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .isEqualTo(Arrays.asList(TestBindingsChannels.COMMAND_RESULTS));
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).isEqualTo(
+            Arrays.asList(TestBindingsChannels.COMMAND_RESULTS)
+        );
     }
 
     @Test
     void testInputBindingsDefinitions() {
         Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_COMMAND_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
-            .isEqualTo(COMMAND_CONSUMER);
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME))
+        ).isEqualTo(COMMAND_CONSUMER);
 
         Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_AUDIT_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
-            .isEqualTo(AUDIT_CONSUMER);
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME))
+        ).isEqualTo(AUDIT_CONSUMER);
 
         Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_QUERY_CONSUMER_NAME);
-        Assertions
-            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
-            .isEqualTo(QUERY_CONSUMER);
+        Assertions.assertThat(
+            streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME))
+        ).isEqualTo(QUERY_CONSUMER);
     }
 
     @Test
@@ -207,25 +207,33 @@ public class FunctionBindingConfigurationIT {
 
     @Test
     public void testStreamBindings() {
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.AUDIT_PRODUCER));
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME)).matches(
+            bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.AUDIT_PRODUCER)
+        );
 
-        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .matches(bindings -> bindings == null || bindings.isEmpty());
-        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
+        assertThat(streamFunctionProperties.getInputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).matches(
+            bindings -> bindings == null || bindings.isEmpty()
+        );
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME)).matches(
+            bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS)
+        );
     }
 
     @Test
@@ -237,11 +245,10 @@ public class FunctionBindingConfigurationIT {
         send(message, "engineEvents");
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(consumerMessage).isNotNull();
-                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Consumer");
-            });
+        await().untilAsserted(() -> {
+            assertThat(consumerMessage).isNotNull();
+            assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Consumer");
+        });
     }
 
     @Test
@@ -253,23 +260,21 @@ public class FunctionBindingConfigurationIT {
         channels.commandConsumer().send(message);
 
         // then
-        await()
-            .untilAsserted(() -> {
-                assertThat(consumerMessage).isNotNull();
-                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+        await().untilAsserted(() -> {
+            assertThat(consumerMessage).isNotNull();
+            assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
 
-                Message<?> outputMessage = output.receive(
-                    1000,
-                    bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
-                );
-                assertThat(outputMessage).isNotNull();
-                assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
-            });
+            Message<?> outputMessage = output.receive(
+                1000,
+                bindingResolver.getBindingDestination(TestBindingsChannels.COMMAND_RESULTS)
+            );
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
+        });
     }
 
     protected void send(Message<String> message, String destination) {
-        final var messageToSend = Optional
-            .of(message)
+        final var messageToSend = Optional.of(message)
             .filter(it -> messagingProperties.getFunctionRouter().isEnabled())
             .map(it -> MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build())
             .orElse(message);

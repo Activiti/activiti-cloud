@@ -56,11 +56,12 @@ class QueryConsumerAutoConfigurationTest {
 
     @Test
     void shouldHandleUnexpectedMessageTypeInPartitionedQueryConsumerErrorIntegrationFlow(CapturedOutput output) {
-        assertThatCode(() -> partitionedQueryConsumerErrorChannel.send(MessageBuilder.withPayload("unexpected").build())
-            )
-            .doesNotThrowAnyException();
-        assertThat(output)
-            .contains(" Unexpected message type class org.springframework.messaging.support.GenericMessage");
+        assertThatCode(() ->
+            partitionedQueryConsumerErrorChannel.send(MessageBuilder.withPayload("unexpected").build())
+        ).doesNotThrowAnyException();
+        assertThat(output).contains(
+            " Unexpected message type class org.springframework.messaging.support.GenericMessage"
+        );
     }
 
     @Configuration

@@ -8,14 +8,15 @@ inputs:
   script-command:
     description: The npm command to execute playwright tests
     required: true
+  diagnostics-artifact-name:
+    description: Artifact name for test-results/reporter upload on failure
+    required: false
+    default: playwright-diagnostics
 
 outputs:
   outcome:
     description: Tests outcome ('success', 'failure',...)
     value: ${{ steps.launch-tests.outcome }}
-  message:
-    description: Message for notification
-    value: ${{ steps.rp-summarize.outputs.teams-message }}
 
 runs:
   using: composite
@@ -38,7 +39,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@9f51752cb7845dce8e8b13b866c127681f418bb3 # v17.7.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@4e61fa01622e3f3a1898eb059d9a3af208897515 # v18.9.0
 
     - name: Add GitHub Step Summary
       shell: bash
@@ -60,6 +61,17 @@ runs:
         ./node_modules/.bin/playwright install chromium
         eval "${SCRIPT_COMMAND}"
       continue-on-error: true
+
+    - name: Upload Playwright diagnostics on failure
+      if: always() && steps.launch-tests.outcome == 'failure'
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.diagnostics-artifact-name }}
+        path: |
+          activiti-cloud-acceptance-tests-playwright/test-results
+          activiti-cloud-acceptance-tests-playwright/reporter
+        retention-days: 7
+        if-no-files-found: ignore
 
     - name: Update GitHub Step Summary
       shell: bash

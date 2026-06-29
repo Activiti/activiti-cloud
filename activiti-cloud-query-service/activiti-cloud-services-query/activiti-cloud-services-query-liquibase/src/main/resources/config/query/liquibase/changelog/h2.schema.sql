@@ -1,5 +1,6 @@
 create sequence process_variable_sequence start with 1 increment by 50;
 create sequence task_variable_sequence start with 1 increment by 50;
+create sequence process_variable_history_sequence start with 1 increment by 50;
 
 create table bpmn_activity
 (
@@ -342,3 +343,37 @@ create table process_instance_hierarchy
 create index idx_pih_ancestor      on process_instance_hierarchy (ancestor_id);
 create index idx_pih_descendant    on process_instance_hierarchy (descendant_id);
 create index idx_pih_relation_type on process_instance_hierarchy (relation_type);
+
+create table process_variable_history
+(
+    id                  bigint,
+    process_instance_id varchar(255) not null,
+    variable_name       varchar(255) not null,
+    type                varchar(255),
+    "value"             json,
+    deleted             boolean not null default false,
+    event_time          timestamp not null,
+    record_create_time  timestamp not null default now(),
+    message_id          varchar(255),
+    command_id          varchar(255),
+    sequence_number     integer,
+    primary key (id)
+);
+create index idx_pvh_process_var on process_variable_history (process_instance_id, variable_name, event_time);
+create index idx_pvh_record_create_time on process_variable_history (record_create_time);
+
+CREATE SEQUENCE QUERY_INT_MESSAGE_SEQ START WITH 1 INCREMENT BY 1;
+CREATE TABLE QUERY_INT_CHANNEL_MESSAGE (
+                                   MESSAGE_ID CHAR(36) NOT NULL,
+                                   GROUP_KEY CHAR(36) NOT NULL,
+                                   CREATED_DATE BIGINT NOT NULL,
+                                   MESSAGE_PRIORITY BIGINT,
+                                   MESSAGE_SEQUENCE BIGINT NOT NULL ,
+                                   MESSAGE_CONTENT LONGVARBINARY,
+                                   REGION VARCHAR(100) NOT NULL,
+                                   constraint QUERY_INT_CHANNEL_MESSAGE_PK primary key (REGION, GROUP_KEY, CREATED_DATE, MESSAGE_SEQUENCE)
+);
+
+CREATE INDEX QUERY_INT_CHANNEL_MSG_DELETE_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_ID);
+-- This is only needed if the message group store property 'priorityEnabled' is true
+CREATE UNIQUE INDEX QUERY_INT_CHANNEL_MSG_PRIORITY_IDX ON QUERY_INT_CHANNEL_MESSAGE (REGION, GROUP_KEY, MESSAGE_PRIORITY DESC, CREATED_DATE, MESSAGE_SEQUENCE);

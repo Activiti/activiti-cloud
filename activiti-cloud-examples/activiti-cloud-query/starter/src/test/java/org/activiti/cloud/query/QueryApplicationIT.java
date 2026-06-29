@@ -114,16 +114,15 @@ public class QueryApplicationIT {
             .perform(MockMvcRequestBuilders.get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(
-                content()
-                    .string(
-                        both(notNullValue(String.class))
-                            .and(containsString("ListResponseContentCloudProcessDefinition"))
-                            .and(containsString("EntriesResponseContentCloudProcessDefinition"))
-                            .and(containsString("EntryResponseContentCloudProcessDefinition"))
-                            .and(not(containsString("PagedModel")))
-                            .and(not(containsString("ResourcesOfResource")))
-                            .and(not(containsString("Resource")))
-                    )
+                content().string(
+                    both(notNullValue(String.class))
+                        .and(containsString("ListResponseContentCloudProcessDefinition"))
+                        .and(containsString("EntriesResponseContentCloudProcessDefinition"))
+                        .and(containsString("EntryResponseContentCloudProcessDefinition"))
+                        .and(not(containsString("PagedModel")))
+                        .and(not(containsString("ResourcesOfResource")))
+                        .and(not(containsString("Resource")))
+                )
             );
     }
 
@@ -148,10 +147,12 @@ public class QueryApplicationIT {
 
     @Test
     void rabbitBinderCompression() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class))
-            .isEqualTo(9);
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class))
-            .isTrue();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.binder.compression-level", Integer.class)
+        ).isEqualTo(9);
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.compress", Boolean.class)
+        ).isTrue();
     }
 
     @Test
@@ -180,11 +181,13 @@ public class QueryApplicationIT {
 
     @Test
     void rabbitBinderDefaultPrefix() {
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.consumer.prefix", String.class)
+        ).isNullOrEmpty();
 
-        assertThat(environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class))
-            .isNullOrEmpty();
+        assertThat(
+            environment.getProperty("spring.cloud.stream.rabbit.default.producer.prefix", String.class)
+        ).isNullOrEmpty();
     }
 
     @Test
@@ -200,11 +203,13 @@ public class QueryApplicationIT {
         assertThat(binderFactoryListenerTestContext.getAnonymousQueues())
             .isNotEmpty()
             .hasSize(1)
-            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("engineEvents.anonymous.")));
+            .satisfies(map -> assertThat(map.keySet()).anyMatch(key -> key.startsWith("queryEvents.anonymous.")));
     }
 
     @Test
     void rabbitExchanges() {
-        assertThat(binderFactoryListenerTestContext.getExchanges()).isNotEmpty().containsOnlyKeys("engineEvents");
+        assertThat(binderFactoryListenerTestContext.getExchanges())
+            .isNotEmpty()
+            .containsOnlyKeys("engineEvents", "queryEvents");
     }
 }

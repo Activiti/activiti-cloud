@@ -58,18 +58,18 @@ public class KeycloakClientCrudIT {
     @Test
     public void should_handleClientCRUD() {
         String clientId = "crudClientId";
-        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
-            .newKeycloakClientRepresentationBuilder()
-            .withClientId(clientId)
-            .withClientName(clientId)
-            .enabled(true)
-            .directAccessGrantsEnabled(true)
-            .withRedirectUris(Collections.emptyList())
-            .withWebOrigins(Collections.emptyList())
-            .publicClient(true)
-            .implicitFlowEnabled(true)
-            .withAccessTokenLifespanInSeconds(120)
-            .build();
+        KeycloakClientRepresentation client =
+            KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+                .withClientId(clientId)
+                .withClientName(clientId)
+                .enabled(true)
+                .directAccessGrantsEnabled(true)
+                .withRedirectUris(Collections.emptyList())
+                .withWebOrigins(Collections.emptyList())
+                .publicClient(true)
+                .implicitFlowEnabled(true)
+                .withAccessTokenLifespanInSeconds(120)
+                .build();
         Response response = keycloakClient.createClient(client);
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
 
@@ -94,17 +94,17 @@ public class KeycloakClientCrudIT {
     @Test
     public void should_createRoleRepresentationForClient() {
         String clientId = "crudClientId2";
-        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
-            .newKeycloakClientRepresentationBuilder()
-            .withClientId(clientId)
-            .withClientName(clientId)
-            .enabled(true)
-            .directAccessGrantsEnabled(true)
-            .withRedirectUris(Collections.emptyList())
-            .withWebOrigins(Collections.emptyList())
-            .publicClient(true)
-            .implicitFlowEnabled(true)
-            .build();
+        KeycloakClientRepresentation client =
+            KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+                .withClientId(clientId)
+                .withClientName(clientId)
+                .enabled(true)
+                .directAccessGrantsEnabled(true)
+                .withRedirectUris(Collections.emptyList())
+                .withWebOrigins(Collections.emptyList())
+                .publicClient(true)
+                .implicitFlowEnabled(true)
+                .build();
         Response response = keycloakClient.createClient(client);
         String idOfClient = getIdOfClient(client.getClientId());
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
@@ -123,18 +123,18 @@ public class KeycloakClientCrudIT {
     @Test
     public void should_handleClientWithServiceAccountEnabledCRUD() {
         String clientId = "crudClientWithServiceAccountId";
-        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
-            .newKeycloakClientRepresentationBuilder()
-            .withClientId(clientId)
-            .withClientName(clientId)
-            .enabled(true)
-            .directAccessGrantsEnabled(true)
-            .withRedirectUris(Collections.emptyList())
-            .withWebOrigins(Collections.emptyList())
-            .publicClient(true)
-            .implicitFlowEnabled(true)
-            .withAccessTokenLifespanInSeconds(120)
-            .build();
+        KeycloakClientRepresentation client =
+            KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+                .withClientId(clientId)
+                .withClientName(clientId)
+                .enabled(true)
+                .directAccessGrantsEnabled(true)
+                .withRedirectUris(Collections.emptyList())
+                .withWebOrigins(Collections.emptyList())
+                .publicClient(true)
+                .implicitFlowEnabled(true)
+                .withAccessTokenLifespanInSeconds(120)
+                .build();
         Response response = keycloakClient.createClient(client);
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
 
@@ -155,10 +155,8 @@ public class KeycloakClientCrudIT {
         assertThat(clientUpdated.getPublicClient()).isFalse();
         assertThat(clientUpdated.getAttributes().accessTokenLifespan()).isNull();
 
-        KeycloakCredentialRequestRepresentation requestRepresentation = new KeycloakCredentialRequestRepresentation.Builder()
-            .withId(idOfClient)
-            .withRealm("activiti")
-            .build();
+        KeycloakCredentialRequestRepresentation requestRepresentation =
+            new KeycloakCredentialRequestRepresentation.Builder().withId(idOfClient).withRealm("activiti").build();
 
         KeycloakCredentialRepresentation clientSecret = keycloakClient.generateNewClientSecret(
             requestRepresentation,

@@ -77,7 +77,9 @@ public class ExampleConnectorIT {
             (byte[]) outputMessage.getPayload(),
             IntegrationResultImpl.class
         );
-        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables())
-            .containsEntry("var1", "ExampleConnector was called for instance 10");
+        assertThat(integrationResult.getIntegrationContext().getOutBoundVariables()).containsEntry(
+            "var1",
+            "ExampleConnector was called for instance 10"
+        );
     }
 }

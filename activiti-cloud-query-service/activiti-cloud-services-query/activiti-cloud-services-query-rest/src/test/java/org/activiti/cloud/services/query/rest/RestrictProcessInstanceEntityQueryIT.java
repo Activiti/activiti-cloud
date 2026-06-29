@@ -177,8 +177,9 @@ public class RestrictProcessInstanceEntityQueryIT {
         while (iterator.hasNext()) {
             ProcessInstanceEntity proc = iterator.next();
             assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
-            assertThat(proc.getServiceName().replace("-", ""))
-                .isEqualToIgnoringCase("test-cmd-endpoint".replace("-", ""));
+            assertThat(proc.getServiceName().replace("-", "")).isEqualToIgnoringCase(
+                "test-cmd-endpoint".replace("-", "")
+            );
         }
 
         assertThat(processInstanceRepository.count(predicate)).isEqualTo(2);
@@ -190,8 +191,10 @@ public class RestrictProcessInstanceEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("intruder");
 
-        predicate =
-            processInstanceRestrictionService.restrictProcessInstanceQuery(predicate, SecurityPolicyAccess.READ);
+        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            predicate,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }

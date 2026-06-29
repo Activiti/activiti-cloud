@@ -62,9 +62,9 @@ class AuditEventsControllerImpIT {
     @MockitoBean
     private SecurityManager securityManager;
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter
-        .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    ).withZone(ZoneOffset.UTC);
 
     private static final String ENTRIES_ROOT = "$._embedded.events";
     private static final String EVENTS_ID_ROOT = "$._embedded.events[*].id";

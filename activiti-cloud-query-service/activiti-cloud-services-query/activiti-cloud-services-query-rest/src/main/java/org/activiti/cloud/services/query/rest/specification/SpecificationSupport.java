@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.feature.FeatureToggleHolder;
+import org.activiti.cloud.services.query.QueryFeatureToggles;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -183,19 +184,17 @@ public abstract class SpecificationSupport<T, R extends CloudRuntimeEntityFilter
             Expression<?> orderByClause;
             if (sort.isProcessVariable()) {
                 From<T, ProcessVariableEntity> joinRoot = joinSupplier.get();
-                orderByClause =
-                    new VariableSelectionExpressionImpl<>(
-                        joinRoot,
-                        Map.of(
-                            joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                            sort.processDefinitionKey(),
-                            joinRoot.get(ProcessVariableEntity_.name),
-                            sort.field()
-                        ),
-                        javaTypeMapping.get(sort.type()),
-                        criteriaBuilder
-                    )
-                        .getSelectionExpression();
+                orderByClause = new VariableSelectionExpressionImpl<>(
+                    joinRoot,
+                    Map.of(
+                        joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                        sort.processDefinitionKey(),
+                        joinRoot.get(ProcessVariableEntity_.name),
+                        sort.field()
+                    ),
+                    javaTypeMapping.get(sort.type()),
+                    criteriaBuilder
+                ).getSelectionExpression();
                 query.groupBy(root.get(getIdAttribute()));
             } else {
                 orderByClause = root.get(sort.field());

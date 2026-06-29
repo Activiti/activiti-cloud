@@ -32,7 +32,8 @@ public interface BPMNSequenceFlowRepository
         PagingAndSortingRepository<BPMNSequenceFlowEntity, String>,
         QuerydslPredicateExecutor<BPMNSequenceFlowEntity>,
         QuerydslBinderCustomizer<QBPMNSequenceFlowEntity>,
-        CrudRepository<BPMNSequenceFlowEntity, String> {
+        CrudRepository<BPMNSequenceFlowEntity, String>
+{
     @Override
     default void customize(QuerydslBindings bindings, QBPMNSequenceFlowEntity root) {
         whitelist(root).apply(bindings);

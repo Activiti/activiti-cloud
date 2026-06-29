@@ -27,17 +27,18 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class ProcessInstanceSearchResultRepresentationModelAssembler
-    implements RepresentationModelAssembler<ProcessInstanceSearchResult, EntityModel<ProcessInstanceSearchResult>> {
+    implements RepresentationModelAssembler<ProcessInstanceSearchResult, EntityModel<ProcessInstanceSearchResult>>
+{
 
     @Override
     public EntityModel<ProcessInstanceSearchResult> toModel(ProcessInstanceSearchResult entity) {
         Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findByIdProcess(entity.getId())).withSelfRel();
-        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null))
-            .withRel("tasks");
+        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null)).withRel(
+            "tasks"
+        );
         Link variablesRel = linkTo(
             methodOn(ProcessInstanceVariableController.class).getVariablesProcess(entity.getId(), null, null)
-        )
-            .withRel("variables");
+        ).withRel("variables");
         return EntityModel.of(entity, selfRel, tasksRel, variablesRel);
     }
 }

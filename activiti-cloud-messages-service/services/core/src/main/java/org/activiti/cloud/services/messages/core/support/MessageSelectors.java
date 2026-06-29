@@ -33,8 +33,7 @@ public class MessageSelectors {
 
         @Override
         public boolean accept(Message<?> message) {
-            return Optional
-                .ofNullable(message.getHeaders().get(MESSAGE_EVENT_TYPE))
+            return Optional.ofNullable(message.getHeaders().get(MESSAGE_EVENT_TYPE))
                 .filter(type.name()::equals)
                 .isPresent();
         }

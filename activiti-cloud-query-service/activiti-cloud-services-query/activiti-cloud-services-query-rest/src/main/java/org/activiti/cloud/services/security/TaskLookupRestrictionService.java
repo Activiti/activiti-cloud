@@ -77,7 +77,8 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         BooleanExpression userIsInvolved = processInstanceEntity.initiator
             .eq(userId) //is Initiator
             .or(
-                taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process
+                taskEntity.processInstanceId.in(
+                    //user is Involved in one of the tasks of the Process
                     JPAExpressions.select(taskEntity.processInstanceId).from(taskEntity).where(defaultRestrictions)
                 )
             )
@@ -98,16 +99,15 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
         if (userId != null) {
             BooleanExpression isNotAssigned = task.assignee.isNull();
-            restriction =
-                task.assignee
-                    .eq(userId) //user is assignee
-                    .or(task.owner.eq(userId)) //user is owner
-                    .or(
-                        task.taskCandidateUsers
-                            .any()
-                            .userId.eq(userId) //is candidate user and task is not assigned
-                            .and(isNotAssigned)
-                    );
+            restriction = task.assignee
+                .eq(userId) //user is assignee
+                .or(task.owner.eq(userId)) //user is owner
+                .or(
+                    task.taskCandidateUsers
+                        .any()
+                        .userId.eq(userId) //is candidate user and task is not assigned
+                        .and(isNotAssigned)
+                );
 
             List<String> groups = null;
             if (securityManager != null) {
@@ -119,10 +119,9 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
             }
 
             //or there are no candidates set and task is not assigned
-            restriction =
-                restriction.or(
-                    task.taskCandidateUsers.isEmpty().and(task.taskCandidateGroups.isEmpty()).and(isNotAssigned)
-                );
+            restriction = restriction.or(
+                task.taskCandidateUsers.isEmpty().and(task.taskCandidateGroups.isEmpty()).and(isNotAssigned)
+            );
         }
 
         return addAndConditionToPredicate(predicate, restriction);

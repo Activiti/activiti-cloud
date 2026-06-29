@@ -21,7 +21,8 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 
 public class CloudProcessCompletedEventImpl
     extends CloudProcessInstanceEventImpl
-    implements CloudProcessCompletedEvent {
+    implements CloudProcessCompletedEvent
+{
 
     public CloudProcessCompletedEventImpl() {}
 

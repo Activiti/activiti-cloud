@@ -21,8 +21,7 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 public class KeycloakUserToUser {
 
     public static User toUser(KeycloakUser kUser) {
-        return User
-            .builder()
+        return User.builder()
             .id(kUser.getId())
             .firstName(kUser.getFirstName())
             .lastName(kUser.getLastName())

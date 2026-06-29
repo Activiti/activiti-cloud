@@ -21,7 +21,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 public class BPMNActivityRepresentationModelAssembler
-    implements RepresentationModelAssembler<BPMNActivityEntity, EntityModel<BpmnDiagramActivityEntry>> {
+    implements RepresentationModelAssembler<BPMNActivityEntity, EntityModel<BpmnDiagramActivityEntry>>
+{
 
     @Override
     public EntityModel<BpmnDiagramActivityEntry> toModel(BPMNActivityEntity entity) {

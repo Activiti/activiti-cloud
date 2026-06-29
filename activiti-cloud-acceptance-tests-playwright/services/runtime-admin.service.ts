@@ -15,7 +15,7 @@
  */
 
 import { CloudProcessInstance, ProcessQueryParams } from '../models/runtime-bundle.models';
-import { BaseService } from './base.service';
+import { BaseService, RequestResponse } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
 export class RuntimeAdminService extends BaseService {
@@ -53,8 +53,8 @@ export class RuntimeAdminService extends BaseService {
         await this.delete(`${this.basePath}/process-instances/${processInstanceId}/destroy?force=${force}`);
     }
 
-    async replayServiceTask(executionId: string, flowNodeId: string): Promise<void> {
-        await this.post(`${this.basePath}/executions/${executionId}/replay/service-task`, {
+    async replayServiceTask(executionId: string, flowNodeId: string): Promise<RequestResponse> {
+        return this.post(`${this.basePath}/executions/${executionId}/replay/service-task`, {
             data: { flowNodeId },
         });
     }

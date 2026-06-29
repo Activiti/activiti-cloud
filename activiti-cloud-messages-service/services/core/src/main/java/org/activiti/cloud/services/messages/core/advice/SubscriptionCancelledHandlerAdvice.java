@@ -49,21 +49,18 @@ public class SubscriptionCancelledHandlerAdvice extends AbstractMessageConnector
         Object groupId = correlationStrategy.getCorrelationKey(message);
         Object key = UUIDConverter.getUUID(groupId).toString();
 
-        lockTemplate.lockInterruptibly(
-            key,
-            () -> {
-                MessageGroup group = messageStore.getMessageGroup(groupId);
+        lockTemplate.lockInterruptibly(key, () -> {
+            MessageGroup group = messageStore.getMessageGroup(groupId);
 
-                Collection<Message<?>> messages = group
-                    .getMessages()
-                    .stream()
-                    .filter(not(START_MESSAGE_DEPLOYED))
-                    .collect(Collectors.toList());
-                if (!messages.isEmpty()) {
-                    messageStore.removeMessagesFromGroup(groupId, messages);
-                }
+            Collection<Message<?>> messages = group
+                .getMessages()
+                .stream()
+                .filter(not(START_MESSAGE_DEPLOYED))
+                .collect(Collectors.toList());
+            if (!messages.isEmpty()) {
+                messageStore.removeMessagesFromGroup(groupId, messages);
             }
-        );
+        });
 
         return null;
     }

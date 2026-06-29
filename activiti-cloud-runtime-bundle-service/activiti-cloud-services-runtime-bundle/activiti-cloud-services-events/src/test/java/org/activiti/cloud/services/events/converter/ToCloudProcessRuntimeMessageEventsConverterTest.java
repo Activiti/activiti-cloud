@@ -103,8 +103,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
     @Test
     public void shouldConvertMessageSubscriptionCancelledEventToCloudMessageSubscriptionCancelledEvent() {
         //given
-        MessageSubscription entity = MessageSubscriptionImpl
-            .builder()
+        MessageSubscription entity = MessageSubscriptionImpl.builder()
             .withId("entityId")
             .withEventName("messageName")
             .withConfiguration("correlationKey")
@@ -119,8 +118,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         CloudMessageSubscriptionCancelledEvent cloudEvent = converter.from(runtimeEvent);
 
         //then
-        Assertions
-            .assertThat(cloudEvent.getEntity())
+        Assertions.assertThat(cloudEvent.getEntity())
             .isNotNull()
             .isEqualTo(entity)
             .extracting(
@@ -146,8 +144,7 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
         entity.setProcessInstanceId("procInstId");
         entity.setProcessDefinitionId("procDefId");
 
-        MessageEventPayload payload = MessagePayloadBuilder
-            .event("message")
+        MessageEventPayload payload = MessagePayloadBuilder.event("message")
             .withBusinessKey("businessId")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
@@ -158,7 +155,8 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
     }
 
     static class CloudBPMNMessageEventAssert
-        extends AbstractAssert<CloudBPMNMessageEventAssert, CloudBPMNMessageEvent> {
+        extends AbstractAssert<CloudBPMNMessageEventAssert, CloudBPMNMessageEvent>
+    {
 
         public CloudBPMNMessageEventAssert(CloudBPMNMessageEvent actual, Class<?> selfType) {
             super(actual, selfType);
@@ -172,9 +170,9 @@ public class ToCloudProcessRuntimeMessageEventsConverterTest {
             isNotNull();
 
             Assertions.assertThat(actual.getEntity()).isEqualTo(entity);
-            Assertions
-                .assertThat(actual.getEntity().getProcessDefinitionId())
-                .isEqualTo(entity.getProcessDefinitionId());
+            Assertions.assertThat(actual.getEntity().getProcessDefinitionId()).isEqualTo(
+                entity.getProcessDefinitionId()
+            );
             Assertions.assertThat(actual.getEntity().getProcessInstanceId()).isEqualTo(entity.getProcessInstanceId());
 
             return this;

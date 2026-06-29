@@ -51,9 +51,8 @@ public class MessageEventConverterTest {
         CloudBPMNMessageSentEventImpl event = createMessageSentEvent();
 
         //when
-        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(
-            event
-        );
+        MessageSentAuditEventEntity auditEventEntity =
+            (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(event);
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -65,9 +64,8 @@ public class MessageEventConverterTest {
         CloudBPMNMessageWaitingEventImpl event = createMessageWaitingEvent();
 
         //when
-        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(
-            event
-        );
+        MessageWaitingAuditEventEntity auditEventEntity =
+            (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(event);
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -79,9 +77,8 @@ public class MessageEventConverterTest {
         CloudBPMNMessageReceivedEventImpl event = createMessageReceivedEvent();
 
         //when
-        MessageAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(
-            event
-        );
+        MessageAuditEventEntity auditEventEntity =
+            (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(event);
 
         //then
         assertThatIsEqualTo(auditEventEntity, event);
@@ -90,14 +87,12 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageSentEvent() {
         //given
-        MessageSentAuditEventEntity auditEventEntity = (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(
-            createMessageSentEvent()
-        );
+        MessageSentAuditEventEntity auditEventEntity =
+            (MessageSentAuditEventEntity) messageSentEventComverter.convertToEntity(createMessageSentEvent());
 
         //when
-        CloudBPMNMessageSentEventImpl cloudEvent = (CloudBPMNMessageSentEventImpl) messageSentEventComverter.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNMessageSentEventImpl cloudEvent =
+            (CloudBPMNMessageSentEventImpl) messageSentEventComverter.convertToAPI(auditEventEntity);
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -105,14 +100,12 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageWaitingEvent() {
         //given
-        MessageWaitingAuditEventEntity auditEventEntity = (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(
-            createMessageWaitingEvent()
-        );
+        MessageWaitingAuditEventEntity auditEventEntity =
+            (MessageWaitingAuditEventEntity) messageWaitingEventConverter.convertToEntity(createMessageWaitingEvent());
 
         //when
-        CloudBPMNMessageWaitingEventImpl cloudEvent = (CloudBPMNMessageWaitingEventImpl) messageWaitingEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNMessageWaitingEventImpl cloudEvent =
+            (CloudBPMNMessageWaitingEventImpl) messageWaitingEventConverter.convertToAPI(auditEventEntity);
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -120,14 +113,14 @@ public class MessageEventConverterTest {
     @Test
     public void checkConvertToAPIMessageReceivedEvent() {
         //given
-        MessageReceivedAuditEventEntity auditEventEntity = (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(
-            createMessageReceivedEvent()
-        );
+        MessageReceivedAuditEventEntity auditEventEntity =
+            (MessageReceivedAuditEventEntity) messageReceivedEventConverter.convertToEntity(
+                createMessageReceivedEvent()
+            );
 
         //when
-        CloudBPMNMessageReceivedEventImpl cloudEvent = (CloudBPMNMessageReceivedEventImpl) messageReceivedEventConverter.convertToAPI(
-            auditEventEntity
-        );
+        CloudBPMNMessageReceivedEventImpl cloudEvent =
+            (CloudBPMNMessageReceivedEventImpl) messageReceivedEventConverter.convertToAPI(auditEventEntity);
 
         assertThatIsEqualTo(auditEventEntity, cloudEvent);
     }
@@ -208,14 +201,11 @@ public class MessageEventConverterTest {
     }
 
     private MessageEventPayload createMessagePayload() {
-        MessageEventPayload messagePayload = MessagePayloadBuilder
-            .event("messageName")
+        return MessagePayloadBuilder.event("messageName")
             .withBusinessKey("businessId")
             .withCorrelationKey("correlationId")
             .withVariable("name", "value")
             .build();
-
-        return messagePayload;
     }
 
     private void appendEventInfo(CloudBPMNMessageEventImpl event, ProcessInstance processInstance) {
@@ -238,10 +228,12 @@ public class MessageEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getMessage().getProcessInstanceId())
-            .isEqualTo(event.getEntity().getProcessInstanceId());
-        assertThat(auditEventEntity.getMessage().getProcessDefinitionId())
-            .isEqualTo(event.getEntity().getProcessDefinitionId());
+        assertThat(auditEventEntity.getMessage().getProcessInstanceId()).isEqualTo(
+            event.getEntity().getProcessInstanceId()
+        );
+        assertThat(auditEventEntity.getMessage().getProcessDefinitionId()).isEqualTo(
+            event.getEntity().getProcessDefinitionId()
+        );
         assertThat(auditEventEntity.getMessage().getMessagePayload()).isEqualTo(event.getEntity().getMessagePayload());
     }
 }

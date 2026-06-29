@@ -109,8 +109,7 @@ public final class ContentTypeUtils {
             return null;
         }
 
-        return Optional
-            .ofNullable(extension)
+        return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> filename + fullExtension)
@@ -122,8 +121,7 @@ public final class ContentTypeUtils {
             return null;
         }
 
-        return Optional
-            .ofNullable(extension)
+        return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> removeExtension(filename) + fullExtension)
@@ -135,8 +133,7 @@ public final class ContentTypeUtils {
             return null;
         }
 
-        return Optional
-            .ofNullable(extension)
+        return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(filename::endsWith)
             .map(filename::lastIndexOf)

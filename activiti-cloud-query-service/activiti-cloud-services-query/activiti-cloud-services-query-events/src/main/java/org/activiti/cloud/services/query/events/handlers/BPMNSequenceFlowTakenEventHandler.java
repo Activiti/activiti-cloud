@@ -41,25 +41,23 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
         CloudSequenceFlowTakenEvent sequenceFlowTakenEvent = CloudSequenceFlowTakenEvent.class.cast(event);
         var entityId = getEntityId(sequenceFlowTakenEvent);
 
-        Optional
-            .ofNullable(entityManager.find(BPMNSequenceFlowEntity.class, entityId))
-            .ifPresentOrElse(
-                sequenceFlowEntity -> {
-                    logger.warn(
-                        "Sequence flow '" +
+        Optional.ofNullable(entityManager.find(BPMNSequenceFlowEntity.class, entityId)).ifPresentOrElse(
+            sequenceFlowEntity -> {
+                logger.warn(
+                    "Sequence flow '" +
                         sequenceFlowEntity.getElementId() +
                         "' with eventId '" +
                         event.getId() +
                         "' already exists in the process '" +
                         sequenceFlowTakenEvent.getEntity().getProcessInstanceId() +
                         "'!"
-                    );
-                },
-                () -> {
-                    var sequenceFlowTakenEntity = createBpmnSequenceFlowEntity(entityId, sequenceFlowTakenEvent);
-                    entityManager.persist(sequenceFlowTakenEntity);
-                }
-            );
+                );
+            },
+            () -> {
+                var sequenceFlowTakenEntity = createBpmnSequenceFlowEntity(entityId, sequenceFlowTakenEvent);
+                entityManager.persist(sequenceFlowTakenEntity);
+            }
+        );
     }
 
     private BPMNSequenceFlowEntity createBpmnSequenceFlowEntity(String entityId, CloudSequenceFlowTakenEvent event) {

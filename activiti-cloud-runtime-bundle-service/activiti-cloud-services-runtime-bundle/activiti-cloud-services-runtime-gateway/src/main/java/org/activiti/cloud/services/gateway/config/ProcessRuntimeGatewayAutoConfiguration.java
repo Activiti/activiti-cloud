@@ -62,20 +62,16 @@ public class ProcessRuntimeGatewayAutoConfiguration {
         HeaderChannelRegistry headerChannelRegistry,
         FunctionBindingConfiguration.BindingResolver bindingResolver
     ) {
-        return IntegrationFlow
-            .from(
-                ProcessRuntimeGateway.class,
-                gatewayProxySpec ->
-                    gatewayProxySpec
-                        .beanName(PROCESS_RUNTIME_GATEWAY_BEAN_NAME)
-                        .replyTimeout(properties.getReplyTimeout().toMillis())
-            )
+        return IntegrationFlow.from(ProcessRuntimeGateway.class, gatewayProxySpec ->
+            gatewayProxySpec
+                .beanName(PROCESS_RUNTIME_GATEWAY_BEAN_NAME)
+                .replyTimeout(properties.getReplyTimeout().toMillis())
+        )
             .enrichHeaders(headerEnricherSpec ->
                 headerEnricherSpec
                     .headerChannelsToString()
-                    .headerFunction(
-                        PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME,
-                        message -> headerChannelRegistry.channelToChannelName(message.getHeaders().getReplyChannel())
+                    .headerFunction(PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME, message ->
+                        headerChannelRegistry.channelToChannelName(message.getHeaders().getReplyChannel())
                     )
             )
             .handle(
@@ -94,15 +90,11 @@ public class ProcessRuntimeGatewayAutoConfiguration {
 
     @Bean
     IntegrationFlow processRuntimeGatewayResultsFlow(HeaderChannelRegistry headerChannelRegistry) {
-        return IntegrationFlow
-            .from(PROCESS_RUNTIME_GATEWAY_RESULTS_FLOW_INPUT)
-            .filter(
-                Message.class,
-                message ->
-                    Optional
-                        .ofNullable(message.getHeaders().get(PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME, String.class))
-                        .map(headerChannelRegistry::channelNameToChannel)
-                        .isPresent()
+        return IntegrationFlow.from(PROCESS_RUNTIME_GATEWAY_RESULTS_FLOW_INPUT)
+            .filter(Message.class, message ->
+                Optional.ofNullable(message.getHeaders().get(PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME, String.class))
+                    .map(headerChannelRegistry::channelNameToChannel)
+                    .isPresent()
             )
             .route(Message.class, message -> message.getHeaders().get(PROCESS_RUNTIME_GATEWAY_RESULT_CHANNEL_NAME))
             .get();

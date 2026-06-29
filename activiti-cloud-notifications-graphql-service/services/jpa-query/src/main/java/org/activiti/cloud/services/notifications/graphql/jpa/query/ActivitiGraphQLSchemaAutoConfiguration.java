@@ -80,8 +80,7 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                         .coercing(
                             new JavaScalars.GraphQLObjectCoercing() {
                                 public Object serialize(final Object input) {
-                                    return Optional
-                                        .ofNullable(input)
+                                    return Optional.ofNullable(input)
                                         .filter(VariableValue.class::isInstance)
                                         .map(VariableValue.class::cast)
                                         .map(it -> Optional.ofNullable(it.getValue()).orElse(Optional.empty()))
@@ -94,9 +93,9 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
 
             restrictedKeysProvider.ifAvailable(builder::restrictedKeysProvider);
 
-            Optional
-                .ofNullable(properties.getEntities())
-                .ifPresent(entities -> entities.forEach(entity -> builder.entityPath(entity.getName())));
+            Optional.ofNullable(properties.getEntities()).ifPresent(entities ->
+                entities.forEach(entity -> builder.entityPath(entity.getName()))
+            );
         };
     }
 }

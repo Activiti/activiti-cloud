@@ -55,8 +55,7 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
     }
 
     private static Pattern compileValidationRegex() {
-        String pipedBlacklist = Arrays
-            .stream(TECHNICAL_INFO_BLACKLIST)
+        String pipedBlacklist = Arrays.stream(TECHNICAL_INFO_BLACKLIST)
             .map(s -> s.replaceAll("\\.", ""))
             .collect(Collectors.joining("|"));
 

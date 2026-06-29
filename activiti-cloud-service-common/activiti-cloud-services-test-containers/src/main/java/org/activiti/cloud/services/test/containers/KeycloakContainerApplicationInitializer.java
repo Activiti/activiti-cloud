@@ -22,7 +22,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public class KeycloakContainerApplicationInitializer
-    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    implements ApplicationContextInitializer<ConfigurableApplicationContext>
+{
 
     private static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer(
         "quay.io/keycloak/keycloak:26.5.0"
