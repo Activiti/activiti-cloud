@@ -29,7 +29,7 @@
     "test:runtime:process": "npm run pw -- --project=runtime-process",
     "test:runtime:task": "npm run pw -- --project=runtime-task",
     "report": "playwright show-report",
-    "report:coverage": "open activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html",
+    "report:coverage": "npx --yes open@10 activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html",
     "install:browsers": "playwright install",
     "install:deps": "playwright install-deps",
     "matrix:rabbitmq:non-partitioned:default": "bash activiti-cloud-acceptance-tests-playwright/scripts/run-matrix-item.sh -n ${npm_config_name:-local-dev} -b rabbitmq -p non-partitioned -d default-destinations",

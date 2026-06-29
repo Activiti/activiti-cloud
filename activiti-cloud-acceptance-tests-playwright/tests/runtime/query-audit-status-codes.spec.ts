@@ -18,9 +18,17 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { startCatalogProcess } from '../../flows/start-catalog-process';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { EventType } from '../../models/audit.models';
+import { HttpStatusCheck } from '../../models/base-service.models';
 
 const FAKE_ID = '00000000-0000-0000-0000-000000000099';
 const LINK_TYPE = 'acceptance-link-type';
+
+async function collectStatusCodes<TService>(
+    checks: readonly HttpStatusCheck<TService>[],
+    service: TService
+): Promise<number[]> {
+    return Promise.all(checks.map(({ run }) => run(service)));
+}
 
 activiti.describe('Runtime — Query and Audit Status Codes', () => {
     activiti('should return 404 for missing query and audit resources', async ({
@@ -28,21 +36,21 @@ activiti.describe('Runtime — Query and Audit Status Codes', () => {
         queryAdminServiceTestAdmin,
     }) => {
         await activiti.step('When user query GET endpoints reference unknown ids', async () => {
-            for (const { run } of queryServiceTestUser.buildNotFoundGetStatusChecks(FAKE_ID)) {
-                expect(await run(queryServiceTestUser)).toBe(404);
-            }
+            const checks = queryServiceTestUser.buildNotFoundGetStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, queryServiceTestUser);
+            expect(statuses).toEqual(checks.map(() => 404));
         });
 
         await activiti.step('When user query link targets an unknown process instance', async () => {
-            for (const { run } of queryServiceTestUser.buildNotFoundPostStatusChecks(FAKE_ID, LINK_TYPE)) {
-                expect(await run(queryServiceTestUser)).toBe(404);
-            }
+            const checks = queryServiceTestUser.buildNotFoundPostStatusChecks(FAKE_ID, LINK_TYPE);
+            const statuses = await collectStatusCodes(checks, queryServiceTestUser);
+            expect(statuses).toEqual(checks.map(() => 404));
         });
 
         await activiti.step('When admin query GET endpoints reference unknown ids', async () => {
-            for (const { run } of queryAdminServiceTestAdmin.buildNotFoundGetStatusChecks(FAKE_ID)) {
-                expect(await run(queryAdminServiceTestAdmin)).toBe(404);
-            }
+            const checks = queryAdminServiceTestAdmin.buildNotFoundGetStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, queryAdminServiceTestAdmin);
+            expect(statuses).toEqual(checks.map(() => 404));
         });
     });
 
@@ -64,108 +72,100 @@ activiti.describe('Runtime — Query and Audit Status Codes', () => {
         });
 
         await activiti.step('When task search bodies omit required boolean fields', async () => {
-            for (const { run } of queryServiceTestUser.buildBadRequestPostStatusChecks(FAKE_ID)) {
-                expect(await run(queryServiceTestUser)).toBe(400);
-            }
-            for (const { run } of queryAdminServiceTestAdmin.buildBadRequestPostStatusChecks(FAKE_ID)) {
-                expect(await run(queryAdminServiceTestAdmin)).toBe(400);
-            }
+            const userChecks = queryServiceTestUser.buildBadRequestPostStatusChecks(FAKE_ID);
+            const adminChecks = queryAdminServiceTestAdmin.buildBadRequestPostStatusChecks(FAKE_ID);
+            const statuses = [
+                ...(await collectStatusCodes(userChecks, queryServiceTestUser)),
+                ...(await collectStatusCodes(adminChecks, queryAdminServiceTestAdmin)),
+            ];
+            expect(statuses).toEqual([...userChecks, ...adminChecks].map(() => 400));
         });
 
         await activiti.step('When process instance link body is invalid', async () => {
-            for (const { run } of queryServiceTestUser.buildBadRequestLinkStatusChecks(
-                processInstanceId,
-                LINK_TYPE
-            )) {
-                expect(await run(queryServiceTestUser)).toBe(400);
-            }
+            const checks = queryServiceTestUser.buildBadRequestLinkStatusChecks(processInstanceId, LINK_TYPE);
+            const statuses = await collectStatusCodes(checks, queryServiceTestUser);
+            expect(statuses).toEqual(checks.map(() => 400));
         });
 
         await activiti.step('When audit export date range is invalid', async () => {
-            for (const { run } of auditAdminServiceTestAdmin.buildBadRequestGetStatusChecks()) {
-                expect(await run(auditAdminServiceTestAdmin)).toBe(400);
-            }
+            const checks = auditAdminServiceTestAdmin.buildBadRequestGetStatusChecks();
+            const statuses = await collectStatusCodes(checks, auditAdminServiceTestAdmin);
+            expect(statuses).toEqual(checks.map(() => 400));
         });
     });
 
     activiti('should return 403 for unauthenticated POST query endpoints', async ({ anonymousQueryService }) => {
-        for (const { label, run } of anonymousQueryService.buildUnauthenticatedPostStatusChecks(
-            FAKE_ID,
-            LINK_TYPE
-        )) {
-            await activiti.step(`POST query ${label}`, async () => {
-                expect(await run(anonymousQueryService)).toBe(403);
-            });
-        }
+        await activiti.step('POST query endpoints without auth', async () => {
+            const checks = anonymousQueryService.buildUnauthenticatedPostStatusChecks(FAKE_ID, LINK_TYPE);
+            const statuses = await collectStatusCodes(checks, anonymousQueryService);
+            expect(statuses).toEqual(checks.map(() => 403));
+        });
     });
 
     activiti('should return 403 for unauthenticated POST query admin endpoints', async ({
         anonymousQueryAdminService,
     }) => {
-        for (const { label, run } of anonymousQueryAdminService.buildUnauthenticatedPostStatusChecks(FAKE_ID)) {
-            await activiti.step(`POST query admin ${label}`, async () => {
-                expect(await run(anonymousQueryAdminService)).toBe(403);
-            });
-        }
+        await activiti.step('POST query admin endpoints without auth', async () => {
+            const checks = anonymousQueryAdminService.buildUnauthenticatedPostStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, anonymousQueryAdminService);
+            expect(statuses).toEqual(checks.map(() => 403));
+        });
     });
 
     activiti('should return 401 for invalid-token POST query endpoints', async ({
         invalidTokenQueryService,
     }) => {
-        for (const { label, run } of invalidTokenQueryService.buildUnauthenticatedPostStatusChecks(
-            FAKE_ID,
-            LINK_TYPE
-        )) {
-            await activiti.step(`POST query ${label}`, async () => {
-                expect(await run(invalidTokenQueryService)).toBe(401);
-            });
-        }
+        await activiti.step('POST query endpoints with invalid token', async () => {
+            const checks = invalidTokenQueryService.buildUnauthenticatedPostStatusChecks(FAKE_ID, LINK_TYPE);
+            const statuses = await collectStatusCodes(checks, invalidTokenQueryService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 401 for invalid-token POST query admin endpoints', async ({
         invalidTokenQueryAdminService,
     }) => {
-        for (const { label, run } of invalidTokenQueryAdminService.buildUnauthenticatedPostStatusChecks(FAKE_ID)) {
-            await activiti.step(`POST query admin ${label}`, async () => {
-                expect(await run(invalidTokenQueryAdminService)).toBe(401);
-            });
-        }
+        await activiti.step('POST query admin endpoints with invalid token', async () => {
+            const checks = invalidTokenQueryAdminService.buildUnauthenticatedPostStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, invalidTokenQueryAdminService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 401 for unauthenticated GET query endpoints', async ({ anonymousQueryService }) => {
-        for (const { label, run } of anonymousQueryService.buildUnauthenticatedGetStatusChecks(FAKE_ID)) {
-            await activiti.step(`GET query ${label}`, async () => {
-                expect(await run(anonymousQueryService)).toBe(401);
-            });
-        }
+        await activiti.step('GET query endpoints without auth', async () => {
+            const checks = anonymousQueryService.buildUnauthenticatedGetStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, anonymousQueryService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 401 for unauthenticated GET query admin endpoints', async ({
         anonymousQueryAdminService,
     }) => {
-        for (const { label, run } of anonymousQueryAdminService.buildUnauthenticatedGetStatusChecks(FAKE_ID)) {
-            await activiti.step(`GET query admin ${label}`, async () => {
-                expect(await run(anonymousQueryAdminService)).toBe(401);
-            });
-        }
+        await activiti.step('GET query admin endpoints without auth', async () => {
+            const checks = anonymousQueryAdminService.buildUnauthenticatedGetStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, anonymousQueryAdminService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 401 for unauthenticated GET audit endpoints', async ({ anonymousAuditService }) => {
-        for (const { label, run } of anonymousAuditService.buildUnauthenticatedGetStatusChecks(FAKE_ID)) {
-            await activiti.step(`GET audit ${label}`, async () => {
-                expect(await run(anonymousAuditService)).toBe(401);
-            });
-        }
+        await activiti.step('GET audit endpoints without auth', async () => {
+            const checks = anonymousAuditService.buildUnauthenticatedGetStatusChecks(FAKE_ID);
+            const statuses = await collectStatusCodes(checks, anonymousAuditService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 401 for unauthenticated GET audit admin endpoints', async ({
         anonymousAuditAdminService,
     }) => {
-        for (const { label, run } of anonymousAuditAdminService.buildUnauthenticatedGetStatusChecks()) {
-            await activiti.step(`GET audit admin ${label}`, async () => {
-                expect(await run(anonymousAuditAdminService)).toBe(401);
-            });
-        }
+        await activiti.step('GET audit admin endpoints without auth', async () => {
+            const checks = anonymousAuditAdminService.buildUnauthenticatedGetStatusChecks();
+            const statuses = await collectStatusCodes(checks, anonymousAuditAdminService);
+            expect(statuses).toEqual(checks.map(() => 401));
+        });
     });
 
     activiti('should return 403 when the caller lacks query or audit permissions', async ({
@@ -173,10 +173,10 @@ activiti.describe('Runtime — Query and Audit Status Codes', () => {
         taskServiceTestUser,
         auditServiceTestUser,
         auditServiceHrUser,
-        auditAdminServiceHrUser,
         queryServiceTestUser,
         queryServiceHrUser,
         queryAdminServiceHrUser,
+        auditAdminServiceHrUser,
     }) => {
         let taskId = '';
         let eventId = '';
@@ -199,27 +199,29 @@ activiti.describe('Runtime — Query and Audit Status Codes', () => {
         });
 
         await activiti.step('When hruser reads restricted user query resources', async () => {
-            for (const { run } of queryServiceHrUser.buildForbiddenGetStatusChecks(taskId)) {
-                expect(await run(queryServiceHrUser)).toBe(403);
-            }
-            for (const { run } of auditServiceHrUser.buildForbiddenGetStatusChecks(eventId)) {
-                expect(await run(auditServiceHrUser)).toBe(403);
-            }
+            const queryChecks = queryServiceHrUser.buildForbiddenGetStatusChecks(taskId);
+            const auditChecks = auditServiceHrUser.buildForbiddenGetStatusChecks(eventId);
+            const statuses = [
+                ...(await collectStatusCodes(queryChecks, queryServiceHrUser)),
+                ...(await collectStatusCodes(auditChecks, auditServiceHrUser)),
+            ];
+            expect(statuses).toEqual([...queryChecks, ...auditChecks].map(() => 403));
         });
 
         await activiti.step('When hruser calls admin query endpoints', async () => {
-            for (const { run } of queryAdminServiceHrUser.buildForbiddenGetStatusChecks(taskId, processInstanceId)) {
-                expect(await run(queryAdminServiceHrUser)).toBe(403);
-            }
-            for (const { run } of queryAdminServiceHrUser.buildForbiddenPostStatusChecks(taskId, FAKE_ID)) {
-                expect(await run(queryAdminServiceHrUser)).toBe(403);
-            }
+            const getChecks = queryAdminServiceHrUser.buildForbiddenGetStatusChecks(taskId, processInstanceId);
+            const postChecks = queryAdminServiceHrUser.buildForbiddenPostStatusChecks(taskId, FAKE_ID);
+            const statuses = [
+                ...(await collectStatusCodes(getChecks, queryAdminServiceHrUser)),
+                ...(await collectStatusCodes(postChecks, queryAdminServiceHrUser)),
+            ];
+            expect(statuses).toEqual([...getChecks, ...postChecks].map(() => 403));
         });
 
         await activiti.step('When hruser exports audit events via admin API', async () => {
-            for (const { run } of auditAdminServiceHrUser.buildForbiddenGetStatusChecks()) {
-                expect(await run(auditAdminServiceHrUser)).toBe(403);
-            }
+            const checks = auditAdminServiceHrUser.buildForbiddenGetStatusChecks();
+            const statuses = await collectStatusCodes(checks, auditAdminServiceHrUser);
+            expect(statuses).toEqual(checks.map(() => 403));
         });
     });
 });

@@ -45,7 +45,7 @@ export default defineConfig({
   fullyParallel: true,
   retries: isCi ? 2 : 0,
   forbidOnly: isCi,
-  workers: 4,
+  workers,
   projects: [
     {
       name: 'acceptance',
