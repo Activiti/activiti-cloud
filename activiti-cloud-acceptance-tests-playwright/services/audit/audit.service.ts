@@ -18,7 +18,7 @@ import { CloudRuntimeEvent, EventQueryParams, EventType } from '../../models/aud
 import { BaseService } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { HttpStatusCheck, SearchPageParams } from '../../models/base-service.models';
-import { AUDIT_V1_BASE, AuditEventsEndpoint } from './endpoints/index';
+import { AUDIT_ADMIN_V1_BASE, AUDIT_V1_BASE, AuditEventsEndpoint } from './endpoints/index';
 
 const INTEGRATION_EVENT_TYPES: readonly string[] = [
     EventType.INTEGRATION_REQUESTED,
@@ -27,27 +27,57 @@ const INTEGRATION_EVENT_TYPES: readonly string[] = [
 ];
 
 export class AuditService extends BaseService {
-    private readonly eventsEndpoint: AuditEventsEndpoint;
+    readonly events: AuditEventsEndpoint;
+    readonly adminEvents: AuditEventsEndpoint;
 
     constructor(context: CustomAPIRequest) {
         super(context);
-        this.eventsEndpoint = new AuditEventsEndpoint(context);
+        this.events = new AuditEventsEndpoint(context, false);
+        this.adminEvents = new AuditEventsEndpoint(context, true);
     }
 
     async getAllEvents(): Promise<CloudRuntimeEvent[]> {
-        return this.eventsEndpoint.getAllEvents();
+        return this.events.getAllEvents();
     }
 
     async getEvents(params?: EventQueryParams, page?: SearchPageParams): Promise<CloudRuntimeEvent[]> {
-        return this.eventsEndpoint.getEvents(params, page);
+        return this.events.getEvents(params, page);
     }
 
     async getEventById(eventId: string): Promise<CloudRuntimeEvent> {
-        return this.eventsEndpoint.getEventById(eventId);
+        return this.events.getEventById(eventId);
     }
 
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
         return this.getEvents({ entityId });
+    }
+
+    async getAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
+        return this.adminEvents.getAllEvents();
+    }
+
+    async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
+        const byProcessInstance = await this.getEventsAdmin({ processInstanceId: entityId });
+        if (byProcessInstance.length > 0) {
+            return byProcessInstance;
+        }
+
+        const searchParams = new URLSearchParams();
+        searchParams.append('search', `entityId:${entityId},processInstanceId:${entityId}`);
+        const response = await this.get(`${AUDIT_ADMIN_V1_BASE}/events?${searchParams.toString()}`);
+        return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+    }
+
+    async getEventsAdmin(params?: EventQueryParams, page?: SearchPageParams): Promise<CloudRuntimeEvent[]> {
+        return this.adminEvents.getEvents(params, page);
+    }
+
+    async exportEvents(fileName: string, from: string, to: string): Promise<string> {
+        return this.adminEvents.exportEvents(fileName, from, to);
+    }
+
+    async deleteAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
+        return this.adminEvents.deleteAllEvents();
     }
 
     async waitForEventOfTypeForEntity(entityId: string, eventType: EventType): Promise<CloudRuntimeEvent> {
@@ -329,6 +359,24 @@ export class AuditService extends BaseService {
         );
     }
 
+    async waitForAllEventsAdminCount(expectedCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditService.waitFor(
+            () => this.getAllEventsAdmin(),
+            (events) => events.length === expectedCount,
+            'auditEvents',
+            `admin events count to equal ${expectedCount}`
+        );
+    }
+
+    async waitForAllEventsAdminCountGreaterThan(minCount: number): Promise<CloudRuntimeEvent[]> {
+        return AuditService.waitFor(
+            () => this.getAllEventsAdmin(),
+            (events) => events.length > minCount,
+            'auditEvents',
+            `admin events count > ${minCount}`
+        );
+    }
+
     async checkServicesHealth(): Promise<void> {
         const response = await this.get('/audit/actuator/health');
         const status = (response as { status?: string }).status;
@@ -338,17 +386,48 @@ export class AuditService extends BaseService {
     }
 
     async getSwaggerSpecification(group: string = 'Audit'): Promise<string> {
-        return this.eventsEndpoint.getSwaggerSpecification(group);
+        return this.events.getSwaggerSpecification(group);
     }
 
-    buildUnauthenticatedGetStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<AuditService>[] {
+    buildUnauthenticatedGetStatusChecks(): readonly HttpStatusCheck<AuditService>[];
+    buildUnauthenticatedGetStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<AuditService>[];
+    buildUnauthenticatedGetStatusChecks(fakeResourceId?: string): readonly HttpStatusCheck<AuditService>[] {
+        if (fakeResourceId === undefined) {
+            return [
+                BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_ADMIN_V1_BASE}/events`),
+                BaseService.getStatusCheck<AuditService>(
+                    'events export',
+                    `${AUDIT_ADMIN_V1_BASE}/events/export/pw-unauth-export.csv?from=2020-01-01&to=2020-01-31`
+                ),
+            ];
+        }
         return [
             BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_V1_BASE}/events`),
             BaseService.getStatusCheck<AuditService>('event by id', `${AUDIT_V1_BASE}/events/${encodeURIComponent(fakeResourceId)}`),
         ];
     }
 
-    buildForbiddenGetStatusChecks(eventId: string): readonly HttpStatusCheck<AuditService>[] {
+    buildBadRequestGetStatusChecks(): readonly HttpStatusCheck<AuditService>[] {
+        return [
+            BaseService.getStatusCheck<AuditService>(
+                'events export with invalid dates',
+                `${AUDIT_ADMIN_V1_BASE}/events/export/pw-invalid-export.csv?from=not-a-date&to=also-invalid`
+            ),
+        ];
+    }
+
+    buildForbiddenGetStatusChecks(): readonly HttpStatusCheck<AuditService>[];
+    buildForbiddenGetStatusChecks(eventId: string): readonly HttpStatusCheck<AuditService>[];
+    buildForbiddenGetStatusChecks(eventId?: string): readonly HttpStatusCheck<AuditService>[] {
+        if (eventId === undefined) {
+            return [
+                BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_ADMIN_V1_BASE}/events`),
+                BaseService.getStatusCheck<AuditService>(
+                    'events export',
+                    `${AUDIT_ADMIN_V1_BASE}/events/export/pw-forbidden-export.csv?from=2020-01-01&to=2020-01-31`
+                ),
+            ];
+        }
         return [BaseService.getStatusCheck<AuditService>('event by id', `${AUDIT_V1_BASE}/events/${encodeURIComponent(eventId)}`)];
     }
 }

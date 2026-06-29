@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { CloudIntegrationContext, CloudServiceTask, ServiceTaskStatus } from '../../../../models/runtime-bundle.models';
-import { BaseService } from '../../../base.service';
-import { CustomAPIRequest } from '../../../../fixtures/context.models';
-import { QUERY_ADMIN_V1_BASE } from './process-instances.endpoint';
+import { CloudIntegrationContext, CloudServiceTask, ServiceTaskStatus } from '../../../models/runtime-bundle.models';
+import { CustomAPIRequest } from '../../../fixtures/context.models';
+import { BaseService } from '../../base.service';
+import { QUERY_ADMIN_V1_BASE } from './query-base-path';
 
-export class QueryAdminServiceTasksEndpoint extends BaseService {
+export class QueryServiceTasksEndpoint extends BaseService {
     constructor(context: CustomAPIRequest) {
         super(context);
     }

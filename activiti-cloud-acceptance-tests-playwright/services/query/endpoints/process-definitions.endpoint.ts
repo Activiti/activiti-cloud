@@ -17,15 +17,18 @@
 import { CloudProcessDefinition } from '../../../models/process-definition.models';
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService } from '../../base.service';
-import { QUERY_V1_BASE } from './process-instances.endpoint';
+import { queryV1Base } from './query-base-path';
 
 export class QueryProcessDefinitionsEndpoint extends BaseService {
-    constructor(context: CustomAPIRequest) {
+    private readonly basePath: string;
+
+    constructor(context: CustomAPIRequest, admin: boolean = false) {
         super(context);
+        this.basePath = queryV1Base(admin);
     }
 
     async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-definitions`);
+        const response = await this.get(`${this.basePath}/process-definitions`);
         return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
     }
 }

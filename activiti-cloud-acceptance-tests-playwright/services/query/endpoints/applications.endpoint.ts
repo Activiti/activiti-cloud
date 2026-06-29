@@ -16,15 +16,18 @@
 
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService } from '../../base.service';
-import { QUERY_V1_BASE } from './process-instances.endpoint';
+import { queryV1Base } from './query-base-path';
 
 export class QueryApplicationsEndpoint extends BaseService {
-    constructor(context: CustomAPIRequest) {
+    private readonly basePath: string;
+
+    constructor(context: CustomAPIRequest, admin: boolean = false) {
         super(context);
+        this.basePath = queryV1Base(admin);
     }
 
     async getApplications(): Promise<{ name: string; [key: string]: unknown }[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/applications`);
+        const response = await this.get(`${this.basePath}/applications`);
         return this.unwrapList<{ name: string; [key: string]: unknown }>(response, 'applications');
     }
 }

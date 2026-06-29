@@ -25,21 +25,23 @@ import { SearchPageParams } from '../../../models/base-service.models';
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService } from '../../base.service';
 import { parseCountResponse, searchEndpoint } from '../shared/search-utils';
-
-export const QUERY_V1_BASE = '/query/v1';
+import { queryV1Base } from './query-base-path';
 
 export class QueryProcessInstancesEndpoint extends BaseService {
-    constructor(context: CustomAPIRequest) {
+    private readonly basePath: string;
+
+    constructor(context: CustomAPIRequest, admin: boolean = false) {
         super(context);
+        this.basePath = queryV1Base(admin);
     }
 
     async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances`);
+        const response = await this.get(`${this.basePath}/process-instances`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances/${processInstanceId}`);
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}`);
         return this.unwrapEntity<CloudProcessInstance>(response);
     }
 
@@ -50,32 +52,69 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances?${searchParams.toString()}`);
+        const response = await this.get(`${this.basePath}/process-instances?${searchParams.toString()}`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstancesWithVariableKeys(variableKeys: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(
+            `${this.basePath}/process-instances?variableKeys=${encodeURIComponent(variableKeys)}`
+        );
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
     async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
-        return this.getText(`${QUERY_V1_BASE}/process-instances/${processInstanceId}/diagram`, {
+        return this.getText(`${this.basePath}/process-instances/${processInstanceId}/diagram`, {
             Accept: 'image/svg+xml',
         });
     }
 
+    async getProcessInstanceDiagramStatus(processInstanceId: string): Promise<number> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/diagram`, {
+            headers: { Accept: 'image/svg+xml' },
+        });
+        return response.httpStatus ?? 200;
+    }
+
     async getProcessModel(processDefinitionId: string): Promise<string> {
-        return this.getText(`${QUERY_V1_BASE}/process-definitions/${processDefinitionId}/model`);
+        return this.getText(`${this.basePath}/process-definitions/${processDefinitionId}/model`);
     }
 
     async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances/${processInstanceId}/variables`);
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/variables`);
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
     }
 
     async getSubprocesses(processInstanceId: string): Promise<CloudProcessInstance[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances/${processInstanceId}/subprocesses`);
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/subprocesses`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
+    async getSequenceFlows(processInstanceId: string): Promise<Record<string, unknown>[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/sequence-flows`);
+        return this.unwrapList<Record<string, unknown>>(response, 'list');
+    }
+
+    async getBpmnActivities(processInstanceId: string): Promise<Record<string, unknown>[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/bpmn-activities`);
+        return this.unwrapList<Record<string, unknown>>(response, 'list');
+    }
+
+    async getLinkedProcesses(linkedProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${linkedProcessInstanceId}/linkedprocesses`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
+    async getProcessInstanceAppVersions(): Promise<string[]> {
+        const response = await this.get(`${this.basePath}/process-instances/appVersions`);
+        if (Array.isArray(response)) {
+            return response as string[];
+        }
+        return [];
+    }
+
     async getTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/process-instances/${processInstanceId}/tasks`);
+        const response = await this.get(`${this.basePath}/process-instances/${processInstanceId}/tasks`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
@@ -83,7 +122,7 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         searchRequest: ProcessInstanceSearchRequest = {},
         page?: SearchPageParams
     ): Promise<CloudProcessInstance[]> {
-        const response = await this.post(searchEndpoint(`${QUERY_V1_BASE}/process-instances/search`, page), {
+        const response = await this.post(searchEndpoint(`${this.basePath}/process-instances/search`, page), {
             data: searchRequest,
         });
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
@@ -93,7 +132,7 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         searchRequest: ProcessInstanceSearchRequest = {},
         page?: SearchPageParams
     ): Promise<number> {
-        const response = await this.post(searchEndpoint(`${QUERY_V1_BASE}/process-instances/count`, page), {
+        const response = await this.post(searchEndpoint(`${this.basePath}/process-instances/count`, page), {
             data: searchRequest,
         });
         return parseCountResponse(response);
@@ -104,11 +143,16 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         processInstanceIds: string[],
         linkProcessInstanceType: string
     ): Promise<void> {
-        await this.post(`${QUERY_V1_BASE}/process-instances/${mainProcessInstanceId}/link`, {
+        await this.post(`${this.basePath}/process-instances/${mainProcessInstanceId}/link`, {
             data: {
                 processInstanceIds,
                 linkProcessInstanceType,
             },
         });
+    }
+
+    async deleteAllProcessInstances(): Promise<CloudProcessInstance[]> {
+        const response = await this.delete(`${this.basePath}/process-instances`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 }

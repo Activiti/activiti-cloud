@@ -19,7 +19,7 @@ These are **API-level** tests — no browser UI, page objects, or locators. Test
 
 1. **Never create `tests/**/helpers/`** — API calls in `services/`, shared flows in `flows/`, assertions in specs.
 2. **Never define functions inside spec files** — only hooks and test blocks (except `for...of` at describe scope).
-3. **Keep API calls in service/endpoint classes** — query/audit use hxp layout: `services/query/query.service.ts` facade + `endpoints/*.endpoint.ts`. Specs import only fixtures.
+3. **Keep API calls in service/endpoint classes** — query/audit use hxp layout: one facade per service (`QueryService`, `AuditService`) with user + admin endpoint fields; endpoints use `admin: boolean` where paths differ. Specs import only fixtures.
 4. **Keep static test data in `resources/modeling-projects/`** — no inline BPMN/JSON templates.
 5. **No comments or JSDoc** in generated code.
 6. **No `try/catch` in spec files** — use `afterEach`/`afterAll` for cleanup; use `helpers/query-sync.ts` for tolerant polling.

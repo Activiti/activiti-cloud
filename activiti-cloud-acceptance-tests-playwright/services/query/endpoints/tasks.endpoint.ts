@@ -20,15 +20,18 @@ import { SearchPageParams } from '../../../models/base-service.models';
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService } from '../../base.service';
 import { parseCountResponse, searchEndpoint, toTaskSearchBody } from '../shared/search-utils';
-import { QUERY_V1_BASE } from './process-instances.endpoint';
+import { queryV1Base } from './query-base-path';
 
 export class QueryTasksEndpoint extends BaseService {
-    constructor(context: CustomAPIRequest) {
+    private readonly basePath: string;
+
+    constructor(context: CustomAPIRequest, admin: boolean = false) {
         super(context);
+        this.basePath = queryV1Base(admin);
     }
 
     async getAllTasks(): Promise<CloudTask[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks`);
+        const response = await this.get(`${this.basePath}/tasks`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
@@ -41,35 +44,71 @@ export class QueryTasksEndpoint extends BaseService {
         if (params?.processDefinitionKey) searchParams.append('processDefinitionKey', params.processDefinitionKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response = await this.get(`${QUERY_V1_BASE}/tasks?${searchParams.toString()}`);
+        const response = await this.get(`${this.basePath}/tasks?${searchParams.toString()}`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTasksWithVariableKeys(variableKeys: string): Promise<CloudTask[]> {
+        const response = await this.get(`${this.basePath}/tasks?variableKeys=${encodeURIComponent(variableKeys)}`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
+    }
+
+    async getTasksFiltered(filters: {
+        processInstanceId?: string;
+        status?: string;
+        id?: string;
+        skipCount?: number;
+        maxItems?: number;
+        sort?: string[];
+    }): Promise<CloudTask[]> {
+        const params = new URLSearchParams();
+        if (filters.processInstanceId) {
+            params.set('processInstanceId', filters.processInstanceId);
+        }
+        if (filters.status) {
+            params.set('status', filters.status);
+        }
+        if (filters.id) {
+            params.set('id', filters.id);
+        }
+        if (filters.skipCount !== undefined) {
+            params.set('skipCount', String(filters.skipCount));
+        }
+        if (filters.maxItems !== undefined) {
+            params.set('maxItems', String(filters.maxItems));
+        }
+        for (const sort of filters.sort ?? []) {
+            params.append('sort', sort);
+        }
+        const response = await this.get(`${this.basePath}/tasks?${params.toString()}`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async getTaskById(taskId: string): Promise<CloudTask | undefined> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks?id=${encodeURIComponent(taskId)}`);
+        const response = await this.get(`${this.basePath}/tasks?id=${encodeURIComponent(taskId)}`);
         const tasks = this.unwrapList<CloudTask>(response, 'tasks');
         return tasks[0];
     }
 
     async getTask(taskId: string): Promise<CloudTask> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}`);
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}`);
         return this.unwrapEntity<CloudTask>(response);
     }
 
     async getStandaloneTasks(): Promise<CloudTask[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks?standalone=true&sort=createdDate,desc&sort=id,desc`);
+        const response = await this.get(`${this.basePath}/tasks?standalone=true&sort=createdDate,desc&sort=id,desc`);
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async getTasksByNameAndDescription(namePrefix: string, descriptionPrefix: string): Promise<CloudTask[]> {
         const response = await this.get(
-            `${QUERY_V1_BASE}/tasks?name=${encodeURIComponent(namePrefix)}&description=${encodeURIComponent(descriptionPrefix)}`
+            `${this.basePath}/tasks?name=${encodeURIComponent(namePrefix)}&description=${encodeURIComponent(descriptionPrefix)}`
         );
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async getCandidateUsers(taskId: string): Promise<string[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-users`);
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-users`);
         if (Array.isArray(response)) {
             return response as string[];
         }
@@ -80,7 +119,7 @@ export class QueryTasksEndpoint extends BaseService {
     }
 
     async getCandidateGroups(taskId: string): Promise<string[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-groups`);
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/candidate-groups`);
         if (Array.isArray(response)) {
             return response as string[];
         }
@@ -91,28 +130,33 @@ export class QueryTasksEndpoint extends BaseService {
     }
 
     async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/variables`);
+        const response = await this.get(`${this.basePath}/tasks/${encodeURIComponent(taskId)}/variables`);
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
     }
 
     async getRootTasksByProcessInstance(processInstanceId: string): Promise<CloudTask[]> {
         const response = await this.get(
-            `${QUERY_V1_BASE}/tasks?rootTasksOnly=true&processInstanceId=${encodeURIComponent(processInstanceId)}&sort=createdDate,desc&sort=id,desc`
+            `${this.basePath}/tasks?rootTasksOnly=true&processInstanceId=${encodeURIComponent(processInstanceId)}&sort=createdDate,desc&sort=id,desc`
         );
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async searchTasks(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<CloudTask[]> {
-        const response = await this.post(searchEndpoint(`${QUERY_V1_BASE}/tasks/search`, page), {
+        const response = await this.post(searchEndpoint(`${this.basePath}/tasks/search`, page), {
             data: toTaskSearchBody(searchRequest),
         });
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
     async countTasks(searchRequest: TaskSearchRequest = {}, page?: SearchPageParams): Promise<number> {
-        const response = await this.post(searchEndpoint(`${QUERY_V1_BASE}/tasks/count`, page), {
+        const response = await this.post(searchEndpoint(`${this.basePath}/tasks/count`, page), {
             data: toTaskSearchBody(searchRequest),
         });
         return parseCountResponse(response);
+    }
+
+    async deleteAllTasks(): Promise<CloudTask[]> {
+        const response = await this.delete(`${this.basePath}/tasks`);
+        return this.unwrapList<CloudTask>(response, 'tasks');
     }
 }

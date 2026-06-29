@@ -10,11 +10,9 @@ import { TaskService } from '../services/task.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
 import { QueryService } from '../services/query/query.service';
-import { QueryAdminService } from '../services/query/admin/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskAdminService } from '../services/task-admin.service';
 import { AuditService } from '../services/audit/audit.service';
-import { AuditAdminService } from '../services/audit/admin/audit-admin.service';
 import { IdentityManagementService } from '../services/identity-management.service';
 
 export interface ServiceIsolationOptions {
@@ -59,12 +57,8 @@ export function createMultipleRuntimeBundleService(
     return service;
 }
 
-export function createQueryService(context: CustomAPIRequest): QueryService {
-    return new QueryService(context);
-}
-
-export function createQueryAdminService(context: CustomAPIRequest): QueryAdminService {
-    return new QueryAdminService(context);
+export function createQueryService(context: CustomAPIRequest, adminMode = false): QueryService {
+    return new QueryService(context, adminMode);
 }
 
 export function createRuntimeAdminService(context: CustomAPIRequest): RuntimeAdminService {
@@ -77,10 +71,6 @@ export function createTaskAdminService(context: CustomAPIRequest): TaskAdminServ
 
 export function createAuditService(context: CustomAPIRequest): AuditService {
     return new AuditService(context);
-}
-
-export function createAuditAdminService(context: CustomAPIRequest): AuditAdminService {
-    return new AuditAdminService(context);
 }
 
 export function createIdentityManagementService(context: CustomAPIRequest): IdentityManagementService {

@@ -16,7 +16,7 @@
 
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService } from '../../base.service';
-import { QUERY_V1_BASE } from './process-instances.endpoint';
+import { QUERY_V1_BASE } from './query-base-path';
 
 export class QueryOpenApiSpecEndpoint extends BaseService {
     constructor(context: CustomAPIRequest) {

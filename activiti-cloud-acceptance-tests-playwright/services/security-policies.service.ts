@@ -18,9 +18,7 @@ import { RuntimeBundleService } from './runtime-bundle.service';
 import { TaskService } from './task.service';
 import { QueryService } from './query/query.service';
 import { AuditService } from './audit/audit.service';
-import { AuditAdminService } from './audit/admin/audit-admin.service';
 import { RuntimeAdminService } from './runtime-admin.service';
-import { QueryAdminService } from './query/admin/query-admin.service';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudTask } from '../models/task.models';
 import { CloudRuntimeEvent } from '../models/audit.models';
@@ -40,9 +38,7 @@ export class SecurityPoliciesService extends BaseService {
     private readonly taskService: TaskService;
     private readonly queryService: QueryService;
     private readonly auditService: AuditService;
-    private readonly auditAdminService: AuditAdminService;
     private readonly runtimeAdminService: RuntimeAdminService;
-    private readonly queryAdminService: QueryAdminService;
 
     constructor(context: CustomAPIRequest) {
         super(context);
@@ -50,9 +46,7 @@ export class SecurityPoliciesService extends BaseService {
         this.taskService = new TaskService(context);
         this.queryService = new QueryService(context);
         this.auditService = new AuditService(context);
-        this.auditAdminService = new AuditAdminService(context);
         this.runtimeAdminService = new RuntimeAdminService(context);
-        this.queryAdminService = new QueryAdminService(context);
     }
 
     attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
@@ -129,7 +123,7 @@ export class SecurityPoliciesService extends BaseService {
     async getQueryAdminProcessInstances(params: {
         processDefinitionKey: string;
     }): Promise<CloudProcessInstance[]> {
-        return this.queryAdminService.getProcessInstancesAdminWithParams(params);
+        return this.queryService.getProcessInstancesAdminWithParams(params);
     }
 
     async queryAllProcessInstances(): Promise<CloudProcessInstance[]> {
@@ -145,7 +139,7 @@ export class SecurityPoliciesService extends BaseService {
     }
 
     async getEventsByEntityIdAdmin(entityId: string): Promise<CloudRuntimeEvent[]> {
-        return this.auditAdminService.getEventsByEntityIdAdmin(entityId);
+        return this.auditService.getEventsByEntityIdAdmin(entityId);
     }
 
     async getFilteredAllRuntimeInstancesByName(processName: string): Promise<CloudProcessInstance[]> {

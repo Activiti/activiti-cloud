@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { BaseService } from '../../../base.service';
-import { CustomAPIRequest } from '../../../../fixtures/context.models';
-import { QUERY_ADMIN_V1_BASE } from './process-instances.endpoint';
+import { CloudIntegrationContext } from '../../../models/runtime-bundle.models';
+import { CustomAPIRequest } from '../../../fixtures/context.models';
+import { BaseService } from '../../base.service';
+import { QUERY_ADMIN_V1_BASE } from './query-base-path';
 
-export class QueryAdminApplicationsEndpoint extends BaseService {
+export class QueryIntegrationContextsEndpoint extends BaseService {
     constructor(context: CustomAPIRequest) {
         super(context);
     }
 
-    async getApplicationsAdmin(): Promise<{ name: string; [key: string]: unknown }[]> {
-        const response = await this.get(`${QUERY_ADMIN_V1_BASE}/applications`);
-        return this.unwrapList<{ name: string; [key: string]: unknown }>(response, 'applications');
+    async getIntegrationContext(integrationContextId: string): Promise<CloudIntegrationContext> {
+        const response = await this.get(`${QUERY_ADMIN_V1_BASE}/integration-contexts/${encodeURIComponent(integrationContextId)}`);
+        return this.unwrapEntity<CloudIntegrationContext>(response);
     }
 }

@@ -101,11 +101,12 @@ Do not wrap service calls in test-level utility functions.
 
 Do **not** add separate helper modules under `services/` for API client logic. Shared HTTP utilities belong on `BaseService` in `base.service.ts` or in `services/<service>/shared/` when service-specific.
 
-Query and audit services follow the hxp-style layout:
+Query and audit services follow the hxp-process-services layout:
 
-- `services/query/query.service.ts`, `services/audit/audit.service.ts` — facades composing endpoint classes
-- `services/query/endpoints/*.endpoint.ts`, `services/audit/endpoints/*.endpoint.ts` — one class per REST resource area
-- `services/query/admin/`, `services/audit/admin/` — admin variants with the same pattern
+- `services/query/query.service.ts`, `services/audit/audit.service.ts` — single facades with user + admin endpoint fields (e.g. `tasks` / `adminTasks`, `events` / `adminEvents`)
+- `services/query/endpoints/*.endpoint.ts`, `services/audit/endpoints/*.endpoint.ts` — one class per REST resource area; user/admin share an endpoint class via an `admin: boolean` constructor flag where applicable
+- Admin-only query resources (`service-tasks`, `integration-contexts`) use dedicated endpoint classes under `endpoints/`
+- Admin fixtures use the same service type with `createQueryService(context, true)` for admin status-check builders; audit admin methods live on `AuditService.adminEvents`
 
 **Specs must never contain REST paths or URLs or import service classes for status checks.** Call `build*StatusChecks()` on the fixture service instance.
 

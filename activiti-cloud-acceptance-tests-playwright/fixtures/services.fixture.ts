@@ -17,11 +17,9 @@
 import { test as playwrightTest } from '@playwright/test';
 import { DirtyContextRegistry } from '../helpers/dirty-context';
 import {
-    createAuditAdminService,
     createAuditService,
     createIdentityManagementService,
     createMultipleRuntimeBundleService,
-    createQueryAdminService,
     createQueryService,
     createRuntimeAdminService,
     createRuntimeBundleService,
@@ -33,11 +31,9 @@ import { getTestScope, TestScope } from '../helpers/test-isolation';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
 import { RuntimeBundleService } from '../services/runtime-bundle.service';
 import { QueryService } from '../services/query/query.service';
-import { QueryAdminService } from '../services/query/admin/query-admin.service';
 import { RuntimeAdminService } from '../services/runtime-admin.service';
 import { TaskService } from '../services/task.service';
 import { TaskAdminService } from '../services/task-admin.service';
-import { AuditAdminService } from '../services/audit/admin/audit-admin.service';
 import { AuditService } from '../services/audit/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';
@@ -50,9 +46,9 @@ interface ServicesFixture {
     runtimeBundleServiceTestUser: RuntimeBundleService;
     queryServiceTestUser: QueryService;
     queryServiceHrUser: QueryService;
-    queryAdminServiceProcessAdmin: QueryAdminService;
-    queryAdminServiceHrUser: QueryAdminService;
-    queryAdminServiceHradmin: QueryAdminService;
+    queryAdminServiceProcessAdmin: QueryService;
+    queryAdminServiceHrUser: QueryService;
+    queryAdminServiceHradmin: QueryService;
     queryServiceTestAdmin: QueryService;
     runtimeAdminServiceTestAdmin: RuntimeAdminService;
     runtimeBundleServiceTestAdmin: RuntimeBundleService;
@@ -66,15 +62,15 @@ interface ServicesFixture {
     auditServiceTestUser: AuditService;
     auditServiceHrUser: AuditService;
     auditServiceTestAdmin: AuditService;
-    auditAdminServiceTestAdmin: AuditAdminService;
-    auditAdminServiceHrUser: AuditAdminService;
+    auditAdminServiceTestAdmin: AuditService;
+    auditAdminServiceHrUser: AuditService;
     anonymousQueryService: QueryService;
-    anonymousQueryAdminService: QueryAdminService;
+    anonymousQueryAdminService: QueryService;
     anonymousAuditService: AuditService;
-    anonymousAuditAdminService: AuditAdminService;
+    anonymousAuditAdminService: AuditService;
     invalidTokenQueryService: QueryService;
-    invalidTokenQueryAdminService: QueryAdminService;
-    queryAdminServiceTestAdmin: QueryAdminService;
+    invalidTokenQueryAdminService: QueryService;
+    queryAdminServiceTestAdmin: QueryService;
     securityPoliciesServiceTestUser: SecurityPoliciesService;
     securityPoliciesServiceHrUser: SecurityPoliciesService;
     securityPoliciesServiceHradmin: SecurityPoliciesService;
@@ -115,13 +111,13 @@ const activiti = contexts.extend<ServicesFixture>({
         await use(createQueryService(hrUserContext));
     },
     queryAdminServiceProcessAdmin: async ({ processAdminContext }, use) => {
-        await use(createQueryAdminService(processAdminContext));
+        await use(createQueryService(processAdminContext, true));
     },
     queryAdminServiceHrUser: async ({ hrUserContext }, use) => {
-        await use(createQueryAdminService(hrUserContext));
+        await use(createQueryService(hrUserContext, true));
     },
     queryAdminServiceHradmin: async ({ hradminContext }, use) => {
-        await use(createQueryAdminService(hradminContext));
+        await use(createQueryService(hradminContext, true));
     },
     queryServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryService(testAdminUserContext));
@@ -163,31 +159,31 @@ const activiti = contexts.extend<ServicesFixture>({
         await use(createAuditService(testAdminUserContext));
     },
     auditAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createAuditAdminService(testAdminUserContext));
+        await use(createAuditService(testAdminUserContext));
     },
     auditAdminServiceHrUser: async ({ hrUserContext }, use) => {
-        await use(createAuditAdminService(hrUserContext));
+        await use(createAuditService(hrUserContext));
     },
     anonymousQueryService: async ({ anonymousGatewayContext }, use) => {
         await use(createQueryService(anonymousGatewayContext));
     },
     anonymousQueryAdminService: async ({ anonymousGatewayContext }, use) => {
-        await use(createQueryAdminService(anonymousGatewayContext));
+        await use(createQueryService(anonymousGatewayContext, true));
     },
     anonymousAuditService: async ({ anonymousGatewayContext }, use) => {
         await use(createAuditService(anonymousGatewayContext));
     },
     anonymousAuditAdminService: async ({ anonymousGatewayContext }, use) => {
-        await use(createAuditAdminService(anonymousGatewayContext));
+        await use(createAuditService(anonymousGatewayContext));
     },
     invalidTokenQueryService: async ({ invalidTokenGatewayContext }, use) => {
         await use(createQueryService(invalidTokenGatewayContext));
     },
     invalidTokenQueryAdminService: async ({ invalidTokenGatewayContext }, use) => {
-        await use(createQueryAdminService(invalidTokenGatewayContext));
+        await use(createQueryService(invalidTokenGatewayContext, true));
     },
     queryAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createQueryAdminService(testAdminUserContext));
+        await use(createQueryService(testAdminUserContext, true));
     },
     securityPoliciesServiceTestUser: async ({ testUserContext, dirtyRegistry, testScope }, use) => {
         await use(createSecurityPoliciesService(testUserContext, isolationOpts(dirtyRegistry, testScope)));
