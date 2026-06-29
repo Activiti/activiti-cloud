@@ -135,16 +135,8 @@ public class FunctionRouterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    Function<String, ExecutorService> functionRouterExecutorFactory(
-        ActivitiCloudMessagingProperties messagingProperties
-    ) {
+    FunctionRouterExecutorFactory functionRouterExecutorFactory(ActivitiCloudMessagingProperties messagingProperties) {
         return new FunctionRouterExecutorFactory(messagingProperties.getFunctionRouter().getRequestTimeout());
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    FunctionRouterShutdownState functionRouterShutdownState(ActivitiCloudMessagingProperties messagingProperties) {
-        return new FunctionRouterShutdownState(messagingProperties.getFunctionRouter().getShutdownDrainTimeout());
     }
 
     @Bean
@@ -174,15 +166,11 @@ public class FunctionRouterConfiguration {
         FunctionCatalog functionCatalog,
         Function<Message<?>, ExecutorService> functionExecutorSelector,
         MessageContentTypeNormalizer messageContentTypeNormalizer,
-        BindingServiceProperties bindingServiceProperties,
-        FunctionRouterShutdownState shutdownState
+        BindingServiceProperties bindingServiceProperties
     ) {
         final var functionRouter = messagingProperties.getFunctionRouter();
 
         return (message, routingContext) -> {
-            final var messageId = message.getHeaders().getId();
-            final var integrationContextId = message.getHeaders().get("integrationContextId");
-            log.info("FN-ROUTER-TRACE received msgId={} integrationContextId={}", messageId, integrationContextId);
             Optional.ofNullable(message.getHeaders().get(FUNCTION_DESTINATION, String.class))
                 .or(() -> Optional.ofNullable(message.getHeaders().get(CONNECTOR_TYPE, String.class)))
                 .or(() ->
@@ -232,10 +220,9 @@ public class FunctionRouterConfiguration {
                                 )
                                     .thenApply(result -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
-                                        log.info(
-                                            "FN-ROUTER-TRACE routed msgId={} integrationContextId={} to {}",
-                                            messageId,
-                                            integrationContextId,
+                                        log.debug(
+                                            "Function message request {} successfully routed to {}",
+                                            functionRequest,
                                             functionDefinition
                                         );
                                         return Map.entry(functionDefinition, Optional.ofNullable(result));
@@ -243,9 +230,8 @@ public class FunctionRouterConfiguration {
                                     .exceptionally(error -> {
                                         var functionDefinition = resolveFunctionDefinition.apply(functionRequest);
                                         log.error(
-                                            "FN-ROUTER-TRACE route-error msgId={} integrationContextId={} fn={}",
-                                            messageId,
-                                            integrationContextId,
+                                            "Error routing message request {} to function registration {}",
+                                            functionRequest,
                                             functionDefinition,
                                             error
                                         );
@@ -258,7 +244,7 @@ public class FunctionRouterConfiguration {
                             Stream.of(functions).map(CompletableFuture::join).toList()
                         );
 
-                        var drained = completed.thenAccept(results -> {
+                        completed.thenAccept(results -> {
                             var errors = results
                                 .stream()
                                 .map(Map.Entry.class::cast)
@@ -271,12 +257,7 @@ public class FunctionRouterConfiguration {
                                 .toList();
 
                             if (!errors.isEmpty()) {
-                                log.warn(
-                                    "FN-ROUTER-TRACE emitting-errors msgId={} integrationContextId={} count={}",
-                                    messageId,
-                                    integrationContextId,
-                                    errors.size()
-                                );
+                                log.debug("Errors handling function route message request {}", errors);
 
                                 Optional.ofNullable(messagingProperties.getFunctionRouter().getErrorHandlerDefinition())
                                     .filter(StringUtils::hasText)
@@ -302,14 +283,9 @@ public class FunctionRouterConfiguration {
                                             });
                                     });
                             } else {
-                                log.info(
-                                    "FN-ROUTER-TRACE completed msgId={} integrationContextId={}",
-                                    messageId,
-                                    integrationContextId
-                                );
+                                log.debug("Successfully completed function route message request {}", message);
                             }
                         });
-                        shutdownState.register(drained);
                     },
                     () -> {
                         final var destination = message.getHeaders().get(FUNCTION_DESTINATION, String.class);

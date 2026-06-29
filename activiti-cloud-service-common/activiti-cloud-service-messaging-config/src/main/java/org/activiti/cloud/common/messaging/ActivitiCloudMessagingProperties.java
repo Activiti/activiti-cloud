@@ -444,8 +444,6 @@ public class ActivitiCloudMessagingProperties {
 
         private Duration requestTimeout = Duration.ofSeconds(15);
 
-        private Duration shutdownDrainTimeout = Duration.ofSeconds(20);
-
         @NestedConfigurationProperty
         private final FunctionRouterAnonymousProperties anonymous = new FunctionRouterAnonymousProperties();
 
@@ -641,7 +639,6 @@ public class ActivitiCloudMessagingProperties {
                 .add("anonymous=" + anonymous)
                 .add("errorHandlerDefinition=" + errorHandlerDefinition)
                 .add("requestTimeout=" + requestTimeout)
-                .add("shutdownDrainTimeout=" + shutdownDrainTimeout)
                 .toString();
         }
 
@@ -663,14 +660,6 @@ public class ActivitiCloudMessagingProperties {
 
         public void setRequestTimeout(Duration requestTimeout) {
             this.requestTimeout = requestTimeout;
-        }
-
-        public Duration getShutdownDrainTimeout() {
-            return shutdownDrainTimeout;
-        }
-
-        public void setShutdownDrainTimeout(Duration shutdownDrainTimeout) {
-            this.shutdownDrainTimeout = shutdownDrainTimeout;
         }
     }
 

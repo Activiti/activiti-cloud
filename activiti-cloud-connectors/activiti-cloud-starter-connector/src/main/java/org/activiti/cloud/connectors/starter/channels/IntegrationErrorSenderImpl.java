@@ -19,15 +19,11 @@ import static org.activiti.cloud.common.messaging.config.FunctionRouterConfigura
 
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
-
-    private static final Logger logger = LoggerFactory.getLogger(IntegrationErrorSenderImpl.class);
 
     private final StreamBridge streamBridge;
     private final IntegrationErrorChannelResolver resolver;
@@ -43,11 +39,6 @@ public class IntegrationErrorSenderImpl implements IntegrationErrorSender {
 
         String destination = resolver.resolveDestination(request);
 
-        logger.info(
-            "FN-CONNECTOR-TRACE sending IntegrationError integrationContextId={} destination={}",
-            request.getIntegrationContext().getId(),
-            destination
-        );
         streamBridge.send(
             destination,
             MessageBuilder.fromMessage(message).setHeader(FUNCTION_DESTINATION, destination).build()
