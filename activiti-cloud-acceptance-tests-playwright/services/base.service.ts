@@ -448,4 +448,11 @@ export abstract class BaseService {
     ): HttpStatusCheck<T> {
         return { label, run: (service) => service.postHttpStatus(path, { data }) };
     }
+
+    static runStatusChecks<T extends BaseService>(
+        checks: readonly HttpStatusCheck<T>[],
+        service: T
+    ): Promise<number[]> {
+        return Promise.all(checks.map(({ run }) => run(service)));
+    }
 }

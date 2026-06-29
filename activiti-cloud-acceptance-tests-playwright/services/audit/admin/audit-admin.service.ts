@@ -69,7 +69,7 @@ export class AuditAdminService extends BaseService {
         return AuditAdminService.waitFor(
             () => this.getAllEventsAdmin(),
             (events) => events.length > minCount,
-            'querySync',
+            'auditEvents',
             `admin events count > ${minCount}`
         );
     }

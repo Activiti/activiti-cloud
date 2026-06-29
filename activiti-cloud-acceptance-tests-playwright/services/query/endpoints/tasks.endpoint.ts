@@ -69,7 +69,7 @@ export class QueryTasksEndpoint extends BaseService {
     }
 
     async getCandidateUsers(taskId: string): Promise<string[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${taskId}/candidate-users`);
+        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-users`);
         if (Array.isArray(response)) {
             return response as string[];
         }
@@ -80,7 +80,7 @@ export class QueryTasksEndpoint extends BaseService {
     }
 
     async getCandidateGroups(taskId: string): Promise<string[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${taskId}/candidate-groups`);
+        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-groups`);
         if (Array.isArray(response)) {
             return response as string[];
         }
@@ -91,7 +91,7 @@ export class QueryTasksEndpoint extends BaseService {
     }
 
     async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
-        const response = await this.get(`${QUERY_V1_BASE}/tasks/${taskId}/variables`);
+        const response = await this.get(`${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/variables`);
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
     }
 

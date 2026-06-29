@@ -74,8 +74,11 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
         });
 
         await activiti.step('Then the orphan process is linked to the main process instance', async () => {
-            const mainProcess = await queryServiceTestUser.getProcessInstance(parentProcessInstanceId);
-            expect(mainProcess.id).toBe(parentProcessInstanceId);
+            const linkedProcesses = await queryServiceTestUser.waitForLinkedProcess(
+                parentProcessInstanceId,
+                linkedOrphanProcessInstanceId
+            );
+            expect(linkedProcesses.map((instance) => instance.id)).toContain(linkedOrphanProcessInstanceId);
         });
     });
 

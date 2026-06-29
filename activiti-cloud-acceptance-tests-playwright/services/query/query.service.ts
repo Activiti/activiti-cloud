@@ -465,6 +465,24 @@ export class QueryService extends BaseService {
         await this.processInstancesEndpoint.linkProcessInstances(mainProcessInstanceId, processInstanceIds, linkProcessInstanceType);
     }
 
+    async getLinkedProcesses(mainProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const results = await this.searchProcessInstances({ id: [mainProcessInstanceId] });
+        const mainProcess = results.find((instance) => instance.id === mainProcessInstanceId);
+        return (mainProcess?.linkedProcesses as CloudProcessInstance[] | undefined) ?? [];
+    }
+
+    async waitForLinkedProcess(
+        mainProcessInstanceId: string,
+        linkedProcessInstanceId: string
+    ): Promise<CloudProcessInstance[]> {
+        return QueryService.waitFor(
+            () => this.getLinkedProcesses(mainProcessInstanceId),
+            (instances) => instances.some((instance) => instance.id === linkedProcessInstanceId),
+            'querySync',
+            `linked process ${linkedProcessInstanceId} under ${mainProcessInstanceId}`
+        );
+    }
+
     async checkServicesHealth(): Promise<void> {
         const response = await this.get('/query/actuator/health');
         const status = (response as { status?: string }).status;
