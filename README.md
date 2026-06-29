@@ -25,8 +25,8 @@ Requires the following secrets to be set:
 | BOT_GITHUB_USERNAME          | Username to issue propagation PRs  |
 | DOCKERHUB_USERNAME           | Docker Hub repository username     |
 | DOCKERHUB_PASSWORD           | Docker Hub repository password     |
-| NEXUS_USERNAME               | Internal Maven repository username |
-| NEXUS_PASSWORD               | Internal Maven repository password |
+| NEXUS_USERNAME               | Maven repository username (CI)     |
+| NEXUS_PASSWORD               | Maven repository password (CI)     |
 | RANCHER2_URL                 | Rancher URL for tests              |
 | RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
 | RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
