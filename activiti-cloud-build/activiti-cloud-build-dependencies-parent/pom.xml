@@ -24,6 +24,8 @@
     <plexus-utils.version>4.0.3</plexus-utils.version>
     <!-- Security fix: CVE in BouncyCastle 1.81 https://hyland.atlassian.net/browse/AAE-44983 -->
     <bcprov.version>1.84</bcprov.version>
+    <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
+    <spring-kafka.version>4.0.6</spring-kafka.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -58,6 +60,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AAE-47589 Jackson BOM override -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.21.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -126,6 +136,13 @@
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
         <version>${bcprov.version}</version>
+      </dependency>
+
+      <!-- Security fix AAE-47212/AAE-47213: override spring-kafka transitive version. -->
+      <dependency>
+        <groupId>org.springframework.kafka</groupId>
+        <artifactId>spring-kafka</artifactId>
+        <version>${spring-kafka.version}</version>
       </dependency>
 
       <dependency>

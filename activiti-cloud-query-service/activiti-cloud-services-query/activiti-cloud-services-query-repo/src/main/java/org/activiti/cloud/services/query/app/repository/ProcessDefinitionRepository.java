@@ -31,6 +31,7 @@ public interface ProcessDefinitionRepository
         PagingAndSortingRepository<ProcessDefinitionEntity, String>,
         QuerydslPredicateExecutor<ProcessDefinitionEntity>,
         QuerydslBinderCustomizer<QProcessDefinitionEntity>,
+        CustomizedProcessDefinitionRepository,
         CrudRepository<ProcessDefinitionEntity, String>
 {
     @Override
