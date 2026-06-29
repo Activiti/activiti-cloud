@@ -56,6 +56,41 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
+    async getProcessInstancesFiltered(filters: {
+        status?: string;
+        processDefinitionKey?: string;
+        businessKey?: string;
+        name?: string;
+        skipCount?: number;
+        maxItems?: number;
+        sort?: string[];
+    }): Promise<CloudProcessInstance[]> {
+        const params = new URLSearchParams();
+        if (filters.status) {
+            params.set('status', filters.status);
+        }
+        if (filters.processDefinitionKey) {
+            params.set('processDefinitionKey', filters.processDefinitionKey);
+        }
+        if (filters.businessKey) {
+            params.set('businessKey', filters.businessKey);
+        }
+        if (filters.name) {
+            params.set('name', filters.name);
+        }
+        if (filters.skipCount !== undefined) {
+            params.set('skipCount', String(filters.skipCount));
+        }
+        if (filters.maxItems !== undefined) {
+            params.set('maxItems', String(filters.maxItems));
+        }
+        for (const sort of filters.sort ?? []) {
+            params.append('sort', sort);
+        }
+        const response = await this.get(`${this.basePath}/process-instances?${params.toString()}`);
+        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
+    }
+
     async getProcessInstancesWithVariableKeys(variableKeys: string): Promise<CloudProcessInstance[]> {
         const response = await this.get(
             `${this.basePath}/process-instances?variableKeys=${encodeURIComponent(variableKeys)}`
@@ -100,8 +135,8 @@ export class QueryProcessInstancesEndpoint extends BaseService {
         return this.unwrapList<Record<string, unknown>>(response, 'list');
     }
 
-    async getLinkedProcesses(linkedProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        const response = await this.get(`${this.basePath}/process-instances/${linkedProcessInstanceId}/linkedprocesses`);
+    async getLinkedProcesses(mainProcessInstanceId: string): Promise<CloudProcessInstance[]> {
+        const response = await this.get(`${this.basePath}/process-instances/${mainProcessInstanceId}/linkedprocesses`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 

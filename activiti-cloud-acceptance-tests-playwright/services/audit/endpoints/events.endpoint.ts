@@ -60,8 +60,10 @@ export class AuditEventsEndpoint extends BaseService {
         const searchParams = new URLSearchParams();
 
         if (this.base === AUDIT_V1_BASE) {
-            searchParams.append('sort', 'timestamp,desc');
-            searchParams.append('sort', 'id,desc');
+            const sorts = page?.sort?.length ? page.sort : ['timestamp,desc', 'id,desc'];
+            for (const sort of sorts) {
+                searchParams.append('sort', sort);
+            }
 
             const search = buildAuditSearch(params);
             if (search) {

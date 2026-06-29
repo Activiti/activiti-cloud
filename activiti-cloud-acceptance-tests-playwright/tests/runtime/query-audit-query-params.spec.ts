@@ -94,8 +94,11 @@ activiti.describe('Runtime — Query and Audit Query Parameters', () => {
         });
 
         await activiti.step('And the admin lists and searches process instances with query parameters', async () => {
-            const listed = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstances({
+            const listed = await queryAdminServiceTestAdmin.adminProcessInstances.getProcessInstancesFiltered({
                 status: ProcessInstanceStatus.RUNNING,
+                skipCount: 0,
+                maxItems: 10,
+                sort: ['startDate,desc'],
             });
             expect(listed.map((instance) => instance.id)).toContain(processInstanceId);
 
