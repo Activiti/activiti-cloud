@@ -23,6 +23,7 @@ import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +49,7 @@ public class AuditEventsDeleteController {
     public ResponseEntity<AuditEventsDeletionStartResponse> deleteEvents() {
         if (!auditEventsDeletionService.startDeletion()) {
             return ResponseEntity
-                .status(409)
+                .status(HttpStatus.CONFLICT)
                 .body(
                     new AuditEventsDeletionStartResponse(
                         "Audit events deletion is already running",
@@ -73,7 +74,7 @@ public class AuditEventsDeleteController {
     public ResponseEntity<AuditEventsDeletionCancelResponse> cancelDeletion() {
         if (!auditEventsDeletionService.requestCancellation()) {
             return ResponseEntity
-                .status(409)
+                .status(HttpStatus.CONFLICT)
                 .body(
                     new AuditEventsDeletionCancelResponse(
                         "No audit events deletion is currently running",

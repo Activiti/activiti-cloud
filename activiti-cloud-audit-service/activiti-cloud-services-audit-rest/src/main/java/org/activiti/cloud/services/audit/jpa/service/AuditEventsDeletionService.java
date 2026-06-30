@@ -89,12 +89,7 @@ public class AuditEventsDeletionService {
     @Async
     public CompletableFuture<AuditEventsDeletionStatusResponse> deleteEventsAsync() {
         try {
-            while (true) {
-                if (cancellationRequested.get()) {
-                    status.set(AuditEventsDeletionStatus.CANCELLED);
-                    return CompletableFuture.completedFuture(getStatusResponse());
-                }
-
+            while (!cancellationRequested.get()) {
                 Page<AuditEventEntity> eventsPage = eventsRepository.findAll(
                     PageRequest.of(0, batchSize, Sort.by(Sort.Direction.ASC, "id"))
                 );
@@ -114,6 +109,9 @@ public class AuditEventsDeletionService {
                     deletedCount.incrementAndGet();
                 }
             }
+
+            status.set(AuditEventsDeletionStatus.CANCELLED);
+            return CompletableFuture.completedFuture(getStatusResponse());
         } catch (Exception ex) {
             LOGGER.error("Failed to delete audit events asynchronously", ex);
             status.set(AuditEventsDeletionStatus.FAILED);
