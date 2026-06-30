@@ -20,11 +20,16 @@ import { applyResolvedHostsToEnv } from './config/connection/env-hosts';
 import { paths } from './config/paths';
 import { getTestConfiguration } from './config/runtime/test-configuration';
 import { timeouts } from './config/runtime/timeouts';
+import { getReportPortalConfig } from './report-portal.config';
 applyResolvedHostsToEnv();
 
 const testConfig = getTestConfiguration();
 const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? (process.env.CI ? '4' : '2'));
-const isCi = Boolean(process.env.CI);
+const isCi = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
+const reportPortalReporter = isCi
+    ? ([['@reportportal/agent-js-playwright', getReportPortalConfig()], ['github']] as const)
+    : ([] as const);
 
 /** Serial projects (subscriptions, admin bulk-delete). */
 const serial = { workers: 1, fullyParallel: false } as const;
@@ -72,11 +77,11 @@ export default defineConfig({
   maxFailures: isCi ? 10 : undefined,
 
   reporter: [
-    ['html'],
+    ...(isCi ? [] : ([['html']] as const)),
     ['list'],
     ['junit', { outputFile: `${paths.reporter}/junit.xml` }],
     ['json', { outputFile: `${paths.reporter}/results.json` }],
-    ...(isCi ? ([['github']] as const) : []),
+    ...reportPortalReporter,
   ],
 
   outputDir: paths.testResults,

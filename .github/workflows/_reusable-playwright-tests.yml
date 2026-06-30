@@ -26,6 +26,10 @@ on:
         required: true
       RANCHER2_SECRET_KEY:
         required: true
+      REPORT_PORTAL_TOKEN:
+        required: true
+      REPORT_PORTAL_URL:
+        required: true
 
 env:
   CLUSTER_NAME: activiti
@@ -55,11 +59,11 @@ jobs:
           - profile: kafka-non-partitioned-default
             concurrency-slot: 4
           - profile: kafka-partitioned-override
-            concurrency-slot: 1
+            concurrency-slot: 3
           - profile: rabbitmq-non-partitioned-pdb
             concurrency-slot: 2
           - profile: rabbitmq-prefix-pdb
-            concurrency-slot: 3
+            concurrency-slot: 1
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -149,6 +153,12 @@ jobs:
         with:
           script-command: "npm run test:all"
           diagnostics-artifact-name: playwright-diagnostics-${{ matrix.profile }}
+          rp-token: ${{ secrets.REPORT_PORTAL_TOKEN }}
+          rp-url: ${{ secrets.REPORT_PORTAL_URL }}
+          rp-project: activiti-cloud
+          rp-launch-key: activiti-cloud-${{ matrix.profile }}
+          rp-trigger: ${{ github.event_name == 'pull_request' && 'PR' || 'CI' }}
+          rp-environment: activiti
 
       - name: Delete Helm release (${{ matrix.profile }})
         if: always()
