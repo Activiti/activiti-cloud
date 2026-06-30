@@ -27,37 +27,33 @@ import { AuditEventsDeletionStatus } from '../../models/audit.models';
 activiti.describe('Audit — Cancellable Delete [AAE-47805]', { tag: ['@slow', '@destructive'] }, () => {
     activiti.describe.configure({ mode: 'serial' });
 
+    activiti.beforeEach(async ({ runtimeBundleServiceTestUser, auditAdminServiceTestAdmin }) => {
+        const processInstance = await startCatalogProcess(
+            runtimeBundleServiceTestUser,
+            'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
+        );
+        expect(processInstance.id).toBeTruthy();
+        const events = await auditAdminServiceTestAdmin.waitForAllEventsAdminCountGreaterThan(0);
+        expect(events.length).toBeGreaterThan(0);
+    });
+
     activiti(
         'admin can start async audit events deletion and it completes successfully',
-        async ({ runtimeBundleServiceTestUser, auditAdminServiceTestAdmin }) => {
-            await activiti.step(
-                'Given a process is started and audit events are synced',
-                async () => {
-                    const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestUser,
-                        'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                    );
-                    expect(processInstance.id).toBeTruthy();
-                    const events = await auditAdminServiceTestAdmin.waitForAllEventsAdminCountGreaterThan(0);
-                    expect(events.length).toBeGreaterThan(0);
-                }
-            );
-
-            await activiti.step(
-                'When admin starts the cancellable deletion',
-                async () => {
-                    const startResponse = await auditAdminServiceTestAdmin.startCancellableDeletionAdmin();
-                    expect(startResponse.message).toBeTruthy();
-                    expect(startResponse.totalCount).toBeGreaterThan(0);
-                    expect(startResponse.percentComplete).toBeGreaterThanOrEqual(0);
-                }
-            );
+        async ({ auditAdminServiceTestAdmin }) => {
+            await activiti.step('When admin starts the cancellable deletion', async () => {
+                const startResponse = await auditAdminServiceTestAdmin.startCancellableDeletionAdmin();
+                expect(startResponse.message).toBeTruthy();
+                expect(startResponse.totalCount).toBeGreaterThan(0);
+                expect(startResponse.percentComplete).toBeGreaterThanOrEqual(0);
+            });
 
             await activiti.step(
                 'Then deletion reaches a completed state and all audit events are removed',
                 async () => {
                     const finalStatus = await auditAdminServiceTestAdmin.waitForDeletionCompletedAdmin();
                     expect(finalStatus.status).toBe(AuditEventsDeletionStatus.COMPLETED);
+                    expect(finalStatus.remainingCount).toBe(0);
+                    expect(finalStatus.deletedCount).toBeGreaterThan(0);
                     expect(finalStatus.percentComplete).toBe(100);
                     const events = await auditAdminServiceTestAdmin.waitForAllEventsAdminCount(0);
                     expect(events.length).toBe(0);
@@ -68,20 +64,7 @@ activiti.describe('Audit — Cancellable Delete [AAE-47805]', { tag: ['@slow', '
 
     activiti(
         'admin can query the deletion status while async deletion is running',
-        async ({ runtimeBundleServiceTestUser, auditAdminServiceTestAdmin }) => {
-            await activiti.step(
-                'Given a process is started and audit events are synced',
-                async () => {
-                    const processInstance = await startCatalogProcess(
-                        runtimeBundleServiceTestUser,
-                        'PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'
-                    );
-                    expect(processInstance.id).toBeTruthy();
-                    const events = await auditAdminServiceTestAdmin.waitForAllEventsAdminCountGreaterThan(0);
-                    expect(events.length).toBeGreaterThan(0);
-                }
-            );
-
+        async ({ auditAdminServiceTestAdmin }) => {
             await activiti.step('When admin starts the cancellable deletion', async () => {
                 const startResponse = await auditAdminServiceTestAdmin.startCancellableDeletionAdmin();
                 expect(startResponse.message).toBeTruthy();
