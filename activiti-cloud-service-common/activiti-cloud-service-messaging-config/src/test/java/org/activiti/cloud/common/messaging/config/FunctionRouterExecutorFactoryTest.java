@@ -22,11 +22,12 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.springframework.amqp.ImmediateRequeueAmqpException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
++import org.springframework.amqp.ImmediateRequeueAmqpException;
+
 
 class FunctionRouterExecutorFactoryTest {
 
