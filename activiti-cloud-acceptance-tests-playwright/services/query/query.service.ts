@@ -30,10 +30,7 @@ import { RuntimeBundleService } from '../runtime-bundle.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { isDiagramShown } from '../../helpers/diagram-utils';
 import { PollProfile } from '../../config/runtime/timeouts';
-import { HttpStatusCheck } from '../../models/base-service.models';
 import {
-    QUERY_ADMIN_V1_BASE,
-    QUERY_V1_BASE,
     QueryApplicationsEndpoint,
     QueryIntegrationContextsEndpoint,
     QueryOpenApiSpecEndpoint,
@@ -42,6 +39,7 @@ import {
     QueryServiceTasksEndpoint,
     QueryTasksEndpoint,
 } from './endpoints/index';
+import { QueryStatusChecks } from './query-status-checks';
 
 export class QueryService extends BaseService {
     public readonly tasks: QueryTasksEndpoint;
@@ -55,6 +53,7 @@ export class QueryService extends BaseService {
     public readonly processDefinitions: QueryProcessDefinitionsEndpoint;
     public readonly adminProcessDefinitions: QueryProcessDefinitionsEndpoint;
     public readonly openApiSpec: QueryOpenApiSpecEndpoint;
+    public readonly statusChecks: QueryStatusChecks;
 
     private readonly adminMode: boolean;
 
@@ -72,6 +71,7 @@ export class QueryService extends BaseService {
         this.processDefinitions = new QueryProcessDefinitionsEndpoint(context, false);
         this.adminProcessDefinitions = new QueryProcessDefinitionsEndpoint(context, true);
         this.openApiSpec = new QueryOpenApiSpecEndpoint(context);
+        this.statusChecks = new QueryStatusChecks(adminMode);
     }
 
     async getProcessInstanceWhenSynced(processInstanceId: string): Promise<CloudProcessInstance | undefined> {
@@ -373,22 +373,23 @@ export class QueryService extends BaseService {
         );
     }
 
-    async getLinkedProcesses(mainProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        const results = await this.processInstances.searchProcessInstances({ id: [mainProcessInstanceId] });
-        const mainProcess = results.find((instance) => instance.id === mainProcessInstanceId);
-        return (mainProcess?.linkedProcesses as CloudProcessInstance[] | undefined) ?? [];
-    }
-
     async waitForLinkedProcess(
         mainProcessInstanceId: string,
         linkedProcessInstanceId: string
-    ): Promise<CloudProcessInstance[]> {
-        return QueryService.waitFor(
-            () => this.getLinkedProcesses(mainProcessInstanceId),
-            (instances) => instances.some((instance) => instance.id === linkedProcessInstanceId),
+    ): Promise<CloudProcessInstance> {
+        const instance = await QueryService.waitFor(
+            async () => {
+                try {
+                    return await this.processInstances.getProcessInstance(linkedProcessInstanceId);
+                } catch {
+                    return undefined;
+                }
+            },
+            (processInstance) => processInstance?.linkedProcessInstanceId === mainProcessInstanceId,
             'querySync',
-            `linked process ${linkedProcessInstanceId} under ${mainProcessInstanceId}`
+            `process ${linkedProcessInstanceId} linked to ${mainProcessInstanceId}`
         );
+        return instance!;
     }
 
     async checkServicesHealth(): Promise<void> {
@@ -622,206 +623,5 @@ export class QueryService extends BaseService {
             'querySync',
             `admin tasks count > ${minCount}`
         );
-    }
-
-    buildUnauthenticatedGetStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<QueryService>[] {
-        if (this.adminMode) {
-            return [
-                BaseService.getStatusCheck<QueryService>('tasks list', `${QUERY_ADMIN_V1_BASE}/tasks`),
-                BaseService.getStatusCheck<QueryService>('process instances list', `${QUERY_ADMIN_V1_BASE}/process-instances`),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instances with variable keys',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances?variableKeys=start1`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instance by id',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances/${fakeResourceId}`
-                ),
-                BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}`),
-                BaseService.getStatusCheck<QueryService>(
-                    'task candidate groups',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}/candidate-groups`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'task candidate users',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}/candidate-users`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'task variables',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}/variables`
-                ),
-                BaseService.getStatusCheck<QueryService>('applications list', `${QUERY_ADMIN_V1_BASE}/applications`),
-                BaseService.getStatusCheck<QueryService>(
-                    'integration context by id',
-                    `${QUERY_ADMIN_V1_BASE}/integration-contexts/${encodeURIComponent(fakeResourceId)}`
-                ),
-            ];
-        }
-        return [
-            BaseService.getStatusCheck<QueryService>('tasks list', `${QUERY_V1_BASE}/tasks`),
-            BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}`),
-            BaseService.getStatusCheck<QueryService>(
-                'process instance subprocesses',
-                `${QUERY_V1_BASE}/process-instances/${fakeResourceId}/subprocesses`
-            ),
-        ];
-    }
-
-    buildUnauthenticatedPostStatusChecks(
-        fakeResourceId: string,
-        linkType?: string
-    ): readonly HttpStatusCheck<QueryService>[] {
-        if (this.adminMode) {
-            const taskSearchBody = { onlyStandalone: false, onlyRoot: false, id: [fakeResourceId] };
-            return [
-                BaseService.postStatusCheck<QueryService>('process instance search', `${QUERY_ADMIN_V1_BASE}/process-instances/search`, {
-                    id: [fakeResourceId],
-                }),
-                BaseService.postStatusCheck<QueryService>('process instance count', `${QUERY_ADMIN_V1_BASE}/process-instances/count`, {
-                    id: [fakeResourceId],
-                }),
-                BaseService.postStatusCheck<QueryService>('task search', `${QUERY_ADMIN_V1_BASE}/tasks/search`, taskSearchBody),
-                BaseService.postStatusCheck<QueryService>('task count', `${QUERY_ADMIN_V1_BASE}/tasks/count`, taskSearchBody),
-            ];
-        }
-        const taskSearchBody = { onlyStandalone: false, onlyRoot: false, id: [fakeResourceId] };
-        return [
-            BaseService.postStatusCheck<QueryService>('task search', `${QUERY_V1_BASE}/tasks/search`, taskSearchBody),
-            BaseService.postStatusCheck<QueryService>('task count', `${QUERY_V1_BASE}/tasks/count`, taskSearchBody),
-            BaseService.postStatusCheck<QueryService>('process instance search', `${QUERY_V1_BASE}/process-instances/search`, {
-                id: [fakeResourceId],
-            }),
-            BaseService.postStatusCheck<QueryService>('process instance count', `${QUERY_V1_BASE}/process-instances/count`, {
-                id: [fakeResourceId],
-            }),
-            BaseService.postStatusCheck<QueryService>(
-                'process instance link',
-                `${QUERY_V1_BASE}/process-instances/${fakeResourceId}/link`,
-                { processInstanceIds: [fakeResourceId], linkProcessInstanceType: linkType! }
-            ),
-        ];
-    }
-
-    buildNotFoundGetStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<QueryService>[] {
-        if (this.adminMode) {
-            return [
-                BaseService.getStatusCheck<QueryService>(
-                    'process instance by id',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances/${fakeResourceId}`
-                ),
-                BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}`),
-                BaseService.getStatusCheck<QueryService>(
-                    'task candidate groups',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}/candidate-groups`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'task candidate users',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}/candidate-users`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'integration context by id',
-                    `${QUERY_ADMIN_V1_BASE}/integration-contexts/${encodeURIComponent(fakeResourceId)}`
-                ),
-            ];
-        }
-        return [
-            BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_V1_BASE}/tasks/${encodeURIComponent(fakeResourceId)}`),
-            BaseService.getStatusCheck<QueryService>(
-                'process instance subprocesses',
-                `${QUERY_V1_BASE}/process-instances/${fakeResourceId}/subprocesses`
-            ),
-        ];
-    }
-
-    buildNotFoundPostStatusChecks(fakeResourceId: string, linkType: string): readonly HttpStatusCheck<QueryService>[] {
-        return [
-            BaseService.postStatusCheck<QueryService>('process instance link', `${QUERY_V1_BASE}/process-instances/${fakeResourceId}/link`, {
-                processInstanceIds: [fakeResourceId],
-                linkProcessInstanceType: linkType,
-            }),
-        ];
-    }
-
-    buildBadRequestPostStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<QueryService>[] {
-        const base = this.adminMode ? QUERY_ADMIN_V1_BASE : QUERY_V1_BASE;
-        return [
-            BaseService.postStatusCheck<QueryService>('task search', `${base}/tasks/search`, { id: [fakeResourceId] }),
-            BaseService.postStatusCheck<QueryService>('task count', `${base}/tasks/count`, { id: [fakeResourceId] }),
-            BaseService.postStatusCheck<QueryService>('process instance search', `${base}/process-instances/search`, {
-                id: 'not-an-array',
-            }),
-        ];
-    }
-
-    buildForbiddenGetStatusChecks(
-        taskId: string,
-        processInstanceId?: string
-    ): readonly HttpStatusCheck<QueryService>[] {
-        if (processInstanceId !== undefined) {
-            return [
-                BaseService.getStatusCheck<QueryService>('applications list', `${QUERY_ADMIN_V1_BASE}/applications`),
-                BaseService.getStatusCheck<QueryService>('tasks list', `${QUERY_ADMIN_V1_BASE}/tasks`),
-                BaseService.getStatusCheck<QueryService>('process instances list', `${QUERY_ADMIN_V1_BASE}/process-instances`),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instances with variable keys',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances?variableKeys=start1`
-                ),
-                BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(taskId)}`),
-                BaseService.getStatusCheck<QueryService>(
-                    'task variables',
-                    `${QUERY_ADMIN_V1_BASE}/tasks/${encodeURIComponent(taskId)}/variables`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instance variables',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances/${processInstanceId}/variables`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instance sequence flows',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances/${processInstanceId}/sequence-flows`
-                ),
-                BaseService.getStatusCheck<QueryService>(
-                    'process instance subprocesses',
-                    `${QUERY_ADMIN_V1_BASE}/process-instances/${processInstanceId}/subprocesses`
-                ),
-            ];
-        }
-        return [
-            BaseService.getStatusCheck<QueryService>('task by id', `${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}`),
-            BaseService.getStatusCheck<QueryService>(
-                'task candidate users',
-                `${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-users`
-            ),
-            BaseService.getStatusCheck<QueryService>(
-                'task candidate groups',
-                `${QUERY_V1_BASE}/tasks/${encodeURIComponent(taskId)}/candidate-groups`
-            ),
-        ];
-    }
-
-    buildForbiddenPostStatusChecks(taskId: string, fakeResourceId: string): readonly HttpStatusCheck<QueryService>[] {
-        const taskSearchBody = { onlyStandalone: false, onlyRoot: false, id: [taskId] };
-        return [
-            BaseService.postStatusCheck<QueryService>('task search', `${QUERY_ADMIN_V1_BASE}/tasks/search`, taskSearchBody),
-            BaseService.postStatusCheck<QueryService>('task count', `${QUERY_ADMIN_V1_BASE}/tasks/count`, taskSearchBody),
-            BaseService.postStatusCheck<QueryService>('process instance search', `${QUERY_ADMIN_V1_BASE}/process-instances/search`, {
-                id: [fakeResourceId],
-            }),
-            BaseService.postStatusCheck<QueryService>('process instance count', `${QUERY_ADMIN_V1_BASE}/process-instances/count`, {
-                id: [fakeResourceId],
-            }),
-        ];
-    }
-
-    buildBadRequestLinkStatusChecks(
-        mainProcessInstanceId: string,
-        linkProcessInstanceType: string
-    ): readonly HttpStatusCheck<QueryService>[] {
-        return [
-            BaseService.postStatusCheck<QueryService>(
-                'process instance link',
-                `${QUERY_V1_BASE}/process-instances/${mainProcessInstanceId}/link`,
-                { processInstanceIds: 'invalid', linkProcessInstanceType }
-            ),
-        ];
     }
 }

@@ -17,8 +17,8 @@
 import { CloudRuntimeEvent, EventType } from '../../models/audit.models';
 import { BaseService } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
-import { HttpStatusCheck } from '../../models/base-service.models';
-import { AUDIT_ADMIN_V1_BASE, AUDIT_V1_BASE, AuditEventsEndpoint } from './endpoints/index';
+import { AuditStatusChecks } from './audit-status-checks';
+import { AuditEventsEndpoint, AUDIT_ADMIN_V1_BASE } from './endpoints/index';
 
 const INTEGRATION_EVENT_TYPES: readonly string[] = [
     EventType.INTEGRATION_REQUESTED,
@@ -29,11 +29,13 @@ const INTEGRATION_EVENT_TYPES: readonly string[] = [
 export class AuditService extends BaseService {
     readonly events: AuditEventsEndpoint;
     readonly adminEvents: AuditEventsEndpoint;
+    readonly statusChecks: AuditStatusChecks;
 
     constructor(context: CustomAPIRequest) {
         super(context);
         this.events = new AuditEventsEndpoint(context, false);
         this.adminEvents = new AuditEventsEndpoint(context, true);
+        this.statusChecks = new AuditStatusChecks();
     }
 
     async getEventsByEntityId(entityId: string): Promise<CloudRuntimeEvent[]> {
@@ -355,47 +357,5 @@ export class AuditService extends BaseService {
         if (status !== 'UP') {
             throw new Error(`Audit service health check failed: status=${status}`);
         }
-    }
-
-    buildUnauthenticatedGetStatusChecks(): readonly HttpStatusCheck<AuditService>[];
-    buildUnauthenticatedGetStatusChecks(fakeResourceId: string): readonly HttpStatusCheck<AuditService>[];
-    buildUnauthenticatedGetStatusChecks(fakeResourceId?: string): readonly HttpStatusCheck<AuditService>[] {
-        if (fakeResourceId === undefined) {
-            return [
-                BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_ADMIN_V1_BASE}/events`),
-                BaseService.getStatusCheck<AuditService>(
-                    'events export',
-                    `${AUDIT_ADMIN_V1_BASE}/events/export/pw-unauth-export.csv?from=2020-01-01&to=2020-01-31`
-                ),
-            ];
-        }
-        return [
-            BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_V1_BASE}/events`),
-            BaseService.getStatusCheck<AuditService>('event by id', `${AUDIT_V1_BASE}/events/${encodeURIComponent(fakeResourceId)}`),
-        ];
-    }
-
-    buildBadRequestGetStatusChecks(): readonly HttpStatusCheck<AuditService>[] {
-        return [
-            BaseService.getStatusCheck<AuditService>(
-                'events export with invalid dates',
-                `${AUDIT_ADMIN_V1_BASE}/events/export/pw-invalid-export.csv?from=not-a-date&to=also-invalid`
-            ),
-        ];
-    }
-
-    buildForbiddenGetStatusChecks(): readonly HttpStatusCheck<AuditService>[];
-    buildForbiddenGetStatusChecks(eventId: string): readonly HttpStatusCheck<AuditService>[];
-    buildForbiddenGetStatusChecks(eventId?: string): readonly HttpStatusCheck<AuditService>[] {
-        if (eventId === undefined) {
-            return [
-                BaseService.getStatusCheck<AuditService>('events list', `${AUDIT_ADMIN_V1_BASE}/events`),
-                BaseService.getStatusCheck<AuditService>(
-                    'events export',
-                    `${AUDIT_ADMIN_V1_BASE}/events/export/pw-forbidden-export.csv?from=2020-01-01&to=2020-01-31`
-                ),
-            ];
-        }
-        return [BaseService.getStatusCheck<AuditService>('event by id', `${AUDIT_V1_BASE}/events/${encodeURIComponent(eventId)}`)];
     }
 }

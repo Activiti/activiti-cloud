@@ -30,6 +30,8 @@ export interface CloudProcessInstance {
     initiator?: string;
     appName?: string;
     appVersion?: string;
+    linkedProcessInstanceId?: string;
+    linkedProcessInstanceType?: string;
 }
 
 export enum ProcessInstanceStatus {
