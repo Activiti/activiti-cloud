@@ -33,9 +33,5 @@ public interface EventsRepository<
 
     Collection<AuditEventEntity> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime);
 
-    Page<AuditEventEntity> findAllByTimestampBetweenOrderByTimestampDesc(
-        Long startDateTime,
-        Long endDateTime,
-        Pageable pageable
-    );
+    Page<T> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime, Pageable pageable);
 }

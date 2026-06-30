@@ -50,13 +50,9 @@ public class AuditEventsExporter {
 
     public void exportCsvStreaming(
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        String fileName,
         HttpServletResponse response,
         boolean isFirstChunk
     ) throws Exception {
-        if (isFirstChunk) {
-            setHttpHeaders(fileName, response);
-        }
         writeEventsAsCsvChunk(events, response, isFirstChunk);
     }
 
@@ -72,7 +68,7 @@ public class AuditEventsExporter {
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
 
         PrintWriter writer = response.getWriter();
-        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
+        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<CsvLogEntry>(writer)
             .withMappingStrategy(objectToJsonStrategy)
             .build();
         beanToCsv.write(entries);
@@ -84,14 +80,10 @@ public class AuditEventsExporter {
         HttpServletResponse response,
         boolean isFirstChunk
     ) throws Exception {
-        if (events.isEmpty()) {
-            return;
-        }
-
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
 
         PrintWriter writer = response.getWriter();
-        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
+        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<CsvLogEntry>(writer)
             .withMappingStrategy(objectToJsonStrategy)
             .build();
 

@@ -121,32 +121,38 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         @RequestParam(value = "to", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
         HttpServletResponse response
     ) throws Exception {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+
         final int PAGE_SIZE = 1000;
         int pageNumber = 0;
         boolean isFirstChunk = true;
 
-        Page<AuditEventEntity> auditPage;
+        Page<? extends AuditEventEntity> auditPage;
         do {
             Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
             auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
 
             if (auditPage == null || !auditPage.hasContent()) {
+                if (isFirstChunk) {
+                    auditEventsExporter.exportCsvStreaming(List.of(), response, true);
+                }
                 break;
             }
 
             List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
 
-            auditEventsExporter.exportCsvStreaming(events, fileName, response, isFirstChunk);
+            auditEventsExporter.exportCsvStreaming(events, response, isFirstChunk);
 
             isFirstChunk = false;
             pageNumber++;
         } while (auditPage.hasNext());
 
-        response.getWriter().close();
+        response.getWriter().flush();
     }
 
     private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(
-        Iterable<AuditEventEntity> allAuditInPage
+        Iterable<? extends AuditEventEntity> allAuditInPage
     ) {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 

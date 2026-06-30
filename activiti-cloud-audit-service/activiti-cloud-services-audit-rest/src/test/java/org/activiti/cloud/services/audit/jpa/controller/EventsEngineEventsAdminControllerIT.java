@@ -196,6 +196,61 @@ class EventsEngineEventsAdminControllerIT {
         assertCsv(response.getResponse(), CSV_CONTENT);
     }
 
+    @Test
+    void exportEventsMultiplePages() throws Exception {
+        // First page with 1 event
+        List<AuditEventEntity> page1Events = buildEventsData(1);
+        PageRequest page1Request = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Page<AuditEventEntity> page1 = new PageImpl<>(page1Events, page1Request, 2);
+
+        // Second page with 1 event
+        List<AuditEventEntity> page2Events = new ArrayList<>();
+        page2Events.add(buildVariableAuditEventEntity(2));
+        PageRequest page2Request = PageRequest.of(1, 1000, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Page<AuditEventEntity> page2 = new PageImpl<>(page2Events, page2Request, 2);
+
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(page1, page2);
+
+        MvcResult response = mockMvc
+            .perform(
+                get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
+                    .param("from", "2024-07-22")
+                    .param("to", "2024-07-24")
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertCsv(response.getResponse(), CSV_CONTENT);
+    }
+
+    @Test
+    void exportEventsEmpty() throws Exception {
+        // Empty page
+        Page<AuditEventEntity> emptyPage = new PageImpl<>(List.of());
+        given(
+            eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong(), any(Pageable.class))
+        ).willReturn(emptyPage);
+
+        MvcResult response = mockMvc
+            .perform(
+                get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
+                    .param("from", "2024-07-22")
+                    .param("to", "2024-07-24")
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        MockHttpServletResponse servletResponse = response.getResponse();
+        assertThat(servletResponse.getContentType()).isEqualTo("text/csv");
+        assertThat(servletResponse.getHeader(CONTENT_DISPOSITION)).isEqualTo(HEADER_ATTACHMENT_FILENAME + CSV_FILENAME);
+        // Should still have CSV header row even when empty
+        assertThat(servletResponse.getContentAsString()).contains(
+            "ACTOR,APPNAME,APPVERSION,BUSINESSKEY,ENTITY,ENTITYID,EVENTTYPE,ID,MESSAGEID"
+        );
+    }
+
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
         List<AuditEventEntity> eventsList = new ArrayList<>();
 
