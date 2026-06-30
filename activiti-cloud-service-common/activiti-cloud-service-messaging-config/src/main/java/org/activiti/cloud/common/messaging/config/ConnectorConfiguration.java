@@ -95,7 +95,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         @Value(
             "${activiti.connector.async-executor.cancel-remaining-tasks-on-close:true}"
         ) Boolean cancelRemainingTasksOnClose,
-        @Value("${activiti.connector.async-executor.virutal-threads:true}") Boolean virtualThreads
+        @Value("${activiti.connector.async-executor.virtual-threads:true}") Boolean virtualThreads
     ) {
         return new SimpleAsyncTaskExecutorBuilder()
             .threadNamePrefix("connectorAsyncTaskExecutor-")
@@ -185,6 +185,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                         }
                                     }
                                 } catch (InterruptedException interruptedException) {
+                                    future.cancel(true);
                                     Thread.currentThread().interrupt();
                                     throw new RuntimeException(
                                         "Interrupted while waiting for result",
@@ -313,7 +314,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         @Value("${activiti.connector.integration-result-timeout:PT25M}") Duration defaultResultTimeout,
         Function<String, String> resolveExpression
     ) {
-        final var ISO8601DurationPattern = Pattern.compile("^PT(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
+        final var ISO8601DurationPattern = Pattern.compile("^PT(?=.*\\d)(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
         final Function<String, Duration> toDuration = value ->
             Optional.of(value)
                 .filter(Predicate.not(String::isBlank))
