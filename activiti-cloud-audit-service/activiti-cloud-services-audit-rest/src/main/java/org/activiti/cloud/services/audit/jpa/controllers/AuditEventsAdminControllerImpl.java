@@ -124,9 +124,10 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
 
+        auditEventsExporter.writeHeader(response);
+
         final int PAGE_SIZE = 1000;
         int pageNumber = 0;
-        boolean isFirstChunk = true;
 
         Page<? extends AuditEventEntity> auditPage;
         do {
@@ -134,17 +135,12 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
 
             if (auditPage == null || !auditPage.hasContent()) {
-                if (isFirstChunk) {
-                    auditEventsExporter.exportCsvStreaming(List.of(), response, true);
-                }
                 break;
             }
 
             List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
+            auditEventsExporter.writeRows(events, response);
 
-            auditEventsExporter.exportCsvStreaming(events, response, isFirstChunk);
-
-            isFirstChunk = false;
             pageNumber++;
         } while (auditPage.hasNext());
 

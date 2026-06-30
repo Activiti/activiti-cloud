@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,29 +45,10 @@ public class AuditEventsExporter {
         String fileName,
         HttpServletResponse response
     ) throws Exception {
-        setHttpHeaders(fileName, response);
-        writeEventsAsCsv(events, response);
-    }
-
-    public void exportCsvStreaming(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        HttpServletResponse response,
-        boolean isFirstChunk
-    ) throws Exception {
-        writeEventsAsCsvChunk(events, response, isFirstChunk);
-    }
-
-    private void setHttpHeaders(String fileName, HttpServletResponse response) {
         response.setContentType(CSV_CONTENT_TYPE);
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
-    }
 
-    private void writeEventsAsCsv(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        HttpServletResponse response
-    ) throws Exception {
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
-
         PrintWriter writer = response.getWriter();
         StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<CsvLogEntry>(writer)
             .withMappingStrategy(objectToJsonStrategy)
@@ -75,26 +57,46 @@ public class AuditEventsExporter {
         writer.close();
     }
 
-    private void writeEventsAsCsvChunk(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        HttpServletResponse response,
-        boolean isFirstChunk
-    ) throws Exception {
-        List<CsvLogEntry> entries = toCsvLogEntryList(events);
-
+    public void writeHeader(HttpServletResponse response) throws Exception {
         PrintWriter writer = response.getWriter();
-        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<CsvLogEntry>(writer)
-            .withMappingStrategy(objectToJsonStrategy)
-            .build();
+        String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
+        try (
+            CSVWriter csvWriter = new CSVWriter(
+                writer,
+                CSVWriter.DEFAULT_SEPARATOR,
+                CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                ""
+            )
+        ) {
+            csvWriter.writeNext(header, true);
+        }
+        writer.flush();
+    }
 
-        if (isFirstChunk) {
-            beanToCsv.write(entries);
-        } else {
-            for (CsvLogEntry entry : entries) {
-                beanToCsv.write(entry);
-            }
+    public void writeRows(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events, HttpServletResponse response)
+        throws Exception {
+        if (events.isEmpty()) {
+            return;
         }
 
+        List<CsvLogEntry> entries = toCsvLogEntryList(events);
+        PrintWriter writer = response.getWriter();
+
+        try (
+            CSVWriter csvWriter = new CSVWriter(
+                writer,
+                CSVWriter.DEFAULT_SEPARATOR,
+                CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                ""
+            )
+        ) {
+            for (CsvLogEntry entry : entries) {
+                String[] line = objectToJsonStrategy.transmuteBean(entry);
+                csvWriter.writeNext(line, true);
+            }
+        }
         writer.flush();
     }
 
