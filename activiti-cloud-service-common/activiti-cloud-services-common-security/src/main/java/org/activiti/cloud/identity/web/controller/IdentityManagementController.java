@@ -102,9 +102,4 @@ public class IdentityManagementController {
     public User getUsersById(@PathVariable String id) {
         return identityManagementService.findUserById(id);
     }
-
-    @GetMapping(value = "/groups/{id}")
-    public Group getGroupsById(@PathVariable String id) {
-        return identityManagementService.findGroupById(id);
-    }
 }
