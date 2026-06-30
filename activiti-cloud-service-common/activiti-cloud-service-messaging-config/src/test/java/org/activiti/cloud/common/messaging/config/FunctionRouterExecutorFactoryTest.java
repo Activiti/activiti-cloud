@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
@@ -53,8 +54,8 @@ class FunctionRouterExecutorFactoryTest {
         executor.shutdown();
 
         assertThatThrownBy(() -> executor.submit(() -> {}))
-            .isInstanceOf(RejectedExecutionException.class)
-            .hasMessage("Executor has been shutdown");
+            .isInstanceOf(ImmediateRequeueAmqpException.class)
+            .hasMessage("Executor is shutting down; requeueing for redelivery");
     }
 
     @Test
@@ -121,7 +122,7 @@ class FunctionRouterExecutorFactoryTest {
         releaseTask.countDown();
         submitter.join();
 
-        assertThat(thrown.get()).isInstanceOf(RejectedExecutionException.class);
+        assertThat(thrown.get()).isInstanceOf(ImmediateRequeueAmqpException.class);
         assertThat(interrupted.get()).isTrue();
     }
 
