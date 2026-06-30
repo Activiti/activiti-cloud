@@ -96,7 +96,9 @@ runs:
       run: |
         npm ci --ignore-scripts
         ./node_modules/.bin/playwright install chromium
-        eval "${SCRIPT_COMMAND}"
+        set -o pipefail
+        eval "${SCRIPT_COMMAND}" 2>&1 | sed -E 's/ReportPortal Launch Link: [^[:space:]]+/ReportPortal Launch Link: [redacted]/g'
+        exit "${PIPESTATUS[0]}"
       continue-on-error: true
 
     - name: Upload Playwright diagnostics on failure
