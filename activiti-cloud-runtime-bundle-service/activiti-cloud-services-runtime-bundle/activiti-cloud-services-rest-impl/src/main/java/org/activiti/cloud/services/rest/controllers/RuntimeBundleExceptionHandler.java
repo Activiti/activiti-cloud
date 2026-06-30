@@ -129,6 +129,6 @@ public class RuntimeBundleExceptionHandler {
     }
 
     private void logFailedRequest(HttpServletRequest request, Exception ex) {
-        LOGGER.warn("{} {} failed", request.getMethod(), request.getRequestURI(), ex);
+        LOGGER.info("{} {} failed", request.getMethod(), request.getRequestURI(), ex);
     }
 }
