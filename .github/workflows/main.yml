@@ -301,6 +301,8 @@ jobs:
       RANCHER2_URL: ${{ secrets.RANCHER2_URL }}
       RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      REPORT_PORTAL_TOKEN: ${{ secrets.REPORT_PORTAL_TOKEN }}
+      REPORT_PORTAL_URL: ${{ secrets.REPORT_PORTAL_URL }}
 
   build-summary:
     runs-on: ubuntu-latest

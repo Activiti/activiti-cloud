@@ -53,6 +53,7 @@ updates:
       framework:
         patterns:
           - "@playwright/test"
+          - "@reportportal/agent-js-playwright"
         update-types:
           - "minor"
           - "patch"

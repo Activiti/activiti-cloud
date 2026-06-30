@@ -49,6 +49,7 @@
   "author": "michal.fidor@hyland.com",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@reportportal/agent-js-playwright": "^5.4.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.18.1",

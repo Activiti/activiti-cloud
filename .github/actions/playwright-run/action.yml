@@ -12,6 +12,26 @@ inputs:
     description: Artifact name for test-results/reporter upload on failure
     required: false
     default: playwright-diagnostics
+  rp-token:
+    description: The token for Report Portal
+    required: true
+  rp-url:
+    description: The URL for Report Portal API (secret, full endpoint including /api/v1)
+    required: true
+  rp-project:
+    description: The project used in Report Portal
+    required: true
+  rp-launch-key:
+    description: The launch key of the Report Portal job
+    required: true
+  rp-trigger:
+    description: The trigger information for Report Portal
+    required: false
+    default: CI
+  rp-environment:
+    description: The environment information for Report Portal
+    required: false
+    default: activiti
 
 outputs:
   outcome:
@@ -41,14 +61,25 @@ runs:
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@4e61fa01622e3f3a1898eb059d9a3af208897515 # v18.9.0
 
+    - name: Compute Report Portal Launch key
+      id: compute-rp-launch-key
+      shell: bash
+      env:
+        LAUNCH_KEY: ${{ inputs.rp-launch-key }}
+      run: echo "key=playwright-$LAUNCH_KEY" >> $GITHUB_OUTPUT
+
     - name: Add GitHub Step Summary
       shell: bash
       env:
         SCRIPT_COMMAND: ${{ inputs.script-command }}
+        RP_PROJECT: ${{ inputs.rp-project }}
+        RP_LAUNCH_KEY: ${{ steps.compute-rp-launch-key.outputs.key }}
       run: |
         echo "#### ⏱ Before Playwright Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
         echo "#### ⚙ Configuration" >> $GITHUB_STEP_SUMMARY
         echo "- Script command: ${SCRIPT_COMMAND}" >> $GITHUB_STEP_SUMMARY
+        echo "- Report Portal project: ${RP_PROJECT}" >> $GITHUB_STEP_SUMMARY
+        echo "- Report Portal launch key: ${RP_LAUNCH_KEY}" >> $GITHUB_STEP_SUMMARY
 
     - name: Run Tests (continue on error)
       id: launch-tests
@@ -56,6 +87,12 @@ runs:
       working-directory: ${{ github.workspace }}/${{ inputs.working-directory }}
       env:
         SCRIPT_COMMAND: ${{ inputs.script-command }}
+        REPORT_PORTAL_TOKEN: ${{ inputs.rp-token }}
+        REPORT_PORTAL_URL: ${{ inputs.rp-url }}
+        REPORT_PORTAL_PROJECT: ${{ inputs.rp-project }}
+        REPORT_PORTAL_TRIGGER: ${{ inputs.rp-trigger || 'CI' }}
+        REPORT_PORTAL_ENVIRONMENT: ${{ inputs.rp-environment }}
+        REPORT_PORTAL_LAUNCH_KEY: ${{ steps.compute-rp-launch-key.outputs.key }}
       run: |
         npm ci --ignore-scripts
         ./node_modules/.bin/playwright install chromium
