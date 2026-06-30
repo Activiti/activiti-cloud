@@ -44,6 +44,31 @@ export interface EventQueryParams {
     eventType?: string;
 }
 
+export enum AuditEventsDeletionStatus {
+    IDLE = 'IDLE',
+    RUNNING = 'RUNNING',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+    FAILED = 'FAILED',
+}
+
+export interface AuditEventsDeletionStatusResponse {
+    [key: string]: unknown;
+    status: AuditEventsDeletionStatus;
+    deletedCount: number;
+    remainingCount: number;
+    totalCount: number;
+    percentComplete: number;
+}
+
+export interface AuditEventsDeletionStartResponse extends AuditEventsDeletionStatusResponse {
+    message: string;
+}
+
+export interface AuditEventsDeletionCancelResponse extends AuditEventsDeletionStatusResponse {
+    message: string;
+}
+
 export enum EventType {
     PROCESS_STARTED = 'PROCESS_STARTED',
     PROCESS_COMPLETED = 'PROCESS_COMPLETED',

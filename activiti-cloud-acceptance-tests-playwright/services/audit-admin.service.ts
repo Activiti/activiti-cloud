@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams } from '../models/audit.models';
+import { CloudRuntimeEvent, EventQueryParams, AuditEventsDeletionStatus, AuditEventsDeletionStatusResponse, AuditEventsDeletionStartResponse, AuditEventsDeletionCancelResponse } from '../models/audit.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
@@ -62,6 +62,33 @@ export class AuditAdminService extends BaseService {
     async deleteAllEventsAdmin(): Promise<CloudRuntimeEvent[]> {
         const response = await this.delete(`${this.basePath}/events`);
         return this.unwrapList<CloudRuntimeEvent>(response, 'events');
+    }
+
+    async startCancellableDeletionAdmin(): Promise<AuditEventsDeletionStartResponse> {
+        const response = await this.delete(`${this.basePath}/events`);
+        return this.unwrapEntity<AuditEventsDeletionStartResponse>(response);
+    }
+
+    async cancelDeletionAdmin(): Promise<AuditEventsDeletionCancelResponse> {
+        const response = await this.post(`${this.basePath}/events/deletion/cancel`);
+        return this.unwrapEntity<AuditEventsDeletionCancelResponse>(response);
+    }
+
+    async getDeletionStatusAdmin(): Promise<AuditEventsDeletionStatusResponse> {
+        const response = await this.get(`${this.basePath}/events/deletion/status`);
+        return this.unwrapEntity<AuditEventsDeletionStatusResponse>(response);
+    }
+
+    async waitForDeletionCompletedAdmin(): Promise<AuditEventsDeletionStatusResponse> {
+        return AuditAdminService.waitFor(
+            () => this.getDeletionStatusAdmin(),
+            (s) =>
+                s.status === AuditEventsDeletionStatus.COMPLETED ||
+                s.status === AuditEventsDeletionStatus.FAILED ||
+                s.status === AuditEventsDeletionStatus.CANCELLED,
+            'querySync',
+            'audit deletion to reach a terminal state'
+        );
     }
 
     async waitForAllEventsAdminCount(expectedCount: number): Promise<CloudRuntimeEvent[]> {
