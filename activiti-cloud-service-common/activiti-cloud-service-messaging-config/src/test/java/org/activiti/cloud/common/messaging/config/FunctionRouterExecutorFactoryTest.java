@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-+import org.springframework.amqp.ImmediateRequeueAmqpException;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 
 
 class FunctionRouterExecutorFactoryTest {
