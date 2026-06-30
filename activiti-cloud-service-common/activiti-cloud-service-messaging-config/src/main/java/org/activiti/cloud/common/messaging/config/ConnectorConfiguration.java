@@ -323,8 +323,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 .orElse(null);
 
         return (message, connectorBinding) ->
-            Optional.ofNullable(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT, String.class))
-                .map(toDuration)
+            Optional.ofNullable(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                .map(it -> (it instanceof Duration) ? (Duration) it : toDuration.apply(it.toString()))
                 .or(() -> Optional.of(connectorBinding.integrationResultTimeout()).map(toDuration))
                 .filter(it -> it.compareTo(defaultResultTimeout) <= 0)
                 .orElse(defaultResultTimeout);
