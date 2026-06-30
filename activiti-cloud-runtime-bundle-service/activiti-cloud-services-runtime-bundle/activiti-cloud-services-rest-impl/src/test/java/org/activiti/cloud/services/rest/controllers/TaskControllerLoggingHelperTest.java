@@ -37,9 +37,7 @@ class TaskControllerLoggingHelperTest {
 
     @BeforeEach
     void setUp() {
-        testLogger = (Logger) LoggerFactory.getLogger(
-            "test." + TaskControllerLoggingHelperTest.class.getName()
-        );
+        testLogger = (Logger) LoggerFactory.getLogger("test." + TaskControllerLoggingHelperTest.class.getName());
         testLogger.setAdditive(false);
         listAppender = new ListAppender<>();
         listAppender.start();
