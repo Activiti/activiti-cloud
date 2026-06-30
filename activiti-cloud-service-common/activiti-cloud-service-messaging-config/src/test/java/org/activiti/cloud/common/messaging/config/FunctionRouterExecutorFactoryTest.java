@@ -28,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.ImmediateRequeueAmqpException;
 
-
 class FunctionRouterExecutorFactoryTest {
 
     private final FunctionRouterExecutorFactory factory = new FunctionRouterExecutorFactory();
