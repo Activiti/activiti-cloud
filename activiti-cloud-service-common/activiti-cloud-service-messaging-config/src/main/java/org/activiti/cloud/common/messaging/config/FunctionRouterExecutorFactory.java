@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.context.SmartLifecycle;
 
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService>, SmartLifecycle {
@@ -46,7 +47,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
 
     private final RejectedExecutionHandler taskExecutionHandler = (runnable, executor) -> {
         if (executor.isShutdown() || executor.isTerminating()) {
-            throw new RejectedExecutionException("Executor has been shutdown");
+            throw new ImmediateRequeueAmqpException("Executor is shutting down; requeueing for redelivery");
         }
 
         try {
@@ -60,7 +61,7 @@ public class FunctionRouterExecutorFactory implements Function<String, ExecutorS
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
-            throw new RejectedExecutionException("Interrupted while waiting for queue capacity", e);
+            throw new ImmediateRequeueAmqpException("Interrupted during shutdown; requeueing for redelivery", e);
         }
     };
 
