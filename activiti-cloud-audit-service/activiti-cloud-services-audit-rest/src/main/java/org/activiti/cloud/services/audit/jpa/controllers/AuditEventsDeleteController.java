@@ -15,21 +15,16 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
-import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionCancelResponse;
+import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStartResponse;
+import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStatusResponse;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,38 +37,63 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AuditEventsDeleteController {
 
-    private final EventsRepository eventsRepository;
-
-    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
-
-    private final APIEventToEntityConverters eventConverters;
+    private final AuditEventsDeletionService auditEventsDeletionService;
 
     @Autowired
-    public AuditEventsDeleteController(
-        EventsRepository eventsRepository,
-        EventRepresentationModelAssembler eventRepresentationModelAssembler,
-        APIEventToEntityConverters eventConverters
-    ) {
-        this.eventsRepository = eventsRepository;
-        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
-        this.eventConverters = eventConverters;
+    public AuditEventsDeleteController(AuditEventsDeletionService auditEventsDeletionService) {
+        this.auditEventsDeletionService = auditEventsDeletionService;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public CollectionModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> deleteEvents() {
-        Collection<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> result = new ArrayList<>();
-        Iterable<AuditEventEntity> iterable = eventsRepository.findAll();
-
-        for (AuditEventEntity entity : iterable) {
-            result.add(
-                eventRepresentationModelAssembler.toModel(
-                    eventConverters.getConverterByEventTypeName(entity.getEventType()).convertToAPI(entity)
-                )
-            );
+    public ResponseEntity<AuditEventsDeletionStartResponse> deleteEvents() {
+        if (!auditEventsDeletionService.startDeletion()) {
+            return ResponseEntity
+                .status(409)
+                .body(
+                    new AuditEventsDeletionStartResponse(
+                        "Audit events deletion is already running",
+                        auditEventsDeletionService.getStatusResponse()
+                    )
+                );
         }
 
-        eventsRepository.deleteAll(iterable);
+        auditEventsDeletionService.deleteEventsAsync();
 
-        return CollectionModel.of(result);
+        return ResponseEntity
+            .accepted()
+            .body(
+                new AuditEventsDeletionStartResponse(
+                    "Audit events deletion started",
+                    auditEventsDeletionService.getStatusResponse()
+                )
+            );
+    }
+
+    @RequestMapping(value = "/deletion/cancel", method = RequestMethod.POST)
+    public ResponseEntity<AuditEventsDeletionCancelResponse> cancelDeletion() {
+        if (!auditEventsDeletionService.requestCancellation()) {
+            return ResponseEntity
+                .status(409)
+                .body(
+                    new AuditEventsDeletionCancelResponse(
+                        "No audit events deletion is currently running",
+                        auditEventsDeletionService.getStatusResponse()
+                    )
+                );
+        }
+
+        return ResponseEntity
+            .accepted()
+            .body(
+                new AuditEventsDeletionCancelResponse(
+                    "Audit events deletion cancellation requested",
+                    auditEventsDeletionService.getStatusResponse()
+                )
+            );
+    }
+
+    @RequestMapping(value = "/deletion/status", method = RequestMethod.GET)
+    public AuditEventsDeletionStatusResponse getDeletionStatus() {
+        return auditEventsDeletionService.getStatusResponse();
     }
 }
