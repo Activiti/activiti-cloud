@@ -28,7 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
+import org.activiti.cloud.services.audit.jpa.AuditFeatureToggles;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStatus;
 import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStatusResponse;
@@ -55,6 +57,9 @@ public class AuditEventDeleteControllerIT {
     @MockitoBean
     private AuditEventsDeletionService auditEventsDeletionService;
 
+    @MockitoBean
+    private FeatureToggle featureToggle;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -67,6 +72,7 @@ public class AuditEventDeleteControllerIT {
     @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
+        when(featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)).thenReturn(true);
         assertThat(userGroupManager).isNotNull();
     }
 
@@ -149,5 +155,44 @@ public class AuditEventDeleteControllerIT {
             .andExpect(jsonPath("$.remainingCount").value(2))
             .andExpect(jsonPath("$.totalCount").value(5))
             .andExpect(jsonPath("$.percentComplete").value(60.0));
+    }
+
+    @Test
+    public void deleteEventsShouldReturnNotFoundWhenFeatureFlagIsDisabled() throws Exception {
+        when(featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)).thenReturn(false);
+
+        mockMvc
+            .perform(
+                delete("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL).accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void cancelDeletionShouldReturnNotFoundWhenFeatureFlagIsDisabled() throws Exception {
+        when(featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)).thenReturn(false);
+
+        mockMvc
+            .perform(
+                post("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL + "/deletion/cancel").accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getDeletionStatusShouldReturnNotFoundWhenFeatureFlagIsDisabled() throws Exception {
+        when(featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)).thenReturn(false);
+
+        mockMvc
+            .perform(
+                get("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL + "/deletion/status").accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isNotFound());
     }
 }

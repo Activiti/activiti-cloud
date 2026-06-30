@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
+import org.activiti.cloud.services.audit.jpa.AuditFeatureToggles;
 import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionCancelResponse;
 import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStartResponse;
 import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStatusResponse;
@@ -39,14 +41,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuditEventsDeleteController {
 
     private final AuditEventsDeletionService auditEventsDeletionService;
+    private final FeatureToggle featureToggle;
 
     @Autowired
-    public AuditEventsDeleteController(AuditEventsDeletionService auditEventsDeletionService) {
+    public AuditEventsDeleteController(AuditEventsDeletionService auditEventsDeletionService, FeatureToggle featureToggle) {
         this.auditEventsDeletionService = auditEventsDeletionService;
+        this.featureToggle = featureToggle;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<AuditEventsDeletionStartResponse> deleteEvents() {
+        if (!featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)) {
+            return ResponseEntity.notFound().build();
+        }
+
         if (!auditEventsDeletionService.startDeletion()) {
             return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -72,6 +80,10 @@ public class AuditEventsDeleteController {
 
     @RequestMapping(value = "/deletion/cancel", method = RequestMethod.POST)
     public ResponseEntity<AuditEventsDeletionCancelResponse> cancelDeletion() {
+        if (!featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)) {
+            return ResponseEntity.notFound().build();
+        }
+
         if (!auditEventsDeletionService.requestCancellation()) {
             return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -94,7 +106,11 @@ public class AuditEventsDeleteController {
     }
 
     @RequestMapping(value = "/deletion/status", method = RequestMethod.GET)
-    public AuditEventsDeletionStatusResponse getDeletionStatus() {
-        return auditEventsDeletionService.getStatusResponse();
+    public ResponseEntity<AuditEventsDeletionStatusResponse> getDeletionStatus() {
+        if (!featureToggle.isEnabled(AuditFeatureToggles.AUDIT_CANCELLABLE_DELETE)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(auditEventsDeletionService.getStatusResponse());
     }
 }
