@@ -46,7 +46,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -63,6 +62,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.ImmediateRequeueAmqpException;
 import org.springframework.amqp.core.DeclarableCustomizer;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -924,7 +924,7 @@ public class FunctionRouterBindingConfigurationIT {
 
         //then
         assertThat(futureResult.get()).isNull();
-        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(RejectedExecutionException.class);
+        assertThatThrownBy(() -> functionExecutor.submit(() -> {})).isInstanceOf(ImmediateRequeueAmqpException.class);
     }
 
     @Test
