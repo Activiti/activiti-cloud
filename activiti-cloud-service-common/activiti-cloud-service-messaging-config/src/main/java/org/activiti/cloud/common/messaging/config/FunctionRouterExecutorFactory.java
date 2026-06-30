@@ -31,7 +31,7 @@ import org.springframework.context.SmartLifecycle;
 
 public class FunctionRouterExecutorFactory implements Function<String, ExecutorService>, SmartLifecycle {
 
-    private static final int SHUTDOWN_PHASE = Integer.MAX_VALUE - 2000;
+    private static final int SHUTDOWN_PHASE = Integer.MIN_VALUE + 2000;
 
     private final Map<String, ExecutorService> executors = new ConcurrentHashMap<>();
     private final AtomicBoolean running = new AtomicBoolean(false);
