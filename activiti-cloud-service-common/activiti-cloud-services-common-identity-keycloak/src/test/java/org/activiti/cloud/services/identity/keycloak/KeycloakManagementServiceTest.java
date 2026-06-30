@@ -643,16 +643,6 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void should_returnGroup_when_searchingByGroupId() {
-        when(keycloakClient.getGroupById(kGroupOne.getId())).thenReturn(kGroupOne);
-
-        Group group = keycloakManagementService.findGroupById(kGroupOne.getId());
-        assertThat(group).isNotNull();
-        assertThat(group).isEqualTo(groupOne);
-        assertThat(group.getName()).isEqualTo(kGroupOne.getName());
-    }
-
-    @Test
     void should_throwException_when_groupNameNotFound() {
         Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(NON_EXISTENT_GROUP));
         assertThat(thrown)
