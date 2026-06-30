@@ -20,6 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.AfterEach;
@@ -31,12 +32,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 class TaskControllerLoggingHelperTest {
 
-    private ch.qos.logback.classic.Logger testLogger;
+    private Logger testLogger;
     private ListAppender<ILoggingEvent> listAppender;
 
     @BeforeEach
     void setUp() {
-        testLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
+        testLogger = (Logger) LoggerFactory.getLogger(
             "test." + TaskControllerLoggingHelperTest.class.getName()
         );
         testLogger.setAdditive(false);
