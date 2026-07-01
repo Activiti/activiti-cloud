@@ -33,12 +33,16 @@ import org.slf4j.LoggerFactory;
 class RuntimeBundleExceptionHandlerTest {
 
     private Logger handlerLogger;
+    private Level originalLevel;
+    private boolean originalAdditive;
     private ListAppender<ILoggingEvent> listAppender;
     private final RuntimeBundleExceptionHandler handler = new RuntimeBundleExceptionHandler();
 
     @BeforeEach
     void setUp() {
         handlerLogger = (Logger) LoggerFactory.getLogger(RuntimeBundleExceptionHandler.class);
+        originalLevel = handlerLogger.getLevel();
+        originalAdditive = handlerLogger.isAdditive();
         handlerLogger.setAdditive(false);
         handlerLogger.setLevel(Level.INFO);
         listAppender = new ListAppender<>();
@@ -49,6 +53,9 @@ class RuntimeBundleExceptionHandlerTest {
     @AfterEach
     void tearDown() {
         handlerLogger.detachAppender(listAppender);
+        listAppender.stop();
+        handlerLogger.setLevel(originalLevel);
+        handlerLogger.setAdditive(originalAdditive);
     }
 
     @Test
@@ -57,8 +64,9 @@ class RuntimeBundleExceptionHandlerTest {
         given(request.getMethod()).willReturn("POST");
         given(request.getRequestURI()).willReturn("/v1/tasks/task-1/complete");
         HttpServletResponse response = mock(HttpServletResponse.class);
+        IllegalStateException exception = new IllegalStateException("task already completed");
 
-        handler.handleAppException(new IllegalStateException("task already completed"), request, response);
+        handler.handleAppException(exception, request, response);
 
         assertThat(listAppender.list)
             .hasSize(1)
@@ -66,6 +74,12 @@ class RuntimeBundleExceptionHandlerTest {
             .satisfies(event -> {
                 assertThat(event.getLevel()).isEqualTo(Level.INFO);
                 assertThat(event.getFormattedMessage()).isEqualTo("POST /v1/tasks/task-1/complete failed");
+                assertThat(event.getThrowableProxy())
+                    .isNotNull()
+                    .satisfies(throwable -> {
+                        assertThat(throwable.getClassName()).isEqualTo(IllegalStateException.class.getName());
+                        assertThat(throwable.getMessage()).isEqualTo("task already completed");
+                    });
             });
     }
 }
