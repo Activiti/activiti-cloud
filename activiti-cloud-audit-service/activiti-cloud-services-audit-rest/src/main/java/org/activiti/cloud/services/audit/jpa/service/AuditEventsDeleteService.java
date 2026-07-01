@@ -19,11 +19,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public class AuditEventsDeleteService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuditEventsDeleteService.class);
 
     public enum DeleteStatus {
         IDLE,
@@ -40,6 +44,7 @@ public class AuditEventsDeleteService {
     private volatile DeleteStatus status = DeleteStatus.IDLE;
     private final AtomicLong deletedCount = new AtomicLong(0);
     private final AtomicLong totalCount = new AtomicLong(0);
+    private volatile Thread deleteThread;
 
     public AuditEventsDeleteService(
         EventsRepository eventsRepository,
@@ -61,7 +66,7 @@ public class AuditEventsDeleteService {
         totalCount.set(eventsRepository.count());
         status = DeleteStatus.RUNNING;
 
-        Thread.ofVirtual().name("audit-events-delete").start(this::executeDeletion);
+        deleteThread = Thread.ofVirtual().name("audit-events-delete").start(this::executeDeletion);
     }
 
     public void stopDeletion() {
@@ -103,7 +108,10 @@ public class AuditEventsDeleteService {
 
             status = cancelRequested.get() ? DeleteStatus.STOPPED : DeleteStatus.COMPLETED;
         } catch (Exception e) {
+            logger.error("Error during audit events deletion", e);
             status = DeleteStatus.STOPPED;
+        } finally {
+            deleteThread = null;
         }
     }
 }

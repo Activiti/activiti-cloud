@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -78,11 +77,8 @@ class AuditEventsDeleteServiceTest {
     void shouldStopDeletionWhenRequested() {
         when(eventsRepository.count()).thenReturn(1000L);
 
-        AtomicInteger callCount = new AtomicInteger(0);
         when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
             TransactionCallback<?> callback = invocation.getArgument(0);
-            callCount.incrementAndGet();
-            Thread.sleep(50);
             return callback.doInTransaction(null);
         });
 
@@ -105,9 +101,13 @@ class AuditEventsDeleteServiceTest {
     void shouldThrowWhenStartingWhileAlreadyRunning() {
         when(eventsRepository.count()).thenReturn(1000L);
         when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
-            Thread.sleep(500);
-            return true;
+            TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
         });
+
+        List<AuditEventEntity> events = List.of(buildEvent(1L), buildEvent(2L));
+        Page<AuditEventEntity> page = new PageImpl<>(events, Pageable.ofSize(100), 1000);
+        when(eventsRepository.findAll(any(Pageable.class))).thenReturn(page);
 
         deleteService.startDeletion();
 
