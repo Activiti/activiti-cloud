@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { CloudRuntimeEvent, EventQueryParams, AuditEventsDeletionStatus, AuditEventsDeletionStatusResponse, AuditEventsDeletionStartResponse, AuditEventsDeletionCancelResponse } from '../models/audit.models';
+import {
+    AuditEventsDeletionCancelResponse,
+    AuditEventsDeletionStartResponse,
+    AuditEventsDeletionStatus,
+    AuditEventsDeletionStatusResponse,
+    CloudRuntimeEvent,
+    EventQueryParams,
+} from '../models/audit.models';
 import { BaseService } from './base.service';
 import { CustomAPIRequest } from '../fixtures/context.models';
 
