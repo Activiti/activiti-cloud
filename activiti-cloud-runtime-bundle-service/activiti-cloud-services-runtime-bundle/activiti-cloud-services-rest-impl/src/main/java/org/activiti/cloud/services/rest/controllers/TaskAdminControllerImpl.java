@@ -43,6 +43,8 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -53,6 +55,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TaskAdminControllerImpl implements TaskAdminController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskAdminControllerImpl.class);
 
     private final TaskAdminRuntime taskAdminRuntime;
 
@@ -96,20 +100,21 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "complete", taskId);
         if (completeTaskPayload == null) {
             completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
         } else {
             completeTaskPayload.setTaskId(taskId);
         }
-
-        Task task = taskAdminRuntime.complete(completeTaskPayload);
-        return taskRepresentationModelAssembler.toModel(task);
+        return taskRepresentationModelAssembler.toModel(taskAdminRuntime.complete(completeTaskPayload));
     }
 
     @Override
     public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
-        Task task = taskAdminRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
-        return taskRepresentationModelAssembler.toModel(task);
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "delete", taskId);
+        return taskRepresentationModelAssembler.toModel(
+            taskAdminRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build())
+        );
     }
 
     @Override
@@ -117,6 +122,7 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload
     ) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "update", taskId);
         if (updateTaskPayload != null) {
             updateTaskPayload.setTaskId(taskId);
         }
@@ -128,13 +134,16 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         @PathVariable String taskId,
         @RequestBody AssignTaskPayload assignTaskPayload
     ) {
-        if (assignTaskPayload != null) assignTaskPayload.setTaskId(taskId);
-
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign", taskId);
+        if (assignTaskPayload != null) {
+            assignTaskPayload.setTaskId(taskId);
+        }
         return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
     }
 
     @Override
     public PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksPayload assignTasksPayload) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign multiple tasks");
         Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
         Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
         return pagedCollectionModelAssembler.toModel(

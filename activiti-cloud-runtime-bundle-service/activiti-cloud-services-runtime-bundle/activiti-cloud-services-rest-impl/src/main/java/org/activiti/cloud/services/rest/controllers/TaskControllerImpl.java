@@ -46,6 +46,8 @@ import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -62,6 +64,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class TaskControllerImpl implements TaskController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskControllerImpl.class);
 
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
@@ -117,6 +121,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> claimTask(@PathVariable String taskId) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "claim", taskId);
         return taskRepresentationModelAssembler.toModel(
             taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(taskId).build())
         );
@@ -124,6 +129,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public EntityModel<CloudTask> releaseTask(@PathVariable String taskId) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "release", taskId);
         return taskRepresentationModelAssembler.toModel(
             taskRuntime.release(TaskPayloadBuilder.release().withTaskId(taskId).build())
         );
@@ -134,25 +140,27 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
     ) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "complete", taskId);
         if (completeTaskPayload == null) {
             completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
         } else {
             completeTaskPayload.setTaskId(taskId);
             completeTaskPayload = payloadConverter.convert(completeTaskPayload);
         }
-
-        Task task = taskRuntime.complete(completeTaskPayload);
-        return taskRepresentationModelAssembler.toModel(task);
+        return taskRepresentationModelAssembler.toModel(taskRuntime.complete(completeTaskPayload));
     }
 
     @Override
     public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
-        Task task = taskRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
-        return taskRepresentationModelAssembler.toModel(task);
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "delete", taskId);
+        return taskRepresentationModelAssembler.toModel(
+            taskRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build())
+        );
     }
 
     @Override
     public EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "create a task");
         return taskRepresentationModelAssembler.toModel(taskRuntime.create(createTaskPayload));
     }
 
@@ -161,6 +169,7 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody UpdateTaskPayload updateTaskPayload
     ) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "update", taskId);
         if (updateTaskPayload != null) {
             updateTaskPayload.setTaskId(taskId);
         }
@@ -183,6 +192,7 @@ public class TaskControllerImpl implements TaskController {
 
     @Override
     public void saveTask(@PathVariable String taskId, @RequestBody SaveTaskPayload saveTaskPayload) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "save", taskId);
         if (saveTaskPayload != null) {
             saveTaskPayload.setTaskId(taskId);
         }
@@ -194,10 +204,10 @@ public class TaskControllerImpl implements TaskController {
         @PathVariable String taskId,
         @RequestBody AssignTaskPayload assignTaskPayload
     ) {
+        TaskControllerLoggingHelper.logTaskAttempt(LOGGER, "assign", taskId);
         if (assignTaskPayload != null) {
             assignTaskPayload.setTaskId(taskId);
         }
-
         return taskRepresentationModelAssembler.toModel(taskRuntime.assign(assignTaskPayload));
     }
 }
