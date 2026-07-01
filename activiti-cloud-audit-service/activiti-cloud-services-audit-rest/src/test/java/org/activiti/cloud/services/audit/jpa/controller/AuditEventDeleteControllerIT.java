@@ -17,6 +17,7 @@ package org.activiti.cloud.services.audit.jpa.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -34,6 +35,7 @@ import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvide
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeletionPolicy;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -68,6 +70,9 @@ public class AuditEventDeleteControllerIT {
     @MockitoBean
     private EventsRepository eventsRepository;
 
+    @MockitoBean
+    private AuditEventsDeletionPolicy deletionPolicy;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -80,6 +85,7 @@ public class AuditEventDeleteControllerIT {
     @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
+        when(deletionPolicy.isDeletionAllowed()).thenReturn(true);
         assertThat(userGroupManager).isNotNull();
     }
 
@@ -100,6 +106,25 @@ public class AuditEventDeleteControllerIT {
             .andExpect(status().isOk());
 
         verify(eventsRepository).deleteAll(list);
+    }
+
+    @Test
+    public void deleteEventsShouldReturnForbiddenWhenDeletionIsNotAllowed() throws Exception {
+        //given
+        when(deletionPolicy.isDeletionAllowed()).thenReturn(false);
+
+        //when
+        mockMvc
+            .perform(
+                delete("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL).accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            //then
+            .andExpect(status().isForbidden());
+
+        verify(eventsRepository, never()).findAll();
+        verify(eventsRepository, never()).deleteAll();
     }
 
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {

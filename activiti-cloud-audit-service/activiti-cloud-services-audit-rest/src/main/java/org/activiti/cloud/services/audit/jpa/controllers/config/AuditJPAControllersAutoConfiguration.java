@@ -19,6 +19,8 @@ import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentatio
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeletionPolicy;
+import org.activiti.cloud.services.audit.jpa.controllers.PropertyBasedAuditEventsDeletionPolicy;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -54,5 +56,13 @@ public class AuditJPAControllersAutoConfiguration {
     @Bean
     public AuditEventsAdminService auditEventsAdminService(EventsRepository eventsRepository) {
         return new AuditEventsAdminService(eventsRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditEventsDeletionPolicy auditEventsDeletionPolicy(
+        @org.springframework.beans.factory.annotation.Value("${activiti.audit.deletion.allowed:true}") boolean deletionAllowed
+    ) {
+        return new PropertyBasedAuditEventsDeletionPolicy(deletionAllowed);
     }
 }

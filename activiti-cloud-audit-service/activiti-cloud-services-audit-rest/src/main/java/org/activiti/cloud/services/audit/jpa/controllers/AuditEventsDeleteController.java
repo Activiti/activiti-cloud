@@ -29,10 +29,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
@@ -48,19 +50,27 @@ public class AuditEventsDeleteController {
 
     private final APIEventToEntityConverters eventConverters;
 
+    private final AuditEventsDeletionPolicy deletionPolicy;
+
     @Autowired
     public AuditEventsDeleteController(
         EventsRepository eventsRepository,
         EventRepresentationModelAssembler eventRepresentationModelAssembler,
-        APIEventToEntityConverters eventConverters
+        APIEventToEntityConverters eventConverters,
+        AuditEventsDeletionPolicy deletionPolicy
     ) {
         this.eventsRepository = eventsRepository;
         this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
+        this.deletionPolicy = deletionPolicy;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
     public CollectionModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> deleteEvents() {
+        if (!deletionPolicy.isDeletionAllowed()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Deletion of audit events is not allowed");
+        }
+
         Collection<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> result = new ArrayList<>();
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll();
 
