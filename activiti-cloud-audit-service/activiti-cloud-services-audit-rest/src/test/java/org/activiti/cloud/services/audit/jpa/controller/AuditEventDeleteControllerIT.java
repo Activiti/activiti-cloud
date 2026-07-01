@@ -16,18 +16,15 @@
 package org.activiti.cloud.services.audit.jpa.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyIterable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -36,10 +33,8 @@ import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvide
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeletionPolicy;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeleteService;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeleteService.DeleteStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,13 +61,8 @@ import org.springframework.test.web.servlet.MockMvc;
 )
 public class AuditEventDeleteControllerIT {
 
-    private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
-
     @MockitoBean
-    private EventsRepository eventsRepository;
-
-    @MockitoBean
-    private AuditEventsDeletionPolicy deletionPolicy;
+    private AuditEventsDeleteService deleteService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,74 +76,92 @@ public class AuditEventDeleteControllerIT {
     @BeforeEach
     public void setUp() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("admin");
-        when(deletionPolicy.isDeletionAllowed()).thenReturn(true);
         assertThat(userGroupManager).isNotNull();
     }
 
     @Test
-    public void deleteEventsShouldReturnAllEventsAndDeleteThem() throws Exception {
-        //given
-        List<AuditEventEntity> list = buildEventsData(1);
-        given(eventsRepository.findAll()).willReturn(list);
+    public void deleteEventsShouldStartDeletionAndReturnAccepted() throws Exception {
+        when(deleteService.getStatus()).thenReturn(DeleteStatus.RUNNING);
+        when(deleteService.getDeletedCount()).thenReturn(0L);
+        when(deleteService.getTotalCount()).thenReturn(100L);
 
-        //when
         mockMvc
             .perform(
                 delete("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL).accept(
                     MediaType.APPLICATION_JSON
                 )
             )
-            //then
-            .andExpect(status().isOk());
+            .andExpect(status().isAccepted())
+            .andExpect(jsonPath("$.status").value("RUNNING"))
+            .andExpect(jsonPath("$.totalCount").value(100));
 
-        verify(eventsRepository).deleteAll(list);
+        verify(deleteService).startDeletion();
     }
 
     @Test
-    public void deleteEventsShouldReturnForbiddenWhenDeletionIsNotAllowed() throws Exception {
-        //given
-        when(deletionPolicy.isDeletionAllowed()).thenReturn(false);
+    public void deleteEventsShouldReturnConflictWhenAlreadyRunning() throws Exception {
+        doThrow(new IllegalStateException("A deletion process is already running"))
+            .when(deleteService)
+            .startDeletion();
 
-        //when
         mockMvc
             .perform(
                 delete("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL).accept(
                     MediaType.APPLICATION_JSON
                 )
             )
-            //then
-            .andExpect(status().isForbidden());
-
-        verify(eventsRepository, never()).findAll();
-        verify(eventsRepository, never()).deleteAll(anyIterable());
+            .andExpect(status().isConflict());
     }
 
-    private List<AuditEventEntity> buildEventsData(int recordsNumber) {
-        List<AuditEventEntity> eventsList = new ArrayList<>();
+    @Test
+    public void stopDeleteEventsShouldStopRunningDeletion() throws Exception {
+        when(deleteService.getStatus()).thenReturn(DeleteStatus.STOPPED);
+        when(deleteService.getDeletedCount()).thenReturn(50L);
+        when(deleteService.getTotalCount()).thenReturn(100L);
 
-        for (long i = 0; i < recordsNumber; i++) {
-            //would like to mock this but jackson and mockito not happy together
-            AuditEventEntity eventEntity = buildAuditEventEntity(i);
-            eventsList.add(eventEntity);
-        }
+        mockMvc
+            .perform(
+                post("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL + "/delete/stop").accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("STOPPED"))
+            .andExpect(jsonPath("$.deletedCount").value(50));
 
-        return eventsList;
+        verify(deleteService).stopDeletion();
     }
 
-    private AuditEventEntity buildAuditEventEntity(long id) {
-        ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
-        eventEntity.setEventId("eventId");
-        eventEntity.setTimestamp(System.currentTimeMillis());
-        eventEntity.setId(id);
-        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-        processInstance.setId("10");
-        processInstance.setProcessDefinitionId("1");
-        eventEntity.setProcessInstance(processInstance);
-        eventEntity.setServiceName("rb-my-app");
-        eventEntity.setEventType(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
-        eventEntity.setProcessDefinitionId("1");
-        eventEntity.setProcessInstanceId("10");
-        eventEntity.setTimestamp(System.currentTimeMillis());
-        return eventEntity;
+    @Test
+    public void stopDeleteEventsShouldReturnConflictWhenNotRunning() throws Exception {
+        doThrow(new IllegalStateException("No deletion process is currently running"))
+            .when(deleteService)
+            .stopDeletion();
+
+        mockMvc
+            .perform(
+                post("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL + "/delete/stop").accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void getDeleteStatusShouldReturnCurrentStatus() throws Exception {
+        when(deleteService.getStatus()).thenReturn(DeleteStatus.COMPLETED);
+        when(deleteService.getDeletedCount()).thenReturn(100L);
+        when(deleteService.getTotalCount()).thenReturn(100L);
+
+        mockMvc
+            .perform(
+                get("/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL + "/delete/status").accept(
+                    MediaType.APPLICATION_JSON
+                )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("COMPLETED"))
+            .andExpect(jsonPath("$.deletedCount").value(100))
+            .andExpect(jsonPath("$.totalCount").value(100));
     }
 }

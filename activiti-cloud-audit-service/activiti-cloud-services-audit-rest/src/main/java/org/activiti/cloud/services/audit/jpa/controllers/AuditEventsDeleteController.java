@@ -15,22 +15,16 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
-import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import java.util.Map;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
-import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeleteService;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeleteService.DeleteStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,46 +38,46 @@ import org.springframework.web.server.ResponseStatusException;
 )
 public class AuditEventsDeleteController {
 
-    private final EventsRepository eventsRepository;
-
-    private final EventRepresentationModelAssembler eventRepresentationModelAssembler;
-
-    private final APIEventToEntityConverters eventConverters;
-
-    private final AuditEventsDeletionPolicy deletionPolicy;
+    private final AuditEventsDeleteService deleteService;
 
     @Autowired
-    public AuditEventsDeleteController(
-        EventsRepository eventsRepository,
-        EventRepresentationModelAssembler eventRepresentationModelAssembler,
-        APIEventToEntityConverters eventConverters,
-        AuditEventsDeletionPolicy deletionPolicy
-    ) {
-        this.eventsRepository = eventsRepository;
-        this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
-        this.eventConverters = eventConverters;
-        this.deletionPolicy = deletionPolicy;
+    public AuditEventsDeleteController(AuditEventsDeleteService deleteService) {
+        this.deleteService = deleteService;
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public CollectionModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> deleteEvents() {
-        if (!deletionPolicy.isDeletionAllowed()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Deletion of audit events is not allowed");
+    public ResponseEntity<Map<String, Object>> deleteEvents() {
+        try {
+            deleteService.startDeletion();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
 
-        Collection<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> result = new ArrayList<>();
-        Iterable<AuditEventEntity> iterable = eventsRepository.findAll();
+        return ResponseEntity.accepted().body(buildStatusResponse());
+    }
 
-        for (AuditEventEntity entity : iterable) {
-            result.add(
-                eventRepresentationModelAssembler.toModel(
-                    eventConverters.getConverterByEventTypeName(entity.getEventType()).convertToAPI(entity)
-                )
-            );
+    @RequestMapping(value = "/delete/stop", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> stopDeleteEvents() {
+        try {
+            deleteService.stopDeletion();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
 
-        eventsRepository.deleteAll(iterable);
+        return ResponseEntity.ok(buildStatusResponse());
+    }
 
-        return CollectionModel.of(result);
+    @RequestMapping(value = "/delete/status", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, Object>> getDeleteStatus() {
+        return ResponseEntity.ok(buildStatusResponse());
+    }
+
+    private Map<String, Object> buildStatusResponse() {
+        DeleteStatus status = deleteService.getStatus();
+        return Map.of(
+            "status", status.name(),
+            "deletedCount", deleteService.getDeletedCount(),
+            "totalCount", deleteService.getTotalCount()
+        );
     }
 }
