@@ -24,9 +24,7 @@ import org.activiti.cloud.services.audit.jpa.model.AuditEventsDeletionStatusResp
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsDeletionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,10 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
-@RequestMapping(
-    value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
-)
+@RequestMapping(value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL)
 public class AuditEventsDeleteController {
 
     private final AuditEventsDeletionService auditEventsDeletionService;
