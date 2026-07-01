@@ -67,7 +67,7 @@ public class AuditEventsExporter {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER,
             CSVWriter.DEFAULT_LINE_END
         );
-        csvWriter.writeNext(header, true);
+        csvWriter.writeNext(header, false);
         csvWriter.flushQuietly();
         writer.flush();
     }
@@ -81,18 +81,18 @@ public class AuditEventsExporter {
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
         PrintWriter writer = response.getWriter();
 
-        CSVWriter csvWriter = new CSVWriter(
-            writer,
-            CSVWriter.DEFAULT_SEPARATOR,
-            CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            CSVWriter.DEFAULT_LINE_END
-        );
         for (CsvLogEntry entry : entries) {
             String[] line = objectToJsonStrategy.transmuteBean(entry);
+            CSVWriter csvWriter = new CSVWriter(
+                writer,
+                CSVWriter.DEFAULT_SEPARATOR,
+                CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                CSVWriter.DEFAULT_LINE_END
+            );
             csvWriter.writeNext(line, true);
+            csvWriter.flushQuietly();
         }
-        csvWriter.flushQuietly();
         writer.flush();
     }
 
