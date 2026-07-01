@@ -247,7 +247,7 @@ class EventsEngineEventsAdminControllerIT {
         assertThat(servletResponse.getHeader(CONTENT_DISPOSITION)).isEqualTo(HEADER_ATTACHMENT_FILENAME + CSV_FILENAME);
         // Should still have CSV header row even when empty
         assertThat(servletResponse.getContentAsString()).contains(
-            "ACTOR,APPNAME,APPVERSION,BUSINESSKEY,ENTITY,ENTITYID,EVENTTYPE,ID,MESSAGEID"
+            "\"ACTOR\",\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\""
         );
     }
 

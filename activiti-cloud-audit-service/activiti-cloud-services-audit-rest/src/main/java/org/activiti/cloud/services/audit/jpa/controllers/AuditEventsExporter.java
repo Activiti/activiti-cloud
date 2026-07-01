@@ -67,7 +67,7 @@ public class AuditEventsExporter {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER,
             CSVWriter.DEFAULT_LINE_END
         );
-        csvWriter.writeNext(header, false);
+        csvWriter.writeNext(header, true);
         csvWriter.flushQuietly();
         writer.flush();
     }
