@@ -15,15 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
-import org.springframework.beans.factory.annotation.Value;
-
 public class PropertyBasedAuditEventsDeletionPolicy implements AuditEventsDeletionPolicy {
 
     private final boolean deletionAllowed;
 
-    public PropertyBasedAuditEventsDeletionPolicy(
-        @Value("${activiti.audit.deletion.allowed:true}") boolean deletionAllowed
-    ) {
+    public PropertyBasedAuditEventsDeletionPolicy(boolean deletionAllowed) {
         this.deletionAllowed = deletionAllowed;
     }
 
