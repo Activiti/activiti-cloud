@@ -60,17 +60,15 @@ public class AuditEventsExporter {
     public void writeHeader(HttpServletResponse response) throws Exception {
         PrintWriter writer = response.getWriter();
         String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
-        try (
-            CSVWriter csvWriter = new CSVWriter(
-                writer,
-                CSVWriter.DEFAULT_SEPARATOR,
-                CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                ""
-            )
-        ) {
-            csvWriter.writeNext(header, true);
-        }
+        CSVWriter csvWriter = new CSVWriter(
+            writer,
+            CSVWriter.DEFAULT_SEPARATOR,
+            CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ""
+        );
+        csvWriter.writeNext(header, true);
+        csvWriter.flushQuietly();
         writer.flush();
     }
 
@@ -83,20 +81,18 @@ public class AuditEventsExporter {
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
         PrintWriter writer = response.getWriter();
 
-        try (
-            CSVWriter csvWriter = new CSVWriter(
-                writer,
-                CSVWriter.DEFAULT_SEPARATOR,
-                CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                ""
-            )
-        ) {
-            for (CsvLogEntry entry : entries) {
-                String[] line = objectToJsonStrategy.transmuteBean(entry);
-                csvWriter.writeNext(line, true);
-            }
+        CSVWriter csvWriter = new CSVWriter(
+            writer,
+            CSVWriter.DEFAULT_SEPARATOR,
+            CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ""
+        );
+        for (CsvLogEntry entry : entries) {
+            String[] line = objectToJsonStrategy.transmuteBean(entry);
+            csvWriter.writeNext(line, true);
         }
+        csvWriter.flushQuietly();
         writer.flush();
     }
 
