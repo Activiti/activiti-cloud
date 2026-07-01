@@ -65,7 +65,7 @@ public class AuditEventsExporter {
             CSVWriter.DEFAULT_SEPARATOR,
             CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            ""
+            CSVWriter.DEFAULT_LINE_END
         );
         csvWriter.writeNext(header, true);
         csvWriter.flushQuietly();
@@ -86,7 +86,7 @@ public class AuditEventsExporter {
             CSVWriter.DEFAULT_SEPARATOR,
             CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            ""
+            CSVWriter.DEFAULT_LINE_END
         );
         for (CsvLogEntry entry : entries) {
             String[] line = objectToJsonStrategy.transmuteBean(entry);
