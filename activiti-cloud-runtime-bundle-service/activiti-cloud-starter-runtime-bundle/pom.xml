@@ -92,6 +92,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-runtime-bundle-liquibase</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-subscriptions</artifactId>
     </dependency>
     <dependency>

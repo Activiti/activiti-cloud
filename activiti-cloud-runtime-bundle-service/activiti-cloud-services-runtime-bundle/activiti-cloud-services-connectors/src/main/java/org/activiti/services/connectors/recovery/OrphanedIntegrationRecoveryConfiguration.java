@@ -44,21 +44,9 @@ public class OrphanedIntegrationRecoveryConfiguration {
     @Bean
     @ConditionalOnMissingBean(LockProvider.class)
     LockProvider lockProvider(DataSource dataSource) {
-        var jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.execute(
-            """
-            CREATE TABLE IF NOT EXISTS shedlock (
-                name       VARCHAR(64)  NOT NULL,
-                lock_until TIMESTAMP(3) NOT NULL,
-                locked_at  TIMESTAMP(3) NOT NULL,
-                locked_by  VARCHAR(255) NOT NULL,
-                PRIMARY KEY (name)
-            )
-            """
-        );
         return new JdbcTemplateLockProvider(
             JdbcTemplateLockProvider.Configuration.builder()
-                .withJdbcTemplate(jdbcTemplate)
+                .withJdbcTemplate(new JdbcTemplate(dataSource))
                 .usingDbTime()
                 .build()
         );
