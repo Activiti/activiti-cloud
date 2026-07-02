@@ -18,6 +18,9 @@ package org.activiti.cloud.starter.tests.recovery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -37,6 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -56,14 +60,29 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-//import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryScheduler;
-
+/**
+ * Verifies the crash-recovery contract for service tasks: when a connector crashes mid-execution,
+ * the process stays RUNNING and {@link OrphanedIntegrationRecoveryScheduler} recovers the orphaned
+ * {@code ACT_RU_INTEGRATION} record on the next Runtime Bundle instance.
+ *
+ * <p>The connector is co-located inside the Runtime Bundle for testing convenience — closing the
+ * shared context simulates the connector crash. Two Spring contexts ({@code ctx1}, {@code ctx2})
+ * share the same PostgreSQL and RabbitMQ containers, simulating two sequential deployments of the
+ * same service. {@code @SpringBootTest} cannot model this restart scenario because it manages a
+ * single shared context for the whole test class.
+ *
+ * <p>Parameterised over {@code functionRouterEnabled} because ACK behaviour differs: with function-router
+ * disabled the broker redelivers the unACKed message to ctx2's connector (which also never responds);
+ * with function-router enabled the message is ACKed on receipt and lost on crash. Both paths leave an
+ * orphaned record that the scheduler must clean up.
+ */
 @Testcontainers
 class ServiceTaskStartStopBehaviorIT {
 
     private static final String PROCESS_KEY = "serviceTaskLoop";
     private static final String PROCESS_RESOURCE = "processes/service-task-loop.bpmn20.xml";
 
+    // Static so ctx1 and ctx2 — separate Spring contexts in the same JVM — share the same flag.
     static final AtomicBoolean integrationRequestSent = new AtomicBoolean(false);
 
     @Container
@@ -109,10 +128,41 @@ class ServiceTaskStartStopBehaviorIT {
             .start()
             .getId();
 
-        await()
-            .atMost(Duration.ofSeconds(30))
-            .until(integrationRequestSent::get);
+        await().atMost(Duration.ofSeconds(30)).until(integrationRequestSent::get);
 
+        setupAdminSecurityContext();
+
+        assertThat(ctx1.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
+            .as("process should be in RUNNING state while connector is executing")
+            .isEqualTo(ProcessInstanceStatus.RUNNING);
+        assertThat(
+            ctx1
+                .getBean(RuntimeService.class)
+                .createExecutionQuery()
+                .processInstanceId(processInstanceId)
+                .activityId("LongRunningTask")
+                .count()
+        )
+            .as("service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result")
+            .isEqualTo(1);
+        assertThat(ctx1.getBean(ManagementService.class).createJobQuery().count())
+            .as("no async jobs should exist — the process is waiting for the integration result, not a timer or retry")
+            .isZero();
+
+        var jdbcTemplate = new JdbcTemplate(ctx1.getBean(DataSource.class));
+        assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
+                Long.class,
+                processInstanceId
+            )
+        )
+            .as("an integration context record should exist — the service task is in flight")
+            .isEqualTo(1L);
+
+        // Simulate a hard JVM kill: drop the AMQP connection before Spring's shutdown hooks run so
+        // the broker requeues unACKed messages immediately, matching what happens on a real crash.
+        ctx1.getBean(CachingConnectionFactory.class).resetConnection();
         ctx1.close();
 
         ctx2 = buildContext(functionRouterEnabled);
@@ -130,17 +180,13 @@ class ServiceTaskStartStopBehaviorIT {
                 .activityId("LongRunningTask")
                 .count()
         )
-            .as(
-                "service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result"
-            )
+            .as("service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result")
             .isEqualTo(1);
         assertThat(ctx2.getBean(ManagementService.class).createJobQuery().count())
-            .as(
-                "no new async jobs should exist — the process is waiting for the integration result, ctx2 did not re-trigger execution"
-            )
+            .as("no new async jobs should exist — the process is waiting for the integration result, ctx2 did not re-trigger execution")
             .isZero();
 
-        var jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
+        jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
         assertThat(
             jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
@@ -148,32 +194,28 @@ class ServiceTaskStartStopBehaviorIT {
                 processInstanceId
             )
         )
-            .as(
-                "an integration context record should exist — the service task was STARTED and is awaiting                 processInstanceId
-            )
-        )
-            .as(
-                "an integration context record should exist — the service task was STARTED and is awaiting the integration result"
-            )
+            .as("an integration context record should exist — the service task was STARTED and is awaiting the integration result")
             .isEqualTo(1L);
 
-//        ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
+        ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
 
-            jdbcTemplate.queryForObject(plate.queryForObject(
-                        "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
-                        Long.class,
-                        processInstanceId
-                    )
-                )
-                    .as(
-                        "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
-                    )
-                    .isZero();
+        assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
+                Long.class,
+                processInstanceId
+            )
+        )
+            .as("integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up")
+            .isZero();
+
+        await()
+            .pollDelay(Duration.ofSeconds(10))
+            .atMost(Duration.ofSeconds(30))
+            .untilAsserted(() -> {
                 setupAdminSecurityContext();
                 assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
-                    .as(
-                        "process should still be RUNNING after ctx2 has been up — ctx2 must not have completed the service task"
-                    )
+                    .as("process should still be RUNNING after ctx2 has been up — ctx2 must not have completed the service task")
                     .isEqualTo(ProcessInstanceStatus.RUNNING);
                 assertThat(
                     ctx2
@@ -226,6 +268,9 @@ class ServiceTaskStartStopBehaviorIT {
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.group=longRunningConnectorConsumer",
                     "activiti.cloud.messaging.function-router.routes.longRunningConnectorConsumer.enabled=true",
+                    // MANUAL ACK prevents a reconnection race: after resetConnection() the listener container
+                    // tries to reconnect before ctx1.close() stops it; if reconnection succeeds and the
+                    // requeued message is re-delivered, AUTO ACK would fire on interrupt-return and lose it.
                     "spring.cloud.stream.rabbit.bindings.longRunningConnectorConsumer.consumer.acknowledge-mode=manual"
                 ).applyTo(ctx.getEnvironment());
             })
@@ -237,6 +282,7 @@ class ServiceTaskStartStopBehaviorIT {
     static class RbApplication {}
 
     interface LongRunningConnectorChannels {
+
         String CHANNEL_NAME = "longRunningConnectorConsumer";
 
         @InputBinding(CHANNEL_NAME)
@@ -248,14 +294,20 @@ class ServiceTaskStartStopBehaviorIT {
     @Configuration
     static class TestConfiguration implements LongRunningConnectorChannels {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStartStopBehaviorIT.class);
+        static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStartStopBehaviorIT.class);
 
         @Bean
-        @ConnectorBinding(input = LongRunningConnectorChannels.CHANNEL_NAME, connectorType = "test.longRunningConnector", condition = "")
+        @ConnectorBinding(
+            input = LongRunningConnectorChannels.CHANNEL_NAME,
+            connectorType = "test.longRunningConnector",
+            condition = "" // empty bypasses the default appVersion header check
+        )
         ConsumerConnector<IntegrationRequest> longRunningConnector() {
-            LOGGER.info("LongRunningConnector bean created");
             return event -> {
-                LOGGER.info("LongRunningConnector started for process instance {}", event.getIntegrationContext().getProcessInstanceId());
+                LOGGER.info(
+                    "LongRunningConnector started for process instance {}",
+                    event.getIntegrationContext().getProcessInstanceId()
+                );
                 integrationRequestSent.set(true);
                 for (int i = 1; i <= 30; i++) {
                     try {
