@@ -45,11 +45,10 @@ import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoverySche
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.mockito.ArgumentCaptor;
-import org.springframework.test.util.AopTestUtils;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -64,6 +63,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.util.AopTestUtils;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -125,7 +125,9 @@ class ServiceTaskStartStopBehaviorIT {
 
     @ParameterizedTest(name = "functionRouterEnabled={0}")
     @ValueSource(booleans = { false, true })
-    void should_taskRemainInStartedState_when_applicationIsKilledDuringServiceTaskExecution(boolean functionRouterEnabled) {
+    void should_taskRemainInStartedState_when_applicationIsKilledDuringServiceTaskExecution(
+        boolean functionRouterEnabled
+    ) {
         ctx1 = buildContext(functionRouterEnabled);
 
         ctx1.getBean(RepositoryService.class).createDeployment().addClasspathResource(PROCESS_RESOURCE).deploy();
@@ -152,7 +154,9 @@ class ServiceTaskStartStopBehaviorIT {
                 .activityId("LongRunningTask")
                 .count()
         )
-            .as("service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result")
+            .as(
+                "service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result"
+            )
             .isEqualTo(1);
         assertThat(ctx1.getBean(ManagementService.class).createJobQuery().count())
             .as("no async jobs should exist — the process is waiting for the integration result, not a timer or retry")
@@ -191,10 +195,14 @@ class ServiceTaskStartStopBehaviorIT {
                 .activityId("LongRunningTask")
                 .count()
         )
-            .as("service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result")
+            .as(
+                "service task 'LongRunningTask' should be in STARTED state — execution is waiting for integration result"
+            )
             .isEqualTo(1);
         assertThat(ctx2.getBean(ManagementService.class).createJobQuery().count())
-            .as("no new async jobs should exist — the process is waiting for the integration result, ctx2 did not re-trigger execution")
+            .as(
+                "no new async jobs should exist — the process is waiting for the integration result, ctx2 did not re-trigger execution"
+            )
             .isZero();
 
         jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
@@ -205,7 +213,9 @@ class ServiceTaskStartStopBehaviorIT {
                 processInstanceId
             )
         )
-            .as("an integration context record should exist — the service task was STARTED and is awaiting the integration result")
+            .as(
+                "an integration context record should exist — the service task was STARTED and is awaiting the integration result"
+            )
             .isEqualTo(1L);
 
         if (functionRouterEnabled) {
@@ -223,14 +233,17 @@ class ServiceTaskStartStopBehaviorIT {
         ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
 
         var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
-        verify(AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
-            ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
-        )).receive(errorCaptor.capture());
-        assertThat(errorCaptor.getValue())
-            .satisfies(error -> {
-                assertThat(error.getErrorClassName()).isEqualTo(RuntimeException.class.getName());
-                assertThat(error.getErrorMessage()).isEqualTo(OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE);
-            });
+        verify(
+            AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
+                ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
+            )
+        ).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue()).satisfies(error -> {
+            assertThat(error.getErrorClassName()).isEqualTo(RuntimeException.class.getName());
+            assertThat(error.getErrorMessage()).isEqualTo(
+                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
+            );
+        });
         assertThat(
             jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
@@ -238,7 +251,9 @@ class ServiceTaskStartStopBehaviorIT {
                 processInstanceId
             )
         )
-            .as("integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up")
+            .as(
+                "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
+            )
             .isZero();
 
         await()
@@ -247,7 +262,9 @@ class ServiceTaskStartStopBehaviorIT {
             .untilAsserted(() -> {
                 setupAdminSecurityContext();
                 assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
-                    .as("process should still be RUNNING after ctx2 has been up — ctx2 must not have completed the service task")
+                    .as(
+                        "process should still be RUNNING after ctx2 has been up — ctx2 must not have completed the service task"
+                    )
                     .isEqualTo(ProcessInstanceStatus.RUNNING);
                 assertThat(
                     ctx2
@@ -314,7 +331,6 @@ class ServiceTaskStartStopBehaviorIT {
     static class RbApplication {}
 
     interface LongRunningConnectorChannels {
-
         String CHANNEL_NAME = "longRunningConnectorConsumer";
 
         @InputBinding(CHANNEL_NAME)

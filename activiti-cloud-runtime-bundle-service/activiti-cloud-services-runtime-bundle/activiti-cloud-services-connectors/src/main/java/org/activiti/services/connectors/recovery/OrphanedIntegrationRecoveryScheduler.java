@@ -62,11 +62,7 @@ public class OrphanedIntegrationRecoveryScheduler {
     @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
     public void recoverOrphanedIntegrations() {
         var lockAcquired = Boolean.TRUE.equals(
-            jdbcTemplate.queryForObject(
-                "SELECT pg_try_advisory_xact_lock(?)",
-                Boolean.class,
-                ADVISORY_LOCK_KEY
-            )
+            jdbcTemplate.queryForObject("SELECT pg_try_advisory_xact_lock(?)", Boolean.class, ADVISORY_LOCK_KEY)
         );
         if (!lockAcquired) {
             LOGGER.debug("Orphaned integration recovery skipped — another instance holds the lock.");

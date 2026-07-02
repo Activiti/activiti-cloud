@@ -26,7 +26,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@ConditionalOnProperty(value = "activiti.orphaned-integration-recovery.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+    value = "activiti.orphaned-integration-recovery.enabled",
+    havingValue = "true",
+    matchIfMissing = true
+)
 @EnableScheduling
 @EnableConfigurationProperties(OrphanedIntegrationRecoveryProperties.class)
 public class OrphanedIntegrationRecoveryConfiguration {
