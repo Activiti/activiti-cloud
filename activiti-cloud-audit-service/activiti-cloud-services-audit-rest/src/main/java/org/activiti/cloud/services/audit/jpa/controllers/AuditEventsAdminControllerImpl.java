@@ -153,7 +153,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             } while (auditPage.hasNext());
 
             response.getWriter().flush();
-            logger.info("Successfully exported {} audit events for date range {} to {}", totalExported, from, to);
+            logger.debug("Successfully exported {} audit events for date range {} to {}", totalExported, from, to);
         } catch (Exception e) {
             logger.error(
                 "Export failed after writing {} events for date range {} to {}. Client received partial CSV.",
