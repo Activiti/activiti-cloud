@@ -17,14 +17,11 @@ package org.activiti.cloud.services.audit.jpa.controllers;
 
 import com.opencsv.CSVWriter;
 import com.opencsv.ICSVWriter;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvChainedException;
 import com.opencsv.exceptions.CsvFieldAssignmentException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
@@ -34,31 +31,10 @@ import tools.jackson.databind.ObjectMapper;
 
 public class AuditEventsExporter {
 
-    private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
-    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-    private static final String CSV_CONTENT_TYPE = "text/csv";
-
     private ObjectToJsonStrategy objectToJsonStrategy;
 
     public AuditEventsExporter(ObjectMapper objectMapper) {
         objectToJsonStrategy = new ObjectToJsonStrategy(objectMapper);
-    }
-
-    public void exportCsv(
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-        String fileName,
-        HttpServletResponse response
-    ) throws IOException, CsvFieldAssignmentException {
-        response.setContentType(CSV_CONTENT_TYPE);
-        response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
-
-        List<CsvLogEntry> entries = toCsvLogEntryList(events);
-        PrintWriter writer = response.getWriter();
-        StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<CsvLogEntry>(writer)
-            .withMappingStrategy(objectToJsonStrategy)
-            .build();
-        beanToCsv.write(entries);
-        writer.close();
     }
 
     public void writeHeader(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
@@ -99,13 +75,5 @@ public class AuditEventsExporter {
 
         csvWriter.flushQuietly();
         writer.flush();
-    }
-
-    private List<CsvLogEntry> toCsvLogEntryList(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events) {
-        List<CsvLogEntry> entries = new ArrayList<>();
-        for (CloudRuntimeEvent event : events) {
-            entries.add(new CsvLogEntry(event));
-        }
-        return entries;
     }
 }
