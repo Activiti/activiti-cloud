@@ -30,8 +30,6 @@ import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelA
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -57,8 +55,6 @@ import tools.jackson.databind.ObjectMapper;
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
-
-    private static final Logger logger = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
 
     private final EventsRepository eventsRepository;
 
