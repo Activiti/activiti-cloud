@@ -15,20 +15,13 @@
  */
 package org.activiti.services.connectors.recovery;
 
-import javax.sql.DataSource;
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
-import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @ConditionalOnProperty(
@@ -36,22 +29,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
     havingValue = "true",
     matchIfMissing = true
 )
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "PT5M")
 @EnableConfigurationProperties(OrphanedIntegrationRecoveryProperties.class)
 public class OrphanedIntegrationRecoveryConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(LockProvider.class)
-    LockProvider lockProvider(DataSource dataSource) {
-        return new JdbcTemplateLockProvider(
-            JdbcTemplateLockProvider.Configuration.builder()
-                .withJdbcTemplate(new JdbcTemplate(dataSource))
-                .withTableName("shedlock_runtimebundle")
-                .usingDbTime()
-                .build()
-        );
-    }
 
     @Bean
     OrphanedIntegrationRecoveryScheduler orphanedIntegrationRecoveryScheduler(
