@@ -156,13 +156,12 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
             logger.debug("Successfully exported {} audit events for date range {} to {}", totalExported, from, to);
         } catch (Exception e) {
             logger.error(
-                "Export failed after writing {} events for date range {} to {}. Client received partial CSV: {}",
+                "Export failed after writing {} events for date range {} to {}. Client received partial CSV with HTTP 200.",
                 totalExported,
                 from,
                 to,
-                e.getMessage()
+                e
             );
-            throw e;
         }
     }
 
