@@ -50,7 +50,7 @@ public class AuditEventsExporter {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
         String fileName,
         HttpServletResponse response
-    ) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    ) throws IOException, CsvDataTypeMismatchException, CsvFieldAssignmentException {
         response.setContentType(CSV_CONTENT_TYPE);
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
 
@@ -63,7 +63,7 @@ public class AuditEventsExporter {
         writer.close();
     }
 
-    public void writeHeader(HttpServletResponse response) throws IOException, CsvRequiredFieldEmptyException {
+    public void writeHeader(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
         PrintWriter writer = response.getWriter();
         String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
         CSVWriter csvWriter = new CSVWriter(
@@ -79,7 +79,7 @@ public class AuditEventsExporter {
     }
 
     public void writeRows(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events, HttpServletResponse response)
-        throws IOException, CsvRequiredFieldEmptyException, CsvFieldAssignmentException, CsvChainedException {
+        throws IOException, CsvFieldAssignmentException, CsvChainedException {
         if (events.isEmpty()) {
             return;
         }
