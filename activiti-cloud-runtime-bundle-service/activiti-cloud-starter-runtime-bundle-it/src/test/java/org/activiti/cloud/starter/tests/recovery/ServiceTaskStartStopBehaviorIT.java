@@ -17,6 +17,9 @@ package org.activiti.cloud.starter.tests.recovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -24,16 +27,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryScheduler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -213,6 +221,7 @@ class ServiceTaskStartStopBehaviorIT {
 
         ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
 
+        verify(ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)).receive(any(IntegrationError.class));
         assertThat(
             jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
@@ -311,6 +320,26 @@ class ServiceTaskStartStopBehaviorIT {
         static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStartStopBehaviorIT.class);
 
         @Bean
+        ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(
+            RuntimeService runtimeService,
+            IntegrationContextService integrationContextService,
+            ManagementService managementService,
+            RuntimeBundleProperties runtimeBundleProperties,
+            ProcessEngineEventsAggregator processEngineEventsAggregator
+        ) {
+            return spy(
+                new ServiceTaskIntegrationErrorEventHandler(
+                    runtimeService,
+                    integrationContextService,
+                    managementService,
+                    runtimeBundleProperties,
+                    processEngineEventsAggregator
+                )
+            );
+        }
+
+        @SuppressWarnings("java:S2925")
+        @Bean
         @ConnectorBinding(
             input = LongRunningConnectorChannels.CHANNEL_NAME,
             connectorType = "test.longRunningConnector",
@@ -326,7 +355,7 @@ class ServiceTaskStartStopBehaviorIT {
                 for (int i = 1; i <= 30; i++) {
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException _) {
                         Thread.currentThread().interrupt();
                         LOGGER.info("LongRunningConnector interrupted at iteration {}", i);
                         return;
