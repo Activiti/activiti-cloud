@@ -18,6 +18,7 @@ package org.activiti.cloud.connectors.starter.model;
 import static org.activiti.test.Assertions.assertThat;
 
 import java.util.Collections;
+import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -60,13 +61,13 @@ public class IntegrationErrorBuilderTest {
         ).build();
         //then
         assertThat(integrationError)
-            .hasIntegrationContext(integrationContext)
             .hasIntegrationRequest(integrationRequestEvent)
             .hasErrorClassName("java.lang.Error")
             .hasErrorMessage("Boom!")
             .hasStackTraceElements(error.getStackTrace());
 
-        assertThat(integrationContext).hasClientId(ACTIVITY_ELEMENT_ID);
+        Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
+        Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 
     @Test
@@ -124,10 +125,10 @@ public class IntegrationErrorBuilderTest {
             .build();
 
         //then
-        assertThat(integrationError)
-            .hasIntegrationContext(integrationContext)
-            .hasIntegrationRequest(integrationRequestEvent)
-            .hasErrorMessage(customMessage);
+        assertThat(integrationError).hasIntegrationRequest(integrationRequestEvent).hasErrorMessage(customMessage);
+
+        Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
+        Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 
     @Test
@@ -184,5 +185,32 @@ public class IntegrationErrorBuilderTest {
 
         //then
         assertThat(integrationError).hasErrorMessage("Original error message");
+    }
+
+    @Test
+    void shouldClearInBoundVariables_when_buildingIntegrationError() {
+        //given
+        Throwable error = new RuntimeException("Error");
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.setClientId(ACTIVITY_ELEMENT_ID);
+        integrationContext.addInBoundVariables(Map.of("var1", "value1", "var2", "value2"));
+        integrationContext.setProcessDefinitionId(PROC_DEF_ID);
+        integrationContext.setProcessInstanceId(PROC_INST_ID);
+
+        IntegrationRequestImpl integrationRequestEvent = new IntegrationRequestImpl(integrationContext);
+        integrationRequestEvent.setAppName(APP_NAME);
+        integrationRequestEvent.setServiceFullName(RB_NAME);
+
+        //when
+        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(
+            integrationRequestEvent,
+            connectorProperties,
+            error
+        ).build();
+
+        //then
+        Assertions.assertThat(integrationError.getIntegrationContext().getInBoundVariables()).isEmpty();
+        Assertions.assertThat(integrationError.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
     }
 }

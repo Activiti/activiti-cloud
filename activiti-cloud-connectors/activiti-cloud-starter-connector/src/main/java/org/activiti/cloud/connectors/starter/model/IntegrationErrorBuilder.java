@@ -16,6 +16,7 @@
 package org.activiti.cloud.connectors.starter.model;
 
 import java.util.Objects;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -59,6 +60,12 @@ public class IntegrationErrorBuilder {
         Objects.requireNonNull(error);
 
         IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error, customErrorMessage);
+
+        IntegrationContextImpl sanitizedIntegrationContext = new IntegrationContextImpl(
+            integrationRequest.getIntegrationContext()
+        );
+        sanitizedIntegrationContext.clearInBoundVariables();
+        integrationError.setIntegrationContext(sanitizedIntegrationContext);
 
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
