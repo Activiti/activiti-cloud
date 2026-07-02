@@ -8,7 +8,7 @@
   <changeSet author="activiti-runtime-bundle" id="create-shedlock-h2" dbms="h2">
     <preConditions onFail="CONTINUE">
       <not>
-        <tableExists tableName="shedlock"/>
+        <tableExists tableName="shedlock_runtimebundle"/>
       </not>
     </preConditions>
     <sqlFile dbms="h2"
@@ -22,7 +22,7 @@
   <changeSet author="activiti-runtime-bundle" id="create-shedlock-postgresql" dbms="postgresql">
     <preConditions onFail="CONTINUE">
       <not>
-        <tableExists tableName="shedlock"/>
+        <tableExists tableName="shedlock_runtimebundle"/>
       </not>
     </preConditions>
     <sqlFile dbms="postgresql"
@@ -36,7 +36,7 @@
   <changeSet author="activiti-runtime-bundle" id="create-shedlock-oracle" dbms="oracle">
     <preConditions onFail="CONTINUE">
       <not>
-        <tableExists tableName="shedlock"/>
+        <tableExists tableName="shedlock_runtimebundle"/>
       </not>
     </preConditions>
     <sqlFile dbms="oracle"

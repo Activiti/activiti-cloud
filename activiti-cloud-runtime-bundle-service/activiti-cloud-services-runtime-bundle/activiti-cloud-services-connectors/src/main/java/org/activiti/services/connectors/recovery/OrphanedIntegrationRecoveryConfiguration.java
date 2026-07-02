@@ -47,6 +47,7 @@ public class OrphanedIntegrationRecoveryConfiguration {
         return new JdbcTemplateLockProvider(
             JdbcTemplateLockProvider.Configuration.builder()
                 .withJdbcTemplate(new JdbcTemplate(dataSource))
+                .withTableName("shedlock_runtimebundle")
                 .usingDbTime()
                 .build()
         );

@@ -1,4 +1,4 @@
-CREATE TABLE shedlock (
+CREATE TABLE shedlock_runtimebundle (
     name       VARCHAR(64)  NOT NULL,
     lock_until TIMESTAMPTZ  NOT NULL,
     locked_at  TIMESTAMPTZ  NOT NULL,
