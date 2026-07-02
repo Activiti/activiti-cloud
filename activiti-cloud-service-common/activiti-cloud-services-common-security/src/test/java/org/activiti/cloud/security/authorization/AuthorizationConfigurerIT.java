@@ -17,6 +17,9 @@ package org.activiti.cloud.security.authorization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -93,6 +96,32 @@ public class AuthorizationConfigurerIT {
         mockMvc.perform(post(AuthorizationTestController.PUBLIC_POST));
         mockMvc.perform(put(AuthorizationTestController.PUBLIC_PUT));
         mockMvc.perform(delete(AuthorizationTestController.PUBLIC_DELETE));
+    }
+
+    @Test
+    void should_returnOk_whenEndpointIsPublicAndInvalidBearerHeaderIsPresent() throws Exception {
+        // If the BearerTokenResolver did NOT skip public URLs, Spring Security would
+        // invoke the JwtDecoder to validate the header and reject an expired token
+        // with 401 before reaching the authorization phase. Assert the decoder is
+        // never called on public URLs, even when the Authorization header is present.
+        clearInvocations(jwtDecoderMock);
+        MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isOk()).build();
+        mockMvc.perform(get(AuthorizationTestController.PUBLIC_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(post(AuthorizationTestController.PUBLIC_POST).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(put(AuthorizationTestController.PUBLIC_PUT).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(delete(AuthorizationTestController.PUBLIC_DELETE).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        verify(jwtDecoderMock, never()).decode(any());
+    }
+
+    @Test
+    void should_returnOk_whenEndpointIsPublicAndValidBearerHeaderIsPresent() throws Exception {
+        clearInvocations(jwtDecoderMock);
+        MockMvc mockMvc = mockMvcBuilder.alwaysExpect(status().isOk()).build();
+        mockMvc.perform(get(AuthorizationTestController.PUBLIC_GET).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(post(AuthorizationTestController.PUBLIC_POST).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(put(AuthorizationTestController.PUBLIC_PUT).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        mockMvc.perform(delete(AuthorizationTestController.PUBLIC_DELETE).header(AUTH_HEADER_NAME, DUMMY_BEARER));
+        verify(jwtDecoderMock, never()).decode(any());
     }
 
     @Test

@@ -80,21 +80,41 @@ public class AuthorizationConfigurer {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
             authorizationProperties.getSecurityConstraints()
         );
-        List<String> publicUrls = new ArrayList<>();
+        List<String> publicUrls = collectPublicUrlPatterns(orderedSecurityConstraints);
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
+            configureAuthorization(http, securityConstraint);
+        }
+        if (!publicUrls.isEmpty()) {
+            LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
+            http.csrf(csrf -> csrf.ignoringRequestMatchers(new PublicUrlMatcher(publicUrls)));
+        }
+        http.anonymous(withDefaults());
+    }
+
+    /**
+     * Returns the list of URL patterns declared in {@link AuthorizationProperties}
+     * that are not restricted by any role or permission, already normalised
+     * (e.g. {@code /v1/*} is rewritten as {@code /v1/**}).
+     * <p>
+     * Callers can use this list to opt out of authentication filters that would
+     * otherwise process requests targeting public endpoints (for example the
+     * OAuth2 {@code BearerTokenAuthenticationFilter}).
+     */
+    public List<String> getPublicUrlPatterns() {
+        return collectPublicUrlPatterns(authorizationProperties.getSecurityConstraints());
+    }
+
+    private List<String> collectPublicUrlPatterns(List<SecurityConstraint> securityConstraints) {
+        List<String> publicUrls = new ArrayList<>();
+        for (SecurityConstraint securityConstraint : securityConstraints) {
             if (!hasRoleOrPermissionConstraint(securityConstraint)) {
                 List<String> patterns = Arrays.stream(securityConstraint.getSecurityCollections())
                     .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
                     .toList();
                 publicUrls.addAll(patterns);
             }
-            configureAuthorization(http, securityConstraint);
         }
-        if (!publicUrls.isEmpty()) {
-            LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
-            http.csrf(csrf -> csrf.ignoringRequestMatchers(new CsrfIgnoreMatcher(publicUrls)));
-        }
-        http.anonymous(withDefaults());
+        return publicUrls;
     }
 
     private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
