@@ -129,40 +129,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
 
-        final int PAGE_SIZE = 1000;
-        int pageNumber = 0;
-        int totalExported = 0;
-
-        try {
-            auditEventsExporter.writeHeader(response);
-
-            Page<AuditEventEntity> auditPage;
-            do {
-                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
-                auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
-
-                if (auditPage == null || !auditPage.hasContent()) {
-                    break;
-                }
-
-                List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
-                auditEventsExporter.writeRows(events, response);
-                totalExported += events.size();
-
-                pageNumber++;
-            } while (auditPage.hasNext());
-
-            response.getWriter().flush();
-            logger.debug("Successfully exported {} audit events for date range {} to {}", totalExported, from, to);
-        } catch (Exception e) {
-            logger.error(
-                "Export failed after writing {} events for date range {} to {}. Client received partial CSV with HTTP 200.",
-                totalExported,
-                from,
-                to,
-                e
-            );
-        }
+        auditEventsAdminService.exportAuditsBetweenDates(from, to, response);
     }
 
     private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(

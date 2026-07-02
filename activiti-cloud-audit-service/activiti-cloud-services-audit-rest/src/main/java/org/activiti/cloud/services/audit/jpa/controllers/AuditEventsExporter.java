@@ -32,48 +32,46 @@ import tools.jackson.databind.ObjectMapper;
 public class AuditEventsExporter {
 
     private ObjectToJsonStrategy objectToJsonStrategy;
+    private CSVWriter csvWriter;
+    private PrintWriter writer;
 
     public AuditEventsExporter(ObjectMapper objectMapper) {
         objectToJsonStrategy = new ObjectToJsonStrategy(objectMapper);
     }
 
-    public void writeHeader(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
-        PrintWriter writer = response.getWriter();
+    public void startExport(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
+        writer = response.getWriter();
+        csvWriter = createCsvWriter(writer);
+
         String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
-        CSVWriter csvWriter = new CSVWriter(
-            writer,
-            ICSVWriter.DEFAULT_SEPARATOR,
-            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
-            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            ICSVWriter.DEFAULT_LINE_END
-        );
         csvWriter.writeNext(header, true);
-        csvWriter.flushQuietly();
-        writer.flush();
     }
 
-    public void writeRows(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events, HttpServletResponse response)
-        throws IOException, CsvFieldAssignmentException, CsvChainedException {
-        if (events.isEmpty()) {
-            return;
-        }
-
-        PrintWriter writer = response.getWriter();
-        CSVWriter csvWriter = new CSVWriter(
-            writer,
-            ICSVWriter.DEFAULT_SEPARATOR,
-            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
-            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            ICSVWriter.DEFAULT_LINE_END
-        );
-
+    public void writeChunk(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events)
+        throws CsvFieldAssignmentException, CsvChainedException {
         for (CloudRuntimeEvent<?, CloudRuntimeEventType> event : events) {
             CsvLogEntry entry = new CsvLogEntry(event);
             String[] line = objectToJsonStrategy.transmuteBean(entry);
             csvWriter.writeNext(line, true);
         }
+    }
 
-        csvWriter.flushQuietly();
-        writer.flush();
+    public void finishExport() throws IOException {
+        if (csvWriter != null) {
+            csvWriter.flushQuietly();
+        }
+        if (writer != null) {
+            writer.flush();
+        }
+    }
+
+    private CSVWriter createCsvWriter(PrintWriter writer) {
+        return new CSVWriter(
+            writer,
+            ICSVWriter.DEFAULT_SEPARATOR,
+            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
+            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ICSVWriter.DEFAULT_LINE_END
+        );
     }
 }

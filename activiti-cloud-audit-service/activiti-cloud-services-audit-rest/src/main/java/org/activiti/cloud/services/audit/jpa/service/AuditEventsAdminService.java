@@ -15,21 +15,39 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
+import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public class AuditEventsAdminService {
 
     private final EventsRepository eventsRepository;
+    private final APIEventToEntityConverters eventConverters;
+    private final AuditEventsExporter auditEventsExporter;
 
-    public AuditEventsAdminService(EventsRepository eventsRepository) {
+    public AuditEventsAdminService(
+        EventsRepository eventsRepository,
+        APIEventToEntityConverters eventConverters,
+        AuditEventsExporter auditEventsExporter
+    ) {
         this.eventsRepository = eventsRepository;
+        this.eventConverters = eventConverters;
+        this.auditEventsExporter = auditEventsExporter;
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {
@@ -40,6 +58,50 @@ public class AuditEventsAdminService {
     public Page<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
         Long[] timestamps = validateAndConvertDates(fromDate, toDate);
         return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1], pageable);
+    }
+
+    public void exportAuditsBetweenDates(
+        LocalDate fromDate,
+        LocalDate toDate,
+        HttpServletResponse response
+    ) throws IOException, com.opencsv.exceptions.CsvFieldAssignmentException, com.opencsv.exceptions.CsvChainedException {
+        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
+
+        auditEventsExporter.startExport(response);
+
+        final int PAGE_SIZE = 1000;
+        int pageNumber = 0;
+
+        Page<AuditEventEntity> auditPage;
+        do {
+            Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+            auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
+                timestamps[0],
+                timestamps[1],
+                pageable
+            );
+
+            if (auditPage == null || !auditPage.hasContent()) {
+                break;
+            }
+
+            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
+            auditEventsExporter.writeChunk(events);
+
+            pageNumber++;
+        } while (auditPage.hasNext());
+
+        auditEventsExporter.finishExport();
+    }
+
+    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(
+        Iterable<? extends AuditEventEntity> auditEntities
+    ) {
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
+        for (AuditEventEntity aee : auditEntities) {
+            events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
+        }
+        return events;
     }
 
     private Long[] validateAndConvertDates(LocalDate fromDate, LocalDate toDate) {
