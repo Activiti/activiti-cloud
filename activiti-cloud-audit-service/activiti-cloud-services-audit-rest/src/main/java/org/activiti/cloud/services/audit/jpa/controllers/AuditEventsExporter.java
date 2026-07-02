@@ -20,7 +20,6 @@ import com.opencsv.ICSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvChainedException;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvFieldAssignmentException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -49,7 +48,7 @@ public class AuditEventsExporter {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
         String fileName,
         HttpServletResponse response
-    ) throws IOException, CsvDataTypeMismatchException, CsvFieldAssignmentException {
+    ) throws IOException, CsvFieldAssignmentException {
         response.setContentType(CSV_CONTENT_TYPE);
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
 
