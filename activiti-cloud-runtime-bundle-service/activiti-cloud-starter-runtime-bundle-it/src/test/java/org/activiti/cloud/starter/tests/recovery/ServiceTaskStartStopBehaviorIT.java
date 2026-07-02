@@ -314,7 +314,7 @@ class ServiceTaskStartStopBehaviorIT {
                     "activiti.diagram.label.font=0",
                     "spring.activiti.async-executor.seconds-to-wait-on-shutdown=0",
                     "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=",
-                    "activiti.orphaned-integration-recovery.threshold-minutes=0",
+                    "activiti.orphaned-integration-recovery.threshold-seconds=0",
                     "activiti.cloud.messaging.function-router.enabled=" + functionRouterEnabled,
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.group=longRunningConnectorConsumer",

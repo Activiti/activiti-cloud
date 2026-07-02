@@ -34,7 +34,8 @@ public class OrphanedIntegrationRecoveryScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrphanedIntegrationRecoveryScheduler.class);
 
     public static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
-        "Service task did not complete: the application instance was shut down while this integration was in progress.";
+        "Service task did not complete: the integration was not resolved within the expected time." +
+        " Possible causes include application shutdown, connector crash, or task interruption.";
 
     private final IntegrationContextService integrationContextService;
     private final IntegrationRequestBuilder integrationRequestBuilder;
@@ -56,7 +57,7 @@ public class OrphanedIntegrationRecoveryScheduler {
     @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
     @SchedulerLock(name = "orphanedIntegrationRecovery")
     public void recoverOrphanedIntegrations() {
-        var threshold = Date.from(Instant.now().minus(properties.getThresholdMinutes(), ChronoUnit.MINUTES));
+        var threshold = Date.from(Instant.now().minus(properties.getThresholdSeconds(), ChronoUnit.SECONDS));
         var orphaned = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 
         if (orphaned.isEmpty()) {
@@ -64,9 +65,9 @@ public class OrphanedIntegrationRecoveryScheduler {
         }
 
         LOGGER.warn(
-            "Found {} orphaned integration context(s) older than {} minutes. Sending integration errors.",
+            "Found {} orphaned integration context(s) older than {} seconds. Sending integration errors.",
             orphaned.size(),
-            properties.getThresholdMinutes()
+            properties.getThresholdSeconds()
         );
 
         for (var entity : orphaned) {

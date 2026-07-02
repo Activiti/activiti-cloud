@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 class OrphanedIntegrationRecoveryProperties {
 
     private String cron = "0 */5 * * * *";
-    private int thresholdMinutes = 25;
+    private int thresholdSeconds = 1500;
 
     public String getCron() {
         return cron;
@@ -31,11 +31,11 @@ class OrphanedIntegrationRecoveryProperties {
         this.cron = cron;
     }
 
-    public int getThresholdMinutes() {
-        return thresholdMinutes;
+    public int getThresholdSeconds() {
+        return thresholdSeconds;
     }
 
-    public void setThresholdMinutes(int thresholdMinutes) {
-        this.thresholdMinutes = thresholdMinutes;
+    public void setThresholdSeconds(int thresholdSeconds) {
+        this.thresholdSeconds = thresholdSeconds;
     }
 }
