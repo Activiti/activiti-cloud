@@ -16,9 +16,15 @@
 package org.activiti.cloud.services.audit.jpa.controllers;
 
 import com.opencsv.CSVWriter;
+import com.opencsv.ICSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvChainedException;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvFieldAssignmentException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +50,7 @@ public class AuditEventsExporter {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
         String fileName,
         HttpServletResponse response
-    ) throws Exception {
+    ) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         response.setContentType(CSV_CONTENT_TYPE);
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
 
@@ -57,15 +63,15 @@ public class AuditEventsExporter {
         writer.close();
     }
 
-    public void writeHeader(HttpServletResponse response) throws Exception {
+    public void writeHeader(HttpServletResponse response) throws IOException, CsvRequiredFieldEmptyException {
         PrintWriter writer = response.getWriter();
         String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
         CSVWriter csvWriter = new CSVWriter(
             writer,
-            CSVWriter.DEFAULT_SEPARATOR,
-            CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-            CSVWriter.DEFAULT_LINE_END
+            ICSVWriter.DEFAULT_SEPARATOR,
+            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
+            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ICSVWriter.DEFAULT_LINE_END
         );
         csvWriter.writeNext(header, true);
         csvWriter.flushQuietly();
@@ -73,7 +79,7 @@ public class AuditEventsExporter {
     }
 
     public void writeRows(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events, HttpServletResponse response)
-        throws Exception {
+        throws IOException, CsvRequiredFieldEmptyException, CsvFieldAssignmentException, CsvChainedException {
         if (events.isEmpty()) {
             return;
         }
@@ -85,10 +91,10 @@ public class AuditEventsExporter {
             String[] line = objectToJsonStrategy.transmuteBean(entry);
             CSVWriter csvWriter = new CSVWriter(
                 writer,
-                CSVWriter.DEFAULT_SEPARATOR,
-                CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                CSVWriter.DEFAULT_LINE_END
+                ICSVWriter.DEFAULT_SEPARATOR,
+                ICSVWriter.DEFAULT_QUOTE_CHARACTER,
+                ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                ICSVWriter.DEFAULT_LINE_END
             );
             csvWriter.writeNext(line, true);
             csvWriter.flushQuietly();
