@@ -84,21 +84,22 @@ public class AuditEventsExporter {
             return;
         }
 
-        List<CsvLogEntry> entries = toCsvLogEntryList(events);
         PrintWriter writer = response.getWriter();
+        CSVWriter csvWriter = new CSVWriter(
+            writer,
+            ICSVWriter.DEFAULT_SEPARATOR,
+            ICSVWriter.DEFAULT_QUOTE_CHARACTER,
+            ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
+            ICSVWriter.DEFAULT_LINE_END
+        );
 
-        for (CsvLogEntry entry : entries) {
+        for (CloudRuntimeEvent<?, CloudRuntimeEventType> event : events) {
+            CsvLogEntry entry = new CsvLogEntry(event);
             String[] line = objectToJsonStrategy.transmuteBean(entry);
-            CSVWriter csvWriter = new CSVWriter(
-                writer,
-                ICSVWriter.DEFAULT_SEPARATOR,
-                ICSVWriter.DEFAULT_QUOTE_CHARACTER,
-                ICSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                ICSVWriter.DEFAULT_LINE_END
-            );
             csvWriter.writeNext(line, true);
-            csvWriter.flushQuietly();
         }
+
+        csvWriter.flushQuietly();
         writer.flush();
     }
 
