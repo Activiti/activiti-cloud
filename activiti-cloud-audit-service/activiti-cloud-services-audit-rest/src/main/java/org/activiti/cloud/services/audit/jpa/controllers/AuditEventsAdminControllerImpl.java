@@ -30,6 +30,8 @@ import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelA
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -55,6 +57,8 @@ import tools.jackson.databind.ObjectMapper;
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuditEventsAdminControllerImpl.class);
 
     private final EventsRepository eventsRepository;
 
@@ -125,27 +129,41 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
 
-        auditEventsExporter.writeHeader(response);
-
         final int PAGE_SIZE = 1000;
         int pageNumber = 0;
+        int totalExported = 0;
 
-        Page<AuditEventEntity> auditPage;
-        do {
-            Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
-            auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
+        try {
+            auditEventsExporter.writeHeader(response);
 
-            if (auditPage == null || !auditPage.hasContent()) {
-                break;
-            }
+            Page<AuditEventEntity> auditPage;
+            do {
+                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+                auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);
 
-            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
-            auditEventsExporter.writeRows(events, response);
+                if (auditPage == null || !auditPage.hasContent()) {
+                    break;
+                }
 
-            pageNumber++;
-        } while (auditPage.hasNext());
+                List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
+                auditEventsExporter.writeRows(events, response);
+                totalExported += events.size();
 
-        response.getWriter().flush();
+                pageNumber++;
+            } while (auditPage.hasNext());
+
+            response.getWriter().flush();
+            logger.info("Successfully exported {} audit events for date range {} to {}", totalExported, from, to);
+        } catch (Exception e) {
+            logger.error(
+                "Export failed after writing {} events for date range {} to {}. Client received partial CSV.",
+                totalExported,
+                from,
+                to,
+                e
+            );
+            throw e;
+        }
     }
 
     private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(
