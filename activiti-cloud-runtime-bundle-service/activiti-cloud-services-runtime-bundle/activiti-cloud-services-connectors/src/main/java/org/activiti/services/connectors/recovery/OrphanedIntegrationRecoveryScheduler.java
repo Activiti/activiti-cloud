@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -35,9 +36,6 @@ public class OrphanedIntegrationRecoveryScheduler {
 
     public static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
         "Service task did not complete: the application instance was shut down while this integration was in progress.";
-
-    // hashCode of "orphaned-integration-recovery"
-    private static final long ADVISORY_LOCK_KEY = -1532795308L;
 
     private final JdbcTemplate jdbcTemplate;
     private final IntegrationContextService integrationContextService;
@@ -60,15 +58,8 @@ public class OrphanedIntegrationRecoveryScheduler {
     }
 
     @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
+    @SchedulerLock(name = "orphanedIntegrationRecovery")
     public void recoverOrphanedIntegrations() {
-        var lockAcquired = Boolean.TRUE.equals(
-            jdbcTemplate.queryForObject("SELECT pg_try_advisory_xact_lock(?)", Boolean.class, ADVISORY_LOCK_KEY)
-        );
-        if (!lockAcquired) {
-            LOGGER.debug("Orphaned integration recovery skipped — another instance holds the lock.");
-            return;
-        }
-
         var threshold = Date.from(Instant.now().minus(properties.getThresholdMinutes(), ChronoUnit.MINUTES));
         var ids = findOrphanedIntegrationContextIds(threshold);
 
