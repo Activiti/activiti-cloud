@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
+import com.opencsv.exceptions.CsvChainedException;
+import com.opencsv.exceptions.CsvFieldAssignmentException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -27,6 +29,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.springframework.data.domain.Page;
@@ -64,34 +67,38 @@ public class AuditEventsAdminService {
         LocalDate fromDate,
         LocalDate toDate,
         HttpServletResponse response
-    ) throws IOException, com.opencsv.exceptions.CsvFieldAssignmentException, com.opencsv.exceptions.CsvChainedException {
+    ) throws IOException, AuditExportException {
         Long[] timestamps = validateAndConvertDates(fromDate, toDate);
 
-        auditEventsExporter.startExport(response);
+        try {
+            auditEventsExporter.startExport(response);
 
-        final int PAGE_SIZE = 1000;
-        int pageNumber = 0;
+            final int PAGE_SIZE = 1000;
+            int pageNumber = 0;
 
-        Page<AuditEventEntity> auditPage;
-        do {
-            Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
-            auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
-                timestamps[0],
-                timestamps[1],
-                pageable
-            );
+            Page<AuditEventEntity> auditPage;
+            do {
+                Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
+                auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
+                    timestamps[0],
+                    timestamps[1],
+                    pageable
+                );
 
-            if (auditPage == null || !auditPage.hasContent()) {
-                break;
-            }
+                if (auditPage == null || !auditPage.hasContent()) {
+                    break;
+                }
 
-            List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
-            auditEventsExporter.writeChunk(events);
+                List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
+                auditEventsExporter.writeChunk(events);
 
-            pageNumber++;
-        } while (auditPage.hasNext());
+                pageNumber++;
+            } while (auditPage.hasNext());
 
-        auditEventsExporter.finishExport();
+            auditEventsExporter.finishExport();
+        } catch (CsvFieldAssignmentException | CsvChainedException e) {
+            throw new AuditExportException("Failed writing CSV rows", e);
+        }
     }
 
     private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(

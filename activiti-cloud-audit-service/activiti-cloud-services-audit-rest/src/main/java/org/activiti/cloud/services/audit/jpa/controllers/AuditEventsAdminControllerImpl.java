@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,8 +121,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         @RequestParam(value = "from", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(value = "to", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
         HttpServletResponse response
-    )
-        throws java.io.IOException, com.opencsv.exceptions.CsvFieldAssignmentException, com.opencsv.exceptions.CsvChainedException {
+    ) throws IOException, AuditExportException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
 
