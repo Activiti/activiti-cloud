@@ -29,6 +29,7 @@ public class IntegrationResultReceivedEventEntity extends IntegrationEventEntity
 
     public IntegrationResultReceivedEventEntity(CloudIntegrationResultReceivedEvent event) {
         super(event);
+        clearInBoundVariables();
     }
 
     @Override

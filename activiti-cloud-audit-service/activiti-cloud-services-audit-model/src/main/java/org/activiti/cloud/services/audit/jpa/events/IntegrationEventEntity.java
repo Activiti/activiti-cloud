@@ -19,6 +19,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.MappedSuperclass;
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
 
@@ -34,6 +35,14 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
     public IntegrationEventEntity(CloudIntegrationEvent event) {
         super(event);
         this.integrationContext = event.getEntity();
+    }
+
+    protected void clearInBoundVariables() {
+        if (this.integrationContext != null) {
+            IntegrationContextImpl sanitized = new IntegrationContextImpl(this.integrationContext);
+            sanitized.clearInBoundVariables();
+            this.integrationContext = sanitized;
+        }
     }
 
     public IntegrationContext getIntegrationContext() {
