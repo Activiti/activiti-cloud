@@ -130,7 +130,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         final int PAGE_SIZE = 1000;
         int pageNumber = 0;
 
-        Page<? extends AuditEventEntity> auditPage;
+        Page<AuditEventEntity> auditPage;
         do {
             Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
             auditPage = auditEventsAdminService.findAuditsBetweenDates(from, to, pageable);

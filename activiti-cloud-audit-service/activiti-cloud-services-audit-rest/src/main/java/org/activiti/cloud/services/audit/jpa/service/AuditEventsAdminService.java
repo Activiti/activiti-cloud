@@ -37,7 +37,7 @@ public class AuditEventsAdminService {
         return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1]);
     }
 
-    public Page<? extends AuditEventEntity> findAuditsBetweenDates(
+    public Page<AuditEventEntity> findAuditsBetweenDates(
         LocalDate fromDate,
         LocalDate toDate,
         Pageable pageable
