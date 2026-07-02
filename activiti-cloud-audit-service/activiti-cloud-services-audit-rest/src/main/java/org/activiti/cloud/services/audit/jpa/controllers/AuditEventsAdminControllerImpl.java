@@ -120,8 +120,8 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         @RequestParam(value = "from", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(value = "to", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
         HttpServletResponse response
-    ) throws java.io.IOException, com.opencsv.exceptions.CsvRequiredFieldEmptyException,
-             com.opencsv.exceptions.CsvFieldAssignmentException, com.opencsv.exceptions.CsvChainedException {
+    )
+        throws java.io.IOException, com.opencsv.exceptions.CsvRequiredFieldEmptyException, com.opencsv.exceptions.CsvFieldAssignmentException, com.opencsv.exceptions.CsvChainedException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
 
