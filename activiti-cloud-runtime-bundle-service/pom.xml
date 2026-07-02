@@ -18,7 +18,7 @@
     <module>activiti-cloud-starter-runtime-bundle-it</module>
   </modules>
   <properties>
-    <activiti.version>9.1.0-alpha.39</activiti.version>
+    <activiti.version>0.0.1-PR-5460-3056-SNAPSHOT</activiti.version>
     <commons-fileupload.version>1.6.0</commons-fileupload.version>
     <shedlock.version>7.7.0</shedlock.version>
   </properties>
