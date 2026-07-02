@@ -67,8 +67,6 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     private final APIEventToEntityConverters eventConverters;
 
-    private final AuditEventsExporter auditEventsExporter;
-
     private final AuditEventsAdminService auditEventsAdminService;
 
     @Autowired
@@ -77,14 +75,12 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         EventRepresentationModelAssembler eventRepresentationModelAssembler,
         APIEventToEntityConverters eventConverters,
         AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler,
-        ObjectMapper objectMapper,
         AuditEventsAdminService auditEventsAdminService
     ) {
         this.eventsRepository = eventsRepository;
         this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.auditEventsExporter = new AuditEventsExporter(objectMapper);
         this.auditEventsAdminService = auditEventsAdminService;
     }
 
