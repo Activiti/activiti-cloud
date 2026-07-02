@@ -63,11 +63,8 @@ public class AuditEventsAdminService {
         return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1], pageable);
     }
 
-    public void exportAuditsBetweenDates(
-        LocalDate fromDate,
-        LocalDate toDate,
-        HttpServletResponse response
-    ) throws IOException, AuditExportException {
+    public void exportAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, HttpServletResponse response)
+        throws IOException, AuditExportException {
         Long[] timestamps = validateAndConvertDates(fromDate, toDate);
 
         try {
