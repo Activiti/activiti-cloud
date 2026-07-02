@@ -33,7 +33,10 @@ public class ActivitiCloudRuntimeBundleLiquibaseAutoConfiguration extends Spring
 
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleLiquibase")
-    public SpringLiquibase runtimeBundleLiquibase(DataSource dataSource, LiquibaseProperties runtimeBundleLiquibaseProperties) {
+    public SpringLiquibase runtimeBundleLiquibase(
+        DataSource dataSource,
+        LiquibaseProperties runtimeBundleLiquibaseProperties
+    ) {
         return buildSpringLiquibase(dataSource, runtimeBundleLiquibaseProperties);
     }
 

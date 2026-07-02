@@ -55,14 +55,12 @@ public class OrphanedIntegrationRecoveryConfiguration {
 
     @Bean
     OrphanedIntegrationRecoveryScheduler orphanedIntegrationRecoveryScheduler(
-        JdbcTemplate jdbcTemplate,
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
         OrphanedIntegrationRecoveryProperties properties
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
-            jdbcTemplate,
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,

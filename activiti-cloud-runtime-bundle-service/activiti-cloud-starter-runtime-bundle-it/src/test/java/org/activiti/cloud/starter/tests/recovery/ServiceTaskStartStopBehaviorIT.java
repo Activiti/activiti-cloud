@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.sql.DataSource;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -57,7 +56,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -162,13 +160,14 @@ class ServiceTaskStartStopBehaviorIT {
             .as("no async jobs should exist — the process is waiting for the integration result, not a timer or retry")
             .isZero();
 
-        var jdbcTemplate = new JdbcTemplate(ctx1.getBean(DataSource.class));
         assertThat(
-            jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
-                Long.class,
-                processInstanceId
-            )
+            ctx1
+                .getBean(IntegrationContextService.class)
+                .createIntegrationContextQuery()
+                .list()
+                .stream()
+                .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
+                .count()
         )
             .as("an integration context record should exist — the service task is in flight")
             .isEqualTo(1L);
@@ -205,13 +204,14 @@ class ServiceTaskStartStopBehaviorIT {
             )
             .isZero();
 
-        jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
         assertThat(
-            jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
-                Long.class,
-                processInstanceId
-            )
+            ctx2
+                .getBean(IntegrationContextService.class)
+                .createIntegrationContextQuery()
+                .list()
+                .stream()
+                .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
+                .count()
         )
             .as(
                 "an integration context record should exist — the service task was STARTED and is awaiting the integration result"
@@ -245,11 +245,13 @@ class ServiceTaskStartStopBehaviorIT {
             );
         });
         assertThat(
-            jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
-                Long.class,
-                processInstanceId
-            )
+            ctx2
+                .getBean(IntegrationContextService.class)
+                .createIntegrationContextQuery()
+                .list()
+                .stream()
+                .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
+                .count()
         )
             .as(
                 "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
