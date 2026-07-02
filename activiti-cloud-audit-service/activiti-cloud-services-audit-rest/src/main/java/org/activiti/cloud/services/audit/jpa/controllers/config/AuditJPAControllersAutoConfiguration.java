@@ -17,6 +17,9 @@ package org.activiti.cloud.services.audit.jpa.controllers.config;
 
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
+import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
@@ -30,7 +33,14 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
-@Import({ EventRepresentationModelAssemblerConfiguration.class })
+@Import(
+    {
+        EventRepresentationModelAssemblerConfiguration.class,
+        AuditEventsAdminControllerImpl.class,
+        AuditEventsControllerImpl.class,
+        AuditEventsDeleteController.class,
+    }
+)
 public class AuditJPAControllersAutoConfiguration {
 
     @Bean
