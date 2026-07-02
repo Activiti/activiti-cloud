@@ -17,6 +17,8 @@ package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
@@ -27,6 +29,31 @@ class IntegrationResultReceivedEventConverterTest {
 
     private final IntegrationResultReceivedEventConverter integrationResultReceivedEventConverter =
         new IntegrationResultReceivedEventConverter(new EventContextInfoAppender());
+
+    @Test
+    void createEventEntity_should_clearInBoundVariables() {
+        //given
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.addInBoundVariables(Map.of("inputVar", "inputValue"));
+        integrationContext.addOutBoundVariables(Map.of("outputVar", "outputValue"));
+
+        CloudIntegrationResultReceivedEventImpl resultReceivedEvent = new CloudIntegrationResultReceivedEventImpl(
+            integrationContext
+        );
+        resultReceivedEvent.setSequenceNumber(1);
+
+        //when
+        IntegrationResultReceivedEventEntity resultEntity = integrationResultReceivedEventConverter.createEventEntity(
+            resultReceivedEvent
+        );
+
+        //then
+        assertThat(resultEntity.getIntegrationContext()).isNotNull();
+        assertThat(resultEntity.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(resultEntity.getIntegrationContext().getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
+            Map.of("outputVar", "outputValue")
+        );
+    }
 
     @Test
     void shouldConvertToAPIEvent() throws InterruptedException {

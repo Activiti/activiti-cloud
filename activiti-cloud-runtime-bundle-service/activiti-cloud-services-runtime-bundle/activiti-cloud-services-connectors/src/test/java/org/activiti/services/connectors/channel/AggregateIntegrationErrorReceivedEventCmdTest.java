@@ -81,6 +81,35 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
     }
 
     @Test
+    void should_clearInBoundVariables_when_integrationAuditEventIsSent() {
+        //given
+        final IntegrationError integrationError = mock(IntegrationError.class);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.addInBoundVariables(Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2"));
+        integrationContext.addOutBoundVariables(
+            Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
+        );
+
+        when(integrationError.getIntegrationContext()).thenReturn(integrationContext);
+
+        final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator
+        );
+
+        //when
+        command.execute(mock(CommandContext.class));
+
+        //then
+        verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
+        final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
+        IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
+        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
+    }
+
+    @Test
     void should_notRetainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
@@ -111,7 +140,7 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
     }
 
     @Test
-    void should_retainInboundAndOutboundVariables_when_integrationContextHasEphemeralVariables() {
+    void should_retainOutboundVariables_when_integrationContextDoesNotHaveEphemeralVariables() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
 
@@ -136,9 +165,7 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(cloudRuntimeEventArgumentCaptor.capture());
         final CloudRuntimeEvent<?, ?> event = cloudRuntimeEventArgumentCaptor.getValue();
         IntegrationContext sanitizedContext = ((CloudIntegrationErrorReceivedEvent) event).getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).containsExactlyInAnyOrderEntriesOf(
-            Map.of("inboundKey", "inboundValue", "inboundKey2", "inboundValue2")
-        );
+        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
         assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
             Map.of("outboundKey", "outboundValue", "outboundKey2", "outboundValue2")
         );

@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import static org.activiti.test.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 
@@ -57,12 +56,12 @@ public class IntegrationResultBuilderTest {
             .build();
 
         //then
-        assertThat(resultEvent)
-            .hasIntegrationContext(integrationContext)
-            .hasIntegrationRequest(integrationRequestEvent);
-        assertThat(integrationContext)
-            .hasClientId(ACTIVITY_ELEMENT_ID)
-            .hasOutBoundVariables(Collections.singletonMap(VAR, VALUE));
+        assertThat(resultEvent.getIntegrationRequest()).isEqualTo(integrationRequestEvent);
+        assertThat(resultEvent.getIntegrationContext().getInBoundVariables()).isEmpty();
+        assertThat(resultEvent.getIntegrationContext().getClientId()).isEqualTo(ACTIVITY_ELEMENT_ID);
+        assertThat(resultEvent.getIntegrationContext().getOutBoundVariables()).isEqualTo(
+            Collections.singletonMap(VAR, VALUE)
+        );
     }
 
     @Test
@@ -85,7 +84,7 @@ public class IntegrationResultBuilderTest {
         ).buildMessage();
 
         //then
-        Assertions.assertThat(message.getHeaders())
+        assertThat(message.getHeaders())
             .containsEntry("targetService", RB_NAME)
             .containsEntry("targetAppName", APP_NAME);
     }

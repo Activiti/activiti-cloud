@@ -64,7 +64,33 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         //then
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
-        assertThat(event.getEntity()).isEqualTo(integrationContext);
+        assertThat(event.getEntity()).isNotNull();
+    }
+
+    @Test
+    public void should_clearInBoundVariables_when_integrationAuditEventIsSent() {
+        //given
+        given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
+
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        integrationContext.addInBoundVariables(Map.of("inboundVar1", "value1", "inboundVar2", "value2"));
+        integrationContext.addOutBoundVariables(Map.of("outboundVar1", "value1", "outboundVar2", "value2"));
+
+        AggregateIntegrationResultReceivedEventCmd aggregateIntegrationResultReceivedEventCmd =
+            new AggregateIntegrationResultReceivedEventCmd(
+                integrationContext,
+                runtimeBundleProperties,
+                processEngineEventsAggregator
+            );
+
+        //when
+        aggregateIntegrationResultReceivedEventCmd.execute(null);
+
+        //then
+        verify(processEngineEventsAggregator).add(messageCaptor.capture());
+        CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
+        IntegrationContext sanitizedContext = event.getEntity();
+        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
     }
 
     @Test
@@ -108,7 +134,7 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
     }
 
     @Test
-    public void should_retainInboundOutBoundVariables_when_integrationContextHasNoEphemeralVariables() {
+    public void should_retainOutBoundVariables_when_integrationContextHasNoEphemeralVariables() {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(true);
 
@@ -131,9 +157,7 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
         IntegrationContext sanitizedContext = event.getEntity();
-        assertThat(sanitizedContext.getInBoundVariables()).containsExactlyInAnyOrderEntriesOf(
-            Map.of("inboundVar1", "value1", "inboundVar2", "value2")
-        );
+        assertThat(sanitizedContext.getInBoundVariables()).isEmpty();
         assertThat(sanitizedContext.getOutBoundVariables()).containsExactlyInAnyOrderEntriesOf(
             Map.of("outboundVar1", "value1", "outboundVar2", "value2")
         );

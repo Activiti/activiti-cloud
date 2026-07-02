@@ -46,14 +46,13 @@ public class IntegrationErrorReceivedEventConverterTest {
         IntegrationErrorReceivedEventEntity errorReceivedEventEntity = converter.createEventEntity(errorReceivedEvent);
 
         //then
-        assertThat(errorReceivedEventEntity.getIntegrationContext()).isEqualTo(errorReceivedEvent.getEntity());
+        assertThat(errorReceivedEventEntity.getIntegrationContext()).isNotNull();
+        assertThat(errorReceivedEventEntity.getIntegrationContext().getInBoundVariables()).isEmpty();
         assertThat(errorReceivedEventEntity.getErrorCode()).isEqualTo(errorReceivedEvent.getErrorCode());
-        assertThat(errorReceivedEventEntity.getErrorMessage()).isEqualTo(errorReceivedEventEntity.getErrorMessage());
-        assertThat(errorReceivedEventEntity.getErrorClassName()).isEqualTo(
-            errorReceivedEventEntity.getErrorClassName()
-        );
+        assertThat(errorReceivedEventEntity.getErrorMessage()).isEqualTo(errorReceivedEvent.getErrorMessage());
+        assertThat(errorReceivedEventEntity.getErrorClassName()).isEqualTo(errorReceivedEvent.getErrorClassName());
         assertThat(errorReceivedEventEntity.getStackTraceElements()).isEqualTo(
-            errorReceivedEventEntity.getStackTraceElements()
+            errorReceivedEvent.getStackTraceElements()
         );
     }
 
