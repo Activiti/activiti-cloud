@@ -83,7 +83,7 @@ class ServiceTaskStartStopBehaviorIT {
     private static final String PROCESS_RESOURCE = "processes/service-task-loop.bpmn20.xml";
 
     // Static so ctx1 and ctx2 — separate Spring contexts in the same JVM — share the same flag.
-    static final AtomicBoolean integrationRequestSent = new AtomicBoolean(false);
+    static final AtomicBoolean integrationRequestReceived = new AtomicBoolean(false);
 
     @Container
     static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine").waitingFor(
@@ -104,7 +104,7 @@ class ServiceTaskStartStopBehaviorIT {
 
     @AfterEach
     void cleanUp() {
-        integrationRequestSent.set(false);
+        integrationRequestReceived.set(false);
         SecurityContextHolder.clearContext();
         if (ctx1 != null && ctx1.isActive()) {
             ctx1.close();
@@ -128,7 +128,7 @@ class ServiceTaskStartStopBehaviorIT {
             .start()
             .getId();
 
-        await().atMost(Duration.ofSeconds(30)).until(integrationRequestSent::get);
+        await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
 
         setupAdminSecurityContext();
 
@@ -164,6 +164,8 @@ class ServiceTaskStartStopBehaviorIT {
         // the broker requeues unACKed messages immediately, matching what happens on a real crash.
         ctx1.getBean(CachingConnectionFactory.class).resetConnection();
         ctx1.close();
+        // Reset so we can detect whether ctx2's connector receives the requeued message.
+        integrationRequestReceived.set(false);
 
         ctx2 = buildContext(functionRouterEnabled);
 
@@ -196,6 +198,18 @@ class ServiceTaskStartStopBehaviorIT {
         )
             .as("an integration context record should exist — the service task was STARTED and is awaiting the integration result")
             .isEqualTo(1L);
+
+        if (functionRouterEnabled) {
+            // Function router ACKs the message on receipt before routing it to the connector.
+            // On crash the message is already gone — ctx2's connector should never receive it.
+            await()
+                .during(Duration.ofSeconds(5))
+                .atMost(Duration.ofSeconds(6))
+                .until(() -> !integrationRequestReceived.get());
+        } else {
+            // MANUAL ACK + resetConnection causes the broker to redeliver the message to ctx2.
+            await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
+        }
 
         ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
 
@@ -308,7 +322,7 @@ class ServiceTaskStartStopBehaviorIT {
                     "LongRunningConnector started for process instance {}",
                     event.getIntegrationContext().getProcessInstanceId()
                 );
-                integrationRequestSent.set(true);
+                integrationRequestReceived.set(true);
                 for (int i = 1; i <= 30; i++) {
                     try {
                         Thread.sleep(1000);
