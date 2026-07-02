@@ -33,7 +33,7 @@ public class OrphanedIntegrationRecoveryScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrphanedIntegrationRecoveryScheduler.class);
 
-    private static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
+    public static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
         "Service task did not complete: the application instance was shut down while this integration was in progress.";
 
     // hashCode of "orphaned-integration-recovery"

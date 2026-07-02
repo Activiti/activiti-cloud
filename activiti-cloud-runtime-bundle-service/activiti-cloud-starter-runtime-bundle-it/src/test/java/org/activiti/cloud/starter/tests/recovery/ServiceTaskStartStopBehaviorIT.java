@@ -17,7 +17,6 @@ package org.activiti.cloud.starter.tests.recovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -49,6 +48,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -221,7 +222,15 @@ class ServiceTaskStartStopBehaviorIT {
 
         ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
 
-        verify(ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)).receive(any(IntegrationError.class));
+        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+        verify(AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
+            ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
+        )).receive(errorCaptor.capture());
+        assertThat(errorCaptor.getValue())
+            .satisfies(error -> {
+                assertThat(error.getErrorClassName()).isEqualTo(RuntimeException.class.getName());
+                assertThat(error.getErrorMessage()).isEqualTo(OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE);
+            });
         assertThat(
             jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM ACT_RU_INTEGRATION WHERE PROCESS_INSTANCE_ID_ = ?",
