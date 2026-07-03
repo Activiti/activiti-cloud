@@ -473,12 +473,22 @@ jobs:
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/automate-build-tools/.github/actions/setup-commit-signing@45f203f0347f6eace4813dbaa3031055b3d5b9cd # v4.12.0
-        with:
-          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
-          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
-          git-user-name: ${{ vars.HXPS_GIT_USERNAME }}
-          git-user-email: ${{ vars.HXPS_GIT_EMAIL }}
+      - name: Configure commit signing
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_FINGERPRINT: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          GIT_USERNAME: ${{ vars.HXPS_GIT_USERNAME }}
+          GIT_USEREMAIL: ${{ vars.HXPS_GIT_EMAIL }}
+        run: |
+          GNUPGHOME="$(mktemp -d)"
+          chmod 700 "$GNUPGHOME"
+          export GNUPGHOME
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --pinentry-mode loopback --import
+          git config --global user.name "$GIT_USERNAME"
+          git config --global user.email "$GIT_USEREMAIL"
+          git config --global user.signingkey "$GPG_PRIVATE_KEY_FINGERPRINT"
+          git config --global commit.gpgsign true
 
       - name: Commit signed chart changes
         id: commit
