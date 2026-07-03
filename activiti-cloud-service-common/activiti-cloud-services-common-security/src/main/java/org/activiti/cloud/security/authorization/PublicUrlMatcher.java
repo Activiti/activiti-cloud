@@ -21,13 +21,22 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
-public class CsrfIgnoreMatcher implements RequestMatcher {
+/**
+ * Matches an {@link HttpServletRequest} whose URI is covered by a public
+ * URL pattern declared in {@link AuthorizationProperties}. A security
+ * constraint is considered public when it does not declare any required
+ * role or permission.
+ *
+ * <p>Used both to disable CSRF protection and to skip bearer-token
+ * extraction on public endpoints.
+ */
+public class PublicUrlMatcher implements RequestMatcher {
 
     private final List<String> publicUrls;
 
     private final PathMatcher matcher;
 
-    public CsrfIgnoreMatcher(List<String> publicUrls) {
+    public PublicUrlMatcher(List<String> publicUrls) {
         this.publicUrls = publicUrls;
         this.matcher = new AntPathMatcher();
     }
