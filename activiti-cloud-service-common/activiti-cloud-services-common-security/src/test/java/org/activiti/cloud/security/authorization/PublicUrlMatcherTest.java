@@ -22,21 +22,21 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-class CsrfIgnoreMatcherTest {
+class PublicUrlMatcherTest {
 
     private final List<String> publicUrlsPatterns = asList("/public", "/public/**");
     private final List<String> nonPublicUrlsPatterns = asList("/non-public", "/non-public/**");
-    private final CsrfIgnoreMatcher matcher = new CsrfIgnoreMatcher(publicUrlsPatterns);
+    private final PublicUrlMatcher matcher = new PublicUrlMatcher(publicUrlsPatterns);
 
     @Test
     void should_matchPublicURLsPatterns() {
-        nonPublicUrlsPatterns.forEach(url ->
-            assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse()
-        );
+        publicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isTrue());
     }
 
     @Test
     void should_not_matchNonPublicURLsPatterns() {
-        publicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isTrue());
+        nonPublicUrlsPatterns.forEach(url ->
+            assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse()
+        );
     }
 }
