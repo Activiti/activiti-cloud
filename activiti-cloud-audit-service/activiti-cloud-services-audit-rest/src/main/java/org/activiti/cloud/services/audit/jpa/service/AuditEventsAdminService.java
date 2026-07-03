@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
+import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvChainedException;
 import com.opencsv.exceptions.CsvFieldAssignmentException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,17 +61,12 @@ public class AuditEventsAdminService {
         return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(range.start(), range.end());
     }
 
-    public Page<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
-        TimestampRange range = validateAndConvertDates(fromDate, toDate);
-        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(range.start(), range.end(), pageable);
-    }
-
     public void exportAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, HttpServletResponse response)
         throws IOException, AuditExportException {
         TimestampRange range = validateAndConvertDates(fromDate, toDate);
 
         try {
-            auditEventsExporter.startExport(response);
+            CSVWriter csvWriter = auditEventsExporter.startExport(response);
 
             final int PAGE_SIZE = 1000;
             int pageNumber = 0;
@@ -89,12 +85,12 @@ public class AuditEventsAdminService {
                 }
 
                 List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(auditPage.getContent());
-                auditEventsExporter.writeChunk(events);
+                auditEventsExporter.writeChunk(csvWriter, events);
 
                 pageNumber++;
             } while (auditPage.hasNext());
 
-            auditEventsExporter.finishExport();
+            auditEventsExporter.finishExport(csvWriter);
         } catch (CsvFieldAssignmentException | CsvChainedException e) {
             throw new AuditExportException("Failed writing CSV rows", e);
         }

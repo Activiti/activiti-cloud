@@ -32,37 +32,26 @@ import tools.jackson.databind.ObjectMapper;
 public class AuditEventsExporter {
 
     private ObjectToJsonStrategy objectToJsonStrategy;
-    private CSVWriter csvWriter;
-    private PrintWriter writer;
 
     public AuditEventsExporter(ObjectMapper objectMapper) {
         objectToJsonStrategy = new ObjectToJsonStrategy(objectMapper);
     }
 
-    public void startExport(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
-        writer = response.getWriter();
-        csvWriter = createCsvWriter(writer);
-
-        String[] header = objectToJsonStrategy.generateHeader(CsvLogEntry.class);
-        csvWriter.writeNext(header, true);
+    public CSVWriter startExport(HttpServletResponse response) throws IOException, CsvFieldAssignmentException {
+        CSVWriter csvWriter = createCsvWriter(response.getWriter());
+        csvWriter.writeNext(objectToJsonStrategy.generateHeader(CsvLogEntry.class), true);
+        return csvWriter;
     }
 
-    public void writeChunk(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events)
+    public void writeChunk(CSVWriter csvWriter, List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events)
         throws CsvFieldAssignmentException, CsvChainedException {
         for (CloudRuntimeEvent<?, CloudRuntimeEventType> event : events) {
-            CsvLogEntry entry = new CsvLogEntry(event);
-            String[] line = objectToJsonStrategy.transmuteBean(entry);
-            csvWriter.writeNext(line, true);
+            csvWriter.writeNext(objectToJsonStrategy.transmuteBean(new CsvLogEntry(event)), true);
         }
     }
 
-    public void finishExport() {
-        if (csvWriter != null) {
-            csvWriter.flushQuietly();
-        }
-        if (writer != null) {
-            writer.flush();
-        }
+    public void finishExport(CSVWriter csvWriter) {
+        csvWriter.flushQuietly();
     }
 
     private CSVWriter createCsvWriter(PrintWriter writer) {
