@@ -56,7 +56,7 @@ public class AuditEventsExporter {
         }
     }
 
-    public void finishExport() throws IOException {
+    public void finishExport() {
         if (csvWriter != null) {
             csvWriter.flushQuietly();
         }
