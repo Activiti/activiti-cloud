@@ -29,8 +29,8 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsExporter;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.exceptions.AuditExportException;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +38,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public class AuditEventsAdminService {
+
+    private record TimestampRange(long start, long end) {}
 
     private final EventsRepository eventsRepository;
     private final APIEventToEntityConverters eventConverters;
@@ -54,18 +56,18 @@ public class AuditEventsAdminService {
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {
-        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
-        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1]);
+        TimestampRange range = validateAndConvertDates(fromDate, toDate);
+        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(range.start(), range.end());
     }
 
     public Page<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
-        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
-        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(timestamps[0], timestamps[1], pageable);
+        TimestampRange range = validateAndConvertDates(fromDate, toDate);
+        return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(range.start(), range.end(), pageable);
     }
 
     public void exportAuditsBetweenDates(LocalDate fromDate, LocalDate toDate, HttpServletResponse response)
         throws IOException, AuditExportException {
-        Long[] timestamps = validateAndConvertDates(fromDate, toDate);
+        TimestampRange range = validateAndConvertDates(fromDate, toDate);
 
         try {
             auditEventsExporter.startExport(response);
@@ -77,8 +79,8 @@ public class AuditEventsAdminService {
             do {
                 Pageable pageable = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "timestamp"));
                 auditPage = eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(
-                    timestamps[0],
-                    timestamps[1],
+                    range.start(),
+                    range.end(),
                     pageable
                 );
 
@@ -108,7 +110,7 @@ public class AuditEventsAdminService {
         return events;
     }
 
-    private Long[] validateAndConvertDates(LocalDate fromDate, LocalDate toDate) {
+    private TimestampRange validateAndConvertDates(LocalDate fromDate, LocalDate toDate) {
         if (fromDate.isAfter(toDate)) {
             throw new IllegalArgumentException("From date cannot be after to date");
         }
@@ -119,9 +121,9 @@ public class AuditEventsAdminService {
             throw new IllegalArgumentException("Difference between dates cannot be more than 31 days");
         }
 
-        Long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
-        Long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
+        long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        return new Long[] { startDateTime, endDateTime };
+        return new TimestampRange(startDateTime, endDateTime);
     }
 }
