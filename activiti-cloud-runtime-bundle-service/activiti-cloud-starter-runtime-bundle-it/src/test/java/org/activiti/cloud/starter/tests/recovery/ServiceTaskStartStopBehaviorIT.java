@@ -27,6 +27,7 @@ import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -239,7 +240,7 @@ class ServiceTaskStartStopBehaviorIT {
             )
         ).receive(errorCaptor.capture());
         assertThat(errorCaptor.getValue()).satisfies(error -> {
-            assertThat(error.getErrorClassName()).isEqualTo(RuntimeException.class.getName());
+            assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
             assertThat(error.getErrorMessage()).isEqualTo(
                 OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
             );
@@ -258,27 +259,20 @@ class ServiceTaskStartStopBehaviorIT {
             )
             .isZero();
 
-        await()
-            .pollDelay(Duration.ofSeconds(10))
-            .atMost(Duration.ofSeconds(30))
-            .untilAsserted(() -> {
-                setupAdminSecurityContext();
-                assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
-                    .as(
-                        "process should still be RUNNING after ctx2 has been up — ctx2 must not have completed the service task"
-                    )
-                    .isEqualTo(ProcessInstanceStatus.RUNNING);
-                assertThat(
-                    ctx2
-                        .getBean(RuntimeService.class)
-                        .createExecutionQuery()
-                        .processInstanceId(processInstanceId)
-                        .activityId("LongRunningTask")
-                        .count()
-                )
-                    .as("service task 'LongRunningTask' should still be STARTED after the recovery")
-                    .isEqualTo(1);
-            });
+        setupAdminSecurityContext();
+        assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
+            .as("process should still be RUNNING after recovery — no error boundary is configured, so the execution stays at the service task")
+            .isEqualTo(ProcessInstanceStatus.RUNNING);
+        assertThat(
+            ctx2
+                .getBean(RuntimeService.class)
+                .createExecutionQuery()
+                .processInstanceId(processInstanceId)
+                .activityId("LongRunningTask")
+                .count()
+        )
+            .as("service task 'LongRunningTask' should still be STARTED — it remains in the DB for further action")
+            .isEqualTo(1);
     }
 
     private static void setupAdminSecurityContext() {

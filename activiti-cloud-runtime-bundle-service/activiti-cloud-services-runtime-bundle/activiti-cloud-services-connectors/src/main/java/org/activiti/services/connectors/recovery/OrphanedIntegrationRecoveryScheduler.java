@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -32,6 +33,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class OrphanedIntegrationRecoveryScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrphanedIntegrationRecoveryScheduler.class);
+
+    public static final String ORPHANED_INTEGRATION_ERROR_CODE = "ORPHANED_INTEGRATION";
 
     public static final String ORPHANED_INTEGRATION_ERROR_MESSAGE =
         "Service task did not complete: the integration was not resolved within the expected time." +
@@ -70,9 +73,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             properties.getThresholdSeconds()
         );
 
-        for (var entity : orphaned) {
-            recoverOrphanedIntegration(entity);
-        }
+      orphaned.forEach(this::recoverOrphanedIntegration);
     }
 
     private void recoverOrphanedIntegration(IntegrationContextEntity entity) {
@@ -82,11 +83,12 @@ public class OrphanedIntegrationRecoveryScheduler {
             integrationContext.setExecutionId(entity.getExecutionId());
             integrationContext.setProcessInstanceId(entity.getProcessInstanceId());
             integrationContext.setProcessDefinitionId(entity.getProcessDefinitionId());
+            integrationContext.setClientId(entity.getFlowNodeId());
 
             var integrationRequest = integrationRequestBuilder.build(integrationContext);
             var integrationError = new IntegrationErrorImpl(
                 integrationRequest,
-                new RuntimeException(ORPHANED_INTEGRATION_ERROR_MESSAGE)
+                new CloudBpmnError(ORPHANED_INTEGRATION_ERROR_CODE, ORPHANED_INTEGRATION_ERROR_MESSAGE)
             );
 
             errorEventHandler.receive(integrationError);
