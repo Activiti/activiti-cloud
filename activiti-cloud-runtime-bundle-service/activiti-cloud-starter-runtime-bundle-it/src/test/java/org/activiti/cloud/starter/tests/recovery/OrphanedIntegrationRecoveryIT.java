@@ -20,9 +20,14 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.sql.DataSource;
+import net.javacrumbs.shedlock.core.LockConfiguration;
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
@@ -43,6 +48,7 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryScheduler;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +63,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -83,12 +90,16 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  * disabled the broker redelivers the unACKed message to ctx2's connector (which also never responds);
  * with function-router enabled the message is ACKed on receipt and lost on crash. Both paths leave an
  * orphaned record that the scheduler must clean up.
+ *
+ * <p>Also covers the distributed-locking contract: when two instances share the same database,
+ * ShedLock ensures only one runs {@link OrphanedIntegrationRecoveryScheduler} at a time.
  */
 @Testcontainers
-class ServiceTaskStartStopBehaviorIT {
+class OrphanedIntegrationRecoveryIT {
 
     private static final String PROCESS_KEY = "serviceTaskLoop";
     private static final String PROCESS_RESOURCE = "processes/service-task-loop.bpmn20.xml";
+    private static final String LOCK_NAME = "orphanedIntegrationRecovery";
 
     // Static so ctx1 and ctx2 — separate Spring contexts in the same JVM — share the same flag.
     static final AtomicBoolean integrationRequestReceived = new AtomicBoolean(false);
@@ -277,6 +288,53 @@ class ServiceTaskStartStopBehaviorIT {
             .isEqualTo(1);
     }
 
+    @Test
+    void should_runRecoveryOnlyOnce_when_twoInstancesRunConcurrently() {
+        ctx1 = buildContext(false);
+        ctx2 = buildContext(false);
+
+        var lockConfig = new LockConfiguration(
+            Instant.now(),
+            LOCK_NAME,
+            java.time.Duration.ofMinutes(5),
+            java.time.Duration.ZERO
+        );
+
+        // ctx1 acquires the lock, simulating ctx1's scheduler starting execution
+        var ctx1Lock = ctx1.getBean(LockProvider.class).lock(lockConfig);
+        assertThat(ctx1Lock).as("ctx1 should acquire the scheduler lock").isPresent();
+
+        // ctx2 uses the same shedlock_runtimebundle table, so it cannot acquire the same lock
+        assertThat(ctx2.getBean(LockProvider.class).lock(lockConfig))
+            .as("ctx2 should not acquire the lock while ctx1 holds it")
+            .isEmpty();
+
+        // ctx2 calls recoverOrphanedIntegrations() — the ShedLock proxy detects the held lock and
+        // skips the method body without throwing; lock_until in the table must remain unchanged
+        var jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
+        var lockUntilBefore = lockUntil(jdbcTemplate);
+        ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
+        assertThat(lockUntil(jdbcTemplate))
+            .as("lock_until must not change — ctx2 scheduler was skipped by ShedLock")
+            .isEqualTo(lockUntilBefore);
+
+        // ctx1 releases the lock
+        ctx1Lock.get().unlock();
+
+        // ctx2 can now acquire the lock (scheduler will run on the next invocation)
+        assertThat(ctx2.getBean(LockProvider.class).lock(lockConfig))
+            .as("ctx2 should acquire the lock after ctx1 releases it")
+            .isPresent();
+    }
+
+    private static Timestamp lockUntil(JdbcTemplate jdbcTemplate) {
+        return jdbcTemplate.queryForObject(
+            "SELECT lock_until FROM shedlock_runtimebundle WHERE name = ?",
+            Timestamp.class,
+            LOCK_NAME
+        );
+    }
+
     private static void setupAdminSecurityContext() {
         var jwt = Jwt.withTokenValue("test-token").header("alg", "HS256").claim("sub", "admin").build();
         var auth = new JwtAuthenticationToken(
@@ -340,7 +398,7 @@ class ServiceTaskStartStopBehaviorIT {
     @Configuration
     static class TestConfiguration implements LongRunningConnectorChannels {
 
-        static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStartStopBehaviorIT.class);
+        static final Logger LOGGER = LoggerFactory.getLogger(OrphanedIntegrationRecoveryIT.class);
 
         @Bean
         ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(
