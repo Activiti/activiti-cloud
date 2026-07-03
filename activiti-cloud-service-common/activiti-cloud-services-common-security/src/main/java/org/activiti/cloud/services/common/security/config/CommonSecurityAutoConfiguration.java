@@ -25,7 +25,6 @@ import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.security.authorization.AuthorizationConfigurer;
 import org.activiti.cloud.security.authorization.EnableAuthorizationConfiguration;
-import org.activiti.cloud.security.authorization.PublicUrlMatcher;
 import org.activiti.cloud.security.feign.TokenRelayRequestInterceptor;
 import org.activiti.cloud.services.common.security.CustomBearerTokenAccessDeniedHandler;
 import org.activiti.cloud.services.common.security.SecurityManagerImpl;
@@ -56,8 +55,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
@@ -204,30 +201,9 @@ public class CommonSecurityAutoConfiguration {
         return new TokenRelayRequestInterceptor(securityContextTokenProvider);
     }
 
-    /**
-     * Provides a {@link BearerTokenResolver} that skips bearer-token extraction on public
-     * URLs (i.e. security constraints without any required role or permission). When the
-     * resolver returns {@code null}, Spring Security's
-     * {@code BearerTokenAuthenticationFilter} bypasses authentication entirely for the
-     * current request, so a stale/expired {@code Authorization} header on a public
-     * endpoint will not produce a 401.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public BearerTokenResolver bearerTokenResolver() {
-        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        List<String> publicUrls = authorizationConfigurer.getPublicUrlPatterns();
-        if (publicUrls.isEmpty()) {
-            return delegate;
-        }
-        PublicUrlMatcher publicUrlMatcher = new PublicUrlMatcher(publicUrls);
-        return request -> publicUrlMatcher.matches(request) ? null : delegate.resolve(request);
-    }
-
     @Bean
     @SuppressWarnings({ "java:S4502", "java:S5122" })
-    public SecurityFilterChain filterChain(HttpSecurity http, BearerTokenResolver bearerTokenResolver)
-        throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
         http
             .authorizeHttpRequests(spec ->
@@ -245,11 +221,7 @@ public class CommonSecurityAutoConfiguration {
                 spec.accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             )
             .httpBasic(spec -> spec.disable())
-            .oauth2ResourceServer(spec ->
-                spec
-                    .bearerTokenResolver(bearerTokenResolver)
-                    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
-            );
+            .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
         for (HttpSecurityCustomizer customizer : httpSecurityCustomizers) {
             customizer.customize(http);
