@@ -61,6 +61,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "authorizations.security-constraints[4].authPermissions[1]=OTHER_DUMMY_PERMISSION",
         "authorizations.security-constraints[4].securityCollections[0].patterns[0]=/permission/dummy-endpoint/*",
         "authorizations.security-constraints[4].securityCollections[0].omittedMethods[0]=DELETE",
+        "authorizations.security-constraints[5].securityCollections[0].patterns[0]=/role/scope-override",
     }
 )
 @EnableWebMvc
@@ -242,6 +243,41 @@ public class AuthorizationConfigurerIT {
     @Test
     void should_configureSearchCaches() {
         assertThat(caffeineCacheManager.getCacheNames()).containsOnly("userSearch", "groupSearch", "userInfoApiCall");
+    }
+
+    @Test
+    void should_extractBearerTokenAndAllowAccess_whenPublicOverrideIsShadowedByRestrictedConstraintAndScopeMatches()
+        throws Exception {
+        // /role/scope-override is declared as a public constraint but is also matched by the restricted
+        // /role/* constraint. This is a "public override": HTTP-level role check is relaxed and the actual
+        // authorization is delegated to @PreAuthorize("hasAuthority('SCOPE_internal-api')") on the controller.
+        // The bearer token MUST be extracted and validated so the SecurityContext carries the SCOPE_ authority.
+        clearInvocations(jwtDecoderMock);
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("internal-api"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc
+            .perform(get(AuthorizationTestController.ROLE_SCOPE_OVERRIDE).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isOk());
+        verify(jwtDecoderMock).decode(any());
+    }
+
+    @Test
+    void should_denyAccess_whenPublicOverrideIsShadowedByRestrictedConstraintAndScopeIsMissing() throws Exception {
+        when(jwtAdapterMock.getScopes()).thenReturn(List.of("some-other-scope"));
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc
+            .perform(get(AuthorizationTestController.ROLE_SCOPE_OVERRIDE).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_denyAccess_whenPublicOverrideIsShadowedByRestrictedConstraintAndNoTokenIsProvided() throws Exception {
+        // No Authorization header → anonymous SecurityContext. The HTTP-level constraint permitAll lets
+        // the request through, but method-level @PreAuthorize denies it. Spring Security's
+        // ExceptionTranslationFilter turns AccessDenied for an anonymous principal into 401
+        // (authentication required), not 403.
+        MockMvc mockMvc = mockMvcBuilder.build();
+        mockMvc.perform(get(AuthorizationTestController.ROLE_SCOPE_OVERRIDE)).andExpect(status().isUnauthorized());
     }
 
     private void performRoleRestrictedRequests(MockMvc mockMvc) throws Exception {

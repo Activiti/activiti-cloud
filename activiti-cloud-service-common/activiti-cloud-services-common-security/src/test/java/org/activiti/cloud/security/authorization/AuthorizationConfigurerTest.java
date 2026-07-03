@@ -28,6 +28,7 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.PATCH;
 import static org.springframework.http.HttpMethod.TRACE;
 
+import java.util.List;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.junit.jupiter.api.Test;
@@ -244,6 +245,70 @@ class AuthorizationConfigurerTest {
 
     private SecurityConstraint createSecurityConstraintWithRolesAndPatterns(String[] roles, String[] patterns) {
         return createSecurityConstraint(roles, new String[] {}, patterns, new String[] {});
+    }
+
+    @Test
+    public void should_returnAllPublicPatterns_from_getPublicUrlPatterns() {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_1" }, new String[] { "/v1/*" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/v1/hello/scope" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/public/*" })
+            )
+        );
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        assertThat(authorizationConfigurer.getPublicUrlPatterns()).containsExactlyInAnyOrder(
+            "/v1/hello/scope",
+            "/public/**"
+        );
+    }
+
+    @Test
+    public void should_excludePatternsShadowedByRestrictedConstraints_from_getStrictlyPublicUrlPatterns() {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_1" }, new String[] { "/v1/*" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/v1/hello/scope" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/public/*" })
+            )
+        );
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        // /v1/hello/scope is a "public override" shadowed by /v1/** — must NOT be treated as strictly public,
+        // otherwise the bearer token would be skipped and method-level @PreAuthorize checks would fail.
+        // /public/** is not shadowed by any restricted constraint → remains strictly public.
+        assertThat(authorizationConfigurer.getStrictlyPublicUrlPatterns()).containsExactly("/public/**");
+    }
+
+    @Test
+    public void should_returnAllPublicPatterns_from_getStrictlyPublicUrlPatterns_when_noRestrictedConstraintExists() {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/public/*" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/v1/hello/scope" })
+            )
+        );
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        assertThat(authorizationConfigurer.getStrictlyPublicUrlPatterns()).containsExactlyInAnyOrder(
+            "/public/**",
+            "/v1/hello/scope"
+        );
+    }
+
+    @Test
+    public void should_returnEmptyList_from_getStrictlyPublicUrlPatterns_when_noPublicConstraintExists() {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        authorizationProperties.setSecurityConstraints(
+            List.of(createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_1" }, new String[] { "/v1/*" }))
+        );
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        assertThat(authorizationConfigurer.getStrictlyPublicUrlPatterns()).isEmpty();
     }
 
     private SecurityConstraint createSecurityConstraintWithPermissionsAndPatterns(

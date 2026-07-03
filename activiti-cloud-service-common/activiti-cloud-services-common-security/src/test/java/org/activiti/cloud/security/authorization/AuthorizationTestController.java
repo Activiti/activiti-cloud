@@ -16,6 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,8 @@ public class AuthorizationTestController {
     public static final String PERMISSION_DUMMY_ENDPOINT = "/permission/dummy-endpoint";
     public static final String ROLE_DUMMY_ENDPOINT_RESTRICTED = ROLE_DUMMY_ENDPOINT + "/restricted";
     public static final String PERMISSION_DUMMY_ENDPOINT_RESTRICTED = PERMISSION_DUMMY_ENDPOINT + "/restricted";
+    public static final String ROLE_SCOPE_OVERRIDE = "/role/scope-override";
+    public static final String REQUIRED_SCOPE_AUTHORITY = "SCOPE_internal-api";
 
     @GetMapping(PUBLIC_GET)
     public ResponseEntity<Void> publicGet() {
@@ -139,6 +142,12 @@ public class AuthorizationTestController {
 
     @DeleteMapping(PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
     public ResponseEntity<Void> permissionDummyEndpointRestrictedDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(ROLE_SCOPE_OVERRIDE)
+    @PreAuthorize("hasAuthority('" + REQUIRED_SCOPE_AUTHORITY + "')")
+    public ResponseEntity<Void> roleScopeOverrideGet() {
         return ResponseEntity.ok().build();
     }
 }

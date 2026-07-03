@@ -205,18 +205,29 @@ public class CommonSecurityAutoConfiguration {
     }
 
     /**
-     * Provides a {@link BearerTokenResolver} that skips bearer-token extraction on public
-     * URLs (i.e. security constraints without any required role or permission). When the
-     * resolver returns {@code null}, Spring Security's
-     * {@code BearerTokenAuthenticationFilter} bypasses authentication entirely for the
-     * current request, so a stale/expired {@code Authorization} header on a public
-     * endpoint will not produce a 401.
+     * Provides a {@link BearerTokenResolver} that skips bearer-token extraction on
+     * <em>unconditionally</em> public URLs — i.e. security constraints without any
+     * required role or permission that are also not shadowed by another restricted
+     * constraint. When the resolver returns {@code null}, Spring Security's
+     * {@code BearerTokenAuthenticationFilter} bypasses authentication entirely for
+     * the current request, so a stale/expired {@code Authorization} header on a
+     * truly public endpoint will not produce a 401.
+     *
+     * <p>Patterns that are declared as public but are also matched by a restricted
+     * constraint (public "overrides", typically used to switch off the HTTP-level
+     * role check while delegating authorization to method-level annotations such
+     * as {@code @PreAuthorize}) are intentionally excluded here: for those the
+     * bearer token must be extracted and validated, otherwise the
+     * {@code SecurityContext} would not carry the authorities the method-level
+     * check needs.
+     *
+     * @see AuthorizationConfigurer#getStrictlyPublicUrlPatterns()
      */
     @Bean
     @ConditionalOnMissingBean
     public BearerTokenResolver bearerTokenResolver() {
         DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        List<String> publicUrls = authorizationConfigurer.getPublicUrlPatterns();
+        List<String> publicUrls = authorizationConfigurer.getStrictlyPublicUrlPatterns();
         if (publicUrls.isEmpty()) {
             return delegate;
         }

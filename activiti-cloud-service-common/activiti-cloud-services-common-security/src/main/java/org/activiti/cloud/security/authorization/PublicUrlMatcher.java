@@ -22,13 +22,22 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 /**
- * Matches an {@link HttpServletRequest} whose URI is covered by a public
- * URL pattern declared in {@link AuthorizationProperties}. A security
- * constraint is considered public when it does not declare any required
- * role or permission.
+ * Matches an {@link HttpServletRequest} whose URI is covered by any of the
+ * patterns supplied at construction time (typically a subset of the patterns
+ * declared in {@link AuthorizationProperties}).
  *
- * <p>Used both to disable CSRF protection and to skip bearer-token
- * extraction on public endpoints.
+ * <p>Callers decide which flavour of "public" they need:
+ * <ul>
+ *   <li>{@link AuthorizationConfigurer#getPublicUrlPatterns()} — every pattern
+ *   declared without a role/permission. Suitable for HTTP-level opt-outs such
+ *   as disabling CSRF protection.</li>
+ *   <li>{@link AuthorizationConfigurer#getStrictlyPublicUrlPatterns()} — only
+ *   patterns that are also not shadowed by any restricted constraint. Suitable
+ *   when the goal is to bypass authentication entirely (for example, skipping
+ *   bearer-token extraction), so that "public overrides" backed by
+ *   method-level security (like {@code @PreAuthorize}) are not accidentally
+ *   stripped of the authorities they need.</li>
+ * </ul>
  */
 public class PublicUrlMatcher implements RequestMatcher {
 

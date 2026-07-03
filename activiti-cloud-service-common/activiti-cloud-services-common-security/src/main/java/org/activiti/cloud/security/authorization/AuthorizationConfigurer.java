@@ -37,6 +37,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
@@ -95,13 +97,57 @@ public class AuthorizationConfigurer {
      * Returns the list of URL patterns declared in {@link AuthorizationProperties}
      * that are not restricted by any role or permission, already normalised
      * (e.g. {@code /v1/*} is rewritten as {@code /v1/**}).
-     * <p>
-     * Callers can use this list to opt out of authentication filters that would
-     * otherwise process requests targeting public endpoints (for example the
-     * OAuth2 {@code BearerTokenAuthenticationFilter}).
+     *
+     * <p>The returned list reflects the raw declaration in the configuration and
+     * includes patterns that are also matched by another restricted constraint
+     * (i.e. "public overrides" that switch off the HTTP-level role/permission
+     * check but still expect authorization to be enforced elsewhere — typically
+     * by method-level security such as {@code @PreAuthorize}).
+     *
+     * <p>This list is safe to use when the goal is only to opt out of HTTP-level
+     * concerns that must be disabled for any endpoint declared without a role
+     * (e.g. CSRF protection). Callers that want to <strong>bypass authentication
+     * entirely</strong> for a request — for instance, skipping bearer-token
+     * extraction — must use {@link #getStrictlyPublicUrlPatterns()} instead,
+     * otherwise the token would not be validated even when the endpoint relies
+     * on method-level security to check scopes/authorities.
      */
     public List<String> getPublicUrlPatterns() {
         return collectPublicUrlPatterns(authorizationProperties.getSecurityConstraints());
+    }
+
+    /**
+     * Returns the subset of {@link #getPublicUrlPatterns() public URL patterns}
+     * that are not also matched by any restricted security-constraint (i.e. any
+     * constraint that declares roles or permissions).
+     *
+     * <p>A pattern that appears both as a public constraint <em>and</em> is
+     * covered by a restricted constraint is treated as a <em>public override</em>:
+     * the developer intent is to relax the HTTP-level role/permission check for
+     * that specific pattern while delegating the real authorization decision to
+     * method-level security (e.g. {@code @PreAuthorize("hasAuthority('SCOPE_x')")}
+     * on the controller). Skipping bearer-token extraction on such an endpoint
+     * would silently strip the {@code SecurityContext} of the authorities the
+     * method-level check needs, so the pattern is excluded from this list.
+     *
+     * <p>Endpoints that are declared only as public (never shadowed by a
+     * restricted constraint) are considered unconditionally public and are
+     * still returned here — the bearer token, if any, can be safely ignored for
+     * them.
+     */
+    public List<String> getStrictlyPublicUrlPatterns() {
+        List<SecurityConstraint> constraints = authorizationProperties.getSecurityConstraints();
+        List<String> restrictedPatterns = collectRestrictedUrlPatterns(constraints);
+        if (restrictedPatterns.isEmpty()) {
+            return collectPublicUrlPatterns(constraints);
+        }
+        PathMatcher patternMatcher = new AntPathMatcher();
+        return collectPublicUrlPatterns(constraints)
+            .stream()
+            .filter(candidate ->
+                restrictedPatterns.stream().noneMatch(restricted -> patternMatcher.match(restricted, candidate))
+            )
+            .toList();
     }
 
     private List<String> collectPublicUrlPatterns(List<SecurityConstraint> securityConstraints) {
@@ -115,6 +161,19 @@ public class AuthorizationConfigurer {
             }
         }
         return publicUrls;
+    }
+
+    private List<String> collectRestrictedUrlPatterns(List<SecurityConstraint> securityConstraints) {
+        List<String> restrictedUrls = new ArrayList<>();
+        for (SecurityConstraint securityConstraint : securityConstraints) {
+            if (hasRoleOrPermissionConstraint(securityConstraint)) {
+                List<String> patterns = Arrays.stream(securityConstraint.getSecurityCollections())
+                    .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
+                    .toList();
+                restrictedUrls.addAll(patterns);
+            }
+        }
+        return restrictedUrls;
     }
 
     private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
