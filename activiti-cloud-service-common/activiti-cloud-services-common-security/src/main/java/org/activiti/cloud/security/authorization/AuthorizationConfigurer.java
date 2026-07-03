@@ -145,7 +145,9 @@ public class AuthorizationConfigurer {
         return collectPublicUrlPatterns(constraints)
             .stream()
             .filter(candidate ->
-                restrictedPatterns.stream().noneMatch(restricted -> patternMatcher.match(restricted, candidate))
+                restrictedPatterns.stream().noneMatch(restricted ->
+                    patternMatcher.match(restricted, candidate) || patternMatcher.match(candidate, restricted)
+                )
             )
             .toList();
     }

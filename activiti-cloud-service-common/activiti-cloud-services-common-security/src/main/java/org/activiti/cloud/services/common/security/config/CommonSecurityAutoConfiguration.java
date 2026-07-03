@@ -231,9 +231,10 @@ public class CommonSecurityAutoConfiguration {
         if (publicUrls.isEmpty()) {
             return delegate;
         }
-        PublicUrlMatcher publicUrlMatcher = new PublicUrlMatcher(publicUrls);
-        return request -> publicUrlMatcher.matches(request) ? null : delegate.resolve(request);
-    }
+        List<org.springframework.security.web.util.matcher.RequestMatcher> publicMatchers = publicUrls.stream()
+            .map(org.springframework.security.web.util.matcher.AntPathRequestMatcher::new)
+            .toList();
+        return request -> publicMatchers.stream().anyMatch(m -> m.matches(request)) ? null : delegate.resolve(request);
 
     @Bean
     @SuppressWarnings({ "java:S4502", "java:S5122" })
