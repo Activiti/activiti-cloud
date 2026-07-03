@@ -73,7 +73,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             properties.getThresholdSeconds()
         );
 
-      orphaned.forEach(this::recoverOrphanedIntegration);
+        orphaned.forEach(this::recoverOrphanedIntegration);
     }
 
     private void recoverOrphanedIntegration(IntegrationContextEntity entity) {

@@ -25,9 +25,9 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -261,7 +261,9 @@ class ServiceTaskStartStopBehaviorIT {
 
         setupAdminSecurityContext();
         assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
-            .as("process should still be RUNNING after recovery — no error boundary is configured, so the execution stays at the service task")
+            .as(
+                "process should still be RUNNING after recovery — no error boundary is configured, so the execution stays at the service task"
+            )
             .isEqualTo(ProcessInstanceStatus.RUNNING);
         assertThat(
             ctx2

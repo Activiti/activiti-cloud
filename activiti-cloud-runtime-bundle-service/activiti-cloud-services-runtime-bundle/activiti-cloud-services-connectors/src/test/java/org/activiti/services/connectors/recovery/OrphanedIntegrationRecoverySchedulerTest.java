@@ -85,12 +85,12 @@ class OrphanedIntegrationRecoverySchedulerTest {
 
         var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
         verify(errorEventHandler).receive(errorCaptor.capture());
-        assertThat(errorCaptor.getValue())
-            .satisfies(error -> {
-                assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-                assertThat(error.getErrorMessage())
-                    .isEqualTo(OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE);
-            });
+        assertThat(errorCaptor.getValue()).satisfies(error -> {
+            assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+            assertThat(error.getErrorMessage()).isEqualTo(
+                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
+            );
+        });
     }
 
     @Test
@@ -102,14 +102,13 @@ class OrphanedIntegrationRecoverySchedulerTest {
 
         var contextCaptor = ArgumentCaptor.forClass(IntegrationContext.class);
         verify(integrationRequestBuilder).build(contextCaptor.capture());
-        assertThat(contextCaptor.getValue())
-            .satisfies(ctx -> {
-                assertThat(ctx.getId()).isEqualTo("ctx-1");
-                assertThat(ctx.getExecutionId()).isEqualTo("exec-1");
-                assertThat(ctx.getProcessInstanceId()).isEqualTo("proc-1");
-                assertThat(ctx.getProcessDefinitionId()).isEqualTo("procDef-1");
-                assertThat(ctx.getClientId()).isEqualTo("ServiceTask");
-            });
+        assertThat(contextCaptor.getValue()).satisfies(ctx -> {
+            assertThat(ctx.getId()).isEqualTo("ctx-1");
+            assertThat(ctx.getExecutionId()).isEqualTo("exec-1");
+            assertThat(ctx.getProcessInstanceId()).isEqualTo("proc-1");
+            assertThat(ctx.getProcessDefinitionId()).isEqualTo("procDef-1");
+            assertThat(ctx.getClientId()).isEqualTo("ServiceTask");
+        });
     }
 
     @Test
