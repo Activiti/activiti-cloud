@@ -427,15 +427,18 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@10cea6c0b390c4f8af21d9dc1670d581bd10319f # v18.13.0
         with:
           version: ${{ needs.create-tag.outputs.version }}
           auto-merge: "true"
           labels: "be-propagation,${{ env.DEVELOPMENT_BRANCH }}"
           base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
-          git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-username: ${{ vars.HXPS_GIT_USERNAME }}
           git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          git-author-name: ${{ secrets.BOT_GITHUB_USERNAME }}
+          git-author-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-author-email: ${{ vars.HXPS_GIT_EMAIL }}
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
 
   propagate-helm:
     runs-on: ubuntu-latest
@@ -470,14 +473,28 @@ jobs:
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ed80b0eef8e432f517ea1aa51d8a82637c1d1cc1 # v18.12.0
+      - uses: Alfresco/automate-build-tools/.github/actions/setup-commit-signing@45f203f0347f6eace4813dbaa3031055b3d5b9cd # v4.12.0
         with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          repository-directory: ${{ env.FULL_CHART_DIR}}
-          commit-message: "Update docker image tags to $VERSION"
+          gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
+          git-user-name: ${{ vars.HXPS_GIT_USERNAME }}
+          git-user-email: ${{ vars.HXPS_GIT_EMAIL }}
+
+      - name: Commit signed chart changes
+        id: commit
+        working-directory: ${{ env.FULL_CHART_DIR }}
+        run: |
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No chart changes to commit; skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Update docker image tags to $VERSION"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create propagation PR
+        if: steps.commit.outputs.changed == 'true'
         working-directory: ${{ env.FULL_CHART_DIR}}
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
