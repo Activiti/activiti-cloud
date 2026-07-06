@@ -26,7 +26,7 @@ import { CloudProcessDefinition } from '../../models/process-definition.models';
 import { CloudVariableInstance } from '../../models/process-variable.models';
 import { CloudTask, TaskStatus } from '../../models/task.models';
 import { BaseService } from '../base.service';
-import { RuntimeBundleService } from '../runtime-bundle.service';
+import { RuntimeBundleService } from '../runtime-bundle/runtime-bundle.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { isDiagramShown } from '../../helpers/diagram-utils';
 import { PollProfile } from '../../config/runtime/timeouts';

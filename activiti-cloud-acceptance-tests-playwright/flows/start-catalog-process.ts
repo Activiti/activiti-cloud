@@ -4,7 +4,7 @@
 
 import { ProcessDefinitionRegistry } from '../models/process-definition-registry';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
 
 export interface StartCatalogProcessOptions {
     name?: string;

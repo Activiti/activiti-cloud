@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { CloudTask } from '../models/task.models';
-import { BaseService, RequestResponse } from './base.service';
-import { CustomAPIRequest } from '../fixtures/context.models';
-import { CloudVariableInstance } from '../models/process-variable.models';
+import { CloudTask } from '../../../models/task.models';
+import { CloudVariableInstance } from '../../../models/process-variable.models';
+import { CustomAPIRequest } from '../../../fixtures/context.models';
+import { BaseService, RequestResponse } from '../../base.service';
+import { RB_ADMIN_V1_BASE } from '../../runtime-bundle/endpoints/rb-base-path';
 
-export class TaskAdminService extends BaseService {
-    private readonly basePath = '/rb/admin/v1';
+export class RbAdminTasksEndpoint extends BaseService {
+    private readonly basePath = RB_ADMIN_V1_BASE;
 
     constructor(context: CustomAPIRequest) {
         super(context);

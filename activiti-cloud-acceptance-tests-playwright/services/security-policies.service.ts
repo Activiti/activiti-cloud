@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { RuntimeBundleService } from './runtime-bundle.service';
-import { TaskService } from './task.service';
+import { RuntimeBundleService } from './runtime-bundle/runtime-bundle.service';
+import { TaskService } from './task/task.service';
 import { QueryService } from './query/query.service';
 import { AuditService } from './audit/audit.service';
-import { RuntimeAdminService } from './runtime-admin.service';
+import { RuntimeAdminService } from './runtime-admin/runtime-admin.service';
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudTask } from '../models/task.models';
 import { CloudRuntimeEvent } from '../models/audit.models';

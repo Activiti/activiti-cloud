@@ -29,11 +29,11 @@ import {
 } from '../helpers/service-factory';
 import { getTestScope, TestScope } from '../helpers/test-isolation';
 import { MultipleRuntimeBundleService } from '../services/multiple-runtime-bundle.service';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
 import { QueryService } from '../services/query/query.service';
-import { RuntimeAdminService } from '../services/runtime-admin.service';
-import { TaskService } from '../services/task.service';
-import { TaskAdminService } from '../services/task-admin.service';
+import { RuntimeAdminService } from '../services/runtime-admin/runtime-admin.service';
+import { TaskService } from '../services/task/task.service';
+import { TaskAdminService } from '../services/task-admin/task-admin.service';
 import { AuditService } from '../services/audit/audit.service';
 import { SecurityPoliciesService } from '../services/security-policies.service';
 import { IdentityManagementService } from '../services/identity-management.service';

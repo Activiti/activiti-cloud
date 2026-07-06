@@ -18,14 +18,14 @@ import {
     CloudProcessInstance,
     ProcessQueryParams,
     UpdateProcessPayload,
-} from '../models/runtime-bundle.models';
-import { CloudProcessDefinition } from '../models/process-definition.models';
-import { CloudVariableInstance } from '../models/process-variable.models';
-import { BaseService, RequestResponse } from './base.service';
-import { CustomAPIRequest } from '../fixtures/context.models';
+} from '../../../models/runtime-bundle.models';
+import { CloudVariableInstance } from '../../../models/process-variable.models';
+import { CustomAPIRequest } from '../../../fixtures/context.models';
+import { BaseService, RequestResponse } from '../../base.service';
+import { RB_ADMIN_V1_BASE } from '../../runtime-bundle/endpoints/rb-base-path';
 
-export class RuntimeAdminService extends BaseService {
-    private readonly basePath = '/rb/admin/v1';
+export class RbAdminProcessInstancesEndpoint extends BaseService {
+    private readonly basePath = RB_ADMIN_V1_BASE;
 
     constructor(context: CustomAPIRequest) {
         super(context);
@@ -44,10 +44,7 @@ export class RuntimeAdminService extends BaseService {
         if (params?.businessKey) searchParams.append('businessKey', params.businessKey);
         if (params?.name) searchParams.append('name', params.name);
 
-        const response = await this.get(
-            `${this.basePath}/process-instances?${searchParams.toString()}`
-        );
-
+        const response = await this.get(`${this.basePath}/process-instances?${searchParams.toString()}`);
         return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
     }
 
@@ -127,11 +124,6 @@ export class RuntimeAdminService extends BaseService {
         return this.put(`${this.basePath}/process-instances/message`, { data: body });
     }
 
-    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        const response = await this.get(`${this.basePath}/process-definitions`);
-        return this.unwrapList<CloudProcessDefinition>(response, 'processDefinitions');
-    }
-
     async deleteProcessInstance(processInstanceId: string): Promise<void> {
         await this.delete(`${this.basePath}/process-instances/${processInstanceId}`);
     }
@@ -140,16 +132,7 @@ export class RuntimeAdminService extends BaseService {
         await this.delete(`${this.basePath}/process-instances/${processInstanceId}/destroy?force=${force}`);
     }
 
-    async replayServiceTask(executionId: string, flowNodeId: string): Promise<RequestResponse> {
-        return this.post(`${this.basePath}/executions/${executionId}/replay/service-task`, {
-            data: { flowNodeId },
-        });
-    }
-
-    async setProcessVariables(
-        processInstanceId: string,
-        variables: Record<string, unknown>
-    ): Promise<void> {
+    async setProcessVariables(processInstanceId: string, variables: Record<string, unknown>): Promise<void> {
         await this.put(`${this.basePath}/process-instances/${processInstanceId}/variables`, {
             data: {
                 payloadType: 'SetProcessVariablesPayload',

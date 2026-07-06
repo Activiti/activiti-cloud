@@ -4,8 +4,8 @@
 
 import { CloudProcessInstance } from '../models/runtime-bundle.models';
 import { CloudTask } from '../models/task.models';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
-import { TaskService } from '../services/task.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
+import { TaskService } from '../services/task/task.service';
 import { startCatalogProcess, StartCatalogProcessOptions } from './start-catalog-process';
 
 export interface ProcessWithFirstTask {

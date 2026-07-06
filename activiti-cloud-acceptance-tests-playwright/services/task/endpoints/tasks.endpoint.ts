@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { CloudTask, TaskQueryParams, TaskStatus } from '../models/task.models';
-import { CloudVariableInstance } from '../models/process-variable.models';
-import { BaseService, RequestResponse } from './base.service';
-import { CustomAPIRequest } from '../fixtures/context.models';
+import { CloudTask, TaskQueryParams } from '../../../models/task.models';
+import { CloudVariableInstance } from '../../../models/process-variable.models';
+import { CustomAPIRequest } from '../../../fixtures/context.models';
+import { BaseService, RequestResponse } from '../../base.service';
+import { RB_V1_BASE } from '../../runtime-bundle/endpoints/rb-base-path';
 
 export interface CreateTaskPayload {
     payloadType: 'CreateTaskPayload';
@@ -25,12 +26,10 @@ export interface CreateTaskPayload {
     description?: string;
     assignee?: string;
     parentTaskId?: string;
-    /** Required by RB Jackson (primitive int — must not be null in JSON). */
     priority?: number;
 }
 
-/** Matches Serenity TaskPayloadBuilder defaults; strips nulls so Jackson never sees null for int fields. */
-function buildCreateTaskPayload(
+export function buildCreateTaskPayload(
     fields: Omit<CreateTaskPayload, 'payloadType'>
 ): Record<string, string | number> {
     const raw: Record<string, unknown> = {
@@ -43,8 +42,8 @@ function buildCreateTaskPayload(
     ) as Record<string, string | number>;
 }
 
-export class TaskService extends BaseService {
-    private readonly basePath = '/rb/v1';
+export class RbTasksEndpoint extends BaseService {
+    private readonly basePath = RB_V1_BASE;
 
     constructor(context: CustomAPIRequest) {
         super(context);
@@ -74,72 +73,6 @@ export class TaskService extends BaseService {
         return this.unwrapList<CloudTask>(response, 'tasks');
     }
 
-    async getFirstTaskByProcessInstanceId(processInstanceId: string): Promise<CloudTask> {
-        const tasks = await this.getTasksByProcessInstanceId(processInstanceId);
-        if (tasks.length === 0) {
-            throw new Error(`No tasks found for process instance ${processInstanceId}`);
-        }
-        return tasks[0];
-    }
-
-    async waitForOpenTaskByProcessInstanceId(processInstanceId: string): Promise<CloudTask> {
-        const tasks = await TaskService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
-            (list) => list.some((t) => t.status !== TaskStatus.COMPLETED),
-            'querySync',
-            `open task on process ${processInstanceId}`
-        );
-        return tasks.find((t) => t.status !== TaskStatus.COMPLETED)!;
-    }
-
-    async findTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask | undefined> {
-        const tasks = await this.getTasksByProcessInstanceId(processInstanceId);
-        return tasks.find((task) => task.name === taskName);
-    }
-
-    async waitForTaskByName(processInstanceId: string, taskName: string): Promise<CloudTask> {
-        const tasks = await TaskService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
-            (list) => list.some((task) => task.name === taskName),
-            'querySync',
-            `task named ${taskName} on process ${processInstanceId}`
-        );
-        return tasks.find((task) => task.name === taskName)!;
-    }
-
-    async waitForTaskWithNameAndStatus(
-        processInstanceId: string,
-        taskName: string,
-        status: TaskStatus
-    ): Promise<CloudTask> {
-        const tasks = await TaskService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
-            (list) => list.some((task) => task.name === taskName && task.status === status),
-            'querySync',
-            `task ${taskName} with status ${status} on process ${processInstanceId}`
-        );
-        return tasks.find((task) => task.name === taskName && task.status === status)!;
-    }
-
-    async waitForTaskStatus(taskId: string, expectedStatus: TaskStatus): Promise<CloudTask> {
-        return TaskService.waitFor(
-            () => this.getTaskById(taskId),
-            (task) => task.status === expectedStatus,
-            'querySync',
-            `task ${taskId} to reach status ${expectedStatus}`
-        );
-    }
-
-    async waitForTaskAssignee(taskId: string, expectedAssignee: string): Promise<CloudTask> {
-        const task = await TaskService.waitFor(
-            () => this.tryGetTaskById(taskId),
-            (value) => value?.assignee === expectedAssignee,
-            'querySync',
-            `task ${taskId} to be assigned to ${expectedAssignee}`
-        );
-        return task!;
-    }
-
     async getTaskById(taskId: string): Promise<CloudTask> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}`);
         return this.unwrapEntity<CloudTask>(response);
@@ -153,7 +86,8 @@ export class TaskService extends BaseService {
         return this.unwrapEntity<CloudTask>(response);
     }
 
-    private assertCreateTaskSuccess(response: RequestResponse, action: string): void {
+    async createTask(payload: Record<string, string | number>, action = 'Create task'): Promise<CloudTask> {
+        const response = await this.post(`${this.basePath}/tasks`, { data: payload });
         if (response.httpStatus && response.httpStatus >= 400) {
             const detail =
                 (typeof response.message === 'string' && response.message) ||
@@ -161,50 +95,6 @@ export class TaskService extends BaseService {
                 JSON.stringify(response);
             throw new Error(`${action} failed (${response.httpStatus}): ${detail}`);
         }
-    }
-
-    async createStandaloneTask(options?: {
-        name?: string;
-        description?: string;
-        assignee?: string;
-    }): Promise<CloudTask> {
-        const payload = buildCreateTaskPayload({
-            name: options?.name ?? 'new-task',
-            description: options?.description ?? 'task-description',
-            assignee: options?.assignee ?? 'testuser',
-        });
-        const response = await this.post(`${this.basePath}/tasks`, { data: payload });
-        this.assertCreateTaskSuccess(response, 'Create standalone task');
-        const task = this.unwrapEntity<CloudTask>(response);
-        if (task.id) {
-            this.trackCreatedResource(`${this.basePath}/tasks/${task.id}`);
-        }
-        return task;
-    }
-
-    async createUnassignedStandaloneTask(): Promise<CloudTask> {
-        const payload = buildCreateTaskPayload({
-            name: 'unassigned-task',
-            description: 'unassigned-task-description',
-        });
-        const response = await this.post(`${this.basePath}/tasks`, { data: payload });
-        this.assertCreateTaskSuccess(response, 'Create unassigned standalone task');
-        const task = this.unwrapEntity<CloudTask>(response);
-        if (task.id) {
-            this.trackCreatedResource(`${this.basePath}/tasks/${task.id}`);
-        }
-        return task;
-    }
-
-    async createSubtask(parentTaskId: string): Promise<CloudTask> {
-        const payload = buildCreateTaskPayload({
-            name: 'subtask',
-            description: 'subtask-description',
-            assignee: 'testuser',
-            parentTaskId,
-        });
-        const response = await this.post(`${this.basePath}/tasks`, { data: payload });
-        this.assertCreateTaskSuccess(response, 'Create subtask');
         const task = this.unwrapEntity<CloudTask>(response);
         if (task.id) {
             this.trackCreatedResource(`${this.basePath}/tasks/${task.id}`);
@@ -225,11 +115,12 @@ export class TaskService extends BaseService {
         return this.post(`${this.basePath}/tasks/${taskId}/claim`, { data: {} });
     }
 
-    async completeTask(taskId: string): Promise<RequestResponse> {
+    async completeTask(taskId: string, variables?: Record<string, unknown>): Promise<RequestResponse> {
         return this.post(`${this.basePath}/tasks/${taskId}/complete`, {
             data: {
                 payloadType: 'CompleteTaskPayload',
                 taskId,
+                ...(variables ? { variables } : {}),
             },
         });
     }
@@ -329,70 +220,11 @@ export class TaskService extends BaseService {
         return this.unwrapEntity<CloudTask>(response);
     }
 
-    private unwrapCandidateNames(response: RequestResponse, field: 'user' | 'group'): string[] {
-        const items = this.unwrapList<Record<string, unknown>>(response, 'list');
-        return items
-            .map((item) => item[field])
-            .filter((value): value is string => typeof value === 'string');
-    }
-
     async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}/variables`, {
             headers: { 'Content-Type': 'application/json' },
         });
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
-    }
-
-    async waitForTaskVariablesIncluding(
-        taskId: string,
-        variableNames: readonly string[]
-    ): Promise<CloudVariableInstance[]> {
-        return TaskService.waitFor(
-            () => this.getTaskVariables(taskId),
-            (variables) => {
-                const names = new Set(variables.map((variable) => variable.name));
-                return variableNames.every((name) => names.has(name));
-            },
-            'querySync',
-            `task ${taskId} variables to include [${variableNames.join(',')}]`
-        );
-    }
-
-    async waitForTaskVariableValues(
-        taskId: string,
-        expected: Record<string, unknown>
-    ): Promise<CloudVariableInstance[]> {
-        return TaskService.waitFor(
-            () => this.getTaskVariables(taskId),
-            (variables) => {
-                const map = Object.fromEntries(variables.map((v) => [v.name, v.value]));
-                return (
-                    Object.keys(expected).every((name) => map[name] === expected[name]) &&
-                    Object.keys(map).length === Object.keys(expected).length
-                );
-            },
-            'querySync',
-            `task ${taskId} variables to match ${JSON.stringify(expected)}`
-        );
-    }
-
-    async waitForTasksCount(processInstanceId: string, expectedCount: number): Promise<CloudTask[]> {
-        return TaskService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
-            (tasks) => tasks.length === expectedCount,
-            'querySync',
-            `process ${processInstanceId} to have ${expectedCount} tasks`
-        );
-    }
-
-    async waitForActiveTasksCount(processInstanceId: string, expectedCount: number): Promise<CloudTask[]> {
-        const tasks = await TaskService.waitFor(
-            () => this.getTasksByProcessInstanceId(processInstanceId),
-            (list) => list.filter((task) => task.status !== TaskStatus.COMPLETED).length === expectedCount,
-            'querySync',
-            `process ${processInstanceId} to have ${expectedCount} active tasks`
-        );
-        return tasks.filter((task) => task.status !== TaskStatus.COMPLETED);
     }
 
     async updateTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {
@@ -417,22 +249,10 @@ export class TaskService extends BaseService {
         });
     }
 
-    async completeTaskWithVariables(taskId: string, variables: Record<string, unknown>): Promise<RequestResponse> {
-        return this.post(`${this.basePath}/tasks/${taskId}/complete`, {
-            data: {
-                payloadType: 'CompleteTaskPayload',
-                taskId,
-                variables,
-            },
-        });
-    }
-
-    filterByStandalone(tasks: CloudTask[], standalone: boolean): CloudTask[] {
-        return tasks.filter((task) => Boolean(task.standalone) === standalone);
-    }
-
-    async isTaskNotFoundInRuntime(taskId: string): Promise<boolean> {
-        const task = await this.tryGetTaskById(taskId);
-        return task === undefined;
+    private unwrapCandidateNames(response: RequestResponse, field: 'user' | 'group'): string[] {
+        const items = this.unwrapList<Record<string, unknown>>(response, 'list');
+        return items
+            .map((item) => item[field])
+            .filter((value): value is string => typeof value === 'string');
     }
 }

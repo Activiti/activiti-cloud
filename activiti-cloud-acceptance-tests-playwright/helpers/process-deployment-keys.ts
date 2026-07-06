@@ -16,7 +16,7 @@
 
 import { applyResolvedHostsToEnv } from '../config/connection/env-hosts';
 import { ContextFactory } from '../fixtures/context-factory';
-import { RuntimeBundleService } from '../services/runtime-bundle.service';
+import { RuntimeBundleService } from '../services/runtime-bundle/runtime-bundle.service';
 
 /**
  * BPMN keys required for process-instance-actions.story parity (Serenity runtime-acceptance-tests).
