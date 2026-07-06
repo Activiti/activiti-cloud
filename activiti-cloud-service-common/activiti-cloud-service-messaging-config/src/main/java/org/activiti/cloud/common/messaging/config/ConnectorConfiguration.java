@@ -18,10 +18,17 @@ package org.activiti.cloud.common.messaging.config;
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -32,6 +39,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry;
@@ -42,6 +51,8 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -67,6 +78,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
     public static final String NULL_CHANNEL = "nullChannel";
     public static final String RETRY_COUNT = "x-retry-count";
+    public static final String INTEGRATION_RESULT_TIMEOUT = "integrationResultTimeout";
 
     @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
     IntegrationFlow functionBindingSelectorDiscardFlow() {
@@ -74,6 +86,23 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             .log(DEBUG, CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
             .channel(NULL_CHANNEL)
             .get();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "connectorAsyncTaskExecutor")
+    AsyncTaskExecutor connectorAsyncTaskExecutor(
+        @Value("${activiti.connector.async-executor.task-termination-timeout:20s}") Duration taskTerminationTimeout,
+        @Value(
+            "${activiti.connector.async-executor.cancel-remaining-tasks-on-close:true}"
+        ) Boolean cancelRemainingTasksOnClose,
+        @Value("${activiti.connector.async-executor.virtual-threads:true}") Boolean virtualThreads
+    ) {
+        return new SimpleAsyncTaskExecutorBuilder()
+            .threadNamePrefix("connectorAsyncTaskExecutor-")
+            .taskTerminationTimeout(taskTerminationTimeout)
+            .cancelRemainingTasksOnClose(cancelRemainingTasksOnClose)
+            .virtualThreads(virtualThreads)
+            .build();
     }
 
     @Bean(name = "connectorBindingPostProcessor")
@@ -86,6 +115,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             ConnectorBinding,
             Optional<SimpleFunctionRegistry.FunctionInvocationWrapper>
         > connectorErrorHandlerDefinitionResolver,
+        AsyncTaskExecutor connectorAsyncTaskExecutor,
+        BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver,
         @Value("${activiti.connector.retry.default.max:-1}") int defaultMaxRetry,
         @Value("${activiti.connector.retry.default.delay:0}") Long defaultRetryDelay
     ) {
@@ -119,22 +150,56 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             Message<?> response = null;
 
+                            final var integrationResultTimeout = connectorIntegrationResultTimeoutResolver.apply(
+                                message,
+                                connectorBinding
+                            );
+
                             try {
-                                Object result = function.apply(message);
+                                Future<Object> future = connectorAsyncTaskExecutor.submit(() ->
+                                    function.apply(
+                                        MessageBuilder.fromMessage(message)
+                                            .setHeader(INTEGRATION_RESULT_TIMEOUT, integrationResultTimeout)
+                                            .build()
+                                    )
+                                );
 
-                                if (result != null) {
-                                    if (result instanceof Message<?> msg) {
-                                        result = msg.getPayload();
+                                try {
+                                    Object result = future.get(
+                                        integrationResultTimeout.toMillis(),
+                                        TimeUnit.MILLISECONDS
+                                    );
+
+                                    if (result != null) {
+                                        if (result instanceof Message<?> msg) {
+                                            result = msg.getPayload();
+                                        }
+
+                                        response = MessageBuilder.withPayload(result).build();
+
+                                        String destination = headers.get(connectorBinding.outputHeader(), String.class);
+
+                                        if (StringUtils.hasText(destination)) {
+                                            getStreamBridge().send(destination, response);
+                                            return null;
+                                        }
                                     }
-
-                                    response = MessageBuilder.withPayload(result).build();
-
-                                    String destination = headers.get(connectorBinding.outputHeader(), String.class);
-
-                                    if (StringUtils.hasText(destination)) {
-                                        getStreamBridge().send(destination, response);
-                                        return null;
-                                    }
+                                } catch (InterruptedException interruptedException) {
+                                    future.cancel(true);
+                                    Thread.currentThread().interrupt();
+                                    throw new RuntimeException(
+                                        "Interrupted while waiting for result",
+                                        interruptedException
+                                    );
+                                } catch (TimeoutException timeoutException) {
+                                    future.cancel(true);
+                                    throw new RuntimeException(
+                                        "Timeout after " + integrationResultTimeout + " while waiting for result",
+                                        timeoutException
+                                    );
+                                } catch (ExecutionException executionException) {
+                                    final var cause = NestedExceptionUtils.getMostSpecificCause(executionException);
+                                    throw new RuntimeException(cause.getMessage(), cause);
                                 }
                             } catch (Exception connectorError) {
                                 connectorErrorHandlerDefinitionResolver
@@ -242,6 +307,28 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 return bean;
             }
         };
+    }
+
+    @Bean
+    BiFunction<Message<?>, ConnectorBinding, Duration> connectorIntegrationResultTimeoutResolver(
+        @Value("${activiti.connector.integration-result-timeout:PT25M}") Duration defaultResultTimeout,
+        Function<String, String> resolveExpression
+    ) {
+        final var ISO8601DurationPattern = Pattern.compile("^PT(?=.*\\d)(?:\\d+H)?(?:\\d+M)?(?:\\d+S)?$");
+        final Function<String, Duration> toDuration = value ->
+            Optional.of(value)
+                .filter(Predicate.not(String::isBlank))
+                .map(resolveExpression)
+                .filter(it -> ISO8601DurationPattern.matcher(it).matches())
+                .map(Duration::parse)
+                .orElse(null);
+
+        return (message, connectorBinding) ->
+            Optional.ofNullable(message.getHeaders().get(INTEGRATION_RESULT_TIMEOUT))
+                .map(it -> (it instanceof Duration) ? (Duration) it : toDuration.apply(it.toString()))
+                .or(() -> Optional.of(connectorBinding.integrationResultTimeout()).map(toDuration))
+                .filter(it -> it.compareTo(defaultResultTimeout) <= 0)
+                .orElse(defaultResultTimeout);
     }
 
     @Bean
