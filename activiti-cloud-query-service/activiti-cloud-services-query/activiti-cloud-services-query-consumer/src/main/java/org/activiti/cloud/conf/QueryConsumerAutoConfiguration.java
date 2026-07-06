@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.common.messaging.config.PartitionedChannelGracefulShutdown;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.QueryConsumerMessageHandler;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.binding.InputBindingLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.QueueChannel;
@@ -133,10 +135,19 @@ public class QueryConsumerAutoConfiguration {
     }
 
     @Bean
+    public PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown(
+        InputBindingLifecycle inputBindingLifecycle,
+        @Value("${activiti.cloud.query.consumer.shutdown-timeout:30s}") Duration shutdownTimeout
+    ) {
+        return new PartitionedChannelGracefulShutdown(inputBindingLifecycle, shutdownTimeout);
+    }
+
+    @Bean
     public IntegrationFlow partitionedQueryConsumerIntegrationFlow(
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
         GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
+        PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown,
         @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
         return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
@@ -145,6 +156,7 @@ public class QueryConsumerAutoConfiguration {
                 MessageChannels.partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
                     .workerQueueSize(workerQueueSize)
+                    .interceptor(queryConsumerGracefulShutdown.channelInterceptor())
             )
             .handle(genericQueryConsumerChannelHandlerAdapter, endpoint -> endpoint.requiresReply(false))
             .get();
