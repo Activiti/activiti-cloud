@@ -109,6 +109,7 @@ runs:
         path: |
           activiti-cloud-acceptance-tests-playwright/test-results
           activiti-cloud-acceptance-tests-playwright/reporter
+          activiti-cloud-acceptance-tests-playwright/playswag-coverage
         retention-days: 7
         if-no-files-found: ignore
 
