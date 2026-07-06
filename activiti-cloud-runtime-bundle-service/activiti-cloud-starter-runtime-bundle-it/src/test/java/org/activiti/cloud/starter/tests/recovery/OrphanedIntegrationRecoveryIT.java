@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.recovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -242,33 +243,34 @@ class OrphanedIntegrationRecoveryIT {
             await().atMost(Duration.ofSeconds(30)).until(integrationRequestReceived::get);
         }
 
-        ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
-
-        var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
-        verify(
-            AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
-                ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
-            )
-        ).receive(errorCaptor.capture());
-        assertThat(errorCaptor.getValue()).satisfies(error -> {
-            assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
-            assertThat(error.getErrorMessage()).isEqualTo(
-                OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
-            );
-        });
-        assertThat(
-            ctx2
-                .getBean(IntegrationContextService.class)
-                .createIntegrationContextQuery()
-                .list()
-                .stream()
-                .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
-                .count()
-        )
-            .as(
-                "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
-            )
-            .isZero();
+        var errorHandler = AopTestUtils.<ServiceTaskIntegrationErrorEventHandler>getTargetObject(
+            ctx2.getBean(ServiceTaskIntegrationErrorEventHandler.class)
+        );
+        await()
+            .atMost(Duration.ofSeconds(30))
+            .untilAsserted(() -> {
+                var errorCaptor = ArgumentCaptor.forClass(IntegrationError.class);
+                verify(errorHandler, atLeastOnce()).receive(errorCaptor.capture());
+                assertThat(errorCaptor.getValue()).satisfies(error -> {
+                    assertThat(error.getErrorClassName()).isEqualTo(CloudBpmnError.class.getName());
+                    assertThat(error.getErrorMessage()).isEqualTo(
+                        OrphanedIntegrationRecoveryScheduler.ORPHANED_INTEGRATION_ERROR_MESSAGE
+                    );
+                });
+                assertThat(
+                    ctx2
+                        .getBean(IntegrationContextService.class)
+                        .createIntegrationContextQuery()
+                        .list()
+                        .stream()
+                        .filter(ic -> processInstanceId.equals(ic.getProcessInstanceId()))
+                        .count()
+                )
+                    .as(
+                        "integration context record should be deleted after recovery — scheduler sent IntegrationError and handler cleaned up"
+                    )
+                    .isZero();
+            });
 
         setupAdminSecurityContext();
         assertThat(ctx2.getBean(ProcessAdminRuntime.class).processInstance(processInstanceId).getStatus())
@@ -293,38 +295,26 @@ class OrphanedIntegrationRecoveryIT {
         ctx1 = buildContext(false);
         ctx2 = buildContext(false);
 
-        var lockConfig = new LockConfiguration(
-            Instant.now(),
-            LOCK_NAME,
-            java.time.Duration.ofMinutes(5),
-            java.time.Duration.ZERO
-        );
+        var lockConfig = new LockConfiguration(Instant.now(), LOCK_NAME, Duration.ofMinutes(5), Duration.ZERO);
 
-        // ctx1 acquires the lock, simulating ctx1's scheduler starting execution
+        // ctx1 acquires the lock, simulating ctx1's scheduler running
         var ctx1Lock = ctx1.getBean(LockProvider.class).lock(lockConfig);
         assertThat(ctx1Lock).as("ctx1 should acquire the scheduler lock").isPresent();
 
-        // ctx2 uses the same shedlock_runtimebundle table, so it cannot acquire the same lock
-        assertThat(ctx2.getBean(LockProvider.class).lock(lockConfig))
-            .as("ctx2 should not acquire the lock while ctx1 holds it")
-            .isEmpty();
-
-        // ctx2 calls recoverOrphanedIntegrations() — the ShedLock proxy detects the held lock and
-        // skips the method body without throwing; lock_until in the table must remain unchanged
         var jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
         var lockUntilBefore = lockUntil(jdbcTemplate);
-        ctx2.getBean(OrphanedIntegrationRecoveryScheduler.class).recoverOrphanedIntegrations();
-        assertThat(lockUntil(jdbcTemplate))
-            .as("lock_until must not change — ctx2 scheduler was skipped by ShedLock")
-            .isEqualTo(lockUntilBefore);
 
-        // ctx1 releases the lock
+        // ctx2's scheduler fires every 2 seconds but is blocked by ctx1's lock; lock_until must not change
+        await()
+            .during(Duration.ofSeconds(5))
+            .atMost(Duration.ofSeconds(6))
+            .until(() -> lockUntil(jdbcTemplate).equals(lockUntilBefore));
+
+        // ctx1 releases; ctx2's scheduler should now acquire the lock and update lock_until
         ctx1Lock.get().unlock();
-
-        // ctx2 can now acquire the lock (scheduler will run on the next invocation)
-        assertThat(ctx2.getBean(LockProvider.class).lock(lockConfig))
-            .as("ctx2 should acquire the lock after ctx1 releases it")
-            .isPresent();
+        await()
+            .atMost(Duration.ofSeconds(10))
+            .until(() -> !lockUntil(jdbcTemplate).equals(lockUntilBefore));
     }
 
     private static Timestamp lockUntil(JdbcTemplate jdbcTemplate) {
@@ -369,6 +359,7 @@ class OrphanedIntegrationRecoveryIT {
                     "spring.activiti.async-executor.seconds-to-wait-on-shutdown=0",
                     "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
+                    "activiti.orphaned-integration-recovery.cron=*/2 * * * * *",
                     "activiti.cloud.messaging.function-router.enabled=" + functionRouterEnabled,
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.group=longRunningConnectorConsumer",
