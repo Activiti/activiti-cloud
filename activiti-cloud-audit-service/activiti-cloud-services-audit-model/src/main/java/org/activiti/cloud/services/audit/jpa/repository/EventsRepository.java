@@ -18,6 +18,8 @@ package org.activiti.cloud.services.audit.jpa.repository;
 import java.util.Collection;
 import java.util.Optional;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -30,4 +32,6 @@ public interface EventsRepository<
     Collection<T> findAllByOrderByTimestampDesc();
 
     Collection<AuditEventEntity> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime);
+
+    Page<T> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime, Pageable pageable);
 }
