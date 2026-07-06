@@ -102,7 +102,8 @@ class ActivitiQueryConsumerIT {
         assertThat(eventStarted.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(queryConsumerGracefulShutdown.inFlight()).isEqualTo(1);
 
-        final Thread shutdownThread = new Thread(queryConsumerGracefulShutdown::stop);
+        final Thread shutdownThread = new Thread(queryConsumerGracefulShutdown::stop, "graceful-shutdown-test");
+        shutdownThread.setDaemon(true);
         shutdownThread.start();
 
         shutdownThread.join(TimeUnit.SECONDS.toMillis(2));
