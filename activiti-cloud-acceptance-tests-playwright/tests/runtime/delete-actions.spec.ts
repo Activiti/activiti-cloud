@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Port of delete-actions.story.disabled (AAE-46640).
- * Admin bulk-delete wipes query/audit data for the whole preview namespace — not parallel-safe.
- * Tagged @destructive — runs last (project destructive-last, after notifications).
- * Serenity story file remains until a separate retirement ticket removes it.
- */
-
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
 import { startCatalogProcess } from '../../flows/start-process-with-first-task';

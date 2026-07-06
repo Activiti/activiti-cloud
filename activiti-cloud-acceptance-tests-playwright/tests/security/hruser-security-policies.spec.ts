@@ -16,7 +16,6 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { CloudProcessInstance } from '../../models/runtime-bundle.models';
-import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
 
 activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () => {
     activiti.describe('Simple Process Instance Operations', () => {
