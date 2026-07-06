@@ -39,7 +39,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class AggregateIntegrationErrorReceivedEventCmdTest {
+class AggregateIntegrationErrorReceivedEventCmdTest {
 
     private final RuntimeBundleProperties runtimeBundleProperties = new RuntimeBundleProperties();
 
@@ -50,7 +50,7 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
     private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cloudRuntimeEventArgumentCaptor;
 
     @Test
-    public void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
+    void should_aggregateIntegrationErrorReceivedEvent_when_auditEventAreEnabled() {
         //given
         final IntegrationError integrationError = mock(IntegrationError.class);
         final IntegrationContext integrationContext = mock(IntegrationContext.class);
