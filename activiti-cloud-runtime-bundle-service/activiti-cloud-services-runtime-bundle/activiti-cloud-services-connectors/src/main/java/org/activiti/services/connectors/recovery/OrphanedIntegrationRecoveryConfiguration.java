@@ -15,12 +15,12 @@
  */
 package org.activiti.services.connectors.recovery;
 
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.conf.RuntimeBundleShedLockConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +29,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(RuntimeBundleShedLockConfiguration.class)
 @AutoConfigureAfter(name = "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration")
-@ConditionalOnProperty(
-    value = "activiti.orphaned-integration-recovery.enabled",
-    havingValue = "true",
-    matchIfMissing = true
-)
 @EnableConfigurationProperties(OrphanedIntegrationRecoveryProperties.class)
 public class OrphanedIntegrationRecoveryConfiguration {
 
@@ -42,13 +37,15 @@ public class OrphanedIntegrationRecoveryConfiguration {
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
-        OrphanedIntegrationRecoveryProperties properties
+        OrphanedIntegrationRecoveryProperties properties,
+        FeatureToggle featureToggle
     ) {
         return new OrphanedIntegrationRecoveryScheduler(
             integrationContextService,
             integrationRequestBuilder,
             errorEventHandler,
-            properties
+            properties,
+            featureToggle
         );
     }
 }

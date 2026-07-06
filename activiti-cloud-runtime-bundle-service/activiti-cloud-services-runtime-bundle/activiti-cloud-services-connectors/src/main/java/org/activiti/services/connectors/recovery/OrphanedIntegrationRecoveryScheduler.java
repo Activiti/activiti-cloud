@@ -22,6 +22,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
@@ -44,22 +45,28 @@ public class OrphanedIntegrationRecoveryScheduler {
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
     private final OrphanedIntegrationRecoveryProperties properties;
+    private final FeatureToggle featureToggle;
 
     OrphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
-        OrphanedIntegrationRecoveryProperties properties
+        OrphanedIntegrationRecoveryProperties properties,
+        FeatureToggle featureToggle
     ) {
         this.integrationContextService = integrationContextService;
         this.integrationRequestBuilder = integrationRequestBuilder;
         this.errorEventHandler = errorEventHandler;
         this.properties = properties;
+        this.featureToggle = featureToggle;
     }
 
     @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
     @SchedulerLock(name = "orphanedIntegrationRecovery")
     public void recoverOrphanedIntegrations() {
+        if (!featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)) {
+            return;
+        }
         var threshold = Date.from(Instant.now().minus(properties.getThresholdSeconds(), ChronoUnit.SECONDS));
         var orphaned = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 

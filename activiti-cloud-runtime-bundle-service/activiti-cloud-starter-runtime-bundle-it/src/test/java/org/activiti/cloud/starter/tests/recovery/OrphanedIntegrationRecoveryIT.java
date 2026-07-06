@@ -372,7 +372,8 @@ class OrphanedIntegrationRecoveryIT {
                     "spring.activiti.async-executor.seconds-to-wait-on-shutdown=0",
                     "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
-                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *",
+                    "activiti.orphaned-integration-recovery.cron=*/2 * * * * *",
+                    "activiti.features.rb.orphaned-integration-recovery.enabled=true",
                     "activiti.cloud.messaging.function-router.enabled=" + functionRouterEnabled,
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.group=longRunningConnectorConsumer",
@@ -393,7 +394,8 @@ class OrphanedIntegrationRecoveryIT {
                 TestPropertyValues.of(
                     "spring.main.banner-mode=off",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
-                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *"
+                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *",
+                    "activiti.features.rb.orphaned-integration-recovery.enabled=true"
                 ).applyTo(ctx.getEnvironment())
             )
             .run();

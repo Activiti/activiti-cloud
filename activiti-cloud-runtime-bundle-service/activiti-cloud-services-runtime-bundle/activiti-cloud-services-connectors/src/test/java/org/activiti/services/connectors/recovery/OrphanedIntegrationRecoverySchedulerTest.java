@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
+import org.activiti.cloud.common.feature.FeatureToggle;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
@@ -39,6 +40,7 @@ import org.activiti.engine.integration.IntegrationContextQuery;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -62,10 +64,28 @@ class OrphanedIntegrationRecoverySchedulerTest {
     OrphanedIntegrationRecoveryProperties properties;
 
     @Mock
+    FeatureToggle featureToggle;
+
+    @Mock
     IntegrationContextQuery query;
 
     @InjectMocks
     OrphanedIntegrationRecoveryScheduler scheduler;
+
+    @BeforeEach
+    void enableFeatureToggle() {
+        given(featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)).willReturn(true);
+    }
+
+    @Test
+    void should_doNothing_when_featureToggleIsDisabled() {
+        given(featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)).willReturn(false);
+
+        scheduler.recoverOrphanedIntegrations();
+
+        verify(integrationContextService, never()).createIntegrationContextQuery();
+        verify(errorEventHandler, never()).receive(any());
+    }
 
     @Test
     void should_doNothing_when_noOrphanedIntegrationsFound() {
