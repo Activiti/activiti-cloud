@@ -38,6 +38,7 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.common.feature.FeatureToggleAutoConfiguration;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
@@ -402,7 +403,7 @@ class OrphanedIntegrationRecoveryIT {
     }
 
     @SpringBootConfiguration
-    @ImportAutoConfiguration(OrphanedIntegrationRecoveryConfiguration.class)
+    @ImportAutoConfiguration({ OrphanedIntegrationRecoveryConfiguration.class, FeatureToggleAutoConfiguration.class })
     static class LockTestApplication {
 
         @Bean
