@@ -132,10 +132,10 @@ kubectl get ns | grep '^pr-'
 
 Tests use [@michalfidor/playswag](https://www.npmjs.com/package/@michalfidor/playswag) to match HTTP calls against cached OpenAPI specs for **query**, **audit**, and **runtime-bundle**.
 
-| Output | Location |
-| ------ | -------- |
-| HTML report | `activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html` |
-| JSON / Markdown | same directory (CI also uploads on failure) |
+| Output          | Location                                                                              |
+| --------------- | ------------------------------------------------------------------------------------- |
+| HTML report     | `activiti-cloud-acceptance-tests-playwright/playswag-coverage/playswag-coverage.html` |
+| JSON / Markdown | same directory (CI also uploads on failure)                                           |
 
 ```bash
 npm run test
