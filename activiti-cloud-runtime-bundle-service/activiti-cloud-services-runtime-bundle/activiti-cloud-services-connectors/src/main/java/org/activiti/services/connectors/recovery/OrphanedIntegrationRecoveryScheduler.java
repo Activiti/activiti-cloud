@@ -64,13 +64,16 @@ public class OrphanedIntegrationRecoveryScheduler {
     @Scheduled(cron = "${activiti.orphaned-integration-recovery.cron:0 */5 * * * *}")
     @SchedulerLock(name = "orphanedIntegrationRecovery")
     public void recoverOrphanedIntegrations() {
+        LOGGER.debug("Orphaned integration recovery job started.");
         if (!featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)) {
+            LOGGER.debug("Orphaned integration recovery is disabled via feature toggle. Skipping.");
             return;
         }
         var threshold = Date.from(Instant.now().minus(properties.getThresholdSeconds(), ChronoUnit.SECONDS));
         var orphaned = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 
         if (orphaned.isEmpty()) {
+            LOGGER.debug("Orphaned integration recovery job completed. No orphaned contexts found.");
             return;
         }
 
@@ -81,6 +84,7 @@ public class OrphanedIntegrationRecoveryScheduler {
         );
 
         orphaned.forEach(this::recoverOrphanedIntegration);
+        LOGGER.debug("Orphaned integration recovery job completed. Processed {} context(s).", orphaned.size());
     }
 
     private void recoverOrphanedIntegration(IntegrationContextEntity entity) {
