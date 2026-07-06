@@ -17,14 +17,18 @@ package org.activiti.cloud.starter.tests.recovery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
 import net.javacrumbs.shedlock.core.LockConfiguration;
@@ -46,25 +50,34 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.integration.IntegrationContextService;
+import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
+import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryConfiguration;
 import org.activiti.services.connectors.recovery.OrphanedIntegrationRecoveryScheduler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -292,8 +305,8 @@ class OrphanedIntegrationRecoveryIT {
 
     @Test
     void should_runRecoveryOnlyOnce_when_twoInstancesRunConcurrently() {
-        ctx1 = buildContext(false);
-        ctx2 = buildContext(false);
+        ctx1 = buildLightweightContext();
+        ctx2 = buildLightweightContext();
 
         var lockConfig = new LockConfiguration(Instant.now(), LOCK_NAME, Duration.ofMinutes(5), Duration.ZERO);
 
@@ -304,16 +317,16 @@ class OrphanedIntegrationRecoveryIT {
         var jdbcTemplate = new JdbcTemplate(ctx2.getBean(DataSource.class));
         var lockUntilBefore = lockUntil(jdbcTemplate);
 
-        // ctx2's scheduler fires every 2 seconds but is blocked by ctx1's lock; lock_until must not change
+        // ctx2's scheduler fires every second but is blocked by ctx1's lock; lock_until must not change
         await()
-            .during(Duration.ofSeconds(5))
-            .atMost(Duration.ofSeconds(6))
+            .during(Duration.ofSeconds(2))
+            .atMost(Duration.ofSeconds(4))
             .until(() -> lockUntil(jdbcTemplate).equals(lockUntilBefore));
 
         // ctx1 releases; ctx2's scheduler should now acquire the lock and update lock_until
         ctx1Lock.get().unlock();
         await()
-            .atMost(Duration.ofSeconds(10))
+            .atMost(Duration.ofSeconds(5))
             .until(() -> !lockUntil(jdbcTemplate).equals(lockUntilBefore));
     }
 
@@ -359,7 +372,7 @@ class OrphanedIntegrationRecoveryIT {
                     "spring.activiti.async-executor.seconds-to-wait-on-shutdown=0",
                     "activiti.cloud.runtime-bundle.messaging.required-audit-producer-groups=",
                     "activiti.orphaned-integration-recovery.threshold-seconds=0",
-                    "activiti.orphaned-integration-recovery.cron=*/2 * * * * *",
+                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *",
                     "activiti.cloud.messaging.function-router.enabled=" + functionRouterEnabled,
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.destination=test.longRunningConnector",
                     "spring.cloud.stream.bindings.longRunningConnectorConsumer.group=longRunningConnectorConsumer",
@@ -371,6 +384,64 @@ class OrphanedIntegrationRecoveryIT {
                 ).applyTo(ctx.getEnvironment());
             })
             .run();
+    }
+
+    private static ConfigurableApplicationContext buildLightweightContext() {
+        return new SpringApplicationBuilder(LockTestApplication.class, LockTestConfiguration.class)
+            .web(WebApplicationType.NONE)
+            .initializers(ctx ->
+                TestPropertyValues.of(
+                    "spring.main.banner-mode=off",
+                    "activiti.orphaned-integration-recovery.threshold-seconds=0",
+                    "activiti.orphaned-integration-recovery.cron=*/1 * * * * *"
+                ).applyTo(ctx.getEnvironment())
+            )
+            .run();
+    }
+
+    @SpringBootConfiguration
+    @ImportAutoConfiguration(OrphanedIntegrationRecoveryConfiguration.class)
+    static class LockTestApplication {
+
+        @Bean
+        DataSource dataSource() {
+            var ds = new DriverManagerDataSource();
+            ds.setUrl(postgres.getJdbcUrl());
+            ds.setUsername(postgres.getUsername());
+            ds.setPassword(postgres.getPassword());
+            return ds;
+        }
+    }
+
+    @Configuration
+    static class LockTestConfiguration {
+
+        @Bean
+        DataSourceInitializer shedlockSchemaInit(DataSource dataSource) {
+            var init = new DataSourceInitializer();
+            init.setDataSource(dataSource);
+            init.setDatabasePopulator(
+                new ResourceDatabasePopulator(new ClassPathResource("shedlock-runtimebundle-schema.sql"))
+            );
+            return init;
+        }
+
+        @Bean
+        IntegrationContextService integrationContextService() {
+            var svc = mock(IntegrationContextService.class, Answers.RETURNS_DEEP_STUBS);
+            when(svc.createIntegrationContextQuery().createdBefore(any()).list()).thenReturn(List.of());
+            return svc;
+        }
+
+        @Bean
+        IntegrationRequestBuilder integrationRequestBuilder() {
+            return mock(IntegrationRequestBuilder.class);
+        }
+
+        @Bean
+        ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler() {
+            return mock(ServiceTaskIntegrationErrorEventHandler.class);
+        }
     }
 
     @SpringBootApplication
