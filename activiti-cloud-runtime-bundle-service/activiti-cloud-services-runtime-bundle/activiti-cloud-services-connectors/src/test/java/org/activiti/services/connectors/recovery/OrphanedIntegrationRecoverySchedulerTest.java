@@ -44,7 +44,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,19 +60,22 @@ class OrphanedIntegrationRecoverySchedulerTest {
     ServiceTaskIntegrationErrorEventHandler errorEventHandler;
 
     @Mock
-    OrphanedIntegrationRecoveryProperties properties;
-
-    @Mock
     FeatureToggle featureToggle;
 
     @Mock
     IntegrationContextQuery query;
 
-    @InjectMocks
     OrphanedIntegrationRecoveryScheduler scheduler;
 
     @BeforeEach
-    void enableFeatureToggle() {
+    void setUp() {
+        scheduler = new OrphanedIntegrationRecoveryScheduler(
+            integrationContextService,
+            integrationRequestBuilder,
+            errorEventHandler,
+            0,
+            featureToggle
+        );
         given(featureToggle.isEnabled(RuntimeBundleFeatureToggles.ORPHANED_INTEGRATION_RECOVERY)).willReturn(true);
     }
 
@@ -148,12 +150,18 @@ class OrphanedIntegrationRecoverySchedulerTest {
     }
 
     @Test
-    void should_queryWithThresholdBasedOnProperties_when_recoveringOrphanedIntegrations() {
-        given(properties.getThresholdSeconds()).willReturn(300);
+    void should_queryWithThresholdBasedOnConstructorValue_when_recoveringOrphanedIntegrations() {
+        var customScheduler = new OrphanedIntegrationRecoveryScheduler(
+            integrationContextService,
+            integrationRequestBuilder,
+            errorEventHandler,
+            300,
+            featureToggle
+        );
         givenQuery(List.of());
 
         var expectedThreshold = Date.from(Instant.now().minus(300, ChronoUnit.SECONDS));
-        scheduler.recoverOrphanedIntegrations();
+        customScheduler.recoverOrphanedIntegrations();
 
         var dateCaptor = ArgumentCaptor.forClass(Date.class);
         verify(query).createdBefore(dateCaptor.capture());

@@ -44,20 +44,20 @@ public class OrphanedIntegrationRecoveryScheduler {
     private final IntegrationContextService integrationContextService;
     private final IntegrationRequestBuilder integrationRequestBuilder;
     private final ServiceTaskIntegrationErrorEventHandler errorEventHandler;
-    private final OrphanedIntegrationRecoveryProperties properties;
+    private final int thresholdSeconds;
     private final FeatureToggle featureToggle;
 
     OrphanedIntegrationRecoveryScheduler(
         IntegrationContextService integrationContextService,
         IntegrationRequestBuilder integrationRequestBuilder,
         ServiceTaskIntegrationErrorEventHandler errorEventHandler,
-        OrphanedIntegrationRecoveryProperties properties,
+        int thresholdSeconds,
         FeatureToggle featureToggle
     ) {
         this.integrationContextService = integrationContextService;
         this.integrationRequestBuilder = integrationRequestBuilder;
         this.errorEventHandler = errorEventHandler;
-        this.properties = properties;
+        this.thresholdSeconds = thresholdSeconds;
         this.featureToggle = featureToggle;
     }
 
@@ -69,7 +69,7 @@ public class OrphanedIntegrationRecoveryScheduler {
             LOGGER.debug("Orphaned integration recovery is disabled via feature toggle. Skipping.");
             return;
         }
-        var threshold = Date.from(Instant.now().minus(properties.getThresholdSeconds(), ChronoUnit.SECONDS));
+        var threshold = Date.from(Instant.now().minus(thresholdSeconds, ChronoUnit.SECONDS));
         var orphaned = integrationContextService.createIntegrationContextQuery().createdBefore(threshold).list();
 
         if (orphaned.isEmpty()) {
@@ -80,7 +80,7 @@ public class OrphanedIntegrationRecoveryScheduler {
         LOGGER.warn(
             "Found {} orphaned integration context(s) older than {} seconds. Sending integration errors.",
             orphaned.size(),
-            properties.getThresholdSeconds()
+            thresholdSeconds
         );
 
         orphaned.forEach(this::recoverOrphanedIntegration);
