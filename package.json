@@ -53,7 +53,7 @@
     "@michalfidor/playswag": "^1.10.1",
     "@reportportal/agent-js-playwright": "^5.4.0",
     "@playwright/test": "^1.57.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.1.0",
     "@types/ws": "^8.18.1",
     "tsx": "^4.19.4",
     "typescript": "^5.5.4"
