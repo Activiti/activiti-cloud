@@ -19,6 +19,7 @@ import { CloudVariableInstance } from '../../../models/process-variable.models';
 import { CustomAPIRequest } from '../../../fixtures/context.models';
 import { BaseService, RequestResponse } from '../../base.service';
 import { RB_ADMIN_V1_BASE } from '../../runtime-bundle/endpoints/rb-base-path';
+import { candidateNamesFromList } from '../../runtime-bundle/shared/candidate-names';
 
 export class RbAdminTasksEndpoint extends BaseService {
     private readonly basePath = RB_ADMIN_V1_BASE;
@@ -61,12 +62,12 @@ export class RbAdminTasksEndpoint extends BaseService {
 
     async getCandidateUsers(taskId: string): Promise<string[]> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-users`);
-        return this.unwrapCandidateNames(response, 'user');
+        return candidateNamesFromList(this.unwrapList<Record<string, unknown>>(response, 'list'), 'user');
     }
 
     async getCandidateGroups(taskId: string): Promise<string[]> {
         const response = await this.get(`${this.basePath}/tasks/${taskId}/candidate-groups`);
-        return this.unwrapCandidateNames(response, 'group');
+        return candidateNamesFromList(this.unwrapList<Record<string, unknown>>(response, 'list'), 'group');
     }
 
     async addCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
@@ -161,12 +162,5 @@ export class RbAdminTasksEndpoint extends BaseService {
             headers: { 'Content-Type': 'application/json' },
         });
         return this.unwrapList<CloudVariableInstance>(response, 'variables');
-    }
-
-    private unwrapCandidateNames(response: RequestResponse, field: 'user' | 'group'): string[] {
-        const items = this.unwrapList<Record<string, unknown>>(response, 'list');
-        return items
-            .map((item) => item[field])
-            .filter((value): value is string => typeof value === 'string');
     }
 }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { CloudTask, TaskQueryParams, TaskStatus } from '../../models/task.models';
+import { CloudTask, TaskStatus } from '../../models/task.models';
 import { CloudVariableInstance } from '../../models/process-variable.models';
 import { BaseService, RequestResponse } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { DirtyContextRegistry } from '../../helpers/dirty-context';
 import { TestScope } from '../../helpers/test-isolation';
-import { buildCreateTaskPayload, RbTasksEndpoint } from './endpoints/index';
+import { buildCreateTaskPayload, RbTasksEndpoint } from './endpoints/tasks.endpoint';
 
 export class TaskService extends BaseService {
     readonly tasks: RbTasksEndpoint;
@@ -37,10 +37,6 @@ export class TaskService extends BaseService {
 
     async getAllTasks(): Promise<CloudTask[]> {
         return this.tasks.getAllTasks();
-    }
-
-    async getTasks(params?: TaskQueryParams): Promise<CloudTask[]> {
-        return this.tasks.getTasks(params);
     }
 
     async getTasksByProcessInstanceId(processInstanceId: string): Promise<CloudTask[]> {

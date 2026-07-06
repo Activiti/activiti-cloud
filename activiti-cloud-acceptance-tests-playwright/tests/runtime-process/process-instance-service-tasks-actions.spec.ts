@@ -480,7 +480,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
             const executionId = entity.executionId ?? '';
             const clientId = entity.clientId ?? '';
 
-            const response = await runtimeAdminServiceTestAdmin.replayServiceTask(
+            const response = await runtimeAdminServiceTestAdmin.executions.replayServiceTask(
                 executionId,
                 clientId
             );

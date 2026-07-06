@@ -290,7 +290,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
                 'And the admin updates the updatable fields of the task',
             async () => {
                 const tomorrow = new Date(Date.now() + 86400000).toISOString();
-                await taskAdminServiceTestAdmin.updateTask(taskId, {
+                await taskAdminServiceTestAdmin.tasks.updateTask(taskId, {
                     name: 'new-task-name',
                     priority: 3,
                     dueDate: tomorrow,

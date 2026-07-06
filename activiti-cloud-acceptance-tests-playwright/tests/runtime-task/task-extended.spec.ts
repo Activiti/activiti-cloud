@@ -136,7 +136,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         });
 
         await activiti.step('When the admin deletes the standalone task', async () => {
-            await taskAdminServiceTestAdmin.deleteTask(taskId);
+            await taskAdminServiceTestAdmin.tasks.deleteTask(taskId);
         });
 
         await activiti.step('Then the standalone task is deleted', async () => {
@@ -198,7 +198,7 @@ activiti.describe('Runtime — Task Actions (wave 2)', () => {
         });
 
         await activiti.step('And the admin completes the task', async () => {
-            await taskAdminServiceTestAdmin.completeTask(taskId);
+            await taskAdminServiceTestAdmin.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the process is completed', async () => {

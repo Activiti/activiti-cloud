@@ -107,7 +107,7 @@ activiti.describe('Process Definition Actions', () => {
         });
 
         await activiti.step('And the admin lists process definitions', async () => {
-            const definitions = await runtimeAdminServiceTestAdmin.getProcessDefinitions();
+            const definitions = await runtimeAdminServiceTestAdmin.processDefinitions.getProcessDefinitions();
             expect(definitions.map((definition) => definition.key)).toContain(PROCESS_WITH_VARIABLES);
         });
     });

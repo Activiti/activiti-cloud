@@ -139,7 +139,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
                 'When another user is authenticated as testadmin ' +
                     'And the admin deletes boundary signal process',
                 async () => {
-                    await runtimeAdminServiceTestAdmin.deleteProcessInstance(
+                    await runtimeAdminServiceTestAdmin.processInstances.deleteProcessInstance(
                         processInstanceBoundarySignal.id
                     );
                 }

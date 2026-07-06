@@ -117,7 +117,7 @@ export class SecurityPoliciesService extends BaseService {
     async getRuntimeAdminProcessInstances(params: {
         processDefinitionKey: string;
     }): Promise<CloudProcessInstance[]> {
-        return this.runtimeAdminService.getProcessInstancesWithParams(params);
+        return this.runtimeAdminService.processInstances.getProcessInstancesWithParams(params);
     }
 
     async getQueryAdminProcessInstances(params: {

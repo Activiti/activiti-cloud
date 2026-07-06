@@ -31,11 +31,6 @@ export class RbAdminProcessInstancesEndpoint extends BaseService {
         super(context);
     }
 
-    async getAllProcessInstances(): Promise<CloudProcessInstance[]> {
-        const response = await this.get(`${this.basePath}/process-instances`);
-        return this.unwrapList<CloudProcessInstance>(response, 'processInstances');
-    }
-
     async getProcessInstancesWithParams(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
         const searchParams = new URLSearchParams();
 

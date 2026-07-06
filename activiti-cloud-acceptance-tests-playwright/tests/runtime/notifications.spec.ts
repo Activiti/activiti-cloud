@@ -157,7 +157,7 @@ activiti.describe('Runtime — Notifications Actions', () => {
             await activiti.step('And the admin completes the task', async () => {
                 const tasks = await taskServiceTestAdmin.getTasksByProcessInstanceId(processInstanceId!);
                 expect(tasks.length).toBeGreaterThan(0);
-                await taskAdminServiceTestAdmin.completeTask(tasks[0].id);
+                await taskAdminServiceTestAdmin.tasks.completeTask(tasks[0].id);
             });
 
             await activiti.step('And PROCESS_COMPLETED notification payload with actor filter is received', async () => {

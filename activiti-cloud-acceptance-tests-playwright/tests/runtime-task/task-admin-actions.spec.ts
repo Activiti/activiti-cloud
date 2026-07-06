@@ -36,22 +36,22 @@ activiti.describe('Runtime — Task Admin Actions', () => {
         });
 
         await activiti.step('When the admin lists tasks', async () => {
-            const tasks = await taskAdminServiceTestAdmin.getAllTasks();
+            const tasks = await taskAdminServiceTestAdmin.tasks.getAllTasks();
             expect(tasks.map((task) => task.id)).toContain(taskId);
         });
 
         await activiti.step('And fetches the task by id', async () => {
-            const task = await taskAdminServiceTestAdmin.getTaskById(taskId);
+            const task = await taskAdminServiceTestAdmin.tasks.getTaskById(taskId);
             expect(task.id).toBe(taskId);
         });
 
         await activiti.step('Then the admin assigns the task to hruser', async () => {
-            const assigned = await taskAdminServiceTestAdmin.assignTask(taskId, 'hruser');
+            const assigned = await taskAdminServiceTestAdmin.tasks.assignTask(taskId, 'hruser');
             expect(assigned.assignee).toBe('hruser');
         });
 
         await activiti.step('And bulk-assigns the same task via POST /tasks/assign', async () => {
-            const assignedTasks = await taskAdminServiceTestAdmin.assignTasks([taskId], 'testuser');
+            const assignedTasks = await taskAdminServiceTestAdmin.tasks.assignTasks([taskId], 'testuser');
             expect(assignedTasks.map((task) => task.id)).toContain(taskId);
             expect(assignedTasks.find((task) => task.id === taskId)?.assignee).toBe('testuser');
         });

@@ -229,7 +229,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the admin deletes the process', async () => {
-            await runtimeAdminServiceTestAdmin.deleteProcessInstance(processInstanceId);
+            await runtimeAdminServiceTestAdmin.processInstances.deleteProcessInstance(processInstanceId);
         });
 
         await activiti.step('Then the process instance is deleted', async () => {
@@ -255,7 +255,7 @@ activiti.describe('Runtime — Process Instance Actions (extended)', () => {
         });
 
         await activiti.step('And the admin force destroys the process', async () => {
-            await runtimeAdminServiceTestAdmin.destroyProcessInstance(processInstanceId, true);
+            await runtimeAdminServiceTestAdmin.processInstances.destroyProcessInstance(processInstanceId, true);
         });
 
         await activiti.step('Then the process instance is destroyed', async () => {

@@ -189,10 +189,8 @@ export class RuntimeBundleService extends BaseService {
 
     async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
         const definitions = await this.getProcessDefinitions();
-        return RuntimeBundleService.pickHighestVersionByKey(definitions, processDefinitionKey);
+        return pickHighestVersionByKey(definitions, processDefinitionKey);
     }
-
-    static pickHighestVersionByKey = pickHighestVersionByKey;
 
     async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
         return this.processInstances.getProcessInstanceDiagram(processInstanceId);

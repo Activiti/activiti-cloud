@@ -39,34 +39,34 @@ activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }
         });
 
         await activiti.step('When the admin fetches the process instance by id', async () => {
-            const instance = await runtimeAdminServiceTestAdmin.getProcessInstance(processInstanceId);
+            const instance = await runtimeAdminServiceTestAdmin.processInstances.getProcessInstance(processInstanceId);
             expect(instance.id).toBe(processInstanceId);
         });
 
         await activiti.step('And updates the process instance name', async () => {
-            const updated = await runtimeAdminServiceTestAdmin.updateProcessInstance(processInstanceId, {
+            const updated = await runtimeAdminServiceTestAdmin.processInstances.updateProcessInstance(processInstanceId, {
                 name: updatedName,
             });
             expect(updated.name).toBe(updatedName);
         });
 
         await activiti.step('Then the admin reads process instance variables', async () => {
-            const variables = await runtimeAdminServiceTestAdmin.getProcessInstanceVariables(processInstanceId);
+            const variables = await runtimeAdminServiceTestAdmin.processInstances.getProcessInstanceVariables(processInstanceId);
             expect(variables.map((variable) => variable.name)).toEqual(
                 expect.arrayContaining(['start1', 'start2'])
             );
         });
 
         await activiti.step('When the admin suspends and resumes the process instance', async () => {
-            const suspended = await runtimeAdminServiceTestAdmin.suspendProcessInstance(processInstanceId);
+            const suspended = await runtimeAdminServiceTestAdmin.processInstances.suspendProcessInstance(processInstanceId);
             expect(suspended.status).toBe(ProcessInstanceStatus.SUSPENDED);
 
-            const resumed = await runtimeAdminServiceTestAdmin.resumeProcessInstance(processInstanceId);
+            const resumed = await runtimeAdminServiceTestAdmin.processInstances.resumeProcessInstance(processInstanceId);
             expect(resumed.status).toBe(ProcessInstanceStatus.RUNNING);
         });
 
         await activiti.step('Then the process instance is still running under the updated name', async () => {
-            const instance = await runtimeAdminServiceTestAdmin.getProcessInstance(processInstanceId);
+            const instance = await runtimeAdminServiceTestAdmin.processInstances.getProcessInstance(processInstanceId);
             expect(instance.status).toBe(ProcessInstanceStatus.RUNNING);
             expect(instance.name).toBe(updatedName);
         });
@@ -90,12 +90,12 @@ activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }
         });
 
         await activiti.step('When the admin lists subprocesses', async () => {
-            const subprocesses = await runtimeAdminServiceTestAdmin.getSubProcesses(parentProcessInstanceId);
+            const subprocesses = await runtimeAdminServiceTestAdmin.processInstances.getSubProcesses(parentProcessInstanceId);
             expect(subprocesses.length).toBeGreaterThan(0);
         });
 
         await activiti.step('And starts a process via admin start message', async () => {
-            const processInstance = await runtimeAdminServiceTestAdmin.sendStartMessage({
+            const processInstance = await runtimeAdminServiceTestAdmin.processInstances.sendStartMessage({
                 name: 'startMessage',
                 businessKey: businessId,
             });
@@ -104,13 +104,13 @@ activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }
         });
 
         await activiti.step('Then the admin can deliver boundary and catch messages', async () => {
-            const boundaryResponse = await runtimeAdminServiceTestAdmin.sendReceiveMessage({
+            const boundaryResponse = await runtimeAdminServiceTestAdmin.processInstances.sendReceiveMessage({
                 name: 'boundaryMessage',
                 correlationKey: businessId,
             });
             expect(boundaryResponse.httpStatus).toBeLessThan(300);
 
-            const catchResponse = await runtimeAdminServiceTestAdmin.sendReceiveMessage({
+            const catchResponse = await runtimeAdminServiceTestAdmin.processInstances.sendReceiveMessage({
                 name: 'catchMessage',
                 correlationKey: businessId,
             });

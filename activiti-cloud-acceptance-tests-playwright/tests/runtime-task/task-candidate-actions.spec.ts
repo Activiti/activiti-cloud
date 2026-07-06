@@ -62,21 +62,21 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
         });
 
         await activiti.step('When the admin lists and updates candidate users', async () => {
-            const adminUsers = await taskAdminServiceTestAdmin.getCandidateUsers(taskId);
+            const adminUsers = await taskAdminServiceTestAdmin.tasks.getCandidateUsers(taskId);
             expect(adminUsers).toContain('hruser');
 
-            const addResponse = await taskAdminServiceTestAdmin.addCandidateUsers(taskId, ['testuser']);
+            const addResponse = await taskAdminServiceTestAdmin.tasks.addCandidateUsers(taskId, ['testuser']);
             expect(addResponse.httpStatus).toBeLessThan(300);
 
-            const updatedUsers = await taskAdminServiceTestAdmin.getCandidateUsers(taskId);
+            const updatedUsers = await taskAdminServiceTestAdmin.tasks.getCandidateUsers(taskId);
             expect(updatedUsers).toEqual(expect.arrayContaining(['hruser', 'testuser']));
 
-            const deleteResponse = await taskAdminServiceTestAdmin.deleteCandidateUsers(taskId, ['testuser']);
+            const deleteResponse = await taskAdminServiceTestAdmin.tasks.deleteCandidateUsers(taskId, ['testuser']);
             expect(deleteResponse.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then the admin candidate user list matches RB', async () => {
-            const adminUsers = await taskAdminServiceTestAdmin.getCandidateUsers(taskId);
+            const adminUsers = await taskAdminServiceTestAdmin.tasks.getCandidateUsers(taskId);
             const userCandidates = await taskServiceTestUser.getCandidateUsers(taskId);
             expect(adminUsers).toEqual(expect.arrayContaining(userCandidates));
         });
@@ -126,21 +126,21 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
         });
 
         await activiti.step('When the admin lists and updates candidate groups', async () => {
-            const adminGroups = await taskAdminServiceTestAdmin.getCandidateGroups(taskId);
+            const adminGroups = await taskAdminServiceTestAdmin.tasks.getCandidateGroups(taskId);
             expect(adminGroups).toEqual(expect.arrayContaining(['hr', 'testgroup']));
 
-            const addResponse = await taskAdminServiceTestAdmin.addCandidateGroups(taskId, ['activiti']);
+            const addResponse = await taskAdminServiceTestAdmin.tasks.addCandidateGroups(taskId, ['activiti']);
             expect(addResponse.httpStatus).toBeLessThan(300);
 
-            const updatedGroups = await taskAdminServiceTestAdmin.getCandidateGroups(taskId);
+            const updatedGroups = await taskAdminServiceTestAdmin.tasks.getCandidateGroups(taskId);
             expect(updatedGroups).toContain('activiti');
 
-            const deleteResponse = await taskAdminServiceTestAdmin.deleteCandidateGroups(taskId, ['activiti']);
+            const deleteResponse = await taskAdminServiceTestAdmin.tasks.deleteCandidateGroups(taskId, ['activiti']);
             expect(deleteResponse.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then the admin candidate group list matches RB', async () => {
-            const adminGroups = await taskAdminServiceTestAdmin.getCandidateGroups(taskId);
+            const adminGroups = await taskAdminServiceTestAdmin.tasks.getCandidateGroups(taskId);
             const userGroups = await taskServiceTestUser.getCandidateGroups(taskId);
             expect(adminGroups).toEqual(expect.arrayContaining(userGroups));
         });

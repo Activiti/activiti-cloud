@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { CloudTask } from '../../models/task.models';
-import { BaseService, RequestResponse } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
-import { CloudVariableInstance } from '../../models/process-variable.models';
-import { RbAdminTasksEndpoint } from './endpoints/index';
+import { BaseService } from '../base.service';
+import { RbAdminTasksEndpoint } from './endpoints/tasks.endpoint';
 
 export class TaskAdminService extends BaseService {
     readonly tasks: RbAdminTasksEndpoint;
@@ -26,72 +24,5 @@ export class TaskAdminService extends BaseService {
     constructor(context: CustomAPIRequest) {
         super(context);
         this.tasks = new RbAdminTasksEndpoint(context);
-    }
-
-    async getAllTasks(): Promise<CloudTask[]> {
-        return this.tasks.getAllTasks();
-    }
-
-    async getTaskById(taskId: string): Promise<CloudTask> {
-        return this.tasks.getTaskById(taskId);
-    }
-
-    async assignTask(taskId: string, assignee: string): Promise<CloudTask> {
-        return this.tasks.assignTask(taskId, assignee);
-    }
-
-    async assignTasks(taskIds: string[], assignee: string): Promise<CloudTask[]> {
-        return this.tasks.assignTasks(taskIds, assignee);
-    }
-
-    async getCandidateUsers(taskId: string): Promise<string[]> {
-        return this.tasks.getCandidateUsers(taskId);
-    }
-
-    async getCandidateGroups(taskId: string): Promise<string[]> {
-        return this.tasks.getCandidateGroups(taskId);
-    }
-
-    async addCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
-        return this.tasks.addCandidateUsers(taskId, candidateUsers);
-    }
-
-    async deleteCandidateUsers(taskId: string, candidateUsers: string[]): Promise<RequestResponse> {
-        return this.tasks.deleteCandidateUsers(taskId, candidateUsers);
-    }
-
-    async addCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
-        return this.tasks.addCandidateGroups(taskId, candidateGroups);
-    }
-
-    async deleteCandidateGroups(taskId: string, candidateGroups: string[]): Promise<RequestResponse> {
-        return this.tasks.deleteCandidateGroups(taskId, candidateGroups);
-    }
-
-    async completeTask(taskId: string): Promise<void> {
-        return this.tasks.completeTask(taskId);
-    }
-
-    async deleteTask(taskId: string): Promise<void> {
-        return this.tasks.deleteTask(taskId);
-    }
-
-    async updateTask(
-        taskId: string,
-        fields: { name?: string; formKey?: string; priority?: number; dueDate?: string }
-    ): Promise<void> {
-        return this.tasks.updateTask(taskId, fields);
-    }
-
-    async createTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {
-        return this.tasks.createTaskVariable(taskId, name, value);
-    }
-
-    async updateTaskVariable(taskId: string, name: string, value: unknown): Promise<void> {
-        return this.tasks.updateTaskVariable(taskId, name, value);
-    }
-
-    async getTaskVariables(taskId: string): Promise<CloudVariableInstance[]> {
-        return this.tasks.getTaskVariables(taskId);
     }
 }
