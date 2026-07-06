@@ -455,4 +455,8 @@ export abstract class BaseService {
     ): Promise<number[]> {
         return Promise.all(checks.map(({ run }) => run(service)));
     }
+
+    runStatusChecks(checks: readonly HttpStatusCheck<this>[]): Promise<number[]> {
+        return BaseService.runStatusChecks(checks, this);
+    }
 }

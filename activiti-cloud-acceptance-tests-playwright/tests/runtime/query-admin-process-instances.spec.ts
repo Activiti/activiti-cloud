@@ -22,7 +22,6 @@ const LINK_TYPE = 'acceptance-link-type';
 activiti.describe('Runtime — Query Admin Process Instances', () => {
     activiti('should query admin process instances via POST search, count, and related GET endpoints', async ({
         runtimeBundleServiceTestUser,
-        queryServiceTestUser,
         queryAdminServiceTestAdmin,
     }) => {
         let processInstanceId = '';

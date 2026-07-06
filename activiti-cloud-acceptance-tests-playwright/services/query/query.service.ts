@@ -42,18 +42,18 @@ import {
 import { QueryStatusChecks } from './query-status-checks';
 
 export class QueryService extends BaseService {
-    public readonly tasks: QueryTasksEndpoint;
-    public readonly adminTasks: QueryTasksEndpoint;
-    public readonly processInstances: QueryProcessInstancesEndpoint;
-    public readonly adminProcessInstances: QueryProcessInstancesEndpoint;
-    public readonly adminServiceTasks: QueryServiceTasksEndpoint;
-    public readonly adminIntegrationContexts: QueryIntegrationContextsEndpoint;
-    public readonly applications: QueryApplicationsEndpoint;
-    public readonly adminApplications: QueryApplicationsEndpoint;
-    public readonly processDefinitions: QueryProcessDefinitionsEndpoint;
-    public readonly adminProcessDefinitions: QueryProcessDefinitionsEndpoint;
-    public readonly openApiSpec: QueryOpenApiSpecEndpoint;
-    public readonly statusChecks: QueryStatusChecks;
+    readonly tasks: QueryTasksEndpoint;
+    readonly adminTasks: QueryTasksEndpoint;
+    readonly processInstances: QueryProcessInstancesEndpoint;
+    readonly adminProcessInstances: QueryProcessInstancesEndpoint;
+    readonly adminServiceTasks: QueryServiceTasksEndpoint;
+    readonly adminIntegrationContexts: QueryIntegrationContextsEndpoint;
+    readonly applications: QueryApplicationsEndpoint;
+    readonly adminApplications: QueryApplicationsEndpoint;
+    readonly processDefinitions: QueryProcessDefinitionsEndpoint;
+    readonly adminProcessDefinitions: QueryProcessDefinitionsEndpoint;
+    readonly openApiSpec: QueryOpenApiSpecEndpoint;
+    readonly statusChecks: QueryStatusChecks;
 
     private readonly adminMode: boolean;
 

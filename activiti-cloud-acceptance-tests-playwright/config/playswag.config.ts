@@ -29,7 +29,15 @@ function allowedSpecHosts(): string[] {
     try {
         const { baseURL } = resolveGatewayConnection();
         const host = new URL(baseURL).hostname;
-        return host ? [host] : [];
+        if (!host) {
+            return [];
+        }
+        const hosts = new Set([host]);
+        if (host === 'localhost' || host === '127.0.0.1') {
+            hosts.add('localhost');
+            hosts.add('127.0.0.1');
+        }
+        return [...hosts];
     } catch {
         return [];
     }
@@ -58,7 +66,7 @@ export function buildPlayswagReporterConfig(): PlayswagConfiguration {
         outputDir: paths.playswagCoverage,
         outputFormats: isCi ? ['console', 'json', 'html', 'markdown'] : ['console', 'json', 'html'],
         allowedSpecHosts: allowedSpecHosts(),
-        allowPrivateHosts: !isCi,
+        allowPrivateHosts: false,
         excludePatterns: PLAYSWAG_EXCLUDE_PATTERNS,
         acknowledgedServices: [...PLAYSWAG_ACKNOWLEDGED_SERVICES],
         failOnThreshold: false,

@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Ported from JBehave story:
- *   activiti-cloud-acceptance-scenarios/runtime-acceptance-tests/src/main/resources/stories/runtime-bundle/swagger-actions.story
- *
- * Original story preserved verbatim:
- *
- *   Scenario: retrieve the swagger specification
- *   Given the user is authenticated as testuser
- *   When the user asks for swagger specification
- *   Then the user gets swagger specification following Alfresco MediaType
- */
-
 import { activiti, expect } from '../../fixtures/services.fixture';
 
 activiti.describe('Runtime — Swagger Actions', () => {
