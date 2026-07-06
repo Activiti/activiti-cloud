@@ -90,10 +90,10 @@ class ActivitiQueryConsumerIT {
                 if (!releaseEvent.await(30, TimeUnit.SECONDS)) throw new IllegalStateException(
                     "Timed out waiting for test to release event"
                 );
+                eventCompleted.set(true);
             } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
             }
-            eventCompleted.set(true);
             return null;
         });
 
