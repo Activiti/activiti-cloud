@@ -30,6 +30,7 @@ import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContex
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -61,6 +62,7 @@ public class QueryConsumerAutoConfiguration {
     public static final String PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT =
         "partitionedQueryConsumerIntegrationFlowInput";
     public static final String PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL = "partitionedQueryConsumerErrorChannel";
+    public static final String QUERY_CONSUMER_GRACEFUL_SHUTDOWN = "queryConsumerGracefulShutdown";
 
     @Bean
     InitializingBean queryConsumerAutoConfigurationInfo(
@@ -134,7 +136,8 @@ public class QueryConsumerAutoConfiguration {
             .get();
     }
 
-    @Bean
+    @Bean(QUERY_CONSUMER_GRACEFUL_SHUTDOWN)
+    @ConditionalOnMissingBean(name = QUERY_CONSUMER_GRACEFUL_SHUTDOWN)
     public PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown(
         InputBindingLifecycle inputBindingLifecycle,
         @Value("${activiti.cloud.query.consumer.shutdown-timeout:30s}") Duration shutdownTimeout
@@ -147,7 +150,7 @@ public class QueryConsumerAutoConfiguration {
         QueryConsumerPartitionedChannelCountProvider queryConsumerPartitionedChannelCountProvider,
         QueryConsumerPartitionedChannelKeySelector queryConsumerPartitionedChannelKeySelector,
         GenericHandler<List<CloudRuntimeEvent<?, ?>>> genericQueryConsumerChannelHandlerAdapter,
-        PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown,
+        @Qualifier(QUERY_CONSUMER_GRACEFUL_SHUTDOWN) PartitionedChannelGracefulShutdown queryConsumerGracefulShutdown,
         @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
         return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
