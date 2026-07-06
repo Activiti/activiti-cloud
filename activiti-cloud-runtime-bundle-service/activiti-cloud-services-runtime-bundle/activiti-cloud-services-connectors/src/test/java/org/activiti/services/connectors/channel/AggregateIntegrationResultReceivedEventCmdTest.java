@@ -94,7 +94,7 @@ class AggregateIntegrationResultReceivedEventCmdTest {
     }
 
     @Test
-    void shouldNot_sentAuditEvent_when_integrationAuditEventsAreDisabled() {
+    void shouldNot_sendAuditEvent_when_integrationAuditEventsAreDisabled() {
         //given
         given(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).willReturn(false);
 
