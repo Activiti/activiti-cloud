@@ -47,7 +47,7 @@ activiti.describe('Process Definition Actions', () => {
             async () => {
                 const definition = await runtimeBundleServiceTestUser.getProcessDefinitionByKey(BIG_PROCESS);
 
-                const processDiagram = await runtimeBundleServiceTestUser.getProcessDefinitionDiagram(
+                const processDiagram = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionDiagram(
                     definition.id
                 );
                 const expected = readFileSync(
@@ -68,7 +68,7 @@ activiti.describe('Process Definition Actions', () => {
         let connectorDefinitionId = '';
 
         await activiti.step('When the user fetches RB home info', async () => {
-            const home = await runtimeBundleServiceTestUser.getHomeInfo();
+            const home = await runtimeBundleServiceTestUser.openApiSpec.getHomeInfo();
             expect(home).toBeTruthy();
         });
 
@@ -79,30 +79,30 @@ activiti.describe('Process Definition Actions', () => {
         });
 
         await activiti.step('Then the user can fetch definition by id, meta, and mapping values', async () => {
-            const byId = await runtimeBundleServiceTestUser.getProcessDefinitionById(processDefinitionId);
+            const byId = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionById(processDefinitionId);
             expect(byId.id).toBe(processDefinitionId);
 
-            const meta = await runtimeBundleServiceTestUser.getProcessDefinitionMeta(processDefinitionId);
+            const meta = await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionMeta(processDefinitionId);
             expect(Array.isArray(meta.userTasks)).toBe(true);
             expect((meta.userTasks ?? []).length).toBeGreaterThan(0);
 
             const staticValues =
-                await runtimeBundleServiceTestUser.getProcessDefinitionStaticValues(processDefinitionId);
+                await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionStaticValues(processDefinitionId);
             const constantValues =
-                await runtimeBundleServiceTestUser.getProcessDefinitionConstantValues(processDefinitionId);
+                await runtimeBundleServiceTestUser.processDefinitions.getProcessDefinitionConstantValues(processDefinitionId);
             expect(staticValues).toEqual(expect.any(Object));
             expect(constantValues).toEqual(expect.any(Object));
         });
 
         await activiti.step('When the user lists connector definitions', async () => {
-            const connectors = await runtimeBundleServiceTestUser.getConnectorDefinitions();
+            const connectors = await runtimeBundleServiceTestUser.connectorDefinitions.getConnectorDefinitions();
             expect(Array.isArray(connectors)).toBe(true);
             expect(connectors.length).toBeGreaterThan(0);
             connectorDefinitionId = connectors[0].id;
         });
 
         await activiti.step('Then the user fetches a connector definition by id', async () => {
-            const connector = await runtimeBundleServiceTestUser.getConnectorDefinitionById(connectorDefinitionId);
+            const connector = await runtimeBundleServiceTestUser.connectorDefinitions.getConnectorDefinitionById(connectorDefinitionId);
             expect(connector.id).toBe(connectorDefinitionId);
         });
 

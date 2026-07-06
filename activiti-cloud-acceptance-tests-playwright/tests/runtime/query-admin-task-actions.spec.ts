@@ -15,7 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 const TASK_VARIABLES: Record<string, unknown> = {
@@ -112,7 +112,7 @@ activiti.describe('Runtime — Query Admin Task Actions', () => {
             const task = await taskServiceTestUser.createStandaloneTask();
             taskId = task.id;
             for (const [name, value] of Object.entries(TASK_VARIABLES)) {
-                await taskServiceTestUser.createTaskVariable(taskId, name, value);
+                await taskServiceTestUser.tasks.createTaskVariable(taskId, name, value);
             }
             await queryAdminServiceTestAdmin.waitForTaskAdminSynced(taskId);
         });

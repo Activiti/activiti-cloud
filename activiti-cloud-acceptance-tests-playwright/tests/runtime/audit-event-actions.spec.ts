@@ -16,7 +16,7 @@
 
 import { format, subDays, addDays } from 'date-fns';
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { EventType } from '../../models/audit.models';
 
 activiti.describe('Runtime — Audit Event Actions', () => {

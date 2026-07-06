@@ -18,7 +18,7 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { TaskStatus } from '../../models/task.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { EventType } from '../../models/audit.models';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
@@ -75,7 +75,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             );
             expect(processFromQuery).toBeTruthy();
 
-            const rbTask = await taskServiceTestUser.getTaskById(taskId);
+            const rbTask = await taskServiceTestUser.tasks.getTaskById(taskId);
             expect(rbTask.formKey).toBe('taskForm');
             expect(rbTask.processDefinitionId).toBe(processFromQuery.processDefinitionId);
 
@@ -133,11 +133,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And we update task variable start1 to start1modified', async () => {
-            await taskServiceTestUser.updateTaskVariable(taskId, 'start1', 'start1modified');
+            await taskServiceTestUser.tasks.updateTaskVariable(taskId, 'start1', 'start1modified');
         });
 
         await activiti.step('And task variable start1 has value start1modified', async () => {
@@ -150,7 +150,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step(
@@ -194,7 +194,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
 
         await activiti.step('And the user updates the updatable fields of the task', async () => {
             const tomorrow = new Date(Date.now() + 86400000).toISOString();
-            await taskServiceTestUser.updateTask(taskId, {
+            await taskServiceTestUser.tasks.updateTask(taskId, {
                 name: 'new-task-name',
                 priority: 3,
                 dueDate: tomorrow,
@@ -208,7 +208,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the task has the updated fields', async () => {
-            const rbTask = await taskServiceTestUser.getTaskById(taskId);
+            const rbTask = await taskServiceTestUser.tasks.getTaskById(taskId);
             expect(rbTask.name).toBe('new-task-name');
             expect(rbTask.priority).toBe(3);
             expect(rbTask.dueDate).toBeTruthy();
@@ -257,7 +257,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the task has the completion fields set', async () => {
@@ -309,7 +309,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         );
 
         await activiti.step('And the task has the updated fields', async () => {
-            const rbTask = await taskServiceTestUser.getTaskById(taskId);
+            const rbTask = await taskServiceTestUser.tasks.getTaskById(taskId);
             expect(rbTask.name).toBe('new-task-name');
             expect(rbTask.priority).toBe(3);
             expect(rbTask.dueDate).toBeTruthy();
@@ -339,11 +339,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user saves the task with variable status equal to approved', async () => {
-            await taskServiceTestUser.saveTask(taskId, { status: 'approved' });
+            await taskServiceTestUser.tasks.saveTask(taskId, { status: 'approved' });
         });
 
         await activiti.step('Then task variable status has value approved', async () => {
@@ -375,15 +375,15 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user saves the task with variable status equal to approved', async () => {
-            await taskServiceTestUser.saveTask(taskId, { status: 'approved' });
+            await taskServiceTestUser.tasks.saveTask(taskId, { status: 'approved' });
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
@@ -423,15 +423,15 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user saves the task with variable comments equal to lgtm', async () => {
-            await taskServiceTestUser.saveTask(taskId, { comments: 'lgtm' });
+            await taskServiceTestUser.tasks.saveTask(taskId, { comments: 'lgtm' });
         });
 
         await activiti.step('And the user completes the task with variable outcome set to approved', async () => {
-            await taskServiceTestUser.completeTaskWithVariables(taskId, { outcome: 'approved' });
+            await taskServiceTestUser.tasks.completeTask(taskId, { outcome: 'approved' });
         });
 
         await activiti.step('Then the status of the process is changed to completed', async () => {
@@ -493,11 +493,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user completes the task', async () => {
-            await taskServiceTestUser.completeTask(taskId);
+            await taskServiceTestUser.tasks.completeTask(taskId);
         });
 
         await activiti.step('Then the status of the process and the task is changed to completed', async () => {
@@ -507,7 +507,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
             );
             expect(instance.status).toBe(ProcessInstanceStatus.COMPLETED);
             await expect(async () => {
-                await runtimeBundleServiceTestUser.getProcessInstance(processInstanceId);
+                await runtimeBundleServiceTestUser.processInstances.getProcessInstance(processInstanceId);
             }).rejects.toThrow();
         });
 
@@ -550,11 +550,11 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('And the user claims the task', async () => {
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('And the user assign the task to hruser', async () => {
-            await taskServiceTestUser.assignTask(taskId, 'hruser');
+            await taskServiceTestUser.tasks.assignTask(taskId, 'hruser');
         });
 
         await activiti.step(
@@ -589,7 +589,7 @@ activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
         });
 
         await activiti.step('Then the user cannot assign the task to hruser', async () => {
-            const response = await taskServiceTestUser.assignTask(taskId, 'hruser');
+            const response = await taskServiceTestUser.tasks.assignTask(taskId, 'hruser');
             expect(response.httpStatus).toBeGreaterThanOrEqual(400);
             expect(response.httpStatus).toBeLessThan(500);
         });

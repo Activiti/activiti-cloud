@@ -18,7 +18,7 @@ import { randomUUID } from 'node:crypto';
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Runtime — Process Instance Admin Actions', { tag: '@slow' }, () => {
     activiti('should cover RB admin process instance CRUD and lifecycle endpoints', async ({

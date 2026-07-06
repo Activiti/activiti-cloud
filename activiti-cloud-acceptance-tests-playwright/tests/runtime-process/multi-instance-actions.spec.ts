@@ -33,7 +33,7 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
         await activiti.step(
             `When the user starts an instance of the process with key ${MI_PARALLEL_USER_TASKS_PROCESS}`,
             async () => {
-                const instance = await runtimeBundleServiceTestUser.startProcess({
+                const instance = await runtimeBundleServiceTestUser.processInstances.startProcess({
                     processDefinitionKey: MI_PARALLEL_USER_TASKS_PROCESS,
                 });
                 processInstanceId = instance.id;
@@ -45,7 +45,7 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
             'And the user completes the task available in the current process instance passing the following variables: meal=pizza, size=large',
             async () => {
                 const task = await taskServiceTestUser.waitForOpenTaskByProcessInstanceId(processInstanceId);
-                await taskServiceTestUser.completeTaskWithVariables(task.id, { meal: 'pizza', size: 'large' });
+                await taskServiceTestUser.tasks.completeTask(task.id, { meal: 'pizza', size: 'large' });
             }
         );
 
@@ -53,7 +53,7 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
             'And the user completes the task available in the current process instance passing the following variables: meal=pasta, size=medium',
             async () => {
                 const task = await taskServiceTestUser.waitForOpenTaskByProcessInstanceId(processInstanceId);
-                await taskServiceTestUser.completeTaskWithVariables(task.id, { meal: 'pasta', size: 'medium' });
+                await taskServiceTestUser.tasks.completeTask(task.id, { meal: 'pasta', size: 'medium' });
             }
         );
 
@@ -90,7 +90,7 @@ activiti.describe('Runtime — Multi-Instance Actions', () => {
         await activiti.step(
             `When the user starts an instance of the process with key ${MI_SERVICE_TASK_PROCESS}`,
             async () => {
-                const instance = await runtimeBundleServiceTestUser.startProcess({
+                const instance = await runtimeBundleServiceTestUser.processInstances.startProcess({
                     processDefinitionKey: MI_SERVICE_TASK_PROCESS,
                 });
                 processInstanceId = instance.id;

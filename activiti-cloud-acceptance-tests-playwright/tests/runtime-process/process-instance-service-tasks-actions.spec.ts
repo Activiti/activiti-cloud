@@ -39,7 +39,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -75,7 +75,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -107,7 +107,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -140,7 +140,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -183,10 +183,10 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
             'Given the user provides an integer variable named executionCount with value 0 ' +
                 'When the user starts a process with service tasks called CONNECTOR_PROCESS_WITH_LOOP',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcessWithVariables(
-                    CONNECTOR_PROCESS_WITH_LOOP,
-                    { executionCount: 0 }
-                );
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
+                    processDefinitionKey: CONNECTOR_PROCESS_WITH_LOOP,
+                    variables: { executionCount: 0 },
+                });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -240,7 +240,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -288,10 +288,10 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
             'Given the user provides a variable named var with value test ' +
                 'When the user starts a process with service tasks called BPMN_ERROR_CONNECTOR_PROCESS',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcessWithVariables(
-                    TEST_BPMN_ERROR_CONNECTOR_PROCESS,
-                    { var: 'test' }
-                );
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
+                    processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
+                    variables: { var: 'test' },
+                });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -343,7 +343,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called CONNECTOR_PROCESS_INSTANCE',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({ processDefinitionKey: CONNECTOR_PROCESS });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -388,10 +388,10 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         await activiti.step(
             'When the user starts a process with service tasks called BPMN_ERROR_CONNECTOR_PROCESS',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcessWithVariables(
-                    TEST_BPMN_ERROR_CONNECTOR_PROCESS,
-                    { var: 'test' }
-                );
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
+                    processDefinitionKey: TEST_BPMN_ERROR_CONNECTOR_PROCESS,
+                    variables: { var: 'test' },
+                });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -430,10 +430,10 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
             'Given the user provides a variable named var with value test ' +
                 'When the user starts an instance of process called testErrorConnectorProcess with the provided variables',
             async () => {
-                processInstance = await runtimeBundleServiceTestAdmin.startProcessWithVariables(
-                    TEST_ERROR_CONNECTOR_PROCESS,
-                    { var: 'test' }
-                );
+                processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
+                    processDefinitionKey: TEST_ERROR_CONNECTOR_PROCESS,
+                    variables: { var: 'test' },
+                });
                 expect(processInstance.id).toBeTruthy();
             }
         );
@@ -459,7 +459,7 @@ activiti.describe('Process Instance Service Tasks Actions', { tag: '@slow' }, ()
         });
 
         await activiti.step('Then the user set the instance variable var with value replay', async () => {
-            await runtimeBundleServiceTestAdmin.setProcessVariables(processInstance.id, { var: 'replay' });
+            await runtimeBundleServiceTestAdmin.processInstances.setProcessVariables(processInstance.id, { var: 'replay' });
         });
 
         await activiti.step('And the user can replay service task execution', async () => {

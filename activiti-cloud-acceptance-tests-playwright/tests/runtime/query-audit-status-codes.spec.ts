@@ -15,7 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { EventType } from '../../models/audit.models';
 

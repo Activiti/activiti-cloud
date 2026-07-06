@@ -16,7 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
-import { catalogProcessKey } from '../../flows/start-catalog-process';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 const SIGNAL_CATCH_EVENT_PROCESS = 'SignalCatchEventProcess';
@@ -31,8 +31,8 @@ activiti.describe('Runtime — Process Instance Advanced Actions', { tag: '@slow
         let createdProcessInstanceId = '';
 
         await activiti.step('When the user creates a process instance without starting it', async () => {
-            const created = await runtimeBundleServiceTestUser.createProcess({
-                processDefinitionKey: catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
+            const created = await runtimeBundleServiceTestUser.processInstances.createProcess({
+                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
                 businessKey: `create-start-${Date.now()}`,
             });
             createdProcessInstanceId = created.id;
@@ -40,7 +40,7 @@ activiti.describe('Runtime — Process Instance Advanced Actions', { tag: '@slow
         });
 
         await activiti.step('And starts the created process instance', async () => {
-            const started = await runtimeBundleServiceTestUser.startCreatedProcess(createdProcessInstanceId);
+            const started = await runtimeBundleServiceTestUser.processInstances.startCreatedProcess(createdProcessInstanceId);
             expect(started.status).toBe(ProcessInstanceStatus.RUNNING);
         });
 
@@ -52,7 +52,7 @@ activiti.describe('Runtime — Process Instance Advanced Actions', { tag: '@slow
         let catchProcessInstanceId = '';
 
         await activiti.step('Given a process waiting for signal Test', async () => {
-            const catchProcess = await runtimeBundleServiceTestUser.startProcess({
+            const catchProcess = await runtimeBundleServiceTestUser.processInstances.startProcess({
                 processDefinitionKey: SIGNAL_CATCH_EVENT_PROCESS,
             });
             catchProcessInstanceId = catchProcess.id;
@@ -61,7 +61,7 @@ activiti.describe('Runtime — Process Instance Advanced Actions', { tag: '@slow
         });
 
         await activiti.step('When the user broadcasts signal Test via RB', async () => {
-            const response = await runtimeBundleServiceTestUser.sendSignal(SIGNAL_NAME);
+            const response = await runtimeBundleServiceTestUser.processInstances.sendSignal(SIGNAL_NAME);
             expect(response.httpStatus).toBeLessThan(300);
         });
 
@@ -82,7 +82,7 @@ activiti.describe('Runtime — Process Instance Advanced Actions', { tag: '@slow
         });
 
         await activiti.step('Then POST /tasks/next returns a claimable task', async () => {
-            const nextTask = await taskServiceTestUser.getNextTask();
+            const nextTask = await taskServiceTestUser.tasks.getNextTask();
             expect(nextTask?.id).toBeTruthy();
         });
     });

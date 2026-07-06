@@ -15,7 +15,8 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { catalogProcessKey, startCatalogProcess } from '../../flows/start-catalog-process';
+import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { IntegrationContextStatus } from '../../models/runtime-bundle.models';
 
@@ -60,8 +61,8 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
         });
 
         await activiti.step('When the user links an orphan process instance to a main process', async () => {
-            const orphanProcess = await runtimeBundleServiceTestUser.startProcess({
-                processDefinitionKey: catalogProcessKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
+            const orphanProcess = await runtimeBundleServiceTestUser.processInstances.startProcess({
+                processDefinitionKey: ProcessDefinitionRegistry.getProcessDefinitionKey('PROCESS_INSTANCE_WITH_SINGLE_TASK_ASSIGNED'),
                 linkedProcessInstanceType: LINK_TYPE,
             });
             linkedOrphanProcessInstanceId = orphanProcess.id;
@@ -94,7 +95,7 @@ activiti.describe('Runtime — Query Remaining Actions', () => {
         });
 
         await activiti.step('Given a completed connector process with an integration context', async () => {
-            const processInstance = await runtimeBundleServiceTestAdmin.startProcess({
+            const processInstance = await runtimeBundleServiceTestAdmin.processInstances.startProcess({
                 processDefinitionKey: CONNECTOR_PROCESS,
             });
             const tasks = await queryAdminServiceTestAdmin.waitForServiceTasksForProcessInstance(

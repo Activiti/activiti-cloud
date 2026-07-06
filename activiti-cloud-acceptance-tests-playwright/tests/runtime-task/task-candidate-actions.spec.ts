@@ -32,31 +32,31 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
                 'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_USER_CANDIDATES'
             );
             taskId = task.id;
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('When the user lists candidate users via RB', async () => {
-            const users = await taskServiceTestUser.getCandidateUsers(taskId);
+            const users = await taskServiceTestUser.tasks.getCandidateUsers(taskId);
             expect(users).toContain('hruser');
         });
 
         await activiti.step('And adds testuser as a candidate user', async () => {
-            const response = await taskServiceTestUser.addCandidateUsers(taskId, ['testuser']);
+            const response = await taskServiceTestUser.tasks.addCandidateUsers(taskId, ['testuser']);
             expect(response.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then RB lists hruser and testuser as candidates', async () => {
-            const users = await taskServiceTestUser.getCandidateUsers(taskId);
+            const users = await taskServiceTestUser.tasks.getCandidateUsers(taskId);
             expect(users).toEqual(expect.arrayContaining(['hruser', 'testuser']));
         });
 
         await activiti.step('When the user removes testuser from candidate users', async () => {
-            const response = await taskServiceTestUser.deleteCandidateUsers(taskId, ['testuser']);
+            const response = await taskServiceTestUser.tasks.deleteCandidateUsers(taskId, ['testuser']);
             expect(response.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then only hruser remains as candidate user', async () => {
-            const users = await taskServiceTestUser.getCandidateUsers(taskId);
+            const users = await taskServiceTestUser.tasks.getCandidateUsers(taskId);
             expect(users).toContain('hruser');
             expect(users).not.toContain('testuser');
         });
@@ -77,7 +77,7 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
 
         await activiti.step('Then the admin candidate user list matches RB', async () => {
             const adminUsers = await taskAdminServiceTestAdmin.tasks.getCandidateUsers(taskId);
-            const userCandidates = await taskServiceTestUser.getCandidateUsers(taskId);
+            const userCandidates = await taskServiceTestUser.tasks.getCandidateUsers(taskId);
             expect(adminUsers).toEqual(expect.arrayContaining(userCandidates));
         });
     });
@@ -96,31 +96,31 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
                 'PROCESS_INSTANCE_WITH_SINGLE_TASK_AND_GROUP_CANDIDATES'
             );
             taskId = task.id;
-            await taskServiceTestUser.claimTask(taskId);
+            await taskServiceTestUser.tasks.claimTask(taskId);
         });
 
         await activiti.step('When the user lists candidate groups via RB', async () => {
-            const groups = await taskServiceTestUser.getCandidateGroups(taskId);
+            const groups = await taskServiceTestUser.tasks.getCandidateGroups(taskId);
             expect(groups).toEqual(expect.arrayContaining(['hr', 'testgroup']));
         });
 
         await activiti.step('And adds activiti as a candidate group', async () => {
-            const response = await taskServiceTestUser.addCandidateGroups(taskId, ['activiti']);
+            const response = await taskServiceTestUser.tasks.addCandidateGroups(taskId, ['activiti']);
             expect(response.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then RB lists activiti among candidate groups', async () => {
-            const groups = await taskServiceTestUser.getCandidateGroups(taskId);
+            const groups = await taskServiceTestUser.tasks.getCandidateGroups(taskId);
             expect(groups).toContain('activiti');
         });
 
         await activiti.step('When the user removes activiti from candidate groups', async () => {
-            const response = await taskServiceTestUser.deleteCandidateGroups(taskId, ['activiti']);
+            const response = await taskServiceTestUser.tasks.deleteCandidateGroups(taskId, ['activiti']);
             expect(response.httpStatus).toBeLessThan(300);
         });
 
         await activiti.step('Then hr and testgroup remain as candidate groups', async () => {
-            const groups = await taskServiceTestUser.getCandidateGroups(taskId);
+            const groups = await taskServiceTestUser.tasks.getCandidateGroups(taskId);
             expect(groups).toEqual(expect.arrayContaining(['hr', 'testgroup']));
             expect(groups).not.toContain('activiti');
         });
@@ -141,7 +141,7 @@ activiti.describe('Runtime — Task Candidate Actions', () => {
 
         await activiti.step('Then the admin candidate group list matches RB', async () => {
             const adminGroups = await taskAdminServiceTestAdmin.tasks.getCandidateGroups(taskId);
-            const userGroups = await taskServiceTestUser.getCandidateGroups(taskId);
+            const userGroups = await taskServiceTestUser.tasks.getCandidateGroups(taskId);
             expect(adminGroups).toEqual(expect.arrayContaining(userGroups));
         });
     });

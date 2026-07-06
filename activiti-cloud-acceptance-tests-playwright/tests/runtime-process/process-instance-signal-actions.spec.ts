@@ -57,7 +57,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
                 'Given the user is authenticated as hruser ' +
                     'When the user starts a process with intermediate catch signal',
                 async () => {
-                    processInstanceCatchSignal = await runtimeBundleServiceHrUser.startProcess({
+                    processInstanceCatchSignal = await runtimeBundleServiceHrUser.processInstances.startProcess({
                         processDefinitionKey: SIGNAL_CATCH_EVENT_PROCESS,
                     });
                     expect(processInstanceCatchSignal).toBeTruthy();
@@ -66,7 +66,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             );
 
             await activiti.step('And the user starts a process with a boundary signal', async () => {
-                processInstanceBoundarySignal = await runtimeBundleServiceHrUser.startProcess({
+                processInstanceBoundarySignal = await runtimeBundleServiceHrUser.processInstances.startProcess({
                     processDefinitionKey: PROCESS_WITH_BOUNDARY_SIGNAL,
                 });
                 expect(processInstanceBoundarySignal).toBeTruthy();
@@ -82,7 +82,7 @@ activiti.describe('Process Instance Signal Actions', { tag: '@slow' }, () => {
             });
 
             await activiti.step('When the user starts a process with intermediate throw signal', async () => {
-                processInstanceThrowSignal = await runtimeBundleServiceHrUser.startProcess({
+                processInstanceThrowSignal = await runtimeBundleServiceHrUser.processInstances.startProcess({
                     processDefinitionKey: SIGNAL_THROW_EVENT_PROCESS,
                 });
                 expect(processInstanceThrowSignal).toBeTruthy();

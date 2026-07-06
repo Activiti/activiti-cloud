@@ -87,7 +87,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
 
             if (scenario.id === 'tasks') {
                 await activiti.step('When the admin lists tasks via POST /query/admin/v1/tasks', async () => {
-                    const tasks = await queryAdminServiceTestAdmin.postTasksAdminQuery({
+                    const tasks = await queryAdminServiceTestAdmin.adminTasks.postTasksListQuery({
                         standalone: false,
                         rootTasksOnly: false,
                     });
@@ -99,7 +99,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
             await activiti.step(
                 'When the admin lists process instances via POST /query/admin/v1/process-instances',
                 async () => {
-                    const instances = await queryAdminServiceTestAdmin.postProcessInstancesAdminQuery();
+                    const instances = await queryAdminServiceTestAdmin.adminProcessInstances.postProcessInstancesListQuery();
                     expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
                 }
             );
@@ -115,7 +115,7 @@ activiti.describe('Runtime — Process Instance User Message Actions', () => {
         let processInstanceId = '';
 
         await activiti.step('When the user sends a start message', async () => {
-            const processInstance = await runtimeBundleServiceTestUser.sendStartMessage({
+            const processInstance = await runtimeBundleServiceTestUser.processInstances.sendStartMessage({
                 name: 'startMessage',
                 businessKey: businessId,
             });
@@ -124,13 +124,13 @@ activiti.describe('Runtime — Process Instance User Message Actions', () => {
         });
 
         await activiti.step('Then the user can deliver boundary and catch messages', async () => {
-            const boundaryResponse = await runtimeBundleServiceTestUser.sendReceiveMessage({
+            const boundaryResponse = await runtimeBundleServiceTestUser.processInstances.sendReceiveMessage({
                 name: 'boundaryMessage',
                 correlationKey: businessId,
             });
             expect(boundaryResponse.httpStatus).toBeLessThan(300);
 
-            const catchResponse = await runtimeBundleServiceTestUser.sendReceiveMessage({
+            const catchResponse = await runtimeBundleServiceTestUser.processInstances.sendReceiveMessage({
                 name: 'catchMessage',
                 correlationKey: businessId,
             });

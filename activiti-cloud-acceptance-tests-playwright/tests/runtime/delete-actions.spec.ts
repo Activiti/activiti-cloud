@@ -23,7 +23,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { pickScenarioTest, type AcceptanceScenarioMeta } from '../../helpers/acceptance-scenario';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 
 type DeleteScenario = AcceptanceScenarioMeta & { id: 'audit' | 'query-tasks' | 'query-process-instances' };
 

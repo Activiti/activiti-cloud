@@ -17,14 +17,10 @@
 import {
     CloudProcessInstance,
     ProcessInstanceStatus,
-    StartProcessPayload,
-    ProcessQueryParams,
-    UpdateProcessPayload,
-    CreateProcessInstancePayload,
 } from '../../models/runtime-bundle.models';
-import { CloudProcessDefinition, ConnectorDefinition, ProcessDefinitionMeta } from '../../models/process-definition.models';
+import { CloudProcessDefinition } from '../../models/process-definition.models';
 import { CloudVariableInstance } from '../../models/process-variable.models';
-import { BaseService, RequestResponse } from '../base.service';
+import { BaseService } from '../base.service';
 import { CustomAPIRequest } from '../../fixtures/context.models';
 import { DirtyContextRegistry } from '../../helpers/dirty-context';
 import { TestScope } from '../../helpers/test-isolation';
@@ -59,73 +55,12 @@ export class RuntimeBundleService extends BaseService {
         this.processInstances.attachIsolation(dirtyRegistry, testScope, isolationBasePath);
     }
 
-    async startProcess(payload: Omit<StartProcessPayload, 'payloadType'>): Promise<CloudProcessInstance> {
-        return this.processInstances.startProcess(payload);
-    }
-
-    async createProcess(payload: Omit<CreateProcessInstancePayload, 'payloadType'>): Promise<CloudProcessInstance> {
-        return this.processInstances.createProcess(payload);
-    }
-
-    async startCreatedProcess(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.processInstances.startCreatedProcess(processInstanceId);
-    }
-
-    async sendSignal(name: string, variables?: Record<string, unknown>): Promise<RequestResponse> {
-        return this.processInstances.sendSignal(name, variables);
-    }
-
-    async getHomeInfo(): Promise<Record<string, unknown>> {
-        return this.openApiSpec.getHomeInfo();
-    }
-
-    async getProcessDefinitionById(processDefinitionId: string): Promise<CloudProcessDefinition> {
-        return this.processDefinitions.getProcessDefinitionById(processDefinitionId);
-    }
-
-    async getProcessDefinitionMeta(processDefinitionId: string): Promise<ProcessDefinitionMeta> {
-        return this.processDefinitions.getProcessDefinitionMeta(processDefinitionId);
-    }
-
-    async getProcessDefinitionStaticValues(processDefinitionId: string): Promise<Record<string, unknown>> {
-        return this.processDefinitions.getProcessDefinitionStaticValues(processDefinitionId);
-    }
-
-    async getProcessDefinitionConstantValues(processDefinitionId: string): Promise<Record<string, unknown>> {
-        return this.processDefinitions.getProcessDefinitionConstantValues(processDefinitionId);
-    }
-
-    async getConnectorDefinitions(): Promise<ConnectorDefinition[]> {
-        return this.connectorDefinitions.getConnectorDefinitions();
-    }
-
-    async getConnectorDefinitionById(connectorDefinitionId: string): Promise<ConnectorDefinition> {
-        return this.connectorDefinitions.getConnectorDefinitionById(connectorDefinitionId);
-    }
-
-    async startProcessWithVariables(
-        processDefinitionKey: string,
-        variables: Record<string, unknown>,
-        options?: { name?: string; businessKey?: string }
-    ): Promise<CloudProcessInstance> {
-        return this.startProcess({
-            processDefinitionKey,
-            variables,
-            name: options?.name,
-            businessKey: options?.businessKey,
-        });
-    }
-
-    async getProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.processInstances.getProcessInstance(processInstanceId);
-    }
-
     async waitForProcessInstanceStatus(
         processInstanceId: string,
         expectedStatus: ProcessInstanceStatus
     ): Promise<CloudProcessInstance> {
         return RuntimeBundleService.waitFor(
-            () => this.getProcessInstance(processInstanceId),
+            () => this.processInstances.getProcessInstance(processInstanceId),
             (instance) => instance.status === expectedStatus,
             'processStatus',
             `process ${processInstanceId} to reach status ${expectedStatus}`
@@ -146,13 +81,9 @@ export class RuntimeBundleService extends BaseService {
         );
     }
 
-    async getSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[]> {
-        return this.processInstances.getSubProcesses(parentProcessInstanceId);
-    }
-
     async waitForSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[]> {
         return RuntimeBundleService.waitFor(
-            () => this.getSubProcesses(parentProcessInstanceId),
+            () => this.processInstances.getSubProcesses(parentProcessInstanceId),
             (subprocesses) => subprocesses.length > 0,
             'querySync',
             `subprocesses of process ${parentProcessInstanceId}`
@@ -161,55 +92,19 @@ export class RuntimeBundleService extends BaseService {
 
     async findSubProcesses(parentProcessInstanceId: string): Promise<CloudProcessInstance[] | undefined> {
         try {
-            return await this.getSubProcesses(parentProcessInstanceId);
+            return await this.processInstances.getSubProcesses(parentProcessInstanceId);
         } catch {
             return undefined;
         }
     }
 
-    async getProcessInstances(params?: ProcessQueryParams): Promise<CloudProcessInstance[]> {
-        return this.processInstances.getProcessInstances(params);
-    }
-
-    async deleteProcessInstance(processInstanceId: string): Promise<void> {
-        return this.processInstances.deleteProcessInstance(processInstanceId);
-    }
-
-    async suspendProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.processInstances.suspendProcessInstance(processInstanceId);
-    }
-
-    async resumeProcessInstance(processInstanceId: string): Promise<CloudProcessInstance> {
-        return this.processInstances.resumeProcessInstance(processInstanceId);
-    }
-
-    async getProcessDefinitions(): Promise<CloudProcessDefinition[]> {
-        return this.processDefinitions.getProcessDefinitions();
-    }
-
     async getProcessDefinitionByKey(processDefinitionKey: string): Promise<CloudProcessDefinition> {
-        const definitions = await this.getProcessDefinitions();
+        const definitions = await this.processDefinitions.getProcessDefinitions();
         return pickHighestVersionByKey(definitions, processDefinitionKey);
     }
 
-    async getProcessInstanceDiagram(processInstanceId: string): Promise<string> {
-        return this.processInstances.getProcessInstanceDiagram(processInstanceId);
-    }
-
-    async getProcessDefinitionDiagram(processDefinitionId: string): Promise<string> {
-        return this.processDefinitions.getProcessDefinitionDiagram(processDefinitionId);
-    }
-
-    async getSwaggerSpecification(group: string = 'Runtime Bundle'): Promise<string> {
-        return this.openApiSpec.getSwaggerSpecification(group);
-    }
-
-    async getProcessInstanceVariables(processInstanceId: string): Promise<CloudVariableInstance[]> {
-        return this.processInstances.getProcessInstanceVariables(processInstanceId);
-    }
-
     async getProcessInstanceVariableValue(processInstanceId: string, variableName: string): Promise<unknown> {
-        const variables = await this.getProcessInstanceVariables(processInstanceId);
+        const variables = await this.processInstances.getProcessInstanceVariables(processInstanceId);
         return variables.find((variable) => variable.name === variableName)?.value;
     }
 
@@ -240,7 +135,7 @@ export class RuntimeBundleService extends BaseService {
         variableNames: readonly string[]
     ): Promise<CloudVariableInstance[]> {
         return RuntimeBundleService.waitFor(
-            () => this.getProcessInstanceVariables(processInstanceId),
+            () => this.processInstances.getProcessInstanceVariables(processInstanceId),
             (variables) => {
                 const names = new Set(variables.map((variable) => variable.name));
                 return variableNames.every((name) => names.has(name));
@@ -255,7 +150,7 @@ export class RuntimeBundleService extends BaseService {
         expected: Record<string, unknown>
     ): Promise<CloudVariableInstance[]> {
         return RuntimeBundleService.waitFor(
-            () => this.getProcessInstanceVariables(processInstanceId),
+            () => this.processInstances.getProcessInstanceVariables(processInstanceId),
             (variables) =>
                 Object.entries(expected).every(
                     ([name, value]) => variables.find((variable) => variable.name === name)?.value === value
@@ -265,43 +160,8 @@ export class RuntimeBundleService extends BaseService {
         );
     }
 
-    async setProcessVariables(processInstanceId: string, variables: Record<string, unknown>): Promise<void> {
-        return this.processInstances.setProcessVariables(processInstanceId, variables);
-    }
-
-    async updateProcessInstance(
-        processInstanceId: string,
-        payload: Omit<UpdateProcessPayload, 'payloadType'>
-    ): Promise<CloudProcessInstance> {
-        return this.processInstances.updateProcessInstance(processInstanceId, payload);
-    }
-
-    async sendStartMessage(payload: {
-        name: string;
-        businessKey?: string;
-        variables?: Record<string, unknown>;
-    }): Promise<CloudProcessInstance> {
-        return this.processInstances.sendStartMessage(payload);
-    }
-
-    async trySendStartMessage(payload: {
-        name: string;
-        businessKey?: string;
-        variables?: Record<string, unknown>;
-    }): Promise<RequestResponse> {
-        return this.processInstances.trySendStartMessage(payload);
-    }
-
-    async sendReceiveMessage(payload: {
-        name: string;
-        correlationKey?: string;
-        variables?: Record<string, unknown>;
-    }): Promise<RequestResponse> {
-        return this.processInstances.sendReceiveMessage(payload);
-    }
-
     async getDeployedProcessDefinitionKeys(): Promise<Set<string>> {
-        const definitions = await this.getProcessDefinitions();
+        const definitions = await this.processDefinitions.getProcessDefinitions();
         return new Set(definitions.map((definition) => definition.key));
     }
 

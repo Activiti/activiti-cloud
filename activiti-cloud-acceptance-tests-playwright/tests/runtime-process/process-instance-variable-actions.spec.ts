@@ -15,7 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-catalog-process';
+import { startCatalogProcess } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Process Instance Variable Admin Actions', { tag: '@slow' }, () => {
     activiti(
