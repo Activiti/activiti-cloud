@@ -344,8 +344,8 @@ activiti.describe('Runtime — Task Actions (wave 1)', () => {
             async () => {
                 const response = await taskServiceHrUser.tasks.claimTask(taskId);
                 expect(response.httpStatus).toBeGreaterThanOrEqual(400);
-            expect(response.httpStatus).toBeLessThan(500);
-            expect(JSON.stringify(response)).toContain('Unable to find task');
+                expect(response.httpStatus).toBeLessThan(500);
+                expect(JSON.stringify(response)).toContain('Unable to find task');
                 const hrTasks = await queryServiceHrUser.tasks.getAllTasks();
                 expect(hrTasks.map((task) => task.id)).not.toContain(taskId);
             }

@@ -15,6 +15,9 @@
  */
 
 import { CustomAPIRequest } from '../../fixtures/context.models';
+import { DirtyContextRegistry } from '../../helpers/dirty-context';
+import { TestScope } from '../../helpers/test-isolation';
+import { RB_ADMIN_V1_BASE } from '../runtime-bundle/endpoints/rb-base-path';
 import { BaseService } from '../base.service';
 import { RbAdminTasksEndpoint } from './endpoints/tasks.endpoint';
 
@@ -24,5 +27,10 @@ export class TaskAdminService extends BaseService {
     constructor(context: CustomAPIRequest) {
         super(context);
         this.tasks = new RbAdminTasksEndpoint(context);
+    }
+
+    attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
+        super.attachIsolation(dirtyRegistry, testScope);
+        this.tasks.attachIsolation(dirtyRegistry, testScope, RB_ADMIN_V1_BASE);
     }
 }

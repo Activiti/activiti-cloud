@@ -16,8 +16,7 @@
 
 import { activiti, expect } from '../../fixtures/services.fixture';
 import { ProcessDefinitionRegistry } from '../../models/process-definition-registry';
-import { startCatalogProcess } from '../../flows/start-process-with-first-task';
-import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 import { IntegrationContextStatus } from '../../models/runtime-bundle.models';
 
 const LINK_TYPE = 'acceptance-link-type';

@@ -32,7 +32,7 @@ activiti.describe('Runtime — Task Variable Admin Actions', () => {
 
         await activiti.step('Then the user is able to retrieve, using the admin endpoint, a variable named title with value Mr.', async () => {
             const variables = await taskAdminServiceHradmin.tasks.getTaskVariables(taskId);
-            expect(variables.some(v => v.name === 'title' && v.value === 'Mr.')).toBe(true);
+            expect(variables.some((v) => v.name === 'title' && v.value === 'Mr.')).toBe(true);
         });
     });
 
@@ -55,7 +55,7 @@ activiti.describe('Runtime — Task Variable Admin Actions', () => {
 
         await activiti.step('Then the user is able to retrieve, using the admin endpoint, a variable named title with value Dr.', async () => {
             const variables = await taskAdminServiceHradmin.tasks.getTaskVariables(taskId);
-            expect(variables.some(v => v.name === 'title' && v.value === 'Dr.')).toBe(true);
+            expect(variables.some((v) => v.name === 'title' && v.value === 'Dr.')).toBe(true);
         });
     });
 });

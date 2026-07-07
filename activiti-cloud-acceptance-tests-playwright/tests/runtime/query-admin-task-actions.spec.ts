@@ -15,8 +15,7 @@
  */
 
 import { activiti, expect } from '../../fixtures/services.fixture';
-import { startCatalogProcess } from '../../flows/start-process-with-first-task';
-import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 const TASK_VARIABLES: Record<string, unknown> = {
     var1: 'one',

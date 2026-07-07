@@ -52,6 +52,7 @@ export class SecurityPoliciesService extends BaseService {
         super.attachIsolation(dirtyRegistry, testScope);
         this.runtimeBundle.attachIsolation(dirtyRegistry, testScope);
         this.taskService.attachIsolation(dirtyRegistry, testScope);
+        this.runtimeAdmin.attachIsolation(dirtyRegistry, testScope);
     }
 
     async startProcess(processName: string): Promise<CloudProcessInstance> {

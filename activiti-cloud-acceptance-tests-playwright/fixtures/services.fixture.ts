@@ -140,14 +140,14 @@ const activiti = contexts.extend<ServicesFixture>({
     taskServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
         await use(createTaskService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
-    taskAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createTaskAdminService(testAdminUserContext));
+    taskAdminServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
+        await use(createTaskAdminService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
     taskServiceHradmin: async ({ hradminContext, dirtyRegistry, testScope }, use) => {
         await use(createTaskService(hradminContext, isolationOpts(dirtyRegistry, testScope)));
     },
-    taskAdminServiceHradmin: async ({ hradminContext }, use) => {
-        await use(createTaskAdminService(hradminContext));
+    taskAdminServiceHradmin: async ({ hradminContext, dirtyRegistry, testScope }, use) => {
+        await use(createTaskAdminService(hradminContext, isolationOpts(dirtyRegistry, testScope)));
     },
     auditServiceTestUser: async ({ testUserContext }, use) => {
         await use(createAuditService(testUserContext));

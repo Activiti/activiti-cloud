@@ -18,8 +18,7 @@ import { activiti, expect } from '../../fixtures/services.fixture';
 import { TaskStatus } from '../../models/task.models';
 import { ProcessInstanceStatus } from '../../models/runtime-bundle.models';
 import { EventType } from '../../models/audit.models';
-import { startCatalogProcess } from '../../flows/start-process-with-first-task';
-import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
+import { startCatalogProcess, startCatalogProcessWithFirstTask } from '../../flows/start-process-with-first-task';
 
 activiti.describe('Runtime — Task Actions', { tag: '@slow' }, () => {
     activiti('subprocess task is created when starting a parent process with call activities', async ({
