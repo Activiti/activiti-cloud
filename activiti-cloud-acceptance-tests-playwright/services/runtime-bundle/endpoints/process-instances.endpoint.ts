@@ -57,6 +57,9 @@ export class RbProcessInstancesEndpoint extends BaseService {
 
     async createProcess(payload: Omit<CreateProcessInstancePayload, 'payloadType'>): Promise<CloudProcessInstance> {
         const { name, businessKey, processDefinitionKey, ...rest } = payload;
+        if (!processDefinitionKey && !rest.processDefinitionId) {
+            throw new Error('createProcess requires processDefinitionKey or processDefinitionId');
+        }
         const body = {
             payloadType: 'CreateProcessInstancePayload' as const,
             ...rest,

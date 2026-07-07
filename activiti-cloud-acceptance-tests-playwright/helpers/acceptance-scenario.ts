@@ -21,21 +21,9 @@ export type AcceptanceScenarioMeta = {
     exclude?: string;
 };
 
-type ActivitiTestBody = Parameters<typeof ActivitiTest>[1];
-
 export function pickScenarioTest(
     test: typeof ActivitiTest,
     scenario: AcceptanceScenarioMeta
 ): typeof ActivitiTest {
-    if (!scenario.exclude) {
-        return test;
-    }
-
-    const registerSkipped = (title: string, _body: ActivitiTestBody) => {
-        test(title, async () => {
-            test.skip(true, scenario.exclude);
-        });
-    };
-
-    return Object.assign(registerSkipped, test) as typeof ActivitiTest;
+    return (scenario.exclude ? test.skip : test) as typeof ActivitiTest;
 }

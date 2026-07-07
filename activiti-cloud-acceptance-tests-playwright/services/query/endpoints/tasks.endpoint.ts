@@ -167,8 +167,8 @@ export class QueryTasksEndpoint extends BaseService {
     } = {}): Promise<CloudTask[]> {
         const response = await this.post(`${this.basePath}/tasks`, {
             data: {
-                standalone: body.standalone ?? false,
-                rootTasksOnly: body.rootTasksOnly ?? false,
+                ...(body.standalone !== undefined ? { standalone: body.standalone } : {}),
+                ...(body.rootTasksOnly !== undefined ? { rootTasksOnly: body.rootTasksOnly } : {}),
                 ...(body.variableKeys ? { variableKeys: body.variableKeys } : {}),
             },
         });
