@@ -34,7 +34,7 @@ interface ErrorEntry {
 
 export class SecurityPoliciesService extends BaseService {
     readonly runtimeBundle: RuntimeBundleService;
-    readonly task: TaskService;
+    readonly taskService: TaskService;
     readonly query: QueryService;
     readonly audit: AuditService;
     readonly runtimeAdmin: RuntimeAdminService;
@@ -42,7 +42,7 @@ export class SecurityPoliciesService extends BaseService {
     constructor(context: CustomAPIRequest) {
         super(context);
         this.runtimeBundle = new RuntimeBundleService(context);
-        this.task = new TaskService(context);
+        this.taskService = new TaskService(context);
         this.query = new QueryService(context);
         this.audit = new AuditService(context);
         this.runtimeAdmin = new RuntimeAdminService(context);
@@ -51,7 +51,7 @@ export class SecurityPoliciesService extends BaseService {
     attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
         super.attachIsolation(dirtyRegistry, testScope);
         this.runtimeBundle.attachIsolation(dirtyRegistry, testScope);
-        this.task.attachIsolation(dirtyRegistry, testScope);
+        this.taskService.attachIsolation(dirtyRegistry, testScope);
     }
 
     async startProcess(processName: string): Promise<CloudProcessInstance> {

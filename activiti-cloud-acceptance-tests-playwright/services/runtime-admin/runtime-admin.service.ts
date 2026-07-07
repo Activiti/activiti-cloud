@@ -15,6 +15,9 @@
  */
 
 import { CustomAPIRequest } from '../../fixtures/context.models';
+import { DirtyContextRegistry } from '../../helpers/dirty-context';
+import { TestScope } from '../../helpers/test-isolation';
+import { RB_ADMIN_V1_BASE } from '../runtime-bundle/endpoints/rb-base-path';
 import { BaseService } from '../base.service';
 import {
     RbAdminExecutionsEndpoint,
@@ -32,5 +35,10 @@ export class RuntimeAdminService extends BaseService {
         this.processInstances = new RbAdminProcessInstancesEndpoint(context);
         this.processDefinitions = new RbAdminProcessDefinitionsEndpoint(context);
         this.executions = new RbAdminExecutionsEndpoint(context);
+    }
+
+    attachIsolation(dirtyRegistry?: DirtyContextRegistry, testScope?: TestScope): void {
+        super.attachIsolation(dirtyRegistry, testScope);
+        this.processInstances.attachIsolation(dirtyRegistry, testScope, RB_ADMIN_V1_BASE);
     }
 }

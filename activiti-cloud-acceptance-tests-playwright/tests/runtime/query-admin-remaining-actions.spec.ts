@@ -23,12 +23,12 @@ import { startCatalogProcessWithFirstTask } from '../../flows/start-process-with
 const QUERY_ADMIN_POST_ISSUE = 'https://hyland.atlassian.net/browse/AAE-47783';
 
 const postTasksScenario: AcceptanceScenarioMeta = {
-    title: 'POST /query/admin/v1/tasks list endpoint',
+    title: 'admin POST tasks list query',
     exclude: QUERY_ADMIN_POST_ISSUE,
 };
 
 const postProcessInstancesScenario: AcceptanceScenarioMeta = {
-    title: 'POST /query/admin/v1/process-instances list endpoint',
+    title: 'admin POST process instances list query',
     exclude: QUERY_ADMIN_POST_ISSUE,
 };
 
@@ -77,7 +77,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
             taskId = task.id;
         });
 
-        await activiti.step('When the admin lists tasks via POST /query/admin/v1/tasks', async () => {
+        await activiti.step('When the admin lists tasks via POST list query', async () => {
             const tasks = await queryAdminServiceTestAdmin.adminTasks.postTasksListQuery({
                 standalone: false,
                 rootTasksOnly: false,
@@ -104,7 +104,7 @@ activiti.describe('Runtime — Query Admin Remaining Actions', () => {
             await queryAdminServiceTestAdmin.waitForTaskAdminSynced(task.id);
         });
 
-        await activiti.step('When the admin lists process instances via POST /query/admin/v1/process-instances', async () => {
+        await activiti.step('When the admin lists process instances via POST list query', async () => {
             const instances = await queryAdminServiceTestAdmin.adminProcessInstances.postProcessInstancesListQuery();
             expect(instances.map((instance) => instance.id)).toContain(processInstanceId);
         });

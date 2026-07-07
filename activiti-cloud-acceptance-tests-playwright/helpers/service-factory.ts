@@ -61,8 +61,13 @@ export function createQueryService(context: CustomAPIRequest, adminMode = false)
     return new QueryService(context, adminMode);
 }
 
-export function createRuntimeAdminService(context: CustomAPIRequest): RuntimeAdminService {
-    return new RuntimeAdminService(context);
+export function createRuntimeAdminService(
+    context: CustomAPIRequest,
+    isolation: ServiceIsolationOptions = {}
+): RuntimeAdminService {
+    const service = new RuntimeAdminService(context);
+    service.attachIsolation(isolation.dirtyRegistry, isolation.testScope);
+    return service;
 }
 
 export function createTaskAdminService(context: CustomAPIRequest): TaskAdminService {

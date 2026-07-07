@@ -122,8 +122,8 @@ const activiti = contexts.extend<ServicesFixture>({
     queryServiceTestAdmin: async ({ testAdminUserContext }, use) => {
         await use(createQueryService(testAdminUserContext));
     },
-    runtimeAdminServiceTestAdmin: async ({ testAdminUserContext }, use) => {
-        await use(createRuntimeAdminService(testAdminUserContext));
+    runtimeAdminServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
+        await use(createRuntimeAdminService(testAdminUserContext, isolationOpts(dirtyRegistry, testScope)));
     },
     runtimeBundleServiceTestAdmin: async ({ testAdminUserContext, dirtyRegistry, testScope }, use) => {
         await use(createRuntimeBundleService(testAdminUserContext, '/rb', isolationOpts(dirtyRegistry, testScope)));

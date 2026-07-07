@@ -96,7 +96,7 @@ activiti.describe('Security Policies - HR User Actions', { tag: '@smoke' }, () =
     activiti.describe('Task Access', () => {
         activiti('should allow hruser to access tasks', async ({ securityPoliciesServiceHrUser }) => {
             await activiti.step('Then the user can get tasks', async () => {
-                const tasks = await securityPoliciesServiceHrUser.task.tasks.getAllTasks();
+                const tasks = await securityPoliciesServiceHrUser.taskService.tasks.getAllTasks();
                 expect(tasks).toBeDefined();
             });
         });
