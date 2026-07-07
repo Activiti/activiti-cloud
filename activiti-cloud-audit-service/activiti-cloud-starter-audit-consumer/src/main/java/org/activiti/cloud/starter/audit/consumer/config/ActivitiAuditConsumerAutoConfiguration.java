@@ -15,9 +15,33 @@
  */
 package org.activiti.cloud.starter.audit.consumer.config;
 
+import com.zaxxer.hikari.HikariDataSource;
+import org.activiti.cloud.services.audit.jpa.streams.config.AuditConsumerPartitionedChannelCountProvider;
+import org.activiti.cloud.services.audit.jpa.streams.config.AuditJPAStreamsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@AutoConfiguration
+@AutoConfiguration(before = AuditJPAStreamsAutoConfiguration.class, after = DataSourceAutoConfiguration.class)
 @PropertySource("classpath:audit-messaging.properties")
-public class ActivitiAuditConsumerAutoConfiguration {}
+public class ActivitiAuditConsumerAutoConfiguration {
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(HikariDataSource.class)
+    @ConditionalOnBean(HikariDataSource.class)
+    static class HikariDataSourceQueryConsumerPartitionedChannelConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        AuditConsumerPartitionedChannelCountProvider auditConsumerPartitionedChannelCountProvider(
+            HikariDataSource dataSource
+        ) {
+            return dataSource::getMaximumPoolSize;
+        }
+    }
+}

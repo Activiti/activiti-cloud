@@ -140,7 +140,7 @@ public class QueryConsumerAutoConfiguration {
         @Value("${activiti.cloud.query.consumer.worker-queue-size:10}") Integer workerQueueSize
     ) {
         return IntegrationFlow.from(PARTITIONED_QUERY_CONSUMER_INTEGRATION_FLOW_INPUT)
-            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL))
+            .enrichHeaders(headers -> headers.errorChannel(PARTITIONED_QUERY_CONSUMER_ERROR_CHANNEL, true))
             .channel(
                 MessageChannels.partitioned(queryConsumerPartitionedChannelCountProvider.get())
                     .partitionKey(queryConsumerPartitionedChannelKeySelector)
